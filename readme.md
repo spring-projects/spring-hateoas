@@ -1,11 +1,11 @@
-# Spring HATEOAS
-This project provides some APIs to ease creating REST representations that follow the HATEOAS principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+# Spring Hateoas
+This project provides some APIs to ease creating REST representations that follow the (HATEOAS)[http://en.wikipedia.org/wiki/HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 
 ## JAXB / JSON integration
 As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either JAXB, JSON or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
 
 ## Links
-The `Link` value object follows the Atom link definition and consists of a `del` and an `href` attribute. It contains a few constants for well known reels such as `self`, `next` etc. The XML representation will render in the Atom namespace.
+The `Link` value object follows the Atom link definition and consists of a `rel` and an `href` attribute. It contains a few constants for well known reels such as `self`, `next` etc. The XML representation will render in the Atom namespace.
 
     Link link = new Link("http://localhost:8080/something");
     assertThat(link.getHref(), is("http://localhost:8080/something"));
@@ -35,7 +35,7 @@ This would render as follows in JSON:
 
     { firstname : "Dave",
       lastname : "Matthews",
-      _links : [ { del : "self", href : "http://myhost/people" } ] }
+      _links : [ { rel : "self", href : "http://myhost/people" } ] }
       
 … or slightly more verbose in XML …
 
@@ -79,7 +79,7 @@ Let's say you would like to actually link to the collection resource of all peop
 1. To create an absolute URI you'd need to lookup the protocol, hostname, port, servlet base etc. This is cumbersome and requires ugly manual string concatenation code.
 2. You probably don't want to concatenate the `/people` on top of your base URI because you'd have to maintain the information in multiple places then. Change the mapping, change all the clients pointing to it.
 
-Spring HATEOS now provides a ControllerLinkBuilder that allows to create links by pointing to controller classes:
+Spring Hateoas now provides a `ControllerLinkBuilder` that allows to create links by pointing to controller classes:
 
     import static org.sfw.hateoas.mvc.ControllerLinkBuilder.*;
     
@@ -113,9 +113,9 @@ The builder also allows creating URI instances to build up e.g. response header 
 As the mapping from an entity to a resource type will have to be used in multiple places it makes sense to create a dedicated class responsible for doing so. The conversion will of course contain very custom steps but also a few boilerplate ones:
 
 1. Instantiation of the resource class
-2. Adding a link with del `self` pointing to the resource that gets rendered.
+2. Adding a link with rel `self` pointing to the resource that gets rendered.
 
-Spring HATEOAS now provides a `ResourceAssemblerSupport` base class that helps reducing the amount of code needed to be written:
+Spring Hateoas now provides a `ResourceAssemblerSupport` base class that helps reducing the amount of code needed to be written:
 
     class PersonResourceAssembler extends ResourceAssemblerSupport<Person, PersonResource> {
       
@@ -132,7 +132,7 @@ Spring HATEOAS now provides a `ResourceAssemblerSupport` base class that helps r
       }
     }
     
-Setting the class up like this gives you the following benefits: there are a hand full of `createResource(…)` methods that will allow you to create an instance of the resource and have it a `Link` with a del of `self` added to it. The href of that link is determined by the configured controllers request mapping plus the id of the `Identifiable` (e.g. `/people/1` in our case). The resource type gets instantiated by reflection and expects a no-arg constructor. Simply override `instantiateResource(…)` in case you'd like to use a dedicated constructor or avoid the reflection performance overhead.
+Setting the class up like this gives you the following benefits: there are a hand full of `createResource(…)` methods that will allow you to create an instance of the resource and have it a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controllers request mapping plus the id of the `Identifiable` (e.g. `/people/1` in our case). The resource type gets instantiated by reflection and expects a no-arg constructor. Simply override `instantiateResource(…)` in case you'd like to use a dedicated constructor or avoid the reflection performance overhead.
 
 The assembler can then be used to either assemble a single resource or an `Iterable` of them:
 
