@@ -28,7 +28,7 @@ import org.springframework.hateoas.TestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * 
+ *
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
@@ -108,7 +108,10 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@RequestMapping("/people")
-	class PersonController {
+	interface PersonControllerInterface {
+	}
+
+	class PersonController implements PersonControllerInterface {
 
 	}
 

@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Value object for links.
- * 
+ *
  * @author Oliver Gierke
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
@@ -47,7 +47,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
-	 * 
+	 *
 	 * @see #REL_SELF
 	 * @param href must not be {@literal null} or empty.
 	 */
@@ -57,7 +57,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
-	 * 
+	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
 	 */
@@ -72,30 +72,30 @@ public class Link implements Serializable {
 
 	/**
 	 * Empty constructor required by the marshalling framework.
+	 * <p><strong>Note: </strong> Sub-classes should not use this constructor!
 	 */
 	protected Link() {
-
 	}
 
 	/**
 	 * Returns the actual URI the link is pointing to.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getHref() {
-		return href;
+		return this.href;
 	}
 
 	/**
 	 * Returns the rel of the link.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getRel() {
-		return rel;
+		return this.rel;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -122,17 +122,17 @@ public class Link implements Serializable {
 	public int hashCode() {
 
 		int result = 17;
-		result += 31 * href.hashCode();
-		result += 31 * rel.hashCode();
+		result += 31 * this.href.hashCode();
+		result += 31 * this.rel.hashCode();
 		return result;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("{ rel : %s, href : %s }", rel, href);
+		return String.format("{ this.rel : %s, this.href : %s }", this.rel, this.href);
 	}
 }

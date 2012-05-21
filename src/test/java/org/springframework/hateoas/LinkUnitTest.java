@@ -22,7 +22,7 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link Link}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class LinkUnitTest {
@@ -52,12 +52,12 @@ public class LinkUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsEmptyHref() {
-		new Link("");
+		new Link(" ");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsEmptyRel() {
-		new Link("foo", "");
+		new Link("foo", " ");
 	}
 
 	@Test

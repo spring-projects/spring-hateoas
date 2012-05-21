@@ -30,26 +30,26 @@ import org.springframework.web.util.UriTemplate;
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
- * 
+ *
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilder {
 
-	private final UriComponents builder;
+	private final UriComponents uriComponents;
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	private ControllerLinkBuilder(UriComponentsBuilder builder) {
 		Assert.notNull(builder);
-		this.builder = builder.build();
+		this.uriComponents = builder.build();
 	}
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
-	 * 
+	 *
 	 * @param controller
 	 * @return
 	 */
@@ -59,7 +59,7 @@ public class ControllerLinkBuilder {
 
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
 
-		RequestMapping annotation = controller.getAnnotation(RequestMapping.class);
+		RequestMapping annotation = AnnotationUtils.findAnnotation(controller, RequestMapping.class);
 		String[] mapping = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
 
 		if (mapping.length > 1) {
@@ -78,7 +78,7 @@ public class ControllerLinkBuilder {
 
 	/**
 	 * Adds the given object's {@link String} representation as sub-resource to the current URI.
-	 * 
+	 *
 	 * @param object
 	 * @return
 	 */
@@ -89,13 +89,13 @@ public class ControllerLinkBuilder {
 		}
 
 		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
-		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(builder.toUri()).pathSegment(segments));
+		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(this.uriComponents.toUri()).pathSegment(segments));
 	}
 
 	/**
 	 * Adds the given {@link AbstractEntity}'s id as sub-resource. Will simply return the current builder if the given
 	 * entity is {@literal null}.
-	 * 
+	 *
 	 * @param identifyable
 	 * @return
 	 */
@@ -110,11 +110,11 @@ public class ControllerLinkBuilder {
 
 	/**
 	 * Returns a URI resulting from the builder.
-	 * 
+	 *
 	 * @return
 	 */
 	public URI toUri() {
-		return builder.encode().toUri();
+		return this.uriComponents.encode().toUri();
 	}
 
 	public Link withRel(String rel) {
