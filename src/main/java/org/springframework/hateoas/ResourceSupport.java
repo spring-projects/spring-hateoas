@@ -25,13 +25,13 @@ import org.springframework.util.Assert;
 
 /**
  * Base class for DTOs to collect links.
- * 
+ *
  * @author Oliver Gierke
  */
 public class ResourceSupport implements Identifiable<Link> {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
-	private List<Link> links;
+	private final List<Link> links;
 
 	public ResourceSupport() {
 		this.links = new ArrayList<Link>();
@@ -46,7 +46,7 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/**
 	 * Adds the given link to the resource.
-	 * 
+	 *
 	 * @param link
 	 */
 	public void add(Link link) {
@@ -75,13 +75,13 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/**
 	 * Returns the link with the given rel.
-	 * 
+	 *
 	 * @param rel
 	 * @return the link with the given rel or {@literal null} if none found.
 	 */
 	public Link getLink(String rel) {
 
-		for (Link link : links) {
+		for (Link link : this.links) {
 			if (link.getRel().equals(rel)) {
 				return link;
 			}
@@ -90,7 +90,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		return null;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -110,7 +110,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		return this.links.equals(that.links);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -119,7 +119,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		return this.links.hashCode();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

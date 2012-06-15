@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 /**
  * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
  * sure a self-link is always added.
- * 
+ *
  * @author Oliver Gierke
  */
 public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport> implements
@@ -60,7 +60,7 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 
 	/**
 	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
-	 * 
+	 *
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
@@ -75,7 +75,7 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 
 	/**
 	 * Converts all given entities into resources.
-	 * 
+	 *
 	 * @see #toResource(Object)
 	 * @param entities
 	 * @return
@@ -93,7 +93,7 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 
 	/**
 	 * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
@@ -107,7 +107,7 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 
 	/**
 	 * Creates a new resource with a self link to the given id.
-	 * 
+	 *
 	 * @param entity
 	 * @param id
 	 * @return
@@ -122,13 +122,13 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 		Assert.notNull(id);
 
 		D instance = instantiateResource(entity);
-		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
+		instance.add(linkTo(this.controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
 		return instance;
 	}
 
 	/**
 	 * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
-	 * 
+	 *
 	 * @param values must not be {@literal null}.
 	 * @return
 	 */
@@ -147,11 +147,11 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 	 * Instantiates the resource object. Default implementation will assume a no-arg constructor and use reflection but
 	 * can be overridden to manually set up the object instance initially (e.g. to improve performance if this becomes an
 	 * issue).
-	 * 
+	 *
 	 * @param entity
 	 * @return
 	 */
 	protected D instantiateResource(T entity) {
-		return BeanUtils.instantiateClass(resourceType);
+		return BeanUtils.instantiateClass(this.resourceType);
 	}
 }
