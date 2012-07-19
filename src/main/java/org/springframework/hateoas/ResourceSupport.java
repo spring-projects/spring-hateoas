@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
 public class ResourceSupport implements Identifiable<Link> {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
-	private List<Link> links;
+	private final List<Link> links;
 
 	public ResourceSupport() {
 		this.links = new ArrayList<Link>();

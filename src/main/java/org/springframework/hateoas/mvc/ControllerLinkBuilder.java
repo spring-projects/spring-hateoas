@@ -35,16 +35,16 @@ import org.springframework.web.util.UriTemplate;
  */
 public class ControllerLinkBuilder {
 
-	private final UriComponents builder;
+	private final UriComponents uriComponents;
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder}.
 	 * 
-	 * @param builder must not be {@literal null}.
+	 * @param uriComponents must not be {@literal null}.
 	 */
 	private ControllerLinkBuilder(UriComponentsBuilder builder) {
 		Assert.notNull(builder);
-		this.builder = builder.build();
+		this.uriComponents = builder.build();
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class ControllerLinkBuilder {
 
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
 
-		RequestMapping annotation = controller.getAnnotation(RequestMapping.class);
+		RequestMapping annotation = AnnotationUtils.findAnnotation(controller, RequestMapping.class);
 		String[] mapping = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
 
 		if (mapping.length > 1) {
@@ -89,12 +89,12 @@ public class ControllerLinkBuilder {
 		}
 
 		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
-		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(builder.toUri()).pathSegment(segments));
+		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
 	}
 
 	/**
-	 * Adds the given {@link AbstractEntity}'s id as sub-resource. Will simply return the current builder if the given
-	 * entity is {@literal null}.
+	 * Adds the given {@link AbstractEntity}'s id as sub-resource. Will simply return the current uriComponents if the
+	 * given entity is {@literal null}.
 	 * 
 	 * @param identifyable
 	 * @return
@@ -109,12 +109,12 @@ public class ControllerLinkBuilder {
 	}
 
 	/**
-	 * Returns a URI resulting from the builder.
+	 * Returns a URI resulting from the uriComponents.
 	 * 
 	 * @return
 	 */
 	public URI toUri() {
-		return builder.encode().toUri();
+		return uriComponents.encode().toUri();
 	}
 
 	public Link withRel(String rel) {

@@ -18,7 +18,6 @@ package org.springframework.hateoas.mvc;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-import static org.springframework.hateoas.mvc.ResourceAssemblerSupport.EntityId.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.springframework.hateoas.TestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
+ * Unit tests for {@link ResourceAssemblerSupport}.
  * 
  * @author Oliver Gierke
  */
@@ -62,7 +62,7 @@ public class ResourceAssemblerSupportUnitTest extends TestUtils {
 	@Test
 	public void usesAlternateIdIfGivenExplicitly() {
 
-		PersonResource resource = assembler.createResource(person, id(person.alternateId));
+		PersonResource resource = assembler.createResourceWithId(person.alternateId, person);
 		Link selfLink = resource.getId();
 		assertThat(selfLink.getHref(), endsWith("/people/id"));
 	}

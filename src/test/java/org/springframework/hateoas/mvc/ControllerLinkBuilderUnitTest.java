@@ -28,7 +28,6 @@ import org.springframework.hateoas.TestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * 
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
@@ -36,7 +35,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void createsLinkToControllerRoot() {
 
-		Link link = linkTo(PersonController.class).withSelfRel();
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
 	}
@@ -52,7 +51,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void createsLinkToSubResource() {
 
-		Link link = linkTo(PersonController.class).slash("something").withSelfRel();
+		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), Matchers.endsWith("/people/something"));
 	}
@@ -60,7 +59,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void createsLinkWithCustomRel() {
 
-		Link link = linkTo(PersonController.class).withRel(Link.REL_NEXT);
+		Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
 		assertThat(link.getRel(), is(Link.REL_NEXT));
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
 	}
@@ -72,7 +71,6 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 	@Test
 	public void createsLinkToUnmappedController() {
-
 		linkTo(UnmappedController.class);
 	}
 
@@ -83,17 +81,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Identifiable<Long> identifyable = mock(Identifiable.class);
 		when(identifyable.getId()).thenReturn(10L);
 
-		Link link = linkTo(PersonController.class).slash(identifyable).withSelfRel();
+		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
 		assertThat(link.getHref(), Matchers.endsWith("/people/10"));
 	}
 
 	@Test
 	public void appendingNullIsANoOp() {
 
-		Link link = linkTo(PersonController.class).slash(null).withSelfRel();
+		Link link = linkTo(PersonControllerImpl.class).slash(null).withSelfRel();
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
 
-		link = linkTo(PersonController.class).slash((Object) null).withSelfRel();
+		link = linkTo(PersonControllerImpl.class).slash((Object) null).withSelfRel();
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
 	}
 
@@ -108,7 +106,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@RequestMapping("/people")
-	class PersonController {
+	interface PersonController {
+
+	}
+
+	class PersonControllerImpl implements PersonController {
 
 	}
 

@@ -36,25 +36,6 @@ import org.springframework.util.Assert;
 public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport> implements
 		ResourceAssembler<T, D> {
 
-	public static class EntityId {
-
-		private final Object id;
-
-		public EntityId(Object id) {
-			Assert.notNull(id);
-			this.id = id;
-		}
-
-		public static EntityId id(Object object) {
-			return new EntityId(object);
-		}
-
-		@Override
-		public String toString() {
-			return this.id.toString();
-		}
-	}
-
 	private final Class<?> controllerClass;
 	private final Class<D> resourceType;
 
@@ -77,11 +58,12 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 	 * Converts all given entities into resources.
 	 * 
 	 * @see #toResource(Object)
-	 * @param entities
+	 * @param entities must not be {@literal null}.
 	 * @return
 	 */
 	public List<D> toResources(Iterable<? extends T> entities) {
 
+		Assert.notNull(entities);
 		List<D> result = new ArrayList<D>();
 
 		for (T entity : entities) {
@@ -102,21 +84,21 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 	}
 
 	protected D createResource(T entity, Object... parameters) {
-		return createResource(entity, EntityId.id(entity.getId()), parameters);
+		return createResourceWithId(entity.getId(), entity, parameters);
 	}
 
 	/**
 	 * Creates a new resource with a self link to the given id.
 	 * 
-	 * @param entity
-	 * @param id
+	 * @param entity must not be {@literal null}.
+	 * @param id must not be {@literal null}.
 	 * @return
 	 */
-	protected D createResource(T entity, EntityId id) {
-		return createResource(entity, id, new Object[0]);
+	protected D createResourceWithId(Object id, T entity) {
+		return createResourceWithId(id, entity, new Object[0]);
 	}
 
-	protected D createResource(T entity, EntityId id, Object... parameters) {
+	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
 		Assert.notNull(entity);
 		Assert.notNull(id);
