@@ -54,6 +54,11 @@ public class ResourceSupport implements Identifiable<Link> {
 		this.links.add(link);
 	}
 
+	/**
+	 * Adds all given {@link Link}s to the resource.
+	 * 
+	 * @param links
+	 */
 	public void add(Iterable<Link> links) {
 		Assert.notNull(links, "Given links must not be null!");
 		for (Link candidate : links) {
@@ -61,14 +66,30 @@ public class ResourceSupport implements Identifiable<Link> {
 		}
 	}
 
+	/**
+	 * Returns whether the resource contains {@link Link}s at all.
+	 * 
+	 * @return
+	 */
 	public boolean hasLinks() {
 		return !this.links.isEmpty();
 	}
 
+	/**
+	 * Returns whether the resource contains a {@link Link} with the given rel.
+	 * 
+	 * @param rel
+	 * @return
+	 */
 	public boolean hasLink(String rel) {
 		return getLink(rel) != null;
 	}
 
+	/**
+	 * Returns all {@link Link}s contained in this resource.
+	 * 
+	 * @return
+	 */
 	public List<Link> getLinks() {
 		return Collections.unmodifiableList(links);
 	}
