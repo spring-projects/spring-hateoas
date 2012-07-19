@@ -94,8 +94,8 @@ Link link = linkTo(PersonController.class).withRel("people");
 assertThat(link.getRel(), is("people"));
 assertThat(link.getHref(), endsWith("/people"));
 ```
-``
-The `ControllerLinkBuilder` uses Springs `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at `http://localhost:8080/your-app` This will be exactly the URI you're constructing additional parts on top. The builder now inspects the given controller class for its root mapping and thus end up with `http://localhost:8080/your-app/people`. You can also easily build more nested links as well:
+
+The `ControllerLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at `http://localhost:8080/your-app` This will be exactly the URI you're constructing additional parts on top. The builder now inspects the given controller class for its root mapping and thus end up with `http://localhost:8080/your-app/people`. You can also easily build more nested links as well:
 
 ```java
 Person person = new Person(1L, "Dave", "Matthews");
