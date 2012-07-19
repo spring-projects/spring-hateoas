@@ -1,0 +1,9 @@
+Spring Hateoas Changelog
+=========================
+
+Changes in version 0.1.0.RELEASE (2012-07-19)
+---------------------------------------------
+- Initial release with basic support
+- Common abstractions like Link, Identifiable, ResourceSupport (JAXB marshable)
+- ControllerLinkBuilder to easily create Link instances to point to Spring MVC controllers
+- ResourceAssemblerSupport base class to easily create resource (DTO) instances
