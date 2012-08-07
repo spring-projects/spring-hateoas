@@ -1,0 +1,57 @@
+/*
+ * Copyright 2012 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.hateoas;
+
+import org.codehaus.jackson.annotate.JsonUnwrapped;
+import org.springframework.util.Assert;
+
+/**
+ * A simple {@link Resource} wrapping a domain object and adding links to it.
+ * 
+ * @author Oliver Gierke
+ */
+public class Resource<T> extends ResourceSupport {
+
+	@JsonUnwrapped
+	private final T content;
+
+	/**
+	 * Creates an empty {@link Resource}.
+	 */
+	protected Resource() {
+		this.content = null;
+	}
+
+	/**
+	 * Creates a new {@link Resource} with the given content.
+	 * 
+	 * @param content must not be {@literal null}.
+	 */
+	public Resource(T content) {
+
+		Assert.notNull(content, "Content must not be null!");
+		this.content = content;
+	}
+
+	/**
+	 * Returns the underlying entity.
+	 * 
+	 * @return the content
+	 */
+	public T getContent() {
+		return content;
+	}
+}

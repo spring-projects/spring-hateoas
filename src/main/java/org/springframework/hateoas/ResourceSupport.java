@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.util.Assert;
 
 /**
@@ -31,6 +32,7 @@ import org.springframework.util.Assert;
 public class ResourceSupport implements Identifiable<Link> {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
+	@JsonProperty("links")
 	private final List<Link> links;
 
 	public ResourceSupport() {
