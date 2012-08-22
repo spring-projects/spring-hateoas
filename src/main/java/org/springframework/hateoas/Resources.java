@@ -16,6 +16,7 @@
 package org.springframework.hateoas;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -50,13 +51,15 @@ public class Resources<T extends Resource<?>> extends ResourceSupport implements
 	 * Creates a {@link Resources} instance with the given content.
 	 * 
 	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link Resources}.
 	 */
-	public Resources(Collection<T> content) {
+	public Resources(Collection<T> content, Link... links) {
 
 		Assert.notNull(content);
 
 		this.content = new ArrayList<T>();
 		this.content.addAll(content);
+		this.add(Arrays.asList(links));
 	}
 
 	/**

@@ -15,21 +15,20 @@
  */
 package org.springframework.hateoas;
 
-
 /**
- * SPI to let user code manipulate a {@link Resource} by the framework.
+ * SPI interface to allow components to enrich the {@link ResourceSupport} instances returned from Spring MVC
+ * controllers.
  * 
- * @param T the concrete Resource<T> extension
+ * @see Resource
+ * @see Resources
  * @author Oliver Gierke
  */
-public interface ResourceProcessor<T extends Resource<?>> {
+public interface ResourceEnricher<T extends ResourceSupport> {
 
 	/**
-	 * Callback to allow the manipulation of the given {@link Resource} before rendering.
+	 * Enriches the given resource, add links, alter the domain data etc.
 	 * 
-	 * @param resource the standard resource prepared by the framework.
-	 * @param entity the entity backing the resource
-	 * @return a {@link Resource} object (could be a completely different one)
+	 * @param resource
 	 */
-	Resource<?> process(T resource);
+	void enrich(T resource);
 }

@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import java.util.Arrays;
+
 import org.codehaus.jackson.annotate.JsonUnwrapped;
 import org.springframework.util.Assert;
 
@@ -39,11 +41,13 @@ public class Resource<T> extends ResourceSupport {
 	 * Creates a new {@link Resource} with the given content.
 	 * 
 	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link Resource}.
 	 */
-	public Resource(T content) {
+	public Resource(T content, Link... links) {
 
 		Assert.notNull(content, "Content must not be null!");
 		this.content = content;
+		this.add(Arrays.asList(links));
 	}
 
 	/**
