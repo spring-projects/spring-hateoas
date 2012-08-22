@@ -95,4 +95,39 @@ public class Resources<T extends Resource<?>> extends ResourceSupport implements
 	public Iterator<T> iterator() {
 		return content.iterator();
 	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this) {
+			return true;
+		}
+
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+
+		Resources<?> that = (Resources<?>) obj;
+
+		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
+		return contentEqual ? super.equals(obj) : false;
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceSupport#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+
+		int result = super.hashCode();
+		result += content == null ? 0 : 17 * content.hashCode();
+
+		return result;
+	}
+
 }

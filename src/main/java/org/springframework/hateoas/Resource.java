@@ -54,4 +54,37 @@ public class Resource<T> extends ResourceSupport {
 	public T getContent() {
 		return content;
 	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+
+		Resource<?> that = (Resource<?>) obj;
+
+		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
+		return contentEqual ? super.equals(obj) : false;
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceSupport#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+
+		int result = super.hashCode();
+		result += content == null ? 0 : 17 * content.hashCode();
+		return result;
+	}
 }
