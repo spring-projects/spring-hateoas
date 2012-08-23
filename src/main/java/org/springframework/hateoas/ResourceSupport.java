@@ -115,6 +115,15 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/* 
 	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("links: %s", links.toString());
+	}
+
+	/* 
+	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -140,14 +149,5 @@ public class ResourceSupport implements Identifiable<Link> {
 	@Override
 	public int hashCode() {
 		return this.links.hashCode();
-	}
-
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return this.links.toString();
 	}
 }

@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * @author Oliver Gierke
  */
 @XmlRootElement(name = "entities")
-public class Resources<T extends Resource<?>> extends ResourceSupport implements Iterable<T> {
+public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	@XmlAnyElement
 	@XmlElementWrapper
@@ -69,7 +69,7 @@ public class Resources<T extends Resource<?>> extends ResourceSupport implements
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Resource<S>, S> Resources<T> fromEntities(Collection<S> content) {
+	public static <T extends Resource<S>, S> Resources<T> fromEntities(Iterable<S> content) {
 
 		Assert.notNull(content);
 		ArrayList<T> resources = new ArrayList<T>();
@@ -82,7 +82,7 @@ public class Resources<T extends Resource<?>> extends ResourceSupport implements
 	}
 
 	/**
-	 * Returns the underlying {@link Resource}s.
+	 * Returns the underlying elements.
 	 * 
 	 * @return the content will never be {@literal null}.
 	 */
@@ -97,6 +97,15 @@ public class Resources<T extends Resource<?>> extends ResourceSupport implements
 	@Override
 	public Iterator<T> iterator() {
 		return content.iterator();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceSupport#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("Resources { content: %s, %s }", getContent(), super.toString());
 	}
 
 	/* 
@@ -132,5 +141,4 @@ public class Resources<T extends Resource<?>> extends ResourceSupport implements
 
 		return result;
 	}
-
 }
