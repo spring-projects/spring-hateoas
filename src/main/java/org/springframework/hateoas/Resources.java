@@ -79,7 +79,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Resource<S>, S> Resources<T> fromEntities(Iterable<S> content) {
+	public static <T extends Resource<S>, S> Resources<T> wrap(Iterable<S> content) {
 
 		Assert.notNull(content);
 		ArrayList<T> resources = new ArrayList<T>();

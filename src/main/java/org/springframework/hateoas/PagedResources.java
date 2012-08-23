@@ -86,7 +86,7 @@ public class PagedResources<T> extends Resources<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Resource<S>, S> PagedResources<T> fromEntities(Iterable<S> content, PageMetadata metadata) {
+	public static <T extends Resource<S>, S> PagedResources<T> wrap(Iterable<S> content, PageMetadata metadata) {
 
 		Assert.notNull(content);
 		ArrayList<T> resources = new ArrayList<T>();
