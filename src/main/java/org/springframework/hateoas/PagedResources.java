@@ -16,6 +16,7 @@
 package org.springframework.hateoas;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -46,13 +47,24 @@ public class PagedResources<T> extends Resources<T> {
 	}
 
 	/**
-	 * Creates a new {@link PagedResources} from the given content and {@link PageMetadata}.
+	 * Creates a new {@link PagedResources} from the given content, {@link PageMetadata} and {@link Link}s (optional).
 	 * 
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
 	 */
 	public PagedResources(Collection<T> content, PageMetadata metadata, Link... links) {
+		this(content, metadata, Arrays.asList(links));
+	}
+
+	/**
+	 * Creates a new {@link PagedResources} from the given content {@link PageMetadata} and {@link Link}s.
+	 * 
+	 * @param content must not be {@literal null}.
+	 * @param metadata
+	 * @param links
+	 */
+	public PagedResources(Collection<T> content, PageMetadata metadata, Iterable<Link> links) {
 		super(content, links);
 		this.metadata = metadata;
 	}

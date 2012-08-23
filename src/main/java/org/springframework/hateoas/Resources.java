@@ -48,18 +48,28 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	}
 
 	/**
-	 * Creates a {@link Resources} instance with the given content.
+	 * Creates a {@link Resources} instance with the given content and {@link Link}s (optional).
 	 * 
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link Resources}.
 	 */
 	public Resources(Collection<T> content, Link... links) {
+		this(content, Arrays.asList(links));
+	}
+
+	/**
+	 * Creates a {@link Resources} instance with the given content and {@link Link}s.
+	 * 
+	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link Resources}.
+	 */
+	public Resources(Collection<T> content, Iterable<Link> links) {
 
 		Assert.notNull(content);
 
 		this.content = new ArrayList<T>();
 		this.content.addAll(content);
-		this.add(Arrays.asList(links));
+		this.add(links);
 	}
 
 	/**
