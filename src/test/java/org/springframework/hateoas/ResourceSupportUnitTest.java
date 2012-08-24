@@ -133,5 +133,4 @@ public class ResourceSupportUnitTest {
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
-
 }
