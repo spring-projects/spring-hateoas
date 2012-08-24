@@ -16,19 +16,20 @@
 package org.springframework.hateoas;
 
 /**
- * SPI interface to allow components to enrich the {@link ResourceSupport} instances returned from Spring MVC
+ * SPI interface to allow components to process the {@link ResourceSupport} instances returned from Spring MVC
  * controllers.
  * 
  * @see Resource
  * @see Resources
  * @author Oliver Gierke
  */
-public interface ResourceEnricher<T extends ResourceSupport> {
+public interface ResourceProcessor<T extends ResourceSupport> {
 
 	/**
-	 * Enriches the given resource, add links, alter the domain data etc.
+	 * Processes the given resource, add links, alter the domain data etc.
 	 * 
 	 * @param resource
+	 * @return the processed resource
 	 */
-	void enrich(T resource);
+	T enrich(T resource);
 }
