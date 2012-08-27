@@ -31,5 +31,5 @@ public interface ResourceProcessor<T extends ResourceSupport> {
 	 * @param resource
 	 * @return the processed resource
 	 */
-	T enrich(T resource);
+	T process(T resource);
 }
