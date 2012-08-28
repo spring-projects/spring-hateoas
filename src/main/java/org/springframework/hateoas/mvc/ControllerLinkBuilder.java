@@ -50,14 +50,24 @@ public class ControllerLinkBuilder {
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
 	 * 
-	 * @param controller
+	 * @param controller must not be {@literal null}.
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller) {
 		return linkTo(controller, new Object[0]);
 	}
 
+	/**
+	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
+	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
+	 * 
+	 * @param controller must not be {@literal null}.
+	 * @param parameters
+	 * @return
+	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
+
+		Assert.notNull(controller);
 
 		RequestMapping annotation = AnnotationUtils.findAnnotation(controller, RequestMapping.class);
 		String[] mapping = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
@@ -117,10 +127,22 @@ public class ControllerLinkBuilder {
 		return uriComponents.encode().toUri();
 	}
 
+	/**
+	 * Creates the {@link Link} built by the current builder instance with the given rel.
+	 * 
+	 * @param rel must not be {@literal null} or empty.
+	 * @return
+	 */
 	public Link withRel(String rel) {
 		return new Link(this.toString(), rel);
 	}
 
+	/**
+	 * Creates the {@link Link} built by the current builder instance with the default self rel.
+	 * 
+	 * @see Link#REL_SELF
+	 * @return
+	 */
 	public Link withSelfRel() {
 		return new Link(this.toString());
 	}
