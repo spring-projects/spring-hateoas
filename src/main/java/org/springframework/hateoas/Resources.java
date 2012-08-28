@@ -53,7 +53,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link Resources}.
 	 */
-	public Resources(Collection<T> content, Link... links) {
+	public Resources(Iterable<T> content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
 
@@ -63,12 +63,15 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link Resources}.
 	 */
-	public Resources(Collection<T> content, Iterable<Link> links) {
+	public Resources(Iterable<T> content, Iterable<Link> links) {
 
 		Assert.notNull(content);
 
 		this.content = new ArrayList<T>();
-		this.content.addAll(content);
+
+		for (T element : content) {
+			this.content.add(element);
+		}
 		this.add(links);
 	}
 
