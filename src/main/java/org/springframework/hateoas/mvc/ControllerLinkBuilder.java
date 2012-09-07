@@ -20,6 +20,7 @@ import java.net.URI;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilder {
+public class ControllerLinkBuilder implements LinkBuilder {
 
 	private final UriComponents uriComponents;
 
@@ -86,11 +87,9 @@ public class ControllerLinkBuilder {
 		return builder.slash(template.expand(parameters));
 	}
 
-	/**
-	 * Adds the given object's {@link String} representation as sub-resource to the current URI.
-	 * 
-	 * @param object
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
 	 */
 	public ControllerLinkBuilder slash(Object object) {
 
@@ -102,12 +101,9 @@ public class ControllerLinkBuilder {
 		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
 	}
 
-	/**
-	 * Adds the given {@link AbstractEntity}'s id as sub-resource. Will simply return the current uriComponents if the
-	 * given entity is {@literal null}.
-	 * 
-	 * @param identifyable
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
 	 */
 	public ControllerLinkBuilder slash(Identifiable<?> identifyable) {
 
@@ -118,30 +114,25 @@ public class ControllerLinkBuilder {
 		return slash(identifyable.getId());
 	}
 
-	/**
-	 * Returns a URI resulting from the uriComponents.
-	 * 
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilder#toUri()
 	 */
 	public URI toUri() {
 		return uriComponents.encode().toUri();
 	}
 
-	/**
-	 * Creates the {@link Link} built by the current builder instance with the given rel.
-	 * 
-	 * @param rel must not be {@literal null} or empty.
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
 	 */
 	public Link withRel(String rel) {
 		return new Link(this.toString(), rel);
 	}
 
-	/**
-	 * Creates the {@link Link} built by the current builder instance with the default self rel.
-	 * 
-	 * @see Link#REL_SELF
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilder#withSelfRel()
 	 */
 	public Link withSelfRel() {
 		return new Link(this.toString());
