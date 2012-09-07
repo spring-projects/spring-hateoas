@@ -20,6 +20,7 @@ import java.net.URI;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilder {
+public class ControllerLinkBuilder implements LinkBuilder {
 
 	private final UriComponents uriComponents;
 
@@ -42,7 +43,7 @@ public class ControllerLinkBuilder {
 	 * 
 	 * @param uriComponents must not be {@literal null}.
 	 */
-	private ControllerLinkBuilder(UriComponentsBuilder builder) {
+	ControllerLinkBuilder(UriComponentsBuilder builder) {
 		Assert.notNull(builder);
 		this.uriComponents = builder.build();
 	}
