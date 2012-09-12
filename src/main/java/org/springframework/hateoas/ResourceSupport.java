@@ -15,9 +15,9 @@
  */
 package org.springframework.hateoas;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
@@ -34,10 +34,10 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
 	@JsonProperty("links")
-	private final Set<Link> links;
+	private final List<Link> links;
 
 	public ResourceSupport() {
-		this.links = new HashSet<Link>();
+		this.links = new ArrayList<Link>();
 	}
 
 	/**
@@ -94,8 +94,8 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * 
 	 * @return
 	 */
-	public Set<Link> getLinks() {
-		return Collections.unmodifiableSet(links);
+	public List<Link> getLinks() {
+		return Collections.unmodifiableList(links);
 	}
 
 	/**
