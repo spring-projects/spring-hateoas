@@ -59,6 +59,7 @@
 	<properties>
 		<spring.version>3.1.2.RELEASE</spring.version>
 		<jackson.version>1.9.7</jackson.version>
+		<jaxrs.version>1.0</jaxrs.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 	</properties>
 
@@ -88,7 +89,14 @@
 			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>${jaxrs.version}</version>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>

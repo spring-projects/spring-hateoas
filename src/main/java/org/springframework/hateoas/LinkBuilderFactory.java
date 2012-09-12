@@ -20,7 +20,7 @@ package org.springframework.hateoas;
  * 
  * @author Ricardo Gladwell
  */
-public interface LinkBuilderFactory {
+public interface LinkBuilderFactory<T extends LinkBuilder> {
 
 	/**
 	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target clas (controller,
@@ -29,7 +29,7 @@ public interface LinkBuilderFactory {
 	 * @param target must not be {@literal null}.
 	 * @return
 	 */
-	LinkBuilder linkTo(Class<?> target);
+	T linkTo(Class<?> target);
 
 	/**
 	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target class (controller,
@@ -40,5 +40,5 @@ public interface LinkBuilderFactory {
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
-	LinkBuilder linkTo(Class<?> target, Object... parameters);
+	T linkTo(Class<?> target, Object... parameters);
 }

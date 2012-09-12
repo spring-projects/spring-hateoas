@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mvc;
+package org.springframework.hateoas.jaxrs;
 
+import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.LinkBuilderFactory;
 
 /**
- * Factory for {@link UriComponentsLinkBuilder} instances based on the request mapping annotated on the given
- * controller.
+ * Factory for {@link LinkBuilder} instances based on the path mapping annotated on the given JAX-RS service.
  * 
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilderFactory implements LinkBuilderFactory<ControllerLinkBuilder> {
+public class JaxRsLinkBuilderFactory implements LinkBuilderFactory<JaxRsLinkBuilder> {
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class)
 	 */
-	@Override
-	public ControllerLinkBuilder linkTo(Class<?> controller) {
-		return ControllerLinkBuilder.linkTo(controller);
+	public JaxRsLinkBuilder linkTo(Class<?> service) {
+		return JaxRsLinkBuilder.linkTo(service);
 	}
 
 	/*
@@ -40,7 +39,7 @@ public class ControllerLinkBuilderFactory implements LinkBuilderFactory<Controll
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.lang.Object[])
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(controller, parameters);
+	public JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
+		return JaxRsLinkBuilder.linkTo(service, parameters);
 	}
 }

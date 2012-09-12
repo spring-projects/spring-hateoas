@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkBuilderFactory;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddressesController;
@@ -33,7 +32,7 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddr
  */
 public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
-	LinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+	ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
 
 	@Test
 	public void createsLinkToControllerRoot() {

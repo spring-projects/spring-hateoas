@@ -15,17 +15,11 @@
  */
 package org.springframework.hateoas.mvc;
 
-import java.net.URI;
-
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkBuilder;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -34,24 +28,21 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilder implements LinkBuilder {
-
-	private final UriComponents uriComponents;
+public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLinkBuilder> {
 
 	/**
-	 * Creates a new {@link ControllerLinkBuilder}.
+	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
 	 * 
-	 * @param uriComponents must not be {@literal null}.
+	 * @param builder must not be {@literal null}.
 	 */
 	private ControllerLinkBuilder(UriComponentsBuilder builder) {
-		Assert.notNull(builder);
-		this.uriComponents = builder.build();
+		super(builder);
 	}
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
 	 * 
-	 * @param controller must not be {@literal null}.
+	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller) {
@@ -62,8 +53,9 @@ public class ControllerLinkBuilder implements LinkBuilder {
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
 	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
 	 * 
-	 * @param controller must not be {@literal null}.
-	 * @param parameters
+	 * @param controller the class to discover the annotation on, must not be {@literal null}.
+	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
+	 *          {@literal null}.
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
@@ -87,63 +79,21 @@ public class ControllerLinkBuilder implements LinkBuilder {
 		return builder.slash(template.expand(parameters));
 	}
 
-	/*
+	/* 
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
-	 */
-	public ControllerLinkBuilder slash(Object object) {
-
-		if (object == null) {
-			return this;
-		}
-
-		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
-		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
-	 */
-	public ControllerLinkBuilder slash(Identifiable<?> identifyable) {
-
-		if (identifyable == null) {
-			return this;
-		}
-
-		return slash(identifyable.getId());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#toUri()
-	 */
-	public URI toUri() {
-		return uriComponents.encode().toUri();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
-	 */
-	public Link withRel(String rel) {
-		return new Link(this.toString(), rel);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#withSelfRel()
-	 */
-	public Link withSelfRel() {
-		return new Link(this.toString());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
 	@Override
-	public String toString() {
-		return toUri().normalize().toASCIIString();
+	protected ControllerLinkBuilder getThis() {
+		return this;
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
+	 */
+	@Override
+	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder) {
+		return new ControllerLinkBuilder(builder);
 	}
 }
