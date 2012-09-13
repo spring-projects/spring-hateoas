@@ -28,6 +28,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.UriComponentsLinkBuilder;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -86,7 +87,7 @@ public class ResourceAssemblerSupportUnitTest extends TestUtils {
 
 		List<PersonResource> result = assembler.toResources(Arrays.asList(first, second));
 
-		ControllerLinkBuilder builder = linkTo(PersonController.class);
+		UriComponentsLinkBuilder builder = linkTo(PersonController.class);
 
 		PersonResource firstResource = new PersonResource();
 		firstResource.add(builder.slash(1L).withSelfRel());
