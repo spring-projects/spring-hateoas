@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import org.codehaus.jackson.annotate.JsonAutoDetect;
@@ -29,6 +29,8 @@ import org.junit.Test;
  */
 public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTests {
 
+	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}";
+
 	@Test
 	public void inlinesContent() throws Exception {
 
@@ -36,8 +38,31 @@ public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTests
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		assertThat(write(new Resource<Person>(person)),
-				is("{\"links\":[],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}"));
+		Resource<Person> resource = new Resource<Person>(person);
+		resource.add(new Link("localhost"));
+
+		assertThat(write(resource), is(REFERENCE));
+	}
+
+	/**
+	 * @see #14
+	 */
+	@Test
+	public void readsResourceSupportCorrectly() throws Exception {
+
+		PersonResource result = read(REFERENCE, PersonResource.class);
+
+		assertThat(result.getLinks(), hasSize(1));
+		assertThat(result.getLinks(), hasItem(new Link("localhost")));
+		assertThat(result.getContent().firstname, is("Dave"));
+		assertThat(result.getContent().lastname, is("Matthews"));
+	}
+
+	static class PersonResource extends Resource<Person> {
+
+		public PersonResource() {
+
+		}
 	}
 
 	@JsonAutoDetect(fieldVisibility = Visibility.ANY)

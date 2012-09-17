@@ -15,41 +15,36 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
 /**
- * Integration tests for {@link ResourceSupport}.
+ * Integration tests for {@link Link} marshaling.
  * 
  * @author Oliver Gierke
  */
-public class ResourceSupportIntegrationTest extends AbstractMarshallingIntegrationTests {
+public class LinkIntegrationTest extends AbstractMarshallingIntegrationTests {
 
-	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
+	private static final String REFERENCE = "{\"rel\":\"something\",\"href\":\"location\"}";
 
 	/**
-	 * @see #7
+	 * @see #14
 	 */
 	@Test
-	public void doesNotRenderId() throws Exception {
-
-		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link("localhost"));
-
-		assertThat(write(resourceSupport), is(REFERENCE));
+	public void writesLinkCorrectly() throws Exception {
+		assertThat(write(new Link("location", "something")), is(REFERENCE));
 	}
 
 	/**
 	 * @see #14
 	 */
 	@Test
-	public void readResourceSupportCorrectly() throws Exception {
+	public void readsLinkCorrectly() throws Exception {
 
-		ResourceSupport result = read(REFERENCE, ResourceSupport.class);
-
-		assertThat(result.getLinks(), hasSize(1));
-		assertThat(result.getLinks(), hasItem(new Link("localhost")));
+		Link result = read(REFERENCE, Link.class);
+		assertThat(result.getHref(), is("location"));
+		assertThat(result.getRel(), is("something"));
 	}
 }
