@@ -41,4 +41,8 @@ public abstract class AbstractMarshallingIntegrationTests {
 		mapper.writeValue(writer, object);
 		return writer.toString();
 	}
+
+	protected <T> T read(String source, Class<T> targetType) throws Exception {
+		return mapper.readValue(source, targetType);
+	}
 }
