@@ -18,7 +18,6 @@ package org.springframework.hateoas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -101,7 +100,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * @return the content will never be {@literal null}.
 	 */
 	public Collection<T> getContent() {
-		return Collections.unmodifiableCollection(content);
+		return content;
 	}
 
 	/* 

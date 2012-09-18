@@ -20,6 +20,7 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.util.Assert;
 
 /**
@@ -40,8 +41,11 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
+	@JsonProperty("rel")
 	@XmlAttribute
 	private String rel;
+
+	@JsonProperty("href")
 	@XmlAttribute
 	private String href;
 
