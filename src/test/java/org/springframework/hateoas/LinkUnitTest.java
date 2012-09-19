@@ -19,10 +19,11 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.springframework.http.HttpMethod;
 
 /**
  * Unit tests for {@link Link}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class LinkUnitTest {
@@ -60,7 +61,12 @@ public class LinkUnitTest {
 		new Link("foo", "");
 	}
 
-	@Test
+    @Test
+    public void acceptsNullMethod() throws Exception {
+        new Link("href", "rel", null);
+    }
+
+    @Test
 	public void sameRelAndHrefMakeSameLink() {
 
 		Link left = new Link("foo", Link.REL_SELF);
@@ -69,11 +75,20 @@ public class LinkUnitTest {
 		TestUtils.assertEqualAndSameHashCode(left, right);
 	}
 
+    @Test
+	public void sameRelAndHrefAndMethodMakeSameLink() {
+
+		Link left = new Link("foo", Link.REL_SELF, HttpMethod.DELETE);
+		Link right = new Link("foo", Link.REL_SELF, HttpMethod.DELETE);
+
+		TestUtils.assertEqualAndSameHashCode(left, right);
+	}
+
 	@Test
 	public void differentRelMakesDifferentLink() {
 
-		Link left = new Link("foo", Link.REL_PREVIOUS);
-		Link right = new Link("foo", Link.REL_NEXT);
+		Link left = new Link("foo", Link.REL_PREVIOUS, HttpMethod.GET);
+		Link right = new Link("foo", Link.REL_NEXT, HttpMethod.GET);
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
@@ -81,8 +96,17 @@ public class LinkUnitTest {
 	@Test
 	public void differentHrefMakesDifferentLink() {
 
-		Link left = new Link("foo", Link.REL_SELF);
-		Link right = new Link("bar", Link.REL_SELF);
+		Link left = new Link("foo", Link.REL_SELF, HttpMethod.GET);
+		Link right = new Link("bar", Link.REL_SELF, HttpMethod.GET);
+
+		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+	}
+
+    @Test
+	public void differentMethodMakesDifferentLink() {
+
+		Link left = new Link("foo", Link.REL_SELF, HttpMethod.GET);
+		Link right = new Link("foo", Link.REL_SELF, HttpMethod.PUT);
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}

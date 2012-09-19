@@ -23,12 +23,14 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddressesController;
+import org.springframework.http.HttpMethod;
 
 /**
  * Unit tests for {@link ControllerLinkBuilderFactory}.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
+ * @author Daniel Sawano
  */
 public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
@@ -41,6 +43,16 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people"));
+	}
+
+    @Test
+	public void createsPutLinkToControllerRoot() {
+
+		Link link = factory.linkTo(PersonControllerImpl.class).method(HttpMethod.PUT).withSelfRel();
+
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people"));
+        assertThat(link.getMethod(), is(HttpMethod.PUT));
 	}
 
 	@Test

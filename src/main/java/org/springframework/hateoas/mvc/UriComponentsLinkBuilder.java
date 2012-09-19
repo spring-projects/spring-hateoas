@@ -15,56 +15,64 @@
  */
 package org.springframework.hateoas.mvc;
 
-import java.net.URI;
-
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+
 /**
  * Base class to implement {@link LinkBuilder}s based on a Spring MVC {@link UriComponentsBuilder}.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
+ * @author Daniel Sawano
  */
 public abstract class UriComponentsLinkBuilder<T extends LinkBuilder> implements LinkBuilder {
 
-	private final UriComponents uriComponents;
+	private final LinkComponents linkComponents;
 
-	/**
-	 * Creates a new {@link UriComponentsLinkBuilder} using the given {@link UriComponentsBuilder}.
-	 * 
-	 * @param builder must not be {@literal null}.
+    /**
+	 * Creates a new {@link UriComponentsLinkBuilder} using the given {@link LinkComponents}.
+	 *
+	 * @param linkComponents must not be {@literal null}.
 	 */
-	public UriComponentsLinkBuilder(UriComponentsBuilder builder) {
-
-		Assert.notNull(builder);
-		this.uriComponents = builder.build();
+	public UriComponentsLinkBuilder(LinkComponents linkComponents) {
+        Assert.notNull(linkComponents);
+        this.linkComponents = linkComponents;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
-	 */
-	public T slash(Object object) {
+	@Override
+    public T slash(Object object) {
 
 		if (object == null) {
 			return getThis();
 		}
 
-		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
-		return createNewInstance(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
+        String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
+        UriComponents uriComponents = createUriComponentsBuilder().pathSegment(segments).build();
+        return createNewInstance(createLinkComponents(uriComponents, getMethod()));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
-	 */
-	public LinkBuilder slash(Identifiable<?> identifyable) {
+    private UriComponentsBuilder createUriComponentsBuilder() {
+        return UriComponentsBuilder.fromUri(getUriComponents().toUri());
+    }
+
+    private UriComponents getUriComponents() {
+        return linkComponents.getUriComponents();
+    }
+
+    private LinkComponents createLinkComponents(UriComponents uriComponents, HttpMethod method) {
+        return new LinkComponents(uriComponents, method);
+    }
+
+	@Override
+    public LinkBuilder slash(Identifiable<?> identifyable) {
 
 		if (identifyable == null) {
 			return this;
@@ -73,34 +81,30 @@ public abstract class UriComponentsLinkBuilder<T extends LinkBuilder> implements
 		return slash(identifyable.getId());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#toUri()
-	 */
-	public URI toUri() {
-		return uriComponents.encode().toUri();
+    @Override
+    public LinkBuilder method(HttpMethod method) {
+        return createNewInstance(createLinkComponents(createUriComponentsBuilder().build(), method));
+    }
+
+	@Override
+    public URI toUri() {
+		return getUriComponents().encode().toUri();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
-	 */
-	public Link withRel(String rel) {
-		return new Link(this.toString(), rel);
+	@Override
+    public Link withRel(String rel) {
+		return new Link(this.toString(), rel, getMethod());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#withSelfRel()
-	 */
-	public Link withSelfRel() {
-		return new Link(this.toString());
+    private HttpMethod getMethod() {
+        return linkComponents.getMethod();
+    }
+
+	@Override
+    public Link withSelfRel() {
+		return new Link(this.toString(),Link.REL_SELF, getMethod());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return toUri().normalize().toASCIIString();
@@ -108,16 +112,16 @@ public abstract class UriComponentsLinkBuilder<T extends LinkBuilder> implements
 
 	/**
 	 * Returns the current concrete instance.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract T getThis();
 
 	/**
 	 * Creates a new instance of the sub-class.
-	 * 
-	 * @param builder will never be {@literal null}.
+	 *
+	 * @param linkComponents will never be {@literal null}.
 	 * @return
 	 */
-	protected abstract T createNewInstance(UriComponentsBuilder builder);
+	protected abstract T createNewInstance(LinkComponents linkComponents);
 }
