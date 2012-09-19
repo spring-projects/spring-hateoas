@@ -15,15 +15,18 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-
+import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
+import org.springframework.http.HttpMethod;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for {@link Link} marshaling.
- * 
+ *
  * @author Oliver Gierke
+ * @author Daniel Sawano
  */
 public class LinkIntegrationTest extends AbstractMarshallingIntegrationTests {
 
@@ -47,4 +50,39 @@ public class LinkIntegrationTest extends AbstractMarshallingIntegrationTests {
 		assertThat(result.getHref(), is("location"));
 		assertThat(result.getRel(), is("something"));
 	}
+
+    @Test
+    public void serializeToJSON() throws Exception {
+        Link link = new Link("http://localhost", Link.REL_SELF, HttpMethod.GET);
+
+        String json = write(link);
+        JsonNode jsonNode = readTree(json);
+
+        assertHasValue(jsonNode, "href", "http://localhost");
+        assertHasValue(jsonNode, "rel", Link.REL_SELF);
+        assertHasValue(jsonNode, "method", HttpMethod.GET.toString());
+    }
+
+    @Test
+    public void nullMethodValueShouldNotBeSerializedToJSON() throws Exception {
+        Link link = new Link("http://localhost", Link.REL_SELF, null);
+
+        String json = write(link);
+        JsonNode jsonNode = readTree(json);
+
+        assertHasValue(jsonNode, "href", "http://localhost");
+        assertHasValue(jsonNode, "rel", Link.REL_SELF);
+        assertThat("method should not be serialized when null", jsonNode.has("method"), is(false));
+    }
+
+    @Test
+    public void deserializeFromJSON() throws Exception {
+        String json = "{\"rel\": \"self\", \"href\": \"http://localhost\", \"method\": \"POST\"}";
+
+        Link link = read(json, Link.class);
+
+        assertThat(link.getHref(), is("http://localhost"));
+        assertThat(link.getMethod(), is(HttpMethod.POST));
+        assertThat(link.getRel(), is(Link.REL_SELF));
+    }
 }

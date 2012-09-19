@@ -15,20 +15,24 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
  * @author Oliver Gierke
+ * @author Daniel Sawano
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -40,7 +44,25 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
 	}
 
-	@Test
+    @Test
+	public void createsPostLinkToControllerRoot() {
+
+		Link link = linkTo(PersonControllerImpl.class).method(HttpMethod.POST).withSelfRel();
+
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), Matchers.endsWith("/people"));
+        assertThat(link.getMethod(), is(HttpMethod.POST));
+	}
+
+    @Test
+    public void builderShouldNotBeAffectedByCallingOrder() throws Exception {
+        Link link1 = linkTo(PersonController.class).method(HttpMethod.DELETE).slash("someValue").withSelfRel();
+        Link link2 = linkTo(PersonController.class).slash("someValue").method(HttpMethod.DELETE).withSelfRel();
+
+        assertEquals(link1, link2);
+    }
+
+    @Test
 	public void createsLinkToParameterizedControllerRoot() {
 
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
