@@ -15,34 +15,69 @@
  */
 package org.springframework.hateoas;
 
-import java.io.StringWriter;
-import java.io.Writer;
-
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 
+import java.io.IOException;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 /**
  * Base class to eas integration tests for {@link ObjectMapper} marshalling.
- * 
+ *
  * @author Oliver Gierke
  */
 public abstract class AbstractMarshallingIntegrationTests {
 
-	ObjectMapper mapper;
+    ObjectMapper mapper;
 
-	@Before
-	public void setUp() {
-		mapper = new ObjectMapper();
-	}
+    @Before
+    public void setUp() {
+        mapper = new ObjectMapper();
+    }
 
-	protected String write(Object object) throws Exception {
+    protected String write(Object object) throws Exception {
+        return mapper.writeValueAsString(object);
+    }
 
-		Writer writer = new StringWriter();
-		mapper.writeValue(writer, object);
-		return writer.toString();
-	}
+    protected JsonNode readTree(String json) throws IOException {
+        return mapper.readTree(json);
+    }
 
-	protected <T> T read(String source, Class<T> targetType) throws Exception {
-		return mapper.readValue(source, targetType);
-	}
+    protected <T> T read(String source, Class<T> targetType) throws Exception {
+   		return mapper.readValue(source, targetType);
+   	}
+
+    protected String getAsPrettyJSON(Object o) {
+        try {
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void assertHasValue(JsonNode jsonNode, String fieldName, String value) {
+        assertThat(fieldName + " is missing", jsonNode.has(fieldName), is(true));
+        assertThat(field(fieldName).inNode(jsonNode), is(value));
+    }
+
+    protected FieldGetter field(String fieldName) {
+        return new FieldGetter(fieldName);
+    }
+
+    protected static class FieldGetter {
+        private final String fieldName;
+
+        private FieldGetter(String fieldName) {
+            this.fieldName = fieldName;
+        }
+
+        private String inNode(JsonNode node) {
+            return node.get(fieldName).asText();
+        }
+    }
+
 }

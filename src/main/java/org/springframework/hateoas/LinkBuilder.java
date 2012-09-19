@@ -15,18 +15,21 @@
  */
 package org.springframework.hateoas;
 
+import org.springframework.http.HttpMethod;
+
 import java.net.URI;
 
 /**
  * Builder to ease building {@link Link} instances.
- * 
+ *
  * @author Ricardo Gladwell
+ * @author Daniel Sawano
  */
 public interface LinkBuilder {
 
 	/**
 	 * Adds the given object's {@link String} representation as sub-resource to the current URI.
-	 * 
+	 *
 	 * @param object
 	 * @return
 	 */
@@ -35,22 +38,31 @@ public interface LinkBuilder {
 	/**
 	 * Adds the given {@link Identifiable}'s id as sub-resource. Will simply return the {@link LinkBuilder} as is if the
 	 * given entity is {@literal null}.
-	 * 
+	 *
 	 * @param identifiable
 	 * @return
 	 */
 	LinkBuilder slash(Identifiable<?> identifiable);
 
+    /**
+     * Adds the given HTTP method as the method for the current URI.
+     *
+     * @param method
+     *         the HTTP method
+     * @return a {@literal LinkBuilder}
+     */
+    LinkBuilder method(HttpMethod method);
+
 	/**
 	 * Creates a URI of the link built by the current builder instance.
-	 * 
+	 *
 	 * @return
 	 */
 	URI toUri();
 
 	/**
 	 * Creates the {@link Link} built by the current builder instance with the given rel.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -58,7 +70,7 @@ public interface LinkBuilder {
 
 	/**
 	 * Creates the {@link Link} built by the current builder instance with the default self rel.
-	 * 
+	 *
 	 * @see Link#REL_SELF
 	 * @return
 	 */
