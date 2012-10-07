@@ -15,117 +15,238 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+//import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linksToResources;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
+import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
-	@Test
-	public void createsLinkToControllerRoot() {
+    @Test
+    public void createsLinkToControllerRoot() {
 
-		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
-	}
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getRel(), is(Link.REL_SELF));
+        assertThat(link.getHref(), Matchers.endsWith("/people"));
+    }
 
-	@Test
-	public void createsLinkToParameterizedControllerRoot() {
+    @Test
+    public void createsLinkToParameterizedControllerRoot() {
 
-		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
-	}
+        Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
+        assertThat(link.getRel(), is(Link.REL_SELF));
+        assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
+    }
 
-	@Test
-	public void createsLinkToSubResource() {
+    @Test
+    public void createsLinkToControllerMethodWithPathVariable() throws Exception {
 
-		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people/something"));
-	}
+        Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
+        assertEquals("http://localhost/products/15", withRel.getHref());
+        assertEquals("product", withRel.getRel());
 
-	@Test
-	public void createsLinkWithCustomRel() {
+        Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
+        assertEquals("http://localhost/products/15", withSelfRel.getHref());
+        assertEquals("self", withSelfRel.getRel());
+    }
 
-		Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
-		assertThat(link.getRel(), is(Link.REL_NEXT));
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
-	}
+    @Test
+    public void createsLinksToResourcesInController() {
+        List<LinkTemplate> links = linksToResources(PersonsProductsController.class);
+        assertEquals(2, links.size());
 
-	@Test(expected = IllegalStateException.class)
-	public void rejectsControllerWithMultipleMappings() {
-		linkTo(InvalidController.class);
-	}
+        assertEquals("productsOfPerson", links.get(0).getRel());
+        assertEquals("/products", links.get(0).getHref());
+        assertEquals(Object.class, links.get(0).getParams().get("personId"));
 
-	@Test
-	public void createsLinkToUnmappedController() {
-		linkTo(UnmappedController.class);
-	}
+        assertEquals("productById", links.get(1).getRel());
+        assertEquals("/products", links.get(1).getHref());
+        assertEquals(Object.class, links.get(1).getParams().get("productId"));
 
-	@Test
-	@SuppressWarnings("unchecked")
-	public void usesIdOfIdentifyableForPathSegment() {
+    }
 
-		Identifiable<Long> identifyable = mock(Identifiable.class);
-		when(identifyable.getId()).thenReturn(10L);
+    @Test
+    public void createsLinksToResourcesInControllerAtClassLevel() {
+        List<LinkTemplate> links = linksToResources(PersonsProductsControllerClassLevel.class);
+        assertEquals(2, links.size());
 
-		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people/10"));
-	}
+        assertEquals("productsOfPerson", links.get(0).getRel());
+        assertEquals("/products", links.get(0).getHref());
+        assertEquals(Object.class, links.get(0).getParams().get("personId"));
 
-	@Test
-	public void appendingNullIsANoOp() {
+        assertEquals("productById", links.get(1).getRel());
+        assertEquals("/products", links.get(1).getHref());
+        assertEquals(Object.class, links.get(1).getParams().get("productId"));
 
-		Link link = linkTo(PersonControllerImpl.class).slash(null).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+        // TODO: now I know I have resources with params
+        // at /products I would have to create two forms with input personId and
+        // input productId
 
-		link = linkTo(PersonControllerImpl.class).slash((Object) null).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
-	}
+        // what to do about path variables, I do not know. The actual value is
+        // known when a person is requested
+        // i.e. within getPerson.
+        // actually, we could return links
+    }
 
-	class Person implements Identifiable<Long> {
+    @Test
+    public void createsLinksToProductsController() {
+        List<LinkTemplate> links = linksToResources(ProductsController.class);
+        assertEquals(4, links.size());
 
-		Long id;
+        assertEquals("product", links.get(0).getRel());
+        assertEquals("/products/{productId}", links.get(0).getHref());
 
-		@Override
-		public Long getId() {
-			return id;
-		}
-	}
+        assertEquals("productsOfPerson", links.get(1).getRel());
+        assertEquals("/people/{personId}/products", links.get(1).getHref());
 
-	@RequestMapping("/people")
-	interface PersonController {
+        assertEquals("products", links.get(2).getRel());
+        assertEquals("/products", links.get(2).getHref());
 
-	}
+        assertEquals("productDetails", links.get(3).getRel());
+        assertEquals("/products/{productId}/details", links.get(3).getHref());
 
-	class PersonControllerImpl implements PersonController {
+    }
 
-	}
+    @Test
+    public void createsLinkToSubResource() {
 
-	@RequestMapping("/people/{id}/addresses")
-	class PersonsAddressesController {
+        Link link = linkTo(PersonControllerImpl.class).slash("something")
+                .withSelfRel();
+        assertThat(link.getRel(), is(Link.REL_SELF));
+        assertThat(link.getHref(), Matchers.endsWith("/people/something"));
+    }
 
-	}
+    @Test
+    public void createsLinkWithCustomRel() {
 
-	@RequestMapping({ "/persons", "/people" })
-	class InvalidController {
+        Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
+        assertThat(link.getRel(), is(Link.REL_NEXT));
+        assertThat(link.getHref(), Matchers.endsWith("/people"));
+    }
 
-	}
+    @Test(expected = IllegalStateException.class)
+    public void rejectsControllerWithMultipleMappings() {
+        linkTo(InvalidController.class);
+    }
 
-	class UnmappedController {
+    @Test
+    public void createsLinkToUnmappedController() {
+        linkTo(UnmappedController.class);
+    }
 
-	}
+    @Test
+    @SuppressWarnings("unchecked")
+    public void usesIdOfIdentifyableForPathSegment() {
+
+        Identifiable<Long> identifyable = mock(Identifiable.class);
+        when(identifyable.getId()).thenReturn(10L);
+
+        Link link = linkTo(PersonControllerImpl.class).slash(identifyable)
+                .withSelfRel();
+        assertThat(link.getHref(), Matchers.endsWith("/people/10"));
+    }
+
+    @Test
+    public void appendingNullIsANoOp() {
+
+        Link link = linkTo(PersonControllerImpl.class).slash(null)
+                .withSelfRel();
+        assertThat(link.getHref(), Matchers.endsWith("/people"));
+
+        link = linkTo(PersonControllerImpl.class).slash((Object) null)
+                .withSelfRel();
+        assertThat(link.getHref(), Matchers.endsWith("/people"));
+    }
+
+    class Person implements Identifiable<Long> {
+
+        Long id;
+
+        @Override
+        public Long getId() {
+            return id;
+        }
+    }
+
+    @RequestMapping("/people")
+    interface PersonController {
+
+    }
+
+    class PersonControllerImpl implements PersonController {
+
+    }
+
+    @RequestMapping("/people/{id}/addresses")
+    class PersonsAddressesController {
+
+    }
+
+    class Product {
+
+    }
+
+    class PersonsProductsController {
+
+        @RequestMapping(value = "/products", params = "personId")
+        public HttpEntity<List<Product>> productsOfPerson(
+                @RequestParam Long personId) {
+            return null;
+        }
+
+        @RequestMapping(value = "/products", params = "productId")
+        public HttpEntity<List<Product>> productById(
+                @RequestParam Long productId) {
+            return null;
+        }
+
+    }
+
+    @RequestMapping("/products")
+    class PersonsProductsControllerClassLevel {
+
+        @RequestMapping(params = "personId")
+        public HttpEntity<List<Product>> productsOfPerson(
+                @RequestParam Long personId) {
+            return null;
+        }
+
+        @RequestMapping(params = "productId")
+        public HttpEntity<List<Product>> productById(
+                @RequestParam Long productId) {
+            return null;
+        }
+    }
+
+    @RequestMapping({ "/persons", "/people" })
+    class InvalidController {
+
+    }
+
+    class UnmappedController {
+
+    }
+
+
 
 }
