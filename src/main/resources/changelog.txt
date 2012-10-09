@@ -1,6 +1,26 @@
 Spring Hateoas Changelog
 =========================
 
+Changes in version 0.3.0.RELEASE (2012-10-09)
+---------------------------------------------
+#15 - Upgraded to Jackson 1.9.10.
+#14 - Added integration test to make sure default (de)serialization works
+#13 - Added LinkBuilder implementation that inspects JAX-RS @Path annotations 
+#12 - Introduced factories for LinkBuilder to improve client testability
+#11 - Moved to Set and back to List for Links inside ResourceSupport
+#10 - Renamed (Paged)Resources.fromEntities(…) to ….wrap(…) 
+#9 - Added constructor to PagedResources to take an Iterable of Links
+#7 - Excluded getId() of ResourceSupport from default JSON rendering
+- Switched from Collection to Iterable in constructor of Resources 
+- Moved from ResourceEnricher to ResourceProcessor to allow manipulating the resource instance
+
+Changes in version 0.2.0.RELEASE (2012-08-23)
+---------------------------------------------
+- added ResourceEnricher SPI
+- fixed equals(…)/hashCode() in Resource/Resources/PagedResources 
+- Added PagedResources abstraction (collection resource with pagination information)
+- Enhanced resource abstraction with default implementation for Resource and Resources
+
 Changes in version 0.1.0.RELEASE (2012-07-19)
 ---------------------------------------------
 - Initial release with basic support
