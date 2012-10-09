@@ -40,7 +40,7 @@ This would render as follows in JSON:
 ```java
 { firstname : "Dave",
   lastname : "Matthews",
-  _links : [ { rel : "self", href : "http://myhost/people" } ] }
+  links : [ { rel : "self", href : "http://myhost/people" } ] }
 ```
       
 … or slightly more verbose in XML …
