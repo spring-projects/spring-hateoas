@@ -42,211 +42,201 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
-    @Test
-    public void createsLinkToControllerRoot() {
+	@Test
+	public void createsLinkToControllerRoot() {
 
-        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-        assertThat(link.getRel(), is(Link.REL_SELF));
-        assertThat(link.getHref(), Matchers.endsWith("/people"));
-    }
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), Matchers.endsWith("/people"));
+	}
 
-    @Test
-    public void createsLinkToParameterizedControllerRoot() {
+	@Test
+	public void createsLinkToParameterizedControllerRoot() {
 
-        Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
-        assertThat(link.getRel(), is(Link.REL_SELF));
-        assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
-    }
+		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
+	}
 
-    @Test
-    public void createsLinkToControllerMethodWithPathVariable() throws Exception {
+	@Test
+	public void createsLinkToControllerMethodWithPathVariable() throws Exception {
 
-        Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
-        assertEquals("http://localhost/products/15", withRel.getHref());
-        assertEquals("product", withRel.getRel());
+		Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
+		assertEquals("http://localhost/products/15", withRel.getHref());
+		assertEquals("product", withRel.getRel());
 
-        Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
-        assertEquals("http://localhost/products/15", withSelfRel.getHref());
-        assertEquals("self", withSelfRel.getRel());
-    }
+		Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
+		assertEquals("http://localhost/products/15", withSelfRel.getHref());
+		assertEquals("self", withSelfRel.getRel());
+	}
 
-    @Test
-    public void createsLinksToResourcesInController() {
-        List<LinkTemplate> links = linksToResources(PersonsProductsController.class);
-        assertEquals(2, links.size());
+	@Test
+	public void createsLinksToResourcesInController() {
+		List<LinkTemplate> links = linksToResources(PersonsProductsController.class);
+		assertEquals(2, links.size());
 
-        assertEquals("productsOfPerson", links.get(0).getRel());
-        assertEquals("/products", links.get(0).getHref());
-        assertEquals(Object.class, links.get(0).getParams().get("personId"));
+		assertEquals("productsOfPerson", links.get(0).getRel());
+		assertEquals("/products", links.get(0).getHref());
+		assertEquals(Object.class, links.get(0).getParams().get("personId"));
 
-        assertEquals("productById", links.get(1).getRel());
-        assertEquals("/products", links.get(1).getHref());
-        assertEquals(Object.class, links.get(1).getParams().get("productId"));
+		assertEquals("productById", links.get(1).getRel());
+		assertEquals("/products", links.get(1).getHref());
+		assertEquals(Object.class, links.get(1).getParams().get("productId"));
 
-    }
+	}
 
-    @Test
-    public void createsLinksToResourcesInControllerAtClassLevel() {
-        List<LinkTemplate> links = linksToResources(PersonsProductsControllerClassLevel.class);
-        assertEquals(2, links.size());
+	@Test
+	public void createsLinksToResourcesInControllerAtClassLevel() {
+		List<LinkTemplate> links = linksToResources(PersonsProductsControllerClassLevel.class);
+		assertEquals(2, links.size());
 
-        assertEquals("productsOfPerson", links.get(0).getRel());
-        assertEquals("/products", links.get(0).getHref());
-        assertEquals(Object.class, links.get(0).getParams().get("personId"));
+		assertEquals("productsOfPerson", links.get(0).getRel());
+		assertEquals("/products", links.get(0).getHref());
+		assertEquals(Object.class, links.get(0).getParams().get("personId"));
 
-        assertEquals("productById", links.get(1).getRel());
-        assertEquals("/products", links.get(1).getHref());
-        assertEquals(Object.class, links.get(1).getParams().get("productId"));
+		assertEquals("productById", links.get(1).getRel());
+		assertEquals("/products", links.get(1).getHref());
+		assertEquals(Object.class, links.get(1).getParams().get("productId"));
 
-        // TODO: now I know I have resources with params
-        // at /products I would have to create two forms with input personId and
-        // input productId
+		// TODO: now I know I have resources with params
+		// at /products I would have to create two forms with input personId and
+		// input productId
 
-        // what to do about path variables, I do not know. The actual value is
-        // known when a person is requested
-        // i.e. within getPerson.
-        // actually, we could return links
-    }
+		// what to do about path variables, I do not know. The actual value is
+		// known when a person is requested
+		// i.e. within getPerson.
+		// actually, we could return links
+	}
 
-    @Test
-    public void createsLinksToProductsController() {
-        List<LinkTemplate> links = linksToResources(ProductsController.class);
-        assertEquals(4, links.size());
+	@Test
+	public void createsLinksToProductsController() {
+		List<LinkTemplate> links = linksToResources(ProductsController.class);
+		assertEquals(4, links.size());
 
-        assertEquals("product", links.get(0).getRel());
-        assertEquals("/products/{productId}", links.get(0).getHref());
+		assertEquals("product", links.get(0).getRel());
+		assertEquals("/products/{productId}", links.get(0).getHref());
 
-        assertEquals("productsOfPerson", links.get(1).getRel());
-        assertEquals("/people/{personId}/products", links.get(1).getHref());
+		assertEquals("productsOfPerson", links.get(1).getRel());
+		assertEquals("/people/{personId}/products", links.get(1).getHref());
 
-        assertEquals("products", links.get(2).getRel());
-        assertEquals("/products", links.get(2).getHref());
+		assertEquals("products", links.get(2).getRel());
+		assertEquals("/products", links.get(2).getHref());
 
-        assertEquals("productDetails", links.get(3).getRel());
-        assertEquals("/products/{productId}/details", links.get(3).getHref());
+		assertEquals("productDetails", links.get(3).getRel());
+		assertEquals("/products/{productId}/details", links.get(3).getHref());
 
-    }
+	}
 
-    @Test
-    public void createsLinkToSubResource() {
+	@Test
+	public void createsLinkToSubResource() {
 
-        Link link = linkTo(PersonControllerImpl.class).slash("something")
-                .withSelfRel();
-        assertThat(link.getRel(), is(Link.REL_SELF));
-        assertThat(link.getHref(), Matchers.endsWith("/people/something"));
-    }
+		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), Matchers.endsWith("/people/something"));
+	}
 
-    @Test
-    public void createsLinkWithCustomRel() {
+	@Test
+	public void createsLinkWithCustomRel() {
 
-        Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
-        assertThat(link.getRel(), is(Link.REL_NEXT));
-        assertThat(link.getHref(), Matchers.endsWith("/people"));
-    }
+		Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
+		assertThat(link.getRel(), is(Link.REL_NEXT));
+		assertThat(link.getHref(), Matchers.endsWith("/people"));
+	}
 
-    @Test(expected = IllegalStateException.class)
-    public void rejectsControllerWithMultipleMappings() {
-        linkTo(InvalidController.class);
-    }
+	@Test(expected = IllegalStateException.class)
+	public void rejectsControllerWithMultipleMappings() {
+		linkTo(InvalidController.class);
+	}
 
-    @Test
-    public void createsLinkToUnmappedController() {
-        linkTo(UnmappedController.class);
-    }
+	@Test
+	public void createsLinkToUnmappedController() {
+		linkTo(UnmappedController.class);
+	}
 
-    @Test
-    @SuppressWarnings("unchecked")
-    public void usesIdOfIdentifyableForPathSegment() {
+	@Test
+	@SuppressWarnings("unchecked")
+	public void usesIdOfIdentifyableForPathSegment() {
 
-        Identifiable<Long> identifyable = mock(Identifiable.class);
-        when(identifyable.getId()).thenReturn(10L);
+		Identifiable<Long> identifyable = mock(Identifiable.class);
+		when(identifyable.getId()).thenReturn(10L);
 
-        Link link = linkTo(PersonControllerImpl.class).slash(identifyable)
-                .withSelfRel();
-        assertThat(link.getHref(), Matchers.endsWith("/people/10"));
-    }
+		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
+		assertThat(link.getHref(), Matchers.endsWith("/people/10"));
+	}
 
-    @Test
-    public void appendingNullIsANoOp() {
+	@Test
+	public void appendingNullIsANoOp() {
 
-        Link link = linkTo(PersonControllerImpl.class).slash(null)
-                .withSelfRel();
-        assertThat(link.getHref(), Matchers.endsWith("/people"));
+		Link link = linkTo(PersonControllerImpl.class).slash(null).withSelfRel();
+		assertThat(link.getHref(), Matchers.endsWith("/people"));
 
-        link = linkTo(PersonControllerImpl.class).slash((Object) null)
-                .withSelfRel();
-        assertThat(link.getHref(), Matchers.endsWith("/people"));
-    }
+		link = linkTo(PersonControllerImpl.class).slash((Object) null).withSelfRel();
+		assertThat(link.getHref(), Matchers.endsWith("/people"));
+	}
 
-    class Person implements Identifiable<Long> {
+	class Person implements Identifiable<Long> {
 
-        Long id;
+		Long id;
 
-        @Override
-        public Long getId() {
-            return id;
-        }
-    }
+		@Override
+		public Long getId() {
+			return id;
+		}
+	}
 
-    @RequestMapping("/people")
-    interface PersonController {
+	@RequestMapping("/people")
+	interface PersonController {
 
-    }
+	}
 
-    class PersonControllerImpl implements PersonController {
+	class PersonControllerImpl implements PersonController {
 
-    }
+	}
 
-    @RequestMapping("/people/{id}/addresses")
-    class PersonsAddressesController {
+	@RequestMapping("/people/{id}/addresses")
+	class PersonsAddressesController {
 
-    }
+	}
 
-    class Product {
+	class Product {
 
-    }
+	}
 
-    class PersonsProductsController {
+	class PersonsProductsController {
 
-        @RequestMapping(value = "/products", params = "personId")
-        public HttpEntity<List<Product>> productsOfPerson(
-                @RequestParam Long personId) {
-            return null;
-        }
+		@RequestMapping(value = "/products", params = "personId")
+		public HttpEntity<List<Product>> productsOfPerson(@RequestParam Long personId) {
+			return null;
+		}
 
-        @RequestMapping(value = "/products", params = "productId")
-        public HttpEntity<List<Product>> productById(
-                @RequestParam Long productId) {
-            return null;
-        }
+		@RequestMapping(value = "/products", params = "productId")
+		public HttpEntity<List<Product>> productById(@RequestParam Long productId) {
+			return null;
+		}
 
-    }
+	}
 
-    @RequestMapping("/products")
-    class PersonsProductsControllerClassLevel {
+	@RequestMapping("/products")
+	class PersonsProductsControllerClassLevel {
 
-        @RequestMapping(params = "personId")
-        public HttpEntity<List<Product>> productsOfPerson(
-                @RequestParam Long personId) {
-            return null;
-        }
+		@RequestMapping(params = "personId")
+		public HttpEntity<List<Product>> productsOfPerson(@RequestParam Long personId) {
+			return null;
+		}
 
-        @RequestMapping(params = "productId")
-        public HttpEntity<List<Product>> productById(
-                @RequestParam Long productId) {
-            return null;
-        }
-    }
+		@RequestMapping(params = "productId")
+		public HttpEntity<List<Product>> productById(@RequestParam Long productId) {
+			return null;
+		}
+	}
 
-    @RequestMapping({ "/persons", "/people" })
-    class InvalidController {
+	@RequestMapping({ "/persons", "/people" })
+	class InvalidController {
 
-    }
+	}
 
-    class UnmappedController {
+	class UnmappedController {
 
-    }
-
-
+	}
 
 }

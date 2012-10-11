@@ -12,26 +12,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 public class ProductsController {
 
-    @RequestMapping(value = "/products")
-    public HttpEntity<List<Person>> products() {
-        return null;
-    }
+	@RequestMapping(value = "/products")
+	public HttpEntity<List<Person>> products() {
+		return null;
+	}
 
-    @RequestMapping(value = "/products/{productId}")
-    public HttpEntity<Person> product(@PathVariable Long productId) {
-        return null;
-    }
+	@RequestMapping(value = "/products/{productId}")
+	public HttpEntity<Person> product(@PathVariable Long productId) {
+		return null;
+	}
 
-    @RequestMapping(value = "/products/{productId}/details", params = "attr")
-    public HttpEntity<Map<String, String>> productDetails(
-            @PathVariable Long personId,
-            @RequestParam(value = "attr", required = true) String[] attr) {
-        return null;
-    }
+	@RequestMapping(value = "/products/{productId}/details", params = "attr")
+	public HttpEntity<Map<String, String>> productDetails(@PathVariable Long personId,
+			@RequestParam(value = "attr", required = true) String[] attr) {
+		return null;
+	}
 
-    @RequestMapping(value = "/people/{personId}/products")
-    public HttpEntity<List<Product>> productsOfPerson(
-            @PathVariable Long personId) {
-        return null;
-    }
+	@RequestMapping(value = "/people/{personId}/products")
+	public HttpEntity<List<Product>> productsOfPerson(@PathVariable Long personId) {
+		return null;
+	}
 }

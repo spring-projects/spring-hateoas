@@ -125,10 +125,10 @@ public class FormBuilderAspect {
 			}
 			sb.append(FORM_END).append(HTML_END);
 
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Content-Type", "text/html");
-      HttpEntity<String> httpEntity = new HttpEntity<String>(sb.toString(), headers);
-      return httpEntity;
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", "text/html");
+			HttpEntity<String> httpEntity = new HttpEntity<String>(sb.toString(), headers);
+			return httpEntity;
 
 		}
 	}
