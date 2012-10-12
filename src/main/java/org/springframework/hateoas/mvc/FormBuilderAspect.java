@@ -15,6 +15,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Component
@@ -37,9 +38,9 @@ public class FormBuilderAspect {
 			"  </head>" + //
 			"  <body>";
 
-	/** expects action url, form name, form h1 */
+	/** expects action url, form name, form method, form h1 */
 	public static final String FORM_START = "" + //
-			"    <form action='%s' name='%s'>" + //
+			"    <form action='%s' name='%s' method='%s'>" + //
 			"      <h1>%s</h1>"; //
 
 	/** expects field label, input field type and field name */
@@ -62,75 +63,98 @@ public class FormBuilderAspect {
 	@Around("@annotation(form)")
 	public Object buildForm(ProceedingJoinPoint pjp, Form form) throws Throwable {
 
-		Object[] args = pjp.getArgs();
+		String formName = form.value();
 
-		boolean argsAreNull = true;
-		for (Object object : args) {
-			if (object != null) {
-				argsAreNull = false;
-				break;
-			}
-		}
+		Class<?> withinType = pjp.getSourceLocation().getWithinType();
+		Method method = findMatchingFormAction(formName, withinType);
 
-		if (!argsAreNull) {
-			return pjp.proceed(args);
-		} else {
-			MethodSignature methodSignature = (MethodSignature) pjp.getSignature();
+		Class<?>[] methodParameterTypes = method.getParameterTypes();
+		Annotation[][] paramAnnotations = method.getParameterAnnotations();
 
-			String methodName = methodSignature.getName();
-			Class<?>[] methodParameterTypes = methodSignature.getParameterTypes();
-
-			Class<?> withinType = pjp.getSourceLocation().getWithinType();
-			Method method = withinType.getMethod(methodName, methodParameterTypes);
-
-			Annotation[][] paramAnnotations = method.getParameterAnnotations();
-
-			List<RequestParam> requestParamAnnotations = new ArrayList<RequestParam>();
-			List<Class<?>> requestParamArgs = new ArrayList<Class<?>>();
-			for (int i = 0; i < paramAnnotations.length; i++) {
-				Class<?> argType = methodParameterTypes[i].getClass();
-				for (int j = 0; j < paramAnnotations[i].length; j++) {
-					Annotation paramAnnotation = paramAnnotations[i][j];
-					Class<? extends Annotation> annotationType = paramAnnotation.annotationType();
-					if (RequestParam.class == annotationType) {
-						requestParamAnnotations.add((RequestParam) paramAnnotation);
-						requestParamArgs.add(argType);
-					}
+		// collect request param data
+		List<RequestParam> requestParamAnnotations = new ArrayList<RequestParam>();
+		List<Class<?>> requestParamArgTypes = new ArrayList<Class<?>>();
+		for (int i = 0; i < paramAnnotations.length; i++) {
+			Class<?> argType = methodParameterTypes[i].getClass();
+			for (int j = 0; j < paramAnnotations[i].length; j++) {
+				Annotation paramAnnotation = paramAnnotations[i][j];
+				Class<? extends Annotation> annotationType = paramAnnotation.annotationType();
+				if (RequestParam.class == annotationType) {
+					requestParamAnnotations.add((RequestParam) paramAnnotation);
+					requestParamArgTypes.add(argType);
 				}
 			}
-
-			RequestMapping classRequestMapping = AnnotationUtils.findAnnotation(withinType, RequestMapping.class);
-			RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-			String classLevelMapping = classRequestMapping.value()[0];
-			String methodLevelMapping = methodRequestMapping.value()[0];
-
-			String action = classLevelMapping + methodLevelMapping;
-
-			// form name
-			String formName = form.value();
-
-			StringBuilder sb = new StringBuilder();
-			sb.append(String.format(HTML_START, formName));
-			for (int i = 0; i < requestParamAnnotations.size(); i++) {
-				String formH1 = "Form " + formName;
-				sb.append(String.format(FORM_START, action, formName, formH1));
-
-				RequestParam annotation = requestParamAnnotations.get(i);
-				String requestParamName = annotation.value();
-				Class<?> requestParamArg = requestParamArgs.get(i);
-				String inputFieldType = getInputFieldType(requestParamArg);
-				String fieldLabel = requestParamName + ": ";
-				// TODO support list and matrix parameters
-				sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName));
-			}
-			sb.append(FORM_END).append(HTML_END);
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Content-Type", "text/html");
-			HttpEntity<String> httpEntity = new HttpEntity<String>(sb.toString(), headers);
-			return httpEntity;
-
 		}
+
+		RequestMapping classRequestMapping = AnnotationUtils.findAnnotation(withinType, RequestMapping.class);
+		String classLevelMapping = classRequestMapping.value()[0];
+
+		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		String methodLevelMapping = methodRequestMapping.value()[0];
+		RequestMethod requestMethod = methodRequestMapping.method()[0];
+
+
+		String action = classLevelMapping + methodLevelMapping;
+
+		// build the form
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format(HTML_START, formName));
+		for (int i = 0; i < requestParamAnnotations.size(); i++) {
+			String formH1 = "Form " + formName;
+			sb.append(String.format(FORM_START, action, formName, requestMethod.toString(), formH1));
+
+			RequestParam annotation = requestParamAnnotations.get(i);
+			String requestParamName = annotation.value();
+			Class<?> requestParamArg = requestParamArgTypes.get(i);
+			String inputFieldType = getInputFieldType(requestParamArg);
+			String fieldLabel = requestParamName + ": ";
+			// TODO support list and matrix parameters
+			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName));
+		}
+		sb.append(FORM_END).append(HTML_END);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "text/html");
+		HttpEntity<String> httpEntity = new HttpEntity<String>(sb.toString(), headers);
+		return httpEntity;
+
+	}
+
+	/**
+	 * Finds form action by name, if there is only one nameless form action in withinType, it is used by default.
+	 *
+	 * @param formName
+	 * @param withinType
+	 * @return
+	 */
+	private Method findMatchingFormAction(String formName, Class<?> withinType) {
+		// find corresponding form action method
+		Method[] declaredMethods = withinType.getDeclaredMethods();
+
+		Method matchingFormActionMethod = null;
+		List<Method> formActionMethods = new ArrayList<Method>();
+		for (Method method : declaredMethods) {
+			FormAction formAction = AnnotationUtils.findAnnotation(method, FormAction.class);
+			if (formAction != null) {
+				if (formAction.formName().equals(formName)) {
+					matchingFormActionMethod = method;
+					break;
+				} else {
+					formActionMethods.add(method);
+				}
+			}
+		}
+		final Method formActionMethod;
+		if (matchingFormActionMethod != null) {
+			formActionMethod = matchingFormActionMethod;
+		} else {
+			if (formActionMethods.size() == 1) {
+				formActionMethod = formActionMethods.get(0);
+			} else {
+				throw new IllegalStateException("more than one form action found, please add form name to each action");
+			}
+		}
+		return formActionMethod;
 	}
 
 	private String getInputFieldType(Class<?> requestParamArg) {
