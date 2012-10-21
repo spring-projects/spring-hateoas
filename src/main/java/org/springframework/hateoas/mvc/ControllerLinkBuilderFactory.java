@@ -20,7 +20,7 @@ import org.springframework.hateoas.LinkBuilderFactory;
 /**
  * Factory for {@link UriComponentsLinkBuilder} instances based on the request mapping annotated on the given
  * controller.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  */
@@ -42,5 +42,14 @@ public class ControllerLinkBuilderFactory implements LinkBuilderFactory<Controll
 	@Override
 	public ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
 		return ControllerLinkBuilder.linkTo(controller, parameters);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Object)
+	 */
+	@Override
+	public ControllerLinkBuilder linkToMethod(Object method) {
+		return ControllerLinkBuilder.linkToMethod(method);
 	}
 }

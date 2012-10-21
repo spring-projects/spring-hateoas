@@ -15,9 +15,11 @@
  */
 package org.springframework.hateoas;
 
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+
 /**
  * Factory for {@link LinkBuilder} instances.
- * 
+ *
  * @author Ricardo Gladwell
  */
 public interface LinkBuilderFactory<T extends LinkBuilder> {
@@ -25,7 +27,7 @@ public interface LinkBuilderFactory<T extends LinkBuilder> {
 	/**
 	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target clas (controller,
 	 * service, etc.).
-	 * 
+	 *
 	 * @param target must not be {@literal null}.
 	 * @return
 	 */
@@ -35,10 +37,22 @@ public interface LinkBuilderFactory<T extends LinkBuilder> {
 	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target class (controller,
 	 * service, etc.). The additional parameters are used to fill up potentially available path variables in the class
 	 * scope request mapping.
-	 * 
+	 *
 	 * @param target must not be {@literal null}.
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
 	T linkTo(Class<?> target, Object... parameters);
+
+	/**
+	 * Creates a new {@link ControllerLinkBuilder} based on the given controller method, resolving URI templates if
+	 * necessary. The controller method is created by {@link ControllerLinkBuilder#on(Class)}.
+	 * <p>
+	 *
+	 * @param method representation of a method on the target controller, created by {@link #on(Class)}.
+	 * @return link builder which expects you to set a rel, e.g. using {@link #withRel(String)}.
+	 * @see ControllerLinkBuilder#on(Class)
+	 * @see ControllerLinkBuilder#linkToMethod(Object)
+	 */
+	T linkToMethod(Object method);
 }

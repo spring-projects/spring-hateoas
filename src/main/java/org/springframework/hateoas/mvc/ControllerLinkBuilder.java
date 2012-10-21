@@ -19,29 +19,34 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import javax.ws.rs.QueryParam;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkTemplate;
+import org.springframework.hateoas.ResourceDescriptor;
+import org.springframework.hateoas.util.Invocation;
+import org.springframework.hateoas.util.Invocations;
+import org.springframework.hateoas.util.LinkTemplateUtils;
+import org.springframework.hateoas.util.MethodAnnotationUtils.AnnotatedParam;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
- * 
+ *
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLinkBuilder> {
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	private ControllerLinkBuilder(UriComponentsBuilder builder) {
@@ -50,7 +55,7 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
-	 * 
+	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
@@ -61,7 +66,7 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
 	 * additional parameters are used to fill up potentially available path variables in the class scope request mapping.
-	 * 
+	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
 	 *          {@literal null}.
@@ -90,225 +95,115 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 
 	/**
 	 * Allows to create a representation of a method on the given controller, for use with
-	 * {@link ControllerLinkBuilder#linkTo(Object)}. Define the method representation by simply calling the desired method
-	 * as shown below.
+	 * {@link ControllerLinkBuilder#linkToMethod(Object)}. Define the method representation by simply calling the desired
+	 * method as shown below.
 	 * <p>
 	 * This example creates a representation of the method <code>PersonController.showAll()</code>:
-	 * 
+	 *
 	 * <pre>
-	 * methodOn(PersonController.class).showAll();
+	 * on(PersonController.class).showAll();
 	 * </pre>
-	 * 
+	 *
 	 * @param controller
 	 * @return
-	 * @see #linkTo(Object)
+	 * @see #linkToMethod(Object)
 	 */
-	public static <T> T methodOn(Class<T> controller) {
-
-		Invocations invocations = new InvocationsImpl();
-
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(controller);
-		enhancer.setCallback(new RecordingMethodInterceptor(invocations));
-		enhancer.setInterfaces(new Class<?>[] { Invocations.class });
-		@SuppressWarnings("unchecked")
-		T ret = (T) enhancer.create();
-		return ret;
+	public static <T> T on(Class<T> controller) {
+		return LinkTemplateUtils.on(controller);
 	}
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} based on the given controller method, resolving URI templates if
-	 * necessary. The controller method is created by {@link #methodOn(Class)}.
+	 * necessary. The controller method is created by {@link #on(Class)}.
 	 * <p>
 	 * Consider the following PersonController with a class level mapping and a method level mapping:
-	 * 
+	 *
 	 * <pre>
 	 * &#064;Controller
 	 * &#064;RequestMapping(&quot;/people&quot;)
 	 * public class PersonController {
-	 * 
+	 *
 	 * 	&#064;RequestMapping(value = &quot;/{personId}/address&quot;, method = RequestMethod.GET)
 	 *     public HttpEntity&lt;PersonResource&gt; showAddress(@PathVariable Long personId) {
 	 *         (...)
 	 *     }
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * You may link to this person controller's <code>/{personId}/address</code> resource from another controller.
 	 * Assuming we are within a method where we produce the personResource for a given personId, e.g. from a form request
 	 * for www.example.com/people/search?id=42, we can do:
-	 * 
+	 *
 	 * <pre>
-	 * Link address = linkTo(methodOn(PersonController.class).show(personId).withRel("address");
+	 * Link address = linkToMethod(on(PersonController.class).show(personId).withRel("address");
 	 * PersonResource personResource = (...);
 	 * personResource.addLink(address);
 	 * </pre>
-	 * 
+	 *
 	 * The <code>linkTo</code> method above gives us a
 	 * <code>Link</link> to the person's address, which we can add to the personResource. Note that the path
 	 * variable <code>{personId}</code> will be expanded to its actual value:
-	 * 
+	 *
 	 * <pre>
 	 * http://www.example.com/people/42/address
 	 * </pre>
-	 * 
-	 * @param method representation of a method on the target controller, created by {@link #methodOn(Class)}.
+	 *
+	 * @param method representation of a method on the target controller, created by {@link #on(Class)}.
 	 * @return link builder which expects you to set a rel, e.g. using {@link #withRel(String)}.
-	 * @see #methodOn(Class)
+	 * @see #on(Class)
 	 */
-	public static ControllerLinkBuilder linkTo(Object method) {
+	public static ControllerLinkBuilder linkToMethod(Object method) {
 		Invocations invocations = (Invocations) method;
 		List<Invocation> recorded = invocations.getInvocations();
 		Invocation invocation = recorded.get(0);
-		String classLevelMapping = getClassLevelMapping(invocation.target.getClass());
-		LinkTemplate template = createLinkTemplate(classLevelMapping, invocation.method);
+		String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(invocation.getTarget().getClass(),
+				RequestMapping.class);
+		LinkTemplate<PathVariable, QueryParam> template = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
+				invocation.getMethod(), RequestMapping.class, PathVariable.class, QueryParam.class);
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
-		UriTemplate uriTemplate = new UriTemplate(template.getHref());
-		return builder.slash(uriTemplate.expand(invocation.args));
+		UriTemplate uriTemplate = new UriTemplate(template.getLinkTemplate());
+		return builder.slash(uriTemplate.expand(invocation.getArgs()));
 	}
 
 	/**
 	 * Extracts all resources with placeholders as link templates, containing the path variables and request params of the
 	 * resource.
-	 * 
+	 *
 	 * Useful for two things:
 	 * <ul>
 	 * <li>for request params, allows building forms to request the resource</li>
 	 * <li>in case of known variable values, allows to replace path variables.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param controller
 	 * @return
 	 */
-	public static List<LinkTemplate> linksToResources(Class<?> controller) {
-		List<LinkTemplate> ret = new ArrayList<LinkTemplate>();
+	public static List<ResourceDescriptor> linksToResources(Class<?> controller) {
+		List<ResourceDescriptor> ret = new ArrayList<ResourceDescriptor>();
 
-		final String classLevelMapping = getClassLevelMapping(controller);
+		final String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(controller, RequestMapping.class);
 
 		Method[] declaredMethods = controller.getDeclaredMethods();
 		for (Method method : declaredMethods) {
-			final LinkTemplate linkTemplate = createLinkTemplate(classLevelMapping, method);
-			ret.add(linkTemplate);
+			final LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(
+					classLevelMapping, method, RequestMapping.class, PathVariable.class, RequestParam.class);
+
+			ResourceDescriptor resourceDescriptor = new ResourceDescriptor(linkTemplate.getLinkTemplate());
+			List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
+			for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
+				resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
+			}
+			List<AnnotatedParam<RequestParam>> requestParams = linkTemplate.getRequestParams();
+			for (AnnotatedParam<RequestParam> requestParam : requestParams) {
+				resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
+			}
+
+			ret.add(resourceDescriptor);
 		}
+
 		return ret;
-	}
-
-	static class Invocation {
-
-		final Object target;
-		final Method method;
-		final Object[] args;
-
-		public Invocation(Object target, Method method, Object[] args) {
-			super();
-			this.target = target;
-			this.method = method;
-			this.args = args;
-		}
-
-	}
-
-	public static interface Invocations {
-		List<Invocation> getInvocations();
-	}
-
-	static class InvocationsImpl implements Invocations {
-
-		List<Invocation> invocations = new ArrayList<Invocation>();
-
-		@Override
-		public List<Invocation> getInvocations() {
-			return invocations;
-		}
-
-	}
-
-	private static class RecordingMethodInterceptor implements MethodInterceptor {
-
-		Invocations invocations = new InvocationsImpl();
-
-		public RecordingMethodInterceptor(Invocations invocations) {
-			super();
-			this.invocations = invocations;
-		}
-
-		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-
-			Method getInvocations = Invocations.class.getMethod("getInvocations");
-			if (getInvocations.equals(method)) {
-				return invocations.getInvocations();
-			} else {
-				Invocation invocation = new Invocation(obj, method, args);
-				invocations.getInvocations().add(invocation);
-				Class<?> returnType = method.getReturnType();
-				Object returnProxy = Enhancer.create(returnType, new Class<?>[] { Invocations.class }, this);
-				return returnProxy;
-			}
-
-		}
-
-	}
-
-	/**
-	 * Creates a link template based on the given class level mapping and the requestmapping of the given method.
-	 * 
-	 * @param classLevelMapping
-	 * @param method
-	 * @return link template or empty String, if the controller is completely unmapped.
-	 */
-	private static LinkTemplate createLinkTemplate(final String classLevelMapping, Method method) {
-		RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-		String[] params = (String[]) AnnotationUtils.getValue(annotation, "params");
-		String[] mappings = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
-
-		if (mappings.length > 1) {
-			throw new IllegalStateException("Multiple mappings defined on method" + method.getName());
-		}
-
-		final LinkTemplate linkTemplate;
-		if (classLevelMapping.length() == 0 && mappings.length == 0) {
-			return null;
-		} else {
-			final String methodMapping;
-			if (mappings.length == 1) {
-				methodMapping = mappings[0];
-			} else {
-				methodMapping = "";
-			}
-			linkTemplate = new LinkTemplate(classLevelMapping + methodMapping, method.getName());
-			for (String param : params) {
-				linkTemplate.addParam(param, Object.class);
-			}
-		}
-		return linkTemplate;
-	}
-
-	/**
-	 * Gets class level mapping of the given controller.
-	 * 
-	 * @param controller
-	 * @return mapping or empty string if there is no class level mapping
-	 */
-	private static String getClassLevelMapping(Class<?> controller) {
-		RequestMapping classLevelAnnotation = AnnotationUtils.findAnnotation(controller, RequestMapping.class);
-
-		String[] classLevelMappings = classLevelAnnotation == null ? new String[0] : (String[]) AnnotationUtils
-				.getValue(classLevelAnnotation);
-
-		if (classLevelMappings.length > 1) {
-			throw new IllegalStateException("Multiple controller mappings defined! Unable to build URI!");
-		}
-
-		final String classLevelMapping;
-		if (classLevelMappings.length == 1) {
-			classLevelMapping = classLevelMappings[0];
-		} else {
-			classLevelMapping = "";
-		}
-		return classLevelMapping;
 	}
 
 	/*
@@ -331,5 +226,10 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 	@Override
 	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder) {
 		return new ControllerLinkBuilder(builder);
+	}
+
+	public static ResourceDescriptor linkToResource(Object method) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

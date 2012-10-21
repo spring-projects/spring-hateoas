@@ -21,9 +21,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-//import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linksToResources;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.on;
 
 import java.util.List;
 
@@ -32,8 +32,10 @@ import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkTemplate;
+import org.springframework.hateoas.ResourceDescriptor;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -61,70 +63,50 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void createsLinkToControllerMethodWithPathVariable() throws Exception {
 
-		Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
+		Link withRel = linkToMethod(on(ProductsController.class).product(15L)).withRel("product");
 		assertEquals("http://localhost/products/15", withRel.getHref());
 		assertEquals("product", withRel.getRel());
 
-		Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
+		Link withSelfRel = linkToMethod(on(ProductsController.class).product(15L)).withSelfRel();
 		assertEquals("http://localhost/products/15", withSelfRel.getHref());
 		assertEquals("self", withSelfRel.getRel());
 	}
 
 	@Test
 	public void createsLinksToResourcesInController() {
-		List<LinkTemplate> links = linksToResources(PersonsProductsController.class);
+		List<ResourceDescriptor> links = linksToResources(PersonsProductsController.class);
 		assertEquals(2, links.size());
 
-		assertEquals("productsOfPerson", links.get(0).getRel());
-		assertEquals("/products", links.get(0).getHref());
-		assertEquals(Object.class, links.get(0).getParams().get("personId"));
+		assertEquals("/products/{personId}", links.get(0).getLinkTemplate());
+		assertEquals(Long.class, links.get(0).getPathVariables().get("personId"));
 
-		assertEquals("productById", links.get(1).getRel());
-		assertEquals("/products", links.get(1).getHref());
-		assertEquals(Object.class, links.get(1).getParams().get("productId"));
+		assertEquals("/products/{productId}", links.get(1).getLinkTemplate());
+		assertEquals(Long.class, links.get(1).getPathVariables().get("productId"));
 
 	}
 
 	@Test
 	public void createsLinksToResourcesInControllerAtClassLevel() {
-		List<LinkTemplate> links = linksToResources(PersonsProductsControllerClassLevel.class);
+		List<ResourceDescriptor> links = linksToResources(PersonsProductsControllerClassLevel.class);
 		assertEquals(2, links.size());
 
-		assertEquals("productsOfPerson", links.get(0).getRel());
-		assertEquals("/products", links.get(0).getHref());
-		assertEquals(Object.class, links.get(0).getParams().get("personId"));
+		assertEquals("/products/person/{personId}", links.get(0).getLinkTemplate());
+		assertEquals(Long.class, links.get(0).getPathVariables().get("personId"));
 
-		assertEquals("productById", links.get(1).getRel());
-		assertEquals("/products", links.get(1).getHref());
-		assertEquals(Object.class, links.get(1).getParams().get("productId"));
+		assertEquals("/products/{productId}", links.get(1).getLinkTemplate());
+		assertEquals(String.class, links.get(1).getPathVariables().get("productId"));
 
-		// TODO: now I know I have resources with params
-		// at /products I would have to create two forms with input personId and
-		// input productId
-
-		// what to do about path variables, I do not know. The actual value is
-		// known when a person is requested
-		// i.e. within getPerson.
-		// actually, we could return links
 	}
 
 	@Test
 	public void createsLinksToProductsController() {
-		List<LinkTemplate> links = linksToResources(ProductsController.class);
+		List<ResourceDescriptor> links = linksToResources(ProductsController.class);
 		assertEquals(4, links.size());
 
-		assertEquals("product", links.get(0).getRel());
-		assertEquals("/products/{productId}", links.get(0).getHref());
-
-		assertEquals("productsOfPerson", links.get(1).getRel());
-		assertEquals("/people/{personId}/products", links.get(1).getHref());
-
-		assertEquals("products", links.get(2).getRel());
-		assertEquals("/products", links.get(2).getHref());
-
-		assertEquals("productDetails", links.get(3).getRel());
-		assertEquals("/products/{productId}/details", links.get(3).getHref());
-
+		assertEquals("/products/{productId}", links.get(0).getLinkTemplate());
+		assertEquals("/products", links.get(1).getLinkTemplate());
+		assertEquals("/products/{productId}/details", links.get(2).getLinkTemplate());
+		assertEquals("/people/{personId}/products", links.get(3).getLinkTemplate());
 	}
 
 	@Test
@@ -204,13 +186,13 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 	class PersonsProductsController {
 
-		@RequestMapping(value = "/products", params = "personId")
-		public HttpEntity<List<Product>> productsOfPerson(@RequestParam Long personId) {
+		@RequestMapping(value = "/products/{personId}")
+		public HttpEntity<List<Product>> productsOfPerson(@PathVariable("personId") Long personId) {
 			return null;
 		}
 
-		@RequestMapping(value = "/products", params = "productId")
-		public HttpEntity<List<Product>> productById(@RequestParam Long productId) {
+		@RequestMapping(value = "/products/{productId}")
+		public HttpEntity<List<Product>> productById(@PathVariable("productId") Long productId) {
 			return null;
 		}
 
@@ -219,13 +201,13 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@RequestMapping("/products")
 	class PersonsProductsControllerClassLevel {
 
-		@RequestMapping(params = "personId")
-		public HttpEntity<List<Product>> productsOfPerson(@RequestParam Long personId) {
+		@RequestMapping("/person/{personId}")
+		public HttpEntity<List<Product>> productsOfPerson(@PathVariable("personId") Long personId) {
 			return null;
 		}
 
-		@RequestMapping(params = "productId")
-		public HttpEntity<List<Product>> productById(@RequestParam Long productId) {
+		@RequestMapping("/{productId}")
+		public HttpEntity<List<Product>> productById(@PathVariable("productId") String productId) {
 			return null;
 		}
 	}
