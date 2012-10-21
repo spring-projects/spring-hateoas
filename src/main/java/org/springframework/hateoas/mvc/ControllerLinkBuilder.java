@@ -16,26 +16,25 @@
 package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.ws.rs.QueryParam;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.ResourceDescriptor;
+import org.springframework.hateoas.util.AnnotatedParam;
 import org.springframework.hateoas.util.Invocation;
 import org.springframework.hateoas.util.Invocations;
+import org.springframework.hateoas.util.LinkTemplate;
 import org.springframework.hateoas.util.LinkTemplateUtils;
-import org.springframework.hateoas.util.MethodAnnotationUtils.AnnotatedParam;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
+
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
@@ -158,8 +157,8 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 		Invocation invocation = recorded.get(0);
 		String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(invocation.getTarget().getClass(),
 				RequestMapping.class);
-		LinkTemplate<PathVariable, QueryParam> template = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
-				invocation.getMethod(), RequestMapping.class, PathVariable.class, QueryParam.class);
+		LinkTemplate<PathVariable, RequestParam> template = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
+				invocation.getMethod(), RequestMapping.class, PathVariable.class, RequestParam.class);
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
@@ -167,43 +166,58 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 		return builder.slash(uriTemplate.expand(invocation.getArgs()));
 	}
 
-	/**
-	 * Extracts all resources with placeholders as link templates, containing the path variables and request params of the
-	 * resource.
-	 *
-	 * Useful for two things:
-	 * <ul>
-	 * <li>for request params, allows building forms to request the resource</li>
-	 * <li>in case of known variable values, allows to replace path variables.</li>
-	 * </ul>
-	 *
-	 * @param controller
-	 * @return
-	 */
-	public static List<ResourceDescriptor> linksToResources(Class<?> controller) {
-		List<ResourceDescriptor> ret = new ArrayList<ResourceDescriptor>();
+//	/**
+//	 * Extracts all resources with placeholders as link templates, containing the path variables and request params of the
+//	 * resource.
+//	 *
+//	 * Useful for two things:
+//	 * <ul>
+//	 * <li>for request params, allows building forms to request the resource</li>
+//	 * <li>in case of known variable values, allows to replace path variables.</li>
+//	 * </ul>
+//	 *
+//	 * @param controller
+//	 * @return
+//	 */
+//	public static List<ResourceDescriptor> linksToResources(Class<?> controller) {
+//		List<ResourceDescriptor> ret = new ArrayList<ResourceDescriptor>();
+//
+//		final String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(controller, RequestMapping.class);
+//
+//		Method[] declaredMethods = controller.getDeclaredMethods();
+//		for (Method method : declaredMethods) {
+//			final LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(
+//					classLevelMapping, method, RequestMapping.class, PathVariable.class, RequestParam.class);
+//
+//			RequestMethod requestMethod = getRequestMethod(method);
+//
+//			String requestMethodName = requestMethod.name();
+//			ResourceDescriptor resourceDescriptor = new ResourceDescriptor(resourceName, linkTemplate.getLinkTemplate(), requestMethodName);
+//			List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
+//			for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
+//				resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
+//			}
+//			List<AnnotatedParam<RequestParam>> requestParams = linkTemplate.getRequestParams();
+//			for (AnnotatedParam<RequestParam> requestParam : requestParams) {
+//				resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
+//			}
+//
+//			ret.add(resourceDescriptor);
+//		}
+//
+//		return ret;
+//	}
 
-		final String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(controller, RequestMapping.class);
-
-		Method[] declaredMethods = controller.getDeclaredMethods();
-		for (Method method : declaredMethods) {
-			final LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(
-					classLevelMapping, method, RequestMapping.class, PathVariable.class, RequestParam.class);
-
-			ResourceDescriptor resourceDescriptor = new ResourceDescriptor(linkTemplate.getLinkTemplate());
-			List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
-			for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
-				resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
-			}
-			List<AnnotatedParam<RequestParam>> requestParams = linkTemplate.getRequestParams();
-			for (AnnotatedParam<RequestParam> requestParam : requestParams) {
-				resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
-			}
-
-			ret.add(resourceDescriptor);
+	private static RequestMethod getRequestMethod(Method method) {
+		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		RequestMethod requestMethod;
+		if (methodRequestMapping != null) {
+			RequestMethod[] methods = methodRequestMapping.method();
+			requestMethod = methods[0];
+		} else {
+			requestMethod = RequestMethod.GET; // default
 		}
-
-		return ret;
+		return requestMethod;
 	}
 
 	/*
@@ -228,8 +242,51 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 		return new ControllerLinkBuilder(builder);
 	}
 
-	public static ResourceDescriptor linkToResource(Object method) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Creates a resource descriptor which can be used by message converters such as HtmlFormMessageConverter to create
+	 * html forms.
+	 * <p>
+	 * The following example method searchPersonForm creates a search form which has the method showPerson as action
+	 * target:
+	 *
+	 * <pre>
+	 * &#064;RequestMapping(value = &quot;/person&quot;, method = RequestMethod.GET)
+	 * public HttpEntity&lt;ResourceDescriptor[]&gt; searchPersonForm() {
+	 * 	ResourceDescriptor rd = ControllerLinkBuilder.linkToResource(&quot;searchPerson&quot;,
+	 * 			on(PersonController.class).showPerson(null));
+	 * 	return new HttpEntity&lt;ResourceDescriptor&gt;(rd);
+	 * }
+	 * </pre>
+	 *
+	 *
+	 * @param resourceName name of the resource, e.g. to be used as form name
+	 * @param method reference which will handle the request, use {@link #on(Class)} to create a suitable method reference
+	 * @return
+	 */
+	public static ResourceDescriptor linkToResource(String resourceName, Object method) {
+
+		Invocations invocations = (Invocations) method;
+		List<Invocation> recorded = invocations.getInvocations();
+		Invocation invocation = recorded.get(0);
+		String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(invocation.getTarget().getClass(),
+				RequestMapping.class);
+		Method invokedMethod = invocation.getMethod();
+		LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
+				invokedMethod, RequestMapping.class, PathVariable.class, RequestParam.class);
+
+		RequestMethod requestMethod = getRequestMethod(invokedMethod);
+
+		ResourceDescriptor resourceDescriptor = new ResourceDescriptor(resourceName,
+				linkTemplate.getLinkTemplate(), requestMethod.toString());
+		List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
+		for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
+			resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
+		}
+		List<AnnotatedParam<RequestParam>> requestParams = linkTemplate.getRequestParams();
+		for (AnnotatedParam<RequestParam> requestParam : requestParams) {
+			resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
+		}
+
+		return resourceDescriptor;
 	}
 }

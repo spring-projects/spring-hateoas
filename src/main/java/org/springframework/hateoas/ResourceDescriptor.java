@@ -8,9 +8,21 @@ public class ResourceDescriptor {
 	private String linkTemplate;
 	private Map<String, Class<?>> pathVariables = new HashMap<String, Class<?>>();
 	private Map<String, Class<?>> requestParams = new HashMap<String, Class<?>>();
+	private String httpMethod;
+	private String resourceName;
 
-	public ResourceDescriptor(String linkTemplate) {
+	public String getResourceName() {
+		return resourceName;
+	}
+
+	public ResourceDescriptor(String resourceName, String linkTemplate, String httpMethod) {
 		this.linkTemplate = linkTemplate;
+		this.httpMethod = httpMethod;
+		this.resourceName = resourceName;
+	}
+
+	public String getHttpMethod() {
+		return httpMethod;
 	}
 
 	public String getLinkTemplate() {

@@ -15,23 +15,27 @@
  */
 package org.springframework.hateoas.jaxrs;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.ResourceDescriptor;
 import org.springframework.hateoas.mvc.UriComponentsLinkBuilder;
+import org.springframework.hateoas.util.AnnotatedParam;
 import org.springframework.hateoas.util.Invocation;
 import org.springframework.hateoas.util.Invocations;
+import org.springframework.hateoas.util.LinkTemplate;
 import org.springframework.hateoas.util.LinkTemplateUtils;
-import org.springframework.hateoas.util.MethodAnnotationUtils.AnnotatedParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -42,6 +46,15 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Gierke
  */
 public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder> {
+
+	private static final List<Class<? extends Annotation>> HTTP_METHODS;
+
+	static {
+		HTTP_METHODS = new ArrayList<Class<? extends Annotation>>();
+		HTTP_METHODS.add(GET.class);
+		HTTP_METHODS.add(PUT.class);
+		HTTP_METHODS.add(POST.class);
+	}
 
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} from the given {@link UriComponentsBuilder}.
@@ -143,42 +156,42 @@ public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder>
 		return LinkTemplateUtils.on(service);
 	}
 
-	/**
-	 * Extracts all resources with placeholders as link templates, containing the path variables and request params of the
-	 * resource.
-	 *
-	 * Useful for two things:
-	 * <ul>
-	 * <li>for request params, allows building forms to request the resource</li>
-	 * <li>in case of known variable values, allows to replace path variables.</li>
-	 * </ul>
-	 *
-	 * @param controller
-	 * @return
-	 */
-	public static List<ResourceDescriptor> linksToResources(Class<?> controller) {
-		List<ResourceDescriptor> ret = new ArrayList<ResourceDescriptor>();
+	public static ResourceDescriptor linkToResource(String resourceName, Object method) {
 
-		final String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(controller, Path.class);
+		Invocations invocations = (Invocations) method;
+		List<Invocation> recorded = invocations.getInvocations();
+		Invocation invocation = recorded.get(0);
+		String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(invocation.getTarget().getClass(), Path.class);
+		Method invokedMethod = invocation.getMethod();
+		LinkTemplate<PathParam, QueryParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
+				invokedMethod, Path.class, PathParam.class, QueryParam.class);
 
-		Method[] declaredMethods = controller.getDeclaredMethods();
-		for (Method method : declaredMethods) {
-			final LinkTemplate<PathParam, QueryParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
-					method, Path.class, PathParam.class, QueryParam.class);
+		String requestMethod = getRequestMethod(invokedMethod);
 
-			ResourceDescriptor resourceDescriptor = new ResourceDescriptor(linkTemplate.getLinkTemplate());
-			List<AnnotatedParam<PathParam>> pathVariables = linkTemplate.getPathVariables();
-			for (AnnotatedParam<PathParam> pathVariable : pathVariables) {
-				resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
-			}
-			List<AnnotatedParam<QueryParam>> requestParams = linkTemplate.getRequestParams();
-			for (AnnotatedParam<QueryParam> requestParam : requestParams) {
-				resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
-			}
+		ResourceDescriptor resourceDescriptor = new ResourceDescriptor(resourceName, linkTemplate.getLinkTemplate(),
+				requestMethod);
 
-			ret.add(resourceDescriptor);
+		List<AnnotatedParam<PathParam>> pathVariables = linkTemplate.getPathVariables();
+		for (AnnotatedParam<PathParam> pathVariable : pathVariables) {
+			resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
+		}
+		List<AnnotatedParam<QueryParam>> requestParams = linkTemplate.getRequestParams();
+		for (AnnotatedParam<QueryParam> requestParam : requestParams) {
+			resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
 		}
 
+		return resourceDescriptor;
+	}
+
+	private static String getRequestMethod(Method method) {
+		String ret = "GET"; // default
+		for (Class<? extends Annotation> methodAnnotation : HTTP_METHODS) {
+			Annotation ann = AnnotationUtils.findAnnotation(method, methodAnnotation);
+			if (ann != null) {
+				ret = ann.annotationType().getName();
+				break;
+			}
+		}
 		return ret;
 	}
 

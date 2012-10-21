@@ -2,6 +2,7 @@ package org.springframework.hateoas.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.cglib.proxy.Enhancer;
@@ -9,9 +10,7 @@ import net.sf.cglib.proxy.Enhancer;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
-import org.springframework.hateoas.util.MethodAnnotationUtils.AnnotatedParam;
 
 public class LinkTemplateUtils {
 
@@ -31,59 +30,55 @@ public class LinkTemplateUtils {
 	public static <M extends Annotation, P extends Annotation, R extends Annotation> LinkTemplate<P, R> createLinkTemplate(
 			String classLevelMapping, Method method, Class<M> methodAnnotation, Class<P> pathVariableAnnotation,
 			Class<R> requestParamAnnotation) {
-		M annotation = AnnotationUtils.findAnnotation(method, methodAnnotation);
-		// String[] params = (String[]) AnnotationUtils.getValue(annotation, "params");
-		// TODO use MethodAnnotationUtil to get PathParams
-		// List<AnnotatedParam<P>> params = MethodAnnotationUtils.getParamsWithAnnotation(method, pathParamAnnotation);
+		M methodLevelAnnotation = AnnotationUtils.findAnnotation(method, methodAnnotation);
 
-		String[] mappings = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
-
-		if (mappings.length > 1) {
-			throw new IllegalStateException("Multiple mappings defined on method" + method.getName());
-		}
+		String methodMapping = getMappingAnnotationValue(methodLevelAnnotation);
 		List<AnnotatedParam<P>> pathVariables = MethodAnnotationUtils.getParamsWithAnnotation(method,
 				pathVariableAnnotation);
 		List<AnnotatedParam<R>> requestParams = MethodAnnotationUtils.getParamsWithAnnotation(method,
 				requestParamAnnotation);
 
 		final LinkTemplate<P, R> linkTemplate;
-		if (classLevelMapping.length() == 0 && mappings.length == 0) {
+		if (classLevelMapping.length() == 0 && methodMapping.length() == 0) {
 			throw new IllegalStateException("No class level or method level request mappings found for method "
 					+ method.getName());
-		} else {
-			final String methodMapping;
-			if (mappings.length == 1) {
-				methodMapping = mappings[0];
-			} else {
-				methodMapping = "";
-			}
-			linkTemplate = new LinkTemplate<P, R>(classLevelMapping + methodMapping, pathVariables, requestParams);
 		}
+		linkTemplate = new LinkTemplate<P, R>(classLevelMapping + methodMapping, pathVariables, requestParams);
+
 		return linkTemplate;
 	}
 
 	public static <T extends Annotation> String getClassLevelMapping(Class<? extends Object> controller,
 			Class<T> classAnnotation) {
+
 		T classLevelAnnotation = AnnotationUtils.findAnnotation(controller, classAnnotation);
+		String classLevelMapping = getMappingAnnotationValue(classLevelAnnotation);
+		return classLevelMapping;
+	}
 
+	private static <T extends Annotation> String getMappingAnnotationValue(T mappingAnnotation) {
 		String classLevelMapping;
-		Object classLevelAnnotationValue = AnnotationUtils.getValue(classLevelAnnotation);
-		if (classLevelAnnotationValue instanceof String[]) {
-			String[] mappings = classLevelAnnotation == null ? new String[0] : (String[]) classLevelAnnotationValue;
+		Object classLevelAnnotationValue = AnnotationUtils.getValue(mappingAnnotation);
+		if (classLevelAnnotationValue != null) {
+			if (classLevelAnnotationValue instanceof String[]) {
+				String[] mappings = mappingAnnotation == null ? new String[0] : (String[]) classLevelAnnotationValue;
 
-			if (mappings.length > 1) {
-				throw new IllegalStateException("Multiple mappings defined on " + controller.getName());
+				if (mappings.length > 1) {
+					throw new IllegalStateException("Multiple mapping values found, only one mapping is supported: "
+							+ Arrays.toString(mappings));
+				}
+				classLevelMapping = mappings[0];
+			} else {
+				classLevelMapping = (String) classLevelAnnotationValue;
 			}
-			classLevelMapping = mappings[0];
 		} else {
-			classLevelMapping = (String) classLevelAnnotationValue;
+			classLevelMapping = "";
 		}
-
 		final String ret;
-		if (classLevelMapping != null) {
+		if (classLevelMapping.length() > 0) {
 			ret = classLevelMapping.startsWith("/") ? classLevelMapping : "/" + classLevelMapping;
 		} else {
-			ret = "";
+			ret = classLevelMapping;
 		}
 		return ret;
 	}

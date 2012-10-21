@@ -1,14 +1,12 @@
-package org.springframework.hateoas;
+package org.springframework.hateoas.util;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.util.MethodAnnotationUtils.AnnotatedParam;
-
 /**
- * LinkTemplate to represent all resources on a controller. The resources on a controller may not only be links,
- * but a mix of link templates and links.
+ * LinkTemplate to represent all resources on a controller. The resources on a controller may not only be links, but a
+ * mix of link templates and links.
  *
  * @author qqybk2l
  *
@@ -20,10 +18,10 @@ public class LinkTemplate<P extends Annotation, R extends Annotation> {
 	private List<AnnotatedParam<P>> pathVariables = new ArrayList<AnnotatedParam<P>>();
 	private List<AnnotatedParam<R>> requestParams = new ArrayList<AnnotatedParam<R>>();
 
-
 	public LinkTemplate(String linkTemplate, List<AnnotatedParam<P>> pathVariables, List<AnnotatedParam<R>> requestParams) {
 		this.linkTemplate = linkTemplate;
 		this.pathVariables = pathVariables;
+		this.requestParams = requestParams;
 	}
 
 	public String getLinkTemplate() {
@@ -40,9 +38,8 @@ public class LinkTemplate<P extends Annotation, R extends Annotation> {
 
 	@Override
 	public String toString() {
-		return "LinkTemplate [linkTemplate=" + linkTemplate + ", pathVariables=" + pathVariables + "]";
+		return "LinkTemplate [linkTemplate=" + linkTemplate + ", pathVariables=" + pathVariables + ", requestParams="
+				+ requestParams + "]";
 	}
-
-
 
 }

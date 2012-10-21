@@ -22,7 +22,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linksToResources;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.on;
 
 import java.util.List;
@@ -31,13 +30,10 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkTemplate;
-import org.springframework.hateoas.ResourceDescriptor;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Oliver Gierke
@@ -72,42 +68,6 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertEquals("self", withSelfRel.getRel());
 	}
 
-	@Test
-	public void createsLinksToResourcesInController() {
-		List<ResourceDescriptor> links = linksToResources(PersonsProductsController.class);
-		assertEquals(2, links.size());
-
-		assertEquals("/products/{personId}", links.get(0).getLinkTemplate());
-		assertEquals(Long.class, links.get(0).getPathVariables().get("personId"));
-
-		assertEquals("/products/{productId}", links.get(1).getLinkTemplate());
-		assertEquals(Long.class, links.get(1).getPathVariables().get("productId"));
-
-	}
-
-	@Test
-	public void createsLinksToResourcesInControllerAtClassLevel() {
-		List<ResourceDescriptor> links = linksToResources(PersonsProductsControllerClassLevel.class);
-		assertEquals(2, links.size());
-
-		assertEquals("/products/person/{personId}", links.get(0).getLinkTemplate());
-		assertEquals(Long.class, links.get(0).getPathVariables().get("personId"));
-
-		assertEquals("/products/{productId}", links.get(1).getLinkTemplate());
-		assertEquals(String.class, links.get(1).getPathVariables().get("productId"));
-
-	}
-
-	@Test
-	public void createsLinksToProductsController() {
-		List<ResourceDescriptor> links = linksToResources(ProductsController.class);
-		assertEquals(4, links.size());
-
-		assertEquals("/products/{productId}", links.get(0).getLinkTemplate());
-		assertEquals("/products", links.get(1).getLinkTemplate());
-		assertEquals("/products/{productId}/details", links.get(2).getLinkTemplate());
-		assertEquals("/people/{personId}/products", links.get(3).getLinkTemplate());
-	}
 
 	@Test
 	public void createsLinkToSubResource() {

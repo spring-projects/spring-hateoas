@@ -7,23 +7,6 @@ import java.util.List;
 
 public class MethodAnnotationUtils {
 
-	public static class AnnotatedParam<T extends Annotation> {
-		public final T paramAnnotation;
-		public final Class<?> paramType;
-
-		public AnnotatedParam(T paramAnnotation, Class<?> paramType) {
-			super();
-			this.paramAnnotation = paramAnnotation;
-			this.paramType = paramType;
-		}
-
-		@Override
-		public String toString() {
-			return "AnnotatedParam [paramAnnotation=" + paramAnnotation + ", paramType=" + paramType + "]";
-		}
-
-	}
-
 	public static <T extends Annotation, R extends Annotation> List<AnnotatedParam<T>> getParamsWithAnnotation(
 			Method method, Class<T> annotation) {
 
