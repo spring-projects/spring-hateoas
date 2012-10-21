@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * LinkTemplate to represent all resources on a controller. The resources on a controller may not only be links, but a
- * mix of link templates and links.
+ * LinkTemplate to represent a resource on a controller which must be represented by a URI template and not a dereferencable URI.
  *
- * @author qqybk2l
+ * @author Dietrich Schulten
  *
  * @param <P> Annotation for path parameters, e.g. PathVariable or PathParam
  */

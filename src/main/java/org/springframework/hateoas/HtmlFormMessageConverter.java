@@ -10,6 +10,31 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.FileCopyUtils;
 
+/**
+ * Message converter which converts one ResourceDescriptor or an array of ResourceDescriptor items to an HTML page
+ * containing one form per ResourceDescriptor.
+ *
+ * Add the following to your spring configuration to enable this converter:
+ *
+ * <pre>
+ *   &lt;bean
+ *     class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
+ *     &lt;property name="messageConverters"&gt;
+ *       &lt;list&gt;
+ *         &lt;ref bean="jsonConverter" /&gt;
+ *         &lt;ref bean="htmlFormMessageConverter" /&gt;
+ *       &lt;/list&gt;
+ *     &lt;/property&gt;
+ *   &lt;/bean&gt;
+ *
+ *   &lt;bean id="htmlFormMessageConverter" class="org.springframework.hateoas.HtmlFormMessageConverter"&gt;
+ *     &lt;property name="supportedMediaTypes" value="text/html" /&gt;
+ *   &lt;/bean&gt;
+ * </pre>
+ *
+ * @author Dietrich Schulten
+ *
+ */
 public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Object> {
 
 	String searchPerson = "searchPerson";
@@ -45,7 +70,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 	@Override
 	protected boolean supports(Class<?> clazz) {
 		final boolean ret;
-		if (ResourceDescriptor[].class == clazz) {
+		if (ResourceDescriptor.class == clazz || ResourceDescriptor[].class == clazz) {
 			ret = true;
 		} else {
 			ret = false;
@@ -62,33 +87,42 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 	@Override
 	protected void writeInternal(Object t, HttpOutputMessage outputMessage) throws IOException,
 			HttpMessageNotWritableException {
-		// TODO Auto-generated method stub t ResourceDescriptor[]
-		ResourceDescriptor[] descriptors = (ResourceDescriptor[]) t;
 
-		for (ResourceDescriptor resourceDescriptor : descriptors) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format(HTML_START, "Input Data"));
 
-			String formName = resourceDescriptor.getResourceName();
-
-			String action = resourceDescriptor.getLinkTemplate();
-
-			// build the form
-			StringBuilder sb = new StringBuilder();
-			sb.append(String.format(HTML_START, formName));
-			for (Entry<String, Class<?>> entry : resourceDescriptor.getRequestParams().entrySet()) {
-				String formH1 = "Form " + formName;
-				sb.append(String.format(FORM_START, action, formName, resourceDescriptor.getHttpMethod().toString(), formH1));
-
-				String requestParamName = entry.getKey();
-				Class<?> requestParamArg = entry.getValue();
-				String inputFieldType = getInputFieldType(requestParamArg);
-				String fieldLabel = requestParamName + ": ";
-				// TODO support list and matrix parameters
-				sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName));
+		if (t instanceof ResourceDescriptor[]) {
+			ResourceDescriptor[] descriptors = (ResourceDescriptor[]) t;
+			for (ResourceDescriptor resourceDescriptor : descriptors) {
+				appendForm(sb, resourceDescriptor);
 			}
-			sb.append(FORM_END).append(HTML_END);
-			FileCopyUtils.copy(sb.toString().getBytes("UTF-8"), outputMessage.getBody());
+		} else {
+			ResourceDescriptor resourceDescriptor = (ResourceDescriptor) t;
+			appendForm(sb, resourceDescriptor);
 		}
+		sb.append(HTML_END);
+		FileCopyUtils.copy(sb.toString().getBytes("UTF-8"), outputMessage.getBody());
 
+	}
+
+	private void appendForm(StringBuilder sb, ResourceDescriptor resourceDescriptor) {
+		String action = resourceDescriptor.getLinkTemplate();
+		String formName = resourceDescriptor.getResourceName();
+
+		String formH1 = "Form " + formName;
+		sb.append(String.format(FORM_START, action, formName, resourceDescriptor.getHttpMethod().toString(), formH1));
+
+		// build the form
+		for (Entry<String, Class<?>> entry : resourceDescriptor.getRequestParams().entrySet()) {
+
+			String requestParamName = entry.getKey();
+			Class<?> requestParamArg = entry.getValue();
+			String inputFieldType = getInputFieldType(requestParamArg);
+			String fieldLabel = requestParamName + ": ";
+			// TODO support list and matrix parameters
+			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName));
+		}
+		sb.append(FORM_END);
 	}
 
 	private String getInputFieldType(Class<?> requestParamArg) {
