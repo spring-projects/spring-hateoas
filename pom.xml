@@ -5,7 +5,7 @@
 
   <groupId>org.springframework.hateoas</groupId>
   <artifactId>spring-hateoas</artifactId>
-  <version>0.3.0.BUILD-SNAPSHOT</version>
+	<version>0.4.0.BUILD-SNAPSHOT</version>
 
   <name>Spring Hateoas</name>
   <url>http://github.com/SpringSource/spring-hateoas</url>
@@ -59,7 +59,7 @@
 
   <properties>
     <spring.version>3.1.2.RELEASE</spring.version>
-    <jackson.version>1.9.7</jackson.version>
+		<jackson.version>1.9.10</jackson.version>
     <jaxrs.version>1.0</jaxrs.version>
     <cglib.version>2.2.2</cglib.version>
     <bundlor.failOnWarnings>true</bundlor.failOnWarnings>
@@ -132,13 +132,6 @@
       <artifactId>mockito-all</artifactId>
       <version>1.9.0</version>
       <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.1.2</version>
-      <scope>jar</scope>
     </dependency>
 
     <dependency>
