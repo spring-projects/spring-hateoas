@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.util.Assert;
 
@@ -40,6 +41,7 @@ public class ResourceSupport extends AbstractResourceSupport {
     }
 
     @Override
+    @JsonIgnore
     public Link getId() {
         return getLink(Link.REL_SELF);
     }
