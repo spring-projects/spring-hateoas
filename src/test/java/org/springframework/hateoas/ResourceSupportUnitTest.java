@@ -70,7 +70,7 @@ public class ResourceSupportUnitTest {
 	public void selfLinkBecomesId() {
 
 		Link link = new Link("foo");
-		ResourceSupport support = new ResourceSupport();
+		AbstractResourceSupport support = new ResourceSupport();
 		support.add(link);
 
 		assertThat(support.getId(), is(link));
@@ -79,21 +79,21 @@ public class ResourceSupportUnitTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsNullLinkBeingAdded() {
 
-		ResourceSupport support = new ResourceSupport();
+		AbstractResourceSupport support = new ResourceSupport();
 		support.add((Link) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsNullLinksBeingAdded() {
-		ResourceSupport support = new ResourceSupport();
+		AbstractResourceSupport support = new ResourceSupport();
 		support.add((Iterable<Link>) null);
 	}
 
 	@Test
 	public void sameLinkListMeansSameResource() {
 
-		ResourceSupport first = new ResourceSupport();
-		ResourceSupport second = new ResourceSupport();
+		AbstractResourceSupport first = new ResourceSupport();
+		AbstractResourceSupport second = new ResourceSupport();
 
 		TestUtils.assertEqualAndSameHashCode(first, second);
 
@@ -107,8 +107,8 @@ public class ResourceSupportUnitTest {
 	@Test
 	public void differentLinkListsNotEqual() {
 
-		ResourceSupport first = new ResourceSupport();
-		ResourceSupport second = new ResourceSupport();
+		AbstractResourceSupport first = new ResourceSupport();
+		AbstractResourceSupport second = new ResourceSupport();
 		second.add(new Link("foo"));
 
 		TestUtils.assertNotEqualAndDifferentHashCode(first, second);
@@ -117,8 +117,8 @@ public class ResourceSupportUnitTest {
 	@Test
 	public void subclassNotEquals() {
 
-		ResourceSupport left = new ResourceSupport();
-		ResourceSupport right = new ResourceSupport() {
+		AbstractResourceSupport left = new ResourceSupport();
+		AbstractResourceSupport right = new ResourceSupport() {
 
 			@Override
 			public int hashCode() {

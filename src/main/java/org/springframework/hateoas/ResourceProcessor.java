@@ -23,7 +23,7 @@ package org.springframework.hateoas;
  * @see Resources
  * @author Oliver Gierke
  */
-public interface ResourceProcessor<T extends ResourceSupport> {
+public interface ResourceProcessor<T extends AbstractResourceSupport> {
 
 	/**
 	 * Processes the given resource, add links, alter the domain data etc.
@@ -31,5 +31,5 @@ public interface ResourceProcessor<T extends ResourceSupport> {
 	 * @param resource
 	 * @return the processed resource
 	 */
-	T process(T resource);
+	AbstractResourceSupport process(AbstractResourceSupport resource);
 }
