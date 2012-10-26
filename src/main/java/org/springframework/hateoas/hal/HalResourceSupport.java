@@ -7,9 +7,13 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.springframework.hateoas.AbstractResourceSupport;
 import org.springframework.hateoas.Link;
+import org.springframework.util.Assert;
 
 /**
  * Base class for DTOs that collect links and follow JSON-HAL
@@ -21,40 +25,57 @@ public class HalResourceSupport extends AbstractResourceSupport {
 
     @XmlElement(name = "resource")
     @JsonProperty("_embedded")
-    private Map<String, List<HalResourceSupport>> embedded = new HashMap<String, List<HalResourceSupport>>();
+    @JsonSerialize(contentUsing = OptionalListSerializer.class, include = Inclusion.NON_EMPTY)
+    private Map<String, List<AbstractResourceSupport>> embeddedResources = new HashMap<String, List<AbstractResourceSupport>>();
     @XmlElement(name = "link")
     @JsonProperty("_links")
-    private Map<String, List<Link>> halLinks = new HashMap<String, List<Link>>();
+    @JsonSerialize(contentUsing = OptionalListSerializer.class, include = Inclusion.NON_EMPTY)
+    private Map<String, List<Link>> links = new HashMap<String, List<Link>>();
 
     @Override
+    @JsonIgnore
     public Link getId() {
-        List<Link> selfRefs = halLinks.get(Link.REL_SELF);
+        List<Link> selfRefs = links.get(Link.REL_SELF);
         return null == selfRefs ? null : selfRefs.get(0);
     }
 
     @Override
     public void add(Link link) {
-        List<Link> relLinks = null == halLinks.get(link.getRel()) ? halLinks.get(link.getRel()) : halLinks.put(link.getRel(), new ArrayList<Link>());
-        relLinks.add(link);
+        Assert.notNull(link, "Link can not be null");
+
+        if (null == links.get(link.getRel())) {
+            links.put(link.getRel(), new ArrayList<Link>());
+        }
+        links.get(link.getRel()).add(link);
     }
 
-    public Map<String, List<Link>> getMappedLinks() {
-        return halLinks;
+    public void addEmbeddedResource(String relation, AbstractResourceSupport resource) {
+        Assert.notNull(relation, "relation can not be null");
+        Assert.notNull(resource, "embedded resource can not be null");
+
+        if (null == embeddedResources.get(relation)) {
+            embeddedResources.put(relation, new ArrayList<AbstractResourceSupport>());
+        }
+        embeddedResources.get(relation).add(resource);
     }
 
-    public Map<String, List<HalResourceSupport>> getEmbeddeds() {
-        return embedded;
+    public Map<String, List<Link>> getLinks() {
+        return links;
+    }
+
+    public Map<String, List<AbstractResourceSupport>> getEmbeddedResources() {
+        return embeddedResources;
     }
 
     @Override
     public boolean hasLink(String rel) {
-        return (null != halLinks.get(rel)) && (!halLinks.get(rel).isEmpty());
+        return (null != links.get(rel)) && (!links.get(rel).isEmpty());
     }
 
     @Override
     public boolean hasLinks() {
-        for (String rel : halLinks.keySet()) {
-            if (!halLinks.get(rel).isEmpty()) {
+        for (String rel : links.keySet()) {
+            if (!links.get(rel).isEmpty()) {
                 return true;
             }
         }

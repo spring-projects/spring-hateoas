@@ -42,7 +42,7 @@ public class HalResource<T> extends HalResourceSupport {
     }
 
     /**
-     * Creates a new {@link Resource} with the given content and {@link Link}s (optional).
+     * Creates a new {@link HalResource} with the given content and {@link Link}s (optional).
      * 
      * @param content must not be {@literal null}.
      * @param links the links to add to the {@link Resource}.
@@ -52,7 +52,7 @@ public class HalResource<T> extends HalResourceSupport {
     }
 
     /**
-     * Creates a new {@link Resource} with the given content and {@link Link}s.
+     * Creates a new {@link HalResource} with the given content and {@link Link}s.
      * 
      * @param content must not be {@literal null}.
      * @param links the links to add to the {@link Resource}.
@@ -76,7 +76,7 @@ public class HalResource<T> extends HalResourceSupport {
     /*
      * (non-Javadoc)
      * 
-     * @see org.springframework.hateoas.ResourceSupport#toString()
+     * @see org.springframework.hateoas.hal.HalResourceSupport#toString()
      */
     @Override
     public String toString() {
@@ -86,7 +86,7 @@ public class HalResource<T> extends HalResourceSupport {
     /*
      * (non-Javadoc)
      * 
-     * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
+     * @see org.springframework.hateoas.hal.HalResourceSupport#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj) {
@@ -108,7 +108,7 @@ public class HalResource<T> extends HalResourceSupport {
     /*
      * (non-Javadoc)
      * 
-     * @see org.springframework.hateoas.ResourceSupport#hashCode()
+     * @see org.springframework.hateoas.hal.HalResourceSupport#hashCode()
      */
     @Override
     public int hashCode() {
