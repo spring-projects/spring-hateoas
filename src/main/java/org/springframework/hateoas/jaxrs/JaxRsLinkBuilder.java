@@ -19,7 +19,7 @@ import javax.ws.rs.Path;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.mvc.UriComponentsLinkBuilder;
+import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -29,7 +29,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder> {
+public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} from the given {@link UriComponentsBuilder}.

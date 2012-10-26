@@ -17,6 +17,7 @@ package org.springframework.hateoas.mvc;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,7 +29,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLinkBuilder> {
+public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.

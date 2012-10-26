@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mvc;
+package org.springframework.hateoas.core;
 
 import java.net.URI;
 
@@ -31,16 +31,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  */
-public abstract class UriComponentsLinkBuilder<T extends LinkBuilder> implements LinkBuilder {
+public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkBuilder {
 
 	private final UriComponents uriComponents;
 
 	/**
-	 * Creates a new {@link UriComponentsLinkBuilder} using the given {@link UriComponentsBuilder}.
+	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponentsBuilder}.
 	 * 
 	 * @param builder must not be {@literal null}.
 	 */
-	public UriComponentsLinkBuilder(UriComponentsBuilder builder) {
+	public LinkBuilderSupport(UriComponentsBuilder builder) {
 
 		Assert.notNull(builder);
 		this.uriComponents = builder.build();
@@ -56,6 +56,10 @@ public abstract class UriComponentsLinkBuilder<T extends LinkBuilder> implements
 			return getThis();
 		}
 
+		if (object instanceof Identifiable) {
+			return slash((Identifiable<?>) object);
+		}
+
 		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
 		return createNewInstance(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
 	}
@@ -64,10 +68,10 @@ public abstract class UriComponentsLinkBuilder<T extends LinkBuilder> implements
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
 	 */
-	public LinkBuilder slash(Identifiable<?> identifyable) {
+	public T slash(Identifiable<?> identifyable) {
 
 		if (identifyable == null) {
-			return this;
+			return getThis();
 		}
 
 		return slash(identifyable.getId());

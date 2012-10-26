@@ -95,7 +95,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
 	}
 
-	class Person implements Identifiable<Long> {
+	static class Person implements Identifiable<Long> {
 
 		Long id;
 
