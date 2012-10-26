@@ -17,9 +17,8 @@ package org.springframework.hateoas.jaxrs;
 
 import javax.ws.rs.Path;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.core.LinkBuilderSupport;
+import org.springframework.hateoas.mvc.UriComponentsLinkBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -29,7 +28,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
+public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder> {
 
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} from the given {@link UriComponentsBuilder}.
@@ -61,12 +60,9 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	 */
 	public static JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
 
-		Path annotation = AnnotationUtils.findAnnotation(service, Path.class);
-		String path = (String) AnnotationUtils.getValue(annotation);
-
 		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
-		UriTemplate template = new UriTemplate(path);
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(service));
 		return builder.slash(template.expand(parameters));
 	}
 

@@ -15,10 +15,13 @@
  */
 package org.springframework.hateoas.mvc;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import java.lang.reflect.Method;
+import java.net.URI;
+
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -29,7 +32,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
+public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLinkBuilder> {
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -63,21 +66,28 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		Assert.notNull(controller);
 
-		RequestMapping annotation = AnnotationUtils.findAnnotation(controller, RequestMapping.class);
-		String[] mapping = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
-
-		if (mapping.length > 1) {
-			throw new IllegalStateException("Multiple controller mappings defined! Unable to build URI!");
-		}
-
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
-		if (mapping.length == 0) {
-			return builder;
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(controller));
+		return builder.slash(template.expand(parameters));
 		}
 
-		UriTemplate template = new UriTemplate(mapping[0]);
-		return builder.slash(template.expand(parameters));
+	public static ControllerLinkBuilder linkTo(Object invocationValue) {
+
+		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
+		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
+
+		MethodInvocation invocation = invocations.getLastInvocation();
+		Method method = invocation.getMethod();
+
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
+		URI uri = template.expand(accessor.getBoundParameters(invocation));
+
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+		}
+
+	public static <T> T methodOn(Class<T> controller) {
+		return LinkBuilderUtils.methodOn(controller);
 	}
 
 	/* 
