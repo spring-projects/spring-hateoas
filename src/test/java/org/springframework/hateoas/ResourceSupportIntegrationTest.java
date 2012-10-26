@@ -35,7 +35,7 @@ public class ResourceSupportIntegrationTest extends AbstractMarshallingIntegrati
 	@Test
 	public void doesNotRenderId() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
+		AbstractResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost"));
 
 		assertThat(write(resourceSupport), is(REFERENCE));

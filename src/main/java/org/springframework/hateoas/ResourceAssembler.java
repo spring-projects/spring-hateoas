@@ -20,7 +20,7 @@ package org.springframework.hateoas;
  * 
  * @author Oliver Gierke
  */
-public interface ResourceAssembler<T, D extends ResourceSupport> {
+public interface ResourceAssembler<T, D extends AbstractResourceSupport> {
 
 	/**
 	 * Converts the given entity into an {@link ResourceSupport}.

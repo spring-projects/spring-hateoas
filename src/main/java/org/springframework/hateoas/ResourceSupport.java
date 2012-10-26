@@ -30,53 +30,26 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public class ResourceSupport implements Identifiable<Link> {
+public class ResourceSupport extends AbstractResourceSupport {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
 	@JsonProperty("links")
-	private final List<Link> links;
+	final List<Link> links;
 
 	public ResourceSupport() {
 		this.links = new ArrayList<Link>();
 	}
 
-	/**
-	 * Returns the {@link Link} with a rel of {@link Link#REL_SELF}.
-	 */
+	@Override
 	@JsonIgnore
 	public Link getId() {
 		return getLink(Link.REL_SELF);
 	}
 
-	/**
-	 * Adds the given link to the resource.
-	 * 
-	 * @param link
-	 */
+	@Override
 	public void add(Link link) {
 		Assert.notNull(link, "Link must not be null!");
 		this.links.add(link);
-	}
-
-	/**
-	 * Adds all given {@link Link}s to the resource.
-	 * 
-	 * @param links
-	 */
-	public void add(Iterable<Link> links) {
-		Assert.notNull(links, "Given links must not be null!");
-		for (Link candidate : links) {
-			add(candidate);
-		}
-	}
-
-	/**
-	 * Returns whether the resource contains {@link Link}s at all.
-	 * 
-	 * @return
-	 */
-	public boolean hasLinks() {
-		return !this.links.isEmpty();
 	}
 
 	/**
@@ -85,6 +58,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @param rel
 	 * @return
 	 */
+	@Override
 	public boolean hasLink(String rel) {
 		return getLink(rel) != null;
 	}
@@ -115,8 +89,14 @@ public class ResourceSupport implements Identifiable<Link> {
 		return null;
 	}
 
-	/* 
+	@Override
+	public boolean hasLinks() {
+		return !this.links.isEmpty();
+	}
+
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -124,8 +104,9 @@ public class ResourceSupport implements Identifiable<Link> {
 		return String.format("links: %s", links.toString());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -144,8 +125,9 @@ public class ResourceSupport implements Identifiable<Link> {
 		return this.links.equals(that.links);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override

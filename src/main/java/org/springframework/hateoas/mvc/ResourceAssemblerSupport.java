@@ -15,13 +15,14 @@ eed to in writing, software
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.hateoas.AbstractResourceSupport;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
@@ -33,7 +34,7 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport> implements
+public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends AbstractResourceSupport> implements
 		ResourceAssembler<T, D> {
 
 	private final Class<?> controllerClass;
@@ -61,6 +62,7 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 	 * @param entities must not be {@literal null}.
 	 * @return
 	 */
+
 	public List<D> toResources(Iterable<? extends T> entities) {
 
 		Assert.notNull(entities);
