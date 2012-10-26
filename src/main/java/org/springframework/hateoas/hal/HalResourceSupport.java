@@ -23,62 +23,62 @@ import org.springframework.util.Assert;
  */
 public class HalResourceSupport extends AbstractResourceSupport {
 
-    @XmlElement(name = "resource")
-    @JsonProperty("_embedded")
-    @JsonSerialize(contentUsing = OptionalListSerializer.class, include = Inclusion.NON_EMPTY)
-    private Map<String, List<AbstractResourceSupport>> embeddedResources = new HashMap<String, List<AbstractResourceSupport>>();
-    @XmlElement(name = "link")
-    @JsonProperty("_links")
-    @JsonSerialize(contentUsing = OptionalListSerializer.class, include = Inclusion.NON_EMPTY)
-    private Map<String, List<Link>> links = new HashMap<String, List<Link>>();
+	@XmlElement(name = "resource")
+	@JsonProperty("_embedded")
+	@JsonSerialize(contentUsing = OptionalListSerializer.class, include = Inclusion.NON_EMPTY)
+	private Map<String, List<AbstractResourceSupport>> embeddedResources = new HashMap<String, List<AbstractResourceSupport>>();
+	@XmlElement(name = "link")
+	@JsonProperty("_links")
+	@JsonSerialize(contentUsing = OptionalListSerializer.class, include = Inclusion.NON_EMPTY)
+	private Map<String, List<Link>> links = new HashMap<String, List<Link>>();
 
-    @Override
-    @JsonIgnore
-    public Link getId() {
-        List<Link> selfRefs = links.get(Link.REL_SELF);
-        return null == selfRefs ? null : selfRefs.get(0);
-    }
+	@Override
+	@JsonIgnore
+	public Link getId() {
+		List<Link> selfRefs = links.get(Link.REL_SELF);
+		return null == selfRefs ? null : selfRefs.get(0);
+	}
 
-    @Override
-    public void add(Link link) {
-        Assert.notNull(link, "Link can not be null");
+	@Override
+	public void add(Link link) {
+		Assert.notNull(link, "Link can not be null");
 
-        if (null == links.get(link.getRel())) {
-            links.put(link.getRel(), new ArrayList<Link>());
-        }
-        links.get(link.getRel()).add(link);
-    }
+		if (null == links.get(link.getRel())) {
+			links.put(link.getRel(), new ArrayList<Link>());
+		}
+		links.get(link.getRel()).add(link);
+	}
 
-    public void addEmbeddedResource(String relation, AbstractResourceSupport resource) {
-        Assert.notNull(relation, "relation can not be null");
-        Assert.notNull(resource, "embedded resource can not be null");
+	public void addEmbeddedResource(String relation, AbstractResourceSupport resource) {
+		Assert.notNull(relation, "relation can not be null");
+		Assert.notNull(resource, "embedded resource can not be null");
 
-        if (null == embeddedResources.get(relation)) {
-            embeddedResources.put(relation, new ArrayList<AbstractResourceSupport>());
-        }
-        embeddedResources.get(relation).add(resource);
-    }
+		if (null == embeddedResources.get(relation)) {
+			embeddedResources.put(relation, new ArrayList<AbstractResourceSupport>());
+		}
+		embeddedResources.get(relation).add(resource);
+	}
 
-    public Map<String, List<Link>> getLinks() {
-        return links;
-    }
+	public Map<String, List<Link>> getLinks() {
+		return links;
+	}
 
-    public Map<String, List<AbstractResourceSupport>> getEmbeddedResources() {
-        return embeddedResources;
-    }
+	public Map<String, List<AbstractResourceSupport>> getEmbeddedResources() {
+		return embeddedResources;
+	}
 
-    @Override
-    public boolean hasLink(String rel) {
-        return (null != links.get(rel)) && (!links.get(rel).isEmpty());
-    }
+	@Override
+	public boolean hasLink(String rel) {
+		return (null != links.get(rel)) && (!links.get(rel).isEmpty());
+	}
 
-    @Override
-    public boolean hasLinks() {
-        for (String rel : links.keySet()) {
-            if (!links.get(rel).isEmpty()) {
-                return true;
-            }
-        }
-        return false;
-    }
+	@Override
+	public boolean hasLinks() {
+		for (String rel : links.keySet()) {
+			if (!links.get(rel).isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

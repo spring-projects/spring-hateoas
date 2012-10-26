@@ -22,11 +22,11 @@ package org.springframework.hateoas;
  */
 public interface ResourceAssembler<T, D extends AbstractResourceSupport> {
 
-    /**
-     * Converts the given entity into an {@link ResourceSupport}.
-     * 
-     * @param entity
-     * @return
-     */
-    D toResource(T entity);
+	/**
+	 * Converts the given entity into an {@link ResourceSupport}.
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	D toResource(T entity);
 }

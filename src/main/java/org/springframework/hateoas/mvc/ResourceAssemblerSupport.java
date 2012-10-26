@@ -34,107 +34,108 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends AbstractResourceSupport> implements ResourceAssembler<T, D> {
+public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends AbstractResourceSupport> implements
+		ResourceAssembler<T, D> {
 
-    private final Class<?> controllerClass;
-    private final Class<D> resourceType;
+	private final Class<?> controllerClass;
+	private final Class<D> resourceType;
 
-    /**
-     * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
-     * 
-     * @param controllerClass must not be {@literal null}.
-     * @param resourceType must not be {@literal null}.
-     */
-    public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
+	/**
+	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
+	 * 
+	 * @param controllerClass must not be {@literal null}.
+	 * @param resourceType must not be {@literal null}.
+	 */
+	public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
 
-        Assert.notNull(controllerClass);
-        Assert.notNull(resourceType);
+		Assert.notNull(controllerClass);
+		Assert.notNull(resourceType);
 
-        this.controllerClass = controllerClass;
-        this.resourceType = resourceType;
-    }
+		this.controllerClass = controllerClass;
+		this.resourceType = resourceType;
+	}
 
-    /**
-     * Converts all given entities into resources.
-     * 
-     * @see #toResource(Object)
-     * @param entities must not be {@literal null}.
-     * @return
-     */
+	/**
+	 * Converts all given entities into resources.
+	 * 
+	 * @see #toResource(Object)
+	 * @param entities must not be {@literal null}.
+	 * @return
+	 */
 
-    public List<D> toResources(Iterable<? extends T> entities) {
+	public List<D> toResources(Iterable<? extends T> entities) {
 
-        Assert.notNull(entities);
-        List<D> result = new ArrayList<D>();
+		Assert.notNull(entities);
+		List<D> result = new ArrayList<D>();
 
-        for (T entity : entities) {
-            result.add(toResource(entity));
-        }
+		for (T entity : entities) {
+			result.add(toResource(entity));
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    /**
-     * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
-     * 
-     * @param entity must not be {@literal null}.
-     * @return
-     */
-    protected D createResource(T entity) {
-        return createResource(entity, new Object[0]);
-    }
+	/**
+	 * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
+	 * 
+	 * @param entity must not be {@literal null}.
+	 * @return
+	 */
+	protected D createResource(T entity) {
+		return createResource(entity, new Object[0]);
+	}
 
-    protected D createResource(T entity, Object... parameters) {
-        return createResourceWithId(entity.getId(), entity, parameters);
-    }
+	protected D createResource(T entity, Object... parameters) {
+		return createResourceWithId(entity.getId(), entity, parameters);
+	}
 
-    /**
-     * Creates a new resource with a self link to the given id.
-     * 
-     * @param entity must not be {@literal null}.
-     * @param id must not be {@literal null}.
-     * @return
-     */
-    protected D createResourceWithId(Object id, T entity) {
-        return createResourceWithId(id, entity, new Object[0]);
-    }
+	/**
+	 * Creates a new resource with a self link to the given id.
+	 * 
+	 * @param entity must not be {@literal null}.
+	 * @param id must not be {@literal null}.
+	 * @return
+	 */
+	protected D createResourceWithId(Object id, T entity) {
+		return createResourceWithId(id, entity, new Object[0]);
+	}
 
-    protected D createResourceWithId(Object id, T entity, Object... parameters) {
+	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
-        Assert.notNull(entity);
-        Assert.notNull(id);
+		Assert.notNull(entity);
+		Assert.notNull(id);
 
-        D instance = instantiateResource(entity);
-        instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
-        return instance;
-    }
+		D instance = instantiateResource(entity);
+		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
+		return instance;
+	}
 
-    /**
-     * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
-     * 
-     * @param values must not be {@literal null}.
-     * @return
-     */
-    private Object[] unwrapIdentifyables(Object[] values) {
+	/**
+	 * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
+	 * 
+	 * @param values must not be {@literal null}.
+	 * @return
+	 */
+	private Object[] unwrapIdentifyables(Object[] values) {
 
-        List<Object> result = new ArrayList<Object>(values.length);
+		List<Object> result = new ArrayList<Object>(values.length);
 
-        for (Object element : Arrays.asList(values)) {
-            result.add((element instanceof Identifiable) ? ((Identifiable<?>) element).getId() : element);
-        }
+		for (Object element : Arrays.asList(values)) {
+			result.add((element instanceof Identifiable) ? ((Identifiable<?>) element).getId() : element);
+		}
 
-        return result.toArray();
-    }
+		return result.toArray();
+	}
 
-    /**
-     * Instantiates the resource object. Default implementation will assume a no-arg constructor and use reflection but
-     * can be overridden to manually set up the object instance initially (e.g. to improve performance if this becomes an
-     * issue).
-     * 
-     * @param entity
-     * @return
-     */
-    protected D instantiateResource(T entity) {
-        return BeanUtils.instantiateClass(resourceType);
-    }
+	/**
+	 * Instantiates the resource object. Default implementation will assume a no-arg constructor and use reflection but
+	 * can be overridden to manually set up the object instance initially (e.g. to improve performance if this becomes an
+	 * issue).
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	protected D instantiateResource(T entity) {
+		return BeanUtils.instantiateClass(resourceType);
+	}
 }

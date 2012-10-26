@@ -32,106 +32,106 @@ import org.springframework.util.Assert;
  */
 public class ResourceSupport extends AbstractResourceSupport {
 
-    @XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
-    @JsonProperty("links")
-    final List<Link> links;
+	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
+	@JsonProperty("links")
+	final List<Link> links;
 
-    public ResourceSupport() {
-        this.links = new ArrayList<Link>();
-    }
+	public ResourceSupport() {
+		this.links = new ArrayList<Link>();
+	}
 
-    @Override
-    @JsonIgnore
-    public Link getId() {
-        return getLink(Link.REL_SELF);
-    }
+	@Override
+	@JsonIgnore
+	public Link getId() {
+		return getLink(Link.REL_SELF);
+	}
 
-    @Override
-    public void add(Link link) {
-        Assert.notNull(link, "Link must not be null!");
-        this.links.add(link);
-    }
+	@Override
+	public void add(Link link) {
+		Assert.notNull(link, "Link must not be null!");
+		this.links.add(link);
+	}
 
-    /**
-     * Returns whether the resource contains a {@link Link} with the given rel.
-     * 
-     * @param rel
-     * @return
-     */
-    @Override
-    public boolean hasLink(String rel) {
-        return getLink(rel) != null;
-    }
+	/**
+	 * Returns whether the resource contains a {@link Link} with the given rel.
+	 * 
+	 * @param rel
+	 * @return
+	 */
+	@Override
+	public boolean hasLink(String rel) {
+		return getLink(rel) != null;
+	}
 
-    /**
-     * Returns all {@link Link}s contained in this resource.
-     * 
-     * @return
-     */
-    public List<Link> getLinks() {
-        return Collections.unmodifiableList(links);
-    }
+	/**
+	 * Returns all {@link Link}s contained in this resource.
+	 * 
+	 * @return
+	 */
+	public List<Link> getLinks() {
+		return Collections.unmodifiableList(links);
+	}
 
-    /**
-     * Returns the link with the given rel.
-     * 
-     * @param rel
-     * @return the link with the given rel or {@literal null} if none found.
-     */
-    public Link getLink(String rel) {
+	/**
+	 * Returns the link with the given rel.
+	 * 
+	 * @param rel
+	 * @return the link with the given rel or {@literal null} if none found.
+	 */
+	public Link getLink(String rel) {
 
-        for (Link link : links) {
-            if (link.getRel().equals(rel)) {
-                return link;
-            }
-        }
+		for (Link link : links) {
+			if (link.getRel().equals(rel)) {
+				return link;
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    @Override
-    public boolean hasLinks() {
-        return !this.links.isEmpty();
-    }
+	@Override
+	public boolean hasLinks() {
+		return !this.links.isEmpty();
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format("links: %s", links.toString());
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("links: %s", links.toString());
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
 
-        if (this == obj) {
-            return true;
-        }
+		if (this == obj) {
+			return true;
+		}
 
-        if (!obj.getClass().equals(this.getClass())) {
-            return false;
-        }
+		if (!obj.getClass().equals(this.getClass())) {
+			return false;
+		}
 
-        ResourceSupport that = (ResourceSupport) obj;
+		ResourceSupport that = (ResourceSupport) obj;
 
-        return this.links.equals(that.links);
-    }
+		return this.links.equals(that.links);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return this.links.hashCode();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return this.links.hashCode();
+	}
 }

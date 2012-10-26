@@ -25,11 +25,11 @@ package org.springframework.hateoas;
  */
 public interface ResourceProcessor<T extends AbstractResourceSupport> {
 
-    /**
-     * Processes the given resource, add links, alter the domain data etc.
-     * 
-     * @param resource
-     * @return the processed resource
-     */
-    T process(AbstractResourceSupport resource);
+	/**
+	 * Processes the given resource, add links, alter the domain data etc.
+	 * 
+	 * @param resource
+	 * @return the processed resource
+	 */
+	T process(AbstractResourceSupport resource);
 }

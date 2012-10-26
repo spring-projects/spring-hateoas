@@ -31,90 +31,90 @@ import org.springframework.util.Assert;
 @XmlRootElement
 public class HalResource<T> extends HalResourceSupport {
 
-    @JsonUnwrapped
-    private final T content;
+	@JsonUnwrapped
+	private final T content;
 
-    /**
-     * Creates an empty {@link Resource}.
-     */
-    protected HalResource() {
-        this.content = null;
-    }
+	/**
+	 * Creates an empty {@link Resource}.
+	 */
+	protected HalResource() {
+		this.content = null;
+	}
 
-    /**
-     * Creates a new {@link HalResource} with the given content and {@link Link}s (optional).
-     * 
-     * @param content must not be {@literal null}.
-     * @param links the links to add to the {@link Resource}.
-     */
-    public HalResource(T content, Link... links) {
-        this(content, Arrays.asList(links));
-    }
+	/**
+	 * Creates a new {@link HalResource} with the given content and {@link Link}s (optional).
+	 * 
+	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link Resource}.
+	 */
+	public HalResource(T content, Link... links) {
+		this(content, Arrays.asList(links));
+	}
 
-    /**
-     * Creates a new {@link HalResource} with the given content and {@link Link}s.
-     * 
-     * @param content must not be {@literal null}.
-     * @param links the links to add to the {@link Resource}.
-     */
-    public HalResource(T content, Iterable<Link> links) {
+	/**
+	 * Creates a new {@link HalResource} with the given content and {@link Link}s.
+	 * 
+	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link Resource}.
+	 */
+	public HalResource(T content, Iterable<Link> links) {
 
-        Assert.notNull(content, "Content must not be null!");
-        this.content = content;
-        this.add(links);
-    }
+		Assert.notNull(content, "Content must not be null!");
+		this.content = content;
+		this.add(links);
+	}
 
-    /**
-     * Returns the underlying entity.
-     * 
-     * @return the content
-     */
-    public T getContent() {
-        return content;
-    }
+	/**
+	 * Returns the underlying entity.
+	 * 
+	 * @return the content
+	 */
+	public T getContent() {
+		return content;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.hateoas.hal.HalResourceSupport#toString()
-     */
-    @Override
-    public String toString() {
-        return String.format("Resource { content: %s, %s }", getContent(), super.toString());
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.hateoas.hal.HalResourceSupport#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("Resource { content: %s, %s }", getContent(), super.toString());
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.hateoas.hal.HalResourceSupport#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.hateoas.hal.HalResourceSupport#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
 
-        if (this == obj) {
-            return true;
-        }
+		if (this == obj) {
+			return true;
+		}
 
-        if (obj == null || !obj.getClass().equals(getClass())) {
-            return false;
-        }
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
 
-        HalResource<?> that = (HalResource<?>) obj;
+		HalResource<?> that = (HalResource<?>) obj;
 
-        boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
-        return contentEqual ? super.equals(obj) : false;
-    }
+		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
+		return contentEqual ? super.equals(obj) : false;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.springframework.hateoas.hal.HalResourceSupport#hashCode()
-     */
-    @Override
-    public int hashCode() {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.hateoas.hal.HalResourceSupport#hashCode()
+	 */
+	@Override
+	public int hashCode() {
 
-        int result = super.hashCode();
-        result += content == null ? 0 : 17 * content.hashCode();
-        return result;
-    }
+		int result = super.hashCode();
+		result += content == null ? 0 : 17 * content.hashCode();
+		return result;
+	}
 }
