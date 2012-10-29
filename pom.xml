@@ -77,6 +77,20 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>org.springframework.plugin</groupId>
+			<artifactId>spring-plugin-core</artifactId>
+			<version>0.8.0.BUILD-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.2.2</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
@@ -225,7 +239,14 @@
 		</pluginRepository>
 	</pluginRepositories>
 	
-	 <scm>
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<url>http://repo.springsource.org/libs-snapshot</url>
+		</repository>
+	</repositories>
+	
+	<scm>
         <url>https://github.com/SpringSource/spring-hateoas</url>
         <connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>
