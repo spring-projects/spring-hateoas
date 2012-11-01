@@ -25,7 +25,8 @@ import java.net.URI;
 public interface LinkBuilder {
 
 	/**
-	 * Adds the given object's {@link String} representation as sub-resource to the current URI.
+	 * Adds the given object's {@link String} representation as sub-resource to the current URI. Will unwrap
+	 * {@link Identifiable}s to their id value (see {@link Identifiable#getId()}).
 	 * 
 	 * @param object
 	 * @return

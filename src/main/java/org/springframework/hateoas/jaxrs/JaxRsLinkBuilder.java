@@ -29,6 +29,7 @@ import javax.ws.rs.QueryParam;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.FormDescriptor;
 import org.springframework.hateoas.mvc.UriComponentsLinkBuilder;
 import org.springframework.hateoas.util.AnnotatedParam;
@@ -45,7 +46,7 @@ import org.springframework.web.util.UriTemplate;
  *
  * @author Oliver Gierke
  */
-public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder> {
+public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 	private static final List<Class<? extends Annotation>> HTTP_METHODS;
 
