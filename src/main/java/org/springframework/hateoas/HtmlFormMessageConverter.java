@@ -70,7 +70,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 	@Override
 	protected boolean supports(Class<?> clazz) {
 		final boolean ret;
-		if (ResourceDescriptor.class == clazz || ResourceDescriptor[].class == clazz) {
+		if (FormDescriptor.class == clazz || FormDescriptor[].class == clazz) {
 			ret = true;
 		} else {
 			ret = false;
@@ -91,29 +91,29 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format(HTML_START, "Input Data"));
 
-		if (t instanceof ResourceDescriptor[]) {
-			ResourceDescriptor[] descriptors = (ResourceDescriptor[]) t;
-			for (ResourceDescriptor resourceDescriptor : descriptors) {
-				appendForm(sb, resourceDescriptor);
+		if (t instanceof FormDescriptor[]) {
+			FormDescriptor[] descriptors = (FormDescriptor[]) t;
+			for (FormDescriptor formDescriptor : descriptors) {
+				appendForm(sb, formDescriptor);
 			}
 		} else {
-			ResourceDescriptor resourceDescriptor = (ResourceDescriptor) t;
-			appendForm(sb, resourceDescriptor);
+			FormDescriptor formDescriptor = (FormDescriptor) t;
+			appendForm(sb, formDescriptor);
 		}
 		sb.append(HTML_END);
 		FileCopyUtils.copy(sb.toString().getBytes("UTF-8"), outputMessage.getBody());
 
 	}
 
-	private void appendForm(StringBuilder sb, ResourceDescriptor resourceDescriptor) {
-		String action = resourceDescriptor.getLinkTemplate();
-		String formName = resourceDescriptor.getResourceName();
+	private void appendForm(StringBuilder sb, FormDescriptor formDescriptor) {
+		String action = formDescriptor.getLinkTemplate();
+		String formName = formDescriptor.getResourceName();
 
 		String formH1 = "Form " + formName;
-		sb.append(String.format(FORM_START, action, formName, resourceDescriptor.getHttpMethod().toString(), formH1));
+		sb.append(String.format(FORM_START, action, formName, formDescriptor.getHttpMethod().toString(), formH1));
 
 		// build the form
-		for (Entry<String, Class<?>> entry : resourceDescriptor.getRequestParams().entrySet()) {
+		for (Entry<String, Class<?>> entry : formDescriptor.getRequestParams().entrySet()) {
 
 			String requestParamName = entry.getKey();
 			Class<?> requestParamArg = entry.getValue();

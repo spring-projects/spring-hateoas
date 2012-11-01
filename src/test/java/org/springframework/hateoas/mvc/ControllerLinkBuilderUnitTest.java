@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToForm;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.on;
 
 import java.util.List;
@@ -30,10 +31,13 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.FormDescriptor;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Oliver Gierke
@@ -68,6 +72,20 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertEquals("self", withSelfRel.getRel());
 	}
 
+	static class PersonControllerForForm {
+		@RequestMapping(value = "/person/{personName}", method = RequestMethod.POST)
+		public HttpEntity<? extends Object> showPerson(@PathVariable("personName") String bar,
+				@RequestParam(value = "personId") Long personId) {
+			return null;
+		}
+	}
+	@Test
+	public void createsLinkToFormWithPathVariable() throws Exception {
+		FormDescriptor formDescriptor = linkToForm("searchPerson", on(PersonControllerForForm.class)
+				.showPerson("mike", null));
+		// TODO the linkTemplate field should not contain the expanded template
+		assertEquals("/person/mike", formDescriptor.getLinkTemplate());
+	}
 
 	@Test
 	public void createsLinkToSubResource() {

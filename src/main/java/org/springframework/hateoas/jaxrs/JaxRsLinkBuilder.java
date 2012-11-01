@@ -29,7 +29,7 @@ import javax.ws.rs.QueryParam;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.ResourceDescriptor;
+import org.springframework.hateoas.FormDescriptor;
 import org.springframework.hateoas.mvc.UriComponentsLinkBuilder;
 import org.springframework.hateoas.util.AnnotatedParam;
 import org.springframework.hateoas.util.Invocation;
@@ -156,7 +156,7 @@ public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder>
 		return LinkTemplateUtils.on(service);
 	}
 
-	public static ResourceDescriptor linkToResource(String resourceName, Object method) {
+	public static FormDescriptor linkToForm(String formName, Object method) {
 
 		Invocations invocations = (Invocations) method;
 		List<Invocation> recorded = invocations.getInvocations();
@@ -168,19 +168,19 @@ public class JaxRsLinkBuilder extends UriComponentsLinkBuilder<JaxRsLinkBuilder>
 
 		String requestMethod = getRequestMethod(invokedMethod);
 
-		ResourceDescriptor resourceDescriptor = new ResourceDescriptor(resourceName, linkTemplate.getLinkTemplate(),
+		FormDescriptor formDescriptor = new FormDescriptor(formName, linkTemplate.getLinkTemplate(),
 				requestMethod);
 
 		List<AnnotatedParam<PathParam>> pathVariables = linkTemplate.getPathVariables();
 		for (AnnotatedParam<PathParam> pathVariable : pathVariables) {
-			resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
+			formDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
 		}
 		List<AnnotatedParam<QueryParam>> requestParams = linkTemplate.getRequestParams();
 		for (AnnotatedParam<QueryParam> requestParam : requestParams) {
-			resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
+			formDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
 		}
 
-		return resourceDescriptor;
+		return formDescriptor;
 	}
 
 	private static String getRequestMethod(Method method) {

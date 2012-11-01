@@ -17,10 +17,9 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.util.List;
-
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceDescriptor;
+import org.springframework.hateoas.FormDescriptor;
 import org.springframework.hateoas.util.AnnotatedParam;
 import org.springframework.hateoas.util.Invocation;
 import org.springframework.hateoas.util.Invocations;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
-
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
@@ -183,12 +181,12 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 	 * </pre>
 	 *
 	 *
-	 * @param resourceName name of the resource, e.g. to be used as form name
+	 * @param formName name of the resource, e.g. to be used as form name
 	 * @param method reference which will handle the request, use {@link #on(Class)} to create a suitable method reference
 	 * @return resource descriptor
 	 * @throws IllegalStateException if the method has no request mapping
 	 */
-	public static ResourceDescriptor linkToResource(String resourceName, Object method) {
+	public static FormDescriptor linkToForm(String formName, Object method) {
 
 		Invocations invocations = (Invocations) method;
 		List<Invocation> recorded = invocations.getInvocations();
@@ -201,18 +199,25 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 
 		RequestMethod requestMethod = getRequestMethod(invokedMethod);
 
-		ResourceDescriptor resourceDescriptor = new ResourceDescriptor(resourceName,
-				linkTemplate.getLinkTemplate(), requestMethod.toString());
+		UriTemplate uriTemplate = new UriTemplate(linkTemplate.getLinkTemplate());
+		String expanded = uriTemplate.expand(invocation.getArgs()).toASCIIString();
+
+		FormDescriptor formDescriptor = new FormDescriptor(formName, expanded, requestMethod.toString());
+		// TODO use variableMap with names to handle non-positional method params correctly
+		// for now, users can just reorder the method list so that the path vars come first
+		//		Map<String, ?> variableMap = new HashMap<String, String>();
 		List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
 		for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
-			resourceDescriptor.addPathVariable(pathVariable.paramAnnotation.value(), pathVariable.paramType);
+			String paramName = pathVariable.paramAnnotation.value();
+			formDescriptor.addPathVariable(paramName, pathVariable.paramType);
+//			variableMap.put(paramName, value)
 		}
 		List<AnnotatedParam<RequestParam>> requestParams = linkTemplate.getRequestParams();
 		for (AnnotatedParam<RequestParam> requestParam : requestParams) {
-			resourceDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
+			formDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
 		}
 
-		return resourceDescriptor;
+		return formDescriptor;
 	}
 
 	private static RequestMethod getRequestMethod(Method method) {
@@ -248,6 +253,5 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder) {
 		return new ControllerLinkBuilder(builder);
 	}
-
 
 }

@@ -2,11 +2,18 @@ package org.springframework.hateoas.util;
 
 import java.lang.reflect.Method;
 
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
-
+/**
+ * Support class for {@link LinkTemplateUtils#on(Class)}
+ *
+ * @author Dietrich Schulten
+ *
+ */
 class RecordingMethodInterceptor implements MethodInterceptor {
 
 	Invocations invocations = new InvocationsImpl();

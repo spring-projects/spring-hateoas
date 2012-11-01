@@ -3,7 +3,9 @@ package org.springframework.hateoas;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResourceDescriptor {
+public class FormDescriptor {
+
+	// TODO maybe separate expanded and non-expanded link template
 
 	private String linkTemplate;
 	private Map<String, Class<?>> pathVariables = new HashMap<String, Class<?>>();
@@ -15,7 +17,7 @@ public class ResourceDescriptor {
 		return resourceName;
 	}
 
-	public ResourceDescriptor(String resourceName, String linkTemplate, String httpMethod) {
+	public FormDescriptor(String resourceName, String linkTemplate, String httpMethod) {
 		this.linkTemplate = linkTemplate;
 		this.httpMethod = httpMethod;
 		this.resourceName = resourceName;
