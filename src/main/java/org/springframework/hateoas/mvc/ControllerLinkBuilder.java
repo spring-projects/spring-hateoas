@@ -174,10 +174,10 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 *
 	 * <pre>
 	 * &#064;RequestMapping(value = &quot;/person&quot;, method = RequestMethod.GET)
-	 * public HttpEntity&lt;ResourceDescriptor&gt; searchPersonForm() {
-	 * 	ResourceDescriptor rd = ControllerLinkBuilder.linkToResource(&quot;searchPerson&quot;,
+	 * public HttpEntity&lt;FormDescriptor&gt; searchPersonForm() {
+	 * 	FormDescriptor rd = ControllerLinkBuilder.linkToResource(&quot;searchPerson&quot;,
 	 * 			on(PersonController.class).showPerson(null));
-	 * 	return new HttpEntity&lt;ResourceDescriptor&gt;(rd);
+	 * 	return new HttpEntity&lt;FormDescriptor&gt;(rd);
 	 * }
 	 * </pre>
 	 *

@@ -11,8 +11,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Message converter which converts one ResourceDescriptor or an array of ResourceDescriptor items to an HTML page
- * containing one form per ResourceDescriptor.
+ * Message converter which converts one FormDescriptor or an array of FormDescriptor items to an HTML page
+ * containing one form per FormDescriptor.
  *
  * Add the following to your spring configuration to enable this converter:
  *
