@@ -31,7 +31,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.FormDescriptor;
-import org.springframework.hateoas.mvc.UriComponentsLinkBuilder;
 import org.springframework.hateoas.util.AnnotatedParam;
 import org.springframework.hateoas.util.Invocation;
 import org.springframework.hateoas.util.Invocations;
