@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToForm;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.createForm;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.on;
 
 import java.util.List;
@@ -81,7 +81,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 	@Test
 	public void createsLinkToFormWithPathVariable() throws Exception {
-		FormDescriptor formDescriptor = linkToForm("searchPerson", on(PersonControllerForForm.class)
+		FormDescriptor formDescriptor = createForm("searchPerson", on(PersonControllerForForm.class)
 				.showPerson("mike", null));
 		// TODO the linkTemplate field should not contain the expanded template
 		assertEquals("/person/mike", formDescriptor.getLinkTemplate());

@@ -156,8 +156,10 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 		return LinkTemplateUtils.on(service);
 	}
 
-	public static FormDescriptor linkToForm(String formName, Object method) {
+	public static FormDescriptor createForm(String formName, Object method) {
 
+		// TODO use on parameter for form default values
+		
 		Invocations invocations = (Invocations) method;
 		List<Invocation> recorded = invocations.getInvocations();
 		Invocation invocation = recorded.get(0);

@@ -61,7 +61,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/** closes the form */
 	public static final String FORM_END = "" + //
-			"      <input type='submit' value='Find' />" + //
+			"      <input type='submit' value='Submit' />" + //
 			"    </form>";
 	public static final String HTML_END = "" + //
 			"  </body>" + //
@@ -91,6 +91,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format(HTML_START, "Input Data"));
 
+		// TODO support default values and RequestBody mapped by object marshaler
 		if (t instanceof FormDescriptor[]) {
 			FormDescriptor[] descriptors = (FormDescriptor[]) t;
 			for (FormDescriptor formDescriptor : descriptors) {
