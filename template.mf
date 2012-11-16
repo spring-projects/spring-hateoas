@@ -3,7 +3,8 @@ Bundle-Name: Spring HATEOAS
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template:
+ com.fasterxml.jackson.*;version="${jackson2.version:[=.=.=,+1.0.0)}";resolution:=optional,
+ javax.ws.rs.*;version="${jaxrs.version:[=.=.=,+1.0.0)}";resolution:=optional,
  javax.xml.bind.*;version="0",
  org.springframework.*;version="${spring.version:[=.=.=,+1.0.0)}";resolution:=optional,
- org.codehaus.jackson.*;version="${jackson.version:[=.=.=,+1.0.0)}";resolution:=optional,
- javax.ws.rs.*;version="${jaxrs.version:[=.=.=,+1.0.0)}";resolution:=optional
+ org.codehaus.jackson.*;version="${jackson1.version:[=.=.=,+1.0.0)}";resolution:=optional
