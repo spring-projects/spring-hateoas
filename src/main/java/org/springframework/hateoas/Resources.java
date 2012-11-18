@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +37,8 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	@XmlAnyElement
 	@XmlElementWrapper
-	@JsonProperty("content")
+	@org.codehaus.jackson.annotate.JsonProperty("content")
+	@com.fasterxml.jackson.annotation.JsonProperty("content")
 	private final Collection<T> content;
 
 	/**

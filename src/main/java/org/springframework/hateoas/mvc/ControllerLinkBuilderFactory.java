@@ -16,9 +16,10 @@
 package org.springframework.hateoas.mvc;
 
 import org.springframework.hateoas.LinkBuilderFactory;
+import org.springframework.hateoas.core.LinkBuilderSupport;
 
 /**
- * Factory for {@link UriComponentsLinkBuilder} instances based on the request mapping annotated on the given
+ * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given
  * controller.
  * 
  * @author Ricardo Gladwell

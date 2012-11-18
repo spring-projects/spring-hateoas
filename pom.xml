@@ -58,7 +58,8 @@
 
 	<properties>
 		<spring.version>3.1.2.RELEASE</spring.version>
-		<jackson.version>1.9.10</jackson.version>
+		<jackson1.version>1.9.10</jackson1.version>
+		<jackson2.version>2.1.1</jackson2.version>
 		<jaxrs.version>1.0</jaxrs.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 	</properties>
@@ -77,6 +78,20 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>org.springframework.plugin</groupId>
+			<artifactId>spring-plugin-core</artifactId>
+			<version>0.8.0.BUILD-SNAPSHOT</version>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.2.2</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
@@ -86,7 +101,14 @@
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson1.version}</version>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson2.version}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -100,7 +122,14 @@
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson1.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson2.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -225,7 +254,14 @@
 		</pluginRepository>
 	</pluginRepositories>
 	
-	 <scm>
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<url>http://repo.springsource.org/libs-snapshot</url>
+		</repository>
+	</repositories>
+	
+	<scm>
         <url>https://github.com/SpringSource/spring-hateoas</url>
         <connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>
