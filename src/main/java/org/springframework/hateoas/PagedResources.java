@@ -261,10 +261,10 @@ public class PagedResources<T> extends Resources<T> {
 		public int hashCode() {
 
 			int result = 17;
-			result += 31 * (int) (this.number ^ (this.number >>> 32));
-			result += 31 * (int) (this.size ^ (this.size >>> 32));
-			result += 31 * (int) (this.totalElements ^ (this.totalElements >>> 32));
-			result += 31 * (int) (this.totalPages ^ (this.totalPages >>> 32));
+			result += 31 * (int) (this.number ^ this.number >>> 32);
+			result += 31 * (int) (this.size ^ this.size >>> 32);
+			result += 31 * (int) (this.totalElements ^ this.totalElements >>> 32);
+			result += 31 * (int) (this.totalPages ^ this.totalPages >>> 32);
 			return result;
 		}
 	}
