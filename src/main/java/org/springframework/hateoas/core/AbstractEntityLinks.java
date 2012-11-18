@@ -19,6 +19,7 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.util.Assert;
 
 /**
  * Implementation base class to delegate the higher level methods of {@link EntityLinks} by delegating to the more fine
@@ -34,6 +35,7 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 */
 	@Override
 	public Link linkToSingleResource(Identifiable<?> entity) {
+		Assert.notNull(entity);
 		return linkToSingleResource(entity.getClass(), entity.getId());
 	}
 
@@ -52,6 +54,7 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 */
 	@Override
 	public LinkBuilder linkForSingleResource(Identifiable<?> entity) {
+		Assert.notNull(entity);
 		return linkForSingleResource(entity.getClass(), entity.getId());
 	}
 }
