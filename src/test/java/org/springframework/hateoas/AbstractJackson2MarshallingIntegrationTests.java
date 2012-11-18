@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public abstract class AbstractJackson2MarshallingIntegrationTests {
 
-	ObjectMapper mapper;
+	protected ObjectMapper mapper;
 
 	@Before
 	public void setUp() {
