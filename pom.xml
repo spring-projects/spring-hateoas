@@ -9,7 +9,7 @@
 	<name>Spring Hateoas</name>
 	<url>http://github.com/SpringSource/spring-hateoas</url>
 	<description>
-		Library to support implementing represnetaitons for 
+		Library to support implementing representations for
 		hyper-text driven REST web services.
 	</description>
 	
