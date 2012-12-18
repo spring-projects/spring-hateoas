@@ -15,7 +15,7 @@ eed to in writing, software
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +74,7 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 	}
 
 	/**
-	 * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
+	 * Creates a new resource and adds a self link to it using the {@link Identifiable}'s id.
 	 * 
 	 * @param entity must not be {@literal null}.
 	 * @return
@@ -83,6 +83,16 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 		return createResource(entity, new Object[0]);
 	}
 
+	/**
+	 * Creates a new resource and adds a self link to it using the {@link Identifiable}'s id, using the given parameters
+	 * to replace path variables in the request mapping of the given controller class.
+	 * 
+	 * @param entity must not be {@literal null}.
+	 * @param for path variables
+	 * @param parameters for path variables, using their id if {@link Identifiable}
+	 * 
+	 * @return
+	 */
 	protected D createResource(T entity, Object... parameters) {
 		return createResourceWithId(entity.getId(), entity, parameters);
 	}
@@ -98,6 +108,15 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 		return createResourceWithId(id, entity, new Object[0]);
 	}
 
+	/**
+	 * Creates a new resource with a self link to the given id, using the given parameters to replace path variables in
+	 * the request mapping of the given controller class.
+	 * 
+	 * @param id must not be {@literal null}.
+	 * @param entity must not be {@literal null}.
+	 * @param parameters for path variables, using their id if {@link Identifiable}
+	 * @return
+	 */
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
 		Assert.notNull(entity);

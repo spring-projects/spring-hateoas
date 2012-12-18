@@ -15,17 +15,29 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.createForm;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.on;
+
+import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.FormDescriptor;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Oliver Gierke
@@ -46,6 +58,33 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
+	}
+
+	@Test
+	public void createsLinkToControllerMethodWithPathVariable() throws Exception {
+
+		Link withRel = linkToMethod(on(ProductsController.class).product(15L)).withRel("product");
+		assertEquals("http://localhost/products/15", withRel.getHref());
+		assertEquals("product", withRel.getRel());
+
+		Link withSelfRel = linkToMethod(on(ProductsController.class).product(15L)).withSelfRel();
+		assertEquals("http://localhost/products/15", withSelfRel.getHref());
+		assertEquals("self", withSelfRel.getRel());
+	}
+
+	static class PersonControllerForForm {
+		@RequestMapping(value = "/person/{personName}", method = RequestMethod.POST)
+		public HttpEntity<? extends Object> showPerson(@PathVariable("personName") String bar,
+				@RequestParam(value = "personId") Long personId) {
+			return null;
+		}
+	}
+	@Test
+	public void createsLinkToFormWithPathVariable() throws Exception {
+		FormDescriptor formDescriptor = createForm("searchPerson", on(PersonControllerForForm.class)
+				.showPerson("mike", null));
+		// TODO the linkTemplate field should not contain the expanded template
+		assertEquals("/person/mike", formDescriptor.getLinkTemplate());
 	}
 
 	@Test
@@ -117,6 +156,38 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@RequestMapping("/people/{id}/addresses")
 	class PersonsAddressesController {
 
+	}
+
+	class Product {
+
+	}
+
+	class PersonsProductsController {
+
+		@RequestMapping(value = "/products/{personId}")
+		public HttpEntity<List<Product>> productsOfPerson(@PathVariable("personId") Long personId) {
+			return null;
+		}
+
+		@RequestMapping(value = "/products/{productId}")
+		public HttpEntity<List<Product>> productById(@PathVariable("productId") Long productId) {
+			return null;
+		}
+
+	}
+
+	@RequestMapping("/products")
+	class PersonsProductsControllerClassLevel {
+
+		@RequestMapping("/person/{personId}")
+		public HttpEntity<List<Product>> productsOfPerson(@PathVariable("personId") Long personId) {
+			return null;
+		}
+
+		@RequestMapping("/{productId}")
+		public HttpEntity<List<Product>> productById(@PathVariable("productId") String productId) {
+			return null;
+		}
 	}
 
 	@RequestMapping({ "/persons", "/people" })
