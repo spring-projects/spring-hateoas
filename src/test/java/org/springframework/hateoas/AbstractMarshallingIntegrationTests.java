@@ -28,7 +28,7 @@ import org.junit.Before;
  */
 public abstract class AbstractMarshallingIntegrationTests {
 
-	ObjectMapper mapper;
+	protected ObjectMapper mapper;
 
 	@Before
 	public void setUp() {

@@ -21,8 +21,6 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.util.Assert;
 
 /**
@@ -33,7 +31,8 @@ import org.springframework.util.Assert;
 public class ResourceSupport implements Identifiable<Link> {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
-	@JsonProperty("links")
+	@org.codehaus.jackson.annotate.JsonProperty("links")
+	@com.fasterxml.jackson.annotation.JsonProperty("links")
 	private final List<Link> links;
 
 	public ResourceSupport() {
@@ -43,7 +42,8 @@ public class ResourceSupport implements Identifiable<Link> {
 	/**
 	 * Returns the {@link Link} with a rel of {@link Link#REL_SELF}.
 	 */
-	@JsonIgnore
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@com.fasterxml.jackson.annotation.JsonIgnore
 	public Link getId() {
 		return getLink(Link.REL_SELF);
 	}
