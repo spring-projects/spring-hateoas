@@ -42,7 +42,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/** expects title */
 	public static final String HTML_START = "" + //
-			"<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
+			//"<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
 			"<!DOCTYPE html>" + //
 			"<html xmlns='http://www.w3.org/1999/xhtml'>" + //
 			"  <head>" + //
