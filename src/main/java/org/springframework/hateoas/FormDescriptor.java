@@ -3,6 +3,12 @@ package org.springframework.hateoas;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Describes a form that is suitable to call a Controller method which handles the request built by the form.
+ * 
+ * @author Dietrich Schulten
+ * 
+ */
 public class FormDescriptor {
 
 	// TODO maybe separate expanded and non-expanded link template

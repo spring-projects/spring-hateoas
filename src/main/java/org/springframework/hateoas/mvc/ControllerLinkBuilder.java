@@ -16,16 +16,19 @@
 package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
-import java.util.List;
-import org.springframework.core.annotation.AnnotationUtils;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.FormDescriptor;
-import org.springframework.hateoas.util.AnnotatedParam;
-import org.springframework.hateoas.util.Invocation;
-import org.springframework.hateoas.util.Invocations;
-import org.springframework.hateoas.util.LinkTemplate;
-import org.springframework.hateoas.util.LinkTemplateUtils;
+import org.springframework.hateoas.core.AnnotationAttribute;
+import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.DummyInvocationUtils;
+import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.LinkBuilderSupport;
+import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +44,10 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
+
+	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final AnnotatedParametersParameterAccessor accessor = new AnnotatedParametersParameterAccessor(
+			new AnnotationAttribute(PathVariable.class));
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -74,164 +81,81 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		Assert.notNull(controller);
 
-		RequestMapping annotation = AnnotationUtils.findAnnotation(controller, RequestMapping.class);
-		String[] mapping = annotation == null ? new String[0] : (String[]) AnnotationUtils.getValue(annotation);
-
-		if (mapping.length > 1) {
-			throw new IllegalStateException("Multiple controller mappings defined! Unable to build URI!");
-		}
-
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+		String mapping = DISCOVERER.getMapping(controller);
 
-		if (mapping.length == 0) {
-			return builder;
+		if (mapping == null) {
+			throw new IllegalArgumentException(
+					String.format("No mapping found on controller class %s!", controller.getName()));
 		}
 
-		UriTemplate template = new UriTemplate(mapping[0]);
+		UriTemplate template = new UriTemplate(mapping);
 		return builder.slash(template.expand(parameters));
 	}
 
+	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {
+
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
+		URI uri = template.expand(parameters);
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+		}
+
 	/**
-	 * Allows to create a representation of a method on the given controller, for use with
-	 * {@link ControllerLinkBuilder#linkToMethod(Object)}. Define the method representation by simply calling the desired
-	 * method as shown below.
-	 * <p>
-	 * This example creates a representation of the method <code>PersonController.showAll()</code>:
+	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
+	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 * 
 	 * <pre>
-	 * on(PersonController.class).showAll();
+	 * @RequestMapping("/customers")
+	 * class CustomerController {
+	 * 
+	 *   @RequestMapping("/{id}/addresses")
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 * }
+	 * 
+	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
 	 * </pre>
 	 * 
-	 * @param controller
+	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
+	 * {@code addresses}. For more details on the method invocation constraints, see
+	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * 
+	 * @param invocationValue
 	 * @return
-	 * @see #linkToMethod(Object)
 	 */
-	public static <T> T on(Class<T> controller) {
-		return LinkTemplateUtils.on(controller);
+	public static ControllerLinkBuilder linkTo(Object invocationValue) {
+
+		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
+		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
+
+		MethodInvocation invocation = invocations.getLastInvocation();
+		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
+		Method method = invocation.getMethod();
+
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
+		Map<String, Object> values = new HashMap<String, Object>();
+
+		if (classMappingParameters.hasNext()) {
+			for (String variable : template.getVariableNames()) {
+				values.put(variable, classMappingParameters.next());
+	}
+		}
+
+		values.putAll(accessor.getBoundParameters(invocation));
+		URI uri = template.expand(values);
+
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
 	}
 
 	/**
-	 * Creates a new {@link ControllerLinkBuilder} based on the given controller method, resolving URI templates if
-	 * necessary. The controller method is created by {@link #on(Class)}.
-	 * <p>
-	 * Consider the following PersonController with a class level mapping and a method level mapping:
+	 * Wrapper for {@link DummyInvocationUtils#methodOn(Class, Object...)} to be available in case you work with static
+	 * imports of {@link ControllerLinkBuilder}.
 	 * 
-	 * <pre>
-	 * &#064;Controller
-	 * &#064;RequestMapping(&quot;/people&quot;)
-	 * public class PersonController {
-	 * 
-	 * 	&#064;RequestMapping(value = &quot;/{personId}/address&quot;, method = RequestMethod.GET)
-	 *     public HttpEntity&lt;PersonResource&gt; showAddress(@PathVariable Long personId) {
-	 *         (...)
-	 *     }
-	 * }
-	 * </pre>
-	 * 
-	 * You may link to this person controller's <code>/{personId}/address</code> resource from another controller.
-	 * Assuming we are within a method where we produce the personResource for a given personId, e.g. from a form request
-	 * for www.example.com/people/search?id=42, we can do:
-	 * 
-	 * <pre>
-	 * Link address = linkToMethod(on(PersonController.class).show(personId).withRel("address");
-	 * PersonResource personResource = (...);
-	 * personResource.addLink(address);
-	 * </pre>
-	 * 
-	 * The <code>linkTo</code> method above gives us a
-	 * <code>Link</link> to the person's address, which we can add to the personResource. Note that the path
-	 * variable <code>{personId}</code> will be expanded to its actual value:
-	 * 
-	 * <pre>
-	 * http://www.example.com/people/42/address
-	 * </pre>
-	 * 
-	 * @param method representation of a method on the target controller, created by {@link #on(Class)}.
-	 * @return link builder which expects you to set a rel, e.g. using {@link #withRel(String)}.
-	 * @see #on(Class)
+	 * @param controller must not be {@literal null}.
+	 * @param parameters parameters to extend template variables in the type level mapping.
+	 * @return
 	 */
-	public static ControllerLinkBuilder linkToMethod(Object method) {
-		Invocations invocations = (Invocations) method;
-		List<Invocation> recorded = invocations.getInvocations();
-		Invocation invocation = recorded.get(0);
-		String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(invocation.getTarget().getClass(),
-				RequestMapping.class);
-		LinkTemplate<PathVariable, RequestParam> template = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
-				invocation.getMethod(), RequestMapping.class, PathVariable.class, RequestParam.class);
-
-		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
-
-		UriTemplate uriTemplate = new UriTemplate(template.getLinkTemplate());
-		return builder.slash(uriTemplate.expand(invocation.getArgs()));
-	}
-
-	/**
-	 * Creates a form descriptor which can be used by message converters such as HtmlFormMessageConverter to create
-	 * html forms.
-	 * <p>
-	 * The following example method searchPersonForm creates a search form which has the method showPerson as action
-	 * target:
-	 * 
-	 * <pre>
-	 * &#064;RequestMapping(value = &quot;/person&quot;, method = RequestMethod.GET)
-	 * public HttpEntity&lt;FormDescriptor&gt; searchPersonForm() {
-	 * 	FormDescriptor rd = ControllerLinkBuilder.linkToResource(&quot;searchPerson&quot;, on(PersonController.class).showPerson(null));
-	 * 	return new HttpEntity&lt;FormDescriptor&gt;(rd);
-	 * }
-	 * </pre>
-	 * 
-	 * 
-	 * @param formName name of the resource, e.g. to be used as form name
-	 * @param method reference which will handle the request, use {@link #on(Class)} to create a suitable method reference
-	 * @return resource descriptor
-	 * @throws IllegalStateException if the method has no request mapping
-	 */
-	public static FormDescriptor createForm(String formName, Object method) {
-
-		// TODO use on parameter for form default values
-
-		Invocations invocations = (Invocations) method;
-		List<Invocation> recorded = invocations.getInvocations();
-		Invocation invocation = recorded.get(0);
-		String classLevelMapping = LinkTemplateUtils.getClassLevelMapping(invocation.getTarget().getClass(),
-				RequestMapping.class);
-		Method invokedMethod = invocation.getMethod();
-		LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
-				invokedMethod, RequestMapping.class, PathVariable.class, RequestParam.class);
-
-		RequestMethod requestMethod = getRequestMethod(invokedMethod);
-
-		UriTemplate uriTemplate = new UriTemplate(linkTemplate.getLinkTemplate());
-		String expanded = uriTemplate.expand(invocation.getArgs()).toASCIIString();
-
-		FormDescriptor formDescriptor = new FormDescriptor(formName, expanded, requestMethod.toString());
-		// TODO use variableMap with names to handle non-positional method params correctly
-		// for now, users can just reorder the method list so that the path vars come first
-		// Map<String, ?> variableMap = new HashMap<String, String>();
-		List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
-		for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
-			String paramName = pathVariable.paramAnnotation.value();
-			formDescriptor.addPathVariable(paramName, pathVariable.paramType);
-			// variableMap.put(paramName, value)
-		}
-		List<AnnotatedParam<RequestParam>> requestParams = linkTemplate.getRequestParams();
-		for (AnnotatedParam<RequestParam> requestParam : requestParams) {
-			formDescriptor.addRequestParam(requestParam.paramAnnotation.value(), requestParam.paramType);
-		}
-
-		return formDescriptor;
-	}
-
-	private static RequestMethod getRequestMethod(Method method) {
-		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-		RequestMethod requestMethod;
-		if (methodRequestMapping != null) {
-			RequestMethod[] methods = methodRequestMapping.method();
-			requestMethod = methods[0];
-		} else {
-			requestMethod = RequestMethod.GET; // default
-		}
-		return requestMethod;
+	public static <T> T methodOn(Class<T> controller, Object... parameters) {
+		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
 	/*

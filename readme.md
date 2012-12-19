@@ -123,7 +123,78 @@ headers.setLocation(linkTo(PersonController.class).slash(person).toUri());
 return new ResponseEntity<PersonResource>(headers, HttpStatus.CREATED);
 ```
 
+### Building links pointing to methods
+
+As of version 0.4 you can even easily build links pointing to methods or creating dummy controller method invocations. The first approach is to hand a `Method` instance to the `ControllerLinkBuilder`:
+
+```java
+Method method = PersonController.class.getMethod("show", Long.class);
+Link link = linkTo(method, 2L).withSelfRel();
+
+assertThat(link.getHref(), is("/people/2")));
+```
+
+This is still a bit dissatisfying as we have to get a `Method` instance first, which throws an exception and is generally quite cumbersome. At least we don't repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy we can create easily using the `methodOn(…)` helper.
+
+```java
+Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
+assertThat(link.getHref(), is("/people/2")));
+```
+
+`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposed it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
+
+1. The return type has to be capable of proxying as we need to expose the method invocation on it.
+2. The parameters handed into the methods are generally neglected, except the ones referred to through `@PathVariable` as they make up the URI.
+
+## EntityLinks
+
+So far we have created links by pointing to the web-framework implementations (i.e. Spring MVC controllers or JAX-RS resource classes) and inspected the mapping. In many cases these classes essentially read and write representations backed by a model class.
+
+The `EntityLinks` interfaces now exposes API to lookup `Link`s or `LinkBuilder`s based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
+
+```
+EntityLinks links = …;
+LinkBuilder builder = links.linkFor(CustomerResource.class);
+Link link = links.linkToSingleResource(CustomerResource.class, 1L);
+```
+
+`EntityLinks` is available for dependency injection by activating `@EnableEntityLinks` in your Spring MVC configuration. Activating this functionality will cause all your Spring MVC controllers and JAX-RS resource implementations available in the current `ApplicationContext` being inspected for the `@ExposesResourceFor(…)` annotation. The annotation exposes which model type the controller manages. Beyond that we assume you follow the URI mapping convention of a class level base mapping and assuming you have controller methods handling an appended `/{id}`. Here's an example implementation of an `EntityLinks` capable controller:
+
+```java
+@Controller
+@ExposesResourceFor(Order.class)
+@RequestMapping("/orders")
+class OrderController {
+
+  @RequestMapping
+  ResponseEntity orders(…) { … }
+
+  @RequestMapping("/{id}")
+  ResponseEntity order(@PathVariable("id") … ) { … }
+}
+```
+
+The controller exposes that it manages `Order` instances and exposes handler methods that are mapped to our convention. Enabling `EntityLinks` through `@EnableEntityLinks` in your Spring MVC configuration you can now go ahead and create links to the just shown controller as follows.
+
+```java
+@Controller
+class PaymentController {
+
+  @Autowired EntityLinks entityLinks;
+
+  @RequestMapping(…, method = HttpMethod.PUT)
+  ResponseEntity payment(@PathVariable Long orderId) {
+
+	Link link = entityLinks.linkToSingleResource(Order.class, orderId);
+    …
+  }
+}
+```
+
+As you can see you can refer to the link `Order` instances are handled at without even referring to the `OrderController`.
+
 ## Resource assembler
+
 As the mapping from an entity to a resource type will have to be used in multiple places it makes sense to create a dedicated class responsible for doing so. The conversion will of course contain very custom steps but also a few boilerplate ones:
 
 1. Instantiation of the resource class

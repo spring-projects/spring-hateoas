@@ -27,15 +27,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.LinkBuilderSupport;
-import org.springframework.hateoas.FormDescriptor;
-import org.springframework.hateoas.util.AnnotatedParam;
-import org.springframework.hateoas.util.Invocation;
-import org.springframework.hateoas.util.Invocations;
-import org.springframework.hateoas.util.LinkTemplate;
-import org.springframework.hateoas.util.LinkTemplateUtils;
+import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -47,14 +42,7 @@ import org.springframework.web.util.UriTemplate;
  */
 public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
-	private static final List<Class<? extends Annotation>> HTTP_METHODS;
-
-	static {
-		HTTP_METHODS = new ArrayList<Class<? extends Annotation>>();
-		HTTP_METHODS.add(GET.class);
-		HTTP_METHODS.add(PUT.class);
-		HTTP_METHODS.add(POST.class);
-	}
+	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(Path.class);
 
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} from the given {@link UriComponentsBuilder}.
@@ -86,12 +74,9 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	 */
 	public static JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
 
-		Path annotation = AnnotationUtils.findAnnotation(service, Path.class);
-		String path = (String) AnnotationUtils.getValue(annotation);
-
 		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
-		UriTemplate template = new UriTemplate(path);
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(service));
 		return builder.slash(template.expand(parameters));
 	}
 

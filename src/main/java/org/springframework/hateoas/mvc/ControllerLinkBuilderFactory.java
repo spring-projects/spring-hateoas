@@ -15,17 +15,18 @@
  */
 package org.springframework.hateoas.mvc;
 
-import org.springframework.hateoas.LinkBuilderFactory;
+import java.lang.reflect.Method;
+
+import org.springframework.hateoas.MethodLinkBuilderFactory;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 
 /**
- * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given
- * controller.
+ * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
  *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilderFactory implements LinkBuilderFactory<ControllerLinkBuilder> {
+public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
 	/*
 	 * (non-Javadoc)
@@ -45,12 +46,21 @@ public class ControllerLinkBuilderFactory implements LinkBuilderFactory<Controll
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 
-	/*
+	/* 
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Object)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Object)
 	 */
 	@Override
-	public ControllerLinkBuilder linkToMethod(Object method) {
-		return ControllerLinkBuilder.linkToMethod(method);
+	public ControllerLinkBuilder linkTo(Object methodInvocationResult) {
+		return ControllerLinkBuilder.linkTo(methodInvocationResult);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public ControllerLinkBuilder linkTo(Method method, Object... parameters) {
+		return ControllerLinkBuilder.linkTo(method, parameters);
 	}
 }
