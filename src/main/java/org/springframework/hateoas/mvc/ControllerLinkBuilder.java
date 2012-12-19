@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.core.AnnotationAttribute;
@@ -32,9 +34,13 @@ import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -85,7 +91,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		Assert.notNull(controller);
 
-		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
 
 		if (mapping == null) {
@@ -101,7 +107,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
 		URI uri = template.expand(parameters);
-		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+		return new ControllerLinkBuilder(getBuilder()).slash(uri);
 	}
 
 	/**
@@ -113,7 +119,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * class CustomerController {
 	 * 
 	 *   @RequestMapping("/{id}/addresses")
-	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { â€¦ } 
 	 * }
 	 * 
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
@@ -196,4 +202,37 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return new ControllerLinkBuilder(builder);
 	}
 
+	/**
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
+	 * request contains an {@code X-Forwarded-Host} header.
+	 * 
+	 * @return
+	 */
+	private static UriComponentsBuilder getBuilder() {
+
+		HttpServletRequest request = getCurrentRequest();
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
+
+		String header = request.getHeader("X-Forwarded-Host");
+		if (StringUtils.hasText(header)) {
+			builder.host(header);
+		}
+
+		return builder;
+	}
+
+	/**
+	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
+	 * 
+	 * @return
+	 */
+	private static HttpServletRequest getCurrentRequest() {
+
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
+		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
+		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
+		return servletRequest;
+	}
 }
