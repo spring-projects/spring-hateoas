@@ -17,11 +17,11 @@ package org.springframework.hateoas.mvc;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
@@ -48,7 +48,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
+		assertThat(link.getHref(), endsWith("/people/15/addresses"));
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people/something"));
+		assertThat(link.getHref(), endsWith("/people/something"));
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
 		assertThat(link.getRel(), is(Link.REL_NEXT));
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+		assertThat(link.getHref(), endsWith("/people"));
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -81,35 +81,47 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@SuppressWarnings("unchecked")
 	public void usesIdOfIdentifyableForPathSegment() {
 
-		Identifiable<Long> identifyable = mock(Identifiable.class);
-		when(identifyable.getId()).thenReturn(10L);
+		Identifiable<Long> identifyable = Mockito.mock(Identifiable.class);
+		Mockito.when(identifyable.getId()).thenReturn(10L);
 
 		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people/10"));
+		assertThat(link.getHref(), endsWith("/people/10"));
 	}
 
 	@Test
 	public void appendingNullIsANoOp() {
 
 		Link link = linkTo(PersonControllerImpl.class).slash(null).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+		assertThat(link.getHref(), endsWith("/people"));
 
 		link = linkTo(PersonControllerImpl.class).slash((Object) null).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+		assertThat(link.getHref(), endsWith("/people"));
 	}
 
 	@Test
 	public void linksToMethod() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).myMethod(null)).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/something/else"));
+		assertThat(link.getHref(), endsWith("/something/else"));
 	}
 
 	@Test
 	public void linksToMethodWithPathVariable() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("1")).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/something/1/foo"));
+		assertThat(link.getHref(), endsWith("/something/1/foo"));
+	}
+
+	/**
+	 * @see #33
+	 */
+	@Test
+	public void usesForwardedHostAsHostIfHeaderIsSet() {
+
+		request.addHeader("X-Forwarded-Host", "somethingDifferent");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
 	}
 
 	static class Person implements Identifiable<Long> {

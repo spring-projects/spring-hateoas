@@ -18,8 +18,6 @@ package org.springframework.hateoas;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Before;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -32,10 +30,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 public class TestUtils {
 
+	protected MockHttpServletRequest request;
+
 	@Before
 	public void setUp() {
 
-		HttpServletRequest request = new MockHttpServletRequest();
+		request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 	}
