@@ -18,13 +18,25 @@ package org.springframework.hateoas.core;
 import java.lang.reflect.Method;
 
 /**
- *
+ * Strategy interface to discover a URI mapping for either a given type or method.
+ * 
  * @author Oliver Gierke
  */
 public interface MappingDiscoverer {
 
+	/**
+	 * Returns the mapping associated with the given type.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @return the type-level mapping or {@literal null} in case none is present.
+	 */
 	String getMapping(Class<?> type);
 
+	/**
+	 * Returns the mapping associated with the given {@link Method}. This will include the type-level mapping.
+	 * 
+	 * @param method must not be {@literal null}.
+	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
+	 */
 	String getMapping(Method method);
-
 }

@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import org.springframework.util.Assert;
 
 /**
+ * {@link MappingDiscoverer} implementation that inspects mappings from a particular annotation.
+ * 
  * @author Oliver Gierke
  */
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
@@ -30,10 +32,22 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
 
+	/**
+	 * Creates an {@link AnnotationMappingDiscoverer} for the given annotation type. Will lookup the {@code value}
+	 * attribute by default.
+	 * 
+	 * @param annotation must not be {@literal null}.
+	 */
 	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation) {
 		this(annotation, null);
 	}
 
+	/**
+	 * Creates an {@link AnnotationMappingDiscoverer} for the given annotation type and attribute name.
+	 * 
+	 * @param annotation must not be {@literal null}.
+	 * @param mappingAttributeName if {@literal null}, it defaults to {@code value}.
+	 */
 	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation, String mappingAttributeName) {
 
 		Assert.notNull(annotation);
@@ -42,7 +56,8 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		this.mappingAttributeName = mappingAttributeName;
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
 	 */
 	@Override
@@ -55,10 +70,11 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 					type.getName()));
 		}
 
-		return mapping[0];
+		return mapping.length == 0 ? null : mapping[0];
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
 	 */
 	@Override
@@ -71,7 +87,8 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 					method.toString()));
 		}
 
-		return getMapping(method.getDeclaringClass()) + mapping[0];
+		String typeMapping = getMapping(method.getDeclaringClass());
+		return typeMapping == null ? mapping[0] : typeMapping + mapping[0];
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {
@@ -82,6 +99,8 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			return new String[] { (String) value };
 		} else if (value instanceof String[]) {
 			return (String[]) value;
+		} else if (value == null) {
+			return new String[0];
 		}
 
 		throw new IllegalStateException(String.format(

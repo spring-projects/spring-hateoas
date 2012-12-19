@@ -123,6 +123,29 @@ headers.setLocation(linkTo(PersonController.class).slash(person).toUri());
 return new ResponseEntity<PersonResource>(headers, HttpStatus.CREATED);
 ```
 
+### Building links pointing to methods
+
+As of version 0.4 you can even easily build links pointing to methods or creating dummy controller method invocations. The first approach is to hand a `Method` instance to the `ControllerLinkBuilder`:
+
+```java
+Method method = PersonController.class.getMethod("show", Long.class);
+Link link = linkTo(method, 2L).withSelfRel();
+
+assertThat(link.getHref(), is("/people/2")));
+```
+
+This is still a bit dissatisfying as we have to get a `Method` instance first, which throws an exception and is generally quite cumbersome. At least we don't repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy we can create easily using the `methodOn(…)` helper.
+
+```java
+Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
+assertThat(link.getHref(), is("/people/2")));
+```
+
+`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposed it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
+
+1. The return type has to be capable of proxying as we need to expose the method invocation on it.
+2. The parameters handed into the methods are generally neglected, except the ones referred to through `@PathVariable` as they make up the URI.
+
 ## Resource assembler
 As the mapping from an entity to a resource type will have to be used in multiple places it makes sense to create a dedicated class responsible for doing so. The conversion will of course contain very custom steps but also a few boilerplate ones:
 

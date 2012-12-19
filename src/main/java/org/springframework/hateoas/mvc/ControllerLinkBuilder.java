@@ -17,9 +17,18 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.core.AnnotationAttribute;
+import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.DummyInvocationUtils;
+import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
+import org.springframework.hateoas.core.LinkBuilderSupport;
+import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +41,11 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Oliver Gierke
  */
-public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLinkBuilder> {
+public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
+
+	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final AnnotatedParametersParameterAccessor accessor = new AnnotatedParametersParameterAccessor(
+			new AnnotationAttribute(PathVariable.class));
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -67,27 +80,80 @@ public class ControllerLinkBuilder extends UriComponentsLinkBuilder<ControllerLi
 		Assert.notNull(controller);
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+		String mapping = DISCOVERER.getMapping(controller);
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(controller));
-		return builder.slash(template.expand(parameters));
+		if (mapping == null) {
+			throw new IllegalArgumentException(
+					String.format("No mapping found on controller class %s!", controller.getName()));
 		}
 
+		UriTemplate template = new UriTemplate(mapping);
+		return builder.slash(template.expand(parameters));
+	}
+
+	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {
+
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
+		URI uri = template.expand(parameters);
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+	}
+
+	/**
+	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
+	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * 
+	 * <pre>
+	 * @RequestMapping("/customers")
+	 * class CustomerController {
+	 * 
+	 *   @RequestMapping("/{id}/addresses")
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 * }
+	 * 
+	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
+	 * </pre>
+	 * 
+	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
+	 * {@code addresses}. For more details on the method invocation constraints, see
+	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * 
+	 * @param invocationValue
+	 * @return
+	 */
 	public static ControllerLinkBuilder linkTo(Object invocationValue) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
 
 		MethodInvocation invocation = invocations.getLastInvocation();
+		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 		Method method = invocation.getMethod();
 
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
-		URI uri = template.expand(accessor.getBoundParameters(invocation));
+		Map<String, Object> values = new HashMap<String, Object>();
 
-		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+		if (classMappingParameters.hasNext()) {
+			for (String variable : template.getVariableNames()) {
+				values.put(variable, classMappingParameters.next());
+			}
 		}
 
-	public static <T> T methodOn(Class<T> controller) {
-		return LinkBuilderUtils.methodOn(controller);
+		values.putAll(accessor.getBoundParameters(invocation));
+		URI uri = template.expand(values);
+
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+	}
+
+	/**
+	 * Wrapper for {@link DummyInvocationUtils#methodOn(Class, Object...)} to be available in case you work with static
+	 * imports of {@link ControllerLinkBuilder}.
+	 * 
+	 * @param controller must not be {@literal null}.
+	 * @param parameters parameters to extend template variables in the type level mapping.
+	 * @return
+	 */
+	public static <T> T methodOn(Class<T> controller, Object... parameters) {
+		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
 	/* 

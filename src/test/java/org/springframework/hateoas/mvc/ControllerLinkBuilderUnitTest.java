@@ -25,6 +25,9 @@ import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -69,7 +72,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		linkTo(InvalidController.class);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void createsLinkToUnmappedController() {
 		linkTo(UnmappedController.class);
 	}
@@ -93,6 +96,20 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		link = linkTo(PersonControllerImpl.class).slash((Object) null).withSelfRel();
 		assertThat(link.getHref(), Matchers.endsWith("/people"));
+	}
+
+	@Test
+	public void linksToMethod() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).myMethod(null)).withSelfRel();
+		assertThat(link.getHref(), Matchers.endsWith("/something/else"));
+	}
+
+	@Test
+	public void linksToMethodWithPathVariable() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("1")).withSelfRel();
+		assertThat(link.getHref(), Matchers.endsWith("/something/1/foo"));
 	}
 
 	static class Person implements Identifiable<Long> {
@@ -128,4 +145,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 	}
 
+	@RequestMapping("/something")
+	static class ControllerWithMethods {
+
+		@RequestMapping("/else")
+		HttpEntity<Void> myMethod(@RequestBody Object payload) {
+			return null;
+		}
+
+		@RequestMapping("/{id}/foo")
+		HttpEntity<Void> methodWithPathVariable(@PathVariable String id) {
+			return null;
+		}
+	}
 }

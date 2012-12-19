@@ -17,7 +17,7 @@ package org.springframework.hateoas.mvc;
 
 import org.junit.Test;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.hateoas.core.LinkBuilderUtils;
+import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +27,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * @author Oliver Gierke
  */
-public class LinkBuilderUtilsUnitTest extends TestUtils {
+public class DummyInvocationUtilsUnitTest extends TestUtils {
 
 	@Test
 	public void test() {
 
-		ControllerLinkBuilder builder = ControllerLinkBuilder.linkTo(LinkBuilderUtils.methodOn(SampleController.class)
-				.someMethod(1L));
-		System.out.println(builder.toUri());
+		ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someMethod(1L));
 
 	}
 

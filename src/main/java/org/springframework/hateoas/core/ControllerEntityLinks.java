@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.LinkBuilderFactory;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.util.Assert;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * <li>Individual resources are exposed via a nested mapping consisting of the id of the managed entity, e.g. {@code
  * @RequestMapping("/{id}")}.<li>
  * </ol>
- * <code>
+ * <pre>
  * @Controller
  * @ExposesResourceFor(Order.class)
  * @RequestMapping("/orders")
@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  *   @RequestMapping("/{id}")
  *   ResponseEntity order(@PathVariable("id") … ) { … }  
  * }
- * </code>
+ * </pre>
  * 
  * @author Oliver Gierke
  */

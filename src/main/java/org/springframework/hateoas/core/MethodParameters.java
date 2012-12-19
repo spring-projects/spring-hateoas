@@ -20,13 +20,19 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
 
 /**
+ * Value object to represent {@link MethodParameters} to allow to easily find the ones with a given annotation.
+ * 
  * @author Oliver Gierke
  */
 public class MethodParameters {
+
+	private static final ParameterNameDiscoverer DISCOVERER = new LocalVariableTableParameterNameDiscoverer();
 
 	private final List<MethodParameter> parameters;
 
@@ -41,7 +47,10 @@ public class MethodParameters {
 		this.parameters = new ArrayList<MethodParameter>();
 
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			parameters.add(new MethodParameter(method, i));
+
+			MethodParameter parameter = new MethodParameter(method, i);
+			parameter.initParameterNameDiscovery(DISCOVERER);
+			parameters.add(parameter);
 		}
 	}
 
