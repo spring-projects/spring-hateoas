@@ -3,19 +3,21 @@ package org.springframework.hateoas;
 import java.io.IOException;
 import java.util.Map.Entry;
 
+import org.springframework.hateoas.mvc.MethodParameterValue;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Message converter which converts one FormDescriptor or an array of FormDescriptor items to an HTML page
- * containing one form per FormDescriptor.
- *
+ * Message converter which converts one FormDescriptor or an array of FormDescriptor items to an HTML page containing
+ * one form per FormDescriptor.
+ * 
  * Add the following to your spring configuration to enable this converter:
- *
+ * 
  * <pre>
  *   &lt;bean
  *     class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"&gt;
@@ -26,14 +28,14 @@ import org.springframework.util.FileCopyUtils;
  *       &lt;/list&gt;
  *     &lt;/property&gt;
  *   &lt;/bean&gt;
- *
+ * 
  *   &lt;bean id="htmlFormMessageConverter" class="org.springframework.hateoas.HtmlFormMessageConverter"&gt;
  *     &lt;property name="supportedMediaTypes" value="text/html" /&gt;
  *   &lt;/bean&gt;
  * </pre>
- *
+ * 
  * @author Dietrich Schulten
- *
+ * 
  */
 public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Object> {
 
@@ -42,7 +44,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/** expects title */
 	public static final String HTML_START = "" + //
-			//"<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
+			// "<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
 			"<!DOCTYPE html>" + //
 			"<html xmlns='http://www.w3.org/1999/xhtml'>" + //
 			"  <head>" + //
@@ -57,7 +59,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	/** expects field label, input field type and field name */
 	public static final String FORM_INPUT = "" + //
-			"      <label>%s<input type='%s' name='%s' /></label>";
+			"      <label>%s<input type='%s' name='%s' value='%s' /></label>";
 
 	/** closes the form */
 	public static final String FORM_END = "" + //
@@ -114,14 +116,18 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		sb.append(String.format(FORM_START, action, formName, formDescriptor.getHttpMethod().toString(), formH1));
 
 		// build the form
-		for (Entry<String, Class<?>> entry : formDescriptor.getRequestParams().entrySet()) {
+		for (Entry<String, MethodParameterValue> entry : formDescriptor.getRequestParams().entrySet()) {
 
 			String requestParamName = entry.getKey();
-			Class<?> requestParamArg = entry.getValue();
+			MethodParameterValue methodParameterValue = entry.getValue();
+			Class<?> requestParamArg = methodParameterValue.getParameterType();
 			String inputFieldType = getInputFieldType(requestParamArg);
 			String fieldLabel = requestParamName + ": ";
 			// TODO support list and matrix parameters
-			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName));
+			// TODO support default input values from methodParameterValue.getInvocationValue
+			Object invocationValue = methodParameterValue.getInvocationValue();
+			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName, invocationValue == null ? ""
+					: invocationValue.toString()));
 		}
 		sb.append(FORM_END);
 	}

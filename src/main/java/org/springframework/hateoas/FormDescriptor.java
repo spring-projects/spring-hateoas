@@ -3,6 +3,8 @@ package org.springframework.hateoas;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.hateoas.mvc.MethodParameterValue;
+
 /**
  * Describes a form that is suitable to call a Controller method which handles the request built by the form.
  * 
@@ -15,7 +17,7 @@ public class FormDescriptor {
 
 	private String linkTemplate;
 	private Map<String, Class<?>> pathVariables = new HashMap<String, Class<?>>();
-	private Map<String, Class<?>> requestParams = new HashMap<String, Class<?>>();
+	private Map<String, MethodParameterValue> requestParams = new HashMap<String, MethodParameterValue>();
 	private String httpMethod;
 	private String resourceName;
 
@@ -41,7 +43,7 @@ public class FormDescriptor {
 		return pathVariables;
 	}
 
-	public Map<String, Class<?>> getRequestParams() {
+	public Map<String, MethodParameterValue> getRequestParams() {
 		return requestParams;
 	}
 
@@ -49,8 +51,8 @@ public class FormDescriptor {
 		pathVariables.put(key, type);
 	}
 
-	public void addRequestParam(String key, Class<?> type) {
-		requestParams.put(key, type);
+	public void addRequestParam(String key, MethodParameterValue methodParameterValue) {
+		requestParams.put(key, methodParameterValue);
 	}
 
 }

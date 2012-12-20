@@ -39,6 +39,7 @@ public class AnnotatedParametersParameterAccessor {
 		this.attribute = attribute;
 	}
 
+	@Deprecated
 	public Map<String, Object> getBoundParameters(MethodInvocation invocation) {
 
 		MethodParameters parameters = new MethodParameters(invocation.getMethod());
@@ -52,6 +53,24 @@ public class AnnotatedParametersParameterAccessor {
 			String key = StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter
 					.getParameterName();
 			result.put(key, arguments[parameter.getParameterIndex()]);
+		}
+
+		return result;
+	}
+	
+	public Map<String, MethodParameterValue> getBoundMethodParameterValues(MethodInvocation invocation) {
+
+		MethodParameters parameters = new MethodParameters(invocation.getMethod());
+		Object[] arguments = invocation.getArguments();
+		Map<String, MethodParameterValue> result = new HashMap<String, MethodParameterValue>();
+
+		for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
+
+			Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
+			String annotationAttributeValue = attribute.getValueFrom(annotation);
+			String key = StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter
+					.getParameterName();
+			result.put(key, new MethodParameterValue(parameter, arguments[parameter.getParameterIndex()]));
 		}
 
 		return result;

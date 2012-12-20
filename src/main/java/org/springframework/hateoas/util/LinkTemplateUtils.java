@@ -83,31 +83,31 @@ public class LinkTemplateUtils {
 		return ret;
 	}
 
-	/**
-	 * Allows to create a representation of a method on the given controller, for use with
-	 * {@link ControllerLinkBuilder#linkToMethod(Object)}. Define the method representation by simply calling the desired
-	 * method as shown below.
-	 * <p>
-	 * This example creates a representation of the method <code>PersonController.showAll()</code>:
-	 *
-	 * <pre>
-	 * on(PersonController.class).showAll();
-	 * </pre>
-	 *
-	 * @param controller
-	 * @return
-	 * @see #linkToMethod(Object)
-	 */
-	public static <T> T on(Class<T> controller) {
-
-		Invocations invocations = new InvocationsImpl();
-
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(controller);
-		enhancer.setCallback(new RecordingMethodInterceptor(invocations));
-		enhancer.setInterfaces(new Class<?>[] { Invocations.class });
-		@SuppressWarnings("unchecked")
-		T ret = (T) enhancer.create();
-		return ret;
-	}
+//	/**
+//	 * Allows to create a representation of a method on the given controller, for use with
+//	 * {@link ControllerLinkBuilder#linkToMethod(Object)}. Define the method representation by simply calling the desired
+//	 * method as shown below.
+//	 * <p>
+//	 * This example creates a representation of the method <code>PersonController.showAll()</code>:
+//	 *
+//	 * <pre>
+//	 * on(PersonController.class).showAll();
+//	 * </pre>
+//	 *
+//	 * @param controller
+//	 * @return
+//	 * @see #linkToMethod(Object)
+//	 */
+//	public static <T> T on(Class<T> controller) {
+//
+//		Invocations invocations = new InvocationsImpl();
+//
+//		Enhancer enhancer = new Enhancer();
+//		enhancer.setSuperclass(controller);
+//		enhancer.setCallback(new RecordingMethodInterceptor(invocations));
+//		enhancer.setInterfaces(new Class<?>[] { Invocations.class });
+//		@SuppressWarnings("unchecked")
+//		T ret = (T) enhancer.create();
+//		return ret;
+//	}
 }

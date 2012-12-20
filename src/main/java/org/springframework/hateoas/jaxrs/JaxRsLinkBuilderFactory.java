@@ -43,8 +43,5 @@ public class JaxRsLinkBuilderFactory implements LinkBuilderFactory<JaxRsLinkBuil
 		return JaxRsLinkBuilder.linkTo(service, parameters);
 	}
 
-	@Override
-	public JaxRsLinkBuilder linkToMethod(Object method) {
-		return JaxRsLinkBuilder.linkToMethod(method);
-	}
+
 }

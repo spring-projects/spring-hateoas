@@ -44,15 +44,4 @@ public interface LinkBuilderFactory<T extends LinkBuilder> {
 	 */
 	T linkTo(Class<?> target, Object... parameters);
 
-	/**
-	 * Creates a new {@link ControllerLinkBuilder} based on the given controller method, resolving URI templates if
-	 * necessary. The controller method is created by {@link ControllerLinkBuilder#on(Class)}.
-	 * <p>
-	 *
-	 * @param method representation of a method on the target controller, created by {@link #on(Class)}.
-	 * @return link builder which expects you to set a rel, e.g. using {@link #withRel(String)}.
-	 * @see ControllerLinkBuilder#on(Class)
-	 * @see ControllerLinkBuilder#linkToMethod(Object)
-	 */
-	T linkToMethod(Object method);
 }
