@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -15,9 +14,6 @@ import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.hateoas.util.AnnotatedParam;
-import org.springframework.hateoas.util.LinkTemplate;
-import org.springframework.hateoas.util.LinkTemplateUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,8 +78,8 @@ public class ControllerFormBuilder {
 		// Invocation invocation = recorded.get(0);
 
 		String classLevelMapping = DISCOVERER.getMapping(invokedMethod.getDeclaringClass());
-		LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
-				invokedMethod, RequestMapping.class, PathVariable.class, RequestParam.class);
+//		LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
+//				invokedMethod, RequestMapping.class, PathVariable.class, RequestParam.class);
 
 		// UriTemplate uriTemplate = new UriTemplate(linkTemplate.getLinkTemplate());
 

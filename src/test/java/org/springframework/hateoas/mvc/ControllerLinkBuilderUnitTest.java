@@ -21,9 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkToMethod;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.createForm;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.on;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.List;
 
@@ -31,7 +29,6 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.FormDescriptor;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,11 +61,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void createsLinkToControllerMethodWithPathVariable() throws Exception {
 
-		Link withRel = linkToMethod(on(ProductsController.class).product(15L)).withRel("product");
+		Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
 		assertEquals("http://localhost/products/15", withRel.getHref());
 		assertEquals("product", withRel.getRel());
 
-		Link withSelfRel = linkToMethod(on(ProductsController.class).product(15L)).withSelfRel();
+		Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
 		assertEquals("http://localhost/products/15", withSelfRel.getHref());
 		assertEquals("self", withSelfRel.getRel());
 	}
@@ -80,13 +77,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 	}
-	@Test
-	public void createsLinkToFormWithPathVariable() throws Exception {
-		FormDescriptor formDescriptor = createForm("searchPerson", on(PersonControllerForForm.class)
-				.showPerson("mike", null));
-		// TODO the linkTemplate field should not contain the expanded template
-		assertEquals("/person/mike", formDescriptor.getLinkTemplate());
-	}
+
 
 	@Test
 	public void createsLinkToSubResource() {
