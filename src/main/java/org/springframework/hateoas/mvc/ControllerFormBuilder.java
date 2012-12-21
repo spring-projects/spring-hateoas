@@ -34,19 +34,34 @@ public class ControllerFormBuilder {
 	 * forms.
 	 * <p>
 	 * The following example method searchPersonForm creates a search form which has the method showPerson as action
-	 * target:
+	 * target.
 	 * 
 	 * <pre>
 	 * &#064;RequestMapping(value = &quot;/person&quot;, method = RequestMethod.GET)
 	 * public HttpEntity&lt;FormDescriptor&gt; searchPersonForm() {
-	 * 	FormDescriptor rd = ControllerLinkBuilder.linkToResource(&quot;searchPerson&quot;, on(PersonController.class).showPerson(null));
+	 * 	FormDescriptor rd = ControllerFormBuilder.createForm(&quot;searchPerson&quot;, methodOn(PersonController.class)
+	 * 			.showPerson(null));
 	 * 	return new HttpEntity&lt;FormDescriptor&gt;(rd);
 	 * }
+	 * 
+	 * &#064;RequestMapping(value = &quot;/customer&quot;, method = RequestMethod.GET, params = { &quot;personId&quot; })
+	 * 	public HttpEntity&lt;? extends Object&gt; showPerson(@RequestParam(value = &quot;personId&quot;) Long personId) {
+	 * 		...
+	 * }
+	 * 
 	 * </pre>
 	 * 
+	 * If you want to predefine a default value for the searchPerson request parameter, pass it into the method
+	 * invocation.
+	 * 
+	 * <pre>
+	 * methodOn(PersonController.class).showPerson(1234L);
+	 * </pre>
+	 * 
+	 * This way, the form will have a predefined value of 1234 in the personId form field.
 	 * 
 	 * @param formName name of the resource, e.g. to be used as form name
-	 * @param method reference which will handle the request, use {@link #on(Class)} to create a suitable method reference
+	 * @param method reference which will handle the request, use {@link ControllerLinkBuilder#methodOn(Class, Object...)} to create a suitable method reference
 	 * @return resource descriptor
 	 * @throws IllegalStateException if the method has no request mapping
 	 */
@@ -61,44 +76,22 @@ public class ControllerFormBuilder {
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(invokedMethod));
 		Map<String, Object> values = new HashMap<String, Object>();
 
-		if (classMappingParameters.hasNext()) {
-			for (String variable : template.getVariableNames()) {
-				values.put(variable, classMappingParameters.next());
-			}
+		Iterator<String> templateVariables = template.getVariableNames().iterator();
+		while(classMappingParameters.hasNext() && templateVariables.hasNext()) {
+			values.put(templateVariables.next(), classMappingParameters.next());
 		}
 
 		Map<String, Object> pathVariablesMap = pathVariables.getBoundParameters(invocation);
 		values.putAll(pathVariablesMap);
 		URI uri = template.expand(values);
 
-		// TODO use on parameter for form default values
-
-		// Invocations invocations = (Invocations) method;
-		// List<Invocation> recorded = invocations.getInvocations();
-		// Invocation invocation = recorded.get(0);
-
-		String classLevelMapping = DISCOVERER.getMapping(invokedMethod.getDeclaringClass());
-//		LinkTemplate<PathVariable, RequestParam> linkTemplate = LinkTemplateUtils.createLinkTemplate(classLevelMapping,
-//				invokedMethod, RequestMapping.class, PathVariable.class, RequestParam.class);
-
-		// UriTemplate uriTemplate = new UriTemplate(linkTemplate.getLinkTemplate());
-
 		String expanded = uri.toASCIIString();
 		RequestMethod requestMethod = getRequestMethod(invokedMethod);
 		FormDescriptor formDescriptor = new FormDescriptor(formName, expanded, requestMethod.toString());
-		// TODO use variableMap with names to handle non-positional method params correctly
-		// for now, users can just reorder the method param list so that the path vars come first
-		// Map<String, ?> variableMap = new HashMap<String, String>();
-//		List<AnnotatedParam<PathVariable>> pathVariables = linkTemplate.getPathVariables();
-//		for (AnnotatedParam<PathVariable> pathVariable : pathVariables) {
-//			String paramName = pathVariable.paramAnnotation.value();
-//			formDescriptor.addPathVariable(paramName, pathVariable.paramType);
-			// variableMap.put(paramName, value)
-//		}
 		for (Entry<String, Object> entry : pathVariablesMap.entrySet()) {
 			formDescriptor.addPathVariable(entry.getKey(), entry.getValue().getClass());
 		}
-		
+
 		Map<String, MethodParameterValue> requestParamMap = requestParams.getBoundMethodParameterValues(invocation);
 		for (Entry<String, MethodParameterValue> entry : requestParamMap.entrySet()) {
 			formDescriptor.addRequestParam(entry.getKey(), entry.getValue());

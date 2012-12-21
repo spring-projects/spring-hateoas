@@ -98,7 +98,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
 		URI uri = template.expand(parameters);
 		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
-		}
+	}
 
 	/**
 	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
@@ -134,10 +134,9 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
 		Map<String, Object> values = new HashMap<String, Object>();
 
-		if (classMappingParameters.hasNext()) {
-			for (String variable : template.getVariableNames()) {
-				values.put(variable, classMappingParameters.next());
-	}
+		Iterator<String> templateVariables = template.getVariableNames().iterator();
+		while(classMappingParameters.hasNext() && templateVariables.hasNext()) {
+			values.put(templateVariables.next(), classMappingParameters.next());
 		}
 
 		values.putAll(accessor.getBoundParameters(invocation));

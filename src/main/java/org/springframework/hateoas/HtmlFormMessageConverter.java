@@ -109,8 +109,8 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	private void appendForm(StringBuilder sb, FormDescriptor formDescriptor) {
-		String action = formDescriptor.getLinkTemplate();
-		String formName = formDescriptor.getResourceName();
+		String action = formDescriptor.getActionLink();
+		String formName = formDescriptor.getFormName();
 
 		String formH1 = "Form " + formName;
 		sb.append(String.format(FORM_START, action, formName, formDescriptor.getHttpMethod().toString(), formH1));

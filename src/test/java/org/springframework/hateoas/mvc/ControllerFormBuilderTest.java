@@ -6,7 +6,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.FormDescriptor;
-import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerForForm;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 public class ControllerFormBuilderTest {
 
@@ -15,11 +19,19 @@ public class ControllerFormBuilderTest {
 	}
 
 	@Test
-	public void createsLinkToFormWithPathVariable() throws Exception {
+	public void createsLinkToFormWithMethodLevelAndTypeLevelVariables() throws Exception {
 		FormDescriptor formDescriptor = ControllerFormBuilder.createForm("searchPerson",
-				methodOn(PersonControllerForForm.class).showPerson("mike", null));
-		// TODO the linkTemplate field should not contain the expanded template
-		assertEquals("/person/mike", formDescriptor.getLinkTemplate());
+				methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null));
+		assertEquals("/region/region1/person/mike", formDescriptor.getActionLink());
+	}
+
+	@RequestMapping("/region/{regionId}")
+	static class PersonControllerForForm {
+		@RequestMapping(value = "/person/{personName}", method = RequestMethod.POST)
+		public HttpEntity<? extends Object> showPerson(@PathVariable("personName") String bar,
+				@RequestParam(value = "personId") Long personId) {
+			return null;
+		}
 	}
 
 }

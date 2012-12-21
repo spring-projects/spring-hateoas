@@ -5,7 +5,7 @@
 
   <groupId>org.springframework.hateoas</groupId>
   <artifactId>spring-hateoas</artifactId>
-	<version>0.4.0.BUILD-SNAPSHOT</version>
+  <version>0.4.0.BUILD-SNAPSHOT</version>
 
   <name>Spring Hateoas</name>
   <url>http://github.com/SpringSource/spring-hateoas</url>
@@ -58,13 +58,13 @@
   </licenses>
 
   <properties>
-    <spring.version>3.1.2.RELEASE</spring.version>
-		<jackson1.version>1.9.10</jackson1.version>
-		<jackson2.version>2.1.1</jackson2.version>
+    <spring.version>3.2.0.RELEASE</spring.version>
+    <jackson1.version>1.9.10</jackson1.version>
+    <jackson2.version>2.1.1</jackson2.version>
     <jaxrs.version>1.0</jaxrs.version>
     <cglib.version>2.2.2</cglib.version>
-		<jsonpath.version>0.8.1</jsonpath.version>
-		<minidevjson.version>1.1.1</minidevjson.version>
+    <jsonpath.version>0.8.1</jsonpath.version>
+    <minidevjson.version>1.1.1</minidevjson.version>
     <bundlor.failOnWarnings>true</bundlor.failOnWarnings>
   </properties>
 
@@ -82,20 +82,20 @@
     </dependency>
 
     <dependency>
-			<groupId>org.springframework.plugin</groupId>
-			<artifactId>spring-plugin-core</artifactId>
-			<version>0.8.0.BUILD-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
-			<version>2.2.2</version>
-			<optional>true</optional>
-		</dependency>
+      <groupId>org.springframework.plugin</groupId>
+      <artifactId>spring-plugin-core</artifactId>
+      <version>0.8.0.BUILD-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>2.2.2</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
@@ -105,32 +105,32 @@
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
-			<version>${jackson1.version}</version>
+      <version>${jackson1.version}</version>
       <optional>true</optional>
     </dependency>
 
     <dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>${jackson1.version}</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson2.version}</version>
-			<optional>true</optional>
-		</dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>${jackson1.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson2.version}</version>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson2.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson2.version}</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
       <version>${jaxrs.version}</version>
@@ -138,10 +138,10 @@
     </dependency>
 
     <dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>${jsonpath.version}</version>
-			<optional>true</optional>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>${jsonpath.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -164,6 +164,7 @@
       <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
+
 
     <dependency>
       <groupId>org.mockito</groupId>
@@ -265,7 +266,7 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
           only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -308,14 +309,18 @@
     </pluginRepository>
   </pluginRepositories>
 
-	<repositories>
-		<repository>
-			<id>spring-snapshots</id>
-			<url>http://repo.springsource.org/libs-snapshot</url>
-		</repository>
-	</repositories>
-	
-	<scm>
+  <repositories>
+    <repository>
+      <id>spring-snapshots</id>
+      <url>http://repo.springsource.org/libs-snapshot</url>
+    </repository>
+    <repository>
+      <id>spring-milestones</id>
+      <url>http://repo.springsource.org/libs-milestone</url>
+    </repository>
+  </repositories>
+
+  <scm>
     <url>https://github.com/SpringSource/spring-hateoas</url>
     <connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
     <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>

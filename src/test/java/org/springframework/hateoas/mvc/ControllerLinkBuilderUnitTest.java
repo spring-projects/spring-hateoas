@@ -70,13 +70,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertEquals("self", withSelfRel.getRel());
 	}
 
-	static class PersonControllerForForm {
-		@RequestMapping(value = "/person/{personName}", method = RequestMethod.POST)
-		public HttpEntity<? extends Object> showPerson(@PathVariable("personName") String bar,
-				@RequestParam(value = "personId") Long personId) {
-			return null;
-		}
-	}
+
 
 
 	@Test

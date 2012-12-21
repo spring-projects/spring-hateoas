@@ -39,7 +39,6 @@ public class AnnotatedParametersParameterAccessor {
 		this.attribute = attribute;
 	}
 
-	@Deprecated
 	public Map<String, Object> getBoundParameters(MethodInvocation invocation) {
 
 		MethodParameters parameters = new MethodParameters(invocation.getMethod());

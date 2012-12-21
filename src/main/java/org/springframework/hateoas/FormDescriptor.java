@@ -13,30 +13,28 @@ import org.springframework.hateoas.mvc.MethodParameterValue;
  */
 public class FormDescriptor {
 
-	// TODO maybe separate expanded and non-expanded link template
-
-	private String linkTemplate;
+	private String actionLink;
 	private Map<String, Class<?>> pathVariables = new HashMap<String, Class<?>>();
 	private Map<String, MethodParameterValue> requestParams = new HashMap<String, MethodParameterValue>();
 	private String httpMethod;
-	private String resourceName;
-
-	public String getResourceName() {
-		return resourceName;
-	}
+	private String formName;
 
 	public FormDescriptor(String resourceName, String linkTemplate, String httpMethod) {
-		this.linkTemplate = linkTemplate;
+		this.actionLink = linkTemplate;
 		this.httpMethod = httpMethod;
-		this.resourceName = resourceName;
+		this.formName = resourceName;
 	}
 
+	public String getFormName() {
+		return formName;
+	}
+	
 	public String getHttpMethod() {
 		return httpMethod;
 	}
 
-	public String getLinkTemplate() {
-		return linkTemplate;
+	public String getActionLink() {
+		return actionLink;
 	}
 
 	public Map<String, Class<?>> getPathVariables() {
