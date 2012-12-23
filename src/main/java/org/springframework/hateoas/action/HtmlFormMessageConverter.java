@@ -1,4 +1,4 @@
-package org.springframework.hateoas;
+package org.springframework.hateoas.action;
 
 import java.io.IOException;
 import java.util.Map.Entry;
@@ -10,7 +10,6 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Message converter which converts one FormDescriptor or an array of FormDescriptor items to an HTML page containing
@@ -72,7 +71,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 	@Override
 	protected boolean supports(Class<?> clazz) {
 		final boolean ret;
-		if (FormDescriptor.class == clazz || FormDescriptor[].class == clazz) {
+		if (ActionDescriptor.class == clazz || ActionDescriptor[].class == clazz) {
 			ret = true;
 		} else {
 			ret = false;
@@ -93,14 +92,15 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format(HTML_START, "Input Data"));
 
-		// TODO support default values and RequestBody mapped by object marshaler
-		if (t instanceof FormDescriptor[]) {
-			FormDescriptor[] descriptors = (FormDescriptor[]) t;
-			for (FormDescriptor formDescriptor : descriptors) {
+		// TODO support hidden input fields
+		// TODO support RequestBody mapped by object marshaler
+		if (t instanceof ActionDescriptor[]) {
+			ActionDescriptor[] descriptors = (ActionDescriptor[]) t;
+			for (ActionDescriptor formDescriptor : descriptors) {
 				appendForm(sb, formDescriptor);
 			}
 		} else {
-			FormDescriptor formDescriptor = (FormDescriptor) t;
+			ActionDescriptor formDescriptor = (ActionDescriptor) t;
 			appendForm(sb, formDescriptor);
 		}
 		sb.append(HTML_END);
@@ -108,23 +108,22 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	}
 
-	private void appendForm(StringBuilder sb, FormDescriptor formDescriptor) {
+	private void appendForm(StringBuilder sb, ActionDescriptor formDescriptor) {
 		String action = formDescriptor.getActionLink();
-		String formName = formDescriptor.getFormName();
+		String formName = formDescriptor.getResourceName();
 
 		String formH1 = "Form " + formName;
 		sb.append(String.format(FORM_START, action, formName, formDescriptor.getHttpMethod().toString(), formH1));
 
 		// build the form
-		for (Entry<String, MethodParameterValue> entry : formDescriptor.getRequestParams().entrySet()) {
+		for (Entry<String, MethodParameterValue> requestParam : formDescriptor.getRequestParams().entrySet()) {
 
-			String requestParamName = entry.getKey();
-			MethodParameterValue methodParameterValue = entry.getValue();
+			String requestParamName = requestParam.getKey();
+			MethodParameterValue methodParameterValue = requestParam.getValue();
 			Class<?> requestParamArg = methodParameterValue.getParameterType();
 			String inputFieldType = getInputFieldType(requestParamArg);
 			String fieldLabel = requestParamName + ": ";
 			// TODO support list and matrix parameters
-			// TODO support default input values from methodParameterValue.getInvocationValue
 			Object invocationValue = methodParameterValue.getInvocationValue();
 			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName, invocationValue == null ? ""
 					: invocationValue.toString()));

@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 
 /**
  * Factory for {@link LinkBuilder} instances.

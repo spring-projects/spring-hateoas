@@ -2,7 +2,7 @@ package org.springframework.hateoas.sample;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import org.springframework.hateoas.FormDescriptor;
+import org.springframework.hateoas.action.ActionDescriptor;
 import org.springframework.hateoas.mvc.ControllerFormBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Controller;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/people")
 public class SamplePersonController {
 	@RequestMapping(value = "/customer", method = RequestMethod.GET)
-	public HttpEntity<FormDescriptor> searchPersonForm() {
+	public HttpEntity<ActionDescriptor> searchPersonForm() {
 		long defaultPersonId = 1234L;
-		FormDescriptor form = ControllerFormBuilder.createForm("searchPerson", methodOn(SamplePersonController.class)
+		ActionDescriptor form = ControllerFormBuilder.createForm("searchPerson", methodOn(SamplePersonController.class)
 				.showPerson(defaultPersonId));
-		return new HttpEntity<FormDescriptor>(form);
+		return new HttpEntity<ActionDescriptor>(form);
 	}
 
 	@RequestMapping(value = "/customer", method = RequestMethod.GET, params = { "personId" })

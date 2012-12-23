@@ -5,7 +5,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.hateoas.FormDescriptor;
+import org.springframework.hateoas.action.ActionDescriptor;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,7 @@ public class ControllerFormBuilderTest {
 
 	@Test
 	public void createsLinkToFormWithMethodLevelAndTypeLevelVariables() throws Exception {
-		FormDescriptor formDescriptor = ControllerFormBuilder.createForm("searchPerson",
+		ActionDescriptor formDescriptor = ControllerFormBuilder.createForm("searchPerson",
 				methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null));
 		assertEquals("/region/region1/person/mike", formDescriptor.getActionLink());
 	}

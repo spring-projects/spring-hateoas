@@ -25,7 +25,8 @@
     </property>
   </bean>
 
-  <bean id="htmlFormMessageConverter" class="org.springframework.hateoas.HtmlFormMessageConverter">
+  <bean id="htmlFormMessageConverter"
+    class="org.springframework.hateoas.action.HtmlFormMessageConverter">
     <property name="supportedMediaTypes">
       <list>
         <value>text/html</value>

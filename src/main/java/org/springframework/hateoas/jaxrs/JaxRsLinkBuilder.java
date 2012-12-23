@@ -15,17 +15,7 @@
  */
 package org.springframework.hateoas.jaxrs;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;

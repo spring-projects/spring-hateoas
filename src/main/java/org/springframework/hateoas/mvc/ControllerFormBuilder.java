@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.hateoas.FormDescriptor;
+import org.springframework.hateoas.action.ActionDescriptor;
 import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
@@ -65,7 +65,7 @@ public class ControllerFormBuilder {
 	 * @return resource descriptor
 	 * @throws IllegalStateException if the method has no request mapping
 	 */
-	public static FormDescriptor createForm(String formName, Object invocationValue) {
+	public static ActionDescriptor createForm(String formName, Object invocationValue) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
@@ -87,7 +87,7 @@ public class ControllerFormBuilder {
 
 		String expanded = uri.toASCIIString();
 		RequestMethod requestMethod = getRequestMethod(invokedMethod);
-		FormDescriptor formDescriptor = new FormDescriptor(formName, expanded, requestMethod.toString());
+		ActionDescriptor formDescriptor = new ActionDescriptor(formName, expanded, requestMethod.toString());
 		for (Entry<String, Object> entry : pathVariablesMap.entrySet()) {
 			formDescriptor.addPathVariable(entry.getKey(), entry.getValue().getClass());
 		}
