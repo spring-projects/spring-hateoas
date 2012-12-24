@@ -92,38 +92,38 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format(HTML_START, "Input Data"));
 
-		// TODO support hidden input fields
-		// TODO support RequestBody mapped by object marshaler
 		if (t instanceof ActionDescriptor[]) {
 			ActionDescriptor[] descriptors = (ActionDescriptor[]) t;
-			for (ActionDescriptor formDescriptor : descriptors) {
-				appendForm(sb, formDescriptor);
+			for (ActionDescriptor actionDescriptor : descriptors) {
+				appendForm(sb, actionDescriptor);
 			}
 		} else {
-			ActionDescriptor formDescriptor = (ActionDescriptor) t;
-			appendForm(sb, formDescriptor);
+			ActionDescriptor actionDescriptor = (ActionDescriptor) t;
+			appendForm(sb, actionDescriptor);
 		}
 		sb.append(HTML_END);
 		FileCopyUtils.copy(sb.toString().getBytes("UTF-8"), outputMessage.getBody());
 
 	}
 
-	private void appendForm(StringBuilder sb, ActionDescriptor formDescriptor) {
-		String action = formDescriptor.getActionLink();
-		String formName = formDescriptor.getResourceName();
+	private void appendForm(StringBuilder sb, ActionDescriptor actionDescriptor) {
+		String action = actionDescriptor.getActionLink();
+		String formName = actionDescriptor.getResourceName();
 
 		String formH1 = "Form " + formName;
-		sb.append(String.format(FORM_START, action, formName, formDescriptor.getHttpMethod().toString(), formH1));
+		sb.append(String.format(FORM_START, action, formName, actionDescriptor.getHttpMethod().toString(), formH1));
 
 		// build the form
-		for (Entry<String, MethodParameterValue> requestParam : formDescriptor.getRequestParams().entrySet()) {
+		for (Entry<String, MethodParameterValue> requestParam : actionDescriptor.getRequestParams().entrySet()) {
 
 			String requestParamName = requestParam.getKey();
 			MethodParameterValue methodParameterValue = requestParam.getValue();
-			Class<?> requestParamArg = methodParameterValue.getParameterType();
-			String inputFieldType = getInputFieldType(requestParamArg);
+			String inputFieldType = getInputFieldType(methodParameterValue);
 			String fieldLabel = requestParamName + ": ";
-			// TODO support list and matrix parameters
+			// TODO support list and matrix parameters?
+			// TODO support RequestBody mapped by object marshaler? Look at bean properties in that case instead of
+			// RequestParam arguments.
+			// TODO support valid value ranges, possible values, value constraints?
 			Object invocationValue = methodParameterValue.getInvocationValue();
 			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName, invocationValue == null ? ""
 					: invocationValue.toString()));
@@ -131,9 +131,17 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		sb.append(FORM_END);
 	}
 
-	private String getInputFieldType(Class<?> requestParamArg) {
+	private String getInputFieldType(MethodParameterValue methodParameterValue) {
 		// TODO HTML5 input types: number, date, text... depending on requestParamArg
-		return "text";
+		final String ret;
+		if (methodParameterValue.hasParameterAnnotation(Hidden.class)) {
+			// TODO support hidden input fields
+			ret = "hidden";
+		} else {
+			// methodParameterValue.getParameterType()
+			ret = "text";
+		}
+		return ret;
 	}
 
 }
