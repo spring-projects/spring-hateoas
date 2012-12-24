@@ -59,13 +59,13 @@ public class ControllerFormBuilder {
 	 * </pre>
 	 * 
 	 * This way, the form will have a predefined value of 1234 in the personId form field.
-	 * 
-	 * @param formName name of the resource, e.g. to be used as form name
+	 * @param resourceName name of the resource, e.g. to be used as form name
 	 * @param method reference which will handle the request, use {@link ControllerLinkBuilder#methodOn(Class, Object...)} to create a suitable method reference
+	 * 
 	 * @return resource descriptor
 	 * @throws IllegalStateException if the method has no request mapping
 	 */
-	public static ActionDescriptor createForm(String formName, Object invocationValue) {
+	public static ActionDescriptor createFormFor(Object invocationValue, String resourceName) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
@@ -87,7 +87,7 @@ public class ControllerFormBuilder {
 
 		String expanded = uri.toASCIIString();
 		RequestMethod requestMethod = getRequestMethod(invokedMethod);
-		ActionDescriptor formDescriptor = new ActionDescriptor(formName, expanded, requestMethod.toString());
+		ActionDescriptor formDescriptor = new ActionDescriptor(resourceName, expanded, requestMethod.toString());
 		for (Entry<String, Object> entry : pathVariablesMap.entrySet()) {
 			formDescriptor.addPathVariable(entry.getKey(), entry.getValue().getClass());
 		}

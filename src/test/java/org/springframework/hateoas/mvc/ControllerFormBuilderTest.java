@@ -20,8 +20,8 @@ public class ControllerFormBuilderTest {
 
 	@Test
 	public void createsLinkToFormWithMethodLevelAndTypeLevelVariables() throws Exception {
-		ActionDescriptor formDescriptor = ControllerFormBuilder.createForm("searchPerson",
-				methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null));
+		ActionDescriptor formDescriptor = ControllerFormBuilder.createFormFor(methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null),
+				"searchPerson");
 		assertEquals("/region/region1/person/mike", formDescriptor.getActionLink());
 	}
 

@@ -22,7 +22,7 @@ public class MethodParameterValue extends MethodParameter {
 	 * 
 	 * @return value, may be null
 	 */
-	public Object getInvocationValue() {
+	public Object getCallValue() {
 		return value;
 	}
 

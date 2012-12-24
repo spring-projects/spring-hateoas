@@ -124,7 +124,7 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 			// TODO support RequestBody mapped by object marshaler? Look at bean properties in that case instead of
 			// RequestParam arguments.
 			// TODO support valid value ranges, possible values, value constraints?
-			Object invocationValue = methodParameterValue.getInvocationValue();
+			Object invocationValue = methodParameterValue.getCallValue();
 			sb.append(String.format(FORM_INPUT, fieldLabel, inputFieldType, requestParamName, invocationValue == null ? ""
 					: invocationValue.toString()));
 		}
