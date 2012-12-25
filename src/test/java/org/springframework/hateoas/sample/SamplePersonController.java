@@ -40,16 +40,16 @@ public class SamplePersonController {
 	}
 
 	@RequestMapping(value = "/customer/editor")
-	public HttpEntity<ActionDescriptor> changePersonForm() {
+	public HttpEntity<ActionDescriptor> editPersonForm() {
 
 		ActionDescriptor descriptor = ControllerFormBuilder.createFormFor(methodOn(SamplePersonController.class)
-				.changePerson(person.getId(), person.getFirstname(), person.getLastname()), "changePerson");
+				.editPerson(person.getId(), person.getFirstname(), person.getLastname()), "changePerson");
 
 		return new HttpEntity<ActionDescriptor>(descriptor);
 	}
 
 	@RequestMapping(value = "/customer", method = RequestMethod.PUT, params = { "personId", "firstname", "lastname" })
-	public HttpEntity<SamplePersonResource> changePerson(@RequestParam @Hidden Long personId,
+	public HttpEntity<SamplePersonResource> editPerson(@RequestParam @Hidden Long personId,
 			@RequestParam String firstname, @RequestParam String lastname) {
 
 		person.setFirstname(firstname);

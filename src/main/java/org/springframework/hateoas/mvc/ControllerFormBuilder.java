@@ -87,10 +87,7 @@ public class ControllerFormBuilder {
 
 		String expanded = uri.toASCIIString();
 		RequestMethod requestMethod = getRequestMethod(invokedMethod);
-		ActionDescriptor formDescriptor = new ActionDescriptor(resourceName, expanded, requestMethod.toString());
-		for (Entry<String, Object> entry : pathVariablesMap.entrySet()) {
-			formDescriptor.addPathVariable(entry.getKey(), entry.getValue().getClass());
-		}
+		ActionDescriptor formDescriptor = new ActionDescriptor(resourceName, expanded, requestMethod);
 
 		Map<String, MethodParameterValue> requestParamMap = requestParams.getBoundMethodParameterValues(invocation);
 		for (Entry<String, MethodParameterValue> entry : requestParamMap.entrySet()) {

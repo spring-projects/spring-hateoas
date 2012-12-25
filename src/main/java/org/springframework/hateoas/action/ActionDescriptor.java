@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.hateoas.mvc.MethodParameterValue;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Describes an HTTP action, e.g. for a form that calls a Controller method which handles the request built by the form.
@@ -14,21 +15,20 @@ import org.springframework.hateoas.mvc.MethodParameterValue;
 public class ActionDescriptor {
 
 	private String actionLink;
-	private Map<String, Class<?>> pathVariables = new HashMap<String, Class<?>>();
 	private Map<String, MethodParameterValue> requestParams = new HashMap<String, MethodParameterValue>();
-	private String httpMethod;
+	private RequestMethod httpMethod;
 	private String resourceName;
 
 	/**
 	 * Creates an action descriptor. E.g. can be used to create HTML forms or Siren actions.
 	 * 
-	 * @param resourceName can be used by the action representation to identify the action using a form name.
+	 * @param resourceName can be used by the action representation, e.g. to identify the action using a form name.
 	 * @param actionLink to which the action is submitted
-	 * @param httpMethod used during submit
+	 * @param requestMethod used during submit
 	 */
-	public ActionDescriptor(String resourceName, String actionLink, String httpMethod) {
+	public ActionDescriptor(String resourceName, String actionLink, RequestMethod requestMethod) {
 		this.actionLink = actionLink;
-		this.httpMethod = httpMethod;
+		this.httpMethod = requestMethod;
 		this.resourceName = resourceName;
 	}
 
@@ -36,7 +36,7 @@ public class ActionDescriptor {
 		return resourceName;
 	}
 
-	public String getHttpMethod() {
+	public RequestMethod getHttpMethod() {
 		return httpMethod;
 	}
 
@@ -44,17 +44,11 @@ public class ActionDescriptor {
 		return actionLink;
 	}
 
-	public Map<String, Class<?>> getPathVariables() {
-		return pathVariables;
-	}
 
 	public Map<String, MethodParameterValue> getRequestParams() {
 		return requestParams;
 	}
 
-	public void addPathVariable(String key, Class<?> type) {
-		pathVariables.put(key, type);
-	}
 
 	public void addRequestParam(String key, MethodParameterValue methodParameterValue) {
 		requestParams.put(key, methodParameterValue);
