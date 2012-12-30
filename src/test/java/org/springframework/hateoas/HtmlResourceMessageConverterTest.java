@@ -1,4 +1,4 @@
-package org.springframework.hateoas.action;
+package org.springframework.hateoas;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -31,7 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HtmlFormMessageConverterTest {
+public class HtmlResourceMessageConverterTest {
 	@Autowired
 	private WebApplicationContext wac;
 

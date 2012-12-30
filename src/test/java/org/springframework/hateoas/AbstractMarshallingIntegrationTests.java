@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 
 /**
- * Base class to eas integration tests for {@link ObjectMapper} marshalling.
+ * Base class to ease integration tests for {@link ObjectMapper} marshalling.
  * 
  * @author Oliver Gierke
  */

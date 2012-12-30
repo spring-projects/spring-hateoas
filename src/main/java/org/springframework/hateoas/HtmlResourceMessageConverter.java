@@ -1,8 +1,10 @@
-package org.springframework.hateoas.action;
+package org.springframework.hateoas;
 
 import java.io.IOException;
 import java.util.Map.Entry;
 
+import org.springframework.hateoas.action.ActionDescriptor;
+import org.springframework.hateoas.action.Hidden;
 import org.springframework.hateoas.mvc.MethodParameterValue;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -12,8 +14,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Message converter which converts one FormDescriptor or an array of FormDescriptor items to an HTML page containing
- * one form per FormDescriptor.
+ * Message converter which converts one ActionDescriptor or an array of ActionDescriptor items to an HTML page containing
+ * one form per ActionDescriptor.
  * 
  * Add the following to your spring configuration to enable this converter:
  * 
@@ -36,7 +38,7 @@ import org.springframework.util.FileCopyUtils;
  * @author Dietrich Schulten
  * 
  */
-public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Object> {
+public class HtmlResourceMessageConverter extends AbstractHttpMessageConverter<Object> {
 
 	String searchPerson = "searchPerson";
 	String backRel = "back";
@@ -135,7 +137,6 @@ public class HtmlFormMessageConverter extends AbstractHttpMessageConverter<Objec
 		// TODO HTML5 input types: number, date, text... depending on requestParamArg
 		final String ret;
 		if (methodParameterValue.hasParameterAnnotation(Hidden.class)) {
-			// TODO support hidden input fields
 			ret = "hidden";
 		} else {
 			// methodParameterValue.getParameterType()
