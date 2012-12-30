@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public class ControllerFormBuilderTest {
+public class ControllerActionBuilderTest {
 
 	@Before
 	public void setUp() throws Exception {
@@ -20,7 +20,7 @@ public class ControllerFormBuilderTest {
 
 	@Test
 	public void createsLinkToFormWithMethodLevelAndTypeLevelVariables() throws Exception {
-		ActionDescriptor formDescriptor = ControllerFormBuilder.createFormFor(methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null),
+		ActionDescriptor formDescriptor = ControllerActionBuilder.createActionFor(methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null),
 				"searchPerson");
 		assertEquals("/region/region1/person/mike", formDescriptor.getActionLink());
 	}

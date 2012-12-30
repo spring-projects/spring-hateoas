@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriTemplate;
 
-public class ControllerFormBuilder {
+public class ControllerActionBuilder {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
 	private static final AnnotatedParametersParameterAccessor pathVariables = new AnnotatedParametersParameterAccessor(
@@ -30,21 +30,21 @@ public class ControllerFormBuilder {
 			new AnnotationAttribute(RequestParam.class));
 
 	/**
-	 * Creates a form descriptor which can be used by message converters such as HtmlFormMessageConverter to create html
+	 * Creates an action descriptor which can be used by message converters such as HtmlFormMessageConverter to create html
 	 * forms.
 	 * <p>
 	 * The following example method searchPersonForm creates a search form which has the method showPerson as action
 	 * target.
 	 * 
 	 * <pre>
-	 * &#064;RequestMapping(value = &quot;/person&quot;, method = RequestMethod.GET)
+	 * &#064;RequestMapping(value = &quot;/person&quot;)
 	 * public HttpEntity&lt;FormDescriptor&gt; searchPersonForm() {
-	 * 	FormDescriptor rd = ControllerFormBuilder.createForm(&quot;searchPerson&quot;, methodOn(PersonController.class)
+	 * 	ActionDescriptor rd = ControllerActionBuilder.createActionFor(&quot;searchPerson&quot;, methodOn(PersonController.class)
 	 * 			.showPerson(null));
-	 * 	return new HttpEntity&lt;FormDescriptor&gt;(rd);
+	 * 	return new HttpEntity&lt;ActionDescriptor&gt;(rd);
 	 * }
 	 * 
-	 * &#064;RequestMapping(value = &quot;/customer&quot;, method = RequestMethod.GET, params = { &quot;personId&quot; })
+	 * &#064;RequestMapping(value = &quot;/person&quot;, method = RequestMethod.GET, params = { &quot;personId&quot; })
 	 * 	public HttpEntity&lt;? extends Object&gt; showPerson(@RequestParam(value = &quot;personId&quot;) Long personId) {
 	 * 		...
 	 * }
@@ -59,13 +59,15 @@ public class ControllerFormBuilder {
 	 * </pre>
 	 * 
 	 * This way, the form will have a predefined value of 1234 in the personId form field.
-	 * @param resourceName name of the resource, e.g. to be used as form name
-	 * @param method reference which will handle the request, use {@link ControllerLinkBuilder#methodOn(Class, Object...)} to create a suitable method reference
+	 * 
+	 * @param invocationValue method reference which will handle the request, use
+	 *          {@link ControllerLinkBuilder#methodOn(Class, Object...)} to create a suitable method reference
+	 * @param actionName name of the action, e.g. to be used as a form name
 	 * 
 	 * @return resource descriptor
 	 * @throws IllegalStateException if the method has no request mapping
 	 */
-	public static ActionDescriptor createFormFor(Object invocationValue, String resourceName) {
+	public static ActionDescriptor createActionFor(Object invocationValue, String actionName) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
@@ -77,7 +79,7 @@ public class ControllerFormBuilder {
 		Map<String, Object> values = new HashMap<String, Object>();
 
 		Iterator<String> templateVariables = template.getVariableNames().iterator();
-		while(classMappingParameters.hasNext() && templateVariables.hasNext()) {
+		while (classMappingParameters.hasNext() && templateVariables.hasNext()) {
 			values.put(templateVariables.next(), classMappingParameters.next());
 		}
 
@@ -87,14 +89,14 @@ public class ControllerFormBuilder {
 
 		String expanded = uri.toASCIIString();
 		RequestMethod requestMethod = getRequestMethod(invokedMethod);
-		ActionDescriptor formDescriptor = new ActionDescriptor(resourceName, expanded, requestMethod);
+		ActionDescriptor actionDescriptor = new ActionDescriptor(actionName, expanded, requestMethod);
 
 		Map<String, MethodParameterValue> requestParamMap = requestParams.getBoundMethodParameterValues(invocation);
 		for (Entry<String, MethodParameterValue> entry : requestParamMap.entrySet()) {
-			formDescriptor.addRequestParam(entry.getKey(), entry.getValue());
+			actionDescriptor.addRequestParam(entry.getKey(), entry.getValue());
 		}
 
-		return formDescriptor;
+		return actionDescriptor;
 	}
 
 	private static RequestMethod getRequestMethod(Method method) {

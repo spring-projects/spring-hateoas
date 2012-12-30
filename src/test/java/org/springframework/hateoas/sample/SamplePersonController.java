@@ -4,7 +4,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import org.springframework.hateoas.action.ActionDescriptor;
 import org.springframework.hateoas.action.Hidden;
-import org.springframework.hateoas.mvc.ControllerFormBuilder;
+import org.springframework.hateoas.mvc.ControllerActionBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ public class SamplePersonController {
 	@RequestMapping(value = "/customer")
 	public HttpEntity<ActionDescriptor> searchPersonForm() {
 		long defaultPersonId = 1234L;
-		ActionDescriptor form = ControllerFormBuilder.createFormFor(
+		ActionDescriptor form = ControllerActionBuilder.createActionFor(
 				methodOn(SamplePersonController.class).showPerson(defaultPersonId), "searchPerson");
 		return new HttpEntity<ActionDescriptor>(form);
 	}
@@ -42,7 +42,7 @@ public class SamplePersonController {
 	@RequestMapping(value = "/customer/editor")
 	public HttpEntity<ActionDescriptor> editPersonForm() {
 		// PUT is allowed for forms as of HTML 5, programmatic clients and new browsers can handle it
-		ActionDescriptor descriptor = ControllerFormBuilder.createFormFor(methodOn(SamplePersonController.class)
+		ActionDescriptor descriptor = ControllerActionBuilder.createActionFor(methodOn(SamplePersonController.class)
 				.editPerson(person.getId(), person.getFirstname(), person.getLastname()), "changePerson");
 
 		return new HttpEntity<ActionDescriptor>(descriptor);
