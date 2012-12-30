@@ -20,7 +20,7 @@ public class ActionDescriptor {
 	private String resourceName;
 
 	/**
-	 * Creates an action descriptor. E.g. can be used to create HTML forms or Siren actions.
+	 * Creates an action descriptor. E.g. can be used to create HTML forms.
 	 * 
 	 * @param resourceName can be used by the action representation, e.g. to identify the action using a form name.
 	 * @param actionLink to which the action is submitted

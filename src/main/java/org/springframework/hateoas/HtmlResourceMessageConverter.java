@@ -30,7 +30,7 @@ import org.springframework.util.FileCopyUtils;
  *     &lt;/property&gt;
  *   &lt;/bean&gt;
  * 
- *   &lt;bean id="htmlFormMessageConverter" class="org.springframework.hateoas.HtmlFormMessageConverter"&gt;
+ *   &lt;bean id="htmlFormMessageConverter" class="org.springframework.hateoas.HtmlResourceMessageConverter"&gt;
  *     &lt;property name="supportedMediaTypes" value="text/html" /&gt;
  *   &lt;/bean&gt;
  * </pre>
@@ -39,9 +39,6 @@ import org.springframework.util.FileCopyUtils;
  * 
  */
 public class HtmlResourceMessageConverter extends AbstractHttpMessageConverter<Object> {
-
-	String searchPerson = "searchPerson";
-	String backRel = "back";
 
 	/** expects title */
 	public static final String HTML_START = "" + //
