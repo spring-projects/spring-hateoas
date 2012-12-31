@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mvc;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.hamcrest.Matchers;
@@ -31,9 +34,13 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * @author Oliver Gierke
@@ -67,9 +74,6 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertEquals("http://localhost/products/15", withSelfRel.getHref());
 		assertEquals("self", withSelfRel.getRel());
 	}
-
-
-
 
 	@Test
 	public void createsLinkToSubResource() {
@@ -130,6 +134,28 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("1")).withSelfRel();
 		assertThat(link.getHref(), Matchers.endsWith("/something/1/foo"));
+	}
+
+	@Test
+	public void linksToMethodWithPathVariableAndRequestParams() {
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).withSelfRel();
+		UriComponents components = UriComponentsBuilder.fromUriString(link.getHref()).build();
+		assertEquals("/something/1/foo", components.getPath());
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+		assertThat(queryParams.get("offset"), contains("10"));
+	}
+
+	@Test
+	public void linksToMethodWithPathVariableAndMultiValueRequestParams() {
+		Link link = linkTo(
+				methodOn(ControllerWithMethods.class).methodWithMultiValueRequestParams("1", Arrays.asList(3, 7), 5))
+				.withSelfRel();
+		UriComponents components = UriComponentsBuilder.fromUriString(link.getHref()).build();
+		assertEquals("/something/1/foo", components.getPath());
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+		assertThat(queryParams.get("items"), containsInAnyOrder("3", "7"));
 	}
 
 	static class Person implements Identifiable<Long> {
@@ -203,10 +229,22 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		@RequestMapping("/else")
 		HttpEntity<Void> myMethod(@RequestBody Object payload) {
 			return null;
-}
+		}
 
 		@RequestMapping("/{id}/foo")
 		HttpEntity<Void> methodWithPathVariable(@PathVariable String id) {
+			return null;
+		}
+
+		@RequestMapping(value = "/{id}/foo", params = { "limit", "offset" })
+		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam Integer offset,
+				@RequestParam Integer limit) {
+			return null;
+		}
+
+		@RequestMapping(value = "/{id}/foo", params = { "limit", "items" })
+		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
+				@RequestParam Integer limit) {
 			return null;
 		}
 	}

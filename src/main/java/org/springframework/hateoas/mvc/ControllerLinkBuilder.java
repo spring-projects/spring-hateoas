@@ -17,9 +17,11 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.hateoas.Link;
@@ -32,7 +34,9 @@ import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -44,8 +48,10 @@ import org.springframework.web.util.UriTemplate;
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
-	private static final AnnotatedParametersParameterAccessor accessor = new AnnotatedParametersParameterAccessor(
+	private static final AnnotatedParametersParameterAccessor pathVariableAccessor = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
+	private static final AnnotatedParametersParameterAccessor requestParamAccessor = new AnnotatedParametersParameterAccessor(
+			new AnnotationAttribute(RequestParam.class));
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -133,14 +139,27 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		Map<String, Object> values = new HashMap<String, Object>();
 
 		Iterator<String> templateVariables = template.getVariableNames().iterator();
-		while(classMappingParameters.hasNext() && templateVariables.hasNext()) {
+		while (classMappingParameters.hasNext() && templateVariables.hasNext()) {
 			values.put(templateVariables.next(), classMappingParameters.next());
 		}
 
-		values.putAll(accessor.getBoundParameters(invocation));
-		URI uri = template.expand(values);
+		values.putAll(pathVariableAccessor.getBoundParameters(invocation));
+		Map<String, Object> requestParametersWithValue = requestParamAccessor.getBoundParameters(invocation);
 
-		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(method));
+		for (Entry<String, Object> entry : requestParametersWithValue.entrySet()) {
+			Object value = entry.getValue();
+			if (value instanceof Collection) {
+				Collection<?> collection = (Collection<?>) value;
+				Object[] valueArray = collection.toArray(new Object[collection.size()]);
+				builder.queryParam(entry.getKey(), valueArray);
+			} else {
+				builder.queryParam(entry.getKey(), value);
+			}
+		}
+		UriComponents expanded = builder.buildAndExpand(values);
+
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expanded.toUri());
 	}
 
 	/**
