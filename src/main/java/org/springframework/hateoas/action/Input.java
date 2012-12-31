@@ -14,6 +14,14 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface Hidden {
+public @interface Input {
+	
+	Type value();
+	
+	int max() default -1;
+	
+	int min() default -1;
+	
+	int step() default -1;
 
 }

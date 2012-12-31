@@ -58,13 +58,23 @@ public class HtmlResourceMessageConverterTest {
 	}
 
 	@Test
-	public void testCreatesInputFieldWithDefaultValue() throws Exception {
+	public void testCreatesInputFieldWithDefaultNumber() throws Exception {
 
 		this.mockMvc.perform(get("/people/customer").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
 				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
 				.andExpect(xpath("//h:input/@name", namespaces).string("personId"))
-				.andExpect(xpath("//h:input/@type", namespaces).string("text"))
+				.andExpect(xpath("//h:input/@type", namespaces).string("number"))
 				.andExpect(xpath("//h:input/@value", namespaces).string("1234"));
+	}
+
+	@Test
+	public void testCreatesInputFieldWithDefaultText() throws Exception {
+
+		this.mockMvc.perform(get("/people/customerByName").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:input/@name", namespaces).string("name"))
+				.andExpect(xpath("//h:input/@type", namespaces).string("text"))
+				.andExpect(xpath("//h:input/@value", namespaces).string("Bombur"));
 	}
 
 	/**

@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.Map.Entry;
 
 import org.springframework.hateoas.action.ActionDescriptor;
-import org.springframework.hateoas.action.Hidden;
+import org.springframework.hateoas.action.Input;
+import org.springframework.hateoas.action.Type;
 import org.springframework.hateoas.mvc.MethodParameterValue;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -14,8 +15,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Message converter which converts one ActionDescriptor or an array of ActionDescriptor items to an HTML page containing
- * one form per ActionDescriptor.
+ * Message converter which converts one ActionDescriptor or an array of ActionDescriptor items to an HTML page
+ * containing one form per ActionDescriptor.
  * 
  * Add the following to your spring configuration to enable this converter:
  * 
@@ -131,13 +132,17 @@ public class HtmlResourceMessageConverter extends AbstractHttpMessageConverter<O
 	}
 
 	private String getInputFieldType(MethodParameterValue methodParameterValue) {
-		// TODO HTML5 input types: number, date, text... depending on requestParamArg
 		final String ret;
-		if (methodParameterValue.hasParameterAnnotation(Hidden.class)) {
-			ret = "hidden";
+		Input inputAnnotation = methodParameterValue.getParameterAnnotation(Input.class);
+		if (inputAnnotation != null) {
+			ret = inputAnnotation.value().toString();
 		} else {
-			// methodParameterValue.getParameterType()
-			ret = "text";
+			Class<?> parameterType = methodParameterValue.getParameterType();
+			if (Number.class.isAssignableFrom(parameterType)) {
+				ret = Type.NUMBER.toString();
+			} else {
+				ret = Type.TEXT.toString();
+			}
 		}
 		return ret;
 	}
