@@ -65,18 +65,6 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void createsLinkToControllerMethodWithPathVariable() throws Exception {
-
-		Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
-		assertEquals("http://localhost/products/15", withRel.getHref());
-		assertEquals("product", withRel.getRel());
-
-		Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
-		assertEquals("http://localhost/products/15", withSelfRel.getHref());
-		assertEquals("self", withSelfRel.getRel());
-	}
-
-	@Test
 	public void createsLinkToSubResource() {
 
 		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
