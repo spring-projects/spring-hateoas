@@ -32,11 +32,11 @@ import org.springframework.hateoas.TestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Unit tests for {@link ResourceAssemblerSupport}.
+ * Unit tests for {@link ResourceAssemblerIdentifiableSupport}.
  * 
  * @author Oliver Gierke
  */
-public class ResourceAssemblerSupportUnitTest extends TestUtils {
+public class ResourceAssemblerIdentifiableSupportUnitTest extends TestUtils {
 
 	PersonResourceAssembler assembler = new PersonResourceAssembler();
 	Person person;
@@ -124,7 +124,7 @@ public class ResourceAssemblerSupportUnitTest extends TestUtils {
 
 	}
 
-	class PersonResourceAssembler extends ResourceAssemblerSupport<Person, PersonResource> {
+	class PersonResourceAssembler extends ResourceAssemblerIdentifiableSupport<Person, PersonResource> {
 
 		public PersonResourceAssembler() {
 			this(PersonController.class);

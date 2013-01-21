@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
+import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -32,11 +32,7 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> implements
-		ResourceAssembler<T, D> {
-
-	protected final Class<?> controllerClass;
-	private final Class<D> resourceType;
+public abstract class ResourceAssemblerIdentifiableSupport<T extends Identifiable<?>, D extends ResourceSupport> extends ResourceAssemblerSupport<T, D> {
 
 	/**
 	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
@@ -44,64 +40,49 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
-	public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
-
-		Assert.notNull(controllerClass);
-		Assert.notNull(resourceType);
-
-		this.controllerClass = controllerClass;
-		this.resourceType = resourceType;
+	public ResourceAssemblerIdentifiableSupport(Class<?> controllerClass, Class<D> resourceType) {
+		super(controllerClass, resourceType);
 	}
-
+	
 	/**
-	 * Converts all given entities into resources.
-	 * 
-	 * @see #toResource(Object)
-	 * @param entities must not be {@literal null}.
-	 * @return
-	 */
-	public List<D> toResources(Iterable<? extends T> entities) {
-
-		Assert.notNull(entities);
-		List<D> result = new ArrayList<D>();
-
-		for (T entity : entities) {
-			result.add(toResource(entity));
-		}
-
-		return result;
-	}
-
-	/**
-	 * Creates a new resource with a self link to the given id.
+	 * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
 	 * 
 	 * @param entity must not be {@literal null}.
-	 * @param id must not be {@literal null}.
 	 * @return
 	 */
-	protected D createResourceWithId(Object id, T entity) {
-		return createResourceWithId(id, entity, new Object[0]);
+	protected D createResource(T entity) {
+		return createResource(entity, new Object[0]);
 	}
 
+	protected D createResource(T entity, Object... parameters) {
+		return createResourceWithId(entity.getId(), entity, parameters);
+	}
+	
+	@Override
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
 		Assert.notNull(entity);
 		Assert.notNull(id);
 
 		D instance = instantiateResource(entity);
-		instance.add(linkTo(controllerClass, parameters).slash(id).withSelfRel());
+		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
 		return instance;
 	}
 
 	/**
-	 * Instantiates the resource object. Default implementation will assume a no-arg constructor and use reflection but
-	 * can be overridden to manually set up the object instance initially (e.g. to improve performance if this becomes an
-	 * issue).
+	 * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
 	 * 
-	 * @param entity
+	 * @param values must not be {@literal null}.
 	 * @return
 	 */
-	protected D instantiateResource(T entity) {
-		return BeanUtils.instantiateClass(resourceType);
+	private Object[] unwrapIdentifyables(Object[] values) {
+
+		List<Object> result = new ArrayList<Object>(values.length);
+
+		for (Object element : Arrays.asList(values)) {
+			result.add((element instanceof Identifiable) ? ((Identifiable<?>) element).getId() : element);
+		}
+
+		return result.toArray();
 	}
 }
