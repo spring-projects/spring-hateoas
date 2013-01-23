@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	@Test
 	public void throwsExceptionForUnsupportedClass() {
 
-		exception.expect(IllegalStateException.class);
+		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(String.class.getName());
 
 		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.<Class<?>, EntityLinks> create());
