@@ -30,8 +30,8 @@ public class ControllerActionBuilder {
 			new AnnotationAttribute(RequestParam.class));
 
 	/**
-	 * Creates an action descriptor which can be used by message converters such as HtmlResourceMessageConverter to create html
-	 * forms.
+	 * Creates an action descriptor which can be used by message converters such as HtmlResourceMessageConverter to create
+	 * html forms.
 	 * <p>
 	 * The following example method searchPersonForm creates a search form which has the method showPerson as action
 	 * target.
@@ -104,7 +104,11 @@ public class ControllerActionBuilder {
 		RequestMethod requestMethod;
 		if (methodRequestMapping != null) {
 			RequestMethod[] methods = methodRequestMapping.method();
-			requestMethod = methods[0];
+			if (methods.length == 0) {
+				requestMethod = RequestMethod.GET;
+			} else {
+				requestMethod = methods[0];
+			}
 		} else {
 			requestMethod = RequestMethod.GET; // default
 		}
