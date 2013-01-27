@@ -9,7 +9,7 @@ public class SamplePersonResourceAssembler extends ResourceAssemblerSupport<Samp
 	}
 
 	public SamplePersonResource toResource(SamplePerson person) {
-		SamplePersonResource resource = createResource(person);
+		SamplePersonResource resource = createResourceWithId(person.getId(), person);
 		resource.setFirstname(person.getFirstname());
 		resource.setLastname(person.getLastname());
 		return resource;
