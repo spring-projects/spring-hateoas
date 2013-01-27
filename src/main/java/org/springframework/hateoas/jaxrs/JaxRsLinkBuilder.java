@@ -27,7 +27,7 @@ import org.springframework.web.util.UriTemplate;
 
 /**
  * {@link LinkBuilder} to derive URI mappings from a JAX-RS {@link Path} annotation.
- * 
+ *
  * @author Oliver Gierke
  */
 public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
@@ -36,7 +36,7 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} from the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	private JaxRsLinkBuilder(UriComponentsBuilder builder) {
@@ -45,7 +45,7 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 	/**
 	 * Creates a {@link JaxRsLinkBuilder} instance to link to the {@link Path} mapping tied to the given class.
-	 * 
+	 *
 	 * @param service the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
@@ -56,7 +56,7 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} instance to link to the {@link Path} mapping tied to the given class binding
 	 * the given parameters to the URI template.
-	 * 
+	 *
 	 * @param service the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
 	 *          {@literal null}.
@@ -70,7 +70,7 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 		return builder.slash(template.expand(parameters));
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
@@ -79,7 +79,7 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 		return this;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
 	 */
@@ -87,4 +87,5 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	protected JaxRsLinkBuilder createNewInstance(UriComponentsBuilder builder) {
 		return new JaxRsLinkBuilder(builder);
 	}
+
 }

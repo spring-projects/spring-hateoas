@@ -17,9 +17,11 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,10 +37,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -50,8 +54,10 @@ import org.springframework.web.util.UriTemplate;
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
-	private static final AnnotatedParametersParameterAccessor accessor = new AnnotatedParametersParameterAccessor(
+	private static final AnnotatedParametersParameterAccessor pathVariableAccessor = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
+	private static final AnnotatedParametersParameterAccessor requestParamAccessor = new AnnotatedParametersParameterAccessor(
+			new AnnotationAttribute(RequestParam.class));
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -74,7 +80,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
-	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
+	 * additional parameters are used to fill up potentially available path variables in the class scope request mapping.
 	 * 
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
@@ -138,16 +144,28 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
 		Map<String, Object> values = new HashMap<String, Object>();
 
-		if (classMappingParameters.hasNext()) {
-			for (String variable : template.getVariableNames()) {
-				values.put(variable, classMappingParameters.next());
-			}
+		Iterator<String> templateVariables = template.getVariableNames().iterator();
+		while (classMappingParameters.hasNext() && templateVariables.hasNext()) {
+			values.put(templateVariables.next(), classMappingParameters.next());
 		}
 
-		values.putAll(accessor.getBoundParameters(invocation));
-		URI uri = template.expand(values);
+		values.putAll(pathVariableAccessor.getBoundParameters(invocation));
+		Map<String, Object> requestParametersWithValue = requestParamAccessor.getBoundParameters(invocation);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(method));
+		for (Entry<String, Object> entry : requestParametersWithValue.entrySet()) {
+			Object value = entry.getValue();
+			if (value instanceof Collection) {
+				Collection<?> collection = (Collection<?>) value;
+				Object[] valueArray = collection.toArray(new Object[collection.size()]);
+				builder.queryParam(entry.getKey(), valueArray);
+			} else {
+				builder.queryParam(entry.getKey(), value);
+			}
+		}
+		UriComponents expanded = builder.buildAndExpand(values);
+
+		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expanded.toUri());
 	}
 
 	/**
@@ -162,8 +180,9 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
+	 *
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
 	@Override
@@ -171,9 +190,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return this;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
+	 *
+	 * @see
+	 * org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance
+	 * (org.springframework.web.util.UriComponentsBuilder)
 	 */
 	@Override
 	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder) {

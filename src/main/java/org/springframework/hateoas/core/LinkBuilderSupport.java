@@ -16,6 +16,7 @@
 package org.springframework.hateoas.core;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
@@ -60,8 +61,12 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return slash((Identifiable<?>) object);
 		}
 
-		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
-		return createNewInstance(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
+		UriComponents components = UriComponentsBuilder.fromUriString(object.toString()).build();
+
+		List<String> pathSegments = components.getPathSegments();
+		String[] segments = pathSegments.toArray(new String[pathSegments.size()]);
+		return createNewInstance(UriComponentsBuilder.fromUri(uriComponents.toUri())
+				.pathSegment(segments).query(components.getQuery()));
 	}
 
 	/*

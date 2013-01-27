@@ -1,51 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
-	<groupId>org.springframework.hateoas</groupId>
-	<artifactId>spring-hateoas</artifactId>
-	<version>0.4.0.BUILD-SNAPSHOT</version>
-	
-	<name>Spring Hateoas</name>
-	<url>http://github.com/SpringSource/spring-hateoas</url>
-	<description>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.springframework.hateoas</groupId>
+  <artifactId>spring-hateoas</artifactId>
+  <version>0.4.0.BUILD-SNAPSHOT</version>
+
+  <name>Spring Hateoas</name>
+  <url>http://github.com/SpringSource/spring-hateoas</url>
+  <description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
 	</description>
-	
-	<inceptionYear>2012</inceptionYear>
-	
-	<organization>
-		<name>SpringSource, a division of VMware</name>
-		<url>http://www.springsource.org</url>
-	</organization>
-	
-	<developers>
-		<developer>
-			<id>ogierke</id>
-			<name>Oliver Gierke</name>
-			<email>ogierke(at)vmware.com</email>
-			<organization>SpringSource, a division of VMware</organization>
-			<roles>
-				<role>Project lead</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-	</developers>
-	
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
-			<comments>
+
+  <inceptionYear>2012</inceptionYear>
+
+  <organization>
+    <name>SpringSource, a division of VMware</name>
+    <url>http://www.springsource.org</url>
+  </organization>
+
+  <developers>
+    <developer>
+      <id>ogierke</id>
+      <name>Oliver Gierke</name>
+      <email>ogierke(at)vmware.com</email>
+      <organization>SpringSource, a division of VMware</organization>
+      <roles>
+        <role>Project lead</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <comments>
 			Copyright 2011 the original author or authors.
-			 
+
 			Licensed under the Apache License, Version 2.0 (the "License");
 			you may not use this file except in compliance with the License.
 			You may obtain a copy of the License at
-			
+
 			     http://www.apache.org/licenses/LICENSE-2.0
-			
+
 			Unless required by applicable law or agreed to in writing, software
 			distributed under the License is distributed on an "AS IS" BASIS,
 			WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -53,227 +54,276 @@
 			See the License for the specific language governing permissions and
 			limitations under the License.
 			</comments>
-		</license>
-	</licenses>
+    </license>
+  </licenses>
 
-	<properties>
-		<spring.version>3.1.2.RELEASE</spring.version>
-		<jackson1.version>1.9.10</jackson1.version>
-		<jackson2.version>2.1.1</jackson2.version>
-		<jaxrs.version>1.0</jaxrs.version>
-		<jsonpath.version>0.8.1</jsonpath.version>
-		<minidevjson.version>1.1.1</minidevjson.version>
-		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
-	</properties>
+  <properties>
+    <spring.version>3.2.0.RELEASE</spring.version>
+    <jackson1.version>1.9.10</jackson1.version>
+    <jackson2.version>2.1.1</jackson2.version>
+    <jaxrs.version>1.0</jaxrs.version>
+    <cglib.version>2.2.2</cglib.version>
+    <jsonpath.version>0.8.1</jsonpath.version>
+    <minidevjson.version>1.1.1</minidevjson.version>
+    <bundlor.failOnWarnings>true</bundlor.failOnWarnings>
+  </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.plugin</groupId>
-			<artifactId>spring-plugin-core</artifactId>
-			<version>0.8.0.BUILD-SNAPSHOT</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<dependency>
-			<groupId>cglib</groupId>
-			<artifactId>cglib</artifactId>
-			<version>2.2.2</version>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>${jackson1.version}</version>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework.plugin</groupId>
+      <artifactId>spring-plugin-core</artifactId>
+      <version>0.8.0.BUILD-SNAPSHOT</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>${jackson1.version}</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson2.version}</version>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>2.2.2</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson2.version}</version>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>jsr311-api</artifactId>
-			<version>${jaxrs.version}</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>${jsonpath.version}</version>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+      <version>${jackson1.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
-			<version>1.2.1</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>${jackson1.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit-dep</artifactId>
-			<version>4.10</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson2.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${spring.version}</version>
-			<scope>test</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.9.0</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson2.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-	</dependencies>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+      <version>${jaxrs.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.5.1</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>com.springsource.bundlor</groupId>
-				<artifactId>com.springsource.bundlor.maven</artifactId>
-				<version>1.0.0.RELEASE</version>
-				<configuration>
-					<failOnWarnings>${bundlor.failOnWarnings}</failOnWarnings>
-				</configuration>
-				<executions>
-					<execution>
-						<id>bundlor</id>
-						<goals>
-							<goal>bundlor</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
-				<configuration>
-					<useDefaultManifestFile>true</useDefaultManifestFile>
-				</configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<phase>package</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<breakiterator>true</breakiterator>
-					<header>${project.name}</header>
-					<source>1.5</source>
-					<quiet>true</quiet>
-					<javadocDirectory>${project.basedir}/src/main/javadoc</javadocDirectory>
-					<overview>${project.basedir}/src/main/javadoc/overview.html</overview>
-					<stylesheetfile>${project.basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
-					<!-- copies doc-files subdirectory which contains image resources -->
-					<docfilessubdirs>true</docfilessubdirs>
-					<links>
-						<link>http://static.springframework.org/spring/docs/3.1.x/javadoc-api</link>
-						<link>http://download.oracle.com/javase/1.5.0/docs/api</link>
-					</links>
-				</configuration>
-			</plugin>
-			
-		</plugins>
-	</build>
-	
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-plugins-release</id>
-			<url>http://repo.springsource.org/plugins-release</url>
-		</pluginRepository>
-	</pluginRepositories>
-	
-	<repositories>
-		<repository>
-			<id>spring-snapshots</id>
-			<url>http://repo.springsource.org/libs-snapshot</url>
-		</repository>
-	</repositories>
-	
-	<scm>
-        <url>https://github.com/SpringSource/spring-hateoas</url>
-        <connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>
-    </scm>
-	
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>${jsonpath.version}</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-library</artifactId>
+      <version>1.2.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit-dep</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib-nodep</artifactId>
+      <version>2.2.2</version>
+    </dependency>
+
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.springsource.bundlor</groupId>
+        <artifactId>com.springsource.bundlor.maven</artifactId>
+        <version>1.0.0.RELEASE</version>
+        <configuration>
+          <failOnWarnings>${bundlor.failOnWarnings}</failOnWarnings>
+        </configuration>
+        <executions>
+          <execution>
+            <id>bundlor</id>
+            <goals>
+              <goal>bundlor</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.1</version>
+        <configuration>
+          <useDefaultManifestFile>true</useDefaultManifestFile>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.2</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <breakiterator>true</breakiterator>
+          <header>${project.name}</header>
+          <source>1.5</source>
+          <quiet>true</quiet>
+          <javadocDirectory>${project.basedir}/src/main/javadoc</javadocDirectory>
+          <overview>${project.basedir}/src/main/javadoc/overview.html</overview>
+          <stylesheetfile>${project.basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
+          <!-- copies doc-files subdirectory which contains image resources -->
+          <docfilessubdirs>true</docfilessubdirs>
+          <links>
+            <link>http://static.springframework.org/spring/docs/3.1.x/javadoc-api</link>
+            <link>http://download.oracle.com/javase/1.5.0/docs/api</link>
+          </links>
+        </configuration>
+      </plugin>
+
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+          only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>
+                      com.springsource.bundlor
+                    </groupId>
+                    <artifactId>
+                      com.springsource.bundlor.maven
+                    </artifactId>
+                    <versionRange>
+                      [1.0.0.RELEASE,)
+                    </versionRange>
+                    <goals>
+                      <goal>bundlor</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>spring-plugins-release</id>
+      <url>http://repo.springsource.org/plugins-release</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <repositories>
+    <repository>
+      <id>spring-snapshots</id>
+      <url>http://repo.springsource.org/libs-snapshot</url>
+    </repository>
+    <repository>
+      <id>spring-milestones</id>
+      <url>http://repo.springsource.org/libs-milestone</url>
+    </repository>
+  </repositories>
+
+  <scm>
+    <url>https://github.com/SpringSource/spring-hateoas</url>
+    <connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>
+  </scm>
+
 </project>
