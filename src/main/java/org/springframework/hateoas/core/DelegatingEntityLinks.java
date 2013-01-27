@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,8 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 	}
 
 	/**
-	 * Returns the plugin for the given type or throws an {@link IllegalStateException} if no delegate {@link EntityLinks}
-	 * can be found.
+	 * Returns the plugin for the given type or throws an {@link IllegalArgumentException} if no delegate
+	 * {@link EntityLinks} can be found.
 	 * 
 	 * @param type must not be {@literal null}.
 	 * @return
@@ -99,7 +99,7 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 		EntityLinks plugin = delegates.getPluginFor(type);
 
 		if (plugin == null) {
-			throw new IllegalStateException(String.format(
+			throw new IllegalArgumentException(String.format(
 					"Cannot determine link for %s! No EntityLinks instance found supporting the domain type!", type.getName()));
 		}
 
