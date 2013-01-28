@@ -1,6 +1,18 @@
 Spring Hateoas Changelog
 =========================
 
+Changes in version 0.4.0.RELEASE (2013-28-01)
+---------------------------------------------
+- #18 - Added support to build links pointing to controller methods
+- #32 - Added @EnableEntityLinks to transparently expose controllers managing entities
+- Introduced EntityLinks API to build links pointing to components exposing URIs for entities
+- Introduced LinkDiscoverer API to find links by their rels in representations (incl. JSONPath based implementation)
+- #27 - Added support for Jackson 2
+- #29 - Added support for HAL-style link representations
+- #41, #42 - Extracted ResourceAssemblerSupport for non-Identifiables
+- #43 - Fixed potential stack-overflow in ControllerLinkBuilder
+- #33 - ControllerLinkBuilder now considers X-Forwarded-Host header if present
+
 Changes in version 0.3.0.RELEASE (2012-10-09)
 ---------------------------------------------
 #15 - Upgraded to Jackson 1.9.10.

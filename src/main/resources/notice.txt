@@ -1,4 +1,4 @@
-Spring Hateoas 0.3
+Spring Hateoas 0.4
 Copyright (c) [2012] SpringSource, a division of VMware, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").  
