@@ -15,14 +15,19 @@
  */
 package org.springframework.hateoas.hal;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTests;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -34,8 +39,10 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
-	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"test\":{}},\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
-	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"test\":[{},{}]},\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
+
+	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
+	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}}}";
+	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}]}}";
 
 	@Before
 	public void setUpModule() {
@@ -65,5 +72,43 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost2"));
 
 		assertThat(write(resourceSupport), is(LIST_LINK_REFERENCE));
+	}
+
+	@Test
+	public void rendersSimpleResourcesAsEmbedded() throws Exception {
+
+		List<String> content = new ArrayList<String>();
+		content.add("first");
+		content.add("second");
+
+		Resources<String> resources = new Resources<String>(content);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(SIMPLE_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void rendersSingleResourceResourcesAsEmbedded() throws Exception {
+
+		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(SINGLE_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
+
+		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
+
+		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
 	}
 }
