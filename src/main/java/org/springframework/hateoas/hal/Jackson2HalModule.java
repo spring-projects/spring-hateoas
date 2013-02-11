@@ -434,7 +434,6 @@ public class Jackson2HalModule extends SimpleModule {
 			// TODO do this stuff with a reall content deserializer that handles optional lists
 			for (Object curList : sortedLinks.values()) {
 				if (curList instanceof List) {
-					System.out.println("link list? : " + curList);
 					for (Map<String, String> link : (List<Map>) curList) {
 						if (link.keySet().containsAll(Arrays.asList("rel", "href"))) {
 							result.add(new Link(link.get("href"), link.get("rel")));
