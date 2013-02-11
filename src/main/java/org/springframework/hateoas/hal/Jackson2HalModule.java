@@ -237,8 +237,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			// TODO Auto-generated method stub
-			return null;
+			return new HalResourcesSerializer(property);
 		}
 
 		@Override
