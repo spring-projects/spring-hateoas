@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,14 +26,19 @@ import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.BeanProperty;
 import org.codehaus.jackson.map.ContextualSerializer;
+import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.TypeSerializer;
+import org.codehaus.jackson.map.deser.std.ContainerDeserializerBase;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.map.ser.std.ContainerSerializerBase;
 import org.codehaus.jackson.map.ser.std.MapSerializer;
@@ -292,6 +298,57 @@ public class Jackson1HalModule extends SimpleModule {
 					serializer.serialize(elem, jgen, provider);
 				}
 			}
+		}
+	}
+
+	public class HalLinkListDeserializer extends ContainerDeserializerBase<List<Link>> {
+
+		public HalLinkListDeserializer() {
+			super(List.class);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		@Override
+		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+				JsonProcessingException {
+			List<Link> result = new ArrayList<Link>();
+
+			Map<String, Object> sortedLinks = null;
+			// (Map<String, Object>)
+			// ctxt.getDeserializerProvider().findRootValueDeserializer(ctxt.getTypeFactory().constructMapType(HashMap.class,
+			// String.class,
+			// Object.class)).deserialize(jp, ctxt);
+
+			// TODO do this stuff with a reall content deserializer that handles optional lists
+			for (Object curList : sortedLinks.values()) {
+				if (curList instanceof List) {
+					for (Map<String, String> link : (List<Map>) curList) {
+						if (link.keySet().containsAll(Arrays.asList("rel", "href"))) {
+							result.add(new Link(link.get("href"), link.get("rel")));
+						}
+					}
+				} else if (curList instanceof Link) {
+					result.add((Link) curList);
+				} else if (curList instanceof Map) {
+					Map<String, String> link = (Map<String, String>) curList;
+					if (link.keySet().containsAll(Arrays.asList("rel", "href"))) {
+						result.add(new Link(link.get("href"), link.get("rel")));
+					}
+				} else {
+					throw new IllegalArgumentException("unknow content of type : " + curList.getClass());
+				}
+			}
+
+			return result;
 		}
 	}
 }
