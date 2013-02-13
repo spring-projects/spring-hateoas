@@ -88,6 +88,11 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		}
 
 		String typeMapping = getMapping(method.getDeclaringClass());
+
+		if (mapping == null || mapping.length == 0) {
+			return typeMapping;
+		}
+
 		return typeMapping == null ? mapping[0] : typeMapping + mapping[0];
 	}
 

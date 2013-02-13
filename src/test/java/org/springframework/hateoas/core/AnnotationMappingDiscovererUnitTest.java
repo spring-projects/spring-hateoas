@@ -60,11 +60,24 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method), is("/method"));
 	}
 
+	/**
+	 * @see #46
+	 */
+	@Test
+	public void treatsMissingMethodMappingAsEmptyMapping() throws Exception {
+
+		Method method = MyController.class.getMethod("noMethodMapping");
+		assertThat(discoverer.getMapping(method), is("/type"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
 		@RequestMapping("/method")
 		void method();
+
+		@RequestMapping
+		void noMethodMapping();
 	}
 
 	interface ControllerWithoutTypeLevelMapping {
