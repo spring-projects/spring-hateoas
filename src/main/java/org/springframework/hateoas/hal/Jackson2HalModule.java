@@ -41,7 +41,9 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -443,6 +445,70 @@ public class Jackson2HalModule extends SimpleModule {
             }
 
             return result;
+        }
+    }
+
+    public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements ContextualDeserializer {
+
+        private JavaType contentType;
+
+        public HalResourcesDeserializer() {
+            super(List.class);
+        }
+
+        public HalResourcesDeserializer(JavaType vc) {
+            super(null);
+            this.contentType = vc;
+        }
+
+        @Override
+        public JavaType getContentType() {
+            return null;
+        }
+
+        @Override
+        public JsonDeserializer<Object> getContentDeserializer() {
+            return null;
+        }
+
+        @Override
+        public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            List<Object> result = new ArrayList<Object>();
+
+            // TODO make sure this mapper behaves just like the "current" "real" mapper
+            ObjectMapper mapper = new ObjectMapper();
+
+            Object object;
+            // links is an object, so we parse till we find its end.
+            while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+                if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+                    throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+                }
+
+                if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+                    while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+                        object = mapper.readValue(jp, contentType);
+                        result.add(object);
+                    }
+                } else {
+                    object = mapper.readValue(jp, contentType);
+                    result.add(object);
+                }
+            }
+
+            return result;
+        }
+
+        @Override
+        public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
+            JavaType vc = property.getType().getContentType();
+
+            // if (INSTANCES.containsKey(vc)) {
+            // return INSTANCES.get(vc);
+            // }
+            HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
+            // INSTANCES.put(vc, des);
+            return des;
         }
     }
 }
