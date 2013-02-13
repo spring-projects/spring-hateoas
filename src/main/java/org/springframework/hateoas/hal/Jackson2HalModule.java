@@ -471,12 +471,36 @@ public class Jackson2HalModule extends SimpleModule {
             return null;
         }
 
+        /**
+         * straight out of the {@link ObjectMapper} implementation.
+         */
+        protected Object _readValue(DeserializationContext ctxt, JsonParser jp, JavaType valueType) throws IOException, JsonParseException,
+                JsonMappingException {
+            /*
+             * First: may need to read the next token, to initialize
+             * state (either before first read from parser, or after
+             * previous token has been cleared)
+             */
+            Object result;
+            JsonToken t = jp.getCurrentToken();
+            if (t == JsonToken.VALUE_NULL) {
+                // [JACKSON-643]: Ask JsonDeserializer what 'null value' to use:
+                result = ctxt.findRootValueDeserializer(valueType).getNullValue();
+            } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {
+                result = null;
+            } else { // pointing to event other than null
+                JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(valueType);
+                // ok, let's get the value
+                result = deser.deserialize(jp, ctxt);
+            }
+            // Need to consume the token too
+            jp.clearCurrentToken();
+            return result;
+        }
+
         @Override
         public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             List<Object> result = new ArrayList<Object>();
-
-            // TODO make sure this mapper behaves just like the "current" "real" mapper
-            ObjectMapper mapper = new ObjectMapper();
 
             Object object;
             // links is an object, so we parse till we find its end.
@@ -487,11 +511,11 @@ public class Jackson2HalModule extends SimpleModule {
 
                 if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
                     while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-                        object = mapper.readValue(jp, contentType);
+                        object = _readValue(ctxt, jp, contentType);
                         result.add(object);
                     }
                 } else {
-                    object = mapper.readValue(jp, contentType);
+                    object = _readValue(ctxt, jp, contentType);
                     result.add(object);
                 }
             }

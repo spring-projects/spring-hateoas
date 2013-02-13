@@ -130,4 +130,23 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 
         assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
     }
+
+    @Test
+    public void deserializeMultipleResourceResourcesAsEmbedded() throws Exception {
+
+        List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+        content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+        content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
+
+        Resources<Resource<SimplePojo>> expected = new Resources<Resource<SimplePojo>>(content);
+        expected.add(new Link("localhost"));
+
+        Resources<Resource<SimplePojo>> result = mapper.readValue(
+                LIST_EMBEDDED_RESOURCE_REFERENCE,
+                mapper.getTypeFactory().constructParametricType(Resources.class,
+                        mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+
+        assertThat(result, is(expected));
+
+    }
 }

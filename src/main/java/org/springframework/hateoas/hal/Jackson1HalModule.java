@@ -31,11 +31,14 @@ import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.Version;
 import org.codehaus.jackson.map.BeanProperty;
+import org.codehaus.jackson.map.ContextualDeserializer;
 import org.codehaus.jackson.map.ContextualSerializer;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.TypeSerializer;
@@ -337,6 +340,94 @@ public class Jackson1HalModule extends SimpleModule {
             }
 
             return result;
+        }
+    }
+
+    public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements ContextualDeserializer<List<Object>> {
+
+        private JavaType contentType;
+
+        public HalResourcesDeserializer() {
+            super(List.class);
+        }
+
+        public HalResourcesDeserializer(JavaType vc) {
+            super(null);
+            this.contentType = vc;
+        }
+
+        @Override
+        public JavaType getContentType() {
+            return null;
+        }
+
+        @Override
+        public JsonDeserializer<Object> getContentDeserializer() {
+            return null;
+        }
+
+        /**
+         * straight out of the {@link ObjectMapper} implementation.
+         */
+        protected Object _readValue(DeserializationContext ctxt, JsonParser jp, JavaType valueType) throws IOException, JsonParseException,
+                JsonMappingException {
+            /*
+             * First: may need to read the next token, to initialize
+             * state (either before first read from parser, or after
+             * previous token has been cleared)
+             */
+            Object result;
+            JsonToken t = jp.getCurrentToken();
+            if (t == JsonToken.VALUE_NULL) {
+                // [JACKSON-643]: Ask JsonDeserializer what 'null value' to use:
+                result = ctxt.getDeserializerProvider().findTypedValueDeserializer(ctxt.getConfig(), valueType, null).getNullValue();
+            } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {
+                result = null;
+            } else { // pointing to event other than null
+                JsonDeserializer<Object> deser = ctxt.getDeserializerProvider().findTypedValueDeserializer(ctxt.getConfig(), valueType, null);
+                // ok, let's get the value
+                result = deser.deserialize(jp, ctxt);
+            }
+            // Need to consume the token too
+            jp.clearCurrentToken();
+            return result;
+        }
+
+        @Override
+        public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+            List<Object> result = new ArrayList<Object>();
+
+            Object object;
+            // links is an object, so we parse till we find its end.
+            while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+                if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+                    throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+                }
+
+                if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+                    while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+                        object = _readValue(ctxt, jp, contentType);
+                        result.add(object);
+                    }
+                } else {
+                    object = _readValue(ctxt, jp, contentType);
+                    result.add(object);
+                }
+            }
+
+            return result;
+        }
+
+        @Override
+        public JsonDeserializer<List<Object>> createContextual(DeserializationConfig config, BeanProperty property) throws JsonMappingException {
+            JavaType vc = property.getType().getContentType();
+
+            // if (INSTANCES.containsKey(vc)) {
+            // return INSTANCES.get(vc);
+            // }
+            HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
+            // INSTANCES.put(vc, des);
+            return des;
         }
     }
 }
