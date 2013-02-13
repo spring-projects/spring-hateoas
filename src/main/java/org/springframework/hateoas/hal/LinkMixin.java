@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal;
 
 import org.springframework.hateoas.Link;
 
-class LinkMixin extends Link {
-	private static final long serialVersionUID = 4720588561299667409L;
+abstract class LinkMixin extends Link {
+    private static final long serialVersionUID = 4720588561299667409L;
+
 }

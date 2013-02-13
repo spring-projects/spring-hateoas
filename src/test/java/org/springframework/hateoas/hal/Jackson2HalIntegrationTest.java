@@ -37,78 +37,103 @@ import org.springframework.hateoas.Resources;
  */
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTests {
 
-	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}";
-	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
+    static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}";
+    static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
 
-	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
-	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}}}";
-	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}]}}";
+    static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
+    static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}}}";
+    static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}]}}";
 
-	@Before
-	public void setUpModule() {
-		mapper.registerModule(new Jackson2HalModule());
-	}
+    @Before
+    public void setUpModule() {
+        mapper.registerModule(new Jackson2HalModule());
+    }
 
-	/**
-	 * @see #29
-	 */
-	@Test
-	public void rendersSingleLinkAsObject() throws Exception {
+    /**
+     * @see #29
+     */
+    @Test
+    public void rendersSingleLinkAsObject() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link("localhost"));
+        ResourceSupport resourceSupport = new ResourceSupport();
+        resourceSupport.add(new Link("localhost"));
 
-		assertThat(write(resourceSupport), is(SINGLE_LINK_REFERENCE));
-	}
+        assertThat(write(resourceSupport), is(SINGLE_LINK_REFERENCE));
+    }
 
-	/**
-	 * @see #29
-	 */
-	@Test
-	public void rendersMultipleLinkAsArray() throws Exception {
+    @Test
+    public void deserializeSingleLink() throws Exception {
+        ResourceSupport expected = new ResourceSupport();
+        expected.add(new Link("localhost"));
+        assertThat(read(SINGLE_LINK_REFERENCE, ResourceSupport.class), is(expected));
+    }
 
-		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link("localhost"));
-		resourceSupport.add(new Link("localhost2"));
+    /**
+     * @see #29
+     */
+    @Test
+    public void rendersMultipleLinkAsArray() throws Exception {
 
-		assertThat(write(resourceSupport), is(LIST_LINK_REFERENCE));
-	}
+        ResourceSupport resourceSupport = new ResourceSupport();
+        resourceSupport.add(new Link("localhost"));
+        resourceSupport.add(new Link("localhost2"));
 
-	@Test
-	public void rendersSimpleResourcesAsEmbedded() throws Exception {
+        assertThat(write(resourceSupport), is(LIST_LINK_REFERENCE));
+    }
 
-		List<String> content = new ArrayList<String>();
-		content.add("first");
-		content.add("second");
+    @Test
+    public void deserializeMultipleLinks() throws Exception {
 
-		Resources<String> resources = new Resources<String>(content);
-		resources.add(new Link("localhost"));
+        ResourceSupport expected = new ResourceSupport();
+        expected.add(new Link("localhost"));
+        expected.add(new Link("localhost2"));
 
-		assertThat(write(resources), is(SIMPLE_EMBEDDED_RESOURCE_REFERENCE));
-	}
+        assertThat(read(LIST_LINK_REFERENCE, ResourceSupport.class), is(expected));
+    }
 
-	@Test
-	public void rendersSingleResourceResourcesAsEmbedded() throws Exception {
+    @Test
+    public void rendersSimpleResourcesAsEmbedded() throws Exception {
 
-		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
-		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+        List<String> content = new ArrayList<String>();
+        content.add("first");
+        content.add("second");
 
-		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
-		resources.add(new Link("localhost"));
+        Resources<String> resources = new Resources<String>(content);
+        resources.add(new Link("localhost"));
 
-		assertThat(write(resources), is(SINGLE_EMBEDDED_RESOURCE_REFERENCE));
-	}
+        assertThat(write(resources), is(SIMPLE_EMBEDDED_RESOURCE_REFERENCE));
+    }
 
-	@Test
-	public void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
+    @Test
+    public void rendersSingleResourceResourcesAsEmbedded() throws Exception {
 
-		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
-		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
+        List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+        content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
 
-		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
-		resources.add(new Link("localhost"));
+        Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+        resources.add(new Link("localhost"));
 
-		assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
-	}
+        assertThat(write(resources), is(SINGLE_EMBEDDED_RESOURCE_REFERENCE));
+    }
+
+    @Test
+    public void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
+
+        List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+        content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+        content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
+
+        Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+        resources.add(new Link("localhost"));
+
+        assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
+    }
+
+    @Test
+    public void deserializeMultipleResourceResourcesAsEmbedded() throws Exception {
+        mapper.readValue(
+                LIST_EMBEDDED_RESOURCE_REFERENCE,
+                mapper.getTypeFactory().constructParametricType(Resources.class,
+                        mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+    }
 }
