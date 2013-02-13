@@ -88,6 +88,15 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		}
 
 		String typeMapping = getMapping(method.getDeclaringClass());
+		
+		/* sometimes i don't write value option explicitly in request mapping
+		like here @RequestMapping(method = RequestMethod.GET)
+		when the case it throws ArrayIndexOutOfBoundsException
+		*/
+		if(mapping == null || mapping.length<1) {
+			return typeMapping;
+		}
+		
 		return typeMapping == null ? mapping[0] : typeMapping + mapping[0];
 	}
 
