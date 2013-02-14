@@ -38,7 +38,6 @@ import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.TypeSerializer;
@@ -61,373 +60,356 @@ import org.springframework.hateoas.Resources;
  */
 public class Jackson1HalModule extends SimpleModule {
 
-    /**
-     * Creates a new {@link Jackson1HalModule}.
-     */
-    public Jackson1HalModule() {
-
-        super("json-hal-module", new Version(1, 0, 0, null));
-
-        setMixInAnnotation(Link.class, LinkMixin.class);
-        setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-        setMixInAnnotation(Resources.class, ResourcesMixin.class);
-    }
-
-    /**
-     * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the list as a map, where
-     * links are sorted based on their relation.
-     * 
-     * @author Alexander Baetz
-     * @author Oliver Gierke
-     */
-    public static class HalLinkListSerializer extends ContainerSerializerBase<List<Link>> implements ContextualSerializer<List<Link>> {
-
-        private final BeanProperty property;
-
-        /**
-         * Creates a new {@link HalLinkListSerializer}.
-         */
-        public HalLinkListSerializer() {
-            this(null);
-        }
-
-        public HalLinkListSerializer(BeanProperty property) {
-            super(List.class, false);
-            this.property = property;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
-         * org.codehaus.jackson.map.SerializerProvider)
-         */
-        @Override
-        public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            // sort links according to their relation
-            Map<String, List<Link>> sortedLinks = new HashMap<String, List<Link>>();
-
-            for (Link link : value) {
-
-                if (sortedLinks.get(link.getRel()) == null) {
-                    sortedLinks.put(link.getRel(), new ArrayList<Link>());
-                }
-
-                sortedLinks.get(link.getRel()).add(link);
-            }
-
-            TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-            JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-            JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Link.class);
-            JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
-
-            MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null, provider.findKeySerializer(keyType, null),
-                    new OptionalListSerializer(property));
-
-            serializer.serialize(sortedLinks, jgen, provider);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
-         * org.codehaus.jackson.map.BeanProperty)
-         */
-        @Override
-        public JsonSerializer<List<Link>> createContextual(SerializationConfig config, BeanProperty property) throws JsonMappingException {
-            return new HalLinkListSerializer(property);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
-         */
-        @Override
-        public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
-            return null;
-        }
-    }
-
-    /**
-     * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
-     * 
-     * @author Alexander Baetz
-     * @author Oliver Gierke
-     */
-    public static class HalResourcesSerializer extends ContainerSerializerBase<Collection<?>> implements ContextualSerializer<Collection<?>> {
-
-        private final BeanProperty property;
-
-        /**
-         * Creates a new {@link HalLinkListSerializer}.
-         */
-        public HalResourcesSerializer() {
-            this(null);
-        }
-
-        public HalResourcesSerializer(BeanProperty property) {
-            super(Collection.class, false);
-            this.property = property;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
-         * org.codehaus.jackson.map.SerializerProvider)
-         */
-        @Override
-        public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            // sort resources according to their types
-            Map<String, List<Object>> sortedLinks = new HashMap<String, List<Object>>();
-
-            for (Object resource : value) {
-
-                // TODO: do something fancy to get the relation name
-                String relation = "content";
-                if (sortedLinks.get(relation) == null) {
-                    sortedLinks.put(relation, new ArrayList<Object>());
-                }
-
-                sortedLinks.get(relation).add(resource);
-            }
-
-            TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-            JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-            JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
-            JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
-
-            MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null, provider.findKeySerializer(keyType, null),
-                    new OptionalListSerializer(property));
-
-            serializer.serialize(sortedLinks, jgen, provider);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
-         * org.codehaus.jackson.map.BeanProperty)
-         */
-        @Override
-        public JsonSerializer<Collection<?>> createContextual(SerializationConfig config, BeanProperty property) throws JsonMappingException {
-            return new HalResourcesSerializer(property);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
-         */
-        @Override
-        public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
-            return null;
-        }
-    }
-
-    /**
-     * Custom {@link JsonSerializer} to render Objects in HAL compatible JSON. Renders the Object as immediate object if
-     * we have a single one or as array if we have multiple ones.
-     * 
-     * @author Alexander Baetz
-     * @author Oliver Gierke
-     */
-    public static class OptionalListSerializer extends ContainerSerializerBase<Object> {
-
-        private final BeanProperty property;
-        private JsonSerializer<Object> serializer;
-
-        public OptionalListSerializer() {
-            this(null);
-        }
-
-        public OptionalListSerializer(BeanProperty property) {
-
-            super(List.class, false);
-            this.property = property;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
-         */
-        @Override
-        public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
-            throw new UnsupportedOperationException("Not implemented");
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
-         * org.codehaus.jackson.map.SerializerProvider)
-         */
-        @Override
-        public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            List<?> list = (List<?>) value;
-
-            if (list.size() == 1) {
-                serializeContents(list.iterator(), jgen, provider);
-                return;
-            }
-
-            jgen.writeStartArray();
-            serializeContents(list.iterator(), jgen, provider);
-            jgen.writeEndArray();
-        }
-
-        private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            while (value.hasNext()) {
-                Object elem = value.next();
-                if (elem == null) {
-                    provider.defaultSerializeNull(jgen);
-                } else {
-                    if (serializer == null) {
-                        serializer = provider.findValueSerializer(elem.getClass(), property);
-                    }
-                    serializer.serialize(elem, jgen, provider);
-                }
-            }
-        }
-    }
-
-    public static class HalLinkListDeserializer extends ContainerDeserializerBase<List<Link>> {
-
-        public HalLinkListDeserializer() {
-            super(List.class);
-        }
-
-        @Override
-        public JavaType getContentType() {
-            return null;
-        }
-
-        @Override
-        public JsonDeserializer<Object> getContentDeserializer() {
-            return null;
-        }
-
-        @Override
-        public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            List<Link> result = new ArrayList<Link>();
-
-            String relation;
-            Link link;
-            // links is an object, so we parse till we find its end.
-            while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
-                if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-                    throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
-                }
-
-                // save the relation in case the link does not contain it
-                relation = jp.getText();
-
-                if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
-                    while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-                        link = jp.readValueAs(Link.class);
-                        result.add(link);
-                    }
-                } else {
-                    link = jp.readValueAs(Link.class);
-                    result.add(link);
-                }
-            }
-
-            return result;
-        }
-    }
-
-    public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements ContextualDeserializer<List<Object>> {
-
-        private JavaType contentType;
-
-        public HalResourcesDeserializer() {
-            super(List.class);
-        }
-
-        public HalResourcesDeserializer(JavaType vc) {
-            super(null);
-            this.contentType = vc;
-        }
-
-        @Override
-        public JavaType getContentType() {
-            return null;
-        }
-
-        @Override
-        public JsonDeserializer<Object> getContentDeserializer() {
-            return null;
-        }
-
-        /**
-         * straight out of the {@link ObjectMapper} implementation.
-         */
-        protected Object _readValue(DeserializationContext ctxt, JsonParser jp, JavaType valueType) throws IOException, JsonParseException,
-                JsonMappingException {
-            /*
-             * First: may need to read the next token, to initialize
-             * state (either before first read from parser, or after
-             * previous token has been cleared)
-             */
-            Object result;
-            JsonToken t = jp.getCurrentToken();
-            if (t == JsonToken.VALUE_NULL) {
-                // [JACKSON-643]: Ask JsonDeserializer what 'null value' to use:
-                result = ctxt.getDeserializerProvider().findTypedValueDeserializer(ctxt.getConfig(), valueType, null).getNullValue();
-            } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {
-                result = null;
-            } else { // pointing to event other than null
-                JsonDeserializer<Object> deser = ctxt.getDeserializerProvider().findTypedValueDeserializer(ctxt.getConfig(), valueType, null);
-                // ok, let's get the value
-                result = deser.deserialize(jp, ctxt);
-            }
-            // Need to consume the token too
-            jp.clearCurrentToken();
-            return result;
-        }
-
-        @Override
-        public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            List<Object> result = new ArrayList<Object>();
-
-            Object object;
-            // links is an object, so we parse till we find its end.
-            while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
-                if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-                    throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
-                }
-
-                if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
-                    while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-                        object = _readValue(ctxt, jp, contentType);
-                        result.add(object);
-                    }
-                } else {
-                    object = _readValue(ctxt, jp, contentType);
-                    result.add(object);
-                }
-            }
-
-            return result;
-        }
-
-        @Override
-        public JsonDeserializer<List<Object>> createContextual(DeserializationConfig config, BeanProperty property) throws JsonMappingException {
-            JavaType vc = property.getType().getContentType();
-
-            // if (INSTANCES.containsKey(vc)) {
-            // return INSTANCES.get(vc);
-            // }
-            HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
-            // INSTANCES.put(vc, des);
-            return des;
-        }
-    }
+	/**
+	 * Creates a new {@link Jackson1HalModule}.
+	 */
+	public Jackson1HalModule() {
+
+		super("json-hal-module", new Version(1, 0, 0, null));
+
+		setMixInAnnotation(Link.class, LinkMixin.class);
+		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
+		setMixInAnnotation(Resources.class, ResourcesMixin.class);
+	}
+
+	/**
+	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the list as a map, where
+	 * links are sorted based on their relation.
+	 * 
+	 * @author Alexander Baetz
+	 * @author Oliver Gierke
+	 */
+	public static class HalLinkListSerializer extends ContainerSerializerBase<List<Link>> implements
+			ContextualSerializer<List<Link>> {
+
+		private final BeanProperty property;
+
+		/**
+		 * Creates a new {@link HalLinkListSerializer}.
+		 */
+		public HalLinkListSerializer() {
+			this(null);
+		}
+
+		public HalLinkListSerializer(BeanProperty property) {
+			super(List.class, false);
+			this.property = property;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
+		 * org.codehaus.jackson.map.SerializerProvider)
+		 */
+		@Override
+		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+
+			// sort links according to their relation
+			Map<String, List<Link>> sortedLinks = new HashMap<String, List<Link>>();
+
+			for (Link link : value) {
+
+				if (sortedLinks.get(link.getRel()) == null) {
+					sortedLinks.put(link.getRel(), new ArrayList<Link>());
+				}
+
+				sortedLinks.get(link.getRel()).add(link);
+			}
+
+			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
+			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
+			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Link.class);
+			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
+
+			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null,
+					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property));
+
+			serializer.serialize(sortedLinks, jgen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
+		 * org.codehaus.jackson.map.BeanProperty)
+		 */
+		@Override
+		public JsonSerializer<List<Link>> createContextual(SerializationConfig config, BeanProperty property)
+				throws JsonMappingException {
+			return new HalLinkListSerializer(property);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
+		 */
+		@Override
+		public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
+			return null;
+		}
+	}
+
+	/**
+	 * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
+	 * 
+	 * @author Alexander Baetz
+	 * @author Oliver Gierke
+	 */
+	public static class HalResourcesSerializer extends ContainerSerializerBase<Collection<?>> implements
+			ContextualSerializer<Collection<?>> {
+
+		private final BeanProperty property;
+
+		/**
+		 * Creates a new {@link HalLinkListSerializer}.
+		 */
+		public HalResourcesSerializer() {
+			this(null);
+		}
+
+		public HalResourcesSerializer(BeanProperty property) {
+			super(Collection.class, false);
+			this.property = property;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
+		 * org.codehaus.jackson.map.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+
+			// sort resources according to their types
+			Map<String, List<Object>> sortedLinks = new HashMap<String, List<Object>>();
+
+			for (Object resource : value) {
+
+				// TODO: do something fancy to get the relation name
+				String relation = "content";
+				if (sortedLinks.get(relation) == null) {
+					sortedLinks.put(relation, new ArrayList<Object>());
+				}
+
+				sortedLinks.get(relation).add(resource);
+			}
+
+			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
+			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
+			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
+			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
+
+			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null,
+					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property));
+
+			serializer.serialize(sortedLinks, jgen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
+		 * org.codehaus.jackson.map.BeanProperty)
+		 */
+		@Override
+		public JsonSerializer<Collection<?>> createContextual(SerializationConfig config, BeanProperty property)
+				throws JsonMappingException {
+			return new HalResourcesSerializer(property);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
+		 */
+		@Override
+		public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
+			return null;
+		}
+	}
+
+	/**
+	 * Custom {@link JsonSerializer} to render Objects in HAL compatible JSON. Renders the Object as immediate object if
+	 * we have a single one or as array if we have multiple ones.
+	 * 
+	 * @author Alexander Baetz
+	 * @author Oliver Gierke
+	 */
+	public static class OptionalListSerializer extends ContainerSerializerBase<Object> {
+
+		private final BeanProperty property;
+		private JsonSerializer<Object> serializer;
+
+		public OptionalListSerializer() {
+			this(null);
+		}
+
+		public OptionalListSerializer(BeanProperty property) {
+
+			super(List.class, false);
+			this.property = property;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
+		 */
+		@Override
+		public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
+			throw new UnsupportedOperationException("Not implemented");
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
+		 * org.codehaus.jackson.map.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+
+			List<?> list = (List<?>) value;
+
+			if (list.size() == 1) {
+				serializeContents(list.iterator(), jgen, provider);
+				return;
+			}
+
+			jgen.writeStartArray();
+			serializeContents(list.iterator(), jgen, provider);
+			jgen.writeEndArray();
+		}
+
+		private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
+
+			while (value.hasNext()) {
+				Object elem = value.next();
+				if (elem == null) {
+					provider.defaultSerializeNull(jgen);
+				} else {
+					if (serializer == null) {
+						serializer = provider.findValueSerializer(elem.getClass(), property);
+					}
+					serializer.serialize(elem, jgen, provider);
+				}
+			}
+		}
+	}
+
+	public static class HalLinkListDeserializer extends ContainerDeserializerBase<List<Link>> {
+
+		public HalLinkListDeserializer() {
+			super(List.class);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		@Override
+		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+				JsonProcessingException {
+			List<Link> result = new ArrayList<Link>();
+
+			String relation;
+			Link link;
+			// links is an object, so we parse till we find its end.
+			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+				}
+
+				// save the relation in case the link does not contain it
+				relation = jp.getText();
+
+				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+						link = jp.readValueAs(Link.class);
+						result.add(link);
+					}
+				} else {
+					link = jp.readValueAs(Link.class);
+					result.add(link);
+				}
+			}
+
+			return result;
+		}
+	}
+
+	public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements
+			ContextualDeserializer<List<Object>> {
+
+		private JavaType contentType;
+
+		public HalResourcesDeserializer() {
+			super(List.class);
+		}
+
+		public HalResourcesDeserializer(JavaType vc) {
+			super(null);
+			this.contentType = vc;
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		@Override
+		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+				JsonProcessingException {
+			List<Object> result = new ArrayList<Object>();
+
+			JsonDeserializer<Object> deser = ctxt.getDeserializerProvider().findTypedValueDeserializer(ctxt.getConfig(),
+					contentType, null);
+
+			Object object;
+			// links is an object, so we parse till we find its end.
+			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+				}
+
+				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+						object = deser.deserialize(jp, ctxt);
+						result.add(object);
+					}
+				} else {
+					object = deser.deserialize(jp, ctxt);
+					result.add(object);
+				}
+			}
+
+			return result;
+		}
+
+		@Override
+		public JsonDeserializer<List<Object>> createContextual(DeserializationConfig config, BeanProperty property)
+				throws JsonMappingException {
+			JavaType vc = property.getType().getContentType();
+			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
+			return des;
+		}
+	}
 }

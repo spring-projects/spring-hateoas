@@ -41,7 +41,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
@@ -60,479 +59,467 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  */
 public class Jackson2HalModule extends SimpleModule {
 
-    private static final long serialVersionUID = 7806951456457932384L;
-
-    @SuppressWarnings("deprecation")
-    public Jackson2HalModule() {
-
-        super("json-hal-module", new Version(1, 0, 0, null));
-
-        setMixInAnnotation(Link.class, LinkMixin.class);
-        setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-        setMixInAnnotation(Resources.class, ResourcesMixin.class);
-    }
-
-    /**
-     * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON.
-     * 
-     * @author Alexander Baetz
-     * @author Oliver Gierke
-     */
-    public static class HalLinkListSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
-
-        private final BeanProperty property;
-
-        public HalLinkListSerializer() {
-            this(null);
-        }
-
-        public HalLinkListSerializer(BeanProperty property) {
-
-            super(List.class, false);
-            this.property = property;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator,
-         * com.fasterxml.jackson.databind.SerializerProvider)
-         */
-        @Override
-        public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            // sort links according to their relation
-            Map<String, List<Link>> sortedLinks = new HashMap<String, List<Link>>();
-            for (Link link : value) {
-                if (sortedLinks.get(link.getRel()) == null) {
-                    sortedLinks.put(link.getRel(), new ArrayList<Link>());
-                }
-                sortedLinks.get(link.getRel()).add(link);
-            }
-
-            TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-            JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-            JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Link.class);
-            JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
-
-            MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, provider.findKeySerializer(keyType, null),
-                    new OptionalListJackson2Serializer(property));
-
-            serializer.serialize(sortedLinks, jgen, provider);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider,
-         * com.fasterxml.jackson.databind.BeanProperty)
-         */
-        @Override
-        public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property) throws JsonMappingException {
-            return new HalLinkListSerializer(property);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
-         */
-        @Override
-        public JavaType getContentType() {
-            return null;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
-         */
-        @Override
-        public JsonSerializer<?> getContentSerializer() {
-            return null;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
-         */
-        @Override
-        public boolean isEmpty(List<Link> value) {
-            return false;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
-         */
-        @Override
-        public boolean hasSingleElement(List<Link> value) {
-            return false;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.
-         * TypeSerializer)
-         */
-        @Override
-        protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
-            return null;
-        }
-    }
-
-    /**
-     * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
-     * 
-     * @author Alexander Baetz
-     * @author Oliver Gierke
-     */
-    public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>> implements ContextualSerializer {
-
-        private final BeanProperty property;
-
-        /**
-         * Creates a new {@link HalLinkListSerializer}.
-         */
-        public HalResourcesSerializer() {
-            this(null);
-        }
-
-        public HalResourcesSerializer(BeanProperty property) {
-            super(Collection.class, false);
-            this.property = property;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
-         * org.codehaus.jackson.map.SerializerProvider)
-         */
-        @Override
-        public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            // sort resources according to their types
-            Map<String, List<Object>> sortedLinks = new HashMap<String, List<Object>>();
-
-            for (Object resource : value) {
-
-                // TODO: do something fancy to get the relation name
-                String relation = "content";
-                if (sortedLinks.get(relation) == null) {
-                    sortedLinks.put(relation, new ArrayList<Object>());
-                }
-
-                sortedLinks.get(relation).add(resource);
-            }
-
-            TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-            JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-            JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
-            JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
-
-            MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, provider.findKeySerializer(keyType, null),
-                    new OptionalListJackson2Serializer(property));
-
-            serializer.serialize(sortedLinks, jgen, provider);
-        }
-
-        @Override
-        public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
-            return new HalResourcesSerializer(property);
-        }
-
-        @Override
-        public JavaType getContentType() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public JsonSerializer<?> getContentSerializer() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean isEmpty(Collection<?> value) {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public boolean hasSingleElement(Collection<?> value) {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-    }
-
-    /**
-     * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the {@link Link} as
-     * immediate object if we have a single one or as array if we have multiple ones.
-     * 
-     * @author Alexander Baetz
-     * @author Oliver Gierke
-     */
-    public static class OptionalListJackson2Serializer extends ContainerSerializer<Object> implements ContextualSerializer {
-
-        private final BeanProperty property;
-        private JsonSerializer<Object> serializer;
-
-        public OptionalListJackson2Serializer() {
-            this(null);
-        }
-
-        /**
-         * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty}.
-         * 
-         * @param property
-         */
-        public OptionalListJackson2Serializer(BeanProperty property) {
-
-            super(List.class, false);
-            this.property = property;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.
-         * TypeSerializer)
-         */
-        @Override
-        public ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
-            throw new UnsupportedOperationException("not implemented");
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator,
-         * com.fasterxml.jackson.databind.SerializerProvider)
-         */
-        @Override
-        public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            List<?> list = (List<?>) value;
-
-            if (list.size() == 1) {
-                serializeContents(list.iterator(), jgen, provider);
-                return;
-            }
-
-            jgen.writeStartArray();
-            serializeContents(list.iterator(), jgen, provider);
-            jgen.writeEndArray();
-        }
-
-        private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
-
-            while (value.hasNext()) {
-                Object elem = value.next();
-                if (elem == null) {
-                    provider.defaultSerializeNull(jgen);
-                } else {
-                    if (serializer == null) {
-                        serializer = provider.findValueSerializer(elem.getClass(), property);
-                    }
-                    serializer.serialize(elem, jgen, provider);
-                }
-            }
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
-         */
-        @Override
-        public JsonSerializer<?> getContentSerializer() {
-            return serializer;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
-         */
-        @Override
-        public JavaType getContentType() {
-            return null;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
-         */
-        @Override
-        public boolean hasSingleElement(Object arg0) {
-            return false;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
-         */
-        @Override
-        public boolean isEmpty(Object arg0) {
-            return false;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider,
-         * com.fasterxml.jackson.databind.BeanProperty)
-         */
-        @Override
-        public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property) throws JsonMappingException {
-            return new OptionalListJackson2Serializer(property);
-        }
-    }
-
-    public static class HalLinkListDeserializer extends ContainerDeserializerBase<List<Link>> {
-
-        public HalLinkListDeserializer() {
-            super(List.class);
-        }
-
-        @Override
-        public JavaType getContentType() {
-            return null;
-        }
-
-        @Override
-        public JsonDeserializer<Object> getContentDeserializer() {
-            return null;
-        }
-
-        @Override
-        public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            List<Link> result = new ArrayList<Link>();
-
-            String relation;
-            Link link;
-            // links is an object, so we parse till we find its end.
-            while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
-                if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-                    throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
-                }
-
-                // save the relation in case the link does not contain it
-                relation = jp.getText();
-
-                if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
-                    while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-                        link = jp.readValueAs(Link.class);
-                        result.add(link);
-                    }
-                } else {
-                    link = jp.readValueAs(Link.class);
-                    result.add(link);
-                }
-            }
-
-            return result;
-        }
-    }
-
-    public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements ContextualDeserializer {
-
-        private JavaType contentType;
-
-        public HalResourcesDeserializer() {
-            super(List.class);
-        }
-
-        public HalResourcesDeserializer(JavaType vc) {
-            super(null);
-            this.contentType = vc;
-        }
-
-        @Override
-        public JavaType getContentType() {
-            return null;
-        }
-
-        @Override
-        public JsonDeserializer<Object> getContentDeserializer() {
-            return null;
-        }
-
-        /**
-         * straight out of the {@link ObjectMapper} implementation.
-         */
-        protected Object _readValue(DeserializationContext ctxt, JsonParser jp, JavaType valueType) throws IOException, JsonParseException,
-                JsonMappingException {
-            /*
-             * First: may need to read the next token, to initialize
-             * state (either before first read from parser, or after
-             * previous token has been cleared)
-             */
-            Object result;
-            JsonToken t = jp.getCurrentToken();
-            if (t == JsonToken.VALUE_NULL) {
-                // [JACKSON-643]: Ask JsonDeserializer what 'null value' to use:
-                result = ctxt.findRootValueDeserializer(valueType).getNullValue();
-            } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {
-                result = null;
-            } else { // pointing to event other than null
-                JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(valueType);
-                // ok, let's get the value
-                result = deser.deserialize(jp, ctxt);
-            }
-            // Need to consume the token too
-            jp.clearCurrentToken();
-            return result;
-        }
-
-        @Override
-        public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            List<Object> result = new ArrayList<Object>();
-
-            Object object;
-            // links is an object, so we parse till we find its end.
-            while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
-                if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-                    throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
-                }
-
-                if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
-                    while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-                        object = _readValue(ctxt, jp, contentType);
-                        result.add(object);
-                    }
-                } else {
-                    object = _readValue(ctxt, jp, contentType);
-                    result.add(object);
-                }
-            }
-
-            return result;
-        }
-
-        @Override
-        public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
-            JavaType vc = property.getType().getContentType();
-
-            // if (INSTANCES.containsKey(vc)) {
-            // return INSTANCES.get(vc);
-            // }
-            HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
-            // INSTANCES.put(vc, des);
-            return des;
-        }
-    }
+	private static final long serialVersionUID = 7806951456457932384L;
+
+	@SuppressWarnings("deprecation")
+	public Jackson2HalModule() {
+
+		super("json-hal-module", new Version(1, 0, 0, null));
+
+		setMixInAnnotation(Link.class, LinkMixin.class);
+		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
+		setMixInAnnotation(Resources.class, ResourcesMixin.class);
+	}
+
+	/**
+	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON.
+	 * 
+	 * @author Alexander Baetz
+	 * @author Oliver Gierke
+	 */
+	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
+
+		private final BeanProperty property;
+
+		public HalLinkListSerializer() {
+			this(null);
+		}
+
+		public HalLinkListSerializer(BeanProperty property) {
+
+			super(List.class, false);
+			this.property = property;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator,
+		 * com.fasterxml.jackson.databind.SerializerProvider)
+		 */
+		@Override
+		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+
+			// sort links according to their relation
+			Map<String, List<Link>> sortedLinks = new HashMap<String, List<Link>>();
+			for (Link link : value) {
+				if (sortedLinks.get(link.getRel()) == null) {
+					sortedLinks.put(link.getRel(), new ArrayList<Link>());
+				}
+				sortedLinks.get(link.getRel()).add(link);
+			}
+
+			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
+			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
+			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Link.class);
+			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
+
+			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property));
+
+			serializer.serialize(sortedLinks, jgen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider,
+		 * com.fasterxml.jackson.databind.BeanProperty)
+		 */
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
+				throws JsonMappingException {
+			return new HalLinkListSerializer(property);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
+		 */
+		@Override
+		public boolean isEmpty(List<Link> value) {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
+		@Override
+		public boolean hasSingleElement(List<Link> value) {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.
+		 * TypeSerializer)
+		 */
+		@Override
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+			return null;
+		}
+	}
+
+	/**
+	 * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
+	 * 
+	 * @author Alexander Baetz
+	 * @author Oliver Gierke
+	 */
+	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>> implements ContextualSerializer {
+
+		private final BeanProperty property;
+
+		/**
+		 * Creates a new {@link HalLinkListSerializer}.
+		 */
+		public HalResourcesSerializer() {
+			this(null);
+		}
+
+		public HalResourcesSerializer(BeanProperty property) {
+			super(Collection.class, false);
+			this.property = property;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
+		 * org.codehaus.jackson.map.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+
+			// sort resources according to their types
+			Map<String, List<Object>> sortedLinks = new HashMap<String, List<Object>>();
+
+			for (Object resource : value) {
+
+				// TODO: do something fancy to get the relation name
+				String relation = "content";
+				if (sortedLinks.get(relation) == null) {
+					sortedLinks.put(relation, new ArrayList<Object>());
+				}
+
+				sortedLinks.get(relation).add(resource);
+			}
+
+			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
+			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
+			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
+			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
+
+			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property));
+
+			serializer.serialize(sortedLinks, jgen, provider);
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
+			return new HalResourcesSerializer(property);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean isEmpty(Collection<?> value) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean hasSingleElement(Collection<?> value) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+
+	/**
+	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the {@link Link} as
+	 * immediate object if we have a single one or as array if we have multiple ones.
+	 * 
+	 * @author Alexander Baetz
+	 * @author Oliver Gierke
+	 */
+	public static class OptionalListJackson2Serializer extends ContainerSerializer<Object> implements
+			ContextualSerializer {
+
+		private final BeanProperty property;
+		private JsonSerializer<Object> serializer;
+
+		public OptionalListJackson2Serializer() {
+			this(null);
+		}
+
+		/**
+		 * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty}.
+		 * 
+		 * @param property
+		 */
+		public OptionalListJackson2Serializer(BeanProperty property) {
+
+			super(List.class, false);
+			this.property = property;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.
+		 * TypeSerializer)
+		 */
+		@Override
+		public ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+			throw new UnsupportedOperationException("not implemented");
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator,
+		 * com.fasterxml.jackson.databind.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+
+			List<?> list = (List<?>) value;
+
+			if (list.size() == 1) {
+				serializeContents(list.iterator(), jgen, provider);
+				return;
+			}
+
+			jgen.writeStartArray();
+			serializeContents(list.iterator(), jgen, provider);
+			jgen.writeEndArray();
+		}
+
+		private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
+
+			while (value.hasNext()) {
+				Object elem = value.next();
+				if (elem == null) {
+					provider.defaultSerializeNull(jgen);
+				} else {
+					if (serializer == null) {
+						serializer = provider.findValueSerializer(elem.getClass(), property);
+					}
+					serializer.serialize(elem, jgen, provider);
+				}
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			return serializer;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
+		@Override
+		public boolean hasSingleElement(Object arg0) {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
+		 */
+		@Override
+		public boolean isEmpty(Object arg0) {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider,
+		 * com.fasterxml.jackson.databind.BeanProperty)
+		 */
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
+				throws JsonMappingException {
+			return new OptionalListJackson2Serializer(property);
+		}
+	}
+
+	public static class HalLinkListDeserializer extends ContainerDeserializerBase<List<Link>> {
+
+		public HalLinkListDeserializer() {
+			super(List.class);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		@Override
+		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+				JsonProcessingException {
+			List<Link> result = new ArrayList<Link>();
+
+			String relation;
+			Link link;
+			// links is an object, so we parse till we find its end.
+			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+				}
+
+				// save the relation in case the link does not contain it
+				relation = jp.getText();
+
+				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+						link = jp.readValueAs(Link.class);
+						result.add(link);
+					}
+				} else {
+					link = jp.readValueAs(Link.class);
+					result.add(link);
+				}
+			}
+
+			return result;
+		}
+	}
+
+	public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements
+			ContextualDeserializer {
+
+		private JavaType contentType;
+
+		public HalResourcesDeserializer() {
+			super(List.class);
+		}
+
+		public HalResourcesDeserializer(JavaType vc) {
+			super(null);
+			this.contentType = vc;
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		@Override
+		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
+				JsonProcessingException {
+			List<Object> result = new ArrayList<Object>();
+
+			JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
+
+			Object object;
+			// links is an object, so we parse till we find its end.
+			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+				}
+
+				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+						object = deser.deserialize(jp, ctxt);
+						;
+						result.add(object);
+					}
+				} else {
+					object = deser.deserialize(jp, ctxt);
+					result.add(object);
+				}
+			}
+
+			return result;
+		}
+
+		@Override
+		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
+				throws JsonMappingException {
+			JavaType vc = property.getType().getContentType();
+
+			// if (INSTANCES.containsKey(vc)) {
+			// return INSTANCES.get(vc);
+			// }
+			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
+			// INSTANCES.put(vc, des);
+			return des;
+		}
+	}
 }
