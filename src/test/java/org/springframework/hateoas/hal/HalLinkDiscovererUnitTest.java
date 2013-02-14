@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.core;
+package org.springframework.hateoas.hal;
 
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTests;
 
 /**
- * Unit tests for {@link DefaultLinkDiscoverer}.
+ * Unit tests for {@link HalLinkDiscoverer}.
  * 
  * @author Oliver Gierke
  */
-public class DefaultLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTests {
+public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTests {
 
-	static final String SAMPLE = "{ links : [ " + //
-			"{ rel : 'self', href : 'selfHref' }, " + //
-			"{ rel : 'relation', href : 'firstHref' }, " + //
-			"{ rel : 'relation', href : 'secondHref' }]}";
-
-	static final LinkDiscoverer discoverer = new DefaultLinkDiscoverer();
+	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
+	static final String SAMPLE = "{ _links : { " + //
+			"self : { href : 'selfHref' }, " + //
+			"relation : [ " + //
+			"{ href : 'firstHref' }, { href : 'secondHref' }]}}";
 
 	@Override
 	protected LinkDiscoverer getDiscoverer() {
