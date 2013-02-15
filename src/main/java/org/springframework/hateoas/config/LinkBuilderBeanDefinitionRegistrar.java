@@ -42,7 +42,7 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Oliver Gierke
  */
-public class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
+class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private static final boolean IS_JAX_RS_PRESENT = ClassUtils.isPresent("javax.ws.rs.Path",
 			ClassUtils.getDefaultClassLoader());
