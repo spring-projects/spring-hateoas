@@ -44,6 +44,8 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}}}";
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}]}}";
 
+	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}}}";
+
 	@Before
 	public void setUpModule() {
 		mapper.registerModule(new Jackson1HalModule());
@@ -176,6 +178,35 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 
 		Resources<Resource<SimplePojo>> result = mapper.readValue(
 				LIST_EMBEDDED_RESOURCE_REFERENCE,
+				mapper.getTypeFactory().constructParametricType(Resources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+
+		assertThat(result, is(expected));
+	}
+
+	@Test
+	public void rendersAnnotatedResourceResourcesAsEmbedded() throws Exception {
+
+		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimpleAnnotatedPojo>> resources = new Resources<Resource<SimpleAnnotatedPojo>>(content);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void deserializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
+
+		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimpleAnnotatedPojo>> expected = new Resources<Resource<SimpleAnnotatedPojo>>(content);
+		expected.add(new Link("localhost"));
+
+		Resources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				ANNOTATED_EMBEDDED_RESOURCE_REFERENCE,
 				mapper.getTypeFactory().constructParametricType(Resources.class,
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
 

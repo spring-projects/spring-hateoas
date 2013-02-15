@@ -162,6 +162,7 @@ public class Jackson1HalModule extends SimpleModule {
 			ContextualSerializer<Collection<?>> {
 
 		private final BeanProperty property;
+		private RelationResolver resolver = new AnnotationBasedRelationResolver();
 
 		/**
 		 * Creates a new {@link HalLinkListSerializer}.
@@ -173,6 +174,10 @@ public class Jackson1HalModule extends SimpleModule {
 		public HalResourcesSerializer(BeanProperty property) {
 			super(Collection.class, false);
 			this.property = property;
+		}
+
+		public void setResolver(RelationResolver resolver) {
+			this.resolver = resolver;
 		}
 
 		/*
@@ -190,8 +195,10 @@ public class Jackson1HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				// TODO: do something fancy to get the relation name
-				String relation = "content";
+				String relation = resolver.getResourceRelation(resource.getClass());
+				if (relation == null) {
+					relation = RelationResolver.DEFAULT_COLLECTION_RELATION;
+				}
 				if (sortedLinks.get(relation) == null) {
 					sortedLinks.put(relation, new ArrayList<Object>());
 				}
@@ -328,6 +335,7 @@ public class Jackson1HalModule extends SimpleModule {
 			String relation;
 			Link link;
 			// links is an object, so we parse till we find its end.
+			// NOTE: all relation values in the links themself will be ignored! The property name in the _links object counts.
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
 				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
 					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
@@ -339,10 +347,12 @@ public class Jackson1HalModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						link = jp.readValueAs(Link.class);
+						link = new Link(link.getHref(), relation);
 						result.add(link);
 					}
 				} else {
 					link = jp.readValueAs(Link.class);
+					link = new Link(link.getHref(), relation);
 					result.add(link);
 				}
 			}
