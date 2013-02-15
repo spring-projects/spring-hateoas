@@ -9,13 +9,16 @@ import org.springframework.hateoas.Resource;
 
 public class AnnotationBasedRelationResolver implements RelationResolver {
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public String getResourceRelation(Class<?> type) {
+	public String getResourceRelation(Object resource) {
 
-		if (Resource.class.isAssignableFrom(type)) {
+		// check for hateoas wrapper type
+		if (Resource.class.isInstance(resource)) {
+			resource = ((Resource) resource).getContent();
 		}
 
-		HateoasRelation annotation = type.getAnnotation(HateoasRelation.class);
+		HateoasRelation annotation = resource.getClass().getAnnotation(HateoasRelation.class);
 		if (annotation == null || HateoasRelation.NO_RELATION.equals(annotation.value())) {
 			return null;
 		}

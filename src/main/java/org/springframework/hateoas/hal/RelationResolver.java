@@ -7,5 +7,5 @@ public interface RelationResolver {
 	 */
 	public static final String DEFAULT_COLLECTION_RELATION = "content";
 
-	String getResourceRelation(Class<?> type);
+	String getResourceRelation(Object type);
 }

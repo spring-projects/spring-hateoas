@@ -35,13 +35,19 @@ import org.codehaus.jackson.map.ContextualDeserializer;
 import org.codehaus.jackson.map.ContextualSerializer;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.HandlerInstantiator;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.KeyDeserializer;
+import org.codehaus.jackson.map.MapperConfig;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.TypeSerializer;
 import org.codehaus.jackson.map.deser.std.ContainerDeserializerBase;
+import org.codehaus.jackson.map.introspect.Annotated;
+import org.codehaus.jackson.map.jsontype.TypeIdResolver;
+import org.codehaus.jackson.map.jsontype.TypeResolverBuilder;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.codehaus.jackson.map.ser.std.ContainerSerializerBase;
 import org.codehaus.jackson.map.ser.std.MapSerializer;
@@ -158,8 +164,7 @@ public class Jackson1HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public static class HalResourcesSerializer extends ContainerSerializerBase<Collection<?>> implements
-			ContextualSerializer<Collection<?>> {
+	public static class HalResourcesSerializer extends ContainerSerializerBase<Collection<?>> {
 
 		private final BeanProperty property;
 		private RelationResolver resolver = new AnnotationBasedRelationResolver();
@@ -174,6 +179,11 @@ public class Jackson1HalModule extends SimpleModule {
 		public HalResourcesSerializer(BeanProperty property) {
 			super(Collection.class, false);
 			this.property = property;
+		}
+
+		public HalResourcesSerializer(BeanProperty property, RelationResolver resolver) {
+			this(property);
+			this.resolver = resolver;
 		}
 
 		public void setResolver(RelationResolver resolver) {
@@ -195,7 +205,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				String relation = resolver.getResourceRelation(resource.getClass());
+				String relation = resolver.getResourceRelation(resource);
 				if (relation == null) {
 					relation = RelationResolver.DEFAULT_COLLECTION_RELATION;
 				}
@@ -215,18 +225,6 @@ public class Jackson1HalModule extends SimpleModule {
 					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property));
 
 			serializer.serialize(sortedLinks, jgen, provider);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
-		 * org.codehaus.jackson.map.BeanProperty)
-		 */
-		@Override
-		public JsonSerializer<Collection<?>> createContextual(SerializationConfig config, BeanProperty property)
-				throws JsonMappingException {
-			return new HalResourcesSerializer(property);
 		}
 
 		/*
@@ -421,5 +419,52 @@ public class Jackson1HalModule extends SimpleModule {
 			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
 			return des;
 		}
+	}
+
+	public static class HalHandlerInstantiator extends HandlerInstantiator {
+
+		private Map<Class, Object> instanceMap = new HashMap<Class, Object>();
+
+		public void setRelationResolver(RelationResolver resolver) {
+			instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, resolver));
+		}
+
+		private Object findInstance(Class type) {
+			if (instanceMap.containsKey(type)) {
+				return instanceMap.get(type);
+			}
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<? extends JsonDeserializer<?>> deserClass) {
+			return (JsonDeserializer<?>) findInstance(deserClass);
+		}
+
+		@Override
+		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<? extends KeyDeserializer> keyDeserClass) {
+			return (KeyDeserializer) findInstance(keyDeserClass);
+		}
+
+		@Override
+		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated,
+				Class<? extends JsonSerializer<?>> serClass) {
+			return (JsonSerializer<?>) findInstance(serClass);
+		}
+
+		@Override
+		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
+				Class<? extends TypeResolverBuilder<?>> builderClass) {
+			return (TypeResolverBuilder<?>) findInstance(builderClass);
+		}
+
+		@Override
+		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated,
+				Class<? extends TypeIdResolver> resolverClass) {
+			return (TypeIdResolver) findInstance(resolverClass);
+		}
+
 	}
 }

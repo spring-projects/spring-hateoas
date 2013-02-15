@@ -208,7 +208,7 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 		Resources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
 				ANNOTATED_EMBEDDED_RESOURCE_REFERENCE,
 				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(expected));
 	}

@@ -36,14 +36,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
@@ -208,6 +216,11 @@ public class Jackson2HalModule extends SimpleModule {
 			this.property = property;
 		}
 
+		public HalResourcesSerializer(BeanProperty property, RelationResolver resolver) {
+			this(property);
+			this.resolver = resolver;
+		}
+
 		public void setResolver(RelationResolver resolver) {
 			this.resolver = resolver;
 		}
@@ -227,7 +240,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				String relation = resolver.getResourceRelation(resource.getClass());
+				String relation = resolver.getResourceRelation(resource);
 				if (relation == null) {
 					relation = RelationResolver.DEFAULT_COLLECTION_RELATION;
 				}
@@ -526,5 +539,50 @@ public class Jackson2HalModule extends SimpleModule {
 			// INSTANCES.put(vc, des);
 			return des;
 		}
+	}
+
+	public static class HalHandlerInstantiator extends HandlerInstantiator {
+
+		private Map<Class, Object> instanceMap = new HashMap<Class, Object>();
+
+		public void setRelationResolver(RelationResolver resolver) {
+			instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, resolver));
+		}
+
+		private Object findInstance(Class type) {
+			if (instanceMap.containsKey(type)) {
+				return instanceMap.get(type);
+			}
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<?> deserClass) {
+			return (JsonDeserializer<?>) findInstance(deserClass);
+		}
+
+		@Override
+		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<?> keyDeserClass) {
+			return (KeyDeserializer) findInstance(keyDeserClass);
+		}
+
+		@Override
+		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
+			return (JsonSerializer<?>) findInstance(serClass);
+		}
+
+		@Override
+		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
+				Class<?> builderClass) {
+			return (TypeResolverBuilder<?>) findInstance(builderClass);
+		}
+
+		@Override
+		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
+			return (TypeIdResolver) findInstance(resolverClass);
+		}
+
 	}
 }
