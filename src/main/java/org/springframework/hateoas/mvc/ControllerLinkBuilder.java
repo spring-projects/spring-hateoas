@@ -17,23 +17,16 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
-import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -50,15 +43,14 @@ import org.springframework.web.util.UriTemplate;
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
-	private static final AnnotatedParametersParameterAccessor accessor = new AnnotatedParametersParameterAccessor(
-			new AnnotationAttribute(PathVariable.class));
+	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
 	 * 
 	 * @param builder must not be {@literal null}.
 	 */
-	private ControllerLinkBuilder(UriComponentsBuilder builder) {
+	ControllerLinkBuilder(UriComponentsBuilder builder) {
 		super(builder);
 	}
 
@@ -127,27 +119,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Object invocationValue) {
-
-		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
-		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
-
-		MethodInvocation invocation = invocations.getLastInvocation();
-		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
-		Method method = invocation.getMethod();
-
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
-		Map<String, Object> values = new HashMap<String, Object>();
-
-		if (classMappingParameters.hasNext()) {
-			for (String variable : template.getVariableNames()) {
-				values.put(variable, classMappingParameters.next());
-			}
-		}
-
-		values.putAll(accessor.getBoundParameters(invocation));
-		URI uri = template.expand(values);
-
-		return new ControllerLinkBuilder(getBuilder()).slash(uri);
+		return FACTORY.linkTo(invocationValue);
 	}
 
 	/**
@@ -186,7 +158,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * 
 	 * @return
 	 */
-	private static UriComponentsBuilder getBuilder() {
+	static UriComponentsBuilder getBuilder() {
 
 		HttpServletRequest request = getCurrentRequest();
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);

@@ -17,12 +17,20 @@ package org.springframework.hateoas.mvc;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.hateoas.core.DummyInvocationUtils.*;
+
+import java.util.Arrays;
 
 import org.junit.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddressesController;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Unit tests for {@link ControllerLinkBuilderFactory}.
@@ -50,5 +58,41 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people/15/addresses"));
+	}
+
+	@Test
+	public void appliesParameterValueIfContributorConfigured() {
+
+		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+		factory.setUriComponentsContributors(Arrays.asList(new SampleUriComponentsContributor()));
+
+		SpecialType specialType = new SpecialType();
+		specialType.parameterValue = "value";
+
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(1L, specialType)).withSelfRel();
+		assertThat(link.getHref(), endsWith("/sample/1?foo=value"));
+	}
+
+	static interface SampleController {
+
+		@RequestMapping("/sample/{id}")
+		HttpEntity<?> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);
+	}
+
+	static class SampleUriComponentsContributor implements UriComponentsContributor {
+
+		@Override
+		public boolean supportsParameter(MethodParameter parameter) {
+			return SpecialType.class.equals(parameter.getParameterType());
+		}
+
+		@Override
+		public void enhance(UriComponentsBuilder builder, MethodParameter parameter, Object value) {
+			builder.queryParam("foo", ((SpecialType) value).parameterValue);
+		}
+	}
+
+	static class SpecialType {
+		String parameterValue;
 	}
 }
