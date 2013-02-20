@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,5 +90,34 @@ public class LinkUnitTest {
 	@Test
 	public void differentTypeDoesNotEqual() {
 		assertThat(new Link("foo"), is(not((Object) new ResourceSupport())));
+	}
+
+	@Test
+	public void returnsNullForNullOrEmptyLink() {
+
+		assertThat(Link.valueOf(null), is(nullValue()));
+		assertThat(Link.valueOf(""), is(nullValue()));
+	}
+
+	@Test
+	public void parsesRFC5988HeaderIntoLink() {
+
+		assertThat(Link.valueOf("</something>;rel=\"foo\""), is(new Link("/something", "foo")));
+		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo")));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsMissingRelAttribute() {
+		Link.valueOf("</something>);title=\"title\"");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsLinkWithoutAttributesAtAll() {
+		Link.valueOf("</something>);title=\"title\"");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsNonRFC5988String() {
+		Link.valueOf("foo");
 	}
 }

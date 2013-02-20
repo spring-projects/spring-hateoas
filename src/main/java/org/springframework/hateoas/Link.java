@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,17 @@
 package org.springframework.hateoas;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Value object for links.
@@ -115,7 +121,8 @@ public class Link implements Serializable {
 		return this.href.equals(that.href) && this.rel.equals(that.rel);
 	}
 
-	/* (non-Javadoc)
+	/* 
+	 * (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -133,6 +140,62 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return String.format("{ rel : %s, href : %s }", rel, href);
+		return String.format("<%s>;rel=\"%s\"", href, rel);
+	}
+
+	/**
+	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
+	 * link. Will return {@literal null} if an empty or {@literal null} {@link String} is given.
+	 * 
+	 * @param element an RFC-5899 compatible representation of a link.
+	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
+	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
+	 * @return
+	 */
+	public static Link valueOf(String element) {
+
+		if (!StringUtils.hasText(element)) {
+			return null;
+		}
+
+		Pattern uriAndAttributes = Pattern.compile("<(.*)>;(.*)");
+		Matcher matcher = uriAndAttributes.matcher(element);
+
+		if (matcher.find()) {
+
+			Map<String, String> attributes = getAttributeMap(matcher.group(2));
+
+			if (!attributes.containsKey("rel")) {
+				throw new IllegalArgumentException("Link does not provide a rel attribute!");
+			}
+
+			return new Link(matcher.group(1), attributes.get("rel"));
+
+		} else {
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
+		}
+	}
+
+	/**
+	 * Parses the links attributes from the given source {@link String}.
+	 * 
+	 * @param source
+	 * @return
+	 */
+	private static Map<String, String> getAttributeMap(String source) {
+
+		if (!StringUtils.hasText(source)) {
+			return Collections.emptyMap();
+		}
+
+		Map<String, String> attributes = new HashMap<String, String>();
+		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Alnum}*)\"");
+		Matcher matcher = keyAndValue.matcher(source);
+
+		while (matcher.find()) {
+			attributes.put(matcher.group(1), matcher.group(2));
+		}
+
+		return attributes;
 	}
 }
