@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -60,8 +59,14 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return slash((Identifiable<?>) object);
 		}
 
-		String[] segments = StringUtils.tokenizeToStringArray(object.toString(), "/");
-		return createNewInstance(UriComponentsBuilder.fromUri(uriComponents.toUri()).pathSegment(segments));
+		UriComponents components = UriComponentsBuilder.fromUriString(object.toString()).build();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uriComponents.toUri());
+
+		for (String pathSegment : components.getPathSegments()) {
+			builder.pathSegment(pathSegment);
+		}
+
+		return createNewInstance(builder.query(components.getQuery()));
 	}
 
 	/*

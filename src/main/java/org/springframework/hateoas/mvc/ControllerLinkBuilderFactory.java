@@ -16,14 +16,15 @@
 package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.MethodParameter;
@@ -38,6 +39,7 @@ import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -50,8 +52,10 @@ import org.springframework.web.util.UriTemplate;
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
-	private static final AnnotatedParametersParameterAccessor ACCESSOR = new AnnotatedParametersParameterAccessor(
+	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
+	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new AnnotatedParametersParameterAccessor(
+			new AnnotationAttribute(RequestParam.class));
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
 
@@ -107,11 +111,24 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			}
 		}
 
-		values.putAll(ACCESSOR.getBoundParameters(invocation));
-		URI uri = template.expand(values);
+		values.putAll(PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation));
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(template.expand(values));
 
-		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder();
-		return new ControllerLinkBuilder(applyUriComponentsContributer(builder, invocation)).slash(uri);
+		for (Entry<String, Object> param : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation).entrySet()) {
+
+			Object value = param.getValue();
+			String key = param.getKey();
+
+			if (value instanceof Collection) {
+				for (Object element : (Collection<?>) value) {
+					builder.queryParam(key, element);
+				}
+			} else {
+				builder.queryParam(key, value);
+			}
+		}
+
+		return new ControllerLinkBuilder(applyUriComponentsContributer(builder, invocation));
 	}
 
 	/* 

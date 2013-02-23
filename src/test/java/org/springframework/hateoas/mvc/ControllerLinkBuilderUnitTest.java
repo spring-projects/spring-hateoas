@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -26,11 +29,17 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * Unit tests for {@link ControllerLinkBuilder}.
+ * 
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
@@ -124,6 +133,69 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
 	}
 
+	/**
+	 * @see #26, #39
+	 */
+	@Test
+	public void addsRequestParametersHandedIntoSlashCorrectly() {
+
+		Link link = linkTo(PersonController.class).slash("?foo=bar").withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getQuery(), is("foo=bar"));
+	}
+
+	/**
+	 * @see #26, #39
+	 */
+	@Test
+	public void linksToMethodWithPathVariableAndRequestParams() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath(), is("/something/1/foo"));
+
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+		assertThat(queryParams.get("offset"), contains("10"));
+	}
+
+	/**
+	 * @see #26, #39
+	 */
+	@Test
+	public void linksToMethodWithPathVariableAndMultiValueRequestParams() {
+
+		Link link = linkTo(
+				methodOn(ControllerWithMethods.class).methodWithMultiValueRequestParams("1", Arrays.asList(3, 7), 5))
+				.withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath(), is("/something/1/foo"));
+
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+		assertThat(queryParams.get("items"), containsInAnyOrder("3", "7"));
+	}
+
+	/**
+	 * @see #26, #39
+	 */
+	@Test
+	public void returnsUriComponentsBuilder() {
+
+		UriComponents components = linkTo(PersonController.class).slash("something?foo=bar").toUriComponentsBuilder()
+				.build();
+
+		assertThat(components.getPath(), is("/people/something"));
+		assertThat(components.getQuery(), is("foo=bar"));
+	}
+
+	private static UriComponents toComponents(Link link) {
+		return UriComponentsBuilder.fromUriString(link.getHref()).build();
+	}
+
 	static class Person implements Identifiable<Long> {
 
 		Long id;
@@ -167,6 +239,18 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping("/{id}/foo")
 		HttpEntity<Void> methodWithPathVariable(@PathVariable String id) {
+			return null;
+		}
+
+		@RequestMapping(value = "/{id}/foo")
+		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam Integer offset,
+				@RequestParam Integer limit) {
+			return null;
+		}
+
+		@RequestMapping(value = "/{id}/foo")
+		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
+				@RequestParam Integer limit) {
 			return null;
 		}
 	}
