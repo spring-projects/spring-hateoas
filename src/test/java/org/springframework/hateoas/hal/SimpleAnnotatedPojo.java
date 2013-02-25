@@ -1,6 +1,5 @@
 package org.springframework.hateoas.hal;
 
-import org.springframework.hateoas.hal.AnnotationBasedRelationResolver.HateoasRelation;
 
 @HateoasRelation("pojo")
 public class SimpleAnnotatedPojo extends SimplePojo {
