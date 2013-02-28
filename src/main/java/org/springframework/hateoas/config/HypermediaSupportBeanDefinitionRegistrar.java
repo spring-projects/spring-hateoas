@@ -17,6 +17,7 @@ package org.springframework.hateoas.config;
 
 import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -36,7 +37,12 @@ import org.springframework.hateoas.core.DefaultLinkDiscoverer;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -133,11 +139,32 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
+			if (bean instanceof RequestMappingHandlerAdapter) {
+				registerModule(((RequestMappingHandlerAdapter) bean).getMessageConverters());
+			}
+
+			if (bean instanceof AnnotationMethodHandlerAdapter) {
+				registerModule(((AnnotationMethodHandlerAdapter) bean).getMessageConverters());
+			}
+
 			if (bean instanceof ObjectMapper) {
-				((ObjectMapper) bean).registerModule(new Jackson2HalModule());
+				registerModule(bean);
 			}
 
 			return bean;
+		}
+
+		private void registerModule(List<HttpMessageConverter<?>> converters) {
+
+			for (HttpMessageConverter<?> converter : converters) {
+				if (converter instanceof MappingJackson2HttpMessageConverter) {
+					registerModule(((MappingJackson2HttpMessageConverter) converter).getObjectMapper());
+				}
+			}
+		}
+
+		private void registerModule(Object objectMapper) {
+			((ObjectMapper) objectMapper).registerModule(new Jackson2HalModule());
 		}
 	}
 
@@ -165,11 +192,32 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
+			if (bean instanceof AnnotationMethodHandlerAdapter) {
+				registerModule(((AnnotationMethodHandlerAdapter) bean).getMessageConverters());
+			}
+
+			if (bean instanceof RequestMappingHandlerAdapter) {
+				registerModule(((RequestMappingHandlerAdapter) bean).getMessageConverters());
+			}
+
 			if (bean instanceof org.codehaus.jackson.map.ObjectMapper) {
-				((org.codehaus.jackson.map.ObjectMapper) bean).registerModule(new Jackson1HalModule());
+				registerModule(bean);
 			}
 
 			return bean;
+		}
+
+		private void registerModule(List<HttpMessageConverter<?>> converters) {
+
+			for (HttpMessageConverter<?> converter : converters) {
+				if (converter instanceof MappingJacksonHttpMessageConverter) {
+					registerModule(((MappingJacksonHttpMessageConverter) converter).getObjectMapper());
+				}
+			}
+		}
+
+		private void registerModule(Object mapper) {
+			((org.codehaus.jackson.map.ObjectMapper) mapper).registerModule(new Jackson1HalModule());
 		}
 	}
 }
