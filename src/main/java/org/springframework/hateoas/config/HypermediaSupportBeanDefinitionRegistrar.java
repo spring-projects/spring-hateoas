@@ -54,6 +54,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final boolean JACKSON1_PRESENT = ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null);
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 			null);
+	private static final boolean JSONPATH_PRESENT = ClassUtils.isPresent("com.jayway.jsonpath.JsonPath", null);
 
 	/* 
 	 * (non-Javadoc)
@@ -68,8 +69,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				.getName());
 		HypermediaType type = (HypermediaType) attributes.get("type");
 
-		registerBeanDefinition(new BeanDefinitionHolder(getLinkDiscovererBeanDefinition(type), LINK_DISCOVERER_BEAN_NAME),
-				registry);
+		if (JSONPATH_PRESENT) {
+			registerBeanDefinition(
+					new BeanDefinitionHolder(getLinkDiscovererBeanDefinition(type), LINK_DISCOVERER_BEAN_NAME), registry);
+		}
 
 		if (type == HypermediaType.HAL) {
 
