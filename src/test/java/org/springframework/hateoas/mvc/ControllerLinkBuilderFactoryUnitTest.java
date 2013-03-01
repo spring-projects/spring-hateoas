@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(PersonControllerImpl.class).withSelfRel();
 
+		assertPointsToMockServer(link);
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people"));
 	}
@@ -56,6 +57,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, 15).withSelfRel();
 
+		assertPointsToMockServer(link);
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people/15/addresses"));
 	}
@@ -70,6 +72,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		specialType.parameterValue = "value";
 
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(1L, specialType)).withSelfRel();
+		assertPointsToMockServer(link);
 		assertThat(link.getHref(), endsWith("/sample/1?foo=value"));
 	}
 

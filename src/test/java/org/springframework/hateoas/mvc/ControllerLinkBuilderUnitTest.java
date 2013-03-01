@@ -111,6 +111,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void linksToMethod() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).myMethod(null)).withSelfRel();
+		assertPointsToMockServer(link);
 		assertThat(link.getHref(), endsWith("/something/else"));
 	}
 
@@ -118,6 +119,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void linksToMethodWithPathVariable() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("1")).withSelfRel();
+		assertPointsToMockServer(link);
 		assertThat(link.getHref(), endsWith("/something/1/foo"));
 	}
 

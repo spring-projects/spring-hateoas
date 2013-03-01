@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -102,7 +103,10 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 		Method method = invocation.getMethod();
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
+		String mapping = DISCOVERER.getMapping(method);
+		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
+
+		UriTemplate template = new UriTemplate(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();
 
 		if (classMappingParameters.hasNext()) {
@@ -112,7 +116,6 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		values.putAll(PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation));
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(template.expand(values));
 
 		for (Entry<String, Object> param : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation).entrySet()) {
 
@@ -128,7 +131,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			}
 		}
 
-		return new ControllerLinkBuilder(applyUriComponentsContributer(builder, invocation));
+		UriComponents components = applyUriComponentsContributer(builder, invocation).buildAndExpand(values);
+		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(components.toUri()));
 	}
 
 	/* 
