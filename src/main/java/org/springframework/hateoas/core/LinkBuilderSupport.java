@@ -21,6 +21,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -59,7 +60,13 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return slash((Identifiable<?>) object);
 		}
 
-		UriComponents components = UriComponentsBuilder.fromUriString(object.toString()).build();
+		String path = object.toString();
+
+		if (!StringUtils.hasText(path)) {
+			return getThis();
+		}
+
+		UriComponents components = UriComponentsBuilder.fromUriString(path).build();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uriComponents.toUri());
 
 		for (String pathSegment : components.getPathSegments()) {
