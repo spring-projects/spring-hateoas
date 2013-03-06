@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,14 @@ package org.springframework.hateoas.hal;
 
 import org.springframework.hateoas.Link;
 
+/**
+ * Custom mixin to avoid rel attributes being rendered for HAL.
+ * 
+ * @author Alexander Baetz
+ * @author Oliver Gierke
+ */
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(value = "rel")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(value = "rel")
 class LinkMixin extends Link {
 	private static final long serialVersionUID = 4720588561299667409L;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import org.springframework.hateoas.ResourceSupport;
  */
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTests {
 
-	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"rel\":\"self\",\"href\":\"localhost\"}}}";
-	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
-	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"test\":{}},\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
-	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"test\":[{},{}]},\"_links\":{\"self\":[{\"rel\":\"self\",\"href\":\"localhost\"},{\"rel\":\"self\",\"href\":\"localhost2\"}]}}";
+	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
+	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
+	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"test\":{}},\"_links\":{\"self\":[\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
+	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"test\":[{},{}]},\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
 
 	@Before
 	public void setUpModule() {
