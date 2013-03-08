@@ -36,6 +36,20 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 		assertThat(builder.slash(""), is(builder));
 	}
 
+	@Test
+	public void appendsFragmentCorrectly() {
+
+		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
+		builder = builder.slash("foo#bar");
+		assertThat(builder.toString(), endsWith("foo#bar"));
+		builder = builder.slash("bar");
+		assertThat(builder.toString(), endsWith("foo/bar#bar"));
+		builder = builder.slash("#foo");
+		assertThat(builder.toString(), endsWith("foo/bar#foo"));
+		builder = builder.slash("#");
+		assertThat(builder.toString(), endsWith("foo/bar#foo"));
+	}
+
 	static class SampleLinkBuilder extends LinkBuilderSupport<SampleLinkBuilder> {
 
 		public SampleLinkBuilder(UriComponentsBuilder builder) {

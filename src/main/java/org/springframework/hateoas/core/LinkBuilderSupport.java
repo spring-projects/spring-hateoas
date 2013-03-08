@@ -62,6 +62,10 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 		String path = object.toString();
 
+		if (path.endsWith("#")) {
+			path = path.substring(0, path.length() - 1);
+		}
+
 		if (!StringUtils.hasText(path)) {
 			return getThis();
 		}
@@ -71,6 +75,11 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 		for (String pathSegment : components.getPathSegments()) {
 			builder.pathSegment(pathSegment);
+		}
+
+		String fragment = components.getFragment();
+		if (StringUtils.hasText(fragment)) {
+			builder.fragment(fragment);
 		}
 
 		return createNewInstance(builder.query(components.getQuery()));
