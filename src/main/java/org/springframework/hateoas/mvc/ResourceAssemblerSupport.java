@@ -1,13 +1,13 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a coimport javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlSchema;
-
-
-eed to in writing, software
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -18,11 +18,9 @@ package org.springframework.hateoas.mvc;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.util.Assert;
@@ -33,8 +31,7 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport> implements
-		ResourceAssembler<T, D> {
+public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> implements ResourceAssembler<T, D> {
 
 	private final Class<?> controllerClass;
 	private final Class<D> resourceType;
@@ -74,30 +71,6 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 	}
 
 	/**
-	 * Creates a new resource and adds a self link to it using the {@link Identifiable}'s id.
-	 * 
-	 * @param entity must not be {@literal null}.
-	 * @return
-	 */
-	protected D createResource(T entity) {
-		return createResource(entity, new Object[0]);
-	}
-
-	/**
-	 * Creates a new resource and adds a self link to it using the {@link Identifiable}'s id, using the given parameters
-	 * to replace path variables in the request mapping of the given controller class.
-	 * 
-	 * @param entity must not be {@literal null}.
-	 * @param for path variables
-	 * @param parameters for path variables, using their id if {@link Identifiable}
-	 * 
-	 * @return
-	 */
-	protected D createResource(T entity, Object... parameters) {
-		return createResourceWithId(entity.getId(), entity, parameters);
-	}
-
-	/**
 	 * Creates a new resource with a self link to the given id.
 	 * 
 	 * @param entity must not be {@literal null}.
@@ -123,25 +96,8 @@ public abstract class ResourceAssemblerSupport<T extends Identifiable<?>, D exte
 		Assert.notNull(id);
 
 		D instance = instantiateResource(entity);
-		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
+		instance.add(linkTo(controllerClass, parameters).slash(id).withSelfRel());
 		return instance;
-	}
-
-	/**
-	 * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
-	 * 
-	 * @param values must not be {@literal null}.
-	 * @return
-	 */
-	private Object[] unwrapIdentifyables(Object[] values) {
-
-		List<Object> result = new ArrayList<Object>(values.length);
-
-		for (Object element : Arrays.asList(values)) {
-			result.add((element instanceof Identifiable) ? ((Identifiable<?>) element).getId() : element);
-		}
-
-		return result.toArray();
 	}
 
 	/**

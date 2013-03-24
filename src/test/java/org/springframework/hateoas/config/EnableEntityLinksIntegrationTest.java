@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class ConfigIntegrationTest {
+public class EnableEntityLinksIntegrationTest {
 
 	@Configuration
 	@EnableEntityLinks

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,7 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 	 */
 	@Override
 	public LinkBuilder linkFor(Class<?> entity) {
-
-		Class<?> controllerClass = entityToController.get(entity);
-		return linkBuilderFactory.linkTo(controllerClass);
+		return linkFor(entity, new Object[0]);
 	}
 
 	/* 
@@ -106,7 +104,18 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 	 */
 	@Override
 	public LinkBuilder linkFor(Class<?> entity, Object... parameters) {
-		return linkFor(entity, parameters);
+
+		Assert.notNull(entity);
+
+		Class<?> controllerType = entityToController.get(entity);
+
+		if (controllerType == null) {
+			throw new IllegalArgumentException(String.format(
+					"Type %s is not managed by a Spring MVC controller. Make sure you have annotated your controller with %s!",
+					entity.getName(), ExposesResourceFor.class.getName()));
+		}
+
+		return linkBuilderFactory.linkTo(controllerType, parameters);
 	}
 
 	/* 

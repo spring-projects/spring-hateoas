@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.ClassUtils;
  * 
  * @author Oliver Gierke
  */
-public class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
+class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private static final boolean IS_JAX_RS_PRESENT = ClassUtils.isPresent("javax.ws.rs.Path",
 			ClassUtils.getDefaultClassLoader());
@@ -83,9 +83,12 @@ public class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionR
 	private static BeanDefinitionBuilder getEntityControllerLinksFor(Class<? extends Annotation> type,
 			Class<? extends LinkBuilderFactory<?>> linkBuilderFactoryType) {
 
+		RootBeanDefinition definition = new RootBeanDefinition(linkBuilderFactoryType);
+		definition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ControllerEntityLinksFactoryBean.class);
 		builder.addPropertyValue("annotation", type);
-		builder.addPropertyValue("linkBuilderFactory", new RootBeanDefinition(linkBuilderFactoryType));
+		builder.addPropertyValue("linkBuilderFactory", definition);
 
 		return builder;
 	}

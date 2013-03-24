@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.hateoas;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Before;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -32,12 +30,18 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 public class TestUtils {
 
+	protected MockHttpServletRequest request;
+
 	@Before
 	public void setUp() {
 
-		HttpServletRequest request = new MockHttpServletRequest();
+		request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
+	}
+
+	protected void assertPointsToMockServer(Link link) {
+		assertThat(link.getHref(), startsWith("http://localhost"));
 	}
 
 	public static void assertEqualAndSameHashCode(Object left, Object right) {

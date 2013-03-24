@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,21 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.aopalliance.intercept.MethodInvocation;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
-import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -48,17 +43,14 @@ import org.springframework.web.util.UriTemplate;
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
-	private static final AnnotatedParametersParameterAccessor pathVariableAccessor = new AnnotatedParametersParameterAccessor(
-			new AnnotationAttribute(PathVariable.class));
-	private static final AnnotatedParametersParameterAccessor requestParamAccessor = new AnnotatedParametersParameterAccessor(
-			new AnnotationAttribute(RequestParam.class));
+	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
 	 * 
 	 * @param builder must not be {@literal null}.
 	 */
-	private ControllerLinkBuilder(UriComponentsBuilder builder) {
+	ControllerLinkBuilder(UriComponentsBuilder builder) {
 		super(builder);
 	}
 
@@ -74,7 +66,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
-	 * additional parameters are used to fill up potentially available path variables in the class scope request mapping.
+	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
 	 * 
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
@@ -85,7 +77,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		Assert.notNull(controller);
 
-		ControllerLinkBuilder builder = new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
 
 		if (mapping == null) {
@@ -101,7 +93,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
 		URI uri = template.expand(parameters);
-		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(uri);
+		return new ControllerLinkBuilder(getBuilder()).slash(uri);
 	}
 
 	/**
@@ -113,7 +105,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * class CustomerController {
 	 * 
 	 *   @RequestMapping("/{id}/addresses")
-	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { â€¦ } 
 	 * }
 	 * 
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
@@ -127,39 +119,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Object invocationValue) {
-
-		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
-		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
-
-		MethodInvocation invocation = invocations.getLastInvocation();
-		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
-		Method method = invocation.getMethod();
-
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
-		Map<String, Object> values = new HashMap<String, Object>();
-
-		Iterator<String> templateVariables = template.getVariableNames().iterator();
-		while (classMappingParameters.hasNext() && templateVariables.hasNext()) {
-			values.put(templateVariables.next(), classMappingParameters.next());
-		}
-
-		values.putAll(pathVariableAccessor.getBoundParameters(invocation));
-		Map<String, Object> requestParametersWithValue = requestParamAccessor.getBoundParameters(invocation);
-
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(method));
-		for (Entry<String, Object> entry : requestParametersWithValue.entrySet()) {
-			Object value = entry.getValue();
-			if (value instanceof Collection) {
-				Collection<?> collection = (Collection<?>) value;
-				Object[] valueArray = collection.toArray(new Object[collection.size()]);
-				builder.queryParam(entry.getKey(), valueArray);
-			} else {
-				builder.queryParam(entry.getKey(), value);
-			}
-		}
-		UriComponents expanded = builder.buildAndExpand(values);
-
-		return new ControllerLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expanded.toUri());
+		return FACTORY.linkTo(invocationValue);
 	}
 
 	/**
@@ -174,9 +134,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
-	/*
+	/* 
 	 * (non-Javadoc)
-	 *
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
 	@Override
@@ -184,16 +143,55 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return this;
 	}
 
-	/*
+	/* 
 	 * (non-Javadoc)
-	 *
-	 * @see
-	 * org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance
-	 * (org.springframework.web.util.UriComponentsBuilder)
+	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
 	 */
 	@Override
 	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder) {
 		return new ControllerLinkBuilder(builder);
 	}
 
+	/**
+	 * Returns a {@link UriComponentsBuilder} to continue to build the already built URI in a more fine grained way.
+	 * 
+	 * @return
+	 */
+	public UriComponentsBuilder toUriComponentsBuilder() {
+		return UriComponentsBuilder.fromUri(toUri());
+	}
+
+	/**
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
+	 * request contains an {@code X-Forwarded-Host} header.
+	 * 
+	 * @return
+	 */
+	static UriComponentsBuilder getBuilder() {
+
+		HttpServletRequest request = getCurrentRequest();
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
+
+		String header = request.getHeader("X-Forwarded-Host");
+		if (StringUtils.hasText(header)) {
+			builder.host(header);
+		}
+
+		return builder;
+	}
+
+	/**
+	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
+	 * 
+	 * @return
+	 */
+	private static HttpServletRequest getCurrentRequest() {
+
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
+		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
+		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
+		return servletRequest;
+	}
 }

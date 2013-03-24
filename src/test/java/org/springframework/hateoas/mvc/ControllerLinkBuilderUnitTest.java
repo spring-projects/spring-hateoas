@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,16 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
@@ -43,6 +38,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * Unit tests for {@link ControllerLinkBuilder}.
+ * 
  * @author Oliver Gierke
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
@@ -60,19 +57,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people/15/addresses"));
-	}
-
-	@Test
-	public void createsLinkToControllerMethodWithPathVariable() throws Exception {
-
-		Link withRel = linkTo(methodOn(ProductsController.class).product(15L)).withRel("product");
-		assertEquals("http://localhost/products/15", withRel.getHref());
-		assertEquals("product", withRel.getRel());
-
-		Link withSelfRel = linkTo(methodOn(ProductsController.class).product(15L)).withSelfRel();
-		assertEquals("http://localhost/products/15", withSelfRel.getHref());
-		assertEquals("self", withSelfRel.getRel());
+		assertThat(link.getHref(), endsWith("/people/15/addresses"));
 	}
 
 	@Test
@@ -80,7 +65,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), Matchers.endsWith("/people/something"));
+		assertThat(link.getHref(), endsWith("/people/something"));
 	}
 
 	@Test
@@ -88,7 +73,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
 		assertThat(link.getRel(), is(Link.REL_NEXT));
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+		assertThat(link.getHref(), endsWith("/people"));
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -105,57 +90,112 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@SuppressWarnings("unchecked")
 	public void usesIdOfIdentifyableForPathSegment() {
 
-		Identifiable<Long> identifyable = mock(Identifiable.class);
-		when(identifyable.getId()).thenReturn(10L);
+		Identifiable<Long> identifyable = Mockito.mock(Identifiable.class);
+		Mockito.when(identifyable.getId()).thenReturn(10L);
 
 		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people/10"));
+		assertThat(link.getHref(), endsWith("/people/10"));
 	}
 
 	@Test
 	public void appendingNullIsANoOp() {
 
 		Link link = linkTo(PersonControllerImpl.class).slash(null).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+		assertThat(link.getHref(), endsWith("/people"));
 
 		link = linkTo(PersonControllerImpl.class).slash((Object) null).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/people"));
+		assertThat(link.getHref(), endsWith("/people"));
 	}
 
 	@Test
 	public void linksToMethod() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).myMethod(null)).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/something/else"));
+		assertPointsToMockServer(link);
+		assertThat(link.getHref(), endsWith("/something/else"));
 	}
 
 	@Test
 	public void linksToMethodWithPathVariable() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("1")).withSelfRel();
-		assertThat(link.getHref(), Matchers.endsWith("/something/1/foo"));
+		assertPointsToMockServer(link);
+		assertThat(link.getHref(), endsWith("/something/1/foo"));
 	}
 
+	/**
+	 * @see #33
+	 */
+	@Test
+	public void usesForwardedHostAsHostIfHeaderIsSet() {
+
+		request.addHeader("X-Forwarded-Host", "somethingDifferent");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
+	}
+
+	/**
+	 * @see #26, #39
+	 */
+	@Test
+	public void addsRequestParametersHandedIntoSlashCorrectly() {
+
+		Link link = linkTo(PersonController.class).slash("?foo=bar").withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getQuery(), is("foo=bar"));
+	}
+
+	/**
+	 * @see #26, #39
+	 */
 	@Test
 	public void linksToMethodWithPathVariableAndRequestParams() {
+
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).withSelfRel();
-		UriComponents components = UriComponentsBuilder.fromUriString(link.getHref()).build();
-		assertEquals("/something/1/foo", components.getPath());
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath(), is("/something/1/foo"));
+
 		MultiValueMap<String, String> queryParams = components.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("offset"), contains("10"));
 	}
 
+	/**
+	 * @see #26, #39
+	 */
 	@Test
 	public void linksToMethodWithPathVariableAndMultiValueRequestParams() {
+
 		Link link = linkTo(
 				methodOn(ControllerWithMethods.class).methodWithMultiValueRequestParams("1", Arrays.asList(3, 7), 5))
 				.withSelfRel();
-		UriComponents components = UriComponentsBuilder.fromUriString(link.getHref()).build();
-		assertEquals("/something/1/foo", components.getPath());
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath(), is("/something/1/foo"));
+
 		MultiValueMap<String, String> queryParams = components.getQueryParams();
 		assertThat(queryParams.get("limit"), contains("5"));
 		assertThat(queryParams.get("items"), containsInAnyOrder("3", "7"));
+	}
+
+	/**
+	 * @see #26, #39
+	 */
+	@Test
+	public void returnsUriComponentsBuilder() {
+
+		UriComponents components = linkTo(PersonController.class).slash("something?foo=bar").toUriComponentsBuilder()
+				.build();
+
+		assertThat(components.getPath(), is("/people/something"));
+		assertThat(components.getQuery(), is("foo=bar"));
+	}
+
+	private static UriComponents toComponents(Link link) {
+		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
 
 	static class Person implements Identifiable<Long> {
@@ -182,38 +222,6 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 	}
 
-	class Product {
-
-	}
-
-	class PersonsProductsController {
-
-		@RequestMapping(value = "/products/{personId}")
-		public HttpEntity<List<Product>> productsOfPerson(@PathVariable("personId") Long personId) {
-			return null;
-		}
-
-		@RequestMapping(value = "/products/{productId}")
-		public HttpEntity<List<Product>> productById(@PathVariable("productId") Long productId) {
-			return null;
-		}
-
-	}
-
-	@RequestMapping("/products")
-	class PersonsProductsControllerClassLevel {
-
-		@RequestMapping("/person/{personId}")
-		public HttpEntity<List<Product>> productsOfPerson(@PathVariable("personId") Long personId) {
-			return null;
-		}
-
-		@RequestMapping("/{productId}")
-		public HttpEntity<List<Product>> productById(@PathVariable("productId") String productId) {
-			return null;
-		}
-	}
-
 	@RequestMapping({ "/persons", "/people" })
 	class InvalidController {
 
@@ -236,13 +244,13 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 
-		@RequestMapping(value = "/{id}/foo", params = { "limit", "offset" })
+		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam Integer offset,
 				@RequestParam Integer limit) {
 			return null;
 		}
 
-		@RequestMapping(value = "/{id}/foo", params = { "limit", "items" })
+		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
 				@RequestParam Integer limit) {
 			return null;
