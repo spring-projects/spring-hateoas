@@ -15,9 +15,10 @@
  */
 package org.springframework.hateoas;
 
+
 /**
  * Factory for {@link LinkBuilder} instances.
- * 
+ *
  * @author Ricardo Gladwell
  */
 public interface LinkBuilderFactory<T extends LinkBuilder> {
@@ -25,7 +26,7 @@ public interface LinkBuilderFactory<T extends LinkBuilder> {
 	/**
 	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target clas (controller,
 	 * service, etc.).
-	 * 
+	 *
 	 * @param target must not be {@literal null}.
 	 * @return
 	 */
@@ -35,10 +36,11 @@ public interface LinkBuilderFactory<T extends LinkBuilder> {
 	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target class (controller,
 	 * service, etc.). The additional parameters are used to fill up potentially available path variables in the class
 	 * scope request mapping.
-	 * 
+	 *
 	 * @param target must not be {@literal null}.
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
 	T linkTo(Class<?> target, Object... parameters);
+
 }

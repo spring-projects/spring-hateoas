@@ -46,7 +46,7 @@ import org.springframework.web.util.UriTemplate;
 
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  */

@@ -20,7 +20,7 @@ import org.springframework.hateoas.LinkBuilderFactory;
 
 /**
  * Factory for {@link LinkBuilder} instances based on the path mapping annotated on the given JAX-RS service.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  */
@@ -42,4 +42,6 @@ public class JaxRsLinkBuilderFactory implements LinkBuilderFactory<JaxRsLinkBuil
 	public JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
 		return JaxRsLinkBuilder.linkTo(service, parameters);
 	}
+
+
 }

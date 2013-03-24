@@ -16,6 +16,7 @@
 package org.springframework.hateoas.core;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
@@ -64,7 +65,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 		if (path.endsWith("#")) {
 			path = path.substring(0, path.length() - 1);
-		}
+	}
 
 		if (!StringUtils.hasText(path)) {
 			return getThis();
