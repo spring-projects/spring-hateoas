@@ -63,8 +63,6 @@ import org.springframework.util.StringUtils;
  */
 public class Jackson1HalModule extends SimpleModule {
 
-	private final RelProvider relProvider;
-
 	/**
 	 * Creates a new {@link Jackson1HalModule}.
 	 */
@@ -77,11 +75,9 @@ public class Jackson1HalModule extends SimpleModule {
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
 
 		SimpleSerializers serializers = new SimpleSerializers();
-		serializers.addSerializer(new HalResourcesSerializer());
+		serializers.addSerializer(new HalResourcesSerializer(relProvider));
 
 		setSerializers(serializers);
-
-		this.relProvider = relProvider;
 	}
 
 	/**
@@ -165,21 +161,28 @@ public class Jackson1HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public class HalResourcesSerializer extends ContainerSerializerBase<Collection<?>> implements
+	public static class HalResourcesSerializer extends ContainerSerializerBase<Collection<?>> implements
 			ContextualSerializer<Collection<?>> {
 
 		private final BeanProperty property;
+		private final RelProvider relProvider;
 
-		/**
-		 * Creates a new {@link HalLinkListSerializer}.
-		 */
 		public HalResourcesSerializer() {
 			this(null);
 		}
 
-		public HalResourcesSerializer(BeanProperty property) {
+		/**
+		 * Creates a new {@link HalLinkListSerializer}.
+		 */
+		public HalResourcesSerializer(RelProvider relProvider) {
+			this(null, relProvider);
+		}
+
+		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider) {
+
 			super(Collection.class, false);
 			this.property = property;
+			this.relProvider = relProvider;
 		}
 
 		/*
@@ -195,8 +198,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				String relation = property == null || relProvider == null ? "content" : relProvider
-						.getRelForSingleResource(property.getType().getRawClass());
+				String relation = relProvider == null ? "content" : relProvider.getRelForSingleResource(value.getClass());
 
 				if (sortedLinks.get(relation) == null) {
 					sortedLinks.put(relation, new ArrayList<Object>());
@@ -223,7 +225,7 @@ public class Jackson1HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<Collection<?>> createContextual(SerializationConfig config, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property);
+			return new HalResourcesSerializer(property, relProvider);
 		}
 
 		/*

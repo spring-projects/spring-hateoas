@@ -164,7 +164,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		}
 
 		private void registerModule(Object objectMapper) {
-			((ObjectMapper) objectMapper).registerModule(new Jackson2HalModule());
+			((ObjectMapper) objectMapper).registerModule(new Jackson2HalModule(null));
 		}
 	}
 
@@ -217,7 +217,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		}
 
 		private void registerModule(Object mapper) {
-			((org.codehaus.jackson.map.ObjectMapper) mapper).registerModule(new Jackson1HalModule());
+			((org.codehaus.jackson.map.ObjectMapper) mapper).registerModule(new Jackson1HalModule(null));
 		}
 	}
 }
