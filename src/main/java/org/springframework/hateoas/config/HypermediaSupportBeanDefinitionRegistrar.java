@@ -41,6 +41,7 @@ import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.DefaultLinkDiscoverer;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.hateoas.core.DelegatingRelProvider;
+import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
@@ -71,6 +72,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 			null);
 	private static final boolean JSONPATH_PRESENT = ClassUtils.isPresent("com.jayway.jsonpath.JsonPath", null);
+	private static final boolean EVO_PRESENT = ClassUtils.isPresent("org.atteo.evo.inflector.English", null);
 
 	private final ImportBeanDefinitionRegistrar linkBuilderBeanDefinitionRegistrar = new LinkBuilderBeanDefinitionRegistrar();
 
@@ -114,7 +116,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 */
 	private static void registerRelProviderPluginRegistryAndDelegate(BeanDefinitionRegistry registry) {
 
-		RootBeanDefinition defaultRelProviderBeanDefinition = new RootBeanDefinition(DefaultRelProvider.class);
+		Class<?> defaultRelProviderType = EVO_PRESENT ? EvoInflectorRelProvider.class : DefaultRelProvider.class;
+		RootBeanDefinition defaultRelProviderBeanDefinition = new RootBeanDefinition(defaultRelProviderType);
 		registry.registerBeanDefinition("defaultRelProvider", defaultRelProviderBeanDefinition);
 
 		RootBeanDefinition annotationRelProviderBeanDefinition = new RootBeanDefinition(AnnotationRelProvider.class);

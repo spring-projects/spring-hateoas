@@ -66,6 +66,7 @@
 		<jsonpath.version>0.8.1</jsonpath.version>
 		<minidevjson.version>1.1.1</minidevjson.version>
 		<slf4j.version>1.7.2</slf4j.version>
+		<evo.version>1.0.1</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 	</properties>
 
@@ -148,6 +149,13 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 			<version>${jsonpath.version}</version>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.atteo</groupId>
+			<artifactId>evo-inflector</artifactId>
+			<version>${evo.version}</version>
 			<optional>true</optional>
 		</dependency>
 
