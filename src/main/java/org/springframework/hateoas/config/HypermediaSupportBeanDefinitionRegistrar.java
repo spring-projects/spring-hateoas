@@ -15,7 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
+import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerBeanDefinition;
+import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerWithGeneratedName;
 
 import java.util.List;
 import java.util.Map;
@@ -103,12 +104,12 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		AbstractBeanDefinition definition;
 
 		switch (type) {
-			case HAL:
-				definition = new RootBeanDefinition(HalLinkDiscoverer.class);
-				break;
-			case DEFAULT:
-			default:
-				definition = new RootBeanDefinition(DefaultLinkDiscoverer.class);
+		case HAL:
+			definition = new RootBeanDefinition(HalLinkDiscoverer.class);
+			break;
+		case DEFAULT:
+		default:
+			definition = new RootBeanDefinition(DefaultLinkDiscoverer.class);
 		}
 
 		definition.setSource(this);
