@@ -74,7 +74,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring.version}</version>
-		<exclusions>
+			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
@@ -300,9 +300,9 @@
 	</repositories>
 	
 	<scm>
-        <url>https://github.com/SpringSource/spring-hateoas</url>
-        <connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>
-    </scm>
+		<url>https://github.com/SpringSource/spring-hateoas</url>
+		<connection>scm:git:git://github.com/SpringSource/spring-hateoas.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:SpringSource/spring-hateoas.git</developerConnection>
+	</scm>
 	
 </project>
