@@ -23,11 +23,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.core.ObjectUtils;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -37,17 +40,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
@@ -63,17 +73,13 @@ public class Jackson2HalModule extends SimpleModule {
 
 	private static final long serialVersionUID = 7806951456457932384L;
 
-	public Jackson2HalModule(RelProvider relProvider) {
+	public Jackson2HalModule() {
 
 		super("json-hal-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-
-		SimpleSerializers serializers = new SimpleSerializers();
-		serializers.addSerializer(new HalResourcesSerializer(relProvider));
-		setSerializers(serializers);
 	}
 
 	/**
@@ -198,6 +204,8 @@ public class Jackson2HalModule extends SimpleModule {
 	 */
 	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>> implements ContextualSerializer {
 
+		private static final String DEFAULT_REL = "content";
+
 		private final BeanProperty property;
 		private final RelProvider relProvider;
 
@@ -234,12 +242,16 @@ public class Jackson2HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				// TODO: do something fancy to get the relation name
-				String relation = relProvider == null ? "content" : relProvider.getRelForSingleResource(value.getClass());
+				Class<?> type = ObjectUtils.getResourceType(resource);
+				String relation = relProvider == null ? DEFAULT_REL : relProvider.getSingleResourceRelFor(type);
+
+				if (relation == null) {
+					relation = DEFAULT_REL;
+				}
+
 				if (sortedLinks.get(relation) == null) {
 					sortedLinks.put(relation, new ArrayList<Object>());
 				}
-
 				sortedLinks.get(relation).add(resource);
 			}
 
@@ -257,7 +269,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, null);
+			return new HalResourcesSerializer(property, relProvider);
 		}
 
 		@Override
@@ -562,6 +574,71 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType vc = property.getType().getContentType();
 			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
 			return des;
+		}
+	}
+
+	public static class HalHandlerInstantiator extends HandlerInstantiator {
+
+		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
+
+		public HalHandlerInstantiator(RelProvider resolver) {
+
+			Assert.notNull(resolver, "RelProvider must not be null!");
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, resolver));
+		}
+
+		private Object findInstance(Class<?> type) {
+
+			Object result = instanceMap.get(type);
+			return result != null ? result : BeanUtils.instantiateClass(type);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#deserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 */
+		@Override
+		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<?> deserClass) {
+			return (JsonDeserializer<?>) findInstance(deserClass);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#keyDeserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 */
+		@Override
+		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<?> keyDeserClass) {
+			return (KeyDeserializer) findInstance(keyDeserClass);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#serializerInstance(com.fasterxml.jackson.databind.SerializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 */
+		@Override
+		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
+			return (JsonSerializer<?>) findInstance(serClass);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#typeResolverBuilderInstance(com.fasterxml.jackson.databind.cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 */
+		@Override
+		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
+				Class<?> builderClass) {
+			return (TypeResolverBuilder<?>) findInstance(builderClass);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#typeIdResolverInstance(com.fasterxml.jackson.databind.cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 */
+		@Override
+		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
+			return (TypeIdResolver) findInstance(resolverClass);
 		}
 	}
 }

@@ -21,10 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -32,14 +35,20 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.DefaultLinkDiscoverer;
+import org.springframework.hateoas.core.DefaultRelProvider;
+import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.plugin.core.PluginRegistry;
+import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -56,11 +65,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private static final String LINK_DISCOVERER_BEAN_NAME = "_linkDiscoverer";
+	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
 
 	private static final boolean JACKSON1_PRESENT = ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null);
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 			null);
 	private static final boolean JSONPATH_PRESENT = ClassUtils.isPresent("com.jayway.jsonpath.JsonPath", null);
+
+	private final ImportBeanDefinitionRegistrar linkBuilderBeanDefinitionRegistrar = new LinkBuilderBeanDefinitionRegistrar();
 
 	/* 
 	 * (non-Javadoc)
@@ -69,7 +81,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
-		new LinkBuilderBeanDefinitionRegistrar().registerBeanDefinitions(importingClassMetadata, registry);
+		linkBuilderBeanDefinitionRegistrar.registerBeanDefinitions(importingClassMetadata, registry);
 
 		Map<String, Object> attributes = importingClassMetadata.getAnnotationAttributes(EnableHypermediaSupport.class
 				.getName());
@@ -90,6 +102,38 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				registerWithGeneratedName(new RootBeanDefinition(Jackson1ModuleRegisteringBeanPostProcessor.class), registry);
 			}
 		}
+
+		registerRelProviderPluginRegistryAndDelegate(registry);
+	}
+
+	/**
+	 * Registers bean definitions for a {@link PluginRegistry} to capture {@link RelProvider} instances. Wraps the
+	 * registry into a {@link DelegatingRelProvider} bean definition backed by the registry.
+	 * 
+	 * @param registry
+	 */
+	private static void registerRelProviderPluginRegistryAndDelegate(BeanDefinitionRegistry registry) {
+
+		RootBeanDefinition defaultRelProviderBeanDefinition = new RootBeanDefinition(DefaultRelProvider.class);
+		registry.registerBeanDefinition("defaultRelProvider", defaultRelProviderBeanDefinition);
+
+		RootBeanDefinition annotationRelProviderBeanDefinition = new RootBeanDefinition(AnnotationRelProvider.class);
+		registry.registerBeanDefinition("annotationRelProvider", annotationRelProviderBeanDefinition);
+
+		BeanDefinitionBuilder registryFactoryBeanBuilder = BeanDefinitionBuilder
+				.rootBeanDefinition(PluginRegistryFactoryBean.class);
+		registryFactoryBeanBuilder.addPropertyValue("type", RelProvider.class);
+		registryFactoryBeanBuilder.addPropertyValue("exclusions", DelegatingRelProvider.class);
+
+		AbstractBeanDefinition registryBeanDefinition = registryFactoryBeanBuilder.getBeanDefinition();
+		registry.registerBeanDefinition("relProviderPluginRegistry", registryBeanDefinition);
+
+		BeanDefinitionBuilder delegateBuilder = BeanDefinitionBuilder.rootBeanDefinition(DelegatingRelProvider.class);
+		delegateBuilder.addConstructorArgValue(registryBeanDefinition);
+
+		AbstractBeanDefinition beanDefinition = delegateBuilder.getBeanDefinition();
+		beanDefinition.setPrimary(true);
+		registry.registerBeanDefinition(DELEGATING_REL_PROVIDER_BEAN_NAME, beanDefinition);
 	}
 
 	/**
@@ -121,7 +165,17 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 * 
 	 * @author Oliver Gierke
 	 */
-	private static class Jackson2ModuleRegisteringBeanPostProcessor implements BeanPostProcessor {
+	private static class Jackson2ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
+
+		private BeanFactory factory;
+
+		/* (non-Javadoc)
+		 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+		 */
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.factory = beanFactory;
+		}
 
 		/* 
 		 * (non-Javadoc)
@@ -164,7 +218,12 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		}
 
 		private void registerModule(Object objectMapper) {
-			((ObjectMapper) objectMapper).registerModule(new Jackson2HalModule(null));
+
+			RelProvider provider = factory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
+
+			ObjectMapper mapper = (ObjectMapper) objectMapper;
+			mapper.registerModule(new Jackson2HalModule());
+			mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(provider));
 		}
 	}
 
@@ -174,7 +233,18 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 * 
 	 * @author Oliver Gierke
 	 */
-	private static class Jackson1ModuleRegisteringBeanPostProcessor implements BeanPostProcessor {
+	private static class Jackson1ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
+
+		private BeanFactory beanFactory;
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+		 */
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.beanFactory = beanFactory;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -216,8 +286,13 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			}
 		}
 
-		private void registerModule(Object mapper) {
-			((org.codehaus.jackson.map.ObjectMapper) mapper).registerModule(new Jackson1HalModule(null));
+		private void registerModule(Object objectMapper) {
+
+			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
+
+			org.codehaus.jackson.map.ObjectMapper mapper = (org.codehaus.jackson.map.ObjectMapper) objectMapper;
+			mapper.registerModule(new Jackson1HalModule());
+			mapper.setHandlerInstantiator(new Jackson1HalModule.HalHandlerInstantiator(relProvider));
 		}
 	}
 }

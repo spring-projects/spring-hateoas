@@ -15,12 +15,14 @@
  */
 package org.springframework.hateoas;
 
+import org.springframework.plugin.core.Plugin;
+
 /**
  * @author Oliver Gierke
  */
-public interface RelProvider {
+public interface RelProvider extends Plugin<Class<?>> {
 
-	String getRelForCollectionResource(Class<?> type);
+	String getSingleResourceRelFor(Class<?> type);
 
-	String getRelForSingleResource(Class<?> type);
+	String getCollectionResourceRelFor(Class<?> type);
 }

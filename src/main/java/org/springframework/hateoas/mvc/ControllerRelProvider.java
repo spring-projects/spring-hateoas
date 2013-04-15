@@ -18,26 +18,28 @@ package org.springframework.hateoas.mvc;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Oliver Gierke
  */
 public class ControllerRelProvider implements RelProvider {
 
+	private final Class<?> controllerType;
 	private final Class<?> entityType;
-	private final String collectionResourceRel;
-	private final String singleResourceRel;
+	private final PluginRegistry<RelProvider, Class<?>> providers;
 
-	public ControllerRelProvider(Class<?> controller) {
+	public ControllerRelProvider(Class<?> controller, PluginRegistry<RelProvider, Class<?>> providers) {
+
+		Assert.notNull(controller);
 
 		ExposesResourceFor annotation = AnnotationUtils.findAnnotation(controller, ExposesResourceFor.class);
 		Assert.notNull(annotation);
 
+		this.controllerType = controller;
 		this.entityType = annotation.value();
-		this.singleResourceRel = StringUtils.uncapitalize(entityType.getSimpleName());
-		this.collectionResourceRel = singleResourceRel + "List";
+		this.providers = providers;
 	}
 
 	/* 
@@ -45,8 +47,8 @@ public class ControllerRelProvider implements RelProvider {
 	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
 	 */
 	@Override
-	public String getRelForCollectionResource(Class<?> type) {
-		return collectionResourceRel;
+	public String getCollectionResourceRelFor(Class<?> resource) {
+		return providers.getPluginFor(entityType).getCollectionResourceRelFor(resource);
 	}
 
 	/* 
@@ -54,7 +56,16 @@ public class ControllerRelProvider implements RelProvider {
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
 	 */
 	@Override
-	public String getRelForSingleResource(Class<?> type) {
-		return singleResourceRel;
+	public String getSingleResourceRelFor(Class<?> resource) {
+		return providers.getPluginFor(entityType).getSingleResourceRelFor(resource);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
+	 */
+	@Override
+	public boolean supports(Class<?> delimiter) {
+		return controllerType.equals(delimiter);
 	}
 }

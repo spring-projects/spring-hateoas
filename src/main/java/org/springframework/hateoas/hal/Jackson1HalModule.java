@@ -35,24 +35,32 @@ import org.codehaus.jackson.map.ContextualDeserializer;
 import org.codehaus.jackson.map.ContextualSerializer;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.HandlerInstantiator;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.KeyDeserializer;
+import org.codehaus.jackson.map.MapperConfig;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.TypeSerializer;
 import org.codehaus.jackson.map.deser.std.ContainerDeserializerBase;
+import org.codehaus.jackson.map.introspect.Annotated;
+import org.codehaus.jackson.map.jsontype.TypeIdResolver;
+import org.codehaus.jackson.map.jsontype.TypeResolverBuilder;
 import org.codehaus.jackson.map.module.SimpleModule;
-import org.codehaus.jackson.map.module.SimpleSerializers;
 import org.codehaus.jackson.map.ser.std.ContainerSerializerBase;
 import org.codehaus.jackson.map.ser.std.MapSerializer;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
+import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.core.ObjectUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,18 +74,13 @@ public class Jackson1HalModule extends SimpleModule {
 	/**
 	 * Creates a new {@link Jackson1HalModule}.
 	 */
-	public Jackson1HalModule(RelProvider relProvider) {
+	public Jackson1HalModule() {
 
 		super("json-hal-module", new Version(1, 0, 0, null));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-
-		SimpleSerializers serializers = new SimpleSerializers();
-		serializers.addSerializer(new HalResourcesSerializer(relProvider));
-
-		setSerializers(serializers);
 	}
 
 	/**
@@ -198,7 +201,12 @@ public class Jackson1HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				String relation = relProvider == null ? "content" : relProvider.getRelForSingleResource(value.getClass());
+				Class<?> type = ObjectUtils.getResourceType(resource);
+				String relation = relProvider == null ? "content" : relProvider.getSingleResourceRelFor(type);
+
+				if (relation == null) {
+					relation = "content";
+				}
 
 				if (sortedLinks.get(relation) == null) {
 					sortedLinks.put(relation, new ArrayList<Object>());
@@ -452,6 +460,61 @@ public class Jackson1HalModule extends SimpleModule {
 			JavaType vc = property.getType().getContentType();
 			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
 			return des;
+		}
+	}
+
+	public static class HalHandlerInstantiator extends HandlerInstantiator {
+
+		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
+
+		public HalHandlerInstantiator(RelProvider relProvider) {
+
+			Assert.notNull(relProvider, "RelProvider must not be null!");
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, relProvider));
+
+		}
+
+		@Override
+		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<? extends JsonDeserializer<?>> deserClass) {
+			return (JsonDeserializer<?>) findInstance(deserClass, false);
+		}
+
+		@Override
+		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<? extends KeyDeserializer> keyDeserClass) {
+			return (KeyDeserializer) findInstance(keyDeserClass, false);
+		}
+
+		@Override
+		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated,
+				Class<? extends JsonSerializer<?>> serClass) {
+			// there is a know bug in jackson that will not create a serializer instance if the handler instantiator returns
+			// null!
+			return (JsonSerializer<?>) findInstance(serClass, true);
+		}
+
+		@Override
+		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
+				Class<? extends TypeResolverBuilder<?>> builderClass) {
+			return (TypeResolverBuilder<?>) findInstance(builderClass, false);
+		}
+
+		@Override
+		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated,
+				Class<? extends TypeIdResolver> resolverClass) {
+			return (TypeIdResolver) findInstance(resolverClass, false);
+		}
+
+		private Object findInstance(Class<?> type, boolean createInstance) {
+
+			Object result = instanceMap.get(type);
+
+			if (result != null) {
+				return result;
+			}
+
+			return createInstance ? BeanUtils.instantiateClass(type) : null;
 		}
 	}
 }

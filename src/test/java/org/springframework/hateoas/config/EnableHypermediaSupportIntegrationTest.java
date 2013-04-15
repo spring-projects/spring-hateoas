@@ -32,9 +32,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.DefaultLinkDiscoverer;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
+import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
@@ -68,6 +70,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
 		assertEntityLinksSetUp(context);
+		assertRelProvidersSetUp(context);
 		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(DefaultLinkDiscoverer.class)));
 	}
 
@@ -75,6 +78,12 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		Map<String, EntityLinks> discoverers = context.getBeansOfType(EntityLinks.class);
 		assertThat(discoverers.values(), hasItem(Matchers.<EntityLinks> instanceOf(DelegatingEntityLinks.class)));
+	}
+
+	private static void assertRelProvidersSetUp(ApplicationContext context) {
+
+		Map<String, RelProvider> discoverers = context.getBeansOfType(RelProvider.class);
+		assertThat(discoverers.values(), hasItem(Matchers.<RelProvider> instanceOf(DelegatingRelProvider.class)));
 	}
 
 	@Configuration
