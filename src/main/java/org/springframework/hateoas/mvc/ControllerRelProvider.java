@@ -45,7 +45,7 @@ public class ControllerRelProvider implements RelProvider {
 	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
 	 */
 	@Override
-	public String getRelForCollectionResource(Class<?> type) {
+	public String getRelForCollectionResource(Object resource) {
 		return collectionResourceRel;
 	}
 
@@ -54,7 +54,7 @@ public class ControllerRelProvider implements RelProvider {
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
 	 */
 	@Override
-	public String getRelForSingleResource(Class<?> type) {
+	public String getRelForSingleResource(Object resource) {
 		return singleResourceRel;
 	}
 }

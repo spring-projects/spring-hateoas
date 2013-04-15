@@ -20,7 +20,7 @@ package org.springframework.hateoas;
  */
 public interface RelProvider {
 
-	String getRelForCollectionResource(Class<?> type);
+	String getRelForCollectionResource(Object type);
 
-	String getRelForSingleResource(Class<?> type);
+	String getRelForSingleResource(Object type);
 }

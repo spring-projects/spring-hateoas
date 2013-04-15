@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas.hal;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +28,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -44,9 +45,14 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
+	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
+
 	@Before
 	public void setUpModule() {
-		mapper.registerModule(new Jackson2HalModule(null));
+		mapper.registerModule(new Jackson2HalModule());
+		HalHandlerInstantiator hi = new Jackson2HalModule.HalHandlerInstantiator();
+		hi.setRelationResolver(new AnnotationRelProvider());
+		mapper.setHandlerInstantiator(hi);
 	}
 
 	/**
@@ -181,5 +187,34 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		assertThat(result, is(expected));
 
+	}
+
+	@Test
+	public void rendersAnnotatedResourceResourcesAsEmbedded() throws Exception {
+
+		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimpleAnnotatedPojo>> resources = new Resources<Resource<SimpleAnnotatedPojo>>(content);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void deserializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
+
+		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimpleAnnotatedPojo>> expected = new Resources<Resource<SimpleAnnotatedPojo>>(content);
+		expected.add(new Link("localhost"));
+
+		Resources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				ANNOTATED_EMBEDDED_RESOURCE_REFERENCE,
+				mapper.getTypeFactory().constructParametricType(Resources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
+
+		assertThat(result, is(expected));
 	}
 }

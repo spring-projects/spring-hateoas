@@ -37,17 +37,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
@@ -63,17 +70,13 @@ public class Jackson2HalModule extends SimpleModule {
 
 	private static final long serialVersionUID = 7806951456457932384L;
 
-	public Jackson2HalModule(RelProvider relProvider) {
+	public Jackson2HalModule() {
 
 		super("json-hal-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-
-		SimpleSerializers serializers = new SimpleSerializers();
-		serializers.addSerializer(new HalResourcesSerializer(relProvider));
-		setSerializers(serializers);
 	}
 
 	/**
@@ -234,12 +237,14 @@ public class Jackson2HalModule extends SimpleModule {
 
 			for (Object resource : value) {
 
-				// TODO: do something fancy to get the relation name
-				String relation = relProvider == null ? "content" : relProvider.getRelForSingleResource(value.getClass());
+				String relation = relProvider == null ? "content" : relProvider.getRelForSingleResource(resource);
+				if (relation == null) {
+					relation = "content";
+				}
+
 				if (sortedLinks.get(relation) == null) {
 					sortedLinks.put(relation, new ArrayList<Object>());
 				}
-
 				sortedLinks.get(relation).add(resource);
 			}
 
@@ -257,7 +262,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, null);
+			return new HalResourcesSerializer(property, relProvider);
 		}
 
 		@Override
@@ -563,5 +568,61 @@ public class Jackson2HalModule extends SimpleModule {
 			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
 			return des;
 		}
+	}
+
+	public static class HalHandlerInstantiator extends HandlerInstantiator {
+
+		private Map<Class, Object> instanceMap = new HashMap<Class, Object>();
+
+		public void setInstanceMap(Map<Class, Object> instanceMap) {
+			this.instanceMap = instanceMap;
+		}
+
+		public void setRelationResolver(RelProvider resolver) {
+			instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, resolver));
+		}
+
+		private Object findInstance(Class type) {
+			Object result = instanceMap.get(type);
+			if (null == result) {
+				try {
+					result = type.newInstance();
+				} catch (InstantiationException e) {
+					return new RuntimeException(e);
+				} catch (IllegalAccessException e) {
+					return new RuntimeException(e);
+				}
+			}
+			return result;
+		}
+
+		@Override
+		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<?> deserClass) {
+			return (JsonDeserializer<?>) findInstance(deserClass);
+		}
+
+		@Override
+		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
+				Class<?> keyDeserClass) {
+			return (KeyDeserializer) findInstance(keyDeserClass);
+		}
+
+		@Override
+		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
+			return (JsonSerializer<?>) findInstance(serClass);
+		}
+
+		@Override
+		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
+				Class<?> builderClass) {
+			return (TypeResolverBuilder<?>) findInstance(builderClass);
+		}
+
+		@Override
+		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
+			return (TypeIdResolver) findInstance(resolverClass);
+		}
+
 	}
 }
