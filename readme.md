@@ -231,3 +231,35 @@ PersonResourceAssembler assembler = new PersonResourceAssembler();
 PersonResource resource = assembler.toResource(person);
 List<PersonResource> resources = assembler.toResource(people);
 ```
+
+## @EnableHypermediaSupport
+To enable the `ResourceSupport` subtypes be rendered according to the specification of various hypermedia representations types, the support for a particular hypermedia representation format can be activated through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as argument. Currently we support [HAL](http://tools.ietf.org/html/draft-kelly-json-hal) as well as a default rendering. Using the annotation triggers the following:
+
+* registers necessary Jackson modules to render `Resource`/`Resources` in the hypermedia specific format.
+* if JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to lookup links by their `rel`s in plain JSON representations (see [below](#linkdiscoverer-api)).
+* enables `@EnableEntityLinks` by default (see [above](#entitylinks)), will automatically pick up `EntityLinks` implementations and bundle them into a `DelegatingEntityLinks` instance available for autowiring.
+* automatically picks up all `RelProvider` implementations in the `ApplicationContext` and bundles them into a `DelegatingRelProvider` available for autowiring. Registers providers to consider `@Relation` on domain types as well as Spring MVC controllers. If [EVO inflector](https://github.com/atteo/evo-inflector) is on the classpath collection rels are derived using the pluralizing algorithm implemented in the library (see [below](#relprovider-api)).
+
+## LinkDiscoverer API
+When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in them. Spring HATEOAS provides [JSONPath](https://code.google.com/p/json-path/) based implementations of the `LinkProvider` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport` we automatically expose an instance supporting the configured hypermedia type as Spring bean.
+
+Alternatively you can simply setup and use an instance like this:
+
+```java
+String content = "{'_links' :  { 'foo' : { 'href' : '/foo/bar' }}}";
+LinkDiscoverer discoverer = new HalLinkDiscoverer();
+Link link = discoverer.findLinkWithRel("foo", content);
+
+assertThat(link.getRel(), is("foo"));
+assertThat(link.getHref(), is("/foo/bar"));
+```
+
+## RelProvider API
+When building links you usually need to determine the relation type to be used for the like. In most cases the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to lookup the relation types behind a `RelProvider` API that allows to determine the relation types for single and collection resources. Here's the algorithm the relation type is looked up:
+
+1. If the type is annotated with `@RelationType` we use the values configured in the annotation.
+1. if not, we default to the uncapitalized simple class name plus an appended `List` for the collection rel.
+1. in case the [EVO inflector](https://github.com/atteo/evo-inflector) JAR is in the classpath, we rather use the plural of the single resource rel provided by the pluralizing algorithm.
+1. `@Controller` classes annotated with `@ExposesResourceFor` (see section on [EntityLinks](#entitylinks) for details) will transparently lookup the relation types for the type configured in the annotation, so that you can use `relProvider.getSingleResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
+
+A `RelProvider` is exposed as Spring bean when using `@EnableHypermediaSupport` automatically. You can plug in custom providers by simply implementing the interface and exposing them as Spring bean in turn.
