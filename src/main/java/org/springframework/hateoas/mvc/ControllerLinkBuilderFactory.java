@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.MethodParameter;
@@ -36,6 +35,7 @@ import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.hateoas.core.MethodParameters;
+import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -115,19 +115,21 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			}
 		}
 
-		values.putAll(PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation));
+		for (BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation)) {
+			values.put(parameter.getVariableName(), parameter.asString());
+		}
 
-		for (Entry<String, Object> param : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation).entrySet()) {
+		for (BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation)) {
 
-			Object value = param.getValue();
-			String key = param.getKey();
+			Object value = parameter.getValue();
+			String key = parameter.getVariableName();
 
 			if (value instanceof Collection) {
 				for (Object element : (Collection<?>) value) {
 					builder.queryParam(key, element);
 				}
 			} else {
-				builder.queryParam(key, value);
+				builder.queryParam(key, parameter.asString());
 			}
 		}
 

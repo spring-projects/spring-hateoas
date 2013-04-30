@@ -21,8 +21,12 @@ import static org.springframework.hateoas.core.DummyInvocationUtils.*;
 
 import java.util.Arrays;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
@@ -76,10 +80,26 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/sample/1?foo=value"));
 	}
 
+	/**
+	 * @see #57
+	 */
+	@Test
+	public void usesDateTimeFormatForUriBinding() {
+
+		DateTime now = DateTime.now();
+
+		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
+		assertThat(link.getHref(), endsWith("/sample/" + ISODateTimeFormat.date().print(now)));
+	}
+
 	static interface SampleController {
 
 		@RequestMapping("/sample/{id}")
 		HttpEntity<?> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);
+
+		@RequestMapping("/sample/{time}")
+		HttpEntity<?> sampleMethod(@PathVariable("time") @DateTimeFormat(iso = ISO.DATE) DateTime time);
 	}
 
 	static class SampleUriComponentsContributor implements UriComponentsContributor {
