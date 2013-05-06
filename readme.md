@@ -5,7 +5,7 @@ This project provides some APIs to ease creating REST representations that follo
 As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either JAXB, JSON or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
 
 ## Links
-The `Link` value object follows the Atom link definition and consists of a `rel` and an `href` attribute. It contains a few constants for well known reels such as `self`, `next` etc. The XML representation will render in the Atom namespace.
+The `Link` value object follows the Atom link definition and consists of a `rel` and an `href` attribute. It contains a few constants for well known rels such as `self`, `next` etc. The XML representation will render in the Atom namespace.
 
 ```java
 Link link = new Link("http://localhost:8080/something");
