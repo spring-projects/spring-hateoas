@@ -47,6 +47,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
 	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
+	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_links\":{},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
 	@Before
 	public void setUpModule() {
@@ -160,11 +161,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
 
-		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
-		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
-
-		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+		Resources<Resource<SimplePojo>> resources = setupResources();
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
@@ -173,11 +170,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void deserializesMultipleResourceResourcesAsEmbedded() throws Exception {
 
-		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
-		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
-
-		Resources<Resource<SimplePojo>> expected = new Resources<Resource<SimplePojo>>(content);
+		Resources<Resource<SimplePojo>> expected = setupResources();
 		expected.add(new Link("localhost"));
 
 		Resources<Resource<SimplePojo>> result = mapper.readValue(
@@ -186,7 +179,6 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
 
 		assertThat(result, is(expected));
-
 	}
 
 	/**
@@ -222,5 +214,45 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(expected));
+	}
+
+	/**
+	 * @see #63
+	 */
+	@Test
+	public void serializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
+		assertThat(write(setupAnnotatedResources()), is(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE));
+	}
+
+	/**
+	 * @see #63
+	 */
+	@Test
+	public void deserializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
+
+		Resources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				ANNOTATED_EMBEDDED_RESOURCES_REFERENCE,
+				mapper.getTypeFactory().constructParametricType(Resources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
+
+		assertThat(result, is(setupAnnotatedResources()));
+	}
+
+	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedResources() {
+
+		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+
+		return new Resources<Resource<SimpleAnnotatedPojo>>(content);
+	}
+
+	private static Resources<Resource<SimplePojo>> setupResources() {
+
+		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
+
+		return new Resources<Resource<SimplePojo>>(content);
 	}
 }

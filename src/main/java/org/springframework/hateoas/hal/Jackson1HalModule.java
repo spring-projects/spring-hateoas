@@ -59,7 +59,6 @@ import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.core.ObjectUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -170,10 +169,6 @@ public class Jackson1HalModule extends SimpleModule {
 		private final BeanProperty property;
 		private final RelProvider relProvider;
 
-		public HalResourcesSerializer() {
-			this(null);
-		}
-
 		/**
 		 * Creates a new {@link HalLinkListSerializer}.
 		 */
@@ -196,23 +191,10 @@ public class Jackson1HalModule extends SimpleModule {
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
-			// sort resources according to their types
-			Map<String, List<Object>> sortedLinks = new HashMap<String, List<Object>>();
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider);
 
 			for (Object resource : value) {
-
-				Class<?> type = ObjectUtils.getResourceType(resource);
-				String relation = relProvider == null ? "content" : relProvider.getSingleResourceRelFor(type);
-
-				if (relation == null) {
-					relation = "content";
-				}
-
-				if (sortedLinks.get(relation) == null) {
-					sortedLinks.put(relation, new ArrayList<Object>());
-				}
-
-				sortedLinks.get(relation).add(resource);
+				builder.add(resource);
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
@@ -223,7 +205,7 @@ public class Jackson1HalModule extends SimpleModule {
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null,
 					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property));
 
-			serializer.serialize(sortedLinks, jgen, provider);
+			serializer.serialize(builder.asMap(), jgen, provider);
 		}
 
 		/*
