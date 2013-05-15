@@ -25,6 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.AbstractMarshallingIntegrationTests;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedResources.PageMetadata;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
@@ -48,6 +51,10 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 
 	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
 	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+
+	static final String ANNOTATED_PAGED_RESOURCES = "{\"_links\":{\"next\":{\"href\":\"foo\"},\"prev\":{\"href\":\"bar\"}},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]},\"page\":{\"size\":2,\"totalElements\":4,\"totalPages\":2,\"number\":0}}";
+
+	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
 	@Before
 	public void setUpModule() {
@@ -230,6 +237,30 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(setupAnnotatedResources()));
+	}
+
+	@Test
+	public void serializesPagedResource() throws Exception {
+		assertThat(write(setupAnnotatedPagedResources()), is(ANNOTATED_PAGED_RESOURCES));
+	}
+
+	@Test
+	public void deserializesPagedResource() throws Exception {
+		PagedResources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				ANNOTATED_PAGED_RESOURCES,
+				mapper.getTypeFactory().constructParametricType(PagedResources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
+
+		assertThat(result, is(setupAnnotatedPagedResources()));
+	}
+
+	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
+
+		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+
+		return new PagedResources<Resource<SimpleAnnotatedPojo>>(content, new PageMetadata(2, 0, 4), PAGINATION_LINKS);
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedResources() {

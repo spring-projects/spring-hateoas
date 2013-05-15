@@ -88,6 +88,16 @@ public class Links implements Iterable<Link> {
 	}
 
 	/**
+	 * Returns whether the {@link Links} container contains a {@link Link} with the given rel.
+	 * 
+	 * @param rel
+	 * @return
+	 */
+	public boolean hasLink(String rel) {
+		return getLink(rel) != null;
+	}
+
+	/**
 	 * Creates a {@link Links} instance from the given RFC5988-compatible link format.
 	 * 
 	 * @param source a comma separated list of {@link Link} representations.
@@ -112,6 +122,15 @@ public class Links implements Iterable<Link> {
 		}
 
 		return new Links(links);
+	}
+
+	/**
+	 * Returns whether the {@link Links} containter is empty.
+	 * 
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return links.isEmpty();
 	}
 
 	/*

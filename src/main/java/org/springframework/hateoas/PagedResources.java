@@ -34,6 +34,8 @@ import org.springframework.util.Assert;
 @com.fasterxml.jackson.annotation.JsonAutoDetect(fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY)
 public class PagedResources<T> extends Resources<T> {
 
+	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
+
 	@org.codehaus.jackson.annotate.JsonProperty("page")
 	@com.fasterxml.jackson.annotation.JsonProperty("page")
 	private PageMetadata metadata;
@@ -97,13 +99,37 @@ public class PagedResources<T> extends Resources<T> {
 		return new PagedResources<T>(resources, metadata);
 	}
 
+	/**
+	 * Returns the Link pointing to the next page (if set).
+	 * 
+	 * @see #addPaginationLinks(Link)
+	 * @return
+	 */
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	@org.codehaus.jackson.annotate.JsonIgnore
+	public Link getNextLink() {
+		return getLink(Link.REL_NEXT);
+	}
+
+	/**
+	 * Returns the Link pointing to the previous page (if set).
+	 * 
+	 * @see #addPaginationLinks(Link)
+	 * @return
+	 */
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	@org.codehaus.jackson.annotate.JsonIgnore
+	public Link getPreviousLink() {
+		return getLink(Link.REL_PREVIOUS);
+	}
+
 	/* 
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("PagedResource { content: %s, metadata: %s }", getContent(), metadata);
+		return String.format("PagedResource { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
 	}
 
 	/* 
@@ -173,17 +199,33 @@ public class PagedResources<T> extends Resources<T> {
 		}
 
 		/**
+		 * Creates a new {@link PageMetadata} from the given size, number, total elements and total pages.
+		 * 
 		 * @param size
-		 * @param number
+		 * @param number zero-indexed, must be less than totalPages
 		 * @param totalElements
 		 * @param totalPages
 		 */
 		public PageMetadata(long size, long number, long totalElements, long totalPages) {
 
+			Assert.isTrue(number < totalPages,
+					"The current page number cannot be greater or equal to the total number of pages!");
+
 			this.size = size;
 			this.number = number;
 			this.totalElements = totalElements;
 			this.totalPages = totalPages;
+		}
+
+		/**
+		 * Creates a new {@link PageMetadata} from the given size, numer and total elements.
+		 * 
+		 * @param size the size of the page
+		 * @param number the number of the page
+		 * @param totalElements the total number of elements available
+		 */
+		public PageMetadata(long size, long number, long totalElements) {
+			this(size, number, totalElements, totalElements / size);
 		}
 
 		/**

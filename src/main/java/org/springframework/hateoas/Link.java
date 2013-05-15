@@ -42,7 +42,7 @@ public class Link implements Serializable {
 
 	public static final String REL_SELF = "self";
 	public static final String REL_FIRST = "first";
-	public static final String REL_PREVIOUS = "previous";
+	public static final String REL_PREVIOUS = "prev";
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
@@ -99,6 +99,25 @@ public class Link implements Serializable {
 	 */
 	public String getRel() {
 		return rel;
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the given relation.
+	 * 
+	 * @param rel must not be {@literal null} or empty.
+	 * @return
+	 */
+	public Link withRel(String rel) {
+		return new Link(href, rel);
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
+	 * 
+	 * @return
+	 */
+	public Link withSelfRel() {
+		return withRel(Link.REL_SELF);
 	}
 
 	/* 
