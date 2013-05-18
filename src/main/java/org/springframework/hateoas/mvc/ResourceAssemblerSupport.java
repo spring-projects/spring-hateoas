@@ -81,6 +81,15 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 		return createResourceWithId(id, entity, new Object[0]);
 	}
 
+	/**
+	 * Creates a new resource with a self link to the given id, using the given parameters to replace path variables in
+	 * the request mapping of the given controller class.
+	 * 
+	 * @param id must not be {@literal null}.
+	 * @param entity must not be {@literal null}.
+	 * @param parameters for path variables, using their id if {@link Identifiable}
+	 * @return
+	 */
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
 		Assert.notNull(entity);

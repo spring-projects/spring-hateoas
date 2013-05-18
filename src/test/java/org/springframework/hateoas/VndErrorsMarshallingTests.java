@@ -31,6 +31,7 @@ import javax.xml.bind.Marshaller;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
+import org.custommonkey.xmlunit.XMLAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -93,10 +94,9 @@ public class VndErrorsMarshallingTests {
 
 	@Test
 	public void jaxbMarshalling() throws Exception {
-
 		Writer writer = new StringWriter();
 		marshaller.marshal(errors, writer);
-		assertThat(writer.toString(), is(xmlReference));
+		XMLAssert.assertXMLEqual(xmlReference, writer.toString());
 	}
 
 	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {

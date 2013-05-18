@@ -17,7 +17,9 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.MethodParameter;
@@ -142,5 +144,23 @@ class AnnotatedParametersParameterAccessor {
 
 			return (String) CONVERSION_SERVICE.convert(value, parameterTypeDecsriptor, STRING_DESCRIPTOR);
 		}
+	}
+
+	public Map<String, MethodParameterValue> getBoundMethodParameterValues(MethodInvocation invocation) {
+
+		MethodParameters parameters = new MethodParameters(invocation.getMethod());
+		Object[] arguments = invocation.getArguments();
+		Map<String, MethodParameterValue> result = new HashMap<String, MethodParameterValue>();
+
+		for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
+
+			Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
+			String annotationAttributeValue = attribute.getValueFrom(annotation);
+			String key = StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter
+					.getParameterName();
+			result.put(key, new MethodParameterValue(parameter, arguments[parameter.getParameterIndex()]));
+		}
+
+		return result;
 	}
 }

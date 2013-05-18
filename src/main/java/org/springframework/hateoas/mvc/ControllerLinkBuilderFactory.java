@@ -109,10 +109,10 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		UriTemplate template = new UriTemplate(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();
 
-		if (classMappingParameters.hasNext()) {
-			for (String variable : template.getVariableNames()) {
-				values.put(variable, classMappingParameters.next());
-			}
+		Iterator<String> names = template.getVariableNames().iterator();
+		while (classMappingParameters.hasNext()) {
+			String variable = names.next();
+			values.put(variable, classMappingParameters.next());
 		}
 
 		for (BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation)) {
