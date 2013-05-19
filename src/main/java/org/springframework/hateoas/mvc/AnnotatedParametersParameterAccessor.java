@@ -86,7 +86,7 @@ class AnnotatedParametersParameterAccessor {
 		private final MethodParameter parameter;
 		private final Object value;
 		private final AnnotationAttribute attribute;
-		private final TypeDescriptor parameterTypeDecsriptor;
+		private final TypeDescriptor parameterTypeDescriptor;
 
 		/**
 		 * Creates a new {@link BoundMethodParameter}
@@ -102,7 +102,7 @@ class AnnotatedParametersParameterAccessor {
 			this.parameter = parameter;
 			this.value = value;
 			this.attribute = attribute;
-			this.parameterTypeDecsriptor = TypeDescriptor.nested(parameter, 0);
+			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, 0);
 		}
 
 		/**
@@ -142,25 +142,21 @@ class AnnotatedParametersParameterAccessor {
 				return null;
 			}
 
-			return (String) CONVERSION_SERVICE.convert(value, parameterTypeDecsriptor, STRING_DESCRIPTOR);
+			return (String) CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
 		}
 	}
 
 	public Map<String, MethodParameterValue> getBoundMethodParameterValues(MethodInvocation invocation) {
 
-		MethodParameters parameters = new MethodParameters(invocation.getMethod());
-		Object[] arguments = invocation.getArguments();
+		List<BoundMethodParameter> boundParameters = getBoundParameters(invocation);
 		Map<String, MethodParameterValue> result = new HashMap<String, MethodParameterValue>();
-
-		for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
-
-			Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
-			String annotationAttributeValue = attribute.getValueFrom(annotation);
-			String key = StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter
-					.getParameterName();
-			result.put(key, new MethodParameterValue(parameter, arguments[parameter.getParameterIndex()]));
+		for (BoundMethodParameter boundMethodParameter : boundParameters) {
+			String key = boundMethodParameter.getVariableName();
+			MethodParameter parameter = boundMethodParameter.parameter;
+			Object value = boundMethodParameter.getValue();
+			String formatted = boundMethodParameter.asString();
+			result.put(key , new MethodParameterValue(parameter , value, formatted));
 		}
-
 		return result;
 	}
 }

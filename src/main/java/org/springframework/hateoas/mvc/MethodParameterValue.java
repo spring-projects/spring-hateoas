@@ -11,10 +11,12 @@ import org.springframework.core.MethodParameter;
 public class MethodParameterValue extends MethodParameter {
 
 	private Object value;
+	private String formattedValue;
 
-	public MethodParameterValue(MethodParameter original, Object value) {
+	public MethodParameterValue(MethodParameter original, Object value, String formattedValue) {
 		super(original);
 		this.value = value;
+		this.formattedValue = formattedValue;
 	}
 
 	/**
@@ -24,6 +26,15 @@ public class MethodParameterValue extends MethodParameter {
 	 */
 	public Object getCallValue() {
 		return value;
+	}
+
+	/**
+	 * The value of the parameter at invocation time, formatted according to conversion configuration.
+	 * 
+	 * @return value, may be null
+	 */
+	public String getCallValueFormatted() {
+		return formattedValue;
 	}
 
 }
