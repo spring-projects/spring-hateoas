@@ -81,9 +81,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		linkTo(InvalidController.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createsLinkToUnmappedController() {
-		linkTo(UnmappedController.class);
+
+		Link link = linkTo(UnmappedController.class).withSelfRel();
+		assertThat(link.getHref(), is("http://localhost"));
 	}
 
 	@Test

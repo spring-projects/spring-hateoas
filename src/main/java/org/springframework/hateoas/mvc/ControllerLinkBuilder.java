@@ -79,13 +79,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
+		UriTemplate template = new UriTemplate(mapping == null ? "/" : mapping);
 
-		if (mapping == null) {
-			throw new IllegalArgumentException(
-					String.format("No mapping found on controller class %s!", controller.getName()));
-		}
-
-		UriTemplate template = new UriTemplate(mapping);
 		return builder.slash(template.expand(parameters));
 	}
 
