@@ -28,11 +28,14 @@ import org.mockito.Mockito;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.action.ActionDescriptor;
+import org.springframework.hateoas.mvc.ControllerActionBuilderTest.PersonControllerForForm;
 import org.springframework.http.HttpEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -58,6 +61,14 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people/15/addresses"));
+	}
+
+	@Test
+	public void createsLinkToMethodOnParameterizedControllerRoot() {
+
+		Link link = linkTo(methodOn(PersonsAddressesController.class, 15).getAddressesForCountry("DE")).withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/15/addresses/DE"));
 	}
 
 	@Test
@@ -220,8 +231,12 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@RequestMapping("/people/{id}/addresses")
-	class PersonsAddressesController {
+	public static class PersonsAddressesController {
 
+		@RequestMapping("/{country}")
+		public HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
+			return null;
+		}
 	}
 
 	@RequestMapping({ "/persons", "/people" })
@@ -258,4 +273,5 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 	}
+
 }

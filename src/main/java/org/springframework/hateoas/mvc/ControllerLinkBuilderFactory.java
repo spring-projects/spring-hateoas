@@ -63,7 +63,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	/**
 	 * Configures the {@link UriComponentsContributor} to be used when building {@link Link} instances from method
 	 * invocations.
-	 * 
+	 *
 	 * @see #linkTo(Object)
 	 * @param uriComponentsContributors the uriComponentsContributors to set
 	 */
@@ -89,7 +89,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Object)
 	 */
@@ -109,10 +109,10 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		UriTemplate template = new UriTemplate(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();
 
-		if (classMappingParameters.hasNext()) {
-			for (String variable : template.getVariableNames()) {
-				values.put(variable, classMappingParameters.next());
-			}
+		Iterator<String> names = template.getVariableNames().iterator();
+		while (classMappingParameters.hasNext()) {
+			String variable = names.next();
+			values.put(variable, classMappingParameters.next());
 		}
 
 		for (BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation)) {
@@ -137,7 +137,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(components.toUri()));
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
 	 */
@@ -148,7 +148,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 	/**
 	 * Applies the configured {@link UriComponentsContributor}s to the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder will never be {@literal null}.
 	 * @param invocation will never be {@literal null}.
 	 * @return
