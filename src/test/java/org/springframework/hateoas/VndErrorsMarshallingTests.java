@@ -74,7 +74,6 @@ public class VndErrorsMarshallingTests {
 
 		JAXBContext context = JAXBContext.newInstance(VndErrors.class);
 		marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
 		VndError error = new VndError("42", "Validation failed!", //
 				new Link("http://...", "help"), new Link("http://...", "describes"));

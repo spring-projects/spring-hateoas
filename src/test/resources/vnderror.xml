@@ -1,18 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<errors xmlns:ns2="http://www.w3.org/2005/Atom">
-    <error logref="42">
-        <ns2:link href="http://..." rel="help"/>
-        <ns2:link href="http://..." rel="describes"/>
-        <message>Validation failed!</message>
-    </error>
-    <error logref="42">
-        <ns2:link href="http://..." rel="help"/>
-        <ns2:link href="http://..." rel="describes"/>
-        <message>Validation failed!</message>
-    </error>
-    <error logref="42">
-        <ns2:link href="http://..." rel="help"/>
-        <ns2:link href="http://..." rel="describes"/>
-        <message>Validation failed!</message>
-    </error>
-</errors>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><errors xmlns:ns2="http://www.w3.org/2005/Atom"><error logref="42"><ns2:link href="http://..." rel="help"/><ns2:link href="http://..." rel="describes"/><message>Validation failed!</message></error><error logref="42"><ns2:link href="http://..." rel="help"/><ns2:link href="http://..." rel="describes"/><message>Validation failed!</message></error><error logref="42"><ns2:link href="http://..." rel="help"/><ns2:link href="http://..." rel="describes"/><message>Validation failed!</message></error></errors>
