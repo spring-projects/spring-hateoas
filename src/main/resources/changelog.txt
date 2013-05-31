@@ -1,6 +1,30 @@
 Spring Hateoas Changelog
 =========================
 
+Changes in version 0.6.0.RELEASE (2013-31-05)
+---------------------------------------------
+- #73 - ControllerLinkBuilder should allow pointing to unmapped controllers
+- #72 - AnnotationMappingDiscoverer should return polished mapping for root slash mapping
+- #70 - Fixed problem with Controllers having a path parameter on the class mapping
+- #64 - Add HAL support for PagedResources
+- #63 - HAL : Wrong rel name for embedded collections
+- #62 - Add support for vnd.error
+- #61 - Release 0.6
+
+Changes in version 0.5.0.RELEASE (2013-30-04)
+---------------------------------------------
+- #57 - Support formatting of @PathVariables
+- #56 - Improve fragment handling in LinkBuilderSupport
+- #54 - Add basic support for RFC5988 style link headers
+- #53 - Use slf4j for logging
+- #52 - Add SPI to let HandlerMethodArgumentResolver implementations contribute to URI building
+- #51 - Add LinkDiscoverer implementation for HAL
+- #50 - Add @EnableHypermediaSupport to default configuration
+- #48 - Make source encoding explicit in pom.xml
+- #39 - Fix for #26 Add support for request parameters to Link builder
+- #26 - Add support for request parameters to Link builder
+- #44 - Release 0.5
+
 Changes in version 0.4.0.RELEASE (2013-28-01)
 ---------------------------------------------
 - #18 - Added support to build links pointing to controller methods
@@ -15,14 +39,14 @@ Changes in version 0.4.0.RELEASE (2013-28-01)
 
 Changes in version 0.3.0.RELEASE (2012-10-09)
 ---------------------------------------------
-#15 - Upgraded to Jackson 1.9.10.
-#14 - Added integration test to make sure default (de)serialization works
-#13 - Added LinkBuilder implementation that inspects JAX-RS @Path annotations 
-#12 - Introduced factories for LinkBuilder to improve client testability
-#11 - Moved to Set and back to List for Links inside ResourceSupport
-#10 - Renamed (Paged)Resources.fromEntities(…) to ….wrap(…) 
-#9 - Added constructor to PagedResources to take an Iterable of Links
-#7 - Excluded getId() of ResourceSupport from default JSON rendering
+- #15 - Upgraded to Jackson 1.9.10
+- #14 - Added integration test to make sure default (de)serialization works
+- #13 - Added LinkBuilder implementation that inspects JAX-RS @Path annotations
+- #12 - Introduced factories for LinkBuilder to improve client testability
+- #11 - Moved to Set and back to List for Links inside ResourceSupport
+- #10 - Renamed (Paged)Resources.fromEntities(…) to ….wrap(…)
+- #9 - Added constructor to PagedResources to take an Iterable of Links
+- #7 - Excluded getId() of ResourceSupport from default JSON rendering
 - Switched from Collection to Iterable in constructor of Resources 
 - Moved from ResourceEnricher to ResourceProcessor to allow manipulating the resource instance
 
