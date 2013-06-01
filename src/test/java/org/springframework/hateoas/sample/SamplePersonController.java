@@ -26,7 +26,7 @@ public class SamplePersonController {
 	@RequestMapping(value = "/customer")
 	public HttpEntity<ActionDescriptor> searchPersonForm() {
 		long defaultPersonId = 1234L;
-		ActionDescriptor form = ControllerActionBuilder.createActionFor(
+		ActionDescriptor form = ControllerActionBuilder.actionFor(
 				methodOn(SamplePersonController.class).showPerson(defaultPersonId), "searchPerson");
 		return new HttpEntity<ActionDescriptor>(form);
 	}
@@ -43,7 +43,7 @@ public class SamplePersonController {
 	@RequestMapping(value = "/customerByName")
 	public HttpEntity<ActionDescriptor> searchPersonByNameForm() {
 		String defaultName = "Bombur";
-		ActionDescriptor form = ControllerActionBuilder.createActionFor(
+		ActionDescriptor form = ControllerActionBuilder.actionFor(
 				methodOn(SamplePersonController.class).showPerson(defaultName), "searchPerson");
 		return new HttpEntity<ActionDescriptor>(form);
 	}
@@ -60,7 +60,7 @@ public class SamplePersonController {
 	@RequestMapping(value = "/customer/editor")
 	public HttpEntity<ActionDescriptor> editPersonForm() {
 		// PUT is allowed for forms as of HTML 5, programmatic clients and new browsers can handle it
-		ActionDescriptor descriptor = ControllerActionBuilder.createActionFor(methodOn(SamplePersonController.class)
+		ActionDescriptor descriptor = ControllerActionBuilder.actionFor(methodOn(SamplePersonController.class)
 				.editPerson(person.getId(), person.getFirstname(), person.getLastname()), "changePerson");
 
 		return new HttpEntity<ActionDescriptor>(descriptor);

@@ -40,7 +40,7 @@ public class ControllerActionBuilder {
 	 * <pre>
 	 * &#064;RequestMapping(value = &quot;/person&quot;)
 	 * public HttpEntity&lt;FormDescriptor&gt; searchPersonForm() {
-	 * 	ActionDescriptor rd = ControllerActionBuilder.createActionFor(&quot;searchPerson&quot;, methodOn(PersonController.class)
+	 * 	ActionDescriptor rd = ControllerActionBuilder.actionFor(&quot;searchPerson&quot;, methodOn(PersonController.class)
 	 * 			.showPerson(null));
 	 * 	return new HttpEntity&lt;ActionDescriptor&gt;(rd);
 	 * }
@@ -72,7 +72,7 @@ public class ControllerActionBuilder {
 	 * @see <a href="https://github.com/kevinswiber/siren">Siren Hypermedia Format</a>
 	 * @see <a href="http://tools.ietf.org/html/draft-kelly-json-hal-05#appendix-B.5">Why does HAL have no forms</a>
 	 */
-	public static ActionDescriptor createActionFor(Object invocationValue, String actionName) {
+	public static ActionDescriptor actionFor(Object invocationValue, String actionName) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;

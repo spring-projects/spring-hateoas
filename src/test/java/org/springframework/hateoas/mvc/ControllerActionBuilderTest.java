@@ -18,7 +18,7 @@ public class ControllerActionBuilderTest extends TestUtils {
 
 	@Test
 	public void createsRelativeLinkToFormWithMethodLevelAndTypeLevelVariables() throws Exception {
-		ActionDescriptor formDescriptor = ControllerActionBuilder.createActionFor(methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null),
+		ActionDescriptor formDescriptor = ControllerActionBuilder.actionFor(methodOn(PersonControllerForForm.class, "region1").showPerson("mike", null),
 				"searchPerson");
 		assertEquals("/region/region1/person/mike", formDescriptor.getRelativeActionLink());
 	}
