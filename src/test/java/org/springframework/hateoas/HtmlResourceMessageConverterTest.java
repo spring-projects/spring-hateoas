@@ -1,10 +1,10 @@
 package org.springframework.hateoas;
 
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.server.result.MockMvcResultMatchers.xpath;
-import static org.springframework.test.web.server.setup.MockMvcBuilders.webApplicationContextSetup;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +17,9 @@ import org.springframework.hateoas.sample.SamplePersonController;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.server.MockMvc;
-import org.springframework.test.web.server.result.MockMvcResultMatchers;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -28,13 +29,8 @@ import org.springframework.web.context.WebApplicationContext;
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-// for Spring 3.2, delete GenericWebContextLoader and WebContextLoader
-// adjust the package names of static imports to
-// org.springframework.test.web.servlet
-// then use WebAppConfiguration and ContextConfiguration like this:
-// @WebAppConfiguration
-// @ContextConfiguration
-@ContextConfiguration(loader = WebContextLoader.class)
+@WebAppConfiguration
+@ContextConfiguration
 public class HtmlResourceMessageConverterTest {
 	@Autowired
 	private WebApplicationContext wac;
@@ -48,14 +44,14 @@ public class HtmlResourceMessageConverterTest {
 
 	@Before
 	public void setup() {
-		this.mockMvc = webApplicationContextSetup(this.wac).build();
+		this.mockMvc = webAppContextSetup(this.wac).build();
 
 	}
 
 	@Test
 	public void testCreatesHtmlForm() throws Exception {
 		this.mockMvc.perform(get("/people/customer").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
-				.andExpect(content().mimeType(MediaType.TEXT_HTML))
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
 				.andExpect(xpath("h:html/h:body/h:form/@action", namespaces).string("/people/customer"))
 				.andExpect(xpath("//h:form/@name", namespaces).string("searchPerson"))
 				.andExpect(xpath("//h:form/@method", namespaces).string("GET"));
@@ -65,7 +61,7 @@ public class HtmlResourceMessageConverterTest {
 	public void testCreatesInputFieldWithDefaultNumber() throws Exception {
 
 		this.mockMvc.perform(get("/people/customer").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
-				.andExpect(MockMvcResultMatchers.content().mimeType(MediaType.TEXT_HTML))
+				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
 				.andExpect(xpath("//h:input/@name", namespaces).string("personId"))
 				.andExpect(xpath("//h:input/@type", namespaces).string("number"))
 				.andExpect(xpath("//h:input/@value", namespaces).string("1234"));
@@ -75,7 +71,7 @@ public class HtmlResourceMessageConverterTest {
 	public void testCreatesInputFieldWithDefaultText() throws Exception {
 
 		this.mockMvc.perform(get("/people/customerByName").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
-				.andExpect(MockMvcResultMatchers.content().mimeType(MediaType.TEXT_HTML))
+				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
 				.andExpect(xpath("//h:input/@name", namespaces).string("name"))
 				.andExpect(xpath("//h:input/@type", namespaces).string("text"))
 				.andExpect(xpath("//h:input/@value", namespaces).string("Bombur"));
@@ -90,7 +86,7 @@ public class HtmlResourceMessageConverterTest {
 	public void testCreatesHiddenInputField() throws Exception {
 
 		this.mockMvc.perform(get("/people/customer/editor").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
-				.andExpect(MockMvcResultMatchers.content().mimeType(MediaType.TEXT_HTML))
+				.andExpect(MockMvcResultMatchers.content().contentType(MediaType.TEXT_HTML))
 				.andExpect(xpath("//h:input[@name='personId']/@name", namespaces).string("personId"))
 				.andExpect(xpath("//h:input[@name='personId']/@type", namespaces).string("hidden"))
 				.andExpect(xpath("//h:input[@name='personId']/@value", namespaces).string("1234"))
