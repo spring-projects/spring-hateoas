@@ -60,6 +60,13 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method), is("/method"));
 	}
 
+	@Test
+	public void resolvesMethodLevelMappingWithSlashRootMapping() throws Exception {
+
+		Method method = SlashRootMapping.class.getMethod("method");
+		assertThat(discoverer.getMapping(method), is("/method"));
+	}
+
 	/**
 	 * @see #46
 	 */
@@ -81,6 +88,13 @@ public class AnnotationMappingDiscovererUnitTest {
 	}
 
 	interface ControllerWithoutTypeLevelMapping {
+
+		@RequestMapping("/method")
+		void method();
+	}
+
+	@RequestMapping("/")
+	interface SlashRootMapping {
 
 		@RequestMapping("/method")
 		void method();

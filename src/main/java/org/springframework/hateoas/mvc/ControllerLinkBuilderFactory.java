@@ -49,6 +49,7 @@ import org.springframework.web.util.UriTemplate;
  * 
  * @author Ricardo Gladwell
  * @author Oliver Gierke
+ * @author Dietrich Schulten
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
@@ -111,8 +112,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 		Iterator<String> names = template.getVariableNames().iterator();
 		while (classMappingParameters.hasNext()) {
-			String variable = names.next();
-			values.put(variable, classMappingParameters.next());
+			values.put(names.next(), classMappingParameters.next());
 		}
 
 		for (BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation)) {

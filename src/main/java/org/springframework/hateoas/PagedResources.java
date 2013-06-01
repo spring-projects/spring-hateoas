@@ -30,14 +30,12 @@ import org.springframework.util.Assert;
  * @author Oliver Gierke
  */
 @XmlRootElement(name = "entities")
-@org.codehaus.jackson.annotate.JsonAutoDetect(fieldVisibility = org.codehaus.jackson.annotate.JsonAutoDetect.Visibility.ANY)
-@com.fasterxml.jackson.annotation.JsonAutoDetect(fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY)
 public class PagedResources<T> extends Resources<T> {
 
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
-	@org.codehaus.jackson.annotate.JsonProperty("page")
-	@com.fasterxml.jackson.annotation.JsonProperty("page")
+	@org.codehaus.jackson.annotate.JsonProperty("page")//
+	@com.fasterxml.jackson.annotation.JsonProperty("page")//
 	private PageMetadata metadata;
 
 	/**
@@ -170,28 +168,30 @@ public class PagedResources<T> extends Resources<T> {
 	 * 
 	 * @author Oliver Gierke
 	 */
-	@org.codehaus.jackson.annotate.JsonAutoDetect(fieldVisibility = org.codehaus.jackson.annotate.JsonAutoDetect.Visibility.ANY)
-	@com.fasterxml.jackson.annotation.JsonAutoDetect(fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY)
+	@org.codehaus.jackson.annotate.JsonAutoDetect(
+			fieldVisibility = org.codehaus.jackson.annotate.JsonAutoDetect.Visibility.ANY)
+	@com.fasterxml.jackson.annotation.JsonAutoDetect(
+			fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY)
 	public static class PageMetadata {
 
-		@XmlAttribute
-		@org.codehaus.jackson.annotate.JsonProperty
-		@com.fasterxml.jackson.annotation.JsonProperty
+		@XmlAttribute//
+		@org.codehaus.jackson.annotate.JsonProperty//
+		@com.fasterxml.jackson.annotation.JsonProperty//
 		private long size;
 
-		@XmlAttribute
-		@org.codehaus.jackson.annotate.JsonProperty
-		@com.fasterxml.jackson.annotation.JsonProperty
+		@XmlAttribute//
+		@org.codehaus.jackson.annotate.JsonProperty//
+		@com.fasterxml.jackson.annotation.JsonProperty//
 		private long totalElements;
 
-		@XmlAttribute
-		@org.codehaus.jackson.annotate.JsonProperty
-		@com.fasterxml.jackson.annotation.JsonProperty
+		@XmlAttribute//
+		@org.codehaus.jackson.annotate.JsonProperty//
+		@com.fasterxml.jackson.annotation.JsonProperty//
 		private long totalPages;
 
-		@XmlAttribute
-		@org.codehaus.jackson.annotate.JsonProperty
-		@com.fasterxml.jackson.annotation.JsonProperty
+		@XmlAttribute//
+		@org.codehaus.jackson.annotate.JsonProperty//
+		@com.fasterxml.jackson.annotation.JsonProperty//
 		private long number;
 
 		protected PageMetadata() {

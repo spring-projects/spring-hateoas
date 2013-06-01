@@ -44,6 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Unit tests for {@link ControllerLinkBuilder}.
  * 
  * @author Oliver Gierke
+ * @author Dietrich Schulten
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -63,6 +64,9 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/people/15/addresses"));
 	}
 
+	/**
+	 * @see #70
+	 */
 	@Test
 	public void createsLinkToMethodOnParameterizedControllerRoot() {
 
@@ -92,9 +96,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		linkTo(InvalidController.class);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void createsLinkToUnmappedController() {
-		linkTo(UnmappedController.class);
+
+		Link link = linkTo(UnmappedController.class).withSelfRel();
+		assertThat(link.getHref(), is("http://localhost"));
 	}
 
 	@Test
@@ -239,7 +245,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@RequestMapping("/people/{id}/addresses")
-	public static class PersonsAddressesController {
+	static class PersonsAddressesController {
 
 		@RequestMapping("/{country}")
 		public HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {

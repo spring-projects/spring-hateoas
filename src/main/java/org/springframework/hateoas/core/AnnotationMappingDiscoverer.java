@@ -93,7 +93,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			return typeMapping;
 		}
 
-		return typeMapping == null ? mapping[0] : typeMapping + mapping[0];
+		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : typeMapping + mapping[0];
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {
