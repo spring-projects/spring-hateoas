@@ -59,7 +59,6 @@ public class SamplePersonController {
 
 	@RequestMapping(value = "/customer/editor")
 	public HttpEntity<ActionDescriptor> editPersonForm() {
-		// PUT is allowed for forms as of HTML 5, programmatic clients and new browsers can handle it
 		ActionDescriptor descriptor = ControllerActionBuilder.actionFor(methodOn(SamplePersonController.class)
 				.editPerson(person.getId(), person.getFirstname(), person.getLastname()), "changePerson");
 

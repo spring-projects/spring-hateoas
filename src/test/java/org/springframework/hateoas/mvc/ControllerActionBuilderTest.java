@@ -3,7 +3,6 @@ package org.springframework.hateoas.mvc;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.action.ActionDescriptor;
