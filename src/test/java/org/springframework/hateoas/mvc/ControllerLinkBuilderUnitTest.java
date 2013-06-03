@@ -222,6 +222,16 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		}
 	}
 
+	static class Product implements Identifiable<Long> {
+
+		Long id;
+
+		@Override
+		public Long getId() {
+			return id;
+		}
+	}
+
 	@RequestMapping("/people")
 	interface PersonController {
 
@@ -274,4 +284,5 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 	}
+
 }

@@ -19,6 +19,7 @@ import static org.springframework.beans.factory.support.BeanDefinitionReaderUtil
 
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -201,7 +202,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			}
 
 			if (bean instanceof AnnotationMethodHandlerAdapter) {
-				registerModule(((AnnotationMethodHandlerAdapter) bean).getMessageConverters());
+				registerModule(Arrays.asList(((AnnotationMethodHandlerAdapter) bean).getMessageConverters()));
 			}
 
 			if (bean instanceof ObjectMapper) {
@@ -265,14 +266,14 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-			if (bean instanceof AnnotationMethodHandlerAdapter) {
-				registerModule(((AnnotationMethodHandlerAdapter) bean).getMessageConverters());
-			}
-
 			if (bean instanceof RequestMappingHandlerAdapter) {
 				registerModule(((RequestMappingHandlerAdapter) bean).getMessageConverters());
 			}
 
+			if (bean instanceof AnnotationMethodHandlerAdapter) {
+				registerModule(Arrays.asList(((AnnotationMethodHandlerAdapter) bean).getMessageConverters()));
+			}
+			
 			if (bean instanceof org.codehaus.jackson.map.ObjectMapper) {
 				registerModule(bean);
 			}

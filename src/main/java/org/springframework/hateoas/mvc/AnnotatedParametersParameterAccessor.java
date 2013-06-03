@@ -17,7 +17,9 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.MethodParameter;
@@ -84,7 +86,7 @@ class AnnotatedParametersParameterAccessor {
 		private final MethodParameter parameter;
 		private final Object value;
 		private final AnnotationAttribute attribute;
-		private final TypeDescriptor parameterTypeDecsriptor;
+		private final TypeDescriptor parameterTypeDescriptor;
 
 		/**
 		 * Creates a new {@link BoundMethodParameter}
@@ -100,7 +102,7 @@ class AnnotatedParametersParameterAccessor {
 			this.parameter = parameter;
 			this.value = value;
 			this.attribute = attribute;
-			this.parameterTypeDecsriptor = TypeDescriptor.nested(parameter, 0);
+			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, 0);
 		}
 
 		/**
@@ -140,7 +142,21 @@ class AnnotatedParametersParameterAccessor {
 				return null;
 			}
 
-			return (String) CONVERSION_SERVICE.convert(value, parameterTypeDecsriptor, STRING_DESCRIPTOR);
+			return (String) CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
 		}
+	}
+
+	public Map<String, MethodParameterValue> getBoundMethodParameterValues(MethodInvocation invocation) {
+
+		List<BoundMethodParameter> boundParameters = getBoundParameters(invocation);
+		Map<String, MethodParameterValue> result = new HashMap<String, MethodParameterValue>();
+		for (BoundMethodParameter boundMethodParameter : boundParameters) {
+			String key = boundMethodParameter.getVariableName();
+			MethodParameter parameter = boundMethodParameter.parameter;
+			Object value = boundMethodParameter.getValue();
+			String formatted = boundMethodParameter.asString();
+			result.put(key , new MethodParameterValue(parameter , value, formatted));
+		}
+		return result;
 	}
 }
