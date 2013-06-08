@@ -34,11 +34,13 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
-public class Link implements Serializable {
+public class Link implements Serializable
+{
 
 	private static final long serialVersionUID = -9037755944661782121L;
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
+	// see: http://tools.ietf.org/html/rfc4287#section-4.2.7
 
 	public static final String REL_SELF = "self";
 	public static final String REL_FIRST = "first";
@@ -46,28 +48,117 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
+	/**
+	 * Parses the links attributes from the given source {@link String}.
+	 * 
+	 * @param source
+	 * @return
+	 */
+	private static Map<String, String> getAttributeMap(String source)
+	{
+
+		if (!StringUtils.hasText(source))
+		{
+			return Collections.emptyMap();
+		}
+
+		Map<String, String> attributes = new HashMap<String, String>();
+		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Alnum}*)\"");
+		Matcher matcher = keyAndValue.matcher(source);
+
+		while (matcher.find())
+		{
+			attributes.put(matcher.group(1), matcher.group(2));
+		}
+
+		return attributes;
+	}
+
+	/**
+	 * Factory method to easily create {@link Link} instances from RFC-5988
+	 * compatible {@link String} representations of a link. Will return
+	 * {@literal null} if an empty or {@literal null} {@link String} is given.
+	 * 
+	 * @param element
+	 *          an RFC-5899 compatible representation of a link.
+	 * @throws IllegalArgumentException
+	 *           if a non-empty {@link String} was given that does not adhere to
+	 *           RFC-5899.
+	 * @throws IllegalArgumentException
+	 *           if no {@code rel} attribute could be found.
+	 * @return
+	 */
+	public static Link valueOf(String element)
+	{
+
+		if (!StringUtils.hasText(element))
+		{
+			return null;
+		}
+
+		Pattern uriAndAttributes = Pattern.compile("<(.*)>;(.*)");
+		Matcher matcher = uriAndAttributes.matcher(element);
+
+		if (matcher.find())
+		{
+
+			Map<String, String> attributes = getAttributeMap(matcher.group(2));
+
+			if (!attributes.containsKey("rel"))
+			{
+				throw new IllegalArgumentException("Link does not provide a rel attribute!");
+			}
+
+			return new Link(matcher.group(1), attributes.get("rel"));
+
+		}
+		else
+		{
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
+		}
+	}
+
 	@XmlAttribute
 	private String rel;
 	@XmlAttribute
 	private String href;
 
+	@XmlAttribute
+	private String type; // should contain at least 1 '/'
+
+	@XmlAttribute
+	private String title;
+
+	/**
+	 * Empty constructor required by the marshalling framework.
+	 */
+	protected Link()
+	{
+
+	}
+
 	/**
 	 * Creates a new link to the given URI with the self rel.
 	 * 
 	 * @see #REL_SELF
-	 * @param href must not be {@literal null} or empty.
+	 * @param href
+	 *          must not be {@literal null} or empty.
 	 */
-	public Link(String href) {
+	public Link(String href)
+	{
 		this(href, REL_SELF);
 	}
 
 	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
 	 * 
-	 * @param href must not be {@literal null} or empty.
-	 * @param rel must not be {@literal null} or empty.
+	 * @param href
+	 *          must not be {@literal null} or empty.
+	 * @param rel
+	 *          must not be {@literal null} or empty.
 	 */
-	public Link(String href, String rel) {
+	public Link(String href, String rel)
+	{
 
 		Assert.hasText(href, "Href must not be null or empty!");
 		Assert.hasText(rel, "Rel must not be null or empty!");
@@ -76,11 +167,29 @@ public class Link implements Serializable {
 		this.rel = rel;
 	}
 
-	/**
-	 * Empty constructor required by the marshalling framework.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	protected Link() {
+	@Override
+	public boolean equals(Object obj)
+	{
 
+		if (this == obj)
+		{
+			return true;
+		}
+
+		if (!(obj instanceof Link))
+		{
+			return false;
+		}
+
+		Link that = (Link) obj;
+
+		return this.href.equals(that.href) && this.rel.equals(that.rel) && this.title.equals(that.title)
+				&& this.type.equals(that.type);
 	}
 
 	/**
@@ -88,7 +197,8 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	public String getHref() {
+	public String getHref()
+	{
 		return href;
 	}
 
@@ -97,124 +207,106 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	public String getRel() {
+	public String getRel()
+	{
 		return rel;
 	}
 
-	/**
-	 * Returns a {@link Link} pointing to the same URI but with the given relation.
-	 * 
-	 * @param rel must not be {@literal null} or empty.
-	 * @return
-	 */
-	public Link withRel(String rel) {
-		return new Link(href, rel);
+	public String getTitle()
+	{
+		return title;
 	}
 
-	/**
-	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
-	 * 
-	 * @return
-	 */
-	public Link withSelfRel() {
-		return withRel(Link.REL_SELF);
+	public String getType()
+	{
+		return type;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof Link)) {
-			return false;
-		}
-
-		Link that = (Link) obj;
-
-		return this.href.equals(that.href) && this.rel.equals(that.rel);
-	}
-
-	/* 
-	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 
 		int result = 17;
 		result += 31 * href.hashCode();
 		result += 31 * rel.hashCode();
+		result += 31 * title.hashCode();
+		result += 31 * type.hashCode();
 		return result;
 	}
 
-	/* 
+	public void setTitle(String title)
+	{
+		this.title = title;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
+	}
+
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return String.format("<%s>;rel=\"%s\"", href, rel);
 	}
 
 	/**
-	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
-	 * link. Will return {@literal null} if an empty or {@literal null} {@link String} is given.
+	 * Returns a {@link Link} pointing to the same URI but with the given
+	 * relation.
 	 * 
-	 * @param element an RFC-5899 compatible representation of a link.
-	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
-	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
+	 * @param rel
+	 *          must not be {@literal null} or empty.
 	 * @return
 	 */
-	public static Link valueOf(String element) {
-
-		if (!StringUtils.hasText(element)) {
-			return null;
-		}
-
-		Pattern uriAndAttributes = Pattern.compile("<(.*)>;(.*)");
-		Matcher matcher = uriAndAttributes.matcher(element);
-
-		if (matcher.find()) {
-
-			Map<String, String> attributes = getAttributeMap(matcher.group(2));
-
-			if (!attributes.containsKey("rel")) {
-				throw new IllegalArgumentException("Link does not provide a rel attribute!");
-			}
-
-			return new Link(matcher.group(1), attributes.get("rel"));
-
-		} else {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
-		}
+	public Link withRel(String rel)
+	{
+		return new Link(href, rel);
 	}
 
 	/**
-	 * Parses the links attributes from the given source {@link String}.
+	 * Returns a {@link Link} pointing to the same URI but with the {@code self}
+	 * relation.
 	 * 
-	 * @param source
 	 * @return
 	 */
-	private static Map<String, String> getAttributeMap(String source) {
+	public Link withSelfRel()
+	{
+		return withRel(Link.REL_SELF);
+	}
 
-		if (!StringUtils.hasText(source)) {
-			return Collections.emptyMap();
-		}
+	/**
+	 * Returns this {@link Link} with title
+	 * 
+	 * @param title
+	 *          must not be {@literal null} or empty.
+	 * @return
+	 */
+	public Link withTitle(String title)
+	{
+		this.setTitle(title);
+		return this;
+	}
 
-		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Alnum}*)\"");
-		Matcher matcher = keyAndValue.matcher(source);
-
-		while (matcher.find()) {
-			attributes.put(matcher.group(1), matcher.group(2));
-		}
-
-		return attributes;
+	/**
+	 * Returns this {@link Link} with type
+	 * 
+	 * @param type
+	 *          must not be {@literal null} or empty.
+	 * @return
+	 */
+	public Link withType(String type)
+	{
+		this.setType(type);
+		return this;
 	}
 }
