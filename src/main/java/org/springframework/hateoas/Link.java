@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,9 +38,14 @@ import org.springframework.util.StringUtils;
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
+	private static final String ATOM_LINK_SPEC_URL = "http://tools.ietf.org/html/rfc4287#section-4.2.7";
+	private static Pattern ATOM_MEDIA_TYPE_PATTERN = Pattern.compile(".+/.+");
+	// private static final String ATOM_LINK_HREF = "href";
+	private static final String ATOM_LINK_REL = "rel";
+	private static final String ATOM_LINK_TITLE = "title";
+	private static final String ATOM_LINK_TYPE = "type";
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
-
 	public static final String REL_SELF = "self";
 	public static final String REL_FIRST = "first";
 	public static final String REL_PREVIOUS = "prev";
@@ -50,12 +56,17 @@ public class Link implements Serializable {
 	private String rel;
 	@XmlAttribute
 	private String href;
+	@XmlAttribute
+	private String title;
+	@XmlAttribute
+	private String type;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
 	 * 
 	 * @see #REL_SELF
-	 * @param href must not be {@literal null} or empty.
+	 * @param href
+	 *            must not be {@literal null} or empty.
 	 */
 	public Link(String href) {
 		this(href, REL_SELF);
@@ -64,16 +75,49 @@ public class Link implements Serializable {
 	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
 	 * 
-	 * @param href must not be {@literal null} or empty.
-	 * @param rel must not be {@literal null} or empty.
+	 * @param href
+	 *            must not be {@literal null} or empty.
+	 * @param rel
+	 *            must not be {@literal null} or empty.
 	 */
 	public Link(String href, String rel) {
+		this(href, rel, null, null);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given URI with the given rel.
+	 * 
+	 * @param href
+	 *            must not be {@literal null} or empty.
+	 * @param rel
+	 *            must not be {@literal null} or empty.
+	 * @param title
+	 *            may be {@literal null} or empty.
+	 * @param type
+	 *            may be {@literal null} or empty.
+	 */
+	public Link(String href, String rel, String title, String type) {
 
 		Assert.hasText(href, "Href must not be null or empty!");
 		Assert.hasText(rel, "Rel must not be null or empty!");
+		Assert.isTrue((title == null) || StringUtils.hasText(title), "Title must not be empty!");
+		Assert.isTrue((type == null) || isAtomMediaType(type), "Type must be valid atom media type! (see " + ATOM_LINK_SPEC_URL + ")");
 
 		this.href = href;
 		this.rel = rel;
+		this.title = title;
+		this.type = type;
+	}
+
+	/**
+	 * returns check whether passed string is valid atom media type per
+	 * {@value #ATOM_LINK_SPEC_URL}
+	 * 
+	 * @param type
+	 * @return
+	 */
+	private boolean isAtomMediaType(String type) {
+		return ATOM_MEDIA_TYPE_PATTERN.matcher(type).matches();
 	}
 
 	/**
@@ -102,9 +146,29 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Returns a {@link Link} pointing to the same URI but with the given relation.
+	 * Returns the title of the link (may be null)
 	 * 
-	 * @param rel must not be {@literal null} or empty.
+	 * @return
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * Returns the type of the link (may be null)
+	 * 
+	 * @return
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the given
+	 * relation.
+	 * 
+	 * @param rel
+	 *            must not be {@literal null} or empty.
 	 * @return
 	 */
 	public Link withRel(String rel) {
@@ -112,7 +176,8 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
+	 * Returns a {@link Link} pointing to the same URI but with the {@code self}
+	 * relation.
 	 * 
 	 * @return
 	 */
@@ -120,8 +185,32 @@ public class Link implements Serializable {
 		return withRel(Link.REL_SELF);
 	}
 
-	/* 
+	/**
+	 * Returns a {@link Link} based on current Link, but with given title
+	 * 
+	 * @param title
+	 *            may be {@literal null} or non-empty.
+	 * @return
+	 */
+	public Link withTitle(String title) {
+		return new Link(href, rel, title, type);
+	}
+
+	/**
+	 * Returns a {@link Link} based on current Link, but with given title
+	 * 
+	 * @param type
+	 *            may be {@literal null} or valid atom media type per
+	 *            {@value #ATOM_LINK_SPEC_URL}
+	 * @return
+	 */
+	public Link withType(String type) {
+		return new Link(href, rel, title, type);
+	}
+
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -137,38 +226,55 @@ public class Link implements Serializable {
 
 		Link that = (Link) obj;
 
-		return this.href.equals(that.href) && this.rel.equals(that.rel);
+		return this.href.equals(that.href) && this.rel.equals(that.rel) && ObjectUtils.nullSafeEquals(this.title, that.title)
+				&& ObjectUtils.nullSafeEquals(this.type, that.type);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-
+		
 		int result = 17;
 		result += 31 * href.hashCode();
 		result += 31 * rel.hashCode();
+		result += 31 * ObjectUtils.nullSafeHashCode(title);
+		result += 31 * ObjectUtils.nullSafeHashCode(type);
 		return result;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("<%s>;rel=\"%s\"", href, rel);
+		String result = String.format("<%s>;%s=\"%s\"", href, ATOM_LINK_REL, rel);
+		if (title != null) {
+			result += String.format("%s;%s=\"%s\"", result, ATOM_LINK_TITLE, title);
+		}
+		if (type != null) {
+			result += String.format("%s;%s=\"%s\"", result, ATOM_LINK_TYPE, type);
+		}
+		return result;
 	}
 
 	/**
-	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
-	 * link. Will return {@literal null} if an empty or {@literal null} {@link String} is given.
+	 * Factory method to easily create {@link Link} instances from RFC-5988
+	 * compatible {@link String} representations of a link. Will return
+	 * {@literal null} if an empty or {@literal null} {@link String} is given.
 	 * 
-	 * @param element an RFC-5899 compatible representation of a link.
-	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
-	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
+	 * @param element
+	 *            an RFC-5988 compatible representation of a link.
+	 * @throws IllegalArgumentException
+	 *             if a non-empty {@link String} was given that does not adhere
+	 *             to RFC-5988.
+	 * @throws IllegalArgumentException
+	 *             if no {@code rel} attribute could be found.
 	 * @return
 	 */
 	public static Link valueOf(String element) {
@@ -184,11 +290,11 @@ public class Link implements Serializable {
 
 			Map<String, String> attributes = getAttributeMap(matcher.group(2));
 
-			if (!attributes.containsKey("rel")) {
+			if (!attributes.containsKey(ATOM_LINK_REL)) {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			return new Link(matcher.group(1), attributes.get("rel"));
+			return new Link(matcher.group(1), attributes.get(ATOM_LINK_REL), attributes.get(ATOM_LINK_TITLE), attributes.get(ATOM_LINK_TYPE));
 
 		} else {
 			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
@@ -208,11 +314,17 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Alnum}*)\"");
-		Matcher matcher = keyAndValue.matcher(source);
+		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Print}*)\"");
+		String[] keyAndValues = source.split(";");
+		for (int i = 0; i < keyAndValues.length; i++) {
 
-		while (matcher.find()) {
-			attributes.put(matcher.group(1), matcher.group(2));
+			Matcher matcher = keyAndValue.matcher(keyAndValues[i]);
+
+			if (matcher.find()) {
+				attributes.put(matcher.group(1), matcher.group(2));
+			} else {
+				throw new RuntimeException(String.format("unexpected token found parsing link attributes [%s]", keyAndValues[i]));
+			}
 		}
 
 		return attributes;
