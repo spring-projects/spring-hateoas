@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,6 +30,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import org.springframework.hateoas.VndErrors.VndError;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
@@ -61,17 +63,21 @@ public class VndErrorsMarshallingTests {
 		xmlReference = readFile(new ClassPathResource("vnderror.xml"));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Before
 	public void setUp() throws Exception {
 
 		jackson1Mapper = new ObjectMapper();
 		jackson1Mapper.registerModule(new Jackson1HalModule());
 		jackson1Mapper.configure(Feature.INDENT_OUTPUT, true);
-
+		//jackson1Mapper.getSerializationConfig().withSerializationInclusion(JsonSerialize.Inclusion.NON_EMPTY);
+		jackson1Mapper.configure(SerializationConfig.Feature.WRITE_NULL_PROPERTIES, false);
+		
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
 		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-
+		jackson2Mapper.setSerializationInclusion(Include.NON_NULL);
+		
 		JAXBContext context = JAXBContext.newInstance(VndErrors.class);
 		marshaller = context.createMarshaller();
 

@@ -19,6 +19,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.junit.Before;
 
 /**
@@ -33,6 +34,8 @@ public abstract class AbstractMarshallingIntegrationTests {
 	@Before
 	public void setUp() {
 		mapper = new ObjectMapper();
+		mapper.configure(SerializationConfig.Feature.WRITE_NULL_PROPERTIES, false);
+		//mapper.getSerializationConfig().withSerializationInclusion(JsonSerialize.Inclusion.NON_EMPTY);
 	}
 
 	protected String write(Object object) throws Exception {

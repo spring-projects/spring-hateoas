@@ -103,7 +103,14 @@ public class LinkUnitTest {
 	public void parsesRFC5988HeaderIntoLink() {
 
 		assertThat(Link.valueOf("</something>;rel=\"foo\""), is(new Link("/something", "foo")));
-		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo")));
+		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo", "Some title", null)));
+		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\";type=\"application/json\""), is(new Link("/something", "foo",
+				"Some title", "application/json")));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void disallowsInvalidAtomMediaType() {
+		new Link("/foo-href", "foo-rel", "foo-title", "foo-type");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
