@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.ObjectUtils;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.hateoas.core.ObjectUtils;
  * single resource relation to the collection one, once more than one object of the same type is added.
  * 
  * @author Oliver Gierke
+ * @author Dietrich Schulten
  */
 class HalEmbeddedBuilder {
 
@@ -47,13 +49,19 @@ class HalEmbeddedBuilder {
 	}
 
 	/**
-	 * Adds the given value to the embeddeds.
+	 * Adds the given value to the embeddeds. Will skip doing so if the value is {@literal null} or the content of a
+	 * {@link Resource} is {@literal null}.
 	 * 
 	 * @param value
 	 */
 	public void add(Object value) {
 
 		Class<?> type = ObjectUtils.getResourceType(value);
+
+		if (type == null) {
+			return;
+		}
+
 		String singleRel = getDefaultedRelFor(type, false);
 		List<Object> currentValue = embeddeds.get(singleRel);
 

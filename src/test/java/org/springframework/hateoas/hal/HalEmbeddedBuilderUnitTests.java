@@ -24,13 +24,16 @@ import java.util.Map;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 
 /**
  * Unit tests for {@link HalEmbeddedBuilder}.
  * 
  * @author Oliver Gierke
+ * @author Dietrich Schulten
  */
 public class HalEmbeddedBuilderUnitTests {
 
@@ -58,6 +61,19 @@ public class HalEmbeddedBuilderUnitTests {
 		assertThat(map.containsKey("string"), is(false));
 		assertThat(map.get("strings"), Matchers.<List<Object>> allOf(hasSize(2), Matchers.<Object> hasItems("foo", "bar")));
 		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
+	}
+
+	/**
+	 * @see #81, #83
+	 */
+	@Test
+	public void addsNoEmbeddedsForResourceWithoutContent() {
+
+		Resource<?> resource = BeanUtils.instantiateClass(Resource.class);
+		HalEmbeddedBuilder halEmbeddedBuilder = new HalEmbeddedBuilder(provider);
+		halEmbeddedBuilder.add(resource);
+
+		assertThat(halEmbeddedBuilder.asMap().isEmpty(), is(true));
 	}
 
 	private Map<String, List<Object>> setUpBuilder(Object... values) {
