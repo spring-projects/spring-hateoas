@@ -27,7 +27,7 @@ import org.junit.Test;
  * 
  * @author Oliver Gierke
  */
-public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTests {
+public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}";
 

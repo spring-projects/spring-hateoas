@@ -35,7 +35,7 @@ import org.springframework.hateoas.core.EvoInflectorRelProvider;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  */
-public class HalEmbeddedBuilderUnitTests {
+public class HalEmbeddedBuilderUnitTest {
 
 	RelProvider provider;
 

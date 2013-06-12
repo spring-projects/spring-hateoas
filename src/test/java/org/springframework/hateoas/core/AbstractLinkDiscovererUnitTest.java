@@ -31,7 +31,7 @@ import org.springframework.hateoas.LinkDiscoverer;
  * 
  * @author Oliver Gierke
  */
-public abstract class AbstractLinkDiscovererUnitTests {
+public abstract class AbstractLinkDiscovererUnitTest {
 
 	@Test
 	public void findsSingleLink() {

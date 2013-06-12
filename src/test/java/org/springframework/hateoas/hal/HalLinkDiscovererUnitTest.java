@@ -16,14 +16,14 @@
 package org.springframework.hateoas.hal;
 
 import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTests;
+import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 
 /**
  * Unit tests for {@link HalLinkDiscoverer}.
  * 
  * @author Oliver Gierke
  */
-public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTests {
+public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
 	static final String SAMPLE = "{ _links : { " + //

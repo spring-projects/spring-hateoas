@@ -22,7 +22,7 @@ import org.junit.Test;
  * 
  * @author Oliver Gierke
  */
-public class JsonPathLinkDiscovererUnitTests {
+public class JsonPathLinkDiscovererUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullPattern() {

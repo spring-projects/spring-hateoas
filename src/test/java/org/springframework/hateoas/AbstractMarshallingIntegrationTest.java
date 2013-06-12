@@ -26,7 +26,7 @@ import org.junit.Before;
  * 
  * @author Oliver Gierke
  */
-public abstract class AbstractMarshallingIntegrationTests {
+public abstract class AbstractMarshallingIntegrationTest {
 
 	protected ObjectMapper mapper;
 

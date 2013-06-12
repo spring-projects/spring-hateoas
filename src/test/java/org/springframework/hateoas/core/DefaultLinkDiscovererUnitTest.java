@@ -22,7 +22,7 @@ import org.springframework.hateoas.LinkDiscoverer;
  * 
  * @author Oliver Gierke
  */
-public class DefaultLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTests {
+public class DefaultLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	static final String SAMPLE = "{ links : [ " + //
 			"{ rel : 'self', href : 'selfHref' }, " + //

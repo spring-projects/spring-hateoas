@@ -29,7 +29,7 @@ import org.springframework.plugin.core.PluginRegistry;
 /**
  * @author Oliver Gierke
  */
-public class DelegatingRelProviderUnitTests {
+public class DelegatingRelProviderUnitTest {
 
 	@Test
 	public void foo() {

@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-public abstract class AbstractJackson2MarshallingIntegrationTests {
+public abstract class AbstractJackson2MarshallingIntegrationTest {
 
 	protected ObjectMapper mapper;
 

@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * 
  * @author Oliver Gierke
  */
-public class VndErrorsMarshallingTests {
+public class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson1Mapper;
 	com.fasterxml.jackson.databind.ObjectMapper jackson2Mapper;
@@ -55,7 +55,7 @@ public class VndErrorsMarshallingTests {
 	String jsonReference;
 	String xmlReference;
 
-	public VndErrorsMarshallingTests() throws IOException {
+	public VndErrorsMarshallingTest() throws IOException {
 
 		jsonReference = readFile(new ClassPathResource("vnderror.json"));
 		xmlReference = readFile(new ClassPathResource("vnderror.xml"));

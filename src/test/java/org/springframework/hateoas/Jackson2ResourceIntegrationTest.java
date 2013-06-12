@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-public class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTests {
+public class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}";
 

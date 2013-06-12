@@ -33,7 +33,7 @@ import org.springframework.http.ResponseEntity;
  * 
  * @author Oliver Gierke
  */
-public class HeaderLinksResponseEntityUnitTests {
+public class HeaderLinksResponseEntityUnitTest {
 
 	static final Object CONTENT = new Object();
 	static final Link LINK = new Link("href", "rel");

@@ -77,13 +77,13 @@ public class EnableHypermediaSupportIntegrationTest {
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
 
 		Map<String, EntityLinks> discoverers = context.getBeansOfType(EntityLinks.class);
-		assertThat(discoverers.values(), hasItem(Matchers.<EntityLinks> instanceOf(DelegatingEntityLinks.class)));
+		assertThat(discoverers.values(), Matchers.<EntityLinks> hasItem(instanceOf(DelegatingEntityLinks.class)));
 	}
 
 	private static void assertRelProvidersSetUp(ApplicationContext context) {
 
 		Map<String, RelProvider> discoverers = context.getBeansOfType(RelProvider.class);
-		assertThat(discoverers.values(), hasItem(Matchers.<RelProvider> instanceOf(DelegatingRelProvider.class)));
+		assertThat(discoverers.values(), Matchers.<RelProvider> hasItem(instanceOf(DelegatingRelProvider.class)));
 	}
 
 	@Configuration

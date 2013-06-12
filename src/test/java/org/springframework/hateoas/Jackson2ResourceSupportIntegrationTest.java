@@ -25,7 +25,7 @@ import org.junit.Test;
  * 
  * @author Oliver Gierke
  */
-public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTests {
+public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 

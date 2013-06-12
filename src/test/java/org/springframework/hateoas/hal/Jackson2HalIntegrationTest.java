@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTests;
+import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
@@ -40,7 +40,7 @@ import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
-public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTests {
+public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
