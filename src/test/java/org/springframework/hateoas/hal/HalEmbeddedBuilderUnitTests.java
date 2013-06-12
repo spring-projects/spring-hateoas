@@ -15,8 +15,11 @@
  */
 package org.springframework.hateoas.hal;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 
 /**
@@ -58,6 +62,17 @@ public class HalEmbeddedBuilderUnitTests {
 		assertThat(map.containsKey("string"), is(false));
 		assertThat(map.get("strings"), Matchers.<List<Object>> allOf(hasSize(2), Matchers.<Object> hasItems("foo", "bar")));
 		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
+	}
+
+	@Test
+	public void addsNoEmbeddedsForResourceWithoutContent() {
+
+		class SimplePojoResource extends Resource<SimplePojo> {
+		}
+		SimplePojoResource samplePersonResource = new SimplePojoResource();
+		HalEmbeddedBuilder halEmbeddedBuilder = new HalEmbeddedBuilder(provider);
+		halEmbeddedBuilder.add(samplePersonResource);
+		assertTrue("embeddeds should be empty", halEmbeddedBuilder.asMap().isEmpty());
 	}
 
 	private Map<String, List<Object>> setUpBuilder(Object... values) {
