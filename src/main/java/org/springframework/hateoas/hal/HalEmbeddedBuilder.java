@@ -54,19 +54,21 @@ class HalEmbeddedBuilder {
 	public void add(Object value) {
 
 		Class<?> type = ObjectUtils.getResourceType(value);
-		String singleRel = getDefaultedRelFor(type, false);
-		List<Object> currentValue = embeddeds.get(singleRel);
+		if (type != null) {
+			String singleRel = getDefaultedRelFor(type, false);
+			List<Object> currentValue = embeddeds.get(singleRel);
 
-		if (currentValue == null) {
-			ArrayList<Object> arrayList = new ArrayList<Object>();
-			arrayList.add(value);
-			embeddeds.put(singleRel, arrayList);
-		} else if (currentValue.size() == 1) {
-			currentValue.add(value);
-			embeddeds.remove(singleRel);
-			embeddeds.put(getDefaultedRelFor(type, true), currentValue);
-		} else {
-			currentValue.add(value);
+			if (currentValue == null) {
+				ArrayList<Object> arrayList = new ArrayList<Object>();
+				arrayList.add(value);
+				embeddeds.put(singleRel, arrayList);
+			} else if (currentValue.size() == 1) {
+				currentValue.add(value);
+				embeddeds.remove(singleRel);
+				embeddeds.put(getDefaultedRelFor(type, true), currentValue);
+			} else {
+				currentValue.add(value);
+			}
 		}
 	}
 
