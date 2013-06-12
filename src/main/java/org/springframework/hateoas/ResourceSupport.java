@@ -99,6 +99,13 @@ public class ResourceSupport implements Identifiable<Link> {
 	}
 
 	/**
+	 * Removes all {@link Link}s added to the resource so far.
+	 */
+	public void removeLinks() {
+		this.links.clear();
+	}
+
+	/**
 	 * Returns the link with the given rel.
 	 * 
 	 * @param rel
