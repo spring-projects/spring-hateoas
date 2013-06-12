@@ -36,7 +36,7 @@ public class Resource<T> extends ResourceSupport {
 	/**
 	 * Creates an empty {@link Resource}.
 	 */
-	protected Resource() {
+	Resource() {
 		this.content = null;
 	}
 
