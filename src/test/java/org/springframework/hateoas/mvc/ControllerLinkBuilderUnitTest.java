@@ -208,6 +208,30 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(components.getQuery(), is("foo=bar"));
 	}
 
+	/**
+	 * @see #90
+	 */
+	@Test
+	public void usesForwardedHostAndPortFromHeader() {
+
+		request.addHeader("X-Forwarded-Host", "foobar:8088");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://foobar:8088"));
+	}
+
+	/**
+	 * @see #90
+	 */
+	@Test
+	public void usesFirstHostOfXForwardedHost() {
+
+		request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://barfoo:8888"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}

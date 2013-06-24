@@ -168,8 +168,23 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
 		String header = request.getHeader("X-Forwarded-Host");
-		if (StringUtils.hasText(header)) {
-			builder.host(header);
+
+		if (!StringUtils.hasText(header)) {
+			return builder;
+		}
+
+		String[] hosts = StringUtils.commaDelimitedListToStringArray(header);
+		String hostToUse = hosts[0];
+
+		if (hostToUse.contains(":")) {
+
+			String[] hostAndPort = StringUtils.split(hostToUse, ":");
+
+			builder.host(hostAndPort[0]);
+			builder.port(Integer.parseInt(hostAndPort[1]));
+
+		} else {
+			builder.host(hostToUse);
 		}
 
 		return builder;
