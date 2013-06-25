@@ -293,8 +293,8 @@ public class Jackson2HalModule extends SimpleModule {
 			ContextualSerializer {
 
 		private final BeanProperty property;
-		private JsonSerializer<Object> serializer;
-
+		private Map<Class<?>, JsonSerializer<Object>> serializerMap = new HashMap<Class<?>, JsonSerializer<Object>>();
+		
 		public OptionalListJackson2Serializer() {
 			this(null);
 		}
@@ -351,12 +351,19 @@ public class Jackson2HalModule extends SimpleModule {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
 				} else {
-					if (serializer == null) {
-						serializer = provider.findValueSerializer(elem.getClass(), property);
-					}
-					serializer.serialize(elem, jgen, provider);
+					findSerializer(provider, elem.getClass()).serialize(elem, jgen, provider);
 				}
 			}
+		}
+
+		private JsonSerializer<Object> findSerializer(SerializerProvider provider, Class<? extends Object> elemType) 
+				throws JsonMappingException {
+			
+			if(!this.serializerMap.containsKey(elemType)) {
+				JsonSerializer<Object> serializer = provider.findValueSerializer(elemType, property);
+				this.serializerMap.put(elemType, serializer);
+			}
+			return this.serializerMap.get(elemType);
 		}
 
 		/*
@@ -366,7 +373,8 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public JsonSerializer<?> getContentSerializer() {
-			return serializer;
+			Iterator<JsonSerializer<Object>> it = this.serializerMap.values().iterator();
+			return it.hasNext() ? it.next() : null;
 		}
 
 		/*
