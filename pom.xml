@@ -58,13 +58,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.1.4.RELEASE</spring.version>
+		<spring.version>3.2.3.RELEASE</spring.version>
 		<logback.version>1.0.9</logback.version>
 		<jackson1.version>1.9.10</jackson1.version>
 		<jackson2.version>2.1.1</jackson2.version>
 		<jaxrs.version>1.0</jaxrs.version>
 		<jsonpath.version>0.8.1</jsonpath.version>
 		<minidevjson.version>1.1.1</minidevjson.version>
+		<objenesis.version>1.3</objenesis.version>
 		<slf4j.version>1.7.2</slf4j.version>
 		<evo.version>1.0.1</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
@@ -101,6 +102,12 @@
 			<artifactId>cglib</artifactId>
 			<version>2.2.2</version>
 			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.objenesis</groupId>
+			<artifactId>objenesis</artifactId>
+			<version>${objenesis.version}</version>
 		</dependency>
 
 		<dependency>

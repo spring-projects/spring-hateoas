@@ -19,12 +19,12 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.hateoas.core.AnnotationAttribute;
+import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
