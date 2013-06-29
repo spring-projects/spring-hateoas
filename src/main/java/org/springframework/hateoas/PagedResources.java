@@ -168,10 +168,6 @@ public class PagedResources<T> extends Resources<T> {
 	 * 
 	 * @author Oliver Gierke
 	 */
-	@org.codehaus.jackson.annotate.JsonAutoDetect(
-			fieldVisibility = org.codehaus.jackson.annotate.JsonAutoDetect.Visibility.ANY)
-	@com.fasterxml.jackson.annotation.JsonAutoDetect(
-			fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY)
 	public static class PageMetadata {
 
 		@XmlAttribute//
