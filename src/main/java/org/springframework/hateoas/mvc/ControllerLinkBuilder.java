@@ -169,7 +169,13 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		String header = request.getHeader("X-Forwarded-Host");
 		if (StringUtils.hasText(header)) {
-			builder.host(header);
+            if (StringUtils.countOccurrencesOf(header, ":") == 1) {
+                String[] hostAndPort = StringUtils.split(header, ":");
+                builder.host(hostAndPort[0]);
+                builder.port(Integer.parseInt(hostAndPort[1]));
+            } else {
+			    builder.host(header);
+            }
 		}
 
 		return builder;
