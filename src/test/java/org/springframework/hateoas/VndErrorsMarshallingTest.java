@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.MappedByteBuffer;
@@ -28,6 +29,7 @@ import java.nio.charset.Charset;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
@@ -50,6 +52,7 @@ public class VndErrorsMarshallingTest {
 	ObjectMapper jackson1Mapper;
 	com.fasterxml.jackson.databind.ObjectMapper jackson2Mapper;
 	Marshaller marshaller;
+	Unmarshaller unmarshaller;
 
 	VndErrors errors;
 	String jsonReference;
@@ -74,9 +77,10 @@ public class VndErrorsMarshallingTest {
 
 		JAXBContext context = JAXBContext.newInstance(VndErrors.class);
 		marshaller = context.createMarshaller();
+		unmarshaller = context.createUnmarshaller();
 
 		VndError error = new VndError("42", "Validation failed!", //
-				new Link("http://...", "help"), new Link("http://...", "describes"));
+				new Link("http://...", "describes"), new Link("http://...", "help"));
 		errors = new VndErrors(error, error, error);
 	}
 
@@ -96,6 +100,32 @@ public class VndErrorsMarshallingTest {
 		Writer writer = new StringWriter();
 		marshaller.marshal(errors, writer);
 		assertThat(writer.toString(), is(xmlReference));
+	}
+
+	/**
+	 * @see #93, #94
+	 */
+	@Test
+	public void jackson1UnMarshalling() throws Exception {
+		VndErrors actual = jackson1Mapper.readValue(jsonReference, VndErrors.class);
+		assertThat(actual, is(errors));
+	}
+
+	/**
+	 * @see #93, #94
+	 */
+	@Test
+	public void jackson2UnMarshalling() throws Exception {
+		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class), is(errors));
+	}
+
+	/**
+	 * @see #93, #94
+	 */
+	@Test
+	public void jaxbUnMarshalling() throws Exception {
+		VndErrors actual = (VndErrors) unmarshaller.unmarshal(new StringReader(xmlReference));
+		assertThat(actual, is(errors));
 	}
 
 	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {

@@ -27,8 +27,6 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 /**
  * A representation model class to be rendered as specified for the media type {@code application/vnd.error}.
  * 
@@ -38,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @XmlRootElement(name = "errors")
 public class VndErrors implements Iterable<VndErrors.VndError> {
 
-	@XmlElement(name = "error")
+	@XmlElement(name = "error")//
 	private final List<VndError> vndErrors;
 
 	/**
@@ -69,6 +67,20 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	}
 
 	/**
+	 * Creates a new {@link VndErrors} wrapper for the given {@link VndErrors}.
+	 * 
+	 * @param errors must not be {@literal null} or empty.
+	 */
+	@com.fasterxml.jackson.annotation.JsonCreator
+	@org.codehaus.jackson.annotate.JsonCreator
+	public VndErrors(List<VndError> errors) {
+
+		Assert.notNull(errors, "Errors must not be null!");
+		Assert.isTrue(!errors.isEmpty(), "Errors must not be empty!");
+		this.vndErrors = errors;
+	}
+
+	/**
 	 * Protected default constructor to allow JAXB marshalling.
 	 */
 	protected VndErrors() {
@@ -96,13 +108,41 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		return vndErrors;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
 	public Iterator<VndErrors.VndError> iterator() {
 		return this.vndErrors.iterator();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return vndErrors.hashCode();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof VndErrors)) {
+			return false;
+		}
+
+		VndErrors that = (VndErrors) obj;
+		return this.vndErrors.equals(that.vndErrors);
 	}
 
 	/**
@@ -113,14 +153,14 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	@XmlType
 	public static class VndError extends ResourceSupport {
 
-		@com.fasterxml.jackson.annotation.JsonProperty
-		@org.codehaus.jackson.annotate.JsonProperty
-		@XmlAttribute
+		@com.fasterxml.jackson.annotation.JsonProperty//
+		@org.codehaus.jackson.annotate.JsonProperty//
+		@XmlAttribute//
 		private final String logref;
 
-		@com.fasterxml.jackson.annotation.JsonProperty
-		@org.codehaus.jackson.annotate.JsonProperty
-		@XmlElement
+		@com.fasterxml.jackson.annotation.JsonProperty//
+		@org.codehaus.jackson.annotate.JsonProperty//
+		@XmlElement//
 		private final String message;
 
 		/**
@@ -165,6 +205,41 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		 */
 		public String getMessage() {
 			return message;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.ResourceSupport#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+
+			int result = 17;
+
+			result += 31 * logref.hashCode();
+			result += 31 * message.hashCode();
+
+			return result;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj) {
+
+			if (obj == this) {
+				return true;
+			}
+
+			if (!(obj instanceof VndError)) {
+				return false;
+			}
+
+			VndError that = (VndError) obj;
+
+			return this.logref.equals(that.logref) && this.message.equals(that.message);
 		}
 	}
 }
