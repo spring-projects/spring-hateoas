@@ -15,11 +15,12 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.MappedByteBuffer;
@@ -28,6 +29,7 @@ import java.nio.charset.Charset;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
@@ -48,11 +50,17 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson1Mapper;
+
 	com.fasterxml.jackson.databind.ObjectMapper jackson2Mapper;
+
 	Marshaller marshaller;
 
+	Unmarshaller unmarshaller;
+
 	VndErrors errors;
+
 	String jsonReference;
+
 	String xmlReference;
 
 	public VndErrorsMarshallingTest() throws IOException {
@@ -74,9 +82,10 @@ public class VndErrorsMarshallingTest {
 
 		JAXBContext context = JAXBContext.newInstance(VndErrors.class);
 		marshaller = context.createMarshaller();
+		unmarshaller = context.createUnmarshaller();
 
 		VndError error = new VndError("42", "Validation failed!", //
-				new Link("http://...", "help"), new Link("http://...", "describes"));
+				new Link("http://...", "describes"), new Link("http://...", "help"));
 		errors = new VndErrors(error, error, error);
 	}
 
@@ -98,6 +107,23 @@ public class VndErrorsMarshallingTest {
 		assertThat(writer.toString(), is(xmlReference));
 	}
 
+	@Test
+	public void jackson1UnMarshalling() throws Exception {
+		VndErrors actual = jackson1Mapper.readValue(jsonReference, VndErrors.class);
+		assertThat(actual, is(errors));
+	}
+
+	@Test
+	public void jackson2UnMarshalling() throws Exception {
+		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class), is(errors));
+	}
+
+	@Test
+	public void jaxbUnMarshalling() throws Exception {
+		VndErrors actual = (VndErrors) unmarshaller.unmarshal(new StringReader(xmlReference));
+		assertThat(actual, is(errors));
+	}
+
 	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {
 
 		FileInputStream stream = new FileInputStream(resource.getFile());
@@ -106,7 +132,8 @@ public class VndErrorsMarshallingTest {
 			FileChannel fc = stream.getChannel();
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
 			return Charset.defaultCharset().decode(bb).toString();
-		} finally {
+		}
+		finally {
 			stream.close();
 		}
 	}
