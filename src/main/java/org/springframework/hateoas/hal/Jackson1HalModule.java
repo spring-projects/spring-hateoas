@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,14 +109,16 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object,
+		 * org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)
 		 */
 		@Override
 		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
 			// sort links according to their relation
-			Map<String, List<Link>> sortedLinks = new HashMap<String, List<Link>>();
+			Map<String, List<Link>> sortedLinks = new LinkedHashMap<String, List<Link>>();
 
 			for (Link link : value) {
 
@@ -139,7 +142,10 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig, org.codehaus.jackson.map.BeanProperty)
+		 * 
+		 * @see
+		 * org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
+		 * org.codehaus.jackson.map.BeanProperty)
 		 */
 		@Override
 		public JsonSerializer<List<Link>> createContextual(SerializationConfig config, BeanProperty property)
@@ -149,7 +155,10 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
+		 * 
+		 * @see
+		 * org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map
+		 * .TypeSerializer)
 		 */
 		@Override
 		public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
@@ -167,6 +176,7 @@ public class Jackson1HalModule extends SimpleModule {
 			ContextualSerializer<Collection<?>> {
 
 		private final BeanProperty property;
+
 		private final RelProvider relProvider;
 
 		/**
@@ -185,7 +195,9 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object,
+		 * org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)
 		 */
 		@Override
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
@@ -210,7 +222,10 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig, org.codehaus.jackson.map.BeanProperty)
+		 * 
+		 * @see
+		 * org.codehaus.jackson.map.ContextualSerializer#createContextual(org.codehaus.jackson.map.SerializationConfig,
+		 * org.codehaus.jackson.map.BeanProperty)
 		 */
 		@Override
 		public JsonSerializer<Collection<?>> createContextual(SerializationConfig config, BeanProperty property)
@@ -221,7 +236,9 @@ public class Jackson1HalModule extends SimpleModule {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
+		 * @see
+		 * org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map
+		 * .TypeSerializer)
 		 */
 		@Override
 		public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
@@ -239,6 +256,7 @@ public class Jackson1HalModule extends SimpleModule {
 	public static class OptionalListSerializer extends ContainerSerializerBase<Object> {
 
 		private final BeanProperty property;
+
 		private JsonSerializer<Object> serializer;
 
 		public OptionalListSerializer() {
@@ -253,7 +271,10 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map.TypeSerializer)
+		 * 
+		 * @see
+		 * org.codehaus.jackson.map.ser.std.ContainerSerializerBase#_withValueTypeSerializer(org.codehaus.jackson.map
+		 * .TypeSerializer)
 		 */
 		@Override
 		public ContainerSerializerBase<?> _withValueTypeSerializer(TypeSerializer vts) {
@@ -262,7 +283,9 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object,
+		 * org.codehaus.jackson.JsonGenerator, org.codehaus.jackson.map.SerializerProvider)
 		 */
 		@Override
 		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
@@ -287,7 +310,8 @@ public class Jackson1HalModule extends SimpleModule {
 				Object elem = value.next();
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
-				} else {
+				}
+				else {
 					if (serializer == null) {
 						serializer = provider.findValueSerializer(elem.getClass(), property);
 					}
@@ -305,6 +329,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
+		 * 
 		 * @see org.codehaus.jackson.map.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
@@ -314,6 +339,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
+		 * 
 		 * @see org.codehaus.jackson.map.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
@@ -323,7 +349,9 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.JsonDeserializer#deserialize(org.codehaus.jackson.JsonParser, org.codehaus.jackson.map.DeserializationContext)
+		 * 
+		 * @see org.codehaus.jackson.map.JsonDeserializer#deserialize(org.codehaus.jackson.JsonParser,
+		 * org.codehaus.jackson.map.DeserializationContext)
 		 */
 		@Override
 		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
@@ -345,7 +373,8 @@ public class Jackson1HalModule extends SimpleModule {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						result.add(getDefaultedLink(jp, relation));
 					}
-				} else {
+				}
+				else {
 					result.add(getDefaultedLink(jp, relation));
 				}
 			}
@@ -381,6 +410,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
+		 * 
 		 * @see org.codehaus.jackson.map.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
@@ -390,6 +420,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
+		 * 
 		 * @see org.codehaus.jackson.map.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
@@ -399,15 +430,17 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.JsonDeserializer#deserialize(org.codehaus.jackson.JsonParser, org.codehaus.jackson.map.DeserializationContext)
+		 * 
+		 * @see org.codehaus.jackson.map.JsonDeserializer#deserialize(org.codehaus.jackson.JsonParser,
+		 * org.codehaus.jackson.map.DeserializationContext)
 		 */
 		@Override
 		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
 				JsonProcessingException {
 
 			List<Object> result = new ArrayList<Object>();
-			JsonDeserializer<Object> deser = ctxt.getDeserializerProvider().findTypedValueDeserializer(ctxt.getConfig(),
-					contentType, null);
+			JsonDeserializer<Object> deser = ctxt.getDeserializerProvider().findTypedValueDeserializer(
+					ctxt.getConfig(), contentType, null);
 			Object object;
 
 			// links is an object, so we parse till we find its end.
@@ -422,7 +455,8 @@ public class Jackson1HalModule extends SimpleModule {
 						object = deser.deserialize(jp, ctxt);
 						result.add(object);
 					}
-				} else {
+				}
+				else {
 					object = deser.deserialize(jp, ctxt);
 					result.add(object);
 				}
@@ -433,7 +467,10 @@ public class Jackson1HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.codehaus.jackson.map.ContextualDeserializer#createContextual(org.codehaus.jackson.map.DeserializationConfig, org.codehaus.jackson.map.BeanProperty)
+		 * 
+		 * @see
+		 * org.codehaus.jackson.map.ContextualDeserializer#createContextual(org.codehaus.jackson.map.DeserializationConfig
+		 * , org.codehaus.jackson.map.BeanProperty)
 		 */
 		@Override
 		public JsonDeserializer<List<Object>> createContextual(DeserializationConfig config, BeanProperty property)
@@ -471,7 +508,8 @@ public class Jackson1HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated,
 				Class<? extends JsonSerializer<?>> serClass) {
-			// there is a know bug in jackson that will not create a serializer instance if the handler instantiator returns
+			// there is a know bug in jackson that will not create a serializer instance if the handler instantiator
+			// returns
 			// null!
 			return (JsonSerializer<?>) findInstance(serClass, true);
 		}

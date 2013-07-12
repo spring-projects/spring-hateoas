@@ -96,13 +96,39 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		return vndErrors;
 	}
 
-	/* 
+	@com.fasterxml.jackson.annotation.JsonCreator
+	@org.codehaus.jackson.annotate.JsonCreator
+	private VndErrors(List<VndError> errors) {
+		this.vndErrors = errors;
+	}
+
+	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
 	public Iterator<VndErrors.VndError> iterator() {
 		return this.vndErrors.iterator();
+	}
+
+	@Override
+	public int hashCode() {
+		return vndErrors.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VndErrors other = (VndErrors) obj;
+		if (!vndErrors.equals(other.vndErrors))
+			return false;
+		return true;
 	}
 
 	/**
@@ -166,5 +192,32 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		public String getMessage() {
 			return message;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + logref.hashCode();
+			result = prime * result + message.hashCode();
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			VndError other = (VndError) obj;
+			if (!logref.equals(other.logref))
+				return false;
+			if (!message.equals(other.message))
+				return false;
+			return true;
+		}
+
 	}
+
 }
