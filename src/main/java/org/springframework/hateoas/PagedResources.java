@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-@XmlRootElement(name = "entities")
+@XmlRootElement(name = "pagedEntities")
 public class PagedResources<T> extends Resources<T> {
 
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
