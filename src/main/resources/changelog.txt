@@ -1,6 +1,22 @@
 Spring Hateoas Changelog
 =========================
 
+Changes in version 0.7.0.RELEASE (2013-16-07)
+---------------------------------------------
+- #91 - Improve proxying for links build from method references
+- #99 - HalLinkListSerializers don't guarantee stable link order
+- #98 - PagedResources JAXB un-marshalling is broken
+- #94 - Fix for issue #93
+- #93 - Jackson can't deserialize VndErrors
+- #92 - Remove JsonAutoDetect annotations from PagedResources
+- #90 - Consider port number when setting the host from the X-Forward-Host header
+- #86 - Make sure all test run during build
+- #85 - Add support to render resource links as headers instead of in the body
+- #84 - Make Resource more defenisive against null content
+- #83 - #81: handle null content when adding Resource or Resources
+- #81 - Nullpointer in HalEmbeddedBuilder
+- #74 - Release 0.7
+
 Changes in version 0.6.0.RELEASE (2013-31-05)
 ---------------------------------------------
 - #73 - ControllerLinkBuilder should allow pointing to unmapped controllers
