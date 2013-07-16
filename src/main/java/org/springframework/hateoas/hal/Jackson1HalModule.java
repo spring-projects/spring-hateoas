@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +116,7 @@ public class Jackson1HalModule extends SimpleModule {
 				JsonGenerationException {
 
 			// sort links according to their relation
-			Map<String, List<Link>> sortedLinks = new HashMap<String, List<Link>>();
+			Map<String, List<Link>> sortedLinks = new LinkedHashMap<String, List<Link>>();
 
 			for (Link link : value) {
 
