@@ -37,18 +37,29 @@ public class MethodParameters {
 	private final List<MethodParameter> parameters;
 
 	/**
-	 * Creates a new {@link MethodParameter} from the given {@link Method}.
+	 * Creates a new {@link MethodParameters} from the given {@link Method}.
 	 * 
 	 * @param method must not be {@literal null}.
 	 */
 	public MethodParameters(Method method) {
+		this(method, null);
+	}
+
+	/**
+	 * Creates a new {@link MethodParameters} for the given {@link Method} and {@link AnnotationAttribute}. If the latter
+	 * is given, method parameter names will be looked up from the annotation attribute if present.
+	 * 
+	 * @param method must not be {@literal null}.
+	 * @param namingAnnotation can be {@literal null}.
+	 */
+	public MethodParameters(Method method, AnnotationAttribute namingAnnotation) {
 
 		Assert.notNull(method);
 		this.parameters = new ArrayList<MethodParameter>();
 
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
 
-			MethodParameter parameter = new MethodParameter(method, i);
+			MethodParameter parameter = new AnnotationNamingMethodParameter(method, i, namingAnnotation);
 			parameter.initParameterNameDiscovery(DISCOVERER);
 			parameters.add(parameter);
 		}
@@ -61,6 +72,25 @@ public class MethodParameters {
 	 */
 	public List<MethodParameter> getParameters() {
 		return parameters;
+	}
+
+	/**
+	 * Returns the {@link MethodParameter} with the given name or {@literal null} if none found.
+	 * 
+	 * @param name must not be {@literal null} or empty.
+	 * @return
+	 */
+	public MethodParameter getParameter(String name) {
+
+		Assert.hasText(name, "Parameter name must not be null!");
+
+		for (MethodParameter parameter : parameters) {
+			if (name.equals(parameter.getParameterName())) {
+				return parameter;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -81,5 +111,55 @@ public class MethodParameters {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Custom {@link MethodParameter} extension that will favor the name configured in the {@link AnnotationAttribute} if
+	 * set over discovering it.
+	 * 
+	 * @author Oliver Gierke
+	 */
+	private static class AnnotationNamingMethodParameter extends MethodParameter {
+
+		private final AnnotationAttribute attribute;
+		private String name;
+
+		/**
+		 * Creates a new {@link AnnotationNamingMethodParameter} for the given {@link Method}'s parameter with the given
+		 * index.
+		 * 
+		 * @param method must not be {@literal null}.
+		 * @param parameterIndex
+		 * @param attribute can be {@literal null}
+		 */
+		public AnnotationNamingMethodParameter(Method method, int parameterIndex, AnnotationAttribute attribute) {
+
+			super(method, parameterIndex);
+			this.attribute = attribute;
+
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.core.MethodParameter#getParameterName()
+		 */
+		@Override
+		public String getParameterName() {
+
+			if (name != null) {
+				return name;
+			}
+
+			if (attribute != null) {
+				String foundName = attribute.getValueFrom(this);
+				if (foundName != null) {
+					name = foundName;
+					return name;
+				}
+			}
+
+			name = super.getParameterName();
+			return name;
+		}
 	}
 }
