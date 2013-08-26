@@ -55,4 +55,44 @@ public class PagedResourcesUnitTest {
 
 		assertThat(resources.getPreviousLink(), is(notNullValue()));
 	}
+
+	/**
+	 * @see #89
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void preventsNegativePageSize() {
+		new PageMetadata(-1, 0, 0);
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void preventsNegativePageNumber() {
+		new PageMetadata(0, -1, 0);
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void preventsNegativeTotalElements() {
+		new PageMetadata(0, 0, -1);
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void preventsNegativeTotalPages() {
+		new PageMetadata(0, 0, 0, -1);
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test
+	public void allowsOneIndexedPages() {
+		new PageMetadata(10, 1, 0);
+	}
 }

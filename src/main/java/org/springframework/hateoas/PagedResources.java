@@ -204,8 +204,10 @@ public class PagedResources<T> extends Resources<T> {
 		 */
 		public PageMetadata(long size, long number, long totalElements, long totalPages) {
 
-			Assert.isTrue(number < totalPages,
-					"The current page number cannot be greater or equal to the total number of pages!");
+			Assert.isTrue(size > -1, "Size must not be negative!");
+			Assert.isTrue(number > -1, "Number must not be negative!");
+			Assert.isTrue(totalElements > -1, "Total elements must not be negative!");
+			Assert.isTrue(totalPages > -1, "Total pages must not be negative!");
 
 			this.size = size;
 			this.number = number;
@@ -221,7 +223,7 @@ public class PagedResources<T> extends Resources<T> {
 		 * @param totalElements the total number of elements available
 		 */
 		public PageMetadata(long size, long number, long totalElements) {
-			this(size, number, totalElements, totalElements / size);
+			this(size, number, totalElements, size == 0 ? 0 : totalElements / size);
 		}
 
 		/**
