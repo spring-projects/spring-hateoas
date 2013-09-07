@@ -1,0 +1,82 @@
+---
+# The name of your project
+title: Spring HATEOAS
+
+badges:
+
+  # Specify your project's twitter handle, if any. Delete if none.
+  # twitter: SpringData
+
+  # Customize your project's badges. Delete any entries that do not apply.
+  custom:
+    - name: Source (GitHub)
+      url:  https://github.com/SpringSource/spring-hateoas
+      icon: github
+
+    # - name: Issues (JIRA)
+    #   url:  http://jira.springsource.org/browse/DATAJPA
+    #   icon: tracking
+
+    - name: CI (Bamboo)
+      url:  https://build.springsource.org/browse/HATEOAS
+      icon: ci
+
+    - name: Forum
+      url:  http://forum.spring.io
+      icon: forum
+
+    - name: StackOverflow
+      url:  http://stackoverflow.com/questions/tagged/spring-hateoas
+      icon: stackoverflow
+
+    # - name: Metrics (SonarQube)
+    #   url:  https://sonar.springsource.org/dashboard/index/org.springframework.data:spring-data-jpa
+    #   icon: metrics
+
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+
+<!-- Specify the parent of this project (or delete if none) to influence the rendering of the breadcrumb -->
+{% capture parent_link %}
+[Spring Parent]({{ site.projects_site_url }}/spring-parent)
+{% endcapture %}
+
+
+{% capture billboard_description %}
+Create REST representations that follow the [HATEOAS](http://en.wikipedia.org/wiki/HATEOAS) principle from your Spring-based applications.
+
+{% endcapture %}
+
+{% capture main_content %}
+Spring HATOEAS provides some APIs to ease creating REST representations that follow the [HATEOAS](http://en.wikipedia.org/wiki/HATEOAS) principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+
+## Features
+
+- Model classes for link, resource representation models
+- Link builder API to create links pointing to Spring MVC controller methods
+- Support for hypermedia formats like HAL
+
+<span id="quick-start"></span>
+## Quick Start
+
+{% include download_widget.md %}
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+### Getting Started Guides
+
+- [Building a Hypermedia-Driven RESTful Web Service]({{site.main_site_url}}/guides/gs/rest-hatoeas)
+- [Building a RESTful Web Service]({{site.main_site_url}}/guides/gs/rest-service)
+
+### Tutorials
+
+* [Designing and Implementing RESTful Web Services with Spring]({{site.main_site_url}}/guides/tutorials/rest)
+
+{% endcapture %}
+
+
+{% include project_page.html %}
+</html>
