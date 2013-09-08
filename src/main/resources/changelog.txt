@@ -1,6 +1,13 @@
 Spring Hateoas Changelog
 =========================
 
+Changes in version 0.8.0.RELEASE (2013-08-09)
+---------------------------------------------
+- #101 - Enable annotation based parameter name discovery on MethodParameters
+- #89 - PagedMetadata issue
+- #106 - Upgrade to Jackson 2.2.0
+- #105 - Release 0.8
+
 Changes in version 0.7.0.RELEASE (2013-16-07)
 ---------------------------------------------
 - #91 - Improve proxying for links build from method references
