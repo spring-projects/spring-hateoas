@@ -149,6 +149,34 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
 	}
 
+    @Test
+    public void usesForwardedSslIfHeaderIsSet() {
+
+        request.addHeader("X-Forwarded-Ssl", "on");
+
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getHref(), startsWith("https://"));
+    }
+
+    @Test
+    public void usesForwardedSslIfHeaderIsSetOff() {
+
+        request.addHeader("X-Forwarded-Ssl", "off");
+
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getHref(), startsWith("http://"));
+    }
+
+    @Test
+    public void usesForwardedSslAndHostIfHeaderIsSet() {
+
+        request.addHeader("X-Forwarded-Host", "somethingDifferent");
+        request.addHeader("X-Forwarded-Ssl", "on");
+
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getHref(), startsWith("https://somethingDifferent"));
+    }
+
 	/**
 	 * @see #26, #39
 	 */
