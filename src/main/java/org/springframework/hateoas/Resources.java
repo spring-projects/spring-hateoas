@@ -37,8 +37,6 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	@XmlAnyElement
 	@XmlElementWrapper
-	@org.codehaus.jackson.annotate.JsonProperty("content")
-	@com.fasterxml.jackson.annotation.JsonProperty("content")
 	private final Collection<T> content;
 
 	/**
@@ -100,6 +98,8 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * 
 	 * @return the content will never be {@literal null}.
 	 */
+	@org.codehaus.jackson.annotate.JsonProperty("content")
+	@com.fasterxml.jackson.annotation.JsonProperty("content")
 	public Collection<T> getContent() {
 		return Collections.unmodifiableCollection(content);
 	}

@@ -31,8 +31,6 @@ import org.springframework.util.Assert;
 public class ResourceSupport implements Identifiable<Link> {
 
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
-	@org.codehaus.jackson.annotate.JsonProperty("links")
-	@com.fasterxml.jackson.annotation.JsonProperty("links")
 	private final List<Link> links;
 
 	public ResourceSupport() {
@@ -94,6 +92,8 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * 
 	 * @return
 	 */
+	@org.codehaus.jackson.annotate.JsonProperty("links")
+	@com.fasterxml.jackson.annotation.JsonProperty("links")
 	public List<Link> getLinks() {
 		return Collections.unmodifiableList(links);
 	}
