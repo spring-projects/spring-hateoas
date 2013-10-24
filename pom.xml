@@ -61,7 +61,7 @@
 		<spring.version>3.2.3.RELEASE</spring.version>
 		<logback.version>1.0.9</logback.version>
 		<jackson1.version>1.9.10</jackson1.version>
-		<jackson2.version>2.2.0</jackson2.version>
+		<jackson2.version>2.3.0-SNAPSHOT</jackson2.version>
 		<jaxrs.version>1.0</jaxrs.version>
 		<jsonpath.version>0.8.1</jsonpath.version>
 		<minidevjson.version>1.1.1</minidevjson.version>
@@ -305,6 +305,41 @@
 			</plugin>
 			
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.springsource.bundlor
+										</groupId>
+										<artifactId>
+											com.springsource.bundlor.maven
+										</artifactId>
+										<versionRange>
+											[1.0.0.RELEASE,)
+										</versionRange>
+										<goals>
+											<goal>bundlor</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	
 	<pluginRepositories>

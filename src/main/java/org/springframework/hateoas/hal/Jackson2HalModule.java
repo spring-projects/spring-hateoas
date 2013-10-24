@@ -127,7 +127,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property));
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -241,7 +241,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property));
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
 
 			serializer.serialize(builder.asMap(), jgen, provider);
 		}
