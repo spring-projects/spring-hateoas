@@ -56,10 +56,10 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersMultipleElementsWithCollectionResourceRel() {
 
-		Map<String, List<Object>> map = setUpBuilder("foo", "bar", 1L);
+		Map<String, List<Object>> map = setUpBuilder("lorem", "ipsum", "dolor", 1L);
 
 		assertThat(map.containsKey("string"), is(false));
-		assertThat(map.get("strings"), Matchers.<List<Object>> allOf(hasSize(2), Matchers.<Object> hasItems("foo", "bar")));
+		assertThat(map.get("strings"), Matchers.<List<Object>> allOf(hasSize(3), Matchers.<Object> hasItems("lorem", "ipsum", "dolor")));
 		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
 	}
 
