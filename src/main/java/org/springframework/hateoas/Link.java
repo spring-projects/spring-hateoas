@@ -28,6 +28,10 @@ import javax.xml.bind.annotation.XmlType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * Value object for links.
  * 
@@ -109,6 +113,14 @@ public class Link implements Serializable {
 	 */
 	public Link withRel(String rel) {
 		return new Link(href, rel);
+	}
+	
+	@JsonInclude(Include.NON_NULL)
+	public Boolean getTemplated() {
+		if (href != null & href.indexOf('{') > -1) {
+			return Boolean.TRUE;
+		}
+		return null;
 	}
 
 	/**
