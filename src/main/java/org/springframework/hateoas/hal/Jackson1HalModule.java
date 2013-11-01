@@ -93,18 +93,29 @@ public class Jackson1HalModule extends SimpleModule {
 	public static class HalLinkListSerializer extends ContainerSerializerBase<List<Link>> implements
 			ContextualSerializer<List<Link>> {
 
+		private boolean wrapSingleElemLists;
 		private final BeanProperty property;
 
 		/**
 		 * Creates a new {@link HalLinkListSerializer}.
 		 */
 		public HalLinkListSerializer() {
-			this(null);
+			this(null, false);
 		}
 
+		@Deprecated
 		public HalLinkListSerializer(BeanProperty property) {
+			this(property, false);
+		}
+
+		public HalLinkListSerializer(boolean wrapSingleElemLists) {
+			this(null, wrapSingleElemLists);
+		}
+
+		protected HalLinkListSerializer(BeanProperty property, boolean wrapSingleElemLists) {
 			super(List.class, false);
 			this.property = property;
+			this.wrapSingleElemLists = wrapSingleElemLists;
 		}
 
 		/*
@@ -133,7 +144,7 @@ public class Jackson1HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null,
-					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property));
+					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property, wrapSingleElemLists));
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -145,7 +156,7 @@ public class Jackson1HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<List<Link>> createContextual(SerializationConfig config, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinkListSerializer(property);
+			return new HalLinkListSerializer(property, wrapSingleElemLists);
 		}
 
 		/*
@@ -169,19 +180,27 @@ public class Jackson1HalModule extends SimpleModule {
 
 		private final BeanProperty property;
 		private final RelProvider relProvider;
+		private boolean wrapSingleElemLists;
 
-		/**
-		 * Creates a new {@link HalLinkListSerializer}.
-		 */
-		public HalResourcesSerializer(RelProvider relProvider) {
-			this(null, relProvider);
+		public HalResourcesSerializer(RelProvider relPorvider) {
+			this(relPorvider, false);
 		}
 
-		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider) {
+		public HalResourcesSerializer(RelProvider relPorvider, boolean wrapSingleElemLists) {
+			this(null, relPorvider, wrapSingleElemLists);
+		}
 
+		@Deprecated
+		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider) {
+			this(property, relProvider, false);
+		}
+
+		protected HalResourcesSerializer(BeanProperty property, RelProvider relProvider, boolean wrapSingleElemLists) {
 			super(Collection.class, false);
+
 			this.property = property;
 			this.relProvider = relProvider;
+			this.wrapSingleElemLists = wrapSingleElemLists;
 		}
 
 		/*
@@ -204,7 +223,7 @@ public class Jackson1HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null, null,
-					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property));
+					provider.findKeySerializer(keyType, null), new OptionalListSerializer(property, wrapSingleElemLists));
 
 			serializer.serialize(builder.asMap(), jgen, provider);
 		}
@@ -216,7 +235,7 @@ public class Jackson1HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<Collection<?>> createContextual(SerializationConfig config, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, relProvider);
+			return new HalResourcesSerializer(property, relProvider, wrapSingleElemLists);
 		}
 
 		/*
@@ -239,6 +258,8 @@ public class Jackson1HalModule extends SimpleModule {
 	 */
 	public static class OptionalListSerializer extends ContainerSerializerBase<Object> {
 
+		private boolean wrapSingleElemLists = false;
+
 		private final BeanProperty property;
 		private JsonSerializer<Object> serializer;
 
@@ -247,9 +268,17 @@ public class Jackson1HalModule extends SimpleModule {
 		}
 
 		public OptionalListSerializer(BeanProperty property) {
+			this(property, false);
+		}
 
+		public OptionalListSerializer(BeanProperty property, boolean wrapSingleElemLists) {
 			super(List.class, false);
 			this.property = property;
+			this.wrapSingleElemLists = wrapSingleElemLists;
+		}
+
+		public void setWrapSingleElemLists(boolean wrapSingleElemLists) {
+			this.wrapSingleElemLists = wrapSingleElemLists;
 		}
 
 		/*
@@ -271,7 +300,7 @@ public class Jackson1HalModule extends SimpleModule {
 
 			List<?> list = (List<?>) value;
 
-			if (list.size() == 1) {
+			if (list.size() == 1 && !wrapSingleElemLists) {
 				serializeContents(list.iterator(), jgen, provider);
 				return;
 			}
@@ -452,9 +481,14 @@ public class Jackson1HalModule extends SimpleModule {
 
 		public HalHandlerInstantiator(RelProvider relProvider) {
 
-			Assert.notNull(relProvider, "RelProvider must not be null!");
-			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, relProvider));
+			this(relProvider, false);
+		}
 
+		public HalHandlerInstantiator(RelProvider relProvider, boolean wrapSingleElemLists) {
+
+			Assert.notNull(relProvider, "RelProvider must not be null!");
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(relProvider, wrapSingleElemLists));
+			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(wrapSingleElemLists));
 		}
 
 		@Override

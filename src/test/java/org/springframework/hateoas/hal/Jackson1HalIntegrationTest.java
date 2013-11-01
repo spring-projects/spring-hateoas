@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas.hal;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,9 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
 	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+
+	static final String SINGLE_LINK_REFERENCE_WRAPPED = "{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}";
+	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE_WRAPPED = "{\"_links\":{\"self\":[{\"href\":\"localhost\"}]},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}]}}";
 
 	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
 	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
@@ -252,6 +255,62 @@ public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTe
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(setupAnnotatedPagedResources()));
+	}
+
+	@Test
+	public void serializeSingleLinkAsArray() throws Exception {
+		HalHandlerInstantiator hi = new HalHandlerInstantiator(new AnnotationRelProvider(), true);
+		mapper.setHandlerInstantiator(hi);
+
+		ResourceSupport expected = new ResourceSupport();
+		expected.add(new Link("localhost"));
+
+		assertThat(write(expected), is(SINGLE_LINK_REFERENCE_WRAPPED));
+	}
+
+	@Test
+	public void deSerializeSingleLinkFromArray() throws Exception {
+		HalHandlerInstantiator hi = new HalHandlerInstantiator(new AnnotationRelProvider(), true);
+		mapper.setHandlerInstantiator(hi);
+
+		ResourceSupport expected = new ResourceSupport();
+		expected.add(new Link("localhost"));
+
+		ResourceSupport result = mapper.readValue(SINGLE_LINK_REFERENCE_WRAPPED, ResourceSupport.class);
+		assertThat(result, is(expected));
+	}
+
+	@Test
+	public void serializeSingleResourceEmbeddedAsArray() throws Exception {
+		HalHandlerInstantiator hi = new HalHandlerInstantiator(new AnnotationRelProvider(), true);
+		mapper.setHandlerInstantiator(hi);
+
+		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(SINGLE_EMBEDDED_RESOURCE_REFERENCE_WRAPPED));
+	}
+
+	@Test
+	public void deSerializeSingleResourceEmbeddedFromArray() throws Exception {
+		HalHandlerInstantiator hi = new HalHandlerInstantiator(new AnnotationRelProvider(), true);
+		mapper.setHandlerInstantiator(hi);
+
+		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+		content.add(new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")));
+
+		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
+		resources.add(new Link("localhost"));
+
+		Resources<Resource<SimplePojo>> result = mapper.readValue(
+				SINGLE_EMBEDDED_RESOURCE_REFERENCE_WRAPPED,
+				mapper.getTypeFactory().constructParametricType(Resources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+
+		assertThat(result, is(resources));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
