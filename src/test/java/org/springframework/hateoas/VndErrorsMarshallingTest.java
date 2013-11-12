@@ -41,6 +41,7 @@ import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
+import static net.javacrumbs.jsonunit.fluent.JsonAssert.assertThatJson;
 
 /**
  * Integration tests for marshalling of {@link VndErrors}.
@@ -86,12 +87,12 @@ public class VndErrorsMarshallingTest {
 
 	@Test
 	public void jackson1Marshalling() throws Exception {
-		assertThat(jackson1Mapper.writeValueAsString(errors), is(jsonReference));
+		assertThatJson(jackson1Mapper.writeValueAsString(errors)).isEqualTo(jsonReference);
 	}
 
 	@Test
 	public void jackson2Marshalling() throws Exception {
-		assertThat(jackson2Mapper.writeValueAsString(errors), is(jsonReference));
+		assertThatJson(jackson2Mapper.writeValueAsString(errors)).isEqualTo(jsonReference);
 	}
 
 	@Test

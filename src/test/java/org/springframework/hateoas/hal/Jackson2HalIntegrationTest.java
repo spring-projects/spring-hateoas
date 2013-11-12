@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static net.javacrumbs.jsonunit.fluent.JsonAssert.assertThatJson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost"));
 
-		assertThat(write(resourceSupport), is(SINGLE_LINK_REFERENCE));
+		assertThatJson(write(resourceSupport)).isEqualTo(SINGLE_LINK_REFERENCE);
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost"));
 		resourceSupport.add(new Link("localhost2"));
 
-		assertThat(write(resourceSupport), is(LIST_LINK_REFERENCE));
+		assertThatJson(write(resourceSupport)).isEqualTo(LIST_LINK_REFERENCE);
 	}
 
 	@Test
@@ -117,7 +118,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		Resources<String> resources = new Resources<String>(content);
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources), is(SIMPLE_EMBEDDED_RESOURCE_REFERENCE));
+		assertThatJson(write(resources)).isEqualTo(SIMPLE_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	@Test
@@ -146,7 +147,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(content);
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources), is(SINGLE_EMBEDDED_RESOURCE_REFERENCE));
+		assertThatJson(write(resources)).isEqualTo(SINGLE_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	@Test
@@ -173,13 +174,13 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		Resources<Resource<SimplePojo>> resources = setupResources();
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
+		assertThatJson(write(resources)).isEqualTo(LIST_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	@Test
 	public void rendersMixedResourceResourcesAsEmbedded() throws Exception {
 		Resources<?> resources = setupMixedResources();
-		assertThat(write(resources), is(MIXED_EMBEDDED_RESOURCE_REFERENCE));
+		assertThatJson(write(resources)).isEqualTo(MIXED_EMBEDDED_RESOURCE_REFERENCE);
 	}
 	
 	@Test
@@ -208,7 +209,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		Resources<Resource<SimpleAnnotatedPojo>> resources = new Resources<Resource<SimpleAnnotatedPojo>>(content);
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources), is(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE));
+		assertThatJson(write(resources)).isEqualTo(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 */
 	@Test
 	public void serializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
-		assertThat(write(setupAnnotatedResources()), is(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE));
+		assertThatJson(write(setupAnnotatedResources())).isEqualTo(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE);
 	}
 
 	/**
@@ -255,7 +256,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	@Test
 	public void serializesPagedResource() throws Exception {
-		assertThat(write(setupAnnotatedPagedResources()), is(ANNOTATED_PAGED_RESOURCES));
+		assertThatJson(write(setupAnnotatedPagedResources())).isEqualTo(ANNOTATED_PAGED_RESOURCES);
 	}
 
 	@Test
