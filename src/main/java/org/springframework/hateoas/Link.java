@@ -28,16 +28,14 @@ import javax.xml.bind.annotation.XmlType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 /**
  * Value object for links.
  * 
  * @author Oliver Gierke
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
+@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+@org.codehaus.jackson.map.annotate.JsonSerialize(include=org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion.NON_NULL)
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -115,9 +113,8 @@ public class Link implements Serializable {
 		return new Link(href, rel);
 	}
 	
-	@JsonInclude(Include.NON_NULL)
 	public Boolean getTemplated() {
-		if (href != null & href.indexOf('{') > -1) {
+		if (href != null && href.indexOf('{') > -1) {
 			return Boolean.TRUE;
 		}
 		return null;
