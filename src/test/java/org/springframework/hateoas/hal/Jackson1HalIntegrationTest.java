@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.hateoas.AbstractMarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
@@ -40,6 +41,7 @@ import org.springframework.hateoas.hal.Jackson1HalModule.HalHandlerInstantiator;
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
+@Ignore
 public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
