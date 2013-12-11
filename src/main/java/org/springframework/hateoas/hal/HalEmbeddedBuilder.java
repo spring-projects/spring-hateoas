@@ -62,20 +62,22 @@ class HalEmbeddedBuilder {
 			return;
 		}
 
-		String singleRel = getDefaultedRelFor(type, false);
-		List<Object> currentValue = embeddeds.get(singleRel);
+		String multiRel = getDefaultedRelFor(type, true);
+		List<Object> currentValue = embeddeds.get(multiRel);
 
 		if (currentValue == null) {
-			ArrayList<Object> arrayList = new ArrayList<Object>();
-			arrayList.add(value);
-			embeddeds.put(singleRel, arrayList);
-		} else if (currentValue.size() == 1) {
-			currentValue.add(value);
-			embeddeds.remove(singleRel);
-			embeddeds.put(getDefaultedRelFor(type, true), currentValue);
-		} else {
-			currentValue.add(value);
+			String singleRel = getDefaultedRelFor(type, false);
+			
+			if(embeddeds.containsKey(singleRel)) {
+				currentValue = embeddeds.remove(singleRel);
+				embeddeds.put(multiRel, currentValue);
+			} else {
+				currentValue = new ArrayList<Object>();
+				embeddeds.put(singleRel, currentValue);
+			}
 		}
+		
+		currentValue.add(value);
 	}
 
 	private String getDefaultedRelFor(Class<?> type, boolean forCollection) {

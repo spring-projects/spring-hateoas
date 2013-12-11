@@ -49,6 +49,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
+	static final String MIXED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{},\"_embedded\":{\"content\":[{\"roles\":[\"admin\",\"user\"],\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}],\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
+
 	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
 	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_links\":{},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
@@ -175,6 +177,12 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
+	public void rendersMixedResourceResourcesAsEmbedded() throws Exception {
+		Resources<?> resources = setupMixedResources();
+		assertThat(write(resources), is(MIXED_EMBEDDED_RESOURCE_REFERENCE));
+	}
+	
+	@Test
 	public void deserializesMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		Resources<Resource<SimplePojo>> expected = setupResources();
@@ -285,5 +293,16 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
 
 		return new Resources<Resource<SimplePojo>>(content);
+	}
+
+	private static Resources<?> setupMixedResources() {
+
+		List<ResourceSupport> content = new ArrayList<ResourceSupport>();
+		String[] roles = { "admin", "user" };
+		content.add(new SimpleResourcePojo(roles, new Link("localhost")));
+		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
+
+		return new Resources<ResourceSupport>(content);
 	}
 }
