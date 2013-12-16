@@ -18,6 +18,13 @@ package org.springframework.hateoas;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.StringWriter;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
 import org.junit.Test;
@@ -30,6 +37,7 @@ import org.junit.Test;
 public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}";
+	static final String XML_REFERENCE = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><personResource xmlns:ns2=\"http://www.w3.org/2005/Atom\"><ns2:link href=\"/foo\" rel=\"bar\"/><person lastname=\"Matthews\" firstname=\"Dave\"/></personResource>";
 
 	@Test
 	public void inlinesContent() throws Exception {
@@ -42,6 +50,28 @@ public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTest 
 		resource.add(new Link("localhost"));
 
 		assertThat(write(resource), is(REFERENCE));
+	}
+
+	/**
+	 * @see #124
+	 */
+	@Test
+	public void marshalsResourceToXml() throws Exception {
+
+		Person person = new Person();
+		person.firstname = "Dave";
+		person.lastname = "Matthews";
+
+		PersonResource resource = new PersonResource(person);
+		resource.add(new Link("/foo", "bar"));
+
+		JAXBContext context = JAXBContext.newInstance(PersonResource.class, Person.class);
+		StringWriter writer = new StringWriter();
+
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.marshal(resource, writer);
+
+		assertThat(writer.toString(), is(XML_REFERENCE));
 	}
 
 	/**
@@ -58,17 +88,21 @@ public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTest 
 		assertThat(result.getContent().lastname, is("Matthews"));
 	}
 
+	@XmlRootElement
 	static class PersonResource extends Resource<Person> {
 
-		public PersonResource() {
-
+		public PersonResource(Person person) {
+			super(person);
 		}
+
+		protected PersonResource() {}
 	}
 
 	@JsonAutoDetect(fieldVisibility = Visibility.ANY)
+	@XmlRootElement
 	static class Person {
 
-		String firstname;
-		String lastname;
+		@XmlAttribute String firstname;
+		@XmlAttribute String lastname;
 	}
 }

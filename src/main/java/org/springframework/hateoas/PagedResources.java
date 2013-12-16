@@ -34,8 +34,6 @@ public class PagedResources<T> extends Resources<T> {
 
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
-	@org.codehaus.jackson.annotate.JsonProperty("page")//
-	@com.fasterxml.jackson.annotation.JsonProperty("page")//
 	private PageMetadata metadata;
 
 	/**
@@ -73,6 +71,8 @@ public class PagedResources<T> extends Resources<T> {
 	 * 
 	 * @return the metadata
 	 */
+	@org.codehaus.jackson.annotate.JsonProperty("page")
+	@com.fasterxml.jackson.annotation.JsonProperty("page")
 	public PageMetadata getMetadata() {
 		return metadata;
 	}
