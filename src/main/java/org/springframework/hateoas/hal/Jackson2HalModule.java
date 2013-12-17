@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,15 +92,17 @@ public class Jackson2HalModule extends SimpleModule {
 	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
 
 		private final BeanProperty property;
+		private final CurieProvider curieProvider;
 
-		public HalLinkListSerializer() {
-			this(null);
+		public HalLinkListSerializer(CurieProvider curieProvider) {
+			this(null, curieProvider);
 		}
 
-		public HalLinkListSerializer(BeanProperty property) {
+		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider) {
 
 			super(List.class, false);
 			this.property = property;
+			this.curieProvider = curieProvider;
 		}
 
 		/*
@@ -113,17 +116,28 @@ public class Jackson2HalModule extends SimpleModule {
 				JsonGenerationException {
 
 			// sort links according to their relation
-			Map<String, List<Link>> sortedLinks = new LinkedHashMap<String, List<Link>>();
+			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
+			boolean prefixingRequired = curieProvider != null;
+
 			for (Link link : value) {
-				if (sortedLinks.get(link.getRel()) == null) {
-					sortedLinks.put(link.getRel(), new ArrayList<Link>());
+
+				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
+
+				if (sortedLinks.get(rel) == null) {
+					sortedLinks.put(rel, new ArrayList<Object>());
 				}
-				sortedLinks.get(link.getRel()).add(link);
+
+				sortedLinks.get(rel).add(link);
+			}
+
+			if (prefixingRequired) {
+				Object curieInformation = curieProvider.getCurieInformation();
+				sortedLinks.put("curies", Arrays.asList(curieInformation));
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
 			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Link.class);
+			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
@@ -141,7 +155,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinkListSerializer(property);
+			return new HalLinkListSerializer(property, curieProvider);
 		}
 
 		/*
@@ -294,7 +308,7 @@ public class Jackson2HalModule extends SimpleModule {
 			ContextualSerializer {
 
 		private final BeanProperty property;
-		private JsonSerializer<Object> serializer;
+		private final Map<Class<?>, JsonSerializer<Object>> serializers;
 
 		public OptionalListJackson2Serializer() {
 			this(null);
@@ -309,13 +323,12 @@ public class Jackson2HalModule extends SimpleModule {
 
 			super(List.class, false);
 			this.property = property;
+			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * 
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.
-		 * TypeSerializer)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
 		public ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
@@ -324,15 +337,17 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator,
-		 * com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
 		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
 			List<?> list = (List<?>) value;
+
+			if (list.isEmpty()) {
+				return;
+			}
 
 			if (list.size() == 1) {
 				serializeContents(list.iterator(), jgen, provider);
@@ -352,27 +367,35 @@ public class Jackson2HalModule extends SimpleModule {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
 				} else {
-					if (serializer == null) {
-						serializer = provider.findValueSerializer(elem.getClass(), property);
-					}
-					serializer.serialize(elem, jgen, provider);
+					getOrLookupSerializerFor(elem.getClass(), provider).serialize(elem, jgen, provider);
 				}
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
-		 */
-		@Override
-		public JsonSerializer<?> getContentSerializer() {
+		private JsonSerializer<Object> getOrLookupSerializerFor(Class<?> type, SerializerProvider provider)
+				throws JsonMappingException {
+
+			JsonSerializer<Object> serializer = serializers.get(type);
+
+			if (serializer == null) {
+				serializer = provider.findValueSerializer(type, property);
+				serializers.put(type, serializer);
+			}
+
 			return serializer;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
 		 */
 		@Override
@@ -561,10 +584,11 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
 
-		public HalHandlerInstantiator(RelProvider resolver) {
+		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider) {
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
-			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(null, resolver));
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver));
+			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider));
 		}
 
 		private Object findInstance(Class<?> type) {

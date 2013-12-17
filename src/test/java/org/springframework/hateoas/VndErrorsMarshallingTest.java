@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.VndErrors.VndError;
+import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
@@ -54,6 +55,8 @@ public class VndErrorsMarshallingTest {
 	Marshaller marshaller;
 	Unmarshaller unmarshaller;
 
+	RelProvider relProvider = new EvoInflectorRelProvider();
+
 	VndErrors errors;
 	String jsonReference;
 	String xmlReference;
@@ -65,6 +68,7 @@ public class VndErrorsMarshallingTest {
 	}
 
 	@Before
+	@SuppressWarnings("deprecation")
 	public void setUp() throws Exception {
 
 		jackson1Mapper = new ObjectMapper();
@@ -73,6 +77,7 @@ public class VndErrorsMarshallingTest {
 
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
+		jackson2Mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null));
 		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
 		JAXBContext context = JAXBContext.newInstance(VndErrors.class);

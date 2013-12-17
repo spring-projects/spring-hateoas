@@ -52,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class EnableHypermediaSupportIntegrationTest {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void bootstrapHalConfiguration() {
 
 		ApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);

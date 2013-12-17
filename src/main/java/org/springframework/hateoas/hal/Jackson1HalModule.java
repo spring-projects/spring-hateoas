@@ -66,9 +66,11 @@ import org.springframework.util.StringUtils;
 /**
  * Jackson 1 module implementation to render {@link Link} and {@link ResourceSupport} instances in HAL compatible JSON.
  * 
+ * @deprecated use Jackson 2 instead
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
+@Deprecated
 public class Jackson1HalModule extends SimpleModule {
 
 	/**

@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -33,6 +34,9 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.web.util.UriTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -56,11 +60,13 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
+	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":{\"href\":\"htp://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}},\"_embedded\":{}}";
+
 	@Before
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider()));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null));
 	}
 
 	/**
@@ -245,11 +251,17 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		assertThat(result, is(setupAnnotatedResources()));
 	}
 
+	/**
+	 * @see #63
+	 */
 	@Test
 	public void serializesPagedResource() throws Exception {
 		assertThat(write(setupAnnotatedPagedResources()), is(ANNOTATED_PAGED_RESOURCES));
 	}
 
+	/**
+	 * @see #64
+	 */
 	@Test
 	public void deserializesPagedResource() throws Exception {
 		PagedResources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
@@ -258,6 +270,24 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(setupAnnotatedPagedResources()));
+	}
+
+	/**
+	 * @see #126
+	 */
+	@Test
+	public void rendersCuriesCorrectly() throws Exception {
+
+		CurieProvider curieProvider = new DefaultCurieProvider("foo", new UriTemplate("htp://localhost:8080/rels/{rel}"));
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), curieProvider));
+
+		Resources<Object> resources = new Resources<Object>(Collections.emptySet(), new Link("foo"), new Link("bar",
+				"myrel"));
+
+		assertThat(mapper.writeValueAsString(resources), is(CURIED_DOCUMENT));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {

@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -42,6 +43,7 @@ import org.springframework.hateoas.core.DefaultLinkDiscoverer;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
@@ -63,6 +65,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  */
+@SuppressWarnings("deprecation")
 class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private static final String LINK_DISCOVERER_BEAN_NAME = "_linkDiscoverer";
@@ -172,7 +175,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 		private BeanFactory factory;
 
-		/* (non-Javadoc)
+		/* 
+		 * (non-Javadoc)
 		 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
 		 */
 		@Override
@@ -226,7 +230,16 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 			ObjectMapper mapper = (ObjectMapper) objectMapper;
 			mapper.registerModule(new Jackson2HalModule());
-			mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(provider));
+			mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(provider, getCurieProvider()));
+		}
+
+		private CurieProvider getCurieProvider() {
+
+			try {
+				return factory.getBean(CurieProvider.class);
+			} catch (NoSuchBeanDefinitionException e) {
+				return null;
+			}
 		}
 	}
 
@@ -236,6 +249,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 * 
 	 * @author Oliver Gierke
 	 */
+	@Deprecated
 	private static class Jackson1ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
 		private BeanFactory beanFactory;
