@@ -48,6 +48,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
@@ -81,6 +82,18 @@ public class Jackson2HalModule extends SimpleModule {
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
+	}
+
+	/**
+	 * Returns whether the module was already registered in the given {@link ObjectMapper}.
+	 * 
+	 * @param mapper must not be {@literal null}.
+	 * @return
+	 */
+	public static boolean isAlreadyRegisteredIn(ObjectMapper mapper) {
+
+		Assert.notNull(mapper, "ObjectMapper must not be null!");
+		return LinkMixin.class.equals(mapper.findMixInClassFor(Link.class));
 	}
 
 	/**

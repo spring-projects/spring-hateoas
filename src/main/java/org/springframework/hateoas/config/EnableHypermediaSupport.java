@@ -54,7 +54,7 @@ public @interface EnableHypermediaSupport {
 	 * 
 	 * @return
 	 */
-	HypermediaType type() default HypermediaType.DEFAULT;
+	HypermediaType[] type();
 
 	/**
 	 * Hypermedia representation types supported.
@@ -62,8 +62,6 @@ public @interface EnableHypermediaSupport {
 	 * @author Oliver Gierke
 	 */
 	static enum HypermediaType {
-
-		DEFAULT,
 
 		/**
 		 * HAL - Hypermedia Application Language.

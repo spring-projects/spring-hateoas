@@ -26,6 +26,7 @@ import net.minidev.json.JSONArray;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -39,19 +40,23 @@ import com.jayway.jsonpath.JsonPath;
 public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 	private final String pathTemplate;
+	private final MediaType mediaType;
 
 	/**
-	 * Creates a new {@link JsonPathLinkDiscoverer} using the given path template. The template has to contain a single
-	 * {@code %s} placeholder which will be replaced by the relation type.
+	 * Creates a new {@link JsonPathLinkDiscoverer} using the given path template supporting the given {@link MediaType}.
+	 * The template has to contain a single {@code %s} placeholder which will be replaced by the relation type.
 	 * 
 	 * @param pathTemplate must not be {@literal null} or empty and contain a single placeholder.
+	 * @param mediaType the {@link MediaType} to support.
 	 */
-	public JsonPathLinkDiscoverer(String pathTemplate) {
+	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType) {
 
 		Assert.hasText(pathTemplate, "Path template must not be null!");
 		Assert.isTrue(StringUtils.countOccurrencesOf(pathTemplate, "%s") == 1,
 				"Path template must contain a single placeholder!");
+
 		this.pathTemplate = pathTemplate;
+		this.mediaType = mediaType;
 	}
 
 	/* 
@@ -135,5 +140,14 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 		Link link = new Link(parseResult.toString(), rel);
 		return Collections.unmodifiableList(Arrays.asList(link));
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
+	 */
+	@Override
+	public boolean supports(MediaType delimiter) {
+		return this.mediaType == null ? true : this.mediaType.isCompatibleWith(delimiter);
 	}
 }

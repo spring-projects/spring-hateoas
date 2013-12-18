@@ -40,6 +40,7 @@ import org.springframework.hateoas.hal.Jackson1HalModule.HalHandlerInstantiator;
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
+@SuppressWarnings("deprecation")
 public class Jackson1HalIntegrationTest extends AbstractMarshallingIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";

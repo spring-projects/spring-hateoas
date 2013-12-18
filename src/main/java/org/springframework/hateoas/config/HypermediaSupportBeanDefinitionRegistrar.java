@@ -15,8 +15,13 @@
  */
 package org.springframework.hateoas.config;
 
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
+import static org.springframework.hateoas.MediaTypes.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +34,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -36,10 +42,10 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.AnnotationRelProvider;
-import org.springframework.hateoas.core.DefaultLinkDiscoverer;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
@@ -68,8 +74,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SuppressWarnings("deprecation")
 class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
-	private static final String LINK_DISCOVERER_BEAN_NAME = "_linkDiscoverer";
 	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
+	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
+	private static final String HAL_OBJECT_MAPPER_BEAN_NAME = "_halObjectMapper";
 
 	private static final boolean JACKSON1_PRESENT = ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null);
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
@@ -84,28 +91,52 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 * @see org.springframework.context.annotation.ImportBeanDefinitionRegistrar#registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata, org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 */
 	@Override
-	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 
-		linkBuilderBeanDefinitionRegistrar.registerBeanDefinitions(importingClassMetadata, registry);
+		linkBuilderBeanDefinitionRegistrar.registerBeanDefinitions(metadata, registry);
 
-		Map<String, Object> attributes = importingClassMetadata.getAnnotationAttributes(EnableHypermediaSupport.class
-				.getName());
-		HypermediaType type = (HypermediaType) attributes.get("type");
+		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
+		Collection<HypermediaType> types = Arrays.asList((HypermediaType[]) attributes.get("type"));
 
-		if (JSONPATH_PRESENT) {
-			registerBeanDefinition(
-					new BeanDefinitionHolder(getLinkDiscovererBeanDefinition(type), LINK_DISCOVERER_BEAN_NAME), registry);
+		for (HypermediaType type : types) {
+
+			if (JSONPATH_PRESENT) {
+
+				AbstractBeanDefinition linkDiscovererBeanDefinition = getLinkDiscovererBeanDefinition(type);
+				registerBeanDefinition(
+						new BeanDefinitionHolder(linkDiscovererBeanDefinition, BeanDefinitionReaderUtils.generateBeanName(
+								linkDiscovererBeanDefinition, registry)), registry);
+			}
 		}
 
-		if (type == HypermediaType.HAL) {
+		if (types.contains(HypermediaType.HAL)) {
 
 			if (JACKSON2_PRESENT) {
-				registerWithGeneratedName(new RootBeanDefinition(Jackson2ModuleRegisteringBeanPostProcessor.class), registry);
+
+				BeanDefinitionBuilder halQueryMapperBuilder = rootBeanDefinition(ObjectMapper.class);
+				registerSourcedBeanDefinition(halQueryMapperBuilder, metadata, registry, HAL_OBJECT_MAPPER_BEAN_NAME);
+
+				BeanDefinitionBuilder builder = rootBeanDefinition(Jackson2ModuleRegisteringBeanPostProcessor.class);
+				registerSourcedBeanDefinition(builder, metadata, registry);
 			}
 
 			if (JACKSON1_PRESENT) {
-				registerWithGeneratedName(new RootBeanDefinition(Jackson1ModuleRegisteringBeanPostProcessor.class), registry);
+				BeanDefinitionBuilder builder = rootBeanDefinition(Jackson1ModuleRegisteringBeanPostProcessor.class);
+				registerSourcedBeanDefinition(builder, metadata, registry);
 			}
+		}
+
+		if (!types.isEmpty()) {
+
+			BeanDefinitionBuilder linkDiscoverersRegistryBuilder = BeanDefinitionBuilder
+					.rootBeanDefinition(PluginRegistryFactoryBean.class);
+			linkDiscoverersRegistryBuilder.addPropertyValue("type", LinkDiscoverer.class);
+			registerSourcedBeanDefinition(linkDiscoverersRegistryBuilder, metadata, registry,
+					LINK_DISCOVERER_REGISTRY_BEAN_NAME);
+
+			BeanDefinitionBuilder linkDiscoverersBuilder = BeanDefinitionBuilder.rootBeanDefinition(LinkDiscoverers.class);
+			linkDiscoverersBuilder.addConstructorArgReference(LINK_DISCOVERER_REGISTRY_BEAN_NAME);
+			registerSourcedBeanDefinition(linkDiscoverersBuilder, metadata, registry);
 		}
 
 		registerRelProviderPluginRegistryAndDelegate(registry);
@@ -156,13 +187,31 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			case HAL:
 				definition = new RootBeanDefinition(HalLinkDiscoverer.class);
 				break;
-			case DEFAULT:
 			default:
-				definition = new RootBeanDefinition(DefaultLinkDiscoverer.class);
+				throw new IllegalStateException(String.format("Unsupported hypermedia type %s!", type));
 		}
 
 		definition.setSource(this);
 		return definition;
+	}
+
+	private static String registerSourcedBeanDefinition(BeanDefinitionBuilder builder, AnnotationMetadata metadata,
+			BeanDefinitionRegistry registry) {
+
+		AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+		String generateBeanName = BeanDefinitionReaderUtils.generateBeanName(beanDefinition, registry);
+		return registerSourcedBeanDefinition(builder, metadata, registry, generateBeanName);
+	}
+
+	private static String registerSourcedBeanDefinition(BeanDefinitionBuilder builder, AnnotationMetadata metadata,
+			BeanDefinitionRegistry registry, String name) {
+
+		AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+		beanDefinition.setSource(metadata);
+
+		BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, name);
+		registerBeanDefinition(holder, registry);
+		return name;
 	}
 
 	/**
@@ -173,7 +222,9 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 */
 	private static class Jackson2ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
-		private BeanFactory factory;
+		private CurieProvider curieProvider;
+		private RelProvider relProvider;
+		private ObjectMapper halObjectMapper;
 
 		/* 
 		 * (non-Javadoc)
@@ -181,7 +232,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		 */
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.factory = beanFactory;
+
+			this.curieProvider = getCurieProvider(beanFactory);
+			this.relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
+			this.halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 		}
 
 		/* 
@@ -201,39 +255,49 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
 			if (bean instanceof RequestMappingHandlerAdapter) {
-				registerModule(((RequestMappingHandlerAdapter) bean).getMessageConverters());
+
+				RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
+				adapter.setMessageConverters(potentiallyRegisterModule(adapter.getMessageConverters()));
 			}
 
 			if (bean instanceof AnnotationMethodHandlerAdapter) {
-				registerModule(((AnnotationMethodHandlerAdapter) bean).getMessageConverters());
-			}
 
-			if (bean instanceof ObjectMapper) {
-				registerModule(bean);
+				AnnotationMethodHandlerAdapter adapter = (AnnotationMethodHandlerAdapter) bean;
+				List<HttpMessageConverter<?>> augmentedConverters = potentiallyRegisterModule(Arrays
+						.asList(adapter.getMessageConverters()));
+				adapter
+						.setMessageConverters(augmentedConverters.toArray(new HttpMessageConverter<?>[augmentedConverters.size()]));
 			}
 
 			return bean;
 		}
 
-		private void registerModule(List<HttpMessageConverter<?>> converters) {
+		private List<HttpMessageConverter<?>> potentiallyRegisterModule(List<HttpMessageConverter<?>> converters) {
 
 			for (HttpMessageConverter<?> converter : converters) {
 				if (converter instanceof MappingJackson2HttpMessageConverter) {
-					registerModule(((MappingJackson2HttpMessageConverter) converter).getObjectMapper());
+					MappingJackson2HttpMessageConverter halConverterCandidate = (MappingJackson2HttpMessageConverter) converter;
+					ObjectMapper objectMapper = halConverterCandidate.getObjectMapper();
+					if (Jackson2HalModule.isAlreadyRegisteredIn(objectMapper)) {
+						return converters;
+					}
 				}
 			}
+
+			halObjectMapper.registerModule(new Jackson2HalModule());
+			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider));
+
+			MappingJackson2HttpMessageConverter halConverter = new MappingJackson2HttpMessageConverter();
+			halConverter.setSupportedMediaTypes(Arrays.asList(HAL_JSON));
+			halConverter.setObjectMapper(halObjectMapper);
+
+			List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>(converters.size());
+			result.add(halConverter);
+			result.addAll(converters);
+			return result;
 		}
 
-		private void registerModule(Object objectMapper) {
-
-			RelProvider provider = factory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
-
-			ObjectMapper mapper = (ObjectMapper) objectMapper;
-			mapper.registerModule(new Jackson2HalModule());
-			mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(provider, getCurieProvider()));
-		}
-
-		private CurieProvider getCurieProvider() {
+		private static CurieProvider getCurieProvider(BeanFactory factory) {
 
 			try {
 				return factory.getBean(CurieProvider.class);
@@ -252,7 +316,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	@Deprecated
 	private static class Jackson1ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
-		private BeanFactory beanFactory;
+		private RelProvider relProvider;
 
 		/* 
 		 * (non-Javadoc)
@@ -260,7 +324,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		 */
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = beanFactory;
+			this.relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
 		}
 
 		/*
@@ -279,37 +343,39 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-			if (bean instanceof AnnotationMethodHandlerAdapter) {
-				registerModule(((AnnotationMethodHandlerAdapter) bean).getMessageConverters());
-			}
-
 			if (bean instanceof RequestMappingHandlerAdapter) {
-				registerModule(((RequestMappingHandlerAdapter) bean).getMessageConverters());
+
+				RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
+				adapter.setMessageConverters(registerModule(adapter.getMessageConverters()));
 			}
 
-			if (bean instanceof org.codehaus.jackson.map.ObjectMapper) {
-				registerModule(bean);
+			if (bean instanceof AnnotationMethodHandlerAdapter) {
+
+				AnnotationMethodHandlerAdapter adapter = (AnnotationMethodHandlerAdapter) bean;
+				List<HttpMessageConverter<?>> augmentedConverters = registerModule(Arrays
+						.asList(adapter.getMessageConverters()));
+				adapter
+						.setMessageConverters(augmentedConverters.toArray(new HttpMessageConverter<?>[augmentedConverters.size()]));
 			}
 
 			return bean;
 		}
 
-		private void registerModule(List<HttpMessageConverter<?>> converters) {
+		private List<HttpMessageConverter<?>> registerModule(List<HttpMessageConverter<?>> converters) {
 
-			for (HttpMessageConverter<?> converter : converters) {
-				if (converter instanceof MappingJacksonHttpMessageConverter) {
-					registerModule(((MappingJacksonHttpMessageConverter) converter).getObjectMapper());
-				}
-			}
-		}
+			org.codehaus.jackson.map.ObjectMapper objectMapper = new org.codehaus.jackson.map.ObjectMapper();
 
-		private void registerModule(Object objectMapper) {
+			objectMapper.registerModule(new Jackson1HalModule());
+			objectMapper.setHandlerInstantiator(new Jackson1HalModule.HalHandlerInstantiator(relProvider));
 
-			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
+			MappingJacksonHttpMessageConverter halConverter = new MappingJacksonHttpMessageConverter();
+			halConverter.setSupportedMediaTypes(Arrays.asList(HAL_JSON));
+			halConverter.setObjectMapper(objectMapper);
 
-			org.codehaus.jackson.map.ObjectMapper mapper = (org.codehaus.jackson.map.ObjectMapper) objectMapper;
-			mapper.registerModule(new Jackson1HalModule());
-			mapper.setHandlerInstantiator(new Jackson1HalModule.HalHandlerInstantiator(relProvider));
+			List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>(converters.size());
+			result.add(halConverter);
+			result.addAll(converters);
+			return result;
 		}
 	}
 }
