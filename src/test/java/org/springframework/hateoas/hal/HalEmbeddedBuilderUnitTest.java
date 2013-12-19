@@ -64,6 +64,20 @@ public class HalEmbeddedBuilderUnitTest {
 	}
 
 	/**
+	 * @see #110
+	 */
+	@Test
+	public void correctlyPilesUpResourcesInCollectionRel() {
+
+		Map<String, List<Object>> map = setUpBuilder("foo", "bar", "foobar", 1L);
+
+		assertThat(map.containsKey("string"), is(false));
+		assertThat(map.get("strings"),
+				Matchers.<List<Object>> allOf(hasSize(3), Matchers.<Object> hasItems("foo", "bar", "foobar")));
+		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
+	}
+
+	/**
 	 * @see #81, #83
 	 */
 	@Test
