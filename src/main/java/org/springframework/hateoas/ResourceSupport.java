@@ -16,7 +16,6 @@
 package org.springframework.hateoas;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -95,7 +94,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	@org.codehaus.jackson.annotate.JsonProperty("links")
 	@com.fasterxml.jackson.annotation.JsonProperty("links")
 	public List<Link> getLinks() {
-		return Collections.unmodifiableList(links);
+		return links;
 	}
 
 	/**
