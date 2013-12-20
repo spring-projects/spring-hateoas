@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
@@ -56,21 +57,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class EnableHypermediaSupportIntegrationTest {
 
 	@Test
-	@SuppressWarnings({ "unchecked" })
 	public void bootstrapHalConfiguration() {
-
-		ApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
-		assertEntityLinksSetUp(context);
-		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(HalLinkDiscoverer.class)));
-		assertThat(context.getBean(ObjectMapper.class), is(notNullValue()));
-
-		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
-		assertThat(rmha.getMessageConverters(), Matchers.<HttpMessageConverter<?>> hasItems(
-				instanceOf(MappingJackson2HttpMessageConverter.class), instanceOf(MappingJacksonHttpMessageConverter.class)));
-
-		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
-		assertThat(Arrays.asList(amha.getMessageConverters()), Matchers.<HttpMessageConverter<?>> hasItems(
-				instanceOf(MappingJackson2HttpMessageConverter.class), instanceOf(MappingJacksonHttpMessageConverter.class)));
+		assertHalSetupForConfigClass(HalConfig.class);
 	}
 
 	@Test
@@ -82,6 +70,11 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertThat(discoverers, is(notNullValue()));
 		assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON), is(instanceOf(HalLinkDiscoverer.class)));
 		assertRelProvidersSetUp(context);
+	}
+
+	@Test
+	public void foo() {
+		assertHalSetupForConfigClass(ExtendedHalConfig.class);
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -96,8 +89,25 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertThat(discoverers.values(), Matchers.<RelProvider> hasItem(instanceOf(DelegatingRelProvider.class)));
 	}
 
+	@SuppressWarnings({ "unchecked" })
+	private static void assertHalSetupForConfigClass(Class<?> configClass) {
+
+		ApplicationContext context = new AnnotationConfigApplicationContext(configClass);
+		assertEntityLinksSetUp(context);
+		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(HalLinkDiscoverer.class)));
+		assertThat(context.getBean(ObjectMapper.class), is(notNullValue()));
+
+		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
+		assertThat(rmha.getMessageConverters(), Matchers.<HttpMessageConverter<?>> hasItems(
+				instanceOf(MappingJackson2HttpMessageConverter.class), instanceOf(MappingJacksonHttpMessageConverter.class)));
+
+		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
+		assertThat(Arrays.asList(amha.getMessageConverters()), Matchers.<HttpMessageConverter<?>> hasItems(
+				instanceOf(MappingJackson2HttpMessageConverter.class), instanceOf(MappingJacksonHttpMessageConverter.class)));
+	}
+
 	@Configuration
-	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	@Import(DelegateConfig.class)
 	static class HalConfig {
 
 		static int numberOfMessageConverters = 0;
@@ -116,5 +126,16 @@ public class EnableHypermediaSupportIntegrationTest {
 			numberOfMessageConvertersLegacy = adapter.getMessageConverters().length;
 			return adapter;
 		}
+	}
+
+	@Configuration
+	static class ExtendedHalConfig extends HalConfig {
+
+	}
+
+	@Configuration
+	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	static class DelegateConfig {
+
 	}
 }

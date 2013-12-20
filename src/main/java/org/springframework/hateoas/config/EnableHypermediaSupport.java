@@ -17,7 +17,6 @@ package org.springframework.hateoas.config;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -44,7 +43,6 @@ import org.springframework.hateoas.LinkDiscoverer;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Inherited
 @Documented
 @Import(HypermediaSupportBeanDefinitionRegistrar.class)
 public @interface EnableHypermediaSupport {
