@@ -54,13 +54,14 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
 	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojo\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
-	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_links\":{},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
 	static final String ANNOTATED_PAGED_RESOURCES = "{\"_links\":{\"next\":{\"href\":\"foo\"},\"prev\":{\"href\":\"bar\"}},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]},\"page\":{\"size\":2,\"totalElements\":4,\"totalPages\":2,\"number\":0}}";
 
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
-	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":{\"href\":\"htp://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}},\"_embedded\":{}}";
+	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}]}}";
+	static final String EMPTY_DOCUMENT = "{}";
 
 	@Before
 	public void setUpModule() {
@@ -278,16 +279,17 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void rendersCuriesCorrectly() throws Exception {
 
-		CurieProvider curieProvider = new DefaultCurieProvider("foo", new UriTemplate("htp://localhost:8080/rels/{rel}"));
-
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), curieProvider));
-
 		Resources<Object> resources = new Resources<Object>(Collections.emptySet(), new Link("foo"), new Link("bar",
 				"myrel"));
 
-		assertThat(mapper.writeValueAsString(resources), is(CURIED_DOCUMENT));
+		assertThat(getCuriedObjectMapper().writeValueAsString(resources), is(CURIED_DOCUMENT));
+	}
+
+	@Test
+	public void doesNotRenderCuriesIfNoLinkIsPresent() throws Exception {
+
+		Resources<Object> resources = new Resources<Object>(Collections.emptySet());
+		assertThat(getCuriedObjectMapper().writeValueAsString(resources), is(EMPTY_DOCUMENT));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
@@ -315,5 +317,16 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
 
 		return new Resources<Resource<SimplePojo>>(content);
+	}
+
+	private static ObjectMapper getCuriedObjectMapper() {
+
+		CurieProvider curieProvider = new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}"));
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), curieProvider));
+
+		return mapper;
 	}
 }
