@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
 
 /**
@@ -88,8 +89,12 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	@Override
 	public List<Link> findLinksWithRel(String rel, String representation) {
 
-		Object parseResult = getExpression(rel).read(representation);
-		return createLinksFrom(parseResult, rel);
+		try {
+			Object parseResult = getExpression(rel).read(representation);
+			return createLinksFrom(parseResult, rel);
+		} catch (InvalidPathException e) {
+			return Collections.emptyList();
+		}
 	}
 
 	/* 

@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
@@ -63,10 +64,18 @@ public abstract class AbstractLinkDiscovererUnitTest {
 	}
 
 	@Test
-	public void returnsForInxistingLinkFromInputStream() throws Exception {
+	public void returnsForInexistingLinkFromInputStream() throws Exception {
 
 		InputStream inputStream = new ByteArrayInputStream(getInputString().getBytes("UTF-8"));
 		assertThat(getDiscoverer().findLinkWithRel("something", inputStream), is(nullValue()));
+	}
+
+	@Test
+	public void returnsNullForNonExistingLinkContainer() {
+
+		assertThat(getDiscoverer().findLinksWithRel("something", getInputStringWithoutLinkContainer()),
+				is(Matchers.<Link> empty()));
+		assertThat(getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer()), is(nullValue()));
 	}
 
 	/**
@@ -82,4 +91,6 @@ public abstract class AbstractLinkDiscovererUnitTest {
 	 * @return
 	 */
 	protected abstract String getInputString();
+
+	protected abstract String getInputStringWithoutLinkContainer();
 }

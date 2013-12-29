@@ -40,4 +40,9 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	protected String getInputString() {
 		return SAMPLE;
 	}
+
+	@Override
+	protected String getInputStringWithoutLinkContainer() {
+		return "{}";
+	}
 }
