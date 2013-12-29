@@ -18,6 +18,8 @@ package org.springframework.hateoas;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+
 import org.junit.Test;
 
 /**
@@ -63,5 +65,10 @@ public class ResourceUnitTest {
 
 		assertThat(left, is(not(right)));
 		assertThat(right, is(not(left)));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsCollectionContent() {
+		new Resource<Object>(Collections.emptyList());
 	}
 }

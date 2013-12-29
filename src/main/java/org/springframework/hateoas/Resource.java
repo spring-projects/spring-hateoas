@@ -16,6 +16,7 @@
 package org.springframework.hateoas;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -58,6 +59,7 @@ public class Resource<T> extends ResourceSupport {
 	public Resource(T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
+		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
 		this.content = content;
 		this.add(links);
 	}

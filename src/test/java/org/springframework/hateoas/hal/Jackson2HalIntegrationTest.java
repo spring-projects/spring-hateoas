@@ -274,7 +274,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	/**
-	 * @see #126
+	 * @see #125
 	 */
 	@Test
 	public void rendersCuriesCorrectly() throws Exception {
@@ -285,6 +285,9 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources), is(CURIED_DOCUMENT));
 	}
 
+	/**
+	 * @see #125
+	 */
 	@Test
 	public void doesNotRenderCuriesIfNoLinkIsPresent() throws Exception {
 
