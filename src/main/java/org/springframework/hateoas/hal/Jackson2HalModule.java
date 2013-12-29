@@ -128,11 +128,17 @@ public class Jackson2HalModule extends SimpleModule {
 
 			// sort links according to their relation
 			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
+
 			boolean prefixingRequired = curieProvider != null;
+			boolean curiedLinkPresent = false;
 
 			for (Link link : value) {
 
 				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
+
+				if (!link.getRel().equals(rel)) {
+					curiedLinkPresent = true;
+				}
 
 				if (sortedLinks.get(rel) == null) {
 					sortedLinks.put(rel, new ArrayList<Object>());
@@ -141,7 +147,7 @@ public class Jackson2HalModule extends SimpleModule {
 				sortedLinks.get(rel).add(link);
 			}
 
-			if (prefixingRequired) {
+			if (prefixingRequired && curiedLinkPresent) {
 				Object curieInformation = curieProvider.getCurieInformation();
 				List<Object> curies = new ArrayList<Object>();
 				curies.add(Arrays.asList(curieInformation));

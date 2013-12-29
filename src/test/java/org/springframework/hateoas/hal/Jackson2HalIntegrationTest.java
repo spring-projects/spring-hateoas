@@ -61,6 +61,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
 	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}]}}";
+	static final String SINGLE_NON_CURIE_LINK = "{\"_links\":{\"self\":{\"href\":\"foo\"}}}";
 	static final String EMPTY_DOCUMENT = "{}";
 
 	@Before
@@ -293,6 +294,18 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		Resources<Object> resources = new Resources<Object>(Collections.emptySet());
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources), is(EMPTY_DOCUMENT));
+	}
+
+	/**
+	 * @see #125
+	 */
+	@Test
+	public void doesNotRenderCuriesIfNoCurieLinkIsPresent() throws Exception {
+
+		Resources<Object> resources = new Resources<Object>(Collections.emptySet());
+		resources.add(new Link("foo"));
+
+		assertThat(getCuriedObjectMapper().writeValueAsString(resources), is(SINGLE_NON_CURIE_LINK));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
