@@ -269,6 +269,32 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("http://barfoo:8888"));
 	}
 
+	/**
+	 * @see #122
+	 */
+	@Test
+	public void doesNotAppendParameterForNullRequestParameters() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalNextPage(null)).withSelfRel();
+		assertThat(link.getHref(), endsWith("/foo"));
+	}
+
+	/**
+	 * @see #122
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsMissingPathVariable() {
+		linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null));
+	}
+
+	/**
+	 * @see #122
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsMissingRequiredRequestParam() {
+		linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
@@ -323,6 +349,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 
+		@RequestMapping("/foo")
+		HttpEntity<Void> methodWithRequestParam(@RequestParam String id) {
+			return null;
+		}
+
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam Integer offset,
 				@RequestParam Integer limit) {
@@ -332,6 +363,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
 				@RequestParam Integer limit) {
+			return null;
+		}
+
+		@RequestMapping(value = "/foo")
+		HttpEntity<Void> methodForOptionalNextPage(@RequestParam(required = false) Integer offset) {
 			return null;
 		}
 	}
