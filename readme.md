@@ -263,3 +263,22 @@ When building links you usually need to determine the relation type to be used f
 1. `@Controller` classes annotated with `@ExposesResourceFor` (see section on [EntityLinks](#entitylinks) for details) will transparently lookup the relation types for the type configured in the annotation, so that you can use `relProvider.getSingleResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
 
 A `RelProvider` is exposed as Spring bean when using `@EnableHypermediaSupport` automatically. You can plug in custom providers by simply implementing the interface and exposing them as Spring bean in turn.
+
+## Traverson
+
+As of version 0.11 Spring HATEOAS provides an API for client side service traversal inspired by the [Traverson](https://blog.codecentric.de/en/2013/11/traverson/) JavaScript library.
+
+
+```java
+Map<String, Object> parameters = new HashMap<>();
+parameters.put("user", 27);
+
+Traverson traverson = new Traverson("http://localhost:8080/api/", MediaTypes.HAL_JSON);
+String name = traverson.follow("movies", "movie", "actor").
+  withTemplateParameters(parameters).
+  toObject("$.name");
+```
+
+You set up a `Traverson` instance by pointing it to a REST server and configure the media types you want to set as `Accept` header. You then go ahead and define the relation names you want to discover and follow. relation names can either be simple names or JSONPath expressions (starting with an `$`).
+
+The sample then hands a parameter map into the execution. The parameters will be used to expand URIs found during the traversal that are templated. The traversal is concluded by accessing the representation of the final traversal. In the case of the sample we evaluate a JSONPath expression to access the actor's name.
