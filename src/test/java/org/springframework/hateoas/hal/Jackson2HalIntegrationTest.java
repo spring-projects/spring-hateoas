@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.PagedResources.PageMetadata;
@@ -63,6 +64,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}]}}";
 	static final String SINGLE_NON_CURIE_LINK = "{\"_links\":{\"self\":{\"href\":\"foo\"}}}";
 	static final String EMPTY_DOCUMENT = "{}";
+
+	static final String LINK_TEMPLATE = "{\"_links\":{\"search\":{\"href\":\"/foo{?bar}\",\"template\":true}}}";
 
 	@Before
 	public void setUpModule() {
@@ -306,6 +309,18 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resources.add(new Link("foo"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources), is(SINGLE_NON_CURIE_LINK));
+	}
+
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void rendersTemplate() throws Exception {
+
+		ResourceSupport support = new ResourceSupport();
+		support.add(new LinkTemplate("/foo{?bar}", "search"));
+
+		assertThat(write(support), is(LINK_TEMPLATE));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
