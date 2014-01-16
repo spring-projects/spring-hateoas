@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.MethodParameter;
 
 /**
  * Unit tests for {@link MethodParameters}.
@@ -33,7 +35,7 @@ public class MethodParametersUnitTests {
 	@Test
 	public void prefersAnnotatedParameterOverDiscovered() throws Exception {
 
-		Method method = Sample.class.getMethod("method", String.class, String.class);
+		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
 		MethodParameters parameters = new MethodParameters(method, new AnnotationAttribute(Qualifier.class));
 
 		assertThat(parameters.getParameter("param"), is(notNullValue()));
@@ -41,9 +43,23 @@ public class MethodParametersUnitTests {
 		assertThat(parameters.getParameter("another"), is(nullValue()));
 	}
 
+	/**
+	 * @see #138
+	 */
+	@Test
+	public void returnsParametersOfAGivenType() throws Exception {
+
+		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
+		MethodParameters methodParameters = new MethodParameters(method);
+
+		List<MethodParameter> objectParameters = methodParameters.getParametersOfType(Object.class);
+		assertThat(objectParameters, hasSize(1));
+		assertThat(objectParameters.get(0).getParameterIndex(), is(2));
+	}
+
 	static class Sample {
 
-		public void method(String param, @Qualifier("foo") String another) {}
+		public void method(String param, @Qualifier("foo") String another, Object object) {}
 	}
 
 }
