@@ -1,0 +1,31 @@
+{
+  "version" : "1.0",
+  "doc" : {
+    "href" : "http://example.org/samples/full/doc.html"
+  },
+  "descriptors" : [ {
+    "id" : "search",
+    "doc" : {
+      "value" : "A search form with two inputs.",
+      "format" : "TEXT"
+    },
+    "type" : "SAFE",
+    "descriptors" : [ {
+      "href" : "#resultType"
+    }, {
+      "id" : "value",
+      "name" : "search",
+      "type" : "SEMANTIC"
+    } ]
+  }, {
+    "id" : "resultType",
+    "doc" : {
+      "value" : "results format"
+    },
+    "type" : "SEMANTIC",
+    "ext" : {
+      "href" : "http://alps.io/ext/range",
+      "value" : "summary,detail"
+    }
+  } ]
+}
