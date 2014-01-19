@@ -20,8 +20,6 @@ import java.net.URI;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.LinkTemplate;
-import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -113,8 +111,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
 	 */
 	public Link withRel(String rel) {
-		String href = this.toString();
-		return UriTemplate.isTemplate(href) ? new LinkTemplate(href, rel) : new Link(href, rel);
+		return new Link(this.toString(), rel);
 	}
 
 	/*

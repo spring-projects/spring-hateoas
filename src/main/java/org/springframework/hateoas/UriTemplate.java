@@ -67,6 +67,10 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 				this.variables.add(new TemplateVariable(name, type));
 			}
 		}
+
+		if (this.baseUri == null) {
+			this.baseUri = template;
+		}
 	}
 
 	/**

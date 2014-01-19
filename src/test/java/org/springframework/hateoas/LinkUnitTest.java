@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -119,5 +119,31 @@ public class LinkUnitTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNonRFC5988String() {
 		Link.valueOf("foo");
+	}
+
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void isTemplatedIfSourceContainsTemplateVariables() {
+
+		Link link = new Link("/foo{?page}");
+
+		assertThat(link.isTemplate(), is(true));
+		assertThat(link.getVariableNames(), hasSize(1));
+		assertThat(link.getVariableNames(), hasItem("page"));
+		assertThat(link.expand("2"), is(new Link("/foo?page=2")));
+	}
+
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void isntTemplatedIfSourceDoesNotContainTemplateVariables() {
+
+		Link link = new Link("/foo");
+
+		assertThat(link.isTemplate(), is(false));
+		assertThat(link.getVariableNames(), hasSize(0));
 	}
 }

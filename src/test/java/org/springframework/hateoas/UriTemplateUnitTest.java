@@ -32,7 +32,7 @@ import org.springframework.hateoas.UriTemplate.VariableType;
  * 
  * @author Oliver Gierke
  */
-public class UriTemplateUnitTests {
+public class UriTemplateUnitTest {
 
 	/**
 	 * @see #137
@@ -160,6 +160,14 @@ public class UriTemplateUnitTests {
 		UriTemplate template = new UriTemplate("/foo{/bar}{?firstname,lastname}{#anchor}");
 		URI uri = template.expand("path", "Dave", "Matthews", "discography");
 		assertThat(uri.toString(), is("/foo/path?firstname=Dave&lastname=Matthews#discography"));
+	}
+
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void expandsTemplateWithoutVariablesCorrectly() {
+		assertThat(new UriTemplate("/foo").expand().toString(), is("/foo"));
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {

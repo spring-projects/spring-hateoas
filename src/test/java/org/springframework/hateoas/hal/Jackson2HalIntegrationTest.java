@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.PagedResources.PageMetadata;
@@ -61,7 +60,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
-	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}]}}";
+	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"template\":true,\"name\":\"foo\"}]}}";
 	static final String SINGLE_NON_CURIE_LINK = "{\"_links\":{\"self\":{\"href\":\"foo\"}}}";
 	static final String EMPTY_DOCUMENT = "{}";
 
@@ -318,7 +317,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	public void rendersTemplate() throws Exception {
 
 		ResourceSupport support = new ResourceSupport();
-		support.add(new LinkTemplate("/foo{?bar}", "search"));
+		support.add(new Link("/foo{?bar}", "search"));
 
 		assertThat(write(support), is(LINK_TEMPLATE));
 	}

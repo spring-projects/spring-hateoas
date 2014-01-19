@@ -16,6 +16,7 @@
 package org.springframework.hateoas.hal;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +28,6 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkTemplate;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,6 +58,7 @@ import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
@@ -64,6 +66,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
+import com.fasterxml.jackson.databind.ser.std.NonTypedScalarSerializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
@@ -81,7 +84,6 @@ public class Jackson2HalModule extends SimpleModule {
 		super("json-hal-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
-		setMixInAnnotation(LinkTemplate.class, LinkTemplateMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
 	}
@@ -652,6 +654,43 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
 			return (TypeIdResolver) findInstance(resolverClass);
+		}
+	}
+
+	/**
+	 * {@link JsonSerializer} to only render {@link Boolean} values if they're set to {@literal true}.
+	 * 
+	 * @author Oliver Gierke
+	 * @since 0.9
+	 */
+	public static class TrueOnlyBooleanSerializer extends NonTypedScalarSerializerBase<Boolean> {
+
+		public TrueOnlyBooleanSerializer() {
+			super(Boolean.class);
+		}
+
+		@Override
+		public boolean isEmpty(Boolean value) {
+			return value == null || Boolean.FALSE.equals(value);
+		}
+
+		@Override
+		public void serialize(Boolean value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+			jgen.writeBoolean(value.booleanValue());
+		}
+
+		@Override
+		public JsonNode getSchema(SerializerProvider provider, Type typeHint) {
+			return createSchemaNode("boolean", true);
+		}
+
+		@Override
+		public void acceptJsonFormatVisitor(JsonFormatVisitorWrapper visitor, JavaType typeHint)
+				throws JsonMappingException {
+			if (visitor != null) {
+				visitor.expectBooleanFormat(typeHint);
+			}
 		}
 	}
 }

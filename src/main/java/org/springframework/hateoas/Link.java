@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@ package org.springframework.hateoas;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Value object for links.
@@ -46,10 +50,9 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
-	@XmlAttribute
-	private String rel;
-	@XmlAttribute
-	private String href;
+	@XmlAttribute private String rel;
+	@XmlAttribute private String href;
+	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -74,6 +77,7 @@ public class Link implements Serializable {
 
 		this.href = href;
 		this.rel = rel;
+		this.template = new UriTemplate(href);
 	}
 
 	/**
@@ -118,6 +122,56 @@ public class Link implements Serializable {
 	 */
 	public Link withSelfRel() {
 		return withRel(Link.REL_SELF);
+	}
+
+	/**
+	 * Returns the variable names contained in the template.
+	 * 
+	 * @return
+	 */
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@JsonIgnore
+	public List<String> getVariableNames() {
+		return getUriTemplate().getVariableNames();
+	}
+
+	/**
+	 * Returns whether the link is templated.
+	 * 
+	 * @return
+	 */
+	@org.codehaus.jackson.annotate.JsonIgnore
+	public boolean isTemplate() {
+		return !getUriTemplate().getVariables().isEmpty();
+	}
+
+	/**
+	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
+	 * 
+	 * @param arguments
+	 * @return
+	 */
+	public Link expand(Object... arguments) {
+		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+	}
+
+	/**
+	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
+	 * 
+	 * @param arguments must not be {@literal null}.
+	 * @return
+	 */
+	public Link expand(Map<String, ? extends Object> arguments) {
+		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+	}
+
+	private UriTemplate getUriTemplate() {
+
+		if (template == null) {
+			this.template = new UriTemplate(href);
+		}
+
+		return template;
 	}
 
 	/* 

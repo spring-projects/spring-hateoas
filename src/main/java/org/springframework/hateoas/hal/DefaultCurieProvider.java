@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,6 @@ public class DefaultCurieProvider implements CurieProvider {
 		private static final long serialVersionUID = 1L;
 
 		private final String name;
-		private final boolean templated = true;
 
 		public Curie(String name, String href) {
 
@@ -86,10 +85,6 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		public String getName() {
 			return name;
-		}
-
-		public boolean isTemplated() {
-			return templated;
 		}
 	}
 }
