@@ -24,8 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.hateoas.UriTemplate.TemplateVariable;
-import org.springframework.hateoas.UriTemplate.VariableType;
+import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
  * Unit tests for {@link UriTemplate}.

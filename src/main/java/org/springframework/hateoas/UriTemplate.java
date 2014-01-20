@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.hateoas.UriTemplate.TemplateVariable;
+import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -147,7 +147,7 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromPath(baseUri);
 
 		for (TemplateVariable variable : variables) {
-			appendToBuilder(builder, variable, parameters.get(variable.name));
+			appendToBuilder(builder, variable, parameters.get(variable.getName()));
 		}
 
 		return builder.build().toUri();
@@ -175,16 +175,16 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 
 			if (variable.isRequired()) {
 				throw new IllegalArgumentException(String.format("Template variable %s is required but no value was given!",
-						variable.name));
+						variable.getName()));
 			}
 
 			return;
 		}
 
-		switch (variable.type) {
+		switch (variable.getType()) {
 			case REQUEST_PARAM:
 			case REQUEST_PARAM_CONTINUED:
-				builder.queryParam(variable.name, value);
+				builder.queryParam(variable.getName(), value);
 				break;
 			case PATH_VARIABLE:
 			case SEGMENT:
@@ -193,128 +193,6 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 			case FRAGMENT:
 				builder.fragment(value.toString());
 				break;
-		}
-	}
-
-	public static final class TemplateVariable {
-
-		private final String name;
-		private final VariableType type;
-
-		/**
-		 * Creates a new {@link TemplateVariable} with the given name and type.
-		 * 
-		 * @param name must not be {@literal null} or empty.
-		 * @param type must not be {@literal null}.
-		 */
-		TemplateVariable(String name, VariableType type) {
-
-			Assert.hasText("Variable name must not be null or empty!");
-			Assert.notNull("Variable type must not be null!");
-
-			this.name = name;
-			this.type = type;
-		}
-
-		/**
-		 * Returns the name of the variable.
-		 * 
-		 * @return
-		 */
-		public String getName() {
-			return this.name;
-		}
-
-		/**
-		 * Returns whether the template variable is optional, which means the template can be expanded to a URI without a
-		 * value given for that variable.
-		 * 
-		 * @return
-		 */
-		boolean isRequired() {
-			return !type.isOptional();
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(Object obj) {
-
-			if (obj == this) {
-				return true;
-			}
-
-			if (!(obj instanceof TemplateVariable)) {
-				return false;
-			}
-
-			TemplateVariable that = (TemplateVariable) obj;
-			return this.name.equals(that.name) && this.type.equals(that.type);
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see java.lang.Object#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-
-			int result = 17;
-
-			result += this.name.hashCode();
-			result += this.type.hashCode();
-
-			return result;
-		}
-	}
-
-	/**
-	 * An enumeration for all supported variable types.
-	 * 
-	 * @author Oliver Gierke
-	 */
-	static enum VariableType {
-
-		PATH_VARIABLE("", false), //
-		REQUEST_PARAM("?", true), //
-		REQUEST_PARAM_CONTINUED("&", true), //
-		SEGMENT("/", true), //
-		FRAGMENT("#", true);
-
-		private final String key;
-		private final boolean optional;
-
-		private VariableType(String key, boolean optional) {
-			this.key = key;
-			this.optional = optional;
-		}
-
-		/**
-		 * Returns whether the variable of this type is optional.
-		 * 
-		 * @return
-		 */
-		public boolean isOptional() {
-			return optional;
-		}
-
-		/**
-		 * Returns the {@link VariableType} for the given variable key.
-		 * 
-		 * @param key must not be {@literal null}.
-		 * @return
-		 */
-		public static VariableType from(String key) {
-
-			for (VariableType type : values()) {
-				if (type.key.equals(key)) {
-					return type;
-				}
-			}
-
-			throw new IllegalArgumentException("Unsupported variable type " + key + "!");
 		}
 	}
 }

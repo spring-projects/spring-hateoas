@@ -136,6 +136,17 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Returns all {@link TemplateVariables} contained in the {@link Link}.
+	 * 
+	 * @return
+	 */
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@JsonIgnore
+	public List<TemplateVariable> getVariables() {
+		return getUriTemplate().getVariables();
+	}
+
+	/**
 	 * Returns whether the link is templated.
 	 * 
 	 * @return
