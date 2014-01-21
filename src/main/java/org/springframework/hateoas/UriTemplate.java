@@ -40,7 +40,7 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 
 	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,]+)\\}");
 
-	private final List<TemplateVariable> variables = new ArrayList<TemplateVariable>();
+	private final TemplateVariables variables;;
 	private String baseUri;
 
 	/**
@@ -53,24 +53,27 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 		Assert.hasText(template, "Template must not be null or empty!");
 
 		Matcher matcher = VARIABLE_REGEX.matcher(template);
+		int baseUriEndIndex = template.length();
+		List<TemplateVariable> variables = new ArrayList<TemplateVariable>();
 
 		while (matcher.find()) {
 
-			if (baseUri == null) {
-				this.baseUri = template.substring(0, matcher.start(0));
+			int start = matcher.start(0);
+
+			if (start < baseUriEndIndex) {
+				baseUriEndIndex = start;
 			}
 
 			VariableType type = VariableType.from(matcher.group(1));
 			String[] names = matcher.group(2).split(",");
 
 			for (String name : names) {
-				this.variables.add(new TemplateVariable(name, type));
+				variables.add(new TemplateVariable(name, type));
 			}
 		}
 
-		if (this.baseUri == null) {
-			this.baseUri = template;
-		}
+		this.variables = new TemplateVariables(variables);
+		this.baseUri = template.substring(0, baseUriEndIndex);
 	}
 
 	/**
@@ -94,7 +97,7 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	 * @return
 	 */
 	public List<TemplateVariable> getVariables() {
-		return this.variables;
+		return this.variables.asList();
 	}
 
 	/**
@@ -160,6 +163,15 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	@Override
 	public Iterator<TemplateVariable> iterator() {
 		return this.variables.iterator();
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return baseUri + variables.toString();
 	}
 
 	/**

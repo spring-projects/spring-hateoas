@@ -15,13 +15,20 @@
  */
 package org.springframework.hateoas.hal;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.hateoas.IanaRels;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.Assert;
-import org.springframework.web.util.UriTemplate;
 
 /**
+ * Default implementation of {@link CurieProvider} rendering a single configurable {@link UriTemplate} based curie.
+ * 
  * @author Oliver Gierke
+ * @since 0.9
  */
 public class DefaultCurieProvider implements CurieProvider {
 
@@ -48,8 +55,8 @@ public class DefaultCurieProvider implements CurieProvider {
 	 * @see org.springframework.hateoas.hal.CurieProvider#getCurieInformation()
 	 */
 	@Override
-	public Curie getCurieInformation() {
-		return curie;
+	public Collection<? extends Object> getCurieInformation(Links links) {
+		return Collections.singleton(curie);
 	}
 
 	/* 
@@ -70,8 +77,7 @@ public class DefaultCurieProvider implements CurieProvider {
 	 * 
 	 * @author Oliver Gierke
 	 */
-	@SuppressWarnings("unused")
-	private static class Curie extends Link {
+	protected static class Curie extends Link {
 
 		private static final long serialVersionUID = 1L;
 

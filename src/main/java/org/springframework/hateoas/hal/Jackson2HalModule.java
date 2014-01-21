@@ -18,7 +18,6 @@ package org.springframework.hateoas.hal;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +27,7 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
@@ -132,6 +132,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			// sort links according to their relation
 			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
+			List<Link> links = new ArrayList<Link>();
 
 			boolean prefixingRequired = curieProvider != null;
 			boolean curiedLinkPresent = false;
@@ -148,13 +149,15 @@ public class Jackson2HalModule extends SimpleModule {
 					sortedLinks.put(rel, new ArrayList<Object>());
 				}
 
+				links.add(link);
 				sortedLinks.get(rel).add(link);
 			}
 
 			if (prefixingRequired && curiedLinkPresent) {
-				Object curieInformation = curieProvider.getCurieInformation();
-				List<Object> curies = new ArrayList<Object>();
-				curies.add(Arrays.asList(curieInformation));
+
+				ArrayList<Object> curies = new ArrayList<Object>();
+				curies.add(curieProvider.getCurieInformation(new Links(links)));
+
 				sortedLinks.put("curies", curies);
 			}
 
@@ -164,7 +167,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property));
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -270,7 +273,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property));
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
 
 			serializer.serialize(builder.asMap(), jgen, provider);
 		}
@@ -451,6 +454,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private static final long serialVersionUID = 6420432361123210955L;
 
+		@SuppressWarnings("deprecation")
 		public HalLinkListDeserializer() {
 			super(List.class);
 		}
@@ -524,6 +528,7 @@ public class Jackson2HalModule extends SimpleModule {
 			this(null, vc);
 		}
 
+		@SuppressWarnings("deprecation")
 		private HalResourcesDeserializer(Class<?> type, JavaType contentType) {
 
 			super(type);

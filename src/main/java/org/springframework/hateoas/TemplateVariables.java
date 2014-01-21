@@ -90,6 +90,15 @@ public class TemplateVariables implements Iterable<TemplateVariable> {
 		return concat(variables.variables);
 	}
 
+	/**
+	 * Returns the contained {@link TemplateVariable}s as {@link List}.
+	 * 
+	 * @return
+	 */
+	public List<TemplateVariable> asList() {
+		return this.variables;
+	}
+
 	/* 
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()

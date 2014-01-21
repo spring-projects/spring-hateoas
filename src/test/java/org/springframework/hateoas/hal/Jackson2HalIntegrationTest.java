@@ -19,6 +19,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,9 +34,9 @@ import org.springframework.hateoas.PagedResources.PageMetadata;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
-import org.springframework.web.util.UriTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -61,6 +63,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
 	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"template\":true}]}}";
+	static final String MULTIPLE_CURIES_DOCUMENT = "{\"_links\":{\"default:myrel\":{\"href\":\"foo\"},\"curies\":[{\"href\":\"bar\",\"name\":\"foo\"},{\"href\":\"foo\",\"name\":\"bar\"}]}}";
 	static final String SINGLE_NON_CURIE_LINK = "{\"_links\":{\"self\":{\"href\":\"foo\"}}}";
 	static final String EMPTY_DOCUMENT = "{}";
 
@@ -322,6 +325,25 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		assertThat(write(support), is(LINK_TEMPLATE));
 	}
 
+	/**
+	 * @see #142
+	 */
+	@Test
+	public void rendersMultipleCuries() throws Exception {
+
+		Resources<Object> resources = new Resources<Object>(Collections.emptySet());
+		resources.add(new Link("foo", "myrel"));
+
+		CurieProvider provider = new DefaultCurieProvider("default", new UriTemplate("/doc{?rel}")) {
+			@Override
+			public Collection<? extends Object> getCurieInformation(Links links) {
+				return Arrays.asList(new Curie("foo", "bar"), new Curie("bar", "foo"));
+			}
+		};
+
+		assertThat(getCuriedObjectMapper(provider).writeValueAsString(resources), is(MULTIPLE_CURIES_DOCUMENT));
+	}
+
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
 
 		List<Resource<SimpleAnnotatedPojo>> content = new ArrayList<Resource<SimpleAnnotatedPojo>>();
@@ -351,11 +373,14 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	private static ObjectMapper getCuriedObjectMapper() {
 
-		CurieProvider curieProvider = new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}"));
+		return getCuriedObjectMapper(new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}")));
+	}
+
+	private static ObjectMapper getCuriedObjectMapper(CurieProvider provider) {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), curieProvider));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), provider));
 
 		return mapper;
 	}
