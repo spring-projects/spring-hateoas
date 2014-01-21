@@ -71,13 +71,23 @@ public class Link implements Serializable {
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(String href, String rel) {
+		this(new UriTemplate(href), rel);
+	}
 
-		Assert.hasText(href, "Href must not be null or empty!");
+	/**
+	 * Creates a new Link from the given {@link UriTemplate} and rel.
+	 * 
+	 * @param template must not be {@literal null}.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	public Link(UriTemplate template, String rel) {
+
+		Assert.notNull(template, "UriTempalte must not be null!");
 		Assert.hasText(rel, "Rel must not be null or empty!");
 
-		this.href = href;
+		this.template = template;
+		this.href = template.toString();
 		this.rel = rel;
-		this.template = new UriTemplate(href);
 	}
 
 	/**

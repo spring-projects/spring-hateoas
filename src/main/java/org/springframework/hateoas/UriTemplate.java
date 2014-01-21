@@ -77,6 +77,20 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	}
 
 	/**
+	 * Creates a new {@link UriTemplate} from the given base URI and {@link TemplateVariables}.
+	 * 
+	 * @param baseUri must not be {@literal null} or empty.
+	 * @param variables defaults to {@link TemplateVariables#NONE}.
+	 */
+	public UriTemplate(String baseUri, TemplateVariables variables) {
+
+		Assert.hasText("Base URI must not be null or empty!");
+
+		this.baseUri = baseUri;
+		this.variables = variables == null ? TemplateVariables.NONE : variables;
+	}
+
+	/**
 	 * Returns whether the given candidate is a URI template.
 	 * 
 	 * @param candidate
