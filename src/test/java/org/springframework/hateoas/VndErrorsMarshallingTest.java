@@ -60,11 +60,13 @@ public class VndErrorsMarshallingTest {
 
 	VndErrors errors;
 	String jsonReference;
+	String json2Reference;
 	String xmlReference;
 
 	public VndErrorsMarshallingTest() throws IOException {
 
 		jsonReference = readFile(new ClassPathResource("vnderror.json"));
+		json2Reference = readFile(new ClassPathResource("vnderror2.json"));
 		xmlReference = readFile(new ClassPathResource("vnderror.xml"));
 	}
 
@@ -97,7 +99,7 @@ public class VndErrorsMarshallingTest {
 
 	@Test
 	public void jackson2Marshalling() throws Exception {
-		assertThat(jackson2Mapper.writeValueAsString(errors), is(jsonReference));
+		assertThat(jackson2Mapper.writeValueAsString(errors), is(json2Reference));
 	}
 
 	@Test

@@ -1,5 +1,24 @@
-Spring Hateoas Changelog
+Spring HATEOAS Changelog
 =========================
+
+Changes in version 0.9.0.RELEASE (2014-01-24)
+---------------------------------------------
+- #139 - PagedResourcesAssember and URL Variables
+- #138 - MethodParameters should be able to return parameters by type
+- #137 - Add support for link templates
+- #133 - LinkDiscoverer must not throw exceptions if link container is not present
+- #132 - Resource should reject collection content
+- #130 - Guard @EnableHypermediaSupport against issue in Spring 3.2.x
+- #128 - Improve LinkDiscoverer API
+- #125 - Add support for HAL curies
+- #124 - Fix mapping annotations in ResourceSupport and subclasses
+- #123 - Deprecate Jackson 1.9.x support
+- #122 - ControllerLinkBuilder creates parameter names for optional request parameters even if they're null.
+- #121 - OSGi imports for spring-plugin-core are incorrect
+- #112 - Added support for X-Forwarded-Ssl header during link construction
+- #110 - HalEmbeddedBuilder fails to properly encode odd number of elements
+- #140 - Upgrade to latest Spring 3.2.x
+- #126 - Release 0.9
 
 Changes in version 0.8.0.RELEASE (2013-08-09)
 ---------------------------------------------

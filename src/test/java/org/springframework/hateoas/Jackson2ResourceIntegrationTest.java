@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  */
 public class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
-	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}";
+	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 
 	/**
 	 * @see #27
