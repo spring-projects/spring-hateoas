@@ -29,9 +29,9 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public class TemplateVariables implements Iterable<TemplateVariable> {
+public final class TemplateVariables implements Iterable<TemplateVariable> {
 
-	public static TemplateVariables NONE = new TemplateVariables(Collections.<TemplateVariable> emptyList());
+	public static TemplateVariables NONE = new TemplateVariables();
 
 	private final List<TemplateVariable> variables;
 

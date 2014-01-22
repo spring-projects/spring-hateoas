@@ -72,7 +72,7 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 			}
 		}
 
-		this.variables = new TemplateVariables(variables);
+		this.variables = variables.isEmpty() ? TemplateVariables.NONE : new TemplateVariables(variables);
 		this.baseUri = template.substring(0, baseUriEndIndex);
 	}
 
@@ -140,7 +140,11 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	 */
 	public URI expand(Object... parameters) {
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromPath(baseUri);
+		if (TemplateVariables.NONE.equals(variables)) {
+			return URI.create(baseUri);
+		}
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
 
 		for (TemplateVariable variable : variables) {
@@ -160,8 +164,12 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	 */
 	public URI expand(Map<String, Object> parameters) {
 
+		if (TemplateVariables.NONE.equals(variables)) {
+			return URI.create(baseUri);
+		}
+
 		Assert.notNull(parameters, "Parameters must not be null!");
-		UriComponentsBuilder builder = UriComponentsBuilder.fromPath(baseUri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
 
 		for (TemplateVariable variable : variables) {
 			appendToBuilder(builder, variable, parameters.get(variable.getName()));

@@ -169,6 +169,14 @@ public class UriTemplateUnitTest {
 		assertThat(new UriTemplate("/foo").expand().toString(), is("/foo"));
 	}
 
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void correctlyExpandsFullUri() {
+		assertThat(new UriTemplate("http://localhost:8080/foo{?bar}").expand().toString(), is("http://localhost:8080/foo"));
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 
 		assertThat(template.getVariableNames(), hasSize(variables.length));
