@@ -19,8 +19,12 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -177,10 +181,40 @@ public class UriTemplateUnitTest {
 		assertThat(new UriTemplate("http://localhost:8080/foo{?bar}").expand().toString(), is("http://localhost:8080/foo"));
 	}
 
-	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void rendersUriTempalteWithPathVariable() {
 
-		assertThat(template.getVariableNames(), hasSize(variables.length));
-		assertThat(template.getVariables(), hasSize(variables.length));
+		UriTemplate template = new UriTemplate("/{foo}/bar{?page}");
+		assertThat(template.toString(), is("/{foo}/bar{?page}"));
+	}
+
+	/**
+	 * #@see 137
+	 */
+	@Test
+	public void addsTemplateVariables() {
+
+		UriTemplate source = new UriTemplate("/{foo}/bar{?page}");
+		List<TemplateVariable> toAdd = Arrays.asList(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
+
+		List<TemplateVariable> expected = new ArrayList<TemplateVariable>();
+		expected.addAll(source.getVariables());
+		expected.addAll(toAdd);
+
+		assertVariables(source.with(new TemplateVariables(toAdd)), expected);
+	}
+
+	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
+		assertVariables(template, Arrays.asList(variables));
+	}
+
+	private static void assertVariables(UriTemplate template, Collection<TemplateVariable> variables) {
+
+		assertThat(template.getVariableNames(), hasSize(variables.size()));
+		assertThat(template.getVariables(), hasSize(variables.size()));
 
 		for (TemplateVariable variable : variables) {
 

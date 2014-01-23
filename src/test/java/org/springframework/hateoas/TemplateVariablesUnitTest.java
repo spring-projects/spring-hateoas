@@ -88,4 +88,32 @@ public class TemplateVariablesUnitTest {
 		assertThat(variables.toString(), is("{/foo}{?bar}"));
 	}
 
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void combinesContinuedParamWithParam() {
+
+		TemplateVariable first = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
+		TemplateVariable second = new TemplateVariable("bar", VariableType.REQUEST_PARAM_CONTINUED);
+
+		TemplateVariables variables = new TemplateVariables(first, second);
+
+		assertThat(variables.toString(), is("{?foo,bar}"));
+	}
+
+	/**
+	 * @see #137
+	 */
+	@Test
+	public void combinesContinuedParameterWithParameter() {
+
+		TemplateVariable first = new TemplateVariable("foo", VariableType.REQUEST_PARAM_CONTINUED);
+		TemplateVariable second = new TemplateVariable("bar", VariableType.REQUEST_PARAM);
+
+		TemplateVariables variables = new TemplateVariables(first, second);
+
+		assertThat(variables.toString(), is("{&foo,bar}"));
+	}
+
 }

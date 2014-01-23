@@ -60,15 +60,17 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 
 			int start = matcher.start(0);
 
-			if (start < baseUriEndIndex) {
-				baseUriEndIndex = start;
-			}
-
 			VariableType type = VariableType.from(matcher.group(1));
 			String[] names = matcher.group(2).split(",");
 
 			for (String name : names) {
-				variables.add(new TemplateVariable(name, type));
+				TemplateVariable variable = new TemplateVariable(name, type);
+
+				if (!variable.isRequired() && start < baseUriEndIndex) {
+					baseUriEndIndex = start;
+				}
+
+				variables.add(variable);
 			}
 		}
 
@@ -88,6 +90,21 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 
 		this.baseUri = baseUri;
 		this.variables = variables == null ? TemplateVariables.NONE : variables;
+	}
+
+	/**
+	 * Creates a new {@link UriTemplate} with the current {@link TemplateVariable}s augmented with the given ones.
+	 * 
+	 * @param variables can be {@literal null}.
+	 * @return
+	 */
+	public UriTemplate with(TemplateVariables variables) {
+
+		if (variables == null) {
+			return this;
+		}
+
+		return new UriTemplate(baseUri, this.variables.concat(variables));
 	}
 
 	/**
@@ -193,7 +210,20 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	 */
 	@Override
 	public String toString() {
-		return baseUri + variables.toString();
+		return baseUri + getOptionalVariables().toString();
+	}
+
+	private TemplateVariables getOptionalVariables() {
+
+		List<TemplateVariable> result = new ArrayList<TemplateVariable>();
+
+		for (TemplateVariable variable : this) {
+			if (!variable.isRequired()) {
+				result.add(variable);
+			}
+		}
+
+		return new TemplateVariables(result);
 	}
 
 	/**

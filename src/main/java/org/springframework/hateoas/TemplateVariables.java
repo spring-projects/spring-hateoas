@@ -125,7 +125,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable> {
 
 			if (previous == null) {
 				builder.append("{").append(variable.getType().toString());
-			} else if (!previous.isOfSameTypeAs(variable)) {
+			} else if (!previous.isCombinable(variable)) {
 				builder.append("}{").append(variable.getType().toString());
 			} else {
 				builder.append(",");
@@ -136,5 +136,34 @@ public final class TemplateVariables implements Iterable<TemplateVariable> {
 		}
 
 		return builder.append("}").toString();
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof TemplateVariables)) {
+			return false;
+		}
+
+		TemplateVariables that = (TemplateVariables) obj;
+
+		return this.variables.equals(that.variables);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return this.variables.hashCode();
 	}
 }

@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -109,8 +112,8 @@ public final class TemplateVariable {
 	 * @param variable must not be {@literal null}.
 	 * @return
 	 */
-	boolean isOfSameTypeAs(TemplateVariable variable) {
-		return this.type.equals(variable.type);
+	boolean isCombinable(TemplateVariable variable) {
+		return this.type.canBeCombinedWith(variable.type);
 	}
 
 	/* 
@@ -171,6 +174,8 @@ public final class TemplateVariable {
 		SEGMENT("/", true), //
 		FRAGMENT("#", true);
 
+		private static final List<VariableType> combinableTypes = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
+
 		private final String key;
 		private final boolean optional;
 
@@ -186,6 +191,10 @@ public final class TemplateVariable {
 		 */
 		public boolean isOptional() {
 			return optional;
+		}
+
+		public boolean canBeCombinedWith(VariableType type) {
+			return this.equals(type) || combinableTypes.contains(this) && combinableTypes.contains(type);
 		}
 
 		/**
