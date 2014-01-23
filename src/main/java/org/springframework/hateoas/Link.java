@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Value object for links.
@@ -38,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Oliver Gierke
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
+@JsonIgnoreProperties("templated")
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -162,7 +164,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	@org.codehaus.jackson.annotate.JsonIgnore
-	public boolean isTemplate() {
+	public boolean isTemplated() {
 		return !getUriTemplate().getVariables().isEmpty();
 	}
 

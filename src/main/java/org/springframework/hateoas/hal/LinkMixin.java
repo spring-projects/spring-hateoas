@@ -41,5 +41,5 @@ abstract class LinkMixin extends Link {
 	@Override
 	@JsonInclude(Include.NON_EMPTY)
 	@JsonSerialize(using = TrueOnlyBooleanSerializer.class)
-	public abstract boolean isTemplate();
+	public abstract boolean isTemplated();
 }

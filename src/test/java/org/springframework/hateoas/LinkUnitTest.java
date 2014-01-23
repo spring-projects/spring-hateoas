@@ -129,7 +129,7 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo{?page}");
 
-		assertThat(link.isTemplate(), is(true));
+		assertThat(link.isTemplated(), is(true));
 		assertThat(link.getVariableNames(), hasSize(1));
 		assertThat(link.getVariableNames(), hasItem("page"));
 		assertThat(link.expand("2"), is(new Link("/foo?page=2")));
@@ -143,7 +143,7 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo");
 
-		assertThat(link.isTemplate(), is(false));
+		assertThat(link.isTemplated(), is(false));
 		assertThat(link.getVariableNames(), hasSize(0));
 	}
 }
