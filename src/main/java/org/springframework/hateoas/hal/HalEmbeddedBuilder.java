@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,16 @@ class HalEmbeddedBuilder {
 
 	private final Map<String, List<Object>> embeddeds = new HashMap<String, List<Object>>();
 	private final RelProvider provider;
+	private final boolean enforceCollections;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link RelProvider}.
 	 * 
 	 * @param provider can be {@literal null}.
 	 */
-	public HalEmbeddedBuilder(RelProvider provider) {
+	public HalEmbeddedBuilder(RelProvider provider, boolean enforceCollections) {
 		this.provider = provider;
+		this.enforceCollections = enforceCollections;
 	}
 
 	/**
@@ -65,7 +67,7 @@ class HalEmbeddedBuilder {
 		String rel = getDefaultedRelFor(type, true);
 
 		if (!embeddeds.containsKey(rel)) {
-			rel = getDefaultedRelFor(type, false);
+			rel = getDefaultedRelFor(type, enforceCollections);
 		}
 
 		List<Object> currentValue = embeddeds.get(rel);
@@ -89,7 +91,7 @@ class HalEmbeddedBuilder {
 			return DEFAULT_REL;
 		}
 
-		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getSingleResourceRelFor(type);
+		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
 		return rel == null ? DEFAULT_REL : rel;
 	}
 

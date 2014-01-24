@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ public class ControllerRelProvider implements RelProvider {
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
 	 */
 	@Override
-	public String getSingleResourceRelFor(Class<?> resource) {
-		return providers.getPluginFor(entityType).getSingleResourceRelFor(resource);
+	public String getItemResourceRelFor(Class<?> resource) {
+		return providers.getPluginFor(entityType).getItemResourceRelFor(resource);
 	}
 
 	/* 

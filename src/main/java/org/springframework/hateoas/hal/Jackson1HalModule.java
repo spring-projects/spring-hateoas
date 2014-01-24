@@ -194,7 +194,7 @@ public class Jackson1HalModule extends SimpleModule {
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
-			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider);
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, false);
 
 			for (Object resource : value) {
 				builder.add(resource);

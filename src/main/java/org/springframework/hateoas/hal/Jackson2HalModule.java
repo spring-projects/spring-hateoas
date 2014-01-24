@@ -238,17 +238,19 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final BeanProperty property;
 		private final RelProvider relProvider;
+		private final boolean enforceEmbeddedCollections;
 
-		public HalResourcesSerializer(RelProvider relPorvider) {
-			this(null, relPorvider);
+		public HalResourcesSerializer(RelProvider relPorvider, boolean enforceEmbeddedCollections) {
+			this(null, relPorvider, enforceEmbeddedCollections);
 		}
 
-		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider) {
+		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider, boolean enforceEmbeddedCollections) {
 
 			super(Collection.class, false);
 
 			this.property = property;
 			this.relProvider = relProvider;
+			this.enforceEmbeddedCollections = enforceEmbeddedCollections;
 		}
 
 		/*
@@ -261,7 +263,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
-			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider);
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, enforceEmbeddedCollections);
 
 			for (Object resource : value) {
 				builder.add(resource);
@@ -272,8 +274,11 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
+			JsonSerializer<Object> valueSerializer = enforceEmbeddedCollections ? provider.findValueSerializer(valueType,
+					property) : new OptionalListJackson2Serializer(property);
+
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
+					provider.findKeySerializer(keyType, null), valueSerializer, null);
 
 			serializer.serialize(builder.asMap(), jgen, provider);
 		}
@@ -281,12 +286,11 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, relProvider);
+			return new HalResourcesSerializer(property, relProvider, enforceEmbeddedCollections);
 		}
 
 		@Override
 		public JavaType getContentType() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -601,9 +605,14 @@ public class Jackson2HalModule extends SimpleModule {
 		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
 
 		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider) {
+			this(resolver, curieProvider, true);
+		}
+
+		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider, boolean enforceEmbeddedCollections) {
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
-			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver));
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver,
+					enforceEmbeddedCollections));
 			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider));
 		}
 

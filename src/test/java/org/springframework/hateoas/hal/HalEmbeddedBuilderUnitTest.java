@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,15 +84,28 @@ public class HalEmbeddedBuilderUnitTest {
 	public void addsNoEmbeddedsForResourceWithoutContent() {
 
 		Resource<?> resource = BeanUtils.instantiateClass(Resource.class);
-		HalEmbeddedBuilder halEmbeddedBuilder = new HalEmbeddedBuilder(provider);
+		HalEmbeddedBuilder halEmbeddedBuilder = new HalEmbeddedBuilder(provider, true);
 		halEmbeddedBuilder.add(resource);
 
 		assertThat(halEmbeddedBuilder.asMap().isEmpty(), is(true));
 	}
 
+	/**
+	 * @see #135
+	 */
+	@Test
+	public void forcesCollectionRelToBeUsedIfConfigured() {
+
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, true);
+		builder.add("Sample");
+
+		assertThat(builder.asMap().get("string"), is(nullValue()));
+		assertThat(builder.asMap().get("strings"), hasItem("Sample"));
+	}
+
 	private Map<String, List<Object>> setUpBuilder(Object... values) {
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider);
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, false);
 
 		for (Object value : values) {
 			builder.add(value);
