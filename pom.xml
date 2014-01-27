@@ -58,7 +58,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.2.6.RELEASE</spring.version>
+		<spring.version>3.2.7.RELEASE</spring.version>
 		<logback.version>1.0.13</logback.version>
 		<jackson1.version>1.9.13</jackson1.version>
 		<jackson2.version>2.3.0</jackson2.version>
@@ -334,8 +334,8 @@
 	
 	<repositories>
 		<repository>
-			<id>spring-libs-snapshot</id>
-			<url>http://repo.spring.io/libs-snapshot</url>
+			<id>spring-libs-release</id>
+			<url>http://repo.spring.io/libs-release</url>
 		</repository>
 	</repositories>
 	
