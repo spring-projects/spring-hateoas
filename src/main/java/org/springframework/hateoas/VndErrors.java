@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A representation model class to be rendered as specified for the media type {@code application/vnd.error}.
@@ -117,6 +118,15 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		return this.vndErrors.iterator();
 	}
 
+	/* 
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("VndErrors[%s]", StringUtils.collectionToCommaDelimitedString(vndErrors));
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -205,6 +215,16 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		 */
 		public String getMessage() {
 			return message;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.ResourceSupport#toString()
+		 */
+		@Override
+		public String toString() {
+			return String.format("VndError[logref: %s, message: %s, links: [%s]]", logref, message,
+					StringUtils.collectionToCommaDelimitedString(getLinks()));
 		}
 
 		/*
