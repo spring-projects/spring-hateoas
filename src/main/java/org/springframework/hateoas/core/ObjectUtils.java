@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.hateoas.Resource;
 
 /**
@@ -41,6 +42,15 @@ public class ObjectUtils {
 	}
 
 	private static Class<?> nullSafeType(Object object) {
-		return object == null ? null : object.getClass();
+
+		if (object == null) {
+			return null;
+		}
+
+		if (object instanceof Advised) {
+			return ((Advised) object).getTargetClass();
+		}
+
+		return object.getClass();
 	}
 }
