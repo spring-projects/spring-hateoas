@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.ObjectUtils;
@@ -58,16 +59,16 @@ class HalEmbeddedBuilder {
 	 */
 	public void add(Object value) {
 
-		Class<?> type = ObjectUtils.getResourceType(value);
+		Object unwrapped = ObjectUtils.getResourceType(value);
 
-		if (type == null) {
+		if (unwrapped == null) {
 			return;
 		}
 
-		String rel = getDefaultedRelFor(type, true);
+		String rel = getDefaultedRelFor(unwrapped, true);
 
 		if (!embeddeds.containsKey(rel)) {
-			rel = getDefaultedRelFor(type, enforceCollections);
+			rel = getDefaultedRelFor(unwrapped, enforceCollections);
 		}
 
 		List<Object> currentValue = embeddeds.get(rel);
@@ -79,17 +80,19 @@ class HalEmbeddedBuilder {
 		} else if (currentValue.size() == 1) {
 			currentValue.add(value);
 			embeddeds.remove(rel);
-			embeddeds.put(getDefaultedRelFor(type, true), currentValue);
+			embeddeds.put(getDefaultedRelFor(unwrapped, true), currentValue);
 		} else {
 			currentValue.add(value);
 		}
 	}
 
-	private String getDefaultedRelFor(Class<?> type, boolean forCollection) {
+	private String getDefaultedRelFor(Object value, boolean forCollection) {
 
 		if (provider == null) {
 			return DEFAULT_REL;
 		}
+
+		Class<?> type = AopUtils.getTargetClass(value);
 
 		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
 		return rel == null ? DEFAULT_REL : rel;
