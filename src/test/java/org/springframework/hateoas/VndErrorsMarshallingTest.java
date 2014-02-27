@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
+import org.custommonkey.xmlunit.Diff;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -71,7 +72,6 @@ public class VndErrorsMarshallingTest {
 	}
 
 	@Before
-	@SuppressWarnings("deprecation")
 	public void setUp() throws Exception {
 
 		jackson1Mapper = new ObjectMapper();
@@ -92,26 +92,36 @@ public class VndErrorsMarshallingTest {
 		errors = new VndErrors(error, error, error);
 	}
 
+	/**
+	 * @see #62
+	 */
 	@Test
 	public void jackson1Marshalling() throws Exception {
 		assertThat(jackson1Mapper.writeValueAsString(errors), is(jsonReference));
 	}
 
+	/**
+	 * @see #62
+	 */
 	@Test
 	public void jackson2Marshalling() throws Exception {
 		assertThat(jackson2Mapper.writeValueAsString(errors), is(json2Reference));
 	}
 
+	/**
+	 * @see #62, #154
+	 */
 	@Test
 	public void jaxbMarshalling() throws Exception {
 
 		Writer writer = new StringWriter();
 		marshaller.marshal(errors, writer);
-		assertThat(writer.toString(), is(xmlReference));
+
+		assertThat(new Diff(xmlReference, writer.toString()).similar(), is(true));
 	}
 
 	/**
-	 * @see #93, #94
+	 * @see #62, #93, #94
 	 */
 	@Test
 	public void jackson1UnMarshalling() throws Exception {
