@@ -124,7 +124,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{?bar}");
 
-		URI uri = template.expand(Collections.<String, Object> singletonMap("bar", "myBar"));
+		URI uri = template.expand(Collections.singletonMap("bar", "myBar"));
 		assertThat(uri.toString(), is("/foo?bar=myBar"));
 	}
 

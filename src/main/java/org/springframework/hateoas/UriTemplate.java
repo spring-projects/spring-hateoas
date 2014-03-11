@@ -179,7 +179,7 @@ public class UriTemplate implements Iterable<TemplateVariable> {
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
-	public URI expand(Map<String, Object> parameters) {
+	public URI expand(Map<String, ? extends Object> parameters) {
 
 		if (TemplateVariables.NONE.equals(variables)) {
 			return URI.create(baseUri);
