@@ -257,7 +257,7 @@ assertThat(link.getHref(), is("/foo/bar"));
 ## RelProvider API
 When building links you usually need to determine the relation type to be used for the like. In most cases the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to lookup the relation types behind a `RelProvider` API that allows to determine the relation types for single and collection resources. Here's the algorithm the relation type is looked up:
 
-1. If the type is annotated with `@RelationType` we use the values configured in the annotation.
+1. If the type is annotated with `@Relation` we use the values configured in the annotation.
 1. if not, we default to the uncapitalized simple class name plus an appended `List` for the collection rel.
 1. in case the [EVO inflector](https://github.com/atteo/evo-inflector) JAR is in the classpath, we rather use the plural of the single resource rel provided by the pluralizing algorithm.
 1. `@Controller` classes annotated with `@ExposesResourceFor` (see section on [EntityLinks](#entitylinks) for details) will transparently lookup the relation types for the type configured in the annotation, so that you can use `relProvider.getSingleResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
