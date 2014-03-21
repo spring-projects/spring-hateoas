@@ -22,6 +22,9 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Base class for DTOs to collect links.
  * 
@@ -38,8 +41,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	/**
 	 * Returns the {@link Link} with a rel of {@link Link#REL_SELF}.
 	 */
-	@org.codehaus.jackson.annotate.JsonIgnore
-	@com.fasterxml.jackson.annotation.JsonIgnore
+	@JsonIgnore
 	public Link getId() {
 		return getLink(Link.REL_SELF);
 	}
@@ -91,8 +93,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @return
 	 */
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
-	@org.codehaus.jackson.annotate.JsonProperty("links")
-	@com.fasterxml.jackson.annotation.JsonProperty("links")
+	@JsonProperty("links")
 	public List<Link> getLinks() {
 		return links;
 	}

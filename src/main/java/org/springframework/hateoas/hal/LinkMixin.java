@@ -18,6 +18,7 @@ package org.springframework.hateoas.hal;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.hal.Jackson2HalModule.TrueOnlyBooleanSerializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -28,8 +29,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
-@org.codehaus.jackson.annotate.JsonIgnoreProperties(value = "rel")
-@com.fasterxml.jackson.annotation.JsonIgnoreProperties(value = "rel")
+@JsonIgnoreProperties(value = "rel")
 abstract class LinkMixin extends Link {
 
 	private static final long serialVersionUID = 4720588561299667409L;

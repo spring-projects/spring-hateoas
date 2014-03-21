@@ -51,11 +51,9 @@ import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
@@ -78,7 +76,6 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
 	private static final String HAL_OBJECT_MAPPER_BEAN_NAME = "_halObjectMapper";
 
-	private static final boolean JACKSON1_PRESENT = ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", null);
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 			null);
 	private static final boolean JSONPATH_PRESENT = ClassUtils.isPresent("com.jayway.jsonpath.JsonPath", null);
@@ -117,11 +114,6 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				registerSourcedBeanDefinition(halQueryMapperBuilder, metadata, registry, HAL_OBJECT_MAPPER_BEAN_NAME);
 
 				BeanDefinitionBuilder builder = rootBeanDefinition(Jackson2ModuleRegisteringBeanPostProcessor.class);
-				registerSourcedBeanDefinition(builder, metadata, registry);
-			}
-
-			if (JACKSON1_PRESENT) {
-				BeanDefinitionBuilder builder = rootBeanDefinition(Jackson1ModuleRegisteringBeanPostProcessor.class);
 				registerSourcedBeanDefinition(builder, metadata, registry);
 			}
 		}
@@ -304,78 +296,6 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			} catch (NoSuchBeanDefinitionException e) {
 				return null;
 			}
-		}
-	}
-
-	/**
-	 * {@link BeanPostProcessor} to register the {@link Jackson1HalModule} with
-	 * {@link org.codehaus.jackson.map.ObjectMapper} beans registered in the {@link ApplicationContext}.
-	 * 
-	 * @author Oliver Gierke
-	 */
-	@Deprecated
-	private static class Jackson1ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
-
-		private RelProvider relProvider;
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
-		 */
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
-		 */
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-			if (bean instanceof RequestMappingHandlerAdapter) {
-
-				RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
-				adapter.setMessageConverters(registerModule(adapter.getMessageConverters()));
-			}
-
-			if (bean instanceof AnnotationMethodHandlerAdapter) {
-
-				AnnotationMethodHandlerAdapter adapter = (AnnotationMethodHandlerAdapter) bean;
-				List<HttpMessageConverter<?>> augmentedConverters = registerModule(Arrays
-						.asList(adapter.getMessageConverters()));
-				adapter
-						.setMessageConverters(augmentedConverters.toArray(new HttpMessageConverter<?>[augmentedConverters.size()]));
-			}
-
-			return bean;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization(java.lang.Object, java.lang.String)
-		 */
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-			return bean;
-		}
-
-		private List<HttpMessageConverter<?>> registerModule(List<HttpMessageConverter<?>> converters) {
-
-			org.codehaus.jackson.map.ObjectMapper objectMapper = new org.codehaus.jackson.map.ObjectMapper();
-
-			objectMapper.registerModule(new Jackson1HalModule());
-			objectMapper.setHandlerInstantiator(new Jackson1HalModule.HalHandlerInstantiator(relProvider));
-
-			MappingJacksonHttpMessageConverter halConverter = new MappingJacksonHttpMessageConverter();
-			halConverter.setSupportedMediaTypes(Arrays.asList(HAL_JSON));
-			halConverter.setObjectMapper(objectMapper);
-
-			List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>(converters.size());
-			result.add(halConverter);
-			result.addAll(converters);
-			return result;
 		}
 	}
 }

@@ -43,7 +43,6 @@ import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
@@ -103,12 +102,12 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertThat(context.getBean(ObjectMapper.class), is(notNullValue()));
 
 		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
-		assertThat(rmha.getMessageConverters(), Matchers.<HttpMessageConverter<?>> hasItems(
-				instanceOf(MappingJackson2HttpMessageConverter.class), instanceOf(MappingJacksonHttpMessageConverter.class)));
+		assertThat(rmha.getMessageConverters(),
+				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
 
 		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
-		assertThat(Arrays.asList(amha.getMessageConverters()), Matchers.<HttpMessageConverter<?>> hasItems(
-				instanceOf(MappingJackson2HttpMessageConverter.class), instanceOf(MappingJacksonHttpMessageConverter.class)));
+		assertThat(Arrays.asList(amha.getMessageConverters()),
+				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
 	}
 
 	/**

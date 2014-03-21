@@ -25,7 +25,7 @@ import org.junit.Test;
  * 
  * @author Oliver Gierke
  */
-public class LinkIntegrationTest extends AbstractMarshallingIntegrationTest {
+public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	private static final String REFERENCE = "{\"rel\":\"something\",\"href\":\"location\"}";
 

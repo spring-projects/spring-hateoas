@@ -23,6 +23,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 /**
  * A simple {@link Resource} wrapping a domain object and adding links to it.
  * 
@@ -69,8 +71,7 @@ public class Resource<T> extends ResourceSupport {
 	 * 
 	 * @return the content
 	 */
-	@org.codehaus.jackson.annotate.JsonUnwrapped
-	@com.fasterxml.jackson.annotation.JsonUnwrapped
+	@JsonUnwrapped
 	@XmlAnyElement
 	public T getContent() {
 		return content;

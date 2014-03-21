@@ -28,6 +28,10 @@ import javax.xml.bind.annotation.XmlType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * A representation model class to be rendered as specified for the media type {@code application/vnd.error}.
  * 
@@ -72,8 +76,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * 
 	 * @param errors must not be {@literal null} or empty.
 	 */
-	@com.fasterxml.jackson.annotation.JsonCreator
-	@org.codehaus.jackson.annotate.JsonCreator
+	@JsonCreator
 	public VndErrors(List<VndError> errors) {
 
 		Assert.notNull(errors, "Errors must not be null!");
@@ -103,8 +106,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * 
 	 * @return the vndErrors
 	 */
-	@com.fasterxml.jackson.annotation.JsonValue
-	@org.codehaus.jackson.annotate.JsonValue
+	@JsonValue
 	private List<VndError> getErrors() {
 		return vndErrors;
 	}
@@ -163,15 +165,8 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	@XmlType
 	public static class VndError extends ResourceSupport {
 
-		@com.fasterxml.jackson.annotation.JsonProperty//
-		@org.codehaus.jackson.annotate.JsonProperty//
-		@XmlAttribute//
-		private final String logref;
-
-		@com.fasterxml.jackson.annotation.JsonProperty//
-		@org.codehaus.jackson.annotate.JsonProperty//
-		@XmlElement//
-		private final String message;
+		@XmlAttribute @JsonProperty private final String logref;
+		@XmlElement @JsonProperty private final String message;
 
 		/**
 		 * Creates a new {@link VndError} with the given logref, a message as well as some {@link Link}s.

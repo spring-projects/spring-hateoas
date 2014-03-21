@@ -31,17 +31,15 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.custommonkey.xmlunit.Diff;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.VndErrors.VndError;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
-import org.springframework.hateoas.hal.Jackson1HalModule;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
@@ -52,8 +50,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @SuppressWarnings("deprecation")
 public class VndErrorsMarshallingTest {
 
-	ObjectMapper jackson1Mapper;
-	com.fasterxml.jackson.databind.ObjectMapper jackson2Mapper;
+	ObjectMapper jackson2Mapper;
 	Marshaller marshaller;
 	Unmarshaller unmarshaller;
 
@@ -74,10 +71,6 @@ public class VndErrorsMarshallingTest {
 	@Before
 	public void setUp() throws Exception {
 
-		jackson1Mapper = new ObjectMapper();
-		jackson1Mapper.registerModule(new Jackson1HalModule());
-		jackson1Mapper.configure(Feature.INDENT_OUTPUT, true);
-
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
 		jackson2Mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null));
@@ -90,14 +83,6 @@ public class VndErrorsMarshallingTest {
 		VndError error = new VndError("42", "Validation failed!", //
 				new Link("http://...", "describes"), new Link("http://...", "help"));
 		errors = new VndErrors(error, error, error);
-	}
-
-	/**
-	 * @see #62
-	 */
-	@Test
-	public void jackson1Marshalling() throws Exception {
-		assertThat(jackson1Mapper.writeValueAsString(errors), is(jsonReference));
 	}
 
 	/**
@@ -118,15 +103,6 @@ public class VndErrorsMarshallingTest {
 		marshaller.marshal(errors, writer);
 
 		assertThat(new Diff(xmlReference, writer.toString()).similar(), is(true));
-	}
-
-	/**
-	 * @see #62, #93, #94
-	 */
-	@Test
-	public void jackson1UnMarshalling() throws Exception {
-		VndErrors actual = jackson1Mapper.readValue(jsonReference, VndErrors.class);
-		assertThat(actual, is(errors));
 	}
 
 	/**

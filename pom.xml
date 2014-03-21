@@ -60,8 +60,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>3.2.7.RELEASE</spring.version>
 		<logback.version>1.0.13</logback.version>
-		<jackson1.version>1.9.13</jackson1.version>
-		<jackson2.version>2.3.0</jackson2.version>
+		<jackson.version>2.3.0</jackson.version>
 		<jaxrs.version>1.0</jaxrs.version>
 		<minidevjson.version>1.1.1</minidevjson.version>
 		<jsonpath.version>0.9.1</jsonpath.version>
@@ -136,30 +135,16 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-			<version>${jackson1.version}</version>
-			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>${jackson1.version}</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson2.version}</version>
+			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson2.version}</version>
+			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
 

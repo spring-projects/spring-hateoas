@@ -25,19 +25,20 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
 import org.custommonkey.xmlunit.Diff;
 import org.junit.Test;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 /**
  * Integration tests for {@link Resource}.
  * 
  * @author Oliver Gierke
  */
-public class ResourceIntegrationTest extends AbstractMarshallingIntegrationTest {
+public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
-	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}],\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}";
+	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 	static final String XML_REFERENCE = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><personResource xmlns:ns2=\"http://www.w3.org/2005/Atom\"><ns2:link href=\"/foo\" rel=\"bar\"/><person lastname=\"Matthews\" firstname=\"Dave\"/></personResource>";
 
 	@Test

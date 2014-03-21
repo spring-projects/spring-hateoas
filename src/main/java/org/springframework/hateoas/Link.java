@@ -141,7 +141,6 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	@org.codehaus.jackson.annotate.JsonIgnore
 	@JsonIgnore
 	public List<String> getVariableNames() {
 		return getUriTemplate().getVariableNames();
@@ -152,7 +151,6 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	@org.codehaus.jackson.annotate.JsonIgnore
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
 		return getUriTemplate().getVariables();
@@ -163,7 +161,6 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	@org.codehaus.jackson.annotate.JsonIgnore
 	public boolean isTemplated() {
 		return !getUriTemplate().getVariables().isEmpty();
 	}
