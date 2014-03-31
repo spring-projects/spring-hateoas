@@ -41,14 +41,12 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import static net.javacrumbs.jsonunit.fluent.JsonAssert.assertThatJson;
 
 /**
  * Integration tests for marshalling of {@link VndErrors}.
  * 
  * @author Oliver Gierke
  */
-@SuppressWarnings("deprecation")
 public class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson2Mapper;

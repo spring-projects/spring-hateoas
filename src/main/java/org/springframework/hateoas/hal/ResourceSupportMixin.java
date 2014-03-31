@@ -22,12 +22,10 @@ import javax.xml.bind.annotation.XmlElement;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonPropertyOrder({"_links"})
 abstract class ResourceSupportMixin extends ResourceSupport {
 
 	@Override

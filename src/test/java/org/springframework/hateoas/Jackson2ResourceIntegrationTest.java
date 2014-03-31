@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.*;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import static net.javacrumbs.jsonunit.fluent.JsonAssert.assertThatJson;
 
 /**
  * Integration tests for {@link Resource}.
@@ -32,7 +31,7 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 		Resource<Person> resource = new Resource<Person>(person);
 		resource.add(new Link("localhost"));
 
-		assertThatJson(write(resource)).isEqualTo(REFERENCE);
+		assertThat(write(resource), is(REFERENCE));
 	}
 
 	/**
