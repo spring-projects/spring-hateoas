@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Value object to represent {@link MethodParameters} to allow to easily find the ones with a given annotation.
@@ -32,7 +34,20 @@ import org.springframework.util.Assert;
  */
 public class MethodParameters {
 
-	private static final ParameterNameDiscoverer DISCOVERER = new LocalVariableTableParameterNameDiscoverer();
+	private static final String SPRING_4_DISCOVERER_NAME = "org.springframework.core.DefaultParameterNameDiscoverer";
+	private static ParameterNameDiscoverer DISCOVERER;
+
+	static {
+
+		ClassLoader classLoader = MethodParameters.class.getClassLoader();
+
+		try {
+			Class<?> discovererType = ClassUtils.forName(SPRING_4_DISCOVERER_NAME, classLoader);
+			DISCOVERER = (ParameterNameDiscoverer) BeanUtils.instantiate(discovererType);
+		} catch (ClassNotFoundException o_O) {
+			DISCOVERER = new LocalVariableTableParameterNameDiscoverer();
+		}
+	}
 
 	private final List<MethodParameter> parameters;
 
@@ -91,6 +106,27 @@ public class MethodParameters {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns all parameters of the given type.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @return
+	 * @since 0.9
+	 */
+	public List<MethodParameter> getParametersOfType(Class<?> type) {
+
+		Assert.notNull(type, "Type must not be null!");
+		List<MethodParameter> result = new ArrayList<MethodParameter>();
+
+		for (MethodParameter parameter : getParameters()) {
+			if (parameter.getParameterType().equals(type)) {
+				result.add(parameter);
+			}
+		}
+
+		return result;
 	}
 
 	/**

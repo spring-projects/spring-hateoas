@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,25 @@ package org.springframework.hateoas;
 import org.springframework.plugin.core.Plugin;
 
 /**
+ * API to provide relation types for collections and items of the given type.
+ * 
  * @author Oliver Gierke
  */
 public interface RelProvider extends Plugin<Class<?>> {
 
-	String getSingleResourceRelFor(Class<?> type);
+	/**
+	 * Returns the relation type to be used to point to an item resource of the given type.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @return
+	 */
+	String getItemResourceRelFor(Class<?> type);
 
+	/**
+	 * Returns the relation type to be used to point to a collection resource of the given type.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @return
+	 */
 	String getCollectionResourceRelFor(Class<?> type);
 }

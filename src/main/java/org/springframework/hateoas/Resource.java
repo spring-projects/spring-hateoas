@@ -16,10 +16,14 @@
 package org.springframework.hateoas;
 
 import java.util.Arrays;
+import java.util.Collection;
 
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
  * A simple {@link Resource} wrapping a domain object and adding links to it.
@@ -29,8 +33,6 @@ import org.springframework.util.Assert;
 @XmlRootElement
 public class Resource<T> extends ResourceSupport {
 
-	@org.codehaus.jackson.annotate.JsonUnwrapped
-	@com.fasterxml.jackson.annotation.JsonUnwrapped
 	private final T content;
 
 	/**
@@ -59,6 +61,7 @@ public class Resource<T> extends ResourceSupport {
 	public Resource(T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
+		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
 		this.content = content;
 		this.add(links);
 	}
@@ -68,6 +71,8 @@ public class Resource<T> extends ResourceSupport {
 	 * 
 	 * @return the content
 	 */
+	@JsonUnwrapped
+	@XmlAnyElement
 	public T getContent() {
 		return content;
 	}

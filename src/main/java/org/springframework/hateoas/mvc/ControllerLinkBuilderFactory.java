@@ -56,8 +56,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
-	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new AnnotatedParametersParameterAccessor(
-			new AnnotationAttribute(RequestParam.class));
+	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
 
@@ -168,5 +167,29 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		return builder;
+	}
+
+	/**
+	 * Custom extension of {@link AnnotatedParametersParameterAccessor} for {@link RequestParam} to allow {@literal null}
+	 * values handed in for optional request parameters.
+	 * 
+	 * @author Oliver Gierke
+	 */
+	private static class RequestParamParameterAccessor extends AnnotatedParametersParameterAccessor {
+
+		public RequestParamParameterAccessor() {
+			super(new AnnotationAttribute(RequestParam.class));
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#verifyParameterValue(org.springframework.core.MethodParameter, java.lang.Object)
+		 */
+		@Override
+		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
+
+			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
+			return annotation.required() ? super.verifyParameterValue(parameter, value) : value;
+		}
 	}
 }

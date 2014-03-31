@@ -17,29 +17,37 @@ package org.springframework.hateoas.config;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkDiscoverers;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.core.DefaultLinkDiscoverer;
+import org.springframework.hateoas.config.HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.Jackson1HalModule;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -48,30 +56,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  */
+@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class EnableHypermediaSupportIntegrationTest {
 
 	@Test
 	public void bootstrapHalConfiguration() {
-
-		ApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
-		assertEntityLinksSetUp(context);
-		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(HalLinkDiscoverer.class)));
-
-		ObjectMapper mapper = context.getBean(ObjectMapper.class);
-		verify(mapper, times(1)).registerModule(Mockito.any(Jackson2HalModule.class));
-
-		org.codehaus.jackson.map.ObjectMapper jackson1Mapper = context.getBean(org.codehaus.jackson.map.ObjectMapper.class);
-		verify(jackson1Mapper, times(1)).registerModule(Mockito.any(Jackson1HalModule.class));
+		assertHalSetupForConfigClass(HalConfig.class);
 	}
 
 	@Test
-	public void bootstrapsDefaultConfiguration() {
+	public void registersLinkDiscoverers() {
 
-		ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
-		assertEntityLinksSetUp(context);
+		ApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+		LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+		assertThat(discoverers, is(notNullValue()));
+		assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON), is(instanceOf(HalLinkDiscoverer.class)));
 		assertRelProvidersSetUp(context);
-		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(DefaultLinkDiscoverer.class)));
+	}
+
+	@Test
+	public void foo() {
+		assertHalSetupForConfigClass(ExtendedHalConfig.class);
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -86,24 +93,88 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertThat(discoverers.values(), Matchers.<RelProvider> hasItem(instanceOf(DelegatingRelProvider.class)));
 	}
 
+	@SuppressWarnings({ "unchecked" })
+	private static void assertHalSetupForConfigClass(Class<?> configClass) {
+
+		ApplicationContext context = new AnnotationConfigApplicationContext(configClass);
+		assertEntityLinksSetUp(context);
+		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(HalLinkDiscoverer.class)));
+		assertThat(context.getBean(ObjectMapper.class), is(notNullValue()));
+
+		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
+		assertThat(rmha.getMessageConverters(),
+				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
+
+		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
+		assertThat(Arrays.asList(amha.getMessageConverters()),
+				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
+	}
+
+	/**
+	 * @see #134
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+
+		Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+		postProcessor.setBeanFactory(context);
+
+		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+
+		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+
+		boolean found = false;
+
+		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers().getResolvers()) {
+
+			if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
+
+				found = true;
+
+				AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
+				List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils.getField(
+						processor, "messageConverters");
+
+				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+			}
+		}
+
+		assertThat(found, is(true));
+	}
+
 	@Configuration
-	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	@Import(DelegateConfig.class)
 	static class HalConfig {
 
+		static int numberOfMessageConverters = 0;
+		static int numberOfMessageConvertersLegacy = 0;
+
 		@Bean
-		public ObjectMapper jackson2ObjectMapper() {
-			return mock(ObjectMapper.class);
+		public RequestMappingHandlerAdapter rmh() {
+			RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+			numberOfMessageConverters = adapter.getMessageConverters().size();
+			return adapter;
 		}
 
 		@Bean
-		public org.codehaus.jackson.map.ObjectMapper jackson1ObjectMapper() {
-			return mock(org.codehaus.jackson.map.ObjectMapper.class);
+		public AnnotationMethodHandlerAdapter amha() {
+			AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
+			numberOfMessageConvertersLegacy = adapter.getMessageConverters().length;
+			return adapter;
 		}
 	}
 
 	@Configuration
-	@EnableHypermediaSupport
-	static class DefaultConfig {
+	static class ExtendedHalConfig extends HalConfig {
+
+	}
+
+	@Configuration
+	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	static class DelegateConfig {
 
 	}
 }

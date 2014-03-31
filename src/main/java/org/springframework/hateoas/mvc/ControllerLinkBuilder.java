@@ -158,7 +158,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
-	 * request contains an {@code X-Forwarded-Host} header.
+	 * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
+	 * {@code X-Forwarded-Ssl} header
 	 * 
 	 * @return
 	 */
@@ -166,6 +167,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		HttpServletRequest request = getCurrentRequest();
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
+
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+
+		if (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+			builder.scheme("https");
+		}
 
 		String header = request.getHeader("X-Forwarded-Host");
 
@@ -195,6 +202,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	private static HttpServletRequest getCurrentRequest() {
 
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();

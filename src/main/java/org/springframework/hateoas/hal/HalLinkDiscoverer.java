@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.hal;
 
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 
@@ -26,6 +27,6 @@ import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 
 	public HalLinkDiscoverer() {
-		super("$_links..%s.href");
+		super("$_links..%s.href", MediaTypes.HAL_JSON);
 	}
 }

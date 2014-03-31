@@ -65,10 +65,39 @@ class AnnotatedParametersParameterAccessor {
 		List<BoundMethodParameter> result = new ArrayList<BoundMethodParameter>();
 
 		for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
-			result.add(new BoundMethodParameter(parameter, arguments[parameter.getParameterIndex()], attribute));
+
+			Object value = arguments[parameter.getParameterIndex()];
+			Object verifiedValue = verifyParameterValue(parameter, value);
+
+			if (verifiedValue != null) {
+				result.add(new BoundMethodParameter(parameter, value, attribute));
+			}
 		}
 
 		return result;
+	}
+
+	/**
+	 * Callback to verifiy the parameter values given for a dummy invocation. Default implementation rejects
+	 * {@literal null} values as they indicate an invalid dummy call.
+	 * 
+	 * @param parameter will never be {@literal null}.
+	 * @param value could be {@literal null}.
+	 * @return the verified value.
+	 */
+	protected Object verifyParameterValue(MethodParameter parameter, Object value) {
+
+		if (value == null) {
+
+			Object indexOrName = StringUtils.hasText(parameter.getParameterName()) ? parameter.getParameterName() : parameter
+					.getParameterIndex();
+
+			throw new IllegalArgumentException(String.format(
+					"Required controller parameter %s of method %s found but null value given!", indexOrName,
+					parameter.getMethod()));
+		}
+
+		return value;
 	}
 
 	/**

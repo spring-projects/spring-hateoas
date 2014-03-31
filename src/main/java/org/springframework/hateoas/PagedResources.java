@@ -24,6 +24,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * DTO to implement binding response representations of pageable collections.
  * 
@@ -34,8 +37,6 @@ public class PagedResources<T> extends Resources<T> {
 
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
-	@org.codehaus.jackson.annotate.JsonProperty("page")//
-	@com.fasterxml.jackson.annotation.JsonProperty("page")//
 	private PageMetadata metadata;
 
 	/**
@@ -73,6 +74,7 @@ public class PagedResources<T> extends Resources<T> {
 	 * 
 	 * @return the metadata
 	 */
+	@JsonProperty("page")
 	public PageMetadata getMetadata() {
 		return metadata;
 	}
@@ -103,8 +105,7 @@ public class PagedResources<T> extends Resources<T> {
 	 * @see #addPaginationLinks(Link)
 	 * @return
 	 */
-	@com.fasterxml.jackson.annotation.JsonIgnore
-	@org.codehaus.jackson.annotate.JsonIgnore
+	@JsonIgnore
 	public Link getNextLink() {
 		return getLink(Link.REL_NEXT);
 	}
@@ -115,8 +116,7 @@ public class PagedResources<T> extends Resources<T> {
 	 * @see #addPaginationLinks(Link)
 	 * @return
 	 */
-	@com.fasterxml.jackson.annotation.JsonIgnore
-	@org.codehaus.jackson.annotate.JsonIgnore
+	@JsonIgnore
 	public Link getPreviousLink() {
 		return getLink(Link.REL_PREVIOUS);
 	}
@@ -170,25 +170,10 @@ public class PagedResources<T> extends Resources<T> {
 	 */
 	public static class PageMetadata {
 
-		@XmlAttribute//
-		@org.codehaus.jackson.annotate.JsonProperty//
-		@com.fasterxml.jackson.annotation.JsonProperty//
-		private long size;
-
-		@XmlAttribute//
-		@org.codehaus.jackson.annotate.JsonProperty//
-		@com.fasterxml.jackson.annotation.JsonProperty//
-		private long totalElements;
-
-		@XmlAttribute//
-		@org.codehaus.jackson.annotate.JsonProperty//
-		@com.fasterxml.jackson.annotation.JsonProperty//
-		private long totalPages;
-
-		@XmlAttribute//
-		@org.codehaus.jackson.annotate.JsonProperty//
-		@com.fasterxml.jackson.annotation.JsonProperty//
-		private long number;
+		@XmlAttribute @JsonProperty private long size;
+		@XmlAttribute @JsonProperty private long totalElements;
+		@XmlAttribute @JsonProperty private long totalPages;
+		@XmlAttribute @JsonProperty private long number;
 
 		protected PageMetadata() {
 

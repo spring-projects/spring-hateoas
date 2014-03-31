@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.core;
+package org.springframework.hateoas;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.VndErrors.VndError;
 
 /**
- * Unit tests for {@link EvoInflectorRelProvider}.
+ * Unit tests for {@link VndErrors}.
  * 
  * @author Oliver Gierke
  */
-public class EvoInflectorRelProviderUnitTest {
-
-	RelProvider provider = new EvoInflectorRelProvider();
+public class VndErrorsUnitTest {
 
 	@Test
-	public void buildsCollectionRelCorrectly() {
-		assertRels(City.class, "city", "cities");
-		assertRels(Person.class, "person", "persons");
-	}
+	public void rendersToStringCorrectly() {
 
-	private void assertRels(Class<?> type, String singleRel, String collectionRel) {
-		assertThat(provider.getItemResourceRelFor(type), is(singleRel));
-		assertThat(provider.getCollectionResourceRelFor(type), is(collectionRel));
-	}
+		VndError error = new VndErrors.VndError("logref", "message", new Link("foo", "bar"));
+		assertThat(error.toString(), is("VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]"));
 
-	static class Person {
-
-	}
-
-	static class City {
-
+		VndErrors errors = new VndErrors(error);
+		assertThat(errors.toString(),
+				is("VndErrors[VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]]"));
 	}
 }

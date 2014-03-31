@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.ObjectUtils;
@@ -38,14 +39,16 @@ class HalEmbeddedBuilder {
 
 	private final Map<String, List<Object>> embeddeds = new HashMap<String, List<Object>>();
 	private final RelProvider provider;
+	private final boolean enforceCollections;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link RelProvider}.
 	 * 
 	 * @param provider can be {@literal null}.
 	 */
-	public HalEmbeddedBuilder(RelProvider provider) {
+	public HalEmbeddedBuilder(RelProvider provider, boolean enforceCollections) {
 		this.provider = provider;
+		this.enforceCollections = enforceCollections;
 	}
 
 	/**
@@ -56,37 +59,42 @@ class HalEmbeddedBuilder {
 	 */
 	public void add(Object value) {
 
-		Class<?> type = ObjectUtils.getResourceType(value);
+		Object unwrapped = ObjectUtils.getResourceType(value);
 
-		if (type == null) {
+		if (unwrapped == null) {
 			return;
 		}
 
-		String multiRel = getDefaultedRelFor(type, true);
-		List<Object> currentValue = embeddeds.get(multiRel);
+		String rel = getDefaultedRelFor(unwrapped, true);
+
+		if (!embeddeds.containsKey(rel)) {
+			rel = getDefaultedRelFor(unwrapped, enforceCollections);
+		}
+
+		List<Object> currentValue = embeddeds.get(rel);
 
 		if (currentValue == null) {
-			String singleRel = getDefaultedRelFor(type, false);
-			
-			if(embeddeds.containsKey(singleRel)) {
-				currentValue = embeddeds.remove(singleRel);
-				embeddeds.put(multiRel, currentValue);
-			} else {
-				currentValue = new ArrayList<Object>();
-				embeddeds.put(singleRel, currentValue);
-			}
+			ArrayList<Object> arrayList = new ArrayList<Object>();
+			arrayList.add(value);
+			embeddeds.put(rel, arrayList);
+		} else if (currentValue.size() == 1) {
+			currentValue.add(value);
+			embeddeds.remove(rel);
+			embeddeds.put(getDefaultedRelFor(unwrapped, true), currentValue);
+		} else {
+			currentValue.add(value);
 		}
-		
-		currentValue.add(value);
 	}
 
-	private String getDefaultedRelFor(Class<?> type, boolean forCollection) {
+	private String getDefaultedRelFor(Object value, boolean forCollection) {
 
 		if (provider == null) {
 			return DEFAULT_REL;
 		}
 
-		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getSingleResourceRelFor(type);
+		Class<?> type = AopUtils.getTargetClass(value);
+
+		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
 		return rel == null ? DEFAULT_REL : rel;
 	}
 

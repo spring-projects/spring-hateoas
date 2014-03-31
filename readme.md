@@ -11,12 +11,12 @@ The `Link` value object follows the Atom link definition and consists of a `rel`
 Link link = new Link("http://localhost:8080/something");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
 assertThat(link.getRel(), is(Link.SELF));
-    
+
 Link link = new Link("http://localhost:8080/something", "my-rel");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
 assertThat(link.getRel(), is("my-rel"));
 ```
-    
+
 ## Resources
 As pretty much every representation of a resource will contain some links (at least the `self` one) we provide a base class to actually inherit from when designing representation classes.
 ```java
@@ -26,7 +26,7 @@ class PersonResource extends ResourceSupport {
   String lastname;
 }
 ```
-    
+
 Inheriting from `ResourceSupport` will allow adding links easily:
 
 ```java
@@ -35,14 +35,14 @@ resource.firstname = "Dave";
 resource.lastname = "Matthews";
 resource.add(new Link("http://myhost/people"));
 ```
-    
+
 This would render as follows in JSON:
 ```java
 { firstname : "Dave",
   lastname : "Matthews",
   links : [ { rel : "self", href : "http://myhost/people" } ] }
 ```
-      
+
 … or slightly more verbose in XML …
 ```xml
 <person xmlns:atom="http://www.w3.org/2005/Atom">
@@ -53,7 +53,7 @@ This would render as follows in JSON:
   </links>
 </person>
 ```
-    
+
 You can also easily access links contained in that resource:
 ```java
 Link selfLink = new Link("http://myhost/people");
@@ -70,10 +70,10 @@ Assume you have your Spring MVC controllers implemented as follows:
 @Controller
 @RequestMapping("/people")
 class PersonController {
-  
+
   @RequestMapping(method = RequestMethod.GET)
   public HttpEntity<PersonResource> showAll() { … }
-  
+
   @RequestMapping(value = "/{person}", method = RequestMethod.GET)
   public HttpEntity<PersonResource> show(@PathVariable Long person) { … }
 }
@@ -108,13 +108,13 @@ assertThat(link.getHref(), endsWith("/people/1"));
 If your domain class implements the `Identifiable` interface the `slash(…)` method will rather invoke `getId()` on the given object instead of `toString()`. Thus the just shown link creation can be abbreviated to:
 
 ```java
-class Person implements Identifiable<Long> { 
-  public Long getId() { … } 
+class Person implements Identifiable<Long> {
+  public Long getId() { … }
 }
-    
+
 Link link = linkTo(PersonController.class).slash(person).withSelfRel();
 ```
-    
+
 The builder also allows creating URI instances to build up e.g. response header values:
 
 ```java
@@ -204,21 +204,21 @@ Spring Hateoas now provides a `ResourceAssemblerSupport` base class that helps r
 
 ```java
 class PersonResourceAssembler extends ResourceAssemblerSupport<Person, PersonResource> {
-  
+
   public PersonResourceAssembler() {
     super(PersonController.class, PersonResource.class);
   }
-  
+
   @Override
   public PersonResource toResource(Person person) {
-  
+
     PersonResource resource = createResource(person);
     // … do further mapping
     return resource;
   }
 }
 ```
-    
+
 Setting the class up like this gives you the following benefits: there are a hand full of `createResource(…)` methods that will allow you to create an instance of the resource and have it a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controllers request mapping plus the id of the `Identifiable` (e.g. `/people/1` in our case). The resource type gets instantiated by reflection and expects a no-arg constructor. Simply override `instantiateResource(…)` in case you'd like to use a dedicated constructor or avoid the reflection performance overhead.
 
 The assembler can then be used to either assemble a single resource or an `Iterable` of them:
@@ -257,7 +257,7 @@ assertThat(link.getHref(), is("/foo/bar"));
 ## RelProvider API
 When building links you usually need to determine the relation type to be used for the like. In most cases the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to lookup the relation types behind a `RelProvider` API that allows to determine the relation types for single and collection resources. Here's the algorithm the relation type is looked up:
 
-1. If the type is annotated with `@RelationType` we use the values configured in the annotation.
+1. If the type is annotated with `@Relation` we use the values configured in the annotation.
 1. if not, we default to the uncapitalized simple class name plus an appended `List` for the collection rel.
 1. in case the [EVO inflector](https://github.com/atteo/evo-inflector) JAR is in the classpath, we rather use the plural of the single resource rel provided by the pluralizing algorithm.
 1. `@Controller` classes annotated with `@ExposesResourceFor` (see section on [EntityLinks](#entitylinks) for details) will transparently lookup the relation types for the type configured in the annotation, so that you can use `relProvider.getSingleResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.

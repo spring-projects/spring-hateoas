@@ -26,16 +26,16 @@ public class JsonPathLinkDiscovererUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullPattern() {
-		new JsonPathLinkDiscoverer(null);
+		new JsonPathLinkDiscoverer(null, null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsPatternWithWithoutPlaceholder() {
-		new JsonPathLinkDiscoverer("$links");
+		new JsonPathLinkDiscoverer("$links", null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsPatternWithMultiplePlaceholders() {
-		new JsonPathLinkDiscoverer("$links%s%s");
+		new JsonPathLinkDiscoverer("$links%s%s", null);
 	}
 }

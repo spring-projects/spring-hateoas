@@ -31,16 +31,12 @@ public class ObjectUtils {
 	 * @param object can be {@literal null}.
 	 * @return
 	 */
-	public static Class<?> getResourceType(Object object) {
+	public static Object getResourceType(Object object) {
 
 		if (object instanceof Resource) {
-			return nullSafeType(((Resource<?>) object).getContent());
+			return ((Resource<?>) object).getContent();
 		}
 
-		return nullSafeType(object);
-	}
-
-	private static Class<?> nullSafeType(Object object) {
-		return object == null ? null : object.getClass();
+		return object;
 	}
 }

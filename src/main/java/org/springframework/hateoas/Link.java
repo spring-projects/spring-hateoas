@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,20 @@ package org.springframework.hateoas;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Value object for links.
@@ -34,8 +39,7 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
-@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
-@org.codehaus.jackson.map.annotate.JsonSerialize(include=org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion.NON_NULL)
+@JsonIgnoreProperties("templated")
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -48,10 +52,9 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
-	@XmlAttribute
-	private String rel;
-	@XmlAttribute
-	private String href;
+	@XmlAttribute private String rel;
+	@XmlAttribute private String href;
+	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -70,11 +73,22 @@ public class Link implements Serializable {
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(String href, String rel) {
+		this(new UriTemplate(href), rel);
+	}
 
-		Assert.hasText(href, "Href must not be null or empty!");
+	/**
+	 * Creates a new Link from the given {@link UriTemplate} and rel.
+	 * 
+	 * @param template must not be {@literal null}.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	public Link(UriTemplate template, String rel) {
+
+		Assert.notNull(template, "UriTempalte must not be null!");
 		Assert.hasText(rel, "Rel must not be null or empty!");
 
-		this.href = href;
+		this.template = template;
+		this.href = template.toString();
 		this.rel = rel;
 	}
 
@@ -112,13 +126,6 @@ public class Link implements Serializable {
 	public Link withRel(String rel) {
 		return new Link(href, rel);
 	}
-	
-	public Boolean getTemplated() {
-		if (href != null && href.indexOf('{') > -1) {
-			return Boolean.TRUE;
-		}
-		return null;
-	}
 
 	/**
 	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
@@ -127,6 +134,64 @@ public class Link implements Serializable {
 	 */
 	public Link withSelfRel() {
 		return withRel(Link.REL_SELF);
+	}
+
+	/**
+	 * Returns the variable names contained in the template.
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public List<String> getVariableNames() {
+		return getUriTemplate().getVariableNames();
+	}
+
+	/**
+	 * Returns all {@link TemplateVariables} contained in the {@link Link}.
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	public List<TemplateVariable> getVariables() {
+		return getUriTemplate().getVariables();
+	}
+
+	/**
+	 * Returns whether the link is templated.
+	 * 
+	 * @return
+	 */
+	public boolean isTemplated() {
+		return !getUriTemplate().getVariables().isEmpty();
+	}
+
+	/**
+	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
+	 * 
+	 * @param arguments
+	 * @return
+	 */
+	public Link expand(Object... arguments) {
+		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+	}
+
+	/**
+	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
+	 * 
+	 * @param arguments must not be {@literal null}.
+	 * @return
+	 */
+	public Link expand(Map<String, ? extends Object> arguments) {
+		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+	}
+
+	private UriTemplate getUriTemplate() {
+
+		if (template == null) {
+			this.template = new UriTemplate(href);
+		}
+
+		return template;
 	}
 
 	/* 

@@ -27,6 +27,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * General helper to easily create a wrapper for a collection of entities.
  * 
@@ -35,8 +37,6 @@ import org.springframework.util.Assert;
 @XmlRootElement(name = "entities")
 public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
-	@XmlAnyElement
-	@XmlElementWrapper
 	private final Collection<T> content;
 
 	/**
@@ -98,8 +98,9 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * 
 	 * @return the content will never be {@literal null}.
 	 */
-	@org.codehaus.jackson.annotate.JsonProperty("content")
-	@com.fasterxml.jackson.annotation.JsonProperty("content")
+	@XmlAnyElement
+	@XmlElementWrapper
+	@JsonProperty("content")
 	public Collection<T> getContent() {
 		return Collections.unmodifiableCollection(content);
 	}

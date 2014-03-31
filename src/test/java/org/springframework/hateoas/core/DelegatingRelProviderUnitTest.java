@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
 
 /**
+ * Unit tests for {@link DelegatingRelProvider}.
+ * 
  * @author Oliver Gierke
  */
 public class DelegatingRelProviderUnitTest {
@@ -40,11 +42,11 @@ public class DelegatingRelProviderUnitTest {
 		RelProvider delegatingProvider = new DelegatingRelProvider(registry);
 
 		assertThat(delegatingProvider.supports(Sample.class), is(true));
-		assertThat(delegatingProvider.getSingleResourceRelFor(Sample.class), is("foo"));
+		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class), is("foo"));
 		assertThat(delegatingProvider.getCollectionResourceRelFor(Sample.class), is("bar"));
 
 		assertThat(delegatingProvider.supports(String.class), is(true));
-		assertThat(delegatingProvider.getSingleResourceRelFor(String.class), is("string"));
+		assertThat(delegatingProvider.getItemResourceRelFor(String.class), is("string"));
 		assertThat(delegatingProvider.getCollectionResourceRelFor(String.class), is("stringList"));
 	}
 

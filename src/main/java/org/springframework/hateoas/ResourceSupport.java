@@ -16,12 +16,14 @@
 package org.springframework.hateoas;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
 import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Base class for DTOs to collect links.
@@ -30,7 +32,6 @@ import org.springframework.util.Assert;
  */
 public class ResourceSupport implements Identifiable<Link> {
 
-	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
 	private final List<Link> links;
 
 	public ResourceSupport() {
@@ -40,8 +41,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	/**
 	 * Returns the {@link Link} with a rel of {@link Link#REL_SELF}.
 	 */
-	@org.codehaus.jackson.annotate.JsonIgnore
-	@com.fasterxml.jackson.annotation.JsonIgnore
+	@JsonIgnore
 	public Link getId() {
 		return getLink(Link.REL_SELF);
 	}
@@ -92,10 +92,10 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * 
 	 * @return
 	 */
-	@org.codehaus.jackson.annotate.JsonProperty("links")
-	@com.fasterxml.jackson.annotation.JsonProperty("links")
+	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
+	@JsonProperty("links")
 	public List<Link> getLinks() {
-		return Collections.unmodifiableList(links);
+		return links;
 	}
 
 	/**

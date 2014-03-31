@@ -72,9 +72,7 @@ public class PagedResourcesMarshallingTest {
 		assertThat(actual, is(pagedResources));
 	}
 
-	public static class Inner {
-
-	}
+	public static class Inner {}
 
 	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {
 

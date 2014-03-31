@@ -30,7 +30,7 @@ import org.springframework.core.MethodParameter;
  * 
  * @author Oliver Gierke
  */
-public class MethodParametersUnitTests {
+public class MethodParametersUnitTest {
 
 	@Test
 	public void prefersAnnotatedParameterOverDiscovered() throws Exception {

@@ -18,12 +18,15 @@ package org.springframework.hateoas;
 import java.io.InputStream;
 import java.util.List;
 
+import org.springframework.http.MediaType;
+import org.springframework.plugin.core.Plugin;
+
 /**
  * Interface to allow discovering links by relation type from some source.
  * 
  * @author Oliver Gierke
  */
-public interface LinkDiscoverer {
+public interface LinkDiscoverer extends Plugin<MediaType> {
 
 	/**
 	 * Finds a single link with the given relation type in the given {@link String} representation.
