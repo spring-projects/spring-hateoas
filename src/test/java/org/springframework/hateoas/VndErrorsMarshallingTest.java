@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * 
  * @author Oliver Gierke
  */
-@SuppressWarnings("deprecation")
 public class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson2Mapper;
