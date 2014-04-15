@@ -174,13 +174,13 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			builder.scheme("https");
 		}
 
-		String header = request.getHeader("X-Forwarded-Host");
+		String host = request.getHeader("X-Forwarded-Host");
 
-		if (!StringUtils.hasText(header)) {
+		if (!StringUtils.hasText(host)) {
 			return builder;
 		}
 
-		String[] hosts = StringUtils.commaDelimitedListToStringArray(header);
+		String[] hosts = StringUtils.commaDelimitedListToStringArray(host);
 		String hostToUse = hosts[0];
 
 		if (hostToUse.contains(":")) {
@@ -192,6 +192,13 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		} else {
 			builder.host(hostToUse);
+			builder.port(-1); // reset port if it was forwarded from default port
+		}
+
+		String port = request.getHeader("X-Forwarded-Port");
+
+		if (StringUtils.hasText(port)) {
+			builder.port(Integer.parseInt(port));
 		}
 
 		return builder;

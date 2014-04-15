@@ -29,6 +29,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -293,6 +294,34 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsMissingRequiredRequestParam() {
 		linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null));
+	}
+
+	/**
+	 * @see #170
+	 */
+	@Test
+	public void usesForwardedPortFromHeader() {
+
+		request.addHeader("X-Forwarded-Host", "foobarhost");
+		request.addHeader("X-Forwarded-Port", "9090");
+		request.setServerPort(8080);
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+
+		assertThat(link.getHref(), startsWith("http://foobarhost:9090/"));
+	}
+
+	/**
+	 * @see #170
+	 */
+	@Test
+	public void usesForwardedHostFromHeaderWithDefaultPort() {
+
+		request.addHeader("X-Forwarded-Host", "foobarhost");
+		request.setServerPort(8080);
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://foobarhost/"));
 	}
 
 	private static UriComponents toComponents(Link link) {
