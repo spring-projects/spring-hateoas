@@ -1,5 +1,12 @@
 Spring HATEOAS Changelog
-=========================
+========================
+
+Changes in version 0.10.0.RELEASE (2014-05-01)
+----------------------------------------------
+- #173 - Release 0.110.
+- #172 - Link should be serializable.
+- #170 - Proxy header detection should honor X-Forwarded-Port.
+- #114 - linkTo(methodOn()) problem when method is defined by super class of controller.
 
 Changes in version 0.10.0.RELEASE (2014-03-30)
 ----------------------------------------------
