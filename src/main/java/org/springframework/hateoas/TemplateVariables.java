@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,9 +30,10 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
-public final class TemplateVariables implements Iterable<TemplateVariable> {
+public final class TemplateVariables implements Iterable<TemplateVariable>, Serializable {
 
 	public static TemplateVariables NONE = new TemplateVariables();
+	private static final long serialVersionUID = -7736592281223783079L;
 
 	private final List<TemplateVariable> variables;
 
@@ -112,6 +114,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable> {
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 
 		if (variables.isEmpty()) {

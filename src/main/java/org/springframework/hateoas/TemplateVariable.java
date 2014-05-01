@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,7 +27,9 @@ import org.springframework.util.StringUtils;
  * 
  * @author Oliver Gierke
  */
-public final class TemplateVariable {
+public final class TemplateVariable implements Serializable {
+
+	private static final long serialVersionUID = -2731446749851863774L;
 
 	private final String name;
 	private final TemplateVariable.VariableType type;

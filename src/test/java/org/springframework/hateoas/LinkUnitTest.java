@@ -18,6 +18,10 @@ package org.springframework.hateoas;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
 /**
@@ -145,5 +149,18 @@ public class LinkUnitTest {
 
 		assertThat(link.isTemplated(), is(false));
 		assertThat(link.getVariableNames(), hasSize(0));
+	}
+
+	/**
+	 * @see #172
+	 */
+	@Test
+	public void serializesCorrectly() throws IOException {
+
+		Link link = new Link("http://foobar{?foo,bar}");
+
+		ObjectOutputStream stream = new ObjectOutputStream(new ByteArrayOutputStream());
+		stream.writeObject(link);
+		stream.close();
 	}
 }

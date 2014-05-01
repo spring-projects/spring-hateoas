@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,9 +37,10 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @see http://tools.ietf.org/html/rfc6570
  * @since 0.9
  */
-public class UriTemplate implements Iterable<TemplateVariable> {
+public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,]+)\\}");
+	private static final long serialVersionUID = -1007874653930162262L;
 
 	private final TemplateVariables variables;;
 	private String baseUri;
