@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,4 +39,14 @@ public interface MappingDiscoverer {
 	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
 	 */
 	String getMapping(Method method);
+
+	/**
+	 * Returns the mapping for the given {@link Method} invoked on the given type. This can be used to calculate the
+	 * mapping for a super type method being invoked on a sub-type with a type mapping.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
+	 */
+	String getMapping(Class<?> type, Method method);
 }

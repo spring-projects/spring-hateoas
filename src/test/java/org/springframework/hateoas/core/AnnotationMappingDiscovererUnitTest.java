@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,26 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method), is("/type"));
 	}
 
+	/**
+	 * @see #114
+	 */
+	@Test
+	public void detectsClassMappingOnSuperType() throws Exception {
+
+		Method method = ChildController.class.getMethod("mapping");
+		assertThat(discoverer.getMapping(method), is("/parent/child"));
+	}
+
+	/**
+	 * @see #114
+	 */
+	@Test
+	public void includesTypeMappingFromChildClass() throws Exception {
+
+		Method method = ParentWithMethod.class.getMethod("mapping");
+		assertThat(discoverer.getMapping(ChildWithTypeMapping.class, method), is("/child/parent"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -99,4 +119,24 @@ public class AnnotationMappingDiscovererUnitTest {
 		@RequestMapping("/method")
 		void method();
 	}
+
+	@RequestMapping("/parent")
+	interface ParentController {
+
+	}
+
+	interface ChildController extends ParentController {
+
+		@RequestMapping("/child")
+		void mapping();
+	}
+
+	interface ParentWithMethod {
+
+		@RequestMapping("/parent")
+		void mapping();
+	}
+
+	@RequestMapping("/child")
+	interface ChildWithTypeMapping extends ParentWithMethod {}
 }

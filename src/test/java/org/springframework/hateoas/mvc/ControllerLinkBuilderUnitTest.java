@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -324,6 +323,26 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("http://foobarhost/"));
 	}
 
+	/**
+	 * @see #114
+	 */
+	@Test
+	public void discoversParentClassTypeMappingForInvocation() {
+
+		Link link = linkTo(methodOn(ChildController.class).myMethod()).withSelfRel();
+		assertThat(link.getHref(), endsWith("/parent/child"));
+	}
+
+	/**
+	 * @see #114
+	 */
+	@Test
+	public void includesTypeMappingFromChildClass() {
+
+		Link link = linkTo(methodOn(ChildWithTypeMapping.class).myMethod()).withSelfRel();
+		assertThat(link.getHref(), endsWith("/child/parent"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
@@ -339,13 +358,9 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@RequestMapping("/people")
-	interface PersonController {
+	interface PersonController {}
 
-	}
-
-	class PersonControllerImpl implements PersonController {
-
-	}
+	class PersonControllerImpl implements PersonController {}
 
 	@RequestMapping("/people/{id}/addresses")
 	static class PersonsAddressesController {
@@ -400,4 +415,22 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 	}
+
+	@RequestMapping("/parent")
+	interface ParentController {}
+
+	interface ChildController extends ParentController {
+
+		@RequestMapping("/child")
+		Object myMethod();
+	}
+
+	interface ParentWithMethod {
+
+		@RequestMapping("/parent")
+		Object myMethod();
+	}
+
+	@RequestMapping("/child")
+	interface ChildWithTypeMapping extends ParentWithMethod {}
 }

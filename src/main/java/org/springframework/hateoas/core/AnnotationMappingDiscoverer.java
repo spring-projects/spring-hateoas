@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	@Override
 	public String getMapping(Class<?> type) {
 
+		Assert.notNull(type, "Type must not be null!");
+
 		String[] mapping = getMappingFrom(findAnnotation(type, annotationType));
 
 		if (mapping.length > 1) {
@@ -80,6 +82,20 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	@Override
 	public String getMapping(Method method) {
 
+		Assert.notNull(method, "Method must not be null!");
+		return getMapping(method.getDeclaringClass(), method);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
+	 */
+	@Override
+	public String getMapping(Class<?> type, Method method) {
+
+		Assert.notNull(type, "Type must not be null!");
+		Assert.notNull(method, "Method must not be null!");
+
 		String[] mapping = getMappingFrom(findAnnotation(method, annotationType));
 
 		if (mapping.length > 1) {
@@ -87,7 +103,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 					method.toString()));
 		}
 
-		String typeMapping = getMapping(method.getDeclaringClass());
+		String typeMapping = getMapping(type);
 
 		if (mapping == null || mapping.length == 0) {
 			return typeMapping;
