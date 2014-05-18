@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Unit tests for {@link LinkBuilderSupport}.
  * 
  * @author Oliver Gierke
+ * @author Kamill Sokol
  */
 public class LinkBuilderSupportUnitTest extends TestUtils {
 
@@ -48,6 +49,8 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 		assertThat(builder.toString(), endsWith("foo/bar#foo"));
 		builder = builder.slash("#");
 		assertThat(builder.toString(), endsWith("foo/bar#foo"));
+		builder = builder.slash("foo bar");
+		assertThat(builder.toString(), endsWith("foo%20bar#foo"));
 	}
 
 	static class SampleLinkBuilder extends LinkBuilderSupport<SampleLinkBuilder> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -39,6 +40,7 @@ import org.springframework.web.util.UriTemplate;
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
  * 
  * @author Oliver Gierke
+ * @author Kamill Sokol
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -79,9 +81,11 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
-		UriTemplate template = new UriTemplate(mapping == null ? "/" : mapping);
 
-		return builder.slash(template.expand(parameters));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+
+		return builder.slash(expandedComponents);
 	}
 
 	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {

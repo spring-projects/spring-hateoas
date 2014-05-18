@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
 
 /**
  * {@link LinkBuilder} to derive URI mappings from a JAX-RS {@link Path} annotation.
  * 
  * @author Oliver Gierke
+ * @author Kamill Sokol
  */
 public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
@@ -66,8 +67,9 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(service));
-		return builder.slash(template.expand(parameters));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(service)).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+		return builder.slash(expandedComponents);
 	}
 
 	/* 

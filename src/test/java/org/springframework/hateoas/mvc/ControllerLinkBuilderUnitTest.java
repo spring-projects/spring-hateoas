@@ -42,6 +42,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  * @author Oliver Gierke
  * @author Dietrich Schulten
+ * @author Kamill Sokol
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -341,6 +342,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ChildWithTypeMapping.class).myMethod()).withSelfRel();
 		assertThat(link.getHref(), endsWith("/child/parent"));
+	}
+
+	/**
+	 * @see #96
+	 */
+	@Test
+	public void linksToMethodWithPathVariableContainingBlank() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/something/with%20blank/foo"));
 	}
 
 	private static UriComponents toComponents(Link link) {

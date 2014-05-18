@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.core;
 
+import static org.springframework.web.util.UriComponentsBuilder.*;
+
 import java.net.URI;
 
 import org.springframework.hateoas.Identifiable;
@@ -30,6 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  * @author Ricardo Gladwell
  * @author Oliver Gierke
+ * @author Kamill Sokol
  */
 public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkBuilder {
 
@@ -70,8 +73,11 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return getThis();
 		}
 
+		String uriString = uriComponents.toUriString();
+		UriComponentsBuilder builder = uriString.isEmpty() ? fromUri(uriComponents.toUri())
+				: fromUriString(uriString);
+
 		UriComponents components = UriComponentsBuilder.fromUriString(path).build();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uriComponents.toUri());
 
 		for (String pathSegment : components.getPathSegments()) {
 			builder.pathSegment(pathSegment);

@@ -50,6 +50,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Dietrich Schulten
+ * @author Kamill Sokol
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
@@ -133,7 +134,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		UriComponents components = applyUriComponentsContributer(builder, invocation).buildAndExpand(values);
-		return new ControllerLinkBuilder(UriComponentsBuilder.fromUri(components.toUri()));
+		return new ControllerLinkBuilder(UriComponentsBuilder.fromUriString(components.toUriString()));
 	}
 
 	/* 
