@@ -48,7 +48,9 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 		assertThat(builder.toString(), endsWith("foo/bar#foo"));
 		builder = builder.slash("#");
 		assertThat(builder.toString(), endsWith("foo/bar#foo"));
-	}
+		builder = builder.slash("foo bar");
+		assertThat(builder.toString(), endsWith("foo%20bar#foo"));
+    }
 
 	static class SampleLinkBuilder extends LinkBuilderSupport<SampleLinkBuilder> {
 

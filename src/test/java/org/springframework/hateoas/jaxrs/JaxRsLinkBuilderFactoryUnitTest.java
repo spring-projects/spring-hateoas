@@ -37,6 +37,18 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/people/15/addresses"));
 	}
 
+	/**
+	 * @see #96
+	 */
+	@Test
+	public void createsLinkToParameterizedServiceRootWithUrlEncoding() {
+
+		Link link = factory.linkTo(PersonsAddressesService.class, "with blank").withSelfRel();
+
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
+	}
+
 	@Path("/people")
 	interface PersonService {
 

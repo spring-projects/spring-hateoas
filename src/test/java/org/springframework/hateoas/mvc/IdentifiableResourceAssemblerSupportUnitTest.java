@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,22 +39,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
-	PersonResourceAssembler assembler = new PersonResourceAssembler();
-	Person person;
+	PersonResourceAssembler<Long> assemblerForLongId = new PersonResourceAssembler<Long>();
+	PersonResourceAssembler<String> assemblerForStringId = new PersonResourceAssembler<String>();
+	Person<Long> personWithLongId;
+	Person<String> personWithStringId;
 
 	@Override
 	@Before
 	public void setUp() {
 		super.setUp();
-		this.person = new Person();
-		this.person.id = 10L;
-		this.person.alternateId = "id";
+		this.personWithLongId = new Person<Long>();
+		this.personWithLongId.id = 10L;
+		this.personWithLongId.alternateId = "id";
+
+		this.personWithStringId = new Person<String>();
+		this.personWithStringId.id = "firstname lastname";
+		this.personWithStringId.alternateId = "with blank";
 	}
 
 	@Test
 	public void createsInstanceWithSelfLinkToController() {
 
-		PersonResource resource = assembler.createResource(person);
+		PersonResource resource = assemblerForLongId.createResource(personWithLongId);
 		Link link = resource.getLink(Link.REL_SELF);
 
 		assertThat(link, is(notNullValue()));
@@ -63,29 +70,46 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	@Test
 	public void usesAlternateIdIfGivenExplicitly() {
 
-		PersonResource resource = assembler.createResourceWithId(person.alternateId, person);
+		PersonResource resource = assemblerForLongId.createResourceWithId(personWithLongId.alternateId, personWithLongId);
 		Link selfLink = resource.getId();
 		assertThat(selfLink.getHref(), endsWith("/people/id"));
 	}
 
 	@Test
+	public void usesAlternateIdIfGivenExplicitlyWithEncoding() {
+
+		PersonResource resource = assemblerForStringId.createResourceWithId(personWithStringId.alternateId, personWithStringId);
+		Link selfLink = resource.getId();
+		assertThat(selfLink.getHref(), endsWith("/people/with%20blank"));
+	}
+
+	@Test
 	public void unwrapsIdentifyablesForParameters() {
 
-		PersonResource resource = new PersonResourceAssembler(ParameterizedController.class).createResource(person, person,
+		PersonResource resource = new PersonResourceAssembler<Long>(ParameterizedController.class).createResource(personWithLongId, personWithLongId,
 				"bar");
 		Link selfLink = resource.getId();
 		assertThat(selfLink.getHref(), endsWith("/people/10/bar/addresses/10"));
 	}
 
 	@Test
+	public void unwrapsIdentifyablesForParametersWithEncoding() {
+
+		PersonResource resource = new PersonResourceAssembler<String>(ParameterizedController.class).createResource(personWithStringId, personWithStringId,
+				"bar");
+		Link selfLink = resource.getId();
+		assertThat(selfLink.getHref(), endsWith("/people/firstname%20lastname/bar/addresses/firstname%20lastname"));
+	}
+
+	@Test
 	public void convertsEntitiesToResources() {
 
-		Person first = new Person();
+		Person<Long> first = new Person<Long>();
 		first.id = 1L;
-		Person second = new Person();
+		Person<Long> second = new Person<Long>();
 		second.id = 2L;
 
-		List<PersonResource> result = assembler.toResources(Arrays.asList(first, second));
+		List<PersonResource> result = assemblerForLongId.toResources(Arrays.asList(first, second));
 
 		LinkBuilder builder = linkTo(PersonController.class);
 
@@ -109,13 +133,13 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 	}
 
-	static class Person implements Identifiable<Long> {
+	static class Person<ID extends Serializable> implements Identifiable<ID> {
 
-		Long id;
+		ID id;
 		String alternateId;
 
 		@Override
-		public Long getId() {
+		public ID getId() {
 			return id;
 		}
 	}
@@ -124,7 +148,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 	}
 
-	class PersonResourceAssembler extends IdentifiableResourceAssemblerSupport<Person, PersonResource> {
+	class PersonResourceAssembler<ID extends Serializable> extends IdentifiableResourceAssemblerSupport<Person<ID>, PersonResource> {
 
 		public PersonResourceAssembler() {
 			this(PersonController.class);

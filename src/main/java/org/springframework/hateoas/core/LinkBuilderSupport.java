@@ -70,8 +70,15 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return getThis();
 		}
 
+		UriComponentsBuilder builder;
+
+		if(uriComponents.toUriString().isEmpty()) {
+			builder = UriComponentsBuilder.fromUri(uriComponents.toUri());
+		} else {
+			builder = UriComponentsBuilder.fromUriString(uriComponents.toUriString());
+		}
+
 		UriComponents components = UriComponentsBuilder.fromUriString(path).build();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uriComponents.toUri());
 
 		for (String pathSegment : components.getPathSegments()) {
 			builder.pathSegment(pathSegment);

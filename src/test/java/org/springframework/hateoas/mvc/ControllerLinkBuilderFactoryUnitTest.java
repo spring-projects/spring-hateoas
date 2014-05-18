@@ -18,6 +18,8 @@ package org.springframework.hateoas.mvc;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.core.DummyInvocationUtils.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.Arrays;
 
@@ -30,6 +32,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
+import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.ControllerWithMethods;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddressesController;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,6 +94,30 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
 		assertThat(link.getHref(), endsWith("/sample/" + ISODateTimeFormat.date().print(now)));
+	}
+
+	/**
+	 * @see #96
+	 */
+	@Test
+	public void linksToMethodWithPathVariableContainingBlank() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/something/with%20blank/foo"));
+	}
+
+	/**
+	 * @see #96
+	 */
+	@Test
+	public void createsLinkToParameterizedControllerRootContainingBlank() {
+
+		Link link = factory.linkTo(PersonsAddressesController.class, "with blank").withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
 	}
 
 	static interface SampleController {
