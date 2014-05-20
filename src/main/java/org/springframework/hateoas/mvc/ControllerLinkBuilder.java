@@ -32,6 +32,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -79,9 +80,11 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
-		UriTemplate template = new UriTemplate(mapping == null ? "/" : mapping);
 
-		return builder.slash(template.expand(parameters));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+
+		return builder.slash(expandedComponents);
 	}
 
 	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {

@@ -16,6 +16,8 @@
 package org.springframework.hateoas;
 
 import static org.hamcrest.CoreMatchers.*;
+
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.junit.Assert.*;
 
 import java.io.FileInputStream;
@@ -90,7 +92,7 @@ public class VndErrorsMarshallingTest {
 	 */
 	@Test
 	public void jackson2Marshalling() throws Exception {
-		assertThat(jackson2Mapper.writeValueAsString(errors), is(json2Reference));
+		assertThat(jackson2Mapper.writeValueAsString(errors), equalToIgnoringWhiteSpace(json2Reference));
 	}
 
 	/**

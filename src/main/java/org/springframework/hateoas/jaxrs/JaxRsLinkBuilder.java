@@ -22,6 +22,7 @@ import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
@@ -66,8 +67,9 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(service));
-		return builder.slash(template.expand(parameters));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(service)).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+		return builder.slash(expandedComponents);
 	}
 
 	/* 
