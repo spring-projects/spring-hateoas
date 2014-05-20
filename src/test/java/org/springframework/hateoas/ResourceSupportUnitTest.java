@@ -133,4 +133,14 @@ public class ResourceSupportUnitTest {
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
+
+	/**
+	 * @see #178
+	 */
+	@Test
+	public void doesNotEqualNull() {
+
+		ResourceSupport support = new ResourceSupport();
+		assertThat(support.equals(null), is(false));
+	}
 }

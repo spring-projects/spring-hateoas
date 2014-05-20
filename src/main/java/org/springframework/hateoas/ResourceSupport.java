@@ -142,7 +142,7 @@ public class ResourceSupport implements Identifiable<Link> {
 			return true;
 		}
 
-		if (!obj.getClass().equals(this.getClass())) {
+		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
 
