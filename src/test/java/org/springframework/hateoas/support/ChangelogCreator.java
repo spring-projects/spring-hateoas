@@ -30,7 +30,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 11;
+	private static final int MILESTONE_ID = 12;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) throws Exception {
@@ -47,7 +47,9 @@ class ChangelogCreator {
 		System.out.println("Milestone - " + JsonPath.read(response, "$[1].milestone.title"));
 
 		for (Object title : titles) {
-			System.out.println(String.format("- #%s - %s", ids.next(), title));
+
+			String format = String.format("- #%s - %s", ids.next(), title);
+			System.out.println(format.endsWith(".") ? format : format.concat("."));
 		}
 	}
 }

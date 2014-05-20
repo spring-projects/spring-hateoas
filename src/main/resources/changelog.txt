@@ -1,9 +1,18 @@
 Spring HATEOAS Changelog
 ========================
 
-Changes in version 0.10.0.RELEASE (2014-05-01)
+Changes in version 0.12.0.RELEASE (2014-05-20)
 ----------------------------------------------
-- #173 - Release 0.110.
+- #180 - Traverson is not expanding URI template on final call correctly.
+- #179 - Fix double encoding in LinkBuilderSupport.
+- #178 - Potential NullPointerException in ResourceSupport.
+- #177 - Fix typo in readme.
+- #131 - Add support for client side service traversing.
+- #96 - LinkBuilderSupport double encoding URL.
+
+Changes in version 0.11.0.RELEASE (2014-05-01)
+----------------------------------------------
+- #173 - Release 0.11.
 - #172 - Link should be serializable.
 - #170 - Proxy header detection should honor X-Forwarded-Port.
 - #114 - linkTo(methodOn()) problem when method is defined by super class of controller.
