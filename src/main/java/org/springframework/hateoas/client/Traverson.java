@@ -46,6 +46,7 @@ import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
@@ -103,6 +104,7 @@ public class Traverson {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
@@ -197,7 +199,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type, templateParameters).getBody();
+			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -210,7 +212,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type, templateParameters).getBody();
+			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -224,7 +226,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = template.getForObject(traverseToFinalUrl(), String.class, templateParameters);
+			String forObject = template.getForObject(traverseToFinalUrl(), String.class);
 			return JsonPath.read(forObject, jsonPath);
 		}
 
@@ -237,11 +239,14 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return template.getForEntity(traverseToFinalUrl(), type, templateParameters);
+
+			return template.getForEntity(traverseToFinalUrl(), type);
 		}
 
 		private String traverseToFinalUrl() {
-			return getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
+
+			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
+			return new UriTemplate(uri).expand(templateParameters).toString();
 		}
 
 		private String getAndFindLinkWithRel(String uri, Iterator<String> rels) {
