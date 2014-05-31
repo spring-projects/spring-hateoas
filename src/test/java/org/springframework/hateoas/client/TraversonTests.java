@@ -29,6 +29,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 /**
@@ -118,6 +119,44 @@ public class TraversonTests {
 		Resource<Actor> result = traverson.follow("movies", "movie", "actor").toObject(typeReference);
 
 		assertThat(result.getContent().name, is("Keanu Reaves"));
+	}
+
+	/**
+	 * @see #187
+	 */
+	@Test
+	public void sendsConfiguredHeadersForJsonPathExpression() {
+
+		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Link", expectedHeader);
+
+		assertThat(traverson.follow("movies", "movie", "actor").//
+				withHeaders(headers).<String> toObject("$.name"), is("Keanu Reaves"));
+
+		verifyThatRequest(). //
+				havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4"). //
+				havingHeader("Link", hasItem(expectedHeader));
+	}
+
+	/**
+	 * @see #187
+	 */
+	@Test
+	public void sendsConfiguredHeadersForToEntity() {
+
+		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Link", expectedHeader);
+
+		traverson.follow("movies", "movie", "actor").//
+				withHeaders(headers).toEntity(Actor.class);
+
+		verifyThatRequest(). //
+				havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4"). //
+				havingHeader("Link", hasItem(expectedHeader));
 	}
 
 	private void setUpActors() {

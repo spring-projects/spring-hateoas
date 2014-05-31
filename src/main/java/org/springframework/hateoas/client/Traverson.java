@@ -56,6 +56,7 @@ import com.jayway.jsonpath.JsonPath;
  * 
  * @see https://github.com/basti1302/traverson
  * @author Oliver Gierke
+ * @author Dietrich Schulten
  * @since 0.11
  */
 public class Traverson {
@@ -226,7 +227,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = template.getForObject(traverseToFinalUrl(), String.class);
+			String forObject = template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), String.class).getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
 
@@ -239,8 +240,7 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-
-			return template.getForEntity(traverseToFinalUrl(), type);
+			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type);
 		}
 
 		private String traverseToFinalUrl() {
