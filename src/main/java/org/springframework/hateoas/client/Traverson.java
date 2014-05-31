@@ -226,7 +226,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = template.getForObject(traverseToFinalUrl(), String.class);
+			String forObject = template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), String.class).getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
 
