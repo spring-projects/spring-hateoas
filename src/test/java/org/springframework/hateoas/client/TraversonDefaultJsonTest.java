@@ -15,9 +15,10 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static net.jadler.Jadler.verifyThatRequest;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,31 +26,74 @@ import java.net.URI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.DefaultLinkDiscoverer;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.plugin.core.config.EnablePluginRegistries;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
- * Integration tests for {@link Traverson}.
+ * Integration tests for default json format with {@link Traverson}.
  * 
- * @author Oliver Gierke
- * @since 0.11
+ * @author Dietrich Schulten
+ * @since 0.12
  */
-public class TraversonTests {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(loader=AnnotationConfigContextLoader.class)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+public class TraversonDefaultJsonTest {
 
+	
+	@Autowired
 	URI baseUri;
-	HalServer server;
+	
+	@Autowired
+	DefaultJsonServer server;
+	
+	@Autowired
 	Traverson traverson;
+	
+	@Configuration
+	@EnablePluginRegistries(LinkDiscoverer.class)
+  static class ContextConfiguration {
+
+      @Bean
+      public Traverson traverson() {      		
+          return new Traverson(uri(), MediaType.APPLICATION_JSON);
+      }
+      
+      @Bean
+      public DefaultLinkDiscoverer defaultLinkDiscoverer() {
+      	return new DefaultLinkDiscoverer();
+      }
+      
+      @Bean
+      public DefaultJsonServer server() {
+      	DefaultJsonServer server = new DefaultJsonServer();
+      	return server;
+      }
+      
+      
+      @Bean
+      public URI uri() {
+      	return URI.create(server().rootResource());
+      }
+  }
+
 
 	@Before
 	public void setUp() {
-
-		this.server = new HalServer();
-		this.baseUri = URI.create(server.rootResource());
-		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
-
 		setUpActors();
 	}
 
@@ -60,25 +104,6 @@ public class TraversonTests {
 		}
 	}
 
-	/**
-	 * @see #131
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullBaseUri() {
-		new Traverson(null, MediaTypes.HAL_JSON);
-	}
-
-	/**
-	 * @see #131
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsEmptyMediaTypes() {
-		new Traverson(baseUri, new MediaType[0]);
-	}
-
-	/**
-	 * @see #131
-	 */
 	@Test
 	public void sendsConfiguredMediaTypesInAcceptHeader() {
 
@@ -86,7 +111,7 @@ public class TraversonTests {
 
 		verifyThatRequest(). //
 				havingPathEqualTo("/"). //
-				havingHeader("Accept", hasItem("application/hal+json")).receivedOnce();;
+				havingHeader("Accept", hasItem("application/json")).receivedOnce();
 	}
 
 	/**
@@ -101,20 +126,10 @@ public class TraversonTests {
 	 * @see #131
 	 */
 	@Test
-	public void readsJsonPathTraversalIntoJsonPathExpression() {
-		assertThat(traverson.follow(//
-				"$._links.movies.href", //
-				"$._links.movie.href", //
-				"$._links.actor.href").<String> toObject("$.name"), is("Keanu Reaves"));
-	}
-
-	/**
-	 * @see #131
-	 */
-	@Test
 	public void readsTraversalIntoResourceInstance() {
 
-		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
+		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {
+		};
 		Resource<Actor> result = traverson.follow("movies", "movie", "actor").toObject(typeReference);
 
 		assertThat(result.getContent().name, is("Keanu Reaves"));
