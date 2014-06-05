@@ -88,10 +88,24 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return builder.slash(expandedComponents);
 	}
 
+	/*
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
+	 */
 	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {
+		return linkTo(method.getDeclaringClass(), method);
+	}
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(method));
+	/*
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
+	 */
+	public static ControllerLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
+
+		Assert.notNull(controller, "Controller type must not be null!");
+		Assert.notNull(method, "Method must not be null!");
+
+		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(controller, method));
 		URI uri = template.expand(parameters);
+
 		return new ControllerLinkBuilder(getBuilder()).slash(uri);
 	}
 

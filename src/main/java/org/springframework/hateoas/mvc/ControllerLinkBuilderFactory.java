@@ -92,6 +92,15 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 	/* 
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public ControllerLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
+		return ControllerLinkBuilder.linkTo(controller, method, parameters);
+	}
+
+	/* 
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Object)
 	 */
 	@Override

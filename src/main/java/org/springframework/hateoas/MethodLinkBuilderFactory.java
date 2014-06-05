@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,20 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 	T linkTo(Method method, Object... parameters);
 
 	/**
+	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} assuming it was invoked on an
+	 * object of the given type.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @param parameters
+	 * @return
+	 */
+	T linkTo(Class<?> type, Method method, Object... parameters);
+
+	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the method the result is handed into this method. Use
-	 * {@link DummyInvocationUtils#methodOn(Class, Object...)} to obtain a dummy instance of a controller to record a dummy
-	 * method invocation on. See {@link ControllerLinkBuilder#linkTo(Object)} for an example.
+	 * {@link DummyInvocationUtils#methodOn(Class, Object...)} to obtain a dummy instance of a controller to record a
+	 * dummy method invocation on. See {@link ControllerLinkBuilder#linkTo(Object)} for an example.
 	 * 
 	 * @see ControllerLinkBuilder#linkTo(Object)
 	 * @param methodInvocationResult must not be {@literal null}.

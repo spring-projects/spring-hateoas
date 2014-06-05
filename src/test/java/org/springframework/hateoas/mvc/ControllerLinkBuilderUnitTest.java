@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -362,6 +363,18 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void usesRootMappingOfTargetClassForMethodsOfParentClass() {
 
 		Link link = linkTo(methodOn(ChildControllerWithRootMapping.class).someEmptyMappedMethod()).withSelfRel();
+		assertThat(link.getHref(), endsWith("/root"));
+	}
+
+	/**
+	 * @see #192
+	 */
+	@Test
+	public void usesRootMappingOfTargetClassForMethodsOfParen() throws Exception {
+
+		Method method = ParentControllerWithoutRootMapping.class.getMethod("someEmptyMappedMethod");
+
+		Link link = linkTo(ChildControllerWithRootMapping.class, method).withSelfRel();
 		assertThat(link.getHref(), endsWith("/root"));
 	}
 
