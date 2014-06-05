@@ -355,6 +355,16 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/something/with%20blank/foo"));
 	}
 
+	/**
+	 * @see #192
+	 */
+	@Test
+	public void usesRootMappingOfTargetClassForMethodsOfParentClass() {
+
+		Link link = linkTo(methodOn(ChildControllerWithRootMapping.class).someEmptyMappedMethod()).withSelfRel();
+		assertThat(link.getHref(), endsWith("/root"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
@@ -445,4 +455,15 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 	@RequestMapping("/child")
 	interface ChildWithTypeMapping extends ParentWithMethod {}
+
+	interface ParentControllerWithoutRootMapping {
+
+		@RequestMapping
+		Object someEmptyMappedMethod();
+	}
+
+	@RequestMapping("/root")
+	interface ChildControllerWithRootMapping extends ParentControllerWithoutRootMapping {
+
+	}
 }
