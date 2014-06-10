@@ -25,6 +25,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
+import org.springframework.hateoas.RelAware;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
@@ -103,6 +104,27 @@ public class HalEmbeddedBuilderUnitTest {
 		assertThat(builder.asMap().get("strings"), hasItem("Sample"));
 	}
 
+	/**
+	 * @see #195
+	 */
+	@Test
+	public void doesNotPreferCollectionsIfRelAwareWasAdded() {
+
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, true);
+		builder.add(new Sample());
+
+		assertThat(builder.hasOnlyCollections(), is(false));
+		assertThat(builder.asMap().get("foo"), is(notNullValue()));
+	}
+
+	/**
+	 * @see #195
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsNullRelProvider() {
+		new HalEmbeddedBuilder(null, false);
+	}
+
 	private Map<String, List<Object>> setUpBuilder(Object... values) {
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, false);
@@ -112,5 +134,17 @@ public class HalEmbeddedBuilderUnitTest {
 		}
 
 		return builder.asMap();
+	}
+
+	static class Sample implements RelAware {
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.RelAware#getRel()
+		 */
+		@Override
+		public String getRel() {
+			return "foo";
+		}
 	}
 }

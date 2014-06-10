@@ -274,7 +274,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
-			JsonSerializer<Object> valueSerializer = enforceEmbeddedCollections ? provider.findValueSerializer(valueType,
+			JsonSerializer<Object> valueSerializer = builder.hasOnlyCollections() ? provider.findValueSerializer(valueType,
 					property) : new OptionalListJackson2Serializer(property);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
