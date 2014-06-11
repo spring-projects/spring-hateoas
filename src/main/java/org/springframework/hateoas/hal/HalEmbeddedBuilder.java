@@ -16,17 +16,18 @@
 package org.springframework.hateoas.hal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.aop.support.AopUtils;
-import org.springframework.hateoas.RelAware;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.core.ObjectUtils;
+import org.springframework.hateoas.core.EmbeddedWrapper;
+import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Builder class that allows collecting objects under the relation types defined for the objects but moving from the
@@ -39,11 +40,9 @@ class HalEmbeddedBuilder {
 
 	private static final String DEFAULT_REL = "content";
 
-	private final Map<String, List<Object>> embeddeds = new HashMap<String, List<Object>>();
+	private final Map<String, Object> embeddeds = new HashMap<String, Object>();
 	private final RelProvider provider;
-	private final boolean preferCollectionRels;
-
-	private boolean relAwareFound;
+	private final EmbeddedWrappers wrappers;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link RelProvider} and prefer collection rels flag.
@@ -56,68 +55,68 @@ class HalEmbeddedBuilder {
 		Assert.notNull(provider, "Relprovider must not be null!");
 
 		this.provider = provider;
-		this.preferCollectionRels = preferCollectionRels;
+		this.wrappers = new EmbeddedWrappers(preferCollectionRels);
 	}
 
 	/**
 	 * Adds the given value to the embeddeds. Will skip doing so if the value is {@literal null} or the content of a
 	 * {@link Resource} is {@literal null}.
 	 * 
-	 * @param value
+	 * @param value can be {@literal null}.
 	 */
-	public void add(Object value) {
+	public void add(Object source) {
 
-		if (ObjectUtils.getResourceType(value) == null) {
+		EmbeddedWrapper wrapper = wrappers.wrap(source);
+
+		if (wrapper == null) {
 			return;
 		}
 
-		String rel = getDefaultedRelFor(value, true);
+		String collectionRel = getDefaultedRelFor(wrapper, true);
+		String collectionOrItemRel = collectionRel;
 
-		if (!embeddeds.containsKey(rel)) {
-			rel = getDefaultedRelFor(value, preferCollectionRels);
+		if (!embeddeds.containsKey(collectionRel)) {
+			collectionOrItemRel = getDefaultedRelFor(wrapper, wrapper.isCollectionValue());
 		}
 
-		List<Object> currentValue = embeddeds.get(rel);
+		Object currentValue = embeddeds.get(collectionOrItemRel);
+		Object value = wrapper.getValue();
 
-		if (currentValue == null) {
-			ArrayList<Object> arrayList = new ArrayList<Object>();
-			arrayList.add(value);
-			embeddeds.put(rel, arrayList);
-		} else if (currentValue.size() == 1) {
-			currentValue.add(value);
-			embeddeds.remove(rel);
-			embeddeds.put(getDefaultedRelFor(value, true), currentValue);
-		} else {
-			currentValue.add(value);
+		if (currentValue == null && !wrapper.isCollectionValue()) {
+			embeddeds.put(collectionOrItemRel, value);
+			return;
 		}
+
+		List<Object> list = new ArrayList<Object>();
+		list.addAll(asCollection(currentValue));
+		list.addAll(asCollection(wrapper.getValue()));
+
+		embeddeds.remove(collectionOrItemRel);
+		embeddeds.put(collectionRel, list);
 	}
 
-	private String getDefaultedRelFor(Object value, boolean forCollection) {
+	@SuppressWarnings("unchecked")
+	private Collection<Object> asCollection(Object source) {
+		return source instanceof Collection ? (Collection<Object>) source : source == null ? Collections.emptySet()
+				: Collections.singleton(source);
+	}
 
-		Object unwrapped = ObjectUtils.getResourceType(value);
+	private String getDefaultedRelFor(EmbeddedWrapper wrapper, boolean forCollection) {
 
-		if (value instanceof RelAware) {
-			this.relAwareFound = true;
-			return ((RelAware) value).getRel();
+		String valueRel = wrapper.getRel();
+
+		if (StringUtils.hasText(valueRel)) {
+			return valueRel;
 		}
 
 		if (provider == null) {
 			return DEFAULT_REL;
 		}
 
-		Class<?> type = AopUtils.getTargetClass(unwrapped);
+		Class<?> type = wrapper.getRelTargetType();
 
 		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
 		return rel == null ? DEFAULT_REL : rel;
-	}
-
-	/**
-	 * Returns whether the builder only created collection rels.
-	 * 
-	 * @return
-	 */
-	public boolean hasOnlyCollections() {
-		return preferCollectionRels && !relAwareFound;
 	}
 
 	/**
@@ -125,7 +124,7 @@ class HalEmbeddedBuilder {
 	 * 
 	 * @return
 	 */
-	public Map<String, List<Object>> asMap() {
+	public Map<String, Object> asMap() {
 		return Collections.unmodifiableMap(embeddeds);
 	}
 }

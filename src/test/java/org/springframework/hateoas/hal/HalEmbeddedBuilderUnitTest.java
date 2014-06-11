@@ -24,10 +24,8 @@ import java.util.Map;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.BeanUtils;
-import org.springframework.hateoas.RelAware;
 import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 
 /**
@@ -48,20 +46,20 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersSingleElementsWithSingleEntityRel() {
 
-		Map<String, List<Object>> map = setUpBuilder("foo", 1L);
+		Map<String, Object> map = setUpBuilder("foo", 1L);
 
-		assertThat(map.get("string"), Matchers.<List<Object>> allOf(hasSize(1), hasItem("foo")));
-		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
+		assertThat(map.get("string"), is((Object) "foo"));
+		assertThat(map.get("long"), is((Object) 1L));
 	}
 
 	@Test
 	public void rendersMultipleElementsWithCollectionResourceRel() {
 
-		Map<String, List<Object>> map = setUpBuilder("foo", "bar", 1L);
+		Map<String, Object> map = setUpBuilder("foo", "bar", 1L);
 
 		assertThat(map.containsKey("string"), is(false));
-		assertThat(map.get("strings"), Matchers.<List<Object>> allOf(hasSize(2), Matchers.<Object> hasItems("foo", "bar")));
-		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
+		assertThat(map.get("long"), is((Object) 1L));
+		assertHasValues(map, "strings", "foo", "bar");
 	}
 
 	/**
@@ -70,25 +68,11 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void correctlyPilesUpResourcesInCollectionRel() {
 
-		Map<String, List<Object>> map = setUpBuilder("foo", "bar", "foobar", 1L);
+		Map<String, Object> map = setUpBuilder("foo", "bar", "foobar", 1L);
 
 		assertThat(map.containsKey("string"), is(false));
-		assertThat(map.get("strings"),
-				Matchers.<List<Object>> allOf(hasSize(3), Matchers.<Object> hasItems("foo", "bar", "foobar")));
-		assertThat(map.get("long"), Matchers.<List<Object>> allOf(hasSize(1), hasItem(1L)));
-	}
-
-	/**
-	 * @see #81, #83
-	 */
-	@Test
-	public void addsNoEmbeddedsForResourceWithoutContent() {
-
-		Resource<?> resource = BeanUtils.instantiateClass(Resource.class);
-		HalEmbeddedBuilder halEmbeddedBuilder = new HalEmbeddedBuilder(provider, true);
-		halEmbeddedBuilder.add(resource);
-
-		assertThat(halEmbeddedBuilder.asMap().isEmpty(), is(true));
+		assertHasValues(map, "strings", "foo", "bar", "foobar");
+		assertThat(map.get("long"), is((Object) 1L));
 	}
 
 	/**
@@ -101,7 +85,7 @@ public class HalEmbeddedBuilderUnitTest {
 		builder.add("Sample");
 
 		assertThat(builder.asMap().get("string"), is(nullValue()));
-		assertThat(builder.asMap().get("strings"), hasItem("Sample"));
+		assertHasValues(builder.asMap(), "strings", "Sample");
 	}
 
 	/**
@@ -110,11 +94,12 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void doesNotPreferCollectionsIfRelAwareWasAdded() {
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, true);
-		builder.add(new Sample());
+		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
-		assertThat(builder.hasOnlyCollections(), is(false));
-		assertThat(builder.asMap().get("foo"), is(notNullValue()));
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, true);
+		builder.add(wrappers.wrap("MyValue", "foo"));
+
+		assertThat(builder.asMap().get("foo"), is(instanceOf(String.class)));
 	}
 
 	/**
@@ -125,7 +110,15 @@ public class HalEmbeddedBuilderUnitTest {
 		new HalEmbeddedBuilder(null, false);
 	}
 
-	private Map<String, List<Object>> setUpBuilder(Object... values) {
+	private static void assertHasValues(Map<String, Object> source, String rel, Object... values) {
+
+		Object value = source.get(rel);
+
+		assertThat(value, is(instanceOf(List.class)));
+		assertThat((List<Object>) value, Matchers.<List<Object>> allOf(hasSize(values.length), hasItems(values)));
+	}
+
+	private Map<String, Object> setUpBuilder(Object... values) {
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, false);
 
@@ -134,17 +127,5 @@ public class HalEmbeddedBuilderUnitTest {
 		}
 
 		return builder.asMap();
-	}
-
-	static class Sample implements RelAware {
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.RelAware#getRel()
-		 */
-		@Override
-		public String getRel() {
-			return "foo";
-		}
 	}
 }

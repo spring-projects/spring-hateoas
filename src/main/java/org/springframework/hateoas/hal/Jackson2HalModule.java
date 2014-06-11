@@ -269,18 +269,7 @@ public class Jackson2HalModule extends SimpleModule {
 				builder.add(resource);
 			}
 
-			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Resource.class);
-			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
-
-			JsonSerializer<Object> valueSerializer = builder.hasOnlyCollections() ? provider.findValueSerializer(valueType,
-					property) : new OptionalListJackson2Serializer(property);
-
-			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), valueSerializer, null);
-
-			serializer.serialize(builder.asMap(), jgen, provider);
+			provider.findValueSerializer(Map.class, property).serialize(builder.asMap(), jgen, provider);
 		}
 
 		@Override
