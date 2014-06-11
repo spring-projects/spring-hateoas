@@ -91,6 +91,24 @@ public class TraversonTests {
 	}
 
 	/**
+	 * @see #187
+	 */
+	@Test
+	public void sendsConfiguredHeadersForJsonPathExpression() {
+
+		HttpHeaders headers = new HttpHeaders();
+		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		headers.add("Link", expectedHeader);
+		assertThat(traverson.follow(//
+				"$._links.movies.href", //
+				"$._links.movie.href", //
+				"$._links.actor.href").withHeaders(headers).<String> toObject("$.name"), is("Keanu Reaves"));
+
+		verifyThatRequest(). //
+				havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4"). //
+				havingHeader("Link", hasItem(expectedHeader));
+	}
+	/**
 	 * @see #131
 	 */
 	@Test
