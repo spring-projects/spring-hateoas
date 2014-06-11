@@ -77,7 +77,12 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 		List<TemplateVariable> result = new ArrayList<TemplateVariable>(this.variables.size() + variables.size());
 		result.addAll(this.variables);
-		result.addAll(variables);
+
+		for (TemplateVariable variable : variables) {
+			if (!result.contains(variable)) {
+				result.add(variable);
+			}
+		}
 
 		return new TemplateVariables(result);
 	}

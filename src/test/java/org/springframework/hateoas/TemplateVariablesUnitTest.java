@@ -15,8 +15,10 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.springframework.hateoas.TemplateVariable.VariableType;
@@ -116,4 +118,18 @@ public class TemplateVariablesUnitTest {
 		assertThat(variables.toString(), is("{&foo,bar}"));
 	}
 
+	/**
+	 * @see #198
+	 */
+	@Test
+	public void dropsDuplicateTemplateVariable() {
+
+		TemplateVariable variable = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
+		TemplateVariables variables = new TemplateVariables(variable);
+
+		List<TemplateVariable> result = variables.concat(variable).asList();
+
+		assertThat(result, hasSize(1));
+		assertThat(result, hasItem(variable));
+	}
 }
