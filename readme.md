@@ -279,12 +279,13 @@ public class Config {
 
 	@Bean
 	public CurieProvider curieProvider() {
-		return new DefaultCurieProvider("ex", new UriTemplate("http://www.example.com{#rel}"));
+		return new DefaultCurieProvider("ex", 
+		    new UriTemplate("http://www.example.com{#rel}"));
 	}
 }
 ```
 
-Note that now the prefix `ex:` automatically appears before all rels which are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form.
+Note that now the prefix `ex:` automatically appears before all rels which are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form:
 
 ```java
 { 
