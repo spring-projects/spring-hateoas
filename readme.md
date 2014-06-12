@@ -264,6 +264,46 @@ When building links you usually need to determine the relation type to be used f
 
 A `RelProvider` is exposed as Spring bean when using `@EnableHypermediaSupport` automatically. You can plug in custom providers by simply implementing the interface and exposing them as Spring bean in turn.
 
+## CurieProvider API
+
+The [Web Linking RFC](http://tools.ietf.org/html/rfc5988#section-4) describes registered and extension link relation types. Registered rels are well-known strings registered with the [IANA registry of link relation types] (http://www.iana.org/assignments/link-relations/link-relations.xhtml). Extension rels can be used by applications that do not wish to register a relation type. They are a URI that uniquely identifies the relation type. The rel URI can be serialized as a [Curie](http://www.w3.org/TR/curie/). A curie is a compact URI. E.g. a curie `ex:persons` stands for the link relation type `http://example.com#persons` if `ex` is defined as `http://example.com#`. If curies are used, the base URI must be present in the response scope.
+The rels created by the default rel provider are extension relation types and as such must be URIs. The `CurieProvider` API takes care of that: it allows to define a base URI as URI template and a prefix which stands for that base URI. If `@EnableHypermediaSupport` is configured for HAL and a Spring bean of type `CurieProvider` is present in the application scope, the RelProvider prepends all rels with the prefix, and a curie link is automatically added to the HAL resource.
+
+The configuration below defines a default curie provider.
+
+```java
+@Configuration
+@EnableWebMvc
+@EnableHypermediaSupport(type= {HypermediaType.HAL})
+public class Config {
+
+	@Bean
+	public CurieProvider curieProvider() {
+		return new DefaultCurieProvider("ex", new UriTemplate("http://www.example.com{/rel}"));
+	}
+}
+```
+
+A corresponding HAL output might look like this:
+
+```java
+{ 
+  _links : {
+    self: { href: "http://myhost/person/1" },
+ 	curies: {
+         name: "ex",
+         href: "http://example.com#{rel}",
+         templated: true
+    },
+    "ex:orders" : { href: "http://myhost/person/1/orders" }
+  },
+  firstname : "Dave",
+  lastname : "Matthews"
+}
+```
+
+Since the purpose of the `CurieProvider` API is to allow for automatic curie creation, you can define only one `CurieProvider` bean per application scope.
+
 ## Traverson
 
 As of version 0.11 Spring HATEOAS provides an API for client side service traversal inspired by the [Traverson](https://blog.codecentric.de/en/2013/11/traverson/) JavaScript library.
