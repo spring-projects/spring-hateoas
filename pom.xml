@@ -66,7 +66,7 @@
 		<jsonpath.version>0.9.1</jsonpath.version>
 		<objenesis.version>2.1</objenesis.version>
 		<slf4j.version>1.7.7</slf4j.version>
-		<evo.version>1.0.1</evo.version>
+		<evo.version>1.2</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 	</properties>
 

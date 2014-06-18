@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.13.0.RELEASE (2014-06-18)
+----------------------------------------------
+- #199 - Improve design of HalEmbeddedBuilder.
+- #198 - TemplateVariables.concat(…) should not duplicate variables.
+- #195 - HalEmbeddedBuilder should consider rel provided by object to be added.
+- #192 - ControllerLinkBuilder not detecting the right @RequestMapping from a controller.
+- #188 - #187: Traverson correctly applies headers when using JsonPath to evaluat...
+- #187 - Traverson: toObject(jsonPath) does not apply headers.
+
 Changes in version 0.12.0.RELEASE (2014-05-20)
 ----------------------------------------------
 - #180 - Traverson is not expanding URI template on final call correctly.
