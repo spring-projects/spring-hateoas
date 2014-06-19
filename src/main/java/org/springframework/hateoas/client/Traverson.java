@@ -67,6 +67,24 @@ public class Traverson {
 	private final List<MediaType> mediaTypes;
 
 	/**
+	 * Creates a new {@link Traverson} with custom rest template, interacting with the given base URI and using the given
+	 * {@link MediaType}s to interact with the service.
+	 * 
+	 * @param template allowing to customize the http requests with interceptors, client configurations etc.
+	 * @param baseUri must not be {@literal null}.
+	 * @param mediaType must not be {@literal null} or empty.
+	 */
+	public Traverson(RestTemplate template, URI baseUri, MediaType... mediaTypes) {
+		Assert.notNull(baseUri, "Base URI must not be null!");
+		Assert.notEmpty(mediaTypes, "At least one media type must be given!");
+		this.mediaTypes = Arrays.asList(mediaTypes);
+		this.baseUri = baseUri;
+		this.template = prepareTemplate(template, this.mediaTypes);
+		LinkDiscoverer discoverer = new HalLinkDiscoverer();
+		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+	}
+
+	/**
 	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
 	 * interact with the service.
 	 * 
@@ -74,20 +92,10 @@ public class Traverson {
 	 * @param mediaType must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, MediaType... mediaTypes) {
-
-		Assert.notNull(baseUri, "Base URI must not be null!");
-		Assert.notEmpty(mediaTypes, "At least one media must be given!");
-
-		this.mediaTypes = Arrays.asList(mediaTypes);
-		this.template = prepareTemplate(this.mediaTypes);
-
-		this.baseUri = baseUri;
-
-		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+		this(null, baseUri, mediaTypes);
 	}
 
-	private final RestTemplate prepareTemplate(List<MediaType> mediaTypes) {
+	private final RestTemplate prepareTemplate(RestTemplate restTemplate, List<MediaType> mediaTypes) {
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
@@ -95,8 +103,12 @@ public class Traverson {
 		if (mediaTypes.contains(MediaTypes.HAL_JSON)) {
 			converters.add(getHalConverter());
 		}
-
-		RestTemplate template = new RestTemplate();
+		final RestTemplate template;
+		if (restTemplate != null) {
+			template = restTemplate;
+		} else {
+			template = new RestTemplate();
+		}
 		template.setMessageConverters(converters);
 		return template;
 	}
@@ -128,14 +140,14 @@ public class Traverson {
 
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
 
-		HttpHeaders toSent = new HttpHeaders();
-		toSent.putAll(headers);
+		HttpHeaders toSend = new HttpHeaders();
+		toSend.putAll(headers);
 
 		if (headers.getAccept().isEmpty()) {
-			toSent.setAccept(mediaTypes);
+			toSend.setAccept(mediaTypes);
 		}
 
-		return new HttpEntity<Void>(headers);
+		return new HttpEntity<Void>(toSend);
 	}
 
 	/**
