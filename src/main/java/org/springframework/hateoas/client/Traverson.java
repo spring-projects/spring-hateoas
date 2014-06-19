@@ -44,6 +44,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -62,7 +63,7 @@ import com.jayway.jsonpath.JsonPath;
 public class Traverson {
 
 	private final URI baseUri;
-	private final RestTemplate template;
+	private final RestOperations operations;
 	private final LinkDiscoverers discoverers;
 	private final List<MediaType> mediaTypes;
 
@@ -74,20 +75,32 @@ public class Traverson {
 	 * @param mediaType must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, MediaType... mediaTypes) {
+		this(null, baseUri, mediaTypes);
+	}
+
+	/**
+	 * Creates a new {@link Traverson} with custom rest operations, interacting with the given base URI and using the
+	 * given {@link MediaType}s to interact with the service. The custom rest operations will be prepared with message
+	 * converters for the given media types.
+	 * 
+	 * @param operations allowing to customize the http requests with interceptors, client configurations etc.
+	 * @param baseUri must not be {@literal null}.
+	 * @param mediaType must not be {@literal null} or empty.
+	 */
+	public Traverson(RestOperations operations, URI baseUri, MediaType... mediaTypes) {
 
 		Assert.notNull(baseUri, "Base URI must not be null!");
-		Assert.notEmpty(mediaTypes, "At least one media must be given!");
+		Assert.notEmpty(mediaTypes, "At least one media type must be given!");
 
 		this.mediaTypes = Arrays.asList(mediaTypes);
-		this.template = prepareTemplate(this.mediaTypes);
-
 		this.baseUri = baseUri;
+		this.operations = operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
 
 		LinkDiscoverer discoverer = new HalLinkDiscoverer();
 		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
 	}
 
-	private final RestTemplate prepareTemplate(List<MediaType> mediaTypes) {
+	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
@@ -98,10 +111,16 @@ public class Traverson {
 
 		RestTemplate template = new RestTemplate();
 		template.setMessageConverters(converters);
+
 		return template;
 	}
 
-	private final HttpMessageConverter<?> getHalConverter() {
+	/**
+	 * Creates a new {@link HttpMessageConverter} to support HAL.
+	 * 
+	 * @return
+	 */
+	private static final HttpMessageConverter<?> getHalConverter() {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
@@ -128,14 +147,14 @@ public class Traverson {
 
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
 
-		HttpHeaders toSent = new HttpHeaders();
-		toSent.putAll(headers);
+		HttpHeaders toSend = new HttpHeaders();
+		toSend.putAll(headers);
 
 		if (headers.getAccept().isEmpty()) {
-			toSent.setAccept(mediaTypes);
+			toSend.setAccept(mediaTypes);
 		}
 
-		return new HttpEntity<Void>(headers);
+		return new HttpEntity<Void>(toSend);
 	}
 
 	/**
@@ -167,8 +186,8 @@ public class Traverson {
 		}
 
 		/**
-		 * Adds the given template parameters to the traversal. If a link discovered by the traversal is templated, the
-		 * given parameters will be used to expand the template into a resolvable URI.
+		 * Adds the given operations parameters to the traversal. If a link discovered by the traversal is templated, the
+		 * given parameters will be used to expand the operations into a resolvable URI.
 		 * 
 		 * @param parameters can be {@literal null}.
 		 * @return
@@ -200,7 +219,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -213,7 +232,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -227,7 +246,8 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), String.class).getBody();
+			String forObject = operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), String.class)
+					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
 
@@ -240,7 +260,7 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return template.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type);
+			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type);
 		}
 
 		private String traverseToFinalUrl() {
@@ -258,7 +278,7 @@ public class Traverson {
 			HttpEntity<?> request = prepareRequest(headers);
 			UriTemplate uriTemplate = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = template.exchange(uriTemplate.expand(templateParameters), GET, request,
+			ResponseEntity<String> responseEntity = operations.exchange(uriTemplate.expand(templateParameters), GET, request,
 					String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();

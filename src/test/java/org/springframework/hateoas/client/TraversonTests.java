@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +31,12 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link Traverson}.
@@ -159,6 +165,23 @@ public class TraversonTests {
 				havingHeader("Link", hasItem(expectedHeader));
 	}
 
+	/**
+	 * @see #201, #203
+	 */
+	@Test
+	public void allowsCustomizingRestTemplate() {
+
+		CountingInterceptor interceptor = new CountingInterceptor();
+
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList(interceptor));
+
+		this.traverson = new Traverson(restTemplate, baseUri, MediaTypes.HAL_JSON);
+
+		traverson.follow("movies", "movie", "actor").<String> toObject("$.name");
+		assertThat(interceptor.intercepted, is(4));
+	}
+
 	private void setUpActors() {
 
 		Resource<Actor> actor = new Resource<Actor>(new Actor("Keanu Reaves"));
@@ -171,4 +194,16 @@ public class TraversonTests {
 		server.mockResourceFor(resource);
 		server.finishMocking();
 	}
+
+	static class CountingInterceptor implements ClientHttpRequestInterceptor {
+
+		int intercepted;
+
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+				throws IOException {
+			this.intercepted++;
+			return execution.execute(request, body);
+		}
+	};
 }
