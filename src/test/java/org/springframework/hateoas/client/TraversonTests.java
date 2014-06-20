@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +31,12 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link Traverson}.
@@ -157,6 +163,31 @@ public class TraversonTests {
 		verifyThatRequest(). //
 				havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4"). //
 				havingHeader("Link", hasItem(expectedHeader));
+	}
+
+	@Test
+	public void allowsCustomizingRestTemplate() {
+
+		class MyInterceptor implements ClientHttpRequestInterceptor {
+
+			int intercepted;
+
+			@Override
+			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+					throws IOException {
+				this.intercepted++;
+				return execution.execute(request, body);
+			}
+		};
+		ClientHttpRequestInterceptor interceptor = new MyInterceptor();
+
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setInterceptors(Arrays.asList(interceptor ));
+		
+		this.traverson = new Traverson(restTemplate, baseUri, MediaTypes.HAL_JSON);
+
+		traverson.follow("movies", "movie", "actor").<String> toObject("$.name");
+		assertEquals(4, ((MyInterceptor)interceptor).intercepted);
 	}
 
 	private void setUpActors() {

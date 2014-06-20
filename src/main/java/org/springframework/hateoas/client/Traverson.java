@@ -68,7 +68,8 @@ public class Traverson {
 
 	/**
 	 * Creates a new {@link Traverson} with custom rest template, interacting with the given base URI and using the given
-	 * {@link MediaType}s to interact with the service.
+	 * {@link MediaType}s to interact with the service. The custom rest template will be prepared with message converters
+	 * for the given media types.
 	 * 
 	 * @param template allowing to customize the http requests with interceptors, client configurations etc.
 	 * @param baseUri must not be {@literal null}.
@@ -161,7 +162,8 @@ public class Traverson {
 		private Map<String, Object> templateParameters = new HashMap<String, Object>();
 		private HttpHeaders headers = new HttpHeaders();
 
-		private TraversalBuilder() {}
+		private TraversalBuilder() {
+		}
 
 		/**
 		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
