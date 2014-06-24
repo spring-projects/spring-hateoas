@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mvc;
+package org.springframework.hateoas.core;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -23,36 +23,47 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
-import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriTemplate;
 
 /**
  * Value object to allow accessing {@link MethodInvocation} parameters with the configured {@link AnnotationAttribute}.
- * 
+ *
  * @author Oliver Gierke
  */
-class AnnotatedParametersParameterAccessor {
+public class AnnotatedParametersParameterAccessor {
 
 	private final AnnotationAttribute attribute;
+	private final boolean required;
 
 	/**
 	 * Creates a new {@link AnnotatedParametersParameterAccessor} using the given {@link AnnotationAttribute}.
-	 * 
+	 *
 	 * @param attribute must not be {@literal null}.
 	 */
 	public AnnotatedParametersParameterAccessor(AnnotationAttribute attribute) {
 
+		this(attribute, true);
+	}
+
+	/**
+	 * Creates a new {@link AnnotatedParametersParameterAccessor} using the given {@link AnnotationAttribute}.
+	 *
+	 * @param attribute must not be {@literal null}.
+	 * @param required whether a parameter value is required (not null.)
+	 */
+	public AnnotatedParametersParameterAccessor(AnnotationAttribute attribute, boolean required) {
+
 		Assert.notNull(attribute);
 		this.attribute = attribute;
+		this.required = required;
 	}
 
 	/**
 	 * Returns {@link BoundMethodParameter}s contained in the given {@link MethodInvocation}.
-	 * 
+	 *
 	 * @param invocation must not be {@literal null}.
 	 * @return
 	 */
@@ -80,14 +91,14 @@ class AnnotatedParametersParameterAccessor {
 	/**
 	 * Callback to verifiy the parameter values given for a dummy invocation. Default implementation rejects
 	 * {@literal null} values as they indicate an invalid dummy call.
-	 * 
+	 *
 	 * @param parameter will never be {@literal null}.
 	 * @param value could be {@literal null}.
 	 * @return the verified value.
 	 */
 	protected Object verifyParameterValue(MethodParameter parameter, Object value) {
 
-		if (value == null) {
+		if (value == null && isRequired(parameter)) {
 
 			Object indexOrName = StringUtils.hasText(parameter.getParameterName()) ? parameter.getParameterName() : parameter
 					.getParameterIndex();
@@ -100,9 +111,13 @@ class AnnotatedParametersParameterAccessor {
 		return value;
 	}
 
+	protected boolean isRequired(MethodParameter parameter) {
+		return required;
+	}
+
 	/**
 	 * Represents a {@link MethodParameter} alongside the value it has been bound to.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	static class BoundMethodParameter {
@@ -117,7 +132,7 @@ class AnnotatedParametersParameterAccessor {
 
 		/**
 		 * Creates a new {@link BoundMethodParameter}
-		 * 
+		 *
 		 * @param parameter
 		 * @param value
 		 * @param attribute
@@ -129,13 +144,13 @@ class AnnotatedParametersParameterAccessor {
 			this.parameter = parameter;
 			this.value = value;
 			this.attribute = attribute;
-			this.parameterTypeDecsriptor = TypeDescriptor.nested(parameter, 0);
+			parameterTypeDecsriptor = TypeDescriptor.nested(parameter, 0);
 		}
 
 		/**
 		 * Returns the name of the {@link UriTemplate} variable to be bound. The name will be derived from the configured
 		 * {@link AnnotationAttribute} or the {@link MethodParameter} name as fallback.
-		 * 
+		 *
 		 * @return
 		 */
 		public String getVariableName() {
@@ -151,7 +166,7 @@ class AnnotatedParametersParameterAccessor {
 
 		/**
 		 * Returns the raw value bound to the {@link MethodParameter}.
-		 * 
+		 *
 		 * @return
 		 */
 		public Object getValue() {
@@ -160,7 +175,7 @@ class AnnotatedParametersParameterAccessor {
 
 		/**
 		 * Returns the bound value converted into a {@link String} based on default conversion service setup.
-		 * 
+		 *
 		 * @return
 		 */
 		public String asString() {

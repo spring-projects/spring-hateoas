@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mvc;
+package org.springframework.hateoas;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.hateoas.Identifiable;
-import org.springframework.hateoas.ResourceAssembler;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.mvc.ControllerLinkBuilderFactory;
 import org.springframework.util.Assert;
 
 /**
  * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
  * sure a self-link is always added.
- * 
+ *
  * @author Oliver Gierke
  */
 public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport>
@@ -38,8 +36,9 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 	private final Class<?> controllerClass;
 
 	/**
-	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
-	 * 
+	 * Creates a new {@link IdentifiableResourceAssemblerSupport} using the given controller class and resource type.
+	 * A {@link ControllerLinkBuilderFactory} will be used for link creation.
+	 *
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
@@ -50,8 +49,21 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 	}
 
 	/**
+	 * Creates a new {@link IdentifiableResourceAssemblerSupport} using the given link builder factory, controller class and resource type.
+	 *
+	 * @param linkBuilderFactory must not be {@literal null}.
+	 * @param controllerClass must not be {@literal null}.
+	 * @param resourceType must not be {@literal null}.
+	 */
+	public IdentifiableResourceAssemblerSupport(LinkBuilderFactory<? extends LinkBuilder> linkBuilderFactory, Class<?> controllerClass, Class<D> resourceType) {
+
+		super(linkBuilderFactory, controllerClass, resourceType);
+		this.controllerClass = controllerClass;
+	}
+
+	/**
 	 * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
@@ -76,7 +88,7 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 
 	/**
 	 * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
-	 * 
+	 *
 	 * @param values must not be {@literal null}.
 	 * @return
 	 */

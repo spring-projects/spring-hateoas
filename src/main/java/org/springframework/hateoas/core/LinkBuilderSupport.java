@@ -17,19 +17,38 @@ package org.springframework.hateoas.core;
 
 import static org.springframework.web.util.UriComponentsBuilder.*;
 
+import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.hateoas.core.AnnotatedParametersParameterAccessor.BoundMethodParameter;
+import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
+import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.hateoas.mvc.UriComponentsContributor;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriTemplate;
 
 /**
  * Base class to implement {@link LinkBuilder}s based on a Spring MVC {@link UriComponentsBuilder}.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Kamill Sokol
@@ -40,7 +59,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	/**
 	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	public LinkBuilderSupport(UriComponentsBuilder builder) {
@@ -53,6 +72,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
 	 */
+	@Override
 	public T slash(Object object) {
 
 		if (object == null) {
@@ -95,6 +115,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
 	 */
+	@Override
 	public T slash(Identifiable<?> identifyable) {
 
 		if (identifyable == null) {
@@ -108,6 +129,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#toUri()
 	 */
+	@Override
 	public URI toUri() {
 		return uriComponents.encode().toUri();
 	}
@@ -116,6 +138,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
 	 */
+	@Override
 	public Link withRel(String rel) {
 		return new Link(this.toString(), rel);
 	}
@@ -124,6 +147,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#withSelfRel()
 	 */
+	@Override
 	public Link withSelfRel() {
 		return withRel(Link.REL_SELF);
 	}
@@ -139,16 +163,146 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	/**
 	 * Returns the current concrete instance.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract T getThis();
 
 	/**
 	 * Creates a new instance of the sub-class.
-	 * 
+	 *
 	 * @param builder will never be {@literal null}.
 	 * @return
 	 */
 	protected abstract T createNewInstance(UriComponentsBuilder builder);
+
+	public static UriComponentsBuilder linkTo(List<UriComponentsContributor> uriComponentsContributors, MappingDiscoverer discoverer, AnnotatedParametersParameterAccessor pathVariableAccessor, AnnotatedParametersParameterAccessor requestParamAccessor, Object invocationValue) {
+
+		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
+		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
+
+		MethodInvocation invocation = invocations.getLastInvocation();
+		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
+		Method method = invocation.getMethod();
+
+		String mapping = discoverer.getMapping(invocation.getTargetType(), method);
+		UriComponentsBuilder builder = LinkBuilderSupport.getBuilder().path(mapping);
+
+		UriTemplate template = new UriTemplate(mapping);
+		Map<String, Object> values = new HashMap<String, Object>();
+
+		Iterator<String> names = template.getVariableNames().iterator();
+		while (classMappingParameters.hasNext()) {
+			values.put(names.next(), classMappingParameters.next());
+		}
+
+		for (BoundMethodParameter parameter : pathVariableAccessor.getBoundParameters(invocation)) {
+			values.put(parameter.getVariableName(), parameter.asString());
+		}
+
+		for (BoundMethodParameter parameter : requestParamAccessor.getBoundParameters(invocation)) {
+
+			Object value = parameter.getValue();
+			String key = parameter.getVariableName();
+
+			if (value instanceof Collection) {
+				for (Object element : (Collection<?>) value) {
+					builder.queryParam(key, element);
+				}
+			} else {
+				builder.queryParam(key, parameter.asString());
+			}
+		}
+
+		UriComponents components = applyUriComponentsContributer(uriComponentsContributors, builder, invocation).buildAndExpand(values);
+		return UriComponentsBuilder.fromUriString(components.toUriString());
+	}
+
+	/**
+	 * Applies the configured {@link UriComponentsContributor}s to the given {@link UriComponentsBuilder}.
+	 *
+	 * @param builder will never be {@literal null}.
+	 * @param invocation will never be {@literal null}.
+	 * @return
+	 */
+	protected static UriComponentsBuilder applyUriComponentsContributer(List<UriComponentsContributor> uriComponentsContributors, UriComponentsBuilder builder, MethodInvocation invocation) {
+
+		MethodParameters parameters = new MethodParameters(invocation.getMethod());
+		Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
+
+		for (MethodParameter parameter : parameters.getParameters()) {
+			Object parameterValue = parameterValues.next();
+			for (UriComponentsContributor contributor : uriComponentsContributors) {
+				if (contributor.supportsParameter(parameter)) {
+					contributor.enhance(builder, parameter, parameterValue);
+				}
+			}
+		}
+
+		return builder;
+	}
+
+	/**
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
+	 * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
+	 * {@code X-Forwarded-Ssl} header
+	 *
+	 * @return
+	 */
+	protected static UriComponentsBuilder getBuilder() {
+
+		HttpServletRequest request = getCurrentRequest();
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
+
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+
+		if (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+			builder.scheme("https");
+		}
+
+		String host = request.getHeader("X-Forwarded-Host");
+
+		if (!StringUtils.hasText(host)) {
+			return builder;
+		}
+
+		String[] hosts = StringUtils.commaDelimitedListToStringArray(host);
+		String hostToUse = hosts[0];
+
+		if (hostToUse.contains(":")) {
+
+			String[] hostAndPort = StringUtils.split(hostToUse, ":");
+
+			builder.host(hostAndPort[0]);
+			builder.port(Integer.parseInt(hostAndPort[1]));
+
+		} else {
+			builder.host(hostToUse);
+			builder.port(-1); // reset port if it was forwarded from default port
+		}
+
+		String port = request.getHeader("X-Forwarded-Port");
+
+		if (StringUtils.hasText(port)) {
+			builder.port(Integer.parseInt(port));
+		}
+
+		return builder;
+	}
+
+	/**
+	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
+	 *
+	 * @return
+	 */
+	@SuppressWarnings("null")
+	private static HttpServletRequest getCurrentRequest() {
+
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
+		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
+		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
+		return servletRequest;
+	}
 }
