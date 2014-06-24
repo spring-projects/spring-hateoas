@@ -214,9 +214,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 */
 	static class Jackson2ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
-		private CurieProvider curieProvider;
-		private RelProvider relProvider;
-		private ObjectMapper halObjectMapper;
+		private BeanFactory beanFactory;
 
 		/* 
 		 * (non-Javadoc)
@@ -224,10 +222,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		 */
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-
-			this.curieProvider = getCurieProvider(beanFactory);
-			this.relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
-			this.halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
+			this.beanFactory = beanFactory;
 		}
 
 		/* 
@@ -275,6 +270,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 					}
 				}
 			}
+
+			CurieProvider curieProvider = getCurieProvider(beanFactory);
+			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
+			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
 			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider));
