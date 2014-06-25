@@ -83,6 +83,7 @@ public class DummyInvocationUtils {
 		 * (non-Javadoc)
 		 * @see org.springframework.cglib.proxy.MethodInterceptor#intercept(java.lang.Object, java.lang.reflect.Method, java.lang.Object[], org.springframework.cglib.proxy.MethodProxy)
 		 */
+		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) {
 
 			if (GET_INVOCATIONS.equals(method)) {
@@ -96,7 +97,7 @@ public class DummyInvocationUtils {
 			this.invocation = new SimpleMethodInvocation(targetType, method, args);
 
 			Class<?> returnType = method.getReturnType();
-			return returnType.cast(getProxyWithInterceptor(returnType, this));
+			return returnType.cast(getProxyWithInterceptor(returnType, this, obj.getClass().getClassLoader()));
 		}
 
 		/* 
@@ -144,11 +145,11 @@ public class DummyInvocationUtils {
 		Assert.notNull(type, "Given type must not be null!");
 
 		InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(type, parameters);
-		return getProxyWithInterceptor(type, interceptor);
+		return getProxyWithInterceptor(type, interceptor, type.getClassLoader());
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor) {
+	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor, ClassLoader classLoader) {
 
 		if (type.isInterface()) {
 
@@ -164,6 +165,7 @@ public class DummyInvocationUtils {
 		enhancer.setSuperclass(type);
 		enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
 		enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
+		enhancer.setClassLoader(classLoader);
 
 		Factory factory = (Factory) OBJENESIS.newInstance(enhancer.createClass());
 		factory.setCallbacks(new Callback[] { interceptor });
