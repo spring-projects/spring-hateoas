@@ -41,13 +41,13 @@ import org.springframework.http.MediaType;
 public class TraversonTests {
 
 	URI baseUri;
-	Server server;
+	HalServer server;
 	Traverson traverson;
 
 	@Before
 	public void setUp() {
 
-		this.server = new Server();
+		this.server = new HalServer();
 		this.baseUri = URI.create(server.rootResource());
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
 
@@ -87,7 +87,7 @@ public class TraversonTests {
 
 		verifyThatRequest(). //
 				havingPathEqualTo("/"). //
-				havingHeader("Accept", hasItem("application/hal+json"));
+				havingHeader("Accept", hasItem("application/hal+json")).receivedOnce();;
 	}
 
 	/**

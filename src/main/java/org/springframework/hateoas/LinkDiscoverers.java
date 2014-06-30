@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
@@ -29,6 +31,7 @@ public class LinkDiscoverers {
 
 	private final PluginRegistry<LinkDiscoverer, MediaType> discoverers;
 
+	
 	/**
 	 * Creates a new {@link LinkDiscoverers} instance with the given {@link PluginRegistry}.
 	 * 

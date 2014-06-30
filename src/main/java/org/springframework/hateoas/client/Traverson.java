@@ -15,7 +15,8 @@
  */
 package org.springframework.hateoas.client;
 
-import static org.springframework.http.HttpMethod.*;
+import static java.util.Arrays.asList;
+import static org.springframework.http.HttpMethod.GET;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -26,7 +27,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.DefaultLinkDiscoverer;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
@@ -43,6 +46,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
+import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,9 +65,12 @@ import com.jayway.jsonpath.JsonPath;
  */
 public class Traverson {
 
+	@Autowired(required = false)
+	private PluginRegistry<LinkDiscoverer, MediaType> linkDiscovererRegistry;
+	private LinkDiscoverers discoverers;
+
 	private final URI baseUri;
 	private final RestTemplate template;
-	private final LinkDiscoverers discoverers;
 	private final List<MediaType> mediaTypes;
 
 	/**
@@ -82,9 +89,22 @@ public class Traverson {
 		this.template = prepareTemplate(this.mediaTypes);
 
 		this.baseUri = baseUri;
+	}
 
-		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+	/**
+	 * Picks up injected plugin registry bean or creates one.
+	 */
+	private void lazyInit() {
+		if (linkDiscovererRegistry == null) {
+			linkDiscovererRegistry = OrderAwarePluginRegistry.create(asList((LinkDiscoverer) new DefaultLinkDiscoverer(),
+					new HalLinkDiscoverer()));
+		}
+		this.discoverers = new LinkDiscoverers(linkDiscovererRegistry);
+		for (MediaType mediaType : mediaTypes) {
+			if (!linkDiscovererRegistry.hasPluginFor(mediaType)) {
+				throw new IllegalStateException("no link discoverer plugin registered for " + mediaType);
+			}
+		}
 	}
 
 	private final RestTemplate prepareTemplate(List<MediaType> mediaTypes) {
@@ -92,8 +112,12 @@ public class Traverson {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 
+		// TODO should use plugin mechanism, too
 		if (mediaTypes.contains(MediaTypes.HAL_JSON)) {
 			converters.add(getHalConverter());
+		}
+		if (mediaTypes.contains(MediaType.APPLICATION_JSON)) {
+			converters.add(getDefaultJsonConverter());
 		}
 
 		RestTemplate template = new RestTemplate();
@@ -103,14 +127,22 @@ public class Traverson {
 
 	private final HttpMessageConverter<?> getHalConverter() {
 
-		ObjectMapper mapper = new ObjectMapper();
+		MappingJackson2HttpMessageConverter converter = getDefaultJsonConverter();
+		ObjectMapper mapper = converter.getObjectMapper();
+
 		mapper.registerModule(new Jackson2HalModule());
+		converter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON));
+
+		return converter;
+	}
+
+	private final MappingJackson2HttpMessageConverter getDefaultJsonConverter() {
+
+		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-
 		converter.setObjectMapper(mapper);
-		converter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON));
 
 		return converter;
 	}
@@ -123,19 +155,20 @@ public class Traverson {
 	 * @see TraversalBuilder
 	 */
 	public TraversalBuilder follow(String... rels) {
+		lazyInit();
 		return new TraversalBuilder().follow(rels);
 	}
 
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
 
-		HttpHeaders toSent = new HttpHeaders();
-		toSent.putAll(headers);
+		HttpHeaders toSend = new HttpHeaders();
+		toSend.putAll(headers);
 
 		if (headers.getAccept().isEmpty()) {
-			toSent.setAccept(mediaTypes);
+			toSend.setAccept(mediaTypes);
 		}
 
-		return new HttpEntity<Void>(headers);
+		return new HttpEntity<Void>(toSend);
 	}
 
 	/**
@@ -149,7 +182,8 @@ public class Traverson {
 		private Map<String, Object> templateParameters = new HashMap<String, Object>();
 		private HttpHeaders headers = new HttpHeaders();
 
-		private TraversalBuilder() {}
+		private TraversalBuilder() {
+		}
 
 		/**
 		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
@@ -255,11 +289,10 @@ public class Traverson {
 				return uri;
 			}
 
-			HttpEntity<?> request = prepareRequest(headers);
 			UriTemplate uriTemplate = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = template.exchange(uriTemplate.expand(templateParameters), GET, request,
-					String.class);
+			ResponseEntity<String> responseEntity = template.exchange(uriTemplate.expand(templateParameters), GET,
+					prepareRequest(headers), String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 

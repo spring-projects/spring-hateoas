@@ -282,3 +282,5 @@ String name = traverson.follow("movies", "movie", "actor").
 You set up a `Traverson` instance by pointing it to a REST server and configure the media types you want to set as `Accept` header. You then go ahead and define the relation names you want to discover and follow. relation names can either be simple names or JSONPath expressions (starting with an `$`).
 
 The sample then hands a parameter map into the execution. The parameters will be used to expand URIs found during the traversal that are templated. The traversal is concluded by accessing the representation of the final traversal. In the case of the sample we evaluate a JSONPath expression to access the actor's name.
+
+Traverson has a LinkDiscoverer for `MediaTypes.HAL_JSON` and `MediaType.APPLICATION_JSON` out of the box, others can be added as plugins. For this, Traverson must be a Spring bean, the additional `LinkDiscoverer` must be in the scope and a spring-plugin registry for `LinkDiscoverer`s must be defined via @EnableHypermediaSupport or @EnablePluginRegistries.

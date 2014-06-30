@@ -15,7 +15,10 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
+import static net.jadler.Jadler.closeJadler;
+import static net.jadler.Jadler.initJadler;
+import static net.jadler.Jadler.onRequest;
+import static net.jadler.Jadler.port;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,12 +27,11 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -41,24 +43,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  */
-public class Server implements Closeable {
+public class DefaultJsonServer implements Closeable {
 
-	private final ObjectMapper mapper;
-	private final RelProvider relProvider;
+	protected final ObjectMapper mapper;
+	protected final RelProvider relProvider;
 
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<Link, Link>();
 
-	public Server() {
+	public DefaultJsonServer() {
 
 		this.relProvider = new EvoInflectorRelProvider();
 
 		this.mapper = new ObjectMapper();
-		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null));
 
+		init();
+
+	}
+
+	protected void init() {
 		initJadler(). //
 				that().//
-				respondsWithDefaultContentType(MediaTypes.HAL_JSON.toString()). //
+				respondsWithDefaultContentType(MediaType.APPLICATION_JSON_VALUE). //
 				respondsWithDefaultStatus(200).//
 				respondsWithDefaultEncoding(Charset.forName("UTF-8"));
 
