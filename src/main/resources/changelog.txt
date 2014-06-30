@@ -1,6 +1,12 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.14.0.RELEASE (2014-06-30)
+----------------------------------------------
+- #206 - Set classloader for dummy method proxies.
+- #205 - Jackson2ModuleRegisteringBeanPostProcessor must not access beans eagerly.
+- #136 - Class loading issues on JBoss.
+
 Changes in version 0.13.0.RELEASE (2014-06-18)
 ----------------------------------------------
 - #199 - Improve design of HalEmbeddedBuilder.
