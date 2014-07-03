@@ -15,34 +15,24 @@
  */
 package org.springframework.hateoas.mvc;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
-import org.springframework.hateoas.core.AnnotationAttribute;
-import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.*;
 import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
-import org.springframework.hateoas.core.LinkBuilderSupport;
-import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
@@ -133,7 +123,19 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			Object value = parameter.getValue();
 			String key = parameter.getVariableName();
 
-			if (value instanceof Collection) {
+			if (value instanceof MultiValueMap<?, ?>) {
+				MultiValueMap<String, String> requestParams = (MultiValueMap<String, String>)value;
+				for (Map.Entry<String, List<String>> multiValueEntry : requestParams.entrySet()) {
+					for (String singleEntryValue : multiValueEntry.getValue()) {
+						builder.queryParam(multiValueEntry.getKey(), singleEntryValue);
+					}
+				}
+			} else if (value instanceof Map<?, ?>) {
+				Map<String, String> requestParams = (Map<String, String>)value;
+				for (Map.Entry<String, String> requestParamEntry : requestParams.entrySet()) {
+					builder.queryParam(requestParamEntry.getKey(), requestParamEntry.getValue());
+				}
+			} else if (value instanceof Collection) {
 				for (Object element : (Collection<?>) value) {
 					builder.queryParam(key, element);
 				}
