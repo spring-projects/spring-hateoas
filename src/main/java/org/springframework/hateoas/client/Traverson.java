@@ -285,6 +285,18 @@ public class Traverson {
 			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type);
 		}
 
+		/**
+		 * Returns the {@link Link} found for the last rel int the rels configured to follow.
+		 * 
+		 * @return
+		 * @since 0.15
+		 */
+		public Link asLink() {
+
+			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
+			return new Link(traverseToFinalUrl(), rels.get(rels.size() - 1));
+		}
+
 		private String traverseToFinalUrl() {
 
 			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());

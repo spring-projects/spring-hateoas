@@ -197,6 +197,18 @@ public class TraversonTests {
 		assertThat(value, is("value"));
 	}
 
+	/**
+	 * @see #212
+	 */
+	@Test
+	public void shouldReturnLastLinkFound() {
+
+		Link result = traverson.follow("movies").asLink();
+
+		assertThat(result.getHref(), endsWith("/movies"));
+		assertThat(result.getRel(), is("movies"));
+	}
+
 	private void setUpActors() {
 
 		Resource<Actor> actor = new Resource<Actor>(new Actor("Keanu Reaves"));
