@@ -30,6 +30,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -66,6 +67,20 @@ public class Server implements Closeable {
 				havingPathEqualTo("/"). //
 				respond(). //
 				withBody("");
+
+		// For GitHubLinkDiscoverer tests
+
+		onRequest(). //
+				havingPathEqualTo("/github"). //
+				respond(). //
+				withBody("{ \"foo_url\" : \"" + rootResource() + "/github/4711\"}"). //
+				withContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		onRequest(). //
+				havingPathEqualTo("/github/4711"). //
+				respond(). //
+				withBody("{ \"key\" : \"value\"}"). //
+				withContentType(MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	public String rootResource() {

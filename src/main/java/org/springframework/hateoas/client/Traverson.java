@@ -62,10 +62,18 @@ import com.jayway.jsonpath.JsonPath;
  */
 public class Traverson {
 
+	private static final LinkDiscoverers DEFAULT_LINK_DISCOVERERS;
+
+	static {
+		LinkDiscoverer discoverer = new HalLinkDiscoverer();
+		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+	}
+
 	private final URI baseUri;
-	private final RestOperations operations;
-	private final LinkDiscoverers discoverers;
 	private final List<MediaType> mediaTypes;
+
+	private RestOperations operations;
+	private LinkDiscoverers discoverers;
 
 	/**
 	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
@@ -75,29 +83,15 @@ public class Traverson {
 	 * @param mediaType must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, MediaType... mediaTypes) {
-		this(null, baseUri, mediaTypes);
-	}
-
-	/**
-	 * Creates a new {@link Traverson} with custom rest operations, interacting with the given base URI and using the
-	 * given {@link MediaType}s to interact with the service. The custom rest operations will be prepared with message
-	 * converters for the given media types.
-	 * 
-	 * @param operations allowing to customize the http requests with interceptors, client configurations etc.
-	 * @param baseUri must not be {@literal null}.
-	 * @param mediaType must not be {@literal null} or empty.
-	 */
-	public Traverson(RestOperations operations, URI baseUri, MediaType... mediaTypes) {
 
 		Assert.notNull(baseUri, "Base URI must not be null!");
 		Assert.notEmpty(mediaTypes, "At least one media type must be given!");
 
 		this.mediaTypes = Arrays.asList(mediaTypes);
 		this.baseUri = baseUri;
-		this.operations = operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
+		this.discoverers = DEFAULT_LINK_DISCOVERERS;
 
-		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+		setRestOperations(createDefaultTemplate(this.mediaTypes));
 	}
 
 	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
@@ -132,6 +126,34 @@ public class Traverson {
 		converter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON));
 
 		return converter;
+	}
+
+	/**
+	 * Configures the {@link RestOperations} to use. If {@literal null} is provided a default {@link RestTemplate} will be
+	 * used.
+	 * 
+	 * @param operations
+	 * @return
+	 */
+	public Traverson setRestOperations(RestOperations operations) {
+
+		this.operations = operations == null ? createDefaultTemplate(mediaTypes) : operations;
+		return this;
+	}
+
+	/**
+	 * Sets the {@link LinkDiscoverers} to use. By default a single {@link HalLinkDiscoverer} is registered. If
+	 * {@literal null} is provided the default is reapplied.
+	 * 
+	 * @param discoverer can be {@literal null}.
+	 * @return
+	 */
+	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
+
+		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS : new LinkDiscoverers(
+				OrderAwarePluginRegistry.create(discoverer));
+
+		return this;
 	}
 
 	/**

@@ -93,7 +93,15 @@ class Rels {
 		 */
 		@Override
 		public Link findInResponse(String response, MediaType mediaType) {
-			return discoverers.getLinkDiscovererFor(mediaType).findLinkWithRel(rel, response);
+
+			LinkDiscoverer discoverer = discoverers.getLinkDiscovererFor(mediaType);
+
+			if (discoverer == null) {
+				throw new IllegalStateException(String.format("Did not find LinkDiscoverer supporting media type %s!",
+						mediaType));
+			}
+
+			return discoverer.findLinkWithRel(rel, response);
 		}
 	}
 

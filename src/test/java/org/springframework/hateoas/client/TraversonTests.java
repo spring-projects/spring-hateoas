@@ -30,6 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
@@ -176,10 +177,24 @@ public class TraversonTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList(interceptor));
 
-		this.traverson = new Traverson(restTemplate, baseUri, MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
+		this.traverson.setRestOperations(restTemplate);
 
 		traverson.follow("movies", "movie", "actor").<String> toObject("$.name");
 		assertThat(interceptor.intercepted, is(4));
+	}
+
+	/**
+	 * @see #185
+	 */
+	@Test
+	public void usesCustomLinkDiscoverer() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/github"), MediaType.APPLICATION_JSON);
+		this.traverson.setLinkDiscoverers(Arrays.asList(new GitHubLinkDiscoverer()));
+
+		String value = this.traverson.follow("foo").toObject("$.key");
+		assertThat(value, is("value"));
 	}
 
 	private void setUpActors() {
@@ -206,4 +221,11 @@ public class TraversonTests {
 			return execution.execute(request, body);
 		}
 	};
+
+	static class GitHubLinkDiscoverer extends JsonPathLinkDiscoverer {
+
+		public GitHubLinkDiscoverer() {
+			super("$.%s_url", MediaType.APPLICATION_JSON);
+		}
+	}
 }
