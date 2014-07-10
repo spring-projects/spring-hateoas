@@ -1,4 +1,6 @@
 [ {
+  "logref" : "42",
+  "message" : "Validation failed!",
   "_links" : {
     "describes" : {
       "href" : "http://..."
@@ -6,10 +8,10 @@
     "help" : {
       "href" : "http://..."
     }
-  },
-  "logref" : "42",
-  "message" : "Validation failed!"
+  }
 }, {
+  "logref" : "42",
+  "message" : "Validation failed!",
   "_links" : {
     "describes" : {
       "href" : "http://..."
@@ -17,10 +19,10 @@
     "help" : {
       "href" : "http://..."
     }
-  },
-  "logref" : "42",
-  "message" : "Validation failed!"
+  }
 }, {
+  "logref" : "42",
+  "message" : "Validation failed!",
   "_links" : {
     "describes" : {
       "href" : "http://..."
@@ -28,7 +30,5 @@
     "help" : {
       "href" : "http://..."
     }
-  },
-  "logref" : "42",
-  "message" : "Validation failed!"
+  }
 } ]

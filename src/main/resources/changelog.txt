@@ -1,6 +1,16 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.15.0.RELEASE (2014-07-10)
+----------------------------------------------
+- #212 - Traversion should be able to return the last link found.
+- #203 - Traverson can now take a customized RestTemplate.
+- #201 - Make RestTemplate of Traverson configurable.
+- #200 - Updated reference documentation to explain CurieProvider API.
+- #185 - Add support for link discovery for other media types than HAL to Traverson.
+- #183 - Curie documentation or example.
+- #141 - Add support for ALPS.
+
 Changes in version 0.14.0.RELEASE (2014-06-30)
 ----------------------------------------------
 - #206 - Set classloader for dummy method proxies.
