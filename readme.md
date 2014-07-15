@@ -315,7 +315,7 @@ As of version 0.11 Spring HATEOAS provides an API for client side service traver
 Map<String, Object> parameters = new HashMap<>();
 parameters.put("user", 27);
 
-Traverson traverson = new Traverson("http://localhost:8080/api/", MediaTypes.HAL_JSON);
+Traverson traverson = new Traverson(new URI("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
 String name = traverson.follow("movies", "movie", "actor").
   withTemplateParameters(parameters).
   toObject("$.name");
