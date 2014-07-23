@@ -207,6 +207,31 @@ public class UriTemplateUnitTest {
 		assertVariables(source.with(new TemplateVariables(toAdd)), expected);
 	}
 
+	/**
+	 * @see #217
+	 */
+	@Test
+	public void doesNotAddVariablesForAlreadyExistingRequestParameters() {
+
+		UriTemplate template = new UriTemplate("/?page=2");
+		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("page", VariableType.REQUEST_PARAM)));
+		assertThat(result.getVariableNames(), is(empty()));
+
+		result = template.with(new TemplateVariables(new TemplateVariable("page", VariableType.REQUEST_PARAM_CONTINUED)));
+		assertThat(result.getVariableNames(), is(empty()));
+	}
+
+	/**
+	 * @see #217
+	 */
+	@Test
+	public void doesNotAddVariablesForAlreadyExistingFragment() {
+
+		UriTemplate template = new UriTemplate("/#fragment");
+		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("fragment", VariableType.FRAGMENT)));
+		assertThat(result.getVariableNames(), is(empty()));
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}

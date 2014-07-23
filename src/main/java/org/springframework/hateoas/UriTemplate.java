@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -106,7 +107,26 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return this;
 		}
 
-		return new UriTemplate(baseUri, this.variables.concat(variables));
+		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
+		List<TemplateVariable> result = new ArrayList<TemplateVariable>();
+
+		for (TemplateVariable variable : variables) {
+
+			boolean isRequestParam = variable.isRequestParameterVariable();
+			boolean alreadyPresent = components.getQueryParams().containsKey(variable.getName());
+
+			if (isRequestParam && alreadyPresent) {
+				continue;
+			}
+
+			if (variable.isFragment() && StringUtils.hasText(components.getFragment())) {
+				continue;
+			}
+
+			result.add(variable);
+		}
+
+		return new UriTemplate(baseUri, this.variables.concat(result));
 	}
 
 	/**
@@ -212,7 +232,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	@Override
 	public String toString() {
-		return baseUri + getOptionalVariables().toString();
+
+		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
+		boolean hasQueryParameters = !components.getQueryParams().isEmpty();
+
+		return baseUri + getOptionalVariables().toString(hasQueryParameters);
 	}
 
 	private TemplateVariables getOptionalVariables() {

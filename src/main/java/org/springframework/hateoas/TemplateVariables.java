@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import static org.springframework.hateoas.TemplateVariable.VariableType.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
 
 /**
@@ -79,7 +82,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		result.addAll(this.variables);
 
 		for (TemplateVariable variable : variables) {
-			if (!result.contains(variable)) {
+			if (!containsEquivalentFor(variable)) {
 				result.add(variable);
 			}
 		}
@@ -106,6 +109,17 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		return this.variables;
 	}
 
+	private boolean containsEquivalentFor(TemplateVariable candidate) {
+
+		for (TemplateVariable variable : this.variables) {
+			if (variable.isEquivalent(candidate)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	/* 
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
@@ -121,6 +135,16 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	 */
 	@Override
 	public String toString() {
+		return toString(false);
+	}
+
+	/**
+	 * Returns the string representation of the template but forcing a continued style of expressing request parameters.
+	 * 
+	 * @param appended
+	 * @return
+	 */
+	String toString(boolean appended) {
 
 		if (variables.isEmpty()) {
 			return "";
@@ -131,10 +155,13 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 		for (TemplateVariable variable : variables) {
 
+			VariableType type = variable.getType();
+			type = appended && type.equals(REQUEST_PARAM) ? REQUEST_PARAM_CONTINUED : type;
+
 			if (previous == null) {
-				builder.append("{").append(variable.getType().toString());
+				builder.append("{").append(type.toString());
 			} else if (!previous.isCombinable(variable)) {
-				builder.append("}{").append(variable.getType().toString());
+				builder.append("}{").append(type.toString());
 			} else {
 				builder.append(",");
 			}

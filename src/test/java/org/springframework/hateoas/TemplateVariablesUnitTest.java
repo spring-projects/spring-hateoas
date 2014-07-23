@@ -17,6 +17,7 @@ package org.springframework.hateoas;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void rendersSingleVariableCorrectly() {
 
-		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", VariableType.SEGMENT));
+		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
 		assertThat(variables.toString(), is("{/foo}"));
 	}
 
@@ -54,8 +55,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesMultipleVariablesOfTheSameType() {
 
-		TemplateVariable first = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
-		TemplateVariable second = new TemplateVariable("bar", VariableType.REQUEST_PARAM);
+		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM);
+		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
 
 		TemplateVariables variables = new TemplateVariables(first, second);
 
@@ -68,8 +69,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesMultipleVariablesOfTheDifferentType() {
 
-		TemplateVariable first = new TemplateVariable("foo", VariableType.SEGMENT);
-		TemplateVariable second = new TemplateVariable("bar", VariableType.REQUEST_PARAM);
+		TemplateVariable first = new TemplateVariable("foo", SEGMENT);
+		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
 
 		TemplateVariables variables = new TemplateVariables(first, second);
 
@@ -82,10 +83,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void concatsVariables() {
 
-		TemplateVariables first = new TemplateVariables(new TemplateVariable("foo", VariableType.SEGMENT));
-		TemplateVariables second = new TemplateVariables(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
-
-		TemplateVariables variables = first.concat(second);
+		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
+		variables = variables.concat(new TemplateVariable("bar", REQUEST_PARAM));
 
 		assertThat(variables.toString(), is("{/foo}{?bar}"));
 	}
@@ -96,8 +95,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesContinuedParamWithParam() {
 
-		TemplateVariable first = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
-		TemplateVariable second = new TemplateVariable("bar", VariableType.REQUEST_PARAM_CONTINUED);
+		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM);
+		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM_CONTINUED);
 
 		TemplateVariables variables = new TemplateVariables(first, second);
 
@@ -110,8 +109,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesContinuedParameterWithParameter() {
 
-		TemplateVariable first = new TemplateVariable("foo", VariableType.REQUEST_PARAM_CONTINUED);
-		TemplateVariable second = new TemplateVariable("bar", VariableType.REQUEST_PARAM);
+		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM_CONTINUED);
+		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
 
 		TemplateVariables variables = new TemplateVariables(first, second);
 
@@ -124,12 +123,52 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void dropsDuplicateTemplateVariable() {
 
-		TemplateVariable variable = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
+		TemplateVariable variable = new TemplateVariable("foo", REQUEST_PARAM);
 		TemplateVariables variables = new TemplateVariables(variable);
 
 		List<TemplateVariable> result = variables.concat(variable).asList();
 
 		assertThat(result, hasSize(1));
 		assertThat(result, hasItem(variable));
+	}
+
+	/**
+	 * @see #217
+	 */
+	@Test
+	public void considersRequestParameterVariablesEquivalent() {
+
+		TemplateVariable parameter = new TemplateVariable("foo", REQUEST_PARAM);
+		TemplateVariable continued = new TemplateVariable("foo", REQUEST_PARAM_CONTINUED);
+		TemplateVariable fragment = new TemplateVariable("foo", FRAGMENT);
+
+		assertThat(parameter.isEquivalent(continued), is(true));
+		assertThat(continued.isEquivalent(parameter), is(true));
+		assertThat(fragment.isEquivalent(continued), is(false));
+	}
+
+	/**
+	 * @see #217
+	 */
+	@Test
+	public void considersFragementVariable() {
+
+		assertThat(new TemplateVariable("foo", VariableType.FRAGMENT).isFragment(), is(true));
+		assertThat(new TemplateVariable("foo", VariableType.REQUEST_PARAM).isFragment(), is(false));
+	}
+
+	/**
+	 * @see #217
+	 */
+	@Test
+	public void doesNotAddEquivalentVariable() {
+
+		TemplateVariable parameter = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
+		TemplateVariable parameterContinued = new TemplateVariable("foo", VariableType.REQUEST_PARAM_CONTINUED);
+
+		List<TemplateVariable> result = new TemplateVariables(parameter).concat(parameterContinued).asList();
+
+		assertThat(result, hasSize(1));
+		assertThat(result, hasItem(parameter));
 	}
 }
