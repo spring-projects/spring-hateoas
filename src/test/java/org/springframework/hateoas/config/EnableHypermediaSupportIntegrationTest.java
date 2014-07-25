@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.hateoas.config.HypermediaSupportBeanDefinitionRegistr
 import org.springframework.hateoas.core.DelegatingEntityLinks;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -77,8 +78,44 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void foo() {
+	public void bootstrapsHalConfigurationForSubclass() {
 		assertHalSetupForConfigClass(ExtendedHalConfig.class);
+	}
+
+	/**
+	 * @see #134, #219
+	 */
+	@Test
+	@SuppressWarnings("unchecked")
+	public void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+
+		Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+		postProcessor.setBeanFactory(context);
+
+		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+
+		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+
+		boolean found = false;
+
+		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers().getResolvers()) {
+
+			if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
+
+				found = true;
+
+				AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
+				List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils.getField(
+						processor, "messageConverters");
+
+				assertThat(converters.get(0), is(instanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class)));
+				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+			}
+		}
+
+		assertThat(found, is(true));
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -108,41 +145,6 @@ public class EnableHypermediaSupportIntegrationTest {
 		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
 		assertThat(Arrays.asList(amha.getMessageConverters()),
 				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
-	}
-
-	/**
-	 * @see #134
-	 */
-	@Test
-	@SuppressWarnings("unchecked")
-	public void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
-
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
-
-		Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
-		postProcessor.setBeanFactory(context);
-
-		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
-
-		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
-
-		boolean found = false;
-
-		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers().getResolvers()) {
-
-			if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
-
-				found = true;
-
-				AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
-				List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils.getField(
-						processor, "messageConverters");
-
-				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
-			}
-		}
-
-		assertThat(found, is(true));
 	}
 
 	@Configuration
