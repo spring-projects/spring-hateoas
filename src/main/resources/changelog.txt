@@ -1,6 +1,12 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.16.0.RELEASE (2014-07-28)
+----------------------------------------------
+- #219 - Registration of HttpMessageConverter for HAL should restrict rendering to subtypes of ResourceSupport.
+- #217 - Improve UriTemplate's TemplateVariables handling.
+- #216 - Release 0.16.0.RELEASE.
+
 Changes in version 0.15.0.RELEASE (2014-07-10)
 ----------------------------------------------
 - #212 - Traversion should be able to return the last link found.
