@@ -30,13 +30,14 @@ import org.springframework.hateoas.core.EvoInflectorRelProvider;
 
 /**
  * Unit tests for {@link HalEmbeddedBuilder}.
- * 
+ *
  * @author Oliver Gierke
  * @author Dietrich Schulten
  */
 public class HalEmbeddedBuilderUnitTest {
 
 	RelProvider provider;
+   CurieProvider curieProvider;
 
 	@Before
 	public void setUp() {
@@ -81,7 +82,7 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void forcesCollectionRelToBeUsedIfConfigured() {
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, true);
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, true);
 		builder.add("Sample");
 
 		assertThat(builder.asMap().get("string"), is(nullValue()));
@@ -96,7 +97,7 @@ public class HalEmbeddedBuilderUnitTest {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, true);
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, true);
 		builder.add(wrappers.wrap("MyValue", "foo"));
 
 		assertThat(builder.asMap().get("foo"), is(instanceOf(String.class)));
@@ -107,7 +108,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullRelProvider() {
-		new HalEmbeddedBuilder(null, false);
+		new HalEmbeddedBuilder(null, curieProvider, false);
 	}
 
 	private static void assertHasValues(Map<String, Object> source, String rel, Object... values) {
@@ -120,7 +121,7 @@ public class HalEmbeddedBuilderUnitTest {
 
 	private Map<String, Object> setUpBuilder(Object... values) {
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, false);
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, false);
 
 		for (Object value : values) {
 			builder.add(value);
