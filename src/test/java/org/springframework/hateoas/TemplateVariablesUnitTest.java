@@ -171,4 +171,36 @@ public class TemplateVariablesUnitTest {
 		assertThat(result, hasSize(1));
 		assertThat(result, hasItem(parameter));
 	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsEmptyName() {
+		new TemplateVariable("", PATH_VARIABLE);
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsNullName() {
+		new TemplateVariable(null, PATH_VARIABLE);
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsNullType() {
+		new TemplateVariable("foo", null);
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsNullDescription() {
+		new TemplateVariable("foo", PATH_VARIABLE, null);
+	}
 }

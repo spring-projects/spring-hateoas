@@ -56,9 +56,9 @@ public final class TemplateVariable implements Serializable {
 	 */
 	public TemplateVariable(String name, TemplateVariable.VariableType type, String description) {
 
-		Assert.hasText("Variable name must not be null or empty!");
-		Assert.notNull("Variable type must not be null!");
-		Assert.notNull("Description must not be null!");
+		Assert.hasText(name, "Variable name must not be null or empty!");
+		Assert.notNull(type, "Variable type must not be null!");
+		Assert.notNull(description, "Description must not be null!");
 
 		this.name = name;
 		this.type = type;
