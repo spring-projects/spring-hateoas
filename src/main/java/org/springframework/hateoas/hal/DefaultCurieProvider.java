@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  * Default implementation of {@link CurieProvider} rendering a single configurable {@link UriTemplate} based curie.
  * 
  * @author Oliver Gierke
+ * @author Jeff Stano
  * @since 0.9
  */
 public class DefaultCurieProvider implements CurieProvider {
@@ -65,8 +66,15 @@ public class DefaultCurieProvider implements CurieProvider {
 	 */
 	@Override
 	public String getNamespacedRelFrom(Link link) {
+		return getNamespacedRelFor(link.getRel());
+	}
 
-		String rel = link.getRel();
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.hal.CurieProvider#getNamespacedRelFrom(java.lang.String)
+	 */
+	@Override
+	public String getNamespacedRelFor(String rel) {
 
 		boolean prefixingNeeded = !IanaRels.isIanaRel(rel) && !rel.contains(":");
 		return prefixingNeeded ? String.format("%s:%s", curie.name, rel) : rel;

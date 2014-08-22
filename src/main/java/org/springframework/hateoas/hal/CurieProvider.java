@@ -25,6 +25,7 @@ import org.springframework.hateoas.Links;
  * 
  * @see http://tools.ietf.org/html/draft-kelly-json-hal#section-8.2
  * @author Oliver Gierke
+ * @author Jeff Stano
  * @since 0.9
  */
 public interface CurieProvider {
@@ -37,6 +38,16 @@ public interface CurieProvider {
 	 * @return
 	 */
 	String getNamespacedRelFrom(Link link);
+
+	/**
+	 * Returns the rel to be rendered for the given rel. Will potentially prefix the rel but also might decide not to,
+	 * depending on the actual rel.
+	 * 
+	 * @param rel
+	 * @return
+	 * @since 0.17
+	 */
+	String getNamespacedRelFor(String rel);
 
 	/**
 	 * Returns an object to render as the base curie information. Implementations have to make sure, the retunred
