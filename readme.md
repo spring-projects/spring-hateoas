@@ -62,7 +62,7 @@ assertThat(resource.getLink(Link.SELF), is(selfLink));
 ```
 
 ## Link builder
-Now we've got the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link`s in a less fragile way. Right now we'd have to duplicate URI strings all over the place which is brittle and unmaintainable. 
+Now we've got the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link`s in a less fragile way. Right now we'd have to duplicate URI strings all over the place which is brittle and unmaintainable.
 
 Assume you have your Spring MVC controllers implemented as follows:
 
@@ -229,7 +229,7 @@ Iterable<Person> people = Collections.singletonList(person);
 
 PersonResourceAssembler assembler = new PersonResourceAssembler();
 PersonResource resource = assembler.toResource(person);
-List<PersonResource> resources = assembler.toResource(people);
+List<PersonResource> resources = assembler.toResources(people);
 ```
 
 ## @EnableHypermediaSupport
@@ -280,7 +280,7 @@ public class Config {
 
   @Bean
   public CurieProvider curieProvider() {
-    return new DefaultCurieProvider("ex", 
+    return new DefaultCurieProvider("ex",
       new UriTemplate("http://www.example.com{#rel}"));
   }
 }
@@ -309,7 +309,6 @@ Since the purpose of the `CurieProvider` API is to allow for automatic curie cre
 ## Traverson
 
 As of version 0.11 Spring HATEOAS provides an API for client side service traversal inspired by the [Traverson](https://blog.codecentric.de/en/2013/11/traverson/) JavaScript library.
-
 
 ```java
 Map<String, Object> parameters = new HashMap<>();
