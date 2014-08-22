@@ -120,11 +120,9 @@ class HalEmbeddedBuilder {
 
 		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
 
-      if (curieProvider != null) {
-         Link embeddedLinkRel = new Link("http://localhost", rel);
-
-         rel = curieProvider.getNamespacedRelFrom(embeddedLinkRel);
-      }
+		if (curieProvider != null) {
+			rel = curieProvider.getNamespacedRelFrom(rel);
+		}
 
 		return rel == null ? DEFAULT_REL : rel;
 	}
