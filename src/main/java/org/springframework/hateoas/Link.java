@@ -16,10 +16,13 @@
 package org.springframework.hateoas;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +30,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -55,6 +60,7 @@ public class Link implements Serializable {
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
 	@XmlTransient @JsonIgnore private UriTemplate template;
+	private Map<String,Object> attributes = new TreeMap<String, Object>();
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -100,6 +106,17 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Copy constructor needed for the various with methods.
+	 */
+	private Link(Link linkToCopy) {
+
+		this.template = linkToCopy.template;
+		this.href = linkToCopy.href;
+		this.rel = linkToCopy.rel;
+		this.attributes = linkToCopy.attributes;
+	}
+
+	/**
 	 * Returns the actual URI the link is pointing to.
 	 * 
 	 * @return
@@ -115,6 +132,18 @@ public class Link implements Serializable {
 	 */
 	public String getRel() {
 		return rel;
+	}
+
+	/**
+	 * Returns the attributes of the link.
+	 * 
+	 * @return
+	 */
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	@JsonAnyGetter
+	public Map<String,Object> getAttributes() {
+
+		return Collections.unmodifiableMap(attributes);
 	}
 
 	/**
@@ -134,6 +163,83 @@ public class Link implements Serializable {
 	 */
 	public Link withSelfRel() {
 		return withRel(Link.REL_SELF);
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the specified anchor value.
+	 * 
+	 * @param anchor
+	 * @return
+	 */
+	public Link withAnchor(String anchor) {
+
+		Link link = new Link(this);
+		link.setAttributeValue("anchor", anchor);
+		return link;
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the specified hreflang value.
+	 * 
+	 * @param hreflang
+	 * @return
+	 */
+	public Link withHreflang(String hreflang) {
+
+		return withAttribute("hreflang", hreflang);
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the specified media value.
+	 * 
+	 * @param media
+	 * @return
+	 */
+	public Link withMedia(String media) {
+
+		Link link = new Link(this);
+		link.setAttributeValue("media", media);
+		return link;
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the specified title value.
+	 * 
+	 * @param title
+	 * @return
+	 */
+	public Link withTitle(String title) {
+
+		Link link = new Link(this);
+		link.setAttributeValue("title", title);
+		return link;
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the specified type value.
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public Link withType(String type) {
+
+		Link link = new Link(this);
+		link.setAttributeValue("type", type);
+		return link;
+	}
+
+	/**
+	 * Returns a {@link Link} pointing to the same URI but with the specified attribute
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public Link withAttribute(String key, String value) {
+
+		Link link = new Link(this);
+		link.setAttributeValue(key, value);
+		return link;
 	}
 
 	/**
@@ -233,7 +339,59 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return String.format("<%s>;rel=\"%s\"", href, rel);
+
+		StringBuilder str = new StringBuilder();
+
+		str.append("<");
+		str.append(href);
+		str.append(">");
+
+		if (rel != null) {
+			str.append(";rel=\"");
+			str.append(rel);
+			str.append("\"");
+		}
+
+		for (String key : attributes.keySet()) {
+			Object value = attributes.get(key);
+
+			if (value instanceof Collection) {
+				for (String item : (Collection<String>)value) {
+					str.append(";");
+					str.append(key);
+					str.append("=\"");
+					str.append(item);
+					str.append("\"");
+				}
+			}
+			else {
+				str.append(";");
+				str.append(key);
+				str.append("=\"");
+				str.append(value);
+				str.append("\"");
+			}
+		}
+
+		return str.toString();
+	}
+
+	private void setAttributeValue(String key, String value) {
+
+		Object currentValue = attributes.get(key);
+
+		if (currentValue instanceof Collection) {
+			((Collection<String>)currentValue).add(value);
+		}
+		else if (currentValue instanceof String) {
+			Collection<String> values = new ArrayList<String>();
+			attributes.put(key, values);
+			values.add(currentValue.toString());
+			values.add(value);
+		}
+		else {
+			attributes.put(key, value);
+		}
 	}
 
 	/**
@@ -262,7 +420,15 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			return new Link(matcher.group(1), attributes.get("rel"));
+			Link link = new Link(matcher.group(1), attributes.get("rel"));
+
+			for (String key : attributes.keySet()) {
+				if (!key.equalsIgnoreCase("rel")) {
+					link = link.withAttribute(key, attributes.get(key));
+				}
+			}
+
+			return link;
 
 		} else {
 			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
@@ -282,11 +448,19 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Alnum}*)\"");
-		Matcher matcher = keyAndValue.matcher(source);
 
-		while (matcher.find()) {
-			attributes.put(matcher.group(1), matcher.group(2));
+		Pattern attributesPattern = Pattern.compile("\\w+=\\\"[\\s\\p{Alnum}]*\"*");
+		Pattern keyAndValuePattern = Pattern.compile("(\\w+)=\\\"([\\s\\p{Alnum}]*)\"");
+
+		Matcher attributesMatcher = attributesPattern.matcher(source);
+
+		while (attributesMatcher.find()) {
+			String group = attributesMatcher.group();
+			Matcher keyValueMatcher = keyAndValuePattern.matcher(group);
+
+			if (keyValueMatcher.find()) {
+				attributes.put(keyValueMatcher.group(1), keyValueMatcher.group(2));
+			}
 		}
 
 		return attributes;

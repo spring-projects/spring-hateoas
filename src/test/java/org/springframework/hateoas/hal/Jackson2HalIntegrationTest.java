@@ -51,6 +51,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
 
+	static final String SINGLE_LINK_WITH_ATTRIBUTES_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":[\"lang1\",\"lang2\"],\"title\":\"The Title\"}}}";
+
 	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
 	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
@@ -93,6 +95,18 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost"));
 		assertThat(read(SINGLE_LINK_REFERENCE, ResourceSupport.class), is(expected));
+	}
+
+	@Test
+	public void rendersSingleLinkWithAttributesAsObject() throws Exception {
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost")
+									  .withTitle("The Title")
+									  .withHreflang("lang1")
+									  .withHreflang("lang2"));
+
+		assertThat(write(resourceSupport), is(SINGLE_LINK_WITH_ATTRIBUTES_REFERENCE));
 	}
 
 	/**
