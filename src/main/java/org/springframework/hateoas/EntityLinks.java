@@ -42,6 +42,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * given parameters into the URI template the backing controller is mapped to.
 	 * 
 	 * @param type the entity type to point to, must not be {@literal null}.
+	 * @param parameters the parameters to be unfolded into the URI template.
 	 * @return the {@link LinkBuilder} pointing to the collection resource.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
 	 */
@@ -60,14 +61,40 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	LinkBuilder linkForSingleResource(Class<?> type, Object id);
 
 	/**
+	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity type and id, unfolding the
+ 	 * given parameters into the URI template the backing controller is mapped to.
+	 * Implementations will know about the URI structure being used to expose single-resource URIs.
+	 * 
+	 * @param type the entity type to point to, must not be {@literal null}.
+	 * @param id the id of the object of the handed type, {@link Identifiable}s will be unwrapped.
+	 * @param parameters the parameters to be unfolded into the URI template.
+	 * @return the {@link LinkBuilder} pointing to the single resource identified by the given type and id. Will never be
+	 *         {@literal null}.
+	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
+	 */
+	LinkBuilder linkForSingleResource(Class<?> type, Object id, Object... parameters);
+
+	/**
 	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity.
 	 * 
-	 * @see #linkForSingleResource(Class, Object)
+	 * @see #linkForSingleResource(Class, Object, Object...)
 	 * @param entity the entity type to point to, must not be {@literal null}.
 	 * @return the {@link LinkBuilder} pointing the given entity. Will never be {@literal null}.
 	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
 	 */
 	LinkBuilder linkForSingleResource(Identifiable<?> entity);
+
+	/**
+	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity, unfolding the
+ 	 * given parameters into the URI template the backing controller is mapped to.
+	 * 
+	 * @see #linkForSingleResource(Class, Object, Object...)
+	 * @param entity the entity type to point to, must not be {@literal null}.
+	 * @param parameters the parameters to be unfolded into the URI template.
+	 * @return the {@link LinkBuilder} pointing the given entity. Will never be {@literal null}.
+	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
+	 */
+	LinkBuilder linkForSingleResource(Identifiable<?> entity, Object... parameters);
 
 	/**
 	 * Creates a {@link Link} pointing to the collection resource of the given type. The relation type of the link will be
@@ -79,6 +106,19 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
 	 */
 	Link linkToCollectionResource(Class<?> type);
+
+	/**
+	 * Creates a {@link Link} pointing to the collection resource of the given type, unfolding the
+ 	 * given parameters into the URI template the backing controller is mapped to. The relation type of the link will be
+	 * determined by the implementation class and should be defaulted to {@link Link#REL_SELF}.
+	 * 
+	 * @param type the entity type to point to, must not be {@literal null}.
+	 * @param parameters the parameters to be unfolded into the URI template.
+	 * @return the {@link Link} pointing to the collection resource exposed for the given entity. Will never be
+	 *         {@literal null}.
+	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
+	 */
+	Link linkToCollectionResource(Class<?> type, Object... parameters);
 
 	/**
 	 * Creates a {@link Link} pointing to single resource backing the given entity type and id. The relation type of the
@@ -93,6 +133,20 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	Link linkToSingleResource(Class<?> type, Object id);
 
 	/**
+	 * Creates a {@link Link} pointing to single resource backing the given entity type and id, unfolding the
+ 	 * given parameters into the URI template the backing controller is mapped to. The relation type of the
+	 * link will be determined by the implementation class and should be defaulted to {@link Link#REL_SELF}.
+	 * 
+	 * @param type the entity type to point to, must not be {@literal null}.
+	 * @param id the identifier of the entity of the given type
+	 * @param parameters the parameters to be unfolded into the URI template.
+	 * @return the {@link Link} pointing to the resource exposed for the entity with the given type and id. Will never be
+	 *         {@literal null}.
+	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
+	 */
+	Link linkToSingleResource(Class<?> type, Object id, Object... parameters);
+
+	/**
 	 * Creates a {@link Link} pointing to single resource backing the given entity. The relation type of the link will be
 	 * determined by the implementation class and should be defaulted to {@link Link#REL_SELF}.
 	 * 
@@ -101,4 +155,16 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
 	 */
 	Link linkToSingleResource(Identifiable<?> entity);
+
+	/**
+	 * Creates a {@link Link} pointing to single resource backing the given entity, unfolding the
+ 	 * given parameters into the URI template the backing controller is mapped to. The relation type of the link will be
+	 * determined by the implementation class and should be defaulted to {@link Link#REL_SELF}.
+	 * 
+	 * @param entity the entity type to point to, must not be {@literal null}.
+	 * @param parameters the parameters to be unfolded into the URI template.
+	 * @return the {@link Link} pointing to the resource exposed for the given entity. Will never be {@literal null}.
+	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
+	 */
+	Link linkToSingleResource(Identifiable<?> entity, Object... parameters);
 }

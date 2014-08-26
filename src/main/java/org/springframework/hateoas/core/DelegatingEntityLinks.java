@@ -16,6 +16,7 @@
 package org.springframework.hateoas.core;
 
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.plugin.core.PluginRegistry;
@@ -71,11 +72,38 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 
 	/* 
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.EntityLinks#linkToCollectionResource(java.lang.Class, java.lang.Object...)
+	 */
+	@Override
+	public Link linkToCollectionResource(Class<?> type, Object... parameters) {
+		return getPluginFor(type).linkToCollectionResource(type, parameters);
+	}
+
+	/* 
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.EntityLinks#getLinkToSingleResource(java.lang.Class, java.lang.Object)
 	 */
 	@Override
 	public Link linkToSingleResource(Class<?> type, Object id) {
 		return getPluginFor(type).linkToSingleResource(type, id);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.EntityLinks#linkToSingleResource(java.lang.Class, java.lang.Object, java.lang.Object...)
+	 */
+	@Override
+	public Link linkToSingleResource(Class<?> type, Object id, Object... parameters) {
+		return getPluginFor(type).linkToSingleResource(type, id, parameters);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.EntityLinks#linkToSingleResource(java.lang.Class, java.lang.Object, java.lang.Object...)
+	 */
+	@Override
+	public Link linkToSingleResource(Identifiable<?> entity, Object... parameters) {
+		return getPluginFor(entity.getClass()).linkToSingleResource(entity, parameters);
 	}
 
 	/* 
