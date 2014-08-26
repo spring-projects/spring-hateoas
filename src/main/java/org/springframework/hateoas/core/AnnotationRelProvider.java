@@ -15,11 +15,16 @@
  */
 package org.springframework.hateoas.core;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
+import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.RelProvider;
 
 /**
@@ -27,7 +32,9 @@ import org.springframework.hateoas.RelProvider;
  * @author Alexander Baetz
  */
 @Order(100)
-public class AnnotationRelProvider implements RelProvider {
+public class AnnotationRelProvider implements RelProvider, ApplicationContextAware {
+
+	private ApplicationContext context;
 
 	private final Map<Class<?>, Relation> annotationCache = new HashMap<Class<?>, Relation>();
 
@@ -80,12 +87,46 @@ public class AnnotationRelProvider implements RelProvider {
 			return relation;
 		}
 
-		relation = AnnotationUtils.getAnnotation(type, Relation.class);
+		Class controllerClass = getControllerTypeWithAnnotation(ExposesResourceFor.class, type);
+
+		if (controllerClass != null) {
+
+			relation = AnnotationUtils.getAnnotation(controllerClass, Relation.class);
+		}
+
+		if (relation == null) {
+
+			relation = AnnotationUtils.getAnnotation(type, Relation.class);
+		}
 
 		if (relation != null) {
 			annotationCache.put(type, relation);
 		}
 
 		return relation;
+	}
+
+	private Class<?> getControllerTypeWithAnnotation(Class<? extends Annotation> annotationType, Class annotationValue) {
+
+		if (annotationValue == Object.class) {
+			return null;
+		}
+
+		for (String beanName : context.getBeanDefinitionNames()) {
+
+			Annotation annotation = context.findAnnotationOnBean(beanName, annotationType);
+			if (annotation != null && AnnotationUtils.getValue(annotation) == annotationValue) {
+
+				return context.getType(beanName);
+			}
+		}
+
+		return getControllerTypeWithAnnotation(annotationType, annotationValue.getSuperclass());
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+
+		this.context = applicationContext;
 	}
 }
