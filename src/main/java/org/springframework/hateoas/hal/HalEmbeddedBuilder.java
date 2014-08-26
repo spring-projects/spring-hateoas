@@ -42,6 +42,7 @@ class HalEmbeddedBuilder {
 
 	private final Map<String, Object> embeddeds = new HashMap<String, Object>();
 	private final RelProvider provider;
+   private final CurieProvider curieProvider;
 	private final EmbeddedWrappers wrappers;
 
 	/**
@@ -50,11 +51,12 @@ class HalEmbeddedBuilder {
 	 * @param provider can be {@literal null}.
 	 * @param preferCollectionRels whether to prefer to ask the provider for collection rels.
 	 */
-	public HalEmbeddedBuilder(RelProvider provider, boolean preferCollectionRels) {
+	public HalEmbeddedBuilder(RelProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
 		Assert.notNull(provider, "Relprovider must not be null!");
 
 		this.provider = provider;
+      this.curieProvider = curieProvider;
 		this.wrappers = new EmbeddedWrappers(preferCollectionRels);
 	}
 
@@ -62,7 +64,7 @@ class HalEmbeddedBuilder {
 	 * Adds the given value to the embeddeds. Will skip doing so if the value is {@literal null} or the content of a
 	 * {@link Resource} is {@literal null}.
 	 * 
-	 * @param value can be {@literal null}.
+	 * @param source can be {@literal null}.
 	 */
 	public void add(Object source) {
 
@@ -116,6 +118,11 @@ class HalEmbeddedBuilder {
 		Class<?> type = wrapper.getRelTargetType();
 
 		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
+
+		if (curieProvider != null) {
+			rel = curieProvider.getNamespacedRelFrom(rel);
+		}
+
 		return rel == null ? DEFAULT_REL : rel;
 	}
 

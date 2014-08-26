@@ -66,7 +66,15 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public String getNamespacedRelFrom(Link link) {
 
-		String rel = link.getRel();
+		return getNamespacedRelFrom(link.getRel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.hal.CurieProvider#getNamespacedRelFrom(java.lang.String)
+	 */
+	@Override
+	public String getNamespacedRelFrom(String rel) {
 
 		boolean prefixingNeeded = !IanaRels.isIanaRel(rel) && !rel.contains(":");
 		return prefixingNeeded ? String.format("%s:%s", curie.name, rel) : rel;
