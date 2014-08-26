@@ -15,8 +15,11 @@
  */
 package org.springframework.hateoas;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -34,12 +37,14 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 public class Resource<T> extends ResourceSupport {
 
 	private final T content;
+	private final Resources<Resource> resources;
 
 	/**
 	 * Creates an empty {@link Resource}.
 	 */
 	Resource() {
 		this.content = null;
+		this.resources = null;
 	}
 
 	/**
@@ -60,9 +65,21 @@ public class Resource<T> extends ResourceSupport {
 	 */
 	public Resource(T content, Iterable<Link> links) {
 
+		this(content, links, null);
+	}
+
+	/**
+	 * Creates a new {@link Resource} with the given content and {@link Link}s.
+	 * 
+	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link Resource}.
+	 */
+	public Resource(T content, Iterable<Link> links, Resources<Resource> resources) {
+
 		Assert.notNull(content, "Content must not be null!");
 		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
 		this.content = content;
+		this.resources = resources;
 		this.add(links);
 	}
 
@@ -75,6 +92,40 @@ public class Resource<T> extends ResourceSupport {
 	@XmlAnyElement
 	public T getContent() {
 		return content;
+	}
+
+	@JsonUnwrapped
+	@XmlAnyElement
+	public Resources<Resource> getResources() {
+		return resources;
+	}
+
+	public Resource<T> withResources(Iterable<Resource> resources) {
+
+		Collection<Resource> newResources = new ArrayList<Resource>();
+
+		if (this.resources != null) {
+			newResources.addAll(this.resources.getContent());
+		}
+
+		for (Resource resource : resources) {
+			newResources.add(resource);
+		}
+
+		return new Resource<T>(content, getLinks(), new Resources<Resource>(newResources));
+	}
+
+	public Resource<T> withResources(Resource... resources) {
+
+		Collection<Resource> newResources = new ArrayList<Resource>();
+
+		if (this.resources != null) {
+			newResources.addAll(this.resources.getContent());
+		}
+
+		Collections.addAll(newResources, resources);
+
+		return new Resource<T>(content, getLinks(), new Resources<Resource>(newResources));
 	}
 
 	/* 

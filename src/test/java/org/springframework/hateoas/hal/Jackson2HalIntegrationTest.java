@@ -54,6 +54,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
 	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+	static final String RESOURCE_WITH_EMBEDDED_RESOURCE_REFERENCE = "{\"firstName\":\"Bill\",\"lastName\":\"Smith\",\"_embedded\":{\"pojos\":[{\"text\":\"AAAA\",\"number\":1},{\"text\":\"ZZZZ\",\"number\":2}],\"people\":[{\"firstName\":\"Kid\",\"lastName\":\"One\"},{\"firstName\":\"Kid\",\"lastName\":\"Two\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
+	static final String RESOURCE_WITH_NO_EMBEDDED_RESOURCE_REFERENCE = "{\"firstName\":\"Bill\",\"lastName\":\"Smith\",\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
 
 	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
@@ -185,6 +187,32 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void rendersResourceWithNoEmbeddedResourcesWithoutEmbeddedBlock() throws Exception {
+
+		Resource<PersonPojo> billSmith = new Resource<PersonPojo>(new PersonPojo("Bill", "Smith"));
+
+		billSmith.add(new Link("localhost"));
+
+		assertThat(write(billSmith), is(RESOURCE_WITH_NO_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void rendersResourceWithEmbeddedResources() throws Exception {
+
+		Resource<PersonPojo> billSmith = new Resource<PersonPojo>(new PersonPojo("Bill", "Smith"));
+
+		billSmith = billSmith.withResources(new Resource<PersonPojo>(new PersonAnnotatedPojo("Kid", "One")),
+																	 new Resource<PersonPojo>(new PersonAnnotatedPojo("Kid", "Two")));
+
+		billSmith = billSmith.withResources(new Resource<SimplePojo>(new SimpleAnnotatedPojo("AAAA", 1)),
+																	 new Resource<SimplePojo>(new SimpleAnnotatedPojo("ZZZZ", 2)));
+
+		billSmith.add(new Link("localhost"));
+
+		assertThat(write(billSmith), is(RESOURCE_WITH_EMBEDDED_RESOURCE_REFERENCE));
 	}
 
 	@Test
@@ -369,6 +397,17 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
 
 		return new Resources<Resource<SimplePojo>>(content);
+	}
+
+	private static Resources<Resource> setupMultipleResources() {
+
+		List<Resource> content = new ArrayList<Resource>();
+		content.add(new Resource<SimplePojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(new Resource<SimplePojo>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+		content.add(new Resource<PersonPojo>(new PersonAnnotatedPojo("Bill", "Smith"), new Link("localhost")));
+		content.add(new Resource<PersonPojo>(new PersonAnnotatedPojo("Judy", "Jones"), new Link("localhost")));
+
+		return new Resources<Resource>(content);
 	}
 
 	private static ObjectMapper getCuriedObjectMapper() {
