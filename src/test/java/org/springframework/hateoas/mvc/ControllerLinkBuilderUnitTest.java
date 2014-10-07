@@ -378,6 +378,51 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/root"));
 	}
 
+	/**
+	 * @see #257, #107
+	 */
+	@Test
+	public void usesXForwardedProtoHeaderAsLinkSchema() {
+
+		for (String proto : Arrays.asList("http", "https")) {
+
+			setUp();
+			request.addHeader("X-Forwarded-Proto", proto);
+
+			Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+			assertThat(link.getHref(), startsWith(proto + "://"));
+		}
+	}
+
+	/**
+	 * @see #257, #107
+	 */
+	@Test
+	public void usesProtoValueFromForwardedHeaderAsLinkSchema() {
+
+		for (String proto : Arrays.asList("http", "https")) {
+
+			setUp();
+			request.addHeader("Forwarded", new String[] { "proto=" + proto });
+
+			Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+			assertThat(link.getHref(), startsWith(proto.concat("://")));
+		}
+	}
+
+	/**
+	 * @see #257, #107
+	 */
+	@Test
+	public void favorsStandardForwardHeaderOverXForwardedProto() {
+
+		request.addHeader("X-Forwarded-Proto", "foo");
+		request.addHeader(ForwardedHeader.NAME, "proto=bar");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("bar://"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
