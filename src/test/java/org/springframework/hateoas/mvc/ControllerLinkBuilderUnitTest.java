@@ -378,6 +378,29 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/root"));
 	}
 
+    /**
+     * @see #107
+     */
+    @Test
+    public void setLinkSchemaToUseHttpsIfXForwardProtoHeaderIsSetToHttps() {
+
+        request.addHeader("X-Forwarded-Proto", "https");
+
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getHref(), startsWith("https://"));
+    }
+    /**
+     * @see #107
+     */
+    @Test
+    public void ignoreXForwardProtoHeaderIfValueNotHttps() {
+
+        request.addHeader("X-Forwarded-Proto", "not https");
+
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getHref(), startsWith("http://"));
+    }
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
