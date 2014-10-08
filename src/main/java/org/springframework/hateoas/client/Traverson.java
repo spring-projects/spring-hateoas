@@ -70,9 +70,11 @@ public class Traverson {
 	}
 
 	private final URI baseUri;
+
 	private final List<MediaType> mediaTypes;
 
 	private RestOperations operations;
+
 	private LinkDiscoverers discoverers;
 
 	/**
@@ -91,20 +93,33 @@ public class Traverson {
 		this.baseUri = baseUri;
 		this.discoverers = DEFAULT_LINK_DISCOVERERS;
 
-		setRestOperations(createDefaultTemplate(this.mediaTypes));
+		setRestOperations(createDefaultTemplate(mediaTypes));
 	}
 
-	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
+	/**
+	 * Convenience method to construct message converters for a Traverson client. If the media types provided contains
+	 * {@link MediaTypes#HAL_JSON} then a HAL converter will be provided in addition to a plain String converter as a
+	 * fallback.
+	 * 
+	 * @param mediaTypes the media types to use
+	 * @return a list of message converters
+	 */
+	public static final List<HttpMessageConverter<?>> getDefaultMessageConverters(MediaType... mediaTypes) {
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 
-		if (mediaTypes.contains(MediaTypes.HAL_JSON)) {
+		if (Arrays.asList(mediaTypes).contains(MediaTypes.HAL_JSON)) {
 			converters.add(getHalConverter());
 		}
 
+		return converters;
+	}
+
+	private static final RestOperations createDefaultTemplate(MediaType... mediaTypes) {
+
 		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(converters);
+		template.setMessageConverters(getDefaultMessageConverters(mediaTypes));
 
 		return template;
 	}
@@ -129,15 +144,16 @@ public class Traverson {
 	}
 
 	/**
-	 * Configures the {@link RestOperations} to use. If {@literal null} is provided a default {@link RestTemplate} will be
-	 * used.
+	 * Configures the {@link RestOperations} to use. If {@literal null} is provided a default {@link RestTemplate} will
+	 * be used.
 	 * 
 	 * @param operations
 	 * @return
 	 */
 	public Traverson setRestOperations(RestOperations operations) {
 
-		this.operations = operations == null ? createDefaultTemplate(mediaTypes) : operations;
+		this.operations = operations == null ? createDefaultTemplate(mediaTypes
+				.toArray(new MediaType[mediaTypes.size()])) : operations;
 		return this;
 	}
 
@@ -187,14 +203,17 @@ public class Traverson {
 	public class TraversalBuilder {
 
 		private List<String> rels = new ArrayList<String>();
+
 		private Map<String, Object> templateParameters = new HashMap<String, Object>();
+
 		private HttpHeaders headers = new HttpHeaders();
 
-		private TraversalBuilder() {}
+		private TraversalBuilder() {
+		}
 
 		/**
-		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
-		 * line.
+		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel
+		 * in line.
 		 * 
 		 * @param rels must not be {@literal null}.
 		 * @return
@@ -208,8 +227,8 @@ public class Traverson {
 		}
 
 		/**
-		 * Adds the given operations parameters to the traversal. If a link discovered by the traversal is templated, the
-		 * given parameters will be used to expand the operations into a resolvable URI.
+		 * Adds the given operations parameters to the traversal. If a link discovered by the traversal is templated,
+		 * the given parameters will be used to expand the operations into a resolvable URI.
 		 * 
 		 * @param parameters can be {@literal null}.
 		 * @return
@@ -274,7 +293,8 @@ public class Traverson {
 		}
 
 		/**
-		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given type.
+		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given
+		 * type.
 		 * 
 		 * @param type must not be {@literal null}.
 		 * @return
@@ -312,8 +332,8 @@ public class Traverson {
 			HttpEntity<?> request = prepareRequest(headers);
 			UriTemplate uriTemplate = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = operations.exchange(uriTemplate.expand(templateParameters), GET, request,
-					String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(uriTemplate.expand(templateParameters), GET,
+					request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
@@ -321,8 +341,8 @@ public class Traverson {
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
-				throw new IllegalStateException(String.format("Expected to find link with rel '%s' in response %s!", rel,
-						responseBody));
+				throw new IllegalStateException(String.format("Expected to find link with rel '%s' in response %s!",
+						rel, responseBody));
 			}
 
 			return getAndFindLinkWithRel(link.getHref(), rels);
