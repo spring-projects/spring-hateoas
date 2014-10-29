@@ -187,8 +187,9 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
 		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+		String forwardedProto = request.getHeader("X-Forwarded-Proto");
 
-		if (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+		if (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on") || StringUtils.hasText(forwardedProto) && forwardedProto.equalsIgnoreCase("https")) {
 			builder.scheme("https");
 		}
 
