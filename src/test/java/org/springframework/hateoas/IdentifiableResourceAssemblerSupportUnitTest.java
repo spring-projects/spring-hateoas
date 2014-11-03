@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mvc;
+package org.springframework.hateoas;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.junit.Assert.assertThat;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.Path;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.Identifiable;
+import org.springframework.hateoas.IdentifiableResourceAssemblerSupport;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.hateoas.LinkBuilderFactory;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.jaxrs.JaxRsLinkBuilderFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Unit tests for {@link IdentifiableResourceAssemblerSupport}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
@@ -45,9 +49,9 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	@Before
 	public void setUp() {
 		super.setUp();
-		this.person = new Person();
-		this.person.id = 10L;
-		this.person.alternateId = "id";
+		person = new Person();
+		person.id = 10L;
+		person.alternateId = "id";
 	}
 
 	@Test
@@ -66,6 +70,17 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		PersonResource resource = assembler.createResourceWithId(person.alternateId, person);
 		Link selfLink = resource.getId();
 		assertThat(selfLink.getHref(), endsWith("/people/id"));
+	}
+
+	@Test
+	public void usesAlternateLinkBuilderIfGivenExplicitly() {
+
+		PersonResourceAssembler jaxAssembler = new PersonResourceAssembler(new JaxRsLinkBuilderFactory(), JaxRsPersonController.class);
+		PersonResource resource = jaxAssembler.createResource(person);
+		Link link = resource.getLink(Link.REL_SELF);
+
+		assertThat(link, is(notNullValue()));
+		assertThat(resource.getLinks().size(), is(1));
 	}
 
 	@Test
@@ -104,6 +119,11 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 	}
 
+	@Path("/people")
+	static class JaxRsPersonController {
+
+	}
+
 	@RequestMapping("/people/{id}/{foo}/addresses")
 	static class ParameterizedController {
 
@@ -132,6 +152,10 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 		public PersonResourceAssembler(Class<?> controllerType) {
 			super(controllerType, PersonResource.class);
+		}
+
+		public PersonResourceAssembler(LinkBuilderFactory<? extends LinkBuilder> factory, Class<?> controllerType) {
+			super(factory, controllerType, PersonResource.class);
 		}
 
 		@Override
