@@ -39,6 +39,15 @@ public interface CurieProvider {
 	String getNamespacedRelFrom(Link link);
 
 	/**
+	 * Returns the rel to be rendered for the given rel. Will potentially prefix the rel but also might decide
+	 * not to, depending on the actual rel.
+	 *
+	 * @param rel
+	 * @return
+	 */
+	String getNamespacedRelFrom(String rel);
+
+	/**
 	 * Returns an object to render as the base curie information. Implementations have to make sure, the retunred
 	 * instances renders as defined in the spec.
 	 * 
