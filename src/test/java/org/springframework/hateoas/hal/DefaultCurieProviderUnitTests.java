@@ -72,4 +72,19 @@ public class DefaultCurieProviderUnitTests {
 	public void doesNotPrefixQualifiedRels() {
 		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")), is("custom:rel"));
 	}
+
+	@Test
+	public void doesNotPrefixIanaRelsForRelAsString() {
+		assertThat(provider.getNamespacedRelFrom("self"), is("self"));
+	}
+
+	@Test
+	public void prefixesNormalRelsForRelAsString() {
+		assertThat(provider.getNamespacedRelFrom("book"), is("acme:book"));
+	}
+
+	@Test
+	public void doesNotPrefixQualifiedRelsForRelAsString() {
+		assertThat(provider.getNamespacedRelFrom("custom:rel"), is("custom:rel"));
+	}
 }

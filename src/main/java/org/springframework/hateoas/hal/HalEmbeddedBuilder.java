@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.core.EmbeddedWrapper;
@@ -32,7 +33,7 @@ import org.springframework.util.StringUtils;
 /**
  * Builder class that allows collecting objects under the relation types defined for the objects but moving from the
  * single resource relation to the collection one, once more than one object of the same type is added.
- * 
+ *
  * @author Oliver Gierke
  * @author Dietrich Schulten
  */
@@ -42,27 +43,29 @@ class HalEmbeddedBuilder {
 
 	private final Map<String, Object> embeddeds = new HashMap<String, Object>();
 	private final RelProvider provider;
+   private final CurieProvider curieProvider;
 	private final EmbeddedWrappers wrappers;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link RelProvider} and prefer collection rels flag.
-	 * 
+	 *
 	 * @param provider can be {@literal null}.
 	 * @param preferCollectionRels whether to prefer to ask the provider for collection rels.
 	 */
-	public HalEmbeddedBuilder(RelProvider provider, boolean preferCollectionRels) {
+	public HalEmbeddedBuilder(RelProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
 		Assert.notNull(provider, "Relprovider must not be null!");
 
 		this.provider = provider;
+      this.curieProvider = curieProvider;
 		this.wrappers = new EmbeddedWrappers(preferCollectionRels);
 	}
 
 	/**
 	 * Adds the given value to the embeddeds. Will skip doing so if the value is {@literal null} or the content of a
 	 * {@link Resource} is {@literal null}.
-	 * 
-	 * @param value can be {@literal null}.
+	 *
+	 * @param source can be {@literal null}.
 	 */
 	public void add(Object source) {
 
@@ -116,12 +119,17 @@ class HalEmbeddedBuilder {
 		Class<?> type = wrapper.getRelTargetType();
 
 		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
+
+		if (curieProvider != null) {
+			rel = curieProvider.getNamespacedRelFrom(rel);
+		}
+
 		return rel == null ? DEFAULT_REL : rel;
 	}
 
 	/**
 	 * Returns the added objects keyed up by their relation types.
-	 * 
+	 *
 	 * @return
 	 */
 	public Map<String, Object> asMap() {

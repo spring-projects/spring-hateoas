@@ -44,6 +44,26 @@ public class LinkUnitTest {
 		assertThat(link.getRel(), is(Link.REL_SELF));
 	}
 
+	@Test
+	public void createsLinkFromRelAndHrefWithParameters() {
+
+		Link link = new Link("foo", Link.REL_SELF)
+							.withAnchor("anchor")
+							.withHreflang("hreflang")
+							.withMedia("media")
+							.withTitle("title")
+							.withType("type")
+							.withAttribute("name", "name");
+		assertThat(link.getHref(), is("foo"));
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getAttributes().get("anchor").toString(), is("anchor"));
+		assertThat(link.getAttributes().get("hreflang").toString(), is("hreflang"));
+		assertThat(link.getAttributes().get("media").toString(), is("media"));
+		assertThat(link.getAttributes().get("title").toString(), is("title"));
+		assertThat(link.getAttributes().get("type").toString(), is("type"));
+		assertThat(link.getAttributes().get("name").toString(), is("name"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullHref() {
 		new Link(null);
@@ -108,6 +128,32 @@ public class LinkUnitTest {
 
 		assertThat(Link.valueOf("</something>;rel=\"foo\""), is(new Link("/something", "foo")));
 		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo")));
+		assertThat(Link.valueOf("</something>;title=\"Some title\";rel=\"foo\""), is(new Link("/something", "foo")));
+		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\"").getAttributes().get("title").toString(), is("Some title"));
+	}
+
+	@Test
+	public void testToStringWithNoAttributes() {
+
+		Link link = new Link("/foo", Link.REL_SELF);
+
+		assertThat(link.toString(), is("</foo>;rel=\"self\""));
+	}
+
+	@Test
+	public void testToStringWithAllAttributes() {
+
+		Link link = new Link("/foo", Link.REL_SELF)
+							.withAnchor("anchor")
+							.withHreflang("hreflang")
+							.withMedia("media")
+							.withTitle("title")
+							.withType("type")
+							.withAttribute("name", "name")
+							.withAttribute("custom", "custom1")
+							.withAttribute("custom", "custom2");
+
+		assertThat(link.toString(), is("</foo>;rel=\"self\";anchor=\"anchor\";custom=\"custom1\";custom=\"custom2\";hreflang=\"hreflang\";media=\"media\";name=\"name\";title=\"title\";type=\"type\""));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
