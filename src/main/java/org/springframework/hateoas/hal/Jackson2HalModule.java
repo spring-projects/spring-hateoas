@@ -71,7 +71,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Jackson 2 module implementation to render {@link Link} and {@link ResourceSupport} instances in HAL compatible JSON.
- * 
+ *
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
@@ -90,7 +90,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * Returns whether the module was already registered in the given {@link ObjectMapper}.
-	 * 
+	 *
 	 * @param mapper must not be {@literal null}.
 	 * @return
 	 */
@@ -102,7 +102,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON.
-	 * 
+	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
@@ -230,7 +230,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
-	 * 
+	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
@@ -238,24 +238,26 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final BeanProperty property;
 		private final RelProvider relProvider;
+      private final CurieProvider curieProvider;
 		private final boolean enforceEmbeddedCollections;
 
-		public HalResourcesSerializer(RelProvider relPorvider, boolean enforceEmbeddedCollections) {
-			this(null, relPorvider, enforceEmbeddedCollections);
+		public HalResourcesSerializer(RelProvider relPorvider, CurieProvider curieProvider, boolean enforceEmbeddedCollections) {
+			this(null, relPorvider, curieProvider, enforceEmbeddedCollections);
 		}
 
-		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider, boolean enforceEmbeddedCollections) {
+		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider, CurieProvider curieProvider, boolean enforceEmbeddedCollections) {
 
 			super(Collection.class, false);
 
 			this.property = property;
 			this.relProvider = relProvider;
+         this.curieProvider = curieProvider;
 			this.enforceEmbeddedCollections = enforceEmbeddedCollections;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
 		 * org.codehaus.jackson.map.SerializerProvider)
 		 */
@@ -263,7 +265,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
-			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, enforceEmbeddedCollections);
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, enforceEmbeddedCollections);
 
 			for (Object resource : value) {
 				builder.add(resource);
@@ -275,7 +277,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, relProvider, enforceEmbeddedCollections);
+			return new HalResourcesSerializer(property, relProvider, curieProvider, enforceEmbeddedCollections);
 		}
 
 		@Override
@@ -307,7 +309,7 @@ public class Jackson2HalModule extends SimpleModule {
 	/**
 	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the {@link Link} as
 	 * immediate object if we have a single one or as array if we have multiple ones.
-	 * 
+	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
@@ -323,7 +325,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/**
 		 * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty}.
-		 * 
+		 *
 		 * @param property
 		 */
 		public OptionalListJackson2Serializer(BeanProperty property) {
@@ -412,7 +414,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
@@ -422,7 +424,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
 		 */
 		@Override
@@ -432,7 +434,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider,
 		 * com.fasterxml.jackson.databind.BeanProperty)
 		 */
@@ -601,7 +603,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
 			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver,
-					enforceEmbeddedCollections));
+					curieProvider, enforceEmbeddedCollections));
 			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider));
 		}
 
@@ -662,7 +664,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * {@link JsonSerializer} to only render {@link Boolean} values if they're set to {@literal true}.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 * @since 0.9
 	 */
