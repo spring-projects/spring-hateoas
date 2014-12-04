@@ -16,6 +16,7 @@
 package org.springframework.hateoas;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -67,6 +68,16 @@ public class ResourceSupport implements Identifiable<Link> {
 			add(candidate);
 		}
 	}
+
+    /**
+     * Adds all given {@link Link}s to the resource.
+     *
+     * @param links
+     */
+    public void add(Link... links) {
+        Assert.notNull(links, "Given links must not be null!");
+        add(Arrays.asList(links));
+    }
 
 	/**
 	 * Returns whether the resource contains {@link Link}s at all.
