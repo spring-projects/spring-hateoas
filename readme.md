@@ -241,7 +241,7 @@ To enable the `ResourceSupport` subtypes be rendered according to the specificat
 * automatically picks up all `RelProvider` implementations in the `ApplicationContext` and bundles them into a `DelegatingRelProvider` available for autowiring. Registers providers to consider `@Relation` on domain types as well as Spring MVC controllers. If [EVO inflector](https://github.com/atteo/evo-inflector) is on the classpath collection rels are derived using the pluralizing algorithm implemented in the library (see [below](#relprovider-api)).
 
 ## LinkDiscoverer API
-When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in them. Spring HATEOAS provides [JSONPath](https://code.google.com/p/json-path/) based implementations of the `LinkProvider` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport` we automatically expose an instance supporting the configured hypermedia type as Spring bean.
+When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in them. Spring HATEOAS provides [JSONPath](https://code.google.com/p/json-path/) based implementations of the `LinkDiscoverer` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport` we automatically expose an instance supporting the configured hypermedia type as Spring bean.
 
 Alternatively you can simply setup and use an instance like this:
 
