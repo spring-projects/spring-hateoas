@@ -89,7 +89,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public UriTemplate(String baseUri, TemplateVariables variables) {
 
-		Assert.hasText("Base URI must not be null or empty!");
+		Assert.hasText(baseUri,"Base URI must not be null or empty!");
 
 		this.baseUri = baseUri;
 		this.variables = variables == null ? TemplateVariables.NONE : variables;

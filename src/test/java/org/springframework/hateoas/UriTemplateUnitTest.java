@@ -242,6 +242,14 @@ public class UriTemplateUnitTest {
 		assertThat(template.expand(2).toString(), is("/foo/2"));
 	}
 
+	/**
+	 * @see #273
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsEmptyBaseUri() {
+		new UriTemplate(null, TemplateVariables.NONE);
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}
