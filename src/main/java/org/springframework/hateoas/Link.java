@@ -32,6 +32,8 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * Value object for links.
@@ -54,6 +56,12 @@ public class Link implements Serializable {
 
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
+    @JsonInclude(value = Include.NON_EMPTY)
+    @XmlAttribute
+    private String name;
+    @JsonInclude(value = Include.NON_EMPTY)
+    @XmlAttribute
+    private String title;
 	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
@@ -117,12 +125,30 @@ public class Link implements Serializable {
 		return rel;
 	}
 
-	/**
-	 * Returns a {@link Link} pointing to the same URI but with the given relation.
-	 * 
-	 * @param rel must not be {@literal null} or empty.
-	 * @return
-	 */
+    /**
+     * Returns the name of the link.
+     * 
+     * @return
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the title of the link
+     * 
+     * @return
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Returns a {@link Link} pointing to the same URI but with the given relation.
+     * 
+     * @param rel must not be {@literal null} or empty.
+     * @return
+     */
 	public Link withRel(String rel) {
 		return new Link(href, rel);
 	}
@@ -291,4 +317,55 @@ public class Link implements Serializable {
 
 		return attributes;
 	}
+
+    public static class Builder {
+
+        private String rel;
+        private String href;
+        private String name;
+        private String title;
+        private UriTemplate template;
+
+        public Builder rel(String rel) {
+            this.rel = rel;
+            return this;
+        }
+
+        public Builder href(String href) {
+            this.href = href;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder template(UriTemplate template) {
+            this.template = template;
+            return this;
+        }
+
+        public Link build() {
+            Link link = null;
+
+            if (template != null) {
+                link = new Link(template, rel);
+            } else if (rel != null) {
+                link = new Link(href, rel);
+            } else {
+                link = new Link(href);
+            }
+
+            link.title = title;
+            link.name = name;
+
+            return link;
+        }
+    }
 }
