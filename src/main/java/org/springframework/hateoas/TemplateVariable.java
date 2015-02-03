@@ -15,14 +15,16 @@
  */
 package org.springframework.hateoas;
 
-import static org.springframework.hateoas.TemplateVariable.VariableType.*;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.hateoas.TemplateVariable.VariableType.FRAGMENT;
+import static org.springframework.hateoas.TemplateVariable.VariableType.REQUEST_PARAM;
+import static org.springframework.hateoas.TemplateVariable.VariableType.REQUEST_PARAM_CONTINUED;
 
 /**
  * A single template variable.
@@ -56,9 +58,9 @@ public final class TemplateVariable implements Serializable {
 	 */
 	public TemplateVariable(String name, TemplateVariable.VariableType type, String description) {
 
-		Assert.hasText("Variable name must not be null or empty!");
-		Assert.notNull("Variable type must not be null!");
-		Assert.notNull("Description must not be null!");
+		Assert.hasText(name, "Variable name must not be null or empty!");
+		Assert.notNull(type, "Variable type must not be null!");
+		Assert.notNull(description, "Description must not be null!");
 
 		this.name = name;
 		this.type = type;
