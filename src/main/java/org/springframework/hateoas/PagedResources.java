@@ -173,8 +173,8 @@ public class PagedResources<T> extends Resources<T> {
         @XmlAttribute(name = "pageSize")
         @JsonProperty("pageSize")
         private long size;
-        @XmlAttribute(name = "totalDocuments")
-        @JsonProperty("totalDocuments")
+        @XmlAttribute(name = "totalItems")
+        @JsonProperty("totalItems")
         private long totalElements;
         @XmlAttribute
         @JsonProperty
