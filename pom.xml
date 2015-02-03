@@ -340,14 +340,14 @@
 		</pluginRepository>
 	</pluginRepositories>
 
-	<!--repositories>
+	<repositories>
 		<repository>
 			<id>spring-libs-release</id>
 			<url>http://repo.spring.io/libs-release</url>
 		</repository>
 	</repositories>
 
-	<scm>
+	<!--scm>
 		<url>https://github.com/spring-projects/spring-hateoas</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-hateoas.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com:spring-projects/spring-hateoas.git</developerConnection>
