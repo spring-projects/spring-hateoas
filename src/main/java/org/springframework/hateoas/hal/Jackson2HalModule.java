@@ -238,18 +238,22 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final BeanProperty property;
 		private final RelProvider relProvider;
+		private final CurieProvider curieProvider;
 		private final boolean enforceEmbeddedCollections;
 
-		public HalResourcesSerializer(RelProvider relPorvider, boolean enforceEmbeddedCollections) {
-			this(null, relPorvider, enforceEmbeddedCollections);
+		public HalResourcesSerializer(RelProvider relPorvider, CurieProvider curieProvider,
+				boolean enforceEmbeddedCollections) {
+			this(null, relPorvider, curieProvider, enforceEmbeddedCollections);
 		}
 
-		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider, boolean enforceEmbeddedCollections) {
+		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider, CurieProvider curieProvider,
+				boolean enforceEmbeddedCollections) {
 
 			super(Collection.class, false);
 
 			this.property = property;
 			this.relProvider = relProvider;
+			this.curieProvider = curieProvider;
 			this.enforceEmbeddedCollections = enforceEmbeddedCollections;
 		}
 
@@ -263,7 +267,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
-			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, enforceEmbeddedCollections);
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, enforceEmbeddedCollections);
 
 			for (Object resource : value) {
 				builder.add(resource);
@@ -275,7 +279,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, relProvider, enforceEmbeddedCollections);
+			return new HalResourcesSerializer(property, relProvider, curieProvider, enforceEmbeddedCollections);
 		}
 
 		@Override
@@ -600,7 +604,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider, boolean enforceEmbeddedCollections) {
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
-			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver,
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver, curieProvider,
 					enforceEmbeddedCollections));
 			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider));
 		}

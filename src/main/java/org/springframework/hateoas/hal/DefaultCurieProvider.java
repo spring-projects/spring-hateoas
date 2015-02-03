@@ -28,26 +28,43 @@ import org.springframework.util.Assert;
  * Default implementation of {@link CurieProvider} rendering a single configurable {@link UriTemplate} based curie.
  * 
  * @author Oliver Gierke
+ * @author Jeff Stano
  * @since 0.9
  */
 public class DefaultCurieProvider implements CurieProvider {
 
-	private final Curie curie;
+	private final Link curie;
+
+    /**
+     * Creates a new {@link DefaultCurieProvider} for the given name and {@link UriTemplate}.
+     *
+     * @param name must not be {@literal null} or empty.
+     * @param uriTemplate must not be {@literal null} and contain exactly one template variable.
+     */
+    public DefaultCurieProvider(String name, UriTemplate uriTemplate) {
+        this(name, null, uriTemplate);
+    }
 
 	/**
-	 * Creates a new {@link DefaultCurieProvider} for the given name and {@link UriTemplate}.
+	 * Creates a new {@link DefaultCurieProvider} for the given name, title and {@link UriTemplate}.
 	 * 
 	 * @param name must not be {@literal null} or empty.
+     * @param title may be {@literal null} or empty.
 	 * @param uriTemplate must not be {@literal null} and contain exactly one template variable.
 	 */
-	public DefaultCurieProvider(String name, UriTemplate uriTemplate) {
+	public DefaultCurieProvider(String name, String title, UriTemplate uriTemplate) {
 
 		Assert.hasText(name, "Name must not be null or empty!");
 		Assert.notNull(uriTemplate, "UriTemplate must not be null!");
 		Assert.isTrue(uriTemplate.getVariableNames().size() == 1,
 				String.format("Expected a single template variable in the UriTemplate %s!", uriTemplate.toString()));
 
-		this.curie = new Curie(name, uriTemplate.toString());
+		this.curie = new Link.Builder()
+                .name(name)
+                .href(uriTemplate.toString())
+                .rel("curies")
+                .title(title)
+                .build();
 	}
 
 	/* 
@@ -65,16 +82,23 @@ public class DefaultCurieProvider implements CurieProvider {
 	 */
 	@Override
 	public String getNamespacedRelFrom(Link link) {
+		return getNamespacedRelFor(link.getRel());
+	}
 
-		String rel = link.getRel();
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.hal.CurieProvider#getNamespacedRelFrom(java.lang.String)
+	 */
+	@Override
+	public String getNamespacedRelFor(String rel) {
 
 		boolean prefixingNeeded = !IanaRels.isIanaRel(rel) && !rel.contains(":");
-		return prefixingNeeded ? String.format("%s:%s", curie.name, rel) : rel;
+		return prefixingNeeded ? String.format("%s:%s", curie.getName(), rel) : rel;
 	}
 
 	/**
 	 * Value object to get the curie {@link Link} rendered in JSON.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	protected static class Curie extends Link {

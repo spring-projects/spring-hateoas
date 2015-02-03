@@ -15,14 +15,20 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.hateoas.TemplateVariable.VariableType.*;
-
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.hateoas.TemplateVariable.VariableType;
+
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.springframework.hateoas.TemplateVariable.VariableType.FRAGMENT;
+import static org.springframework.hateoas.TemplateVariable.VariableType.PATH_VARIABLE;
+import static org.springframework.hateoas.TemplateVariable.VariableType.REQUEST_PARAM;
+import static org.springframework.hateoas.TemplateVariable.VariableType.REQUEST_PARAM_CONTINUED;
+import static org.springframework.hateoas.TemplateVariable.VariableType.SEGMENT;
 
 /**
  * Unit tests for {@link TemplateVariables}.
@@ -170,5 +176,37 @@ public class TemplateVariablesUnitTest {
 
 		assertThat(result, hasSize(1));
 		assertThat(result, hasItem(parameter));
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsEmptyName() {
+		new TemplateVariable("", PATH_VARIABLE);
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsNullName() {
+		new TemplateVariable(null, PATH_VARIABLE);
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsNullType() {
+		new TemplateVariable("foo", null);
+	}
+
+	/**
+	 * @see #228
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void variableRejectsNullDescription() {
+		new TemplateVariable("foo", PATH_VARIABLE, null);
 	}
 }

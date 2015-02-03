@@ -170,10 +170,18 @@ public class PagedResources<T> extends Resources<T> {
 	 */
 	public static class PageMetadata {
 
-		@XmlAttribute @JsonProperty private long size;
-		@XmlAttribute @JsonProperty private long totalElements;
-		@XmlAttribute @JsonProperty private long totalPages;
-		@XmlAttribute @JsonProperty private long number;
+        @XmlAttribute(name = "pageSize")
+        @JsonProperty("pageSize")
+        private long size;
+        @XmlAttribute(name = "totalItems")
+        @JsonProperty("totalItems")
+        private long totalElements;
+        @XmlAttribute
+        @JsonProperty
+        private long totalPages;
+        @XmlAttribute(name = "pageNumber")
+        @JsonProperty("pageNumber")
+        private long number;
 
 		protected PageMetadata() {
 

@@ -15,12 +15,12 @@
  */
 package org.springframework.hateoas.hal;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.UriTemplate;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link DefaultCurieProvider}.
@@ -71,5 +71,29 @@ public class DefaultCurieProviderUnitTest {
 	@Test
 	public void doesNotPrefixQualifiedRels() {
 		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")), is("custom:rel"));
+	}
+
+	/**
+	 * @see #229
+	 */
+	@Test
+	public void doesNotPrefixIanaRelsForRelAsString() {
+		assertThat(provider.getNamespacedRelFor("self"), is("self"));
+	}
+
+	/**
+	 * @see #229
+	 */
+	@Test
+	public void prefixesNormalRelsForRelAsString() {
+		assertThat(provider.getNamespacedRelFor("book"), is("acme:book"));
+	}
+
+	/**
+	 * @see #229
+	 */
+	@Test
+	public void doesNotPrefixQualifiedRelsForRelAsString() {
+		assertThat(provider.getNamespacedRelFor("custom:rel"), is("custom:rel"));
 	}
 }

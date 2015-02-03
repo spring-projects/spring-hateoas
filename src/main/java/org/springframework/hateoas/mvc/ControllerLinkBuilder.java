@@ -26,7 +26,6 @@ import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -35,6 +34,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
+
+import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
+import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.StringUtils.split;
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
@@ -186,24 +189,29 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		HttpServletRequest request = getCurrentRequest();
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
+		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
+		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
 		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
 
-		if (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+		if (hasText(proto)) {
+			builder.scheme(proto);
+		} else if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
 			builder.scheme("https");
 		}
 
-		String host = request.getHeader("X-Forwarded-Host");
+		String host = forwarded.getHost();
+		host = hasText(host) ? host : request.getHeader("X-Forwarded-Host");
 
-		if (!StringUtils.hasText(host)) {
+		if (!hasText(host)) {
 			return builder;
 		}
 
-		String[] hosts = StringUtils.commaDelimitedListToStringArray(host);
+		String[] hosts = commaDelimitedListToStringArray(host);
 		String hostToUse = hosts[0];
 
 		if (hostToUse.contains(":")) {
 
-			String[] hostAndPort = StringUtils.split(hostToUse, ":");
+			String[] hostAndPort = split(hostToUse, ":");
 
 			builder.host(hostAndPort[0]);
 			builder.port(Integer.parseInt(hostAndPort[1]));
@@ -215,7 +223,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		String port = request.getHeader("X-Forwarded-Port");
 
-		if (StringUtils.hasText(port)) {
+		if (hasText(port)) {
 			builder.port(Integer.parseInt(port));
 		}
 

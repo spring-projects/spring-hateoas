@@ -15,10 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
-import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
-import static org.springframework.hateoas.MediaTypes.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,7 +58,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
+import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerBeanDefinition;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 /**
  * {@link ImportBeanDefinitionRegistrar} implementation to activate hypermedia support based on the configured
@@ -276,6 +277,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			CurieProvider curieProvider = getCurieProvider(beanFactory);
 			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
 			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
+            halObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
 			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider));
