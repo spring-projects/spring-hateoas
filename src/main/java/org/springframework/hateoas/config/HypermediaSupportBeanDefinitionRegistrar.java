@@ -60,6 +60,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.registerBeanDefinition;
@@ -278,6 +279,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
 			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
             halObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+            halObjectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
 			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider));
