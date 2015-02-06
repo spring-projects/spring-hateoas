@@ -55,6 +55,7 @@ public class Link implements Serializable {
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
 	@XmlTransient @JsonIgnore private UriTemplate template;
+	@XmlTransient @JsonIgnore private boolean multiple;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -137,6 +138,16 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Ensures that the rel for this {@link Link} always maps to an array instead of an
+	 * object. Only applicable to HAL+JSON.
+	 * @return
+	 */
+	public Link asMultiple() {
+		this.multiple = true;
+		return this;
+	}
+
+	/**
 	 * Returns the variable names contained in the template.
 	 * 
 	 * @return
@@ -163,6 +174,15 @@ public class Link implements Serializable {
 	 */
 	public boolean isTemplated() {
 		return !getUriTemplate().getVariables().isEmpty();
+	}
+
+	/**
+	 * Returns whether this link should be represented as a multiple.
+	 *
+	 * @return
+	 */
+	public boolean isMultiple() {
+		return multiple;
 	}
 
 	/**
