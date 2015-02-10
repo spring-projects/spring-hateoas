@@ -45,6 +45,7 @@ import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessage
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
@@ -118,6 +119,19 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertThat(found, is(true));
 	}
 
+	/**
+	 * @see #293
+	 */
+	@Test
+	public void registersHttpMessageConvertersForRestTemplate() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+		RestTemplate template = context.getBean(RestTemplate.class);
+
+		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		context.close();
+	}
+
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
 
 		Map<String, EntityLinks> discoverers = context.getBeansOfType(EntityLinks.class);
@@ -166,6 +180,11 @@ public class EnableHypermediaSupportIntegrationTest {
 			AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
 			numberOfMessageConvertersLegacy = adapter.getMessageConverters().length;
 			return adapter;
+		}
+
+		@Bean
+		public RestTemplate restTemplate() {
+			return new RestTemplate();
 		}
 	}
 
