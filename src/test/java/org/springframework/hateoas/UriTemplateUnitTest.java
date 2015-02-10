@@ -250,6 +250,17 @@ public class UriTemplateUnitTest {
 		new UriTemplate(null, TemplateVariables.NONE);
 	}
 
+	/**
+	 * @see #281
+	 */
+	@Test
+	public void allowsAddingTemplateVariable() {
+
+		UriTemplate template = new UriTemplate("/").with("q", VariableType.REQUEST_PARAM);
+
+		assertThat(template.toString(), is("/{?q}"));
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}

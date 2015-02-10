@@ -89,7 +89,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public UriTemplate(String baseUri, TemplateVariables variables) {
 
-		Assert.hasText(baseUri,"Base URI must not be null or empty!");
+		Assert.hasText(baseUri, "Base URI must not be null or empty!");
 
 		this.baseUri = baseUri;
 		this.variables = variables == null ? TemplateVariables.NONE : variables;
@@ -99,7 +99,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * Creates a new {@link UriTemplate} with the current {@link TemplateVariable}s augmented with the given ones.
 	 * 
 	 * @param variables can be {@literal null}.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
 	public UriTemplate with(TemplateVariables variables) {
 
@@ -127,6 +127,17 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		return new UriTemplate(baseUri, this.variables.concat(result));
+	}
+
+	/**
+	 * Creates a new {@link UriTemplate} with a {@link TemplateVariable} with the given name and type added.
+	 * 
+	 * @param variableName must not be {@literal null} or empty.
+	 * @param type must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public UriTemplate with(String variableName, TemplateVariable.VariableType type) {
+		return with(new TemplateVariables(new TemplateVariable(variableName, type)));
 	}
 
 	/**
