@@ -26,15 +26,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.PagedResources.PageMetadata;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
@@ -50,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
+	static final String SINGLE_LINK_REFERENCE_AS_MULTIPLE = "{\"_links\":{\"multiple\":[{\"href\":\"localhost\"}]}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
 
 	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
@@ -94,6 +88,13 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost"));
 		assertThat(read(SINGLE_LINK_REFERENCE, ResourceSupport.class), is(expected));
+	}
+
+	@Test
+	public void rendersSingleLinkAsArrayWhenForced() throws Exception {
+		ResourceWithForcedMultipleLink expected = new ResourceWithForcedMultipleLink();
+		expected.add(new Link("localhost").withRel("multiple"));
+		assertThat(read(SINGLE_LINK_REFERENCE_AS_MULTIPLE, ResourceWithForcedMultipleLink.class), is(expected));
 	}
 
 	/**
@@ -400,5 +401,9 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), provider));
 
 		return mapper;
+	}
+
+	@ForceMultipleLinksOnRels({"multiple"})
+	private static class ResourceWithForcedMultipleLink extends ResourceSupport {
 	}
 }

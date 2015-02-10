@@ -53,6 +53,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	public void add(Link link) {
 		Assert.notNull(link, "Link must not be null!");
+		link.setOwningResource(this.getClass());
 		this.links.add(link);
 	}
 
@@ -64,6 +65,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	public void add(Iterable<Link> links) {
 		Assert.notNull(links, "Given links must not be null!");
 		for (Link candidate : links) {
+			candidate.setOwningResource(this.getClass());
 			add(candidate);
 		}
 	}

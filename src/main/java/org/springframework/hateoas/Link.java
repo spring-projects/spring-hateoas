@@ -55,6 +55,7 @@ public class Link implements Serializable {
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
 	@XmlTransient @JsonIgnore private UriTemplate template;
+	@XmlTransient @JsonIgnore private Class<? extends ResourceSupport> owningResource;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -194,10 +195,18 @@ public class Link implements Serializable {
 		return template;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
+	public Class<? extends ResourceSupport> getOwningResource() {
+		return this.owningResource;
+	}
+
+	void setOwningResource(Class<? extends ResourceSupport> owningResource) {
+		this.owningResource = owningResource;
+	}
+
+	/*
+         * (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
 	@Override
 	public boolean equals(Object obj) {
 

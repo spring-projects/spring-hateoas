@@ -17,21 +17,11 @@ package org.springframework.hateoas.hal;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Links;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.hateoas.*;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -130,14 +120,28 @@ public class Jackson2HalModule extends SimpleModule {
 		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 
+
+			// keeps track of any rels that need their links to be forced as multiple (i.e., serialized to array)
+			// regardless of cardinality
+			List<String> forcedMultipleLinkRels = new ArrayList<String>();
+			if(!value.isEmpty()) {
+				Class<? extends ResourceSupport> owningResource = value.get(0).getOwningResource();
+				ForceMultipleLinksOnRels annotation = AnnotationUtils.findAnnotation(owningResource, ForceMultipleLinksOnRels.class);
+				if(annotation != null) {
+					forcedMultipleLinkRels.addAll(Arrays.asList(annotation.value()));
+				}
+			}
+
 			// sort links according to their relation
 			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
+
 			List<Link> links = new ArrayList<Link>();
 
 			boolean prefixingRequired = curieProvider != null;
 			boolean curiedLinkPresent = false;
 
 			for (Link link : value) {
+
 
 				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
 
@@ -167,7 +171,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, forcedMultipleLinkRels), null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -320,6 +324,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final BeanProperty property;
 		private final Map<Class<?>, JsonSerializer<Object>> serializers;
+		private final List<String> forcedMultipleLinkRels;
 
 		public OptionalListJackson2Serializer() {
 			this(null);
@@ -331,10 +336,24 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param property
 		 */
 		public OptionalListJackson2Serializer(BeanProperty property) {
+			this(property, new ArrayList<String>());
+		}
+
+		/**
+		 * Private constructor that creates a new instance using the given {@link BeanProperty}
+		 * and a list of rels whose links need to be forced into an array representation regardless of
+		 * cardinality.
+		 *
+		 * @param property
+		 * @param forcedMultipleLinkRels
+		 */
+		private OptionalListJackson2Serializer(BeanProperty property, List<String> forcedMultipleLinkRels) {
 
 			super(List.class, false);
+
 			this.property = property;
 			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
+			this.forcedMultipleLinkRels = forcedMultipleLinkRels;
 		}
 
 		/*
@@ -360,14 +379,13 @@ public class Jackson2HalModule extends SimpleModule {
 				return;
 			}
 
-			if (list.size() == 1) {
+			if(list.size() > 1 || ((list.get(0) instanceof Link) && forcedMultipleLinkRels.contains(((Link) list.get(0)).getRel()))) {
+				jgen.writeStartArray();
 				serializeContents(list.iterator(), jgen, provider);
-				return;
+				jgen.writeEndArray();
+			} else {
+				serializeContents(list.iterator(), jgen, provider);
 			}
-
-			jgen.writeStartArray();
-			serializeContents(list.iterator(), jgen, provider);
-			jgen.writeEndArray();
 		}
 
 		private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider)
