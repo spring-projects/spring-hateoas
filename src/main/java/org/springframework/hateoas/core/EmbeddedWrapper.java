@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,16 @@ public interface EmbeddedWrapper {
 
 	/**
 	 * Returns the rel to be used when embedding. If this returns {@literal null}, the rel will be calculated based on the
-	 * type of the embedded value.
+	 * type returned by {@link #getRelTargetType()}. A wrapper returning {@literal null} for both {@link #getRel()} and
+	 * {@link #getRelTargetType()} is considered invalid.
 	 * 
 	 * @return
+	 * @see #getRelTargetType()
 	 */
 	String getRel();
 
 	/**
-	 * Returns whether the wrapper hast the given rel.
+	 * Returns whether the wrapper has the given rel.
 	 * 
 	 * @param rel can be {@literal null}.
 	 * @return
@@ -55,7 +57,9 @@ public interface EmbeddedWrapper {
 	Object getValue();
 
 	/**
-	 * Returns the type to be used to calculate a type based rel.
+	 * Returns the type to be used to calculate a type based rel. Can return {@literal null} in case an explicit rel is
+	 * returned in {@link #getRel()}. A wrapper returning {@literal null} for both {@link #getRel()} and
+	 * {@link #getRelTargetType()} is considered invalid.
 	 * 
 	 * @return
 	 */

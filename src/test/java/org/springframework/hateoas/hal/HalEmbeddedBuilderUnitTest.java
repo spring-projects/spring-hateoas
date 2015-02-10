@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.core.EmbeddedWrapper;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 
@@ -162,6 +164,14 @@ public class HalEmbeddedBuilderUnitTest {
 
 		assertThat(builder.asMap().get("curie:string"), is(nullValue()));
 		assertHasValues(builder.asMap(), "curie:strings", "Sample");
+	}
+
+	/**
+	 * @see #286
+	 */
+	@Test(expected = IllegalStateException.class)
+	public void rejectsInvalidEmbeddedWrapper() {
+		new HalEmbeddedBuilder(provider, curieProvider, false).add(mock(EmbeddedWrapper.class));
 	}
 
 	@SuppressWarnings("unchecked")
