@@ -36,6 +36,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.core.AnnotationRelProvider;
+import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -342,6 +343,22 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		};
 
 		assertThat(getCuriedObjectMapper(provider).writeValueAsString(resources), is(MULTIPLE_CURIES_DOCUMENT));
+	}
+
+	/**
+	 * @see #286, #236
+	 */
+	@Test
+	public void rendersEmptyEmbeddedCollections() throws Exception {
+
+		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
+
+		List<Object> values = new ArrayList<Object>();
+		values.add(wrappers.emptyCollectionOf(SimpleAnnotatedPojo.class));
+
+		Resources<Object> resources = new Resources<Object>(values);
+
+		assertThat(write(resources), is("{\"_embedded\":{\"pojos\":[]}}"));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
