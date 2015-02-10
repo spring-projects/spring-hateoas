@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,10 +183,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
+		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
 
-		for (TemplateVariable variable : variables) {
+		for (TemplateVariable variable : getOptionalVariables()) {
 
 			Object value = iterator.hasNext() ? iterator.next() : null;
 			appendToBuilder(builder, variable, value);
@@ -208,9 +209,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		Assert.notNull(parameters, "Parameters must not be null!");
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
 
-		for (TemplateVariable variable : variables) {
+		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+
+		for (TemplateVariable variable : getOptionalVariables()) {
 			appendToBuilder(builder, variable, parameters.get(variable.getName()));
 		}
 
