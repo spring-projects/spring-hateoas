@@ -22,6 +22,7 @@ import java.util.Collection;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +35,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @XmlRootElement(name = "pagedEntities")
 public class PagedResources<T> extends Resources<T> {
+
+    public static final Link CURIE_REQUIRED_LINK = new Link("will_not_render", "will_not_render");
 
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
@@ -56,6 +59,27 @@ public class PagedResources<T> extends Resources<T> {
 	public PagedResources(Collection<T> content, PageMetadata metadata, Link... links) {
 		this(content, metadata, Arrays.asList(links));
 	}
+
+    /**
+     * Creates a new {@link PagedResources} from the given content, {@link PageMetadata}. If includeCurie is set to true
+     * and there are PagedResources to return, a curie relation will be included by the default {@link CurieProvider}.
+     * {@link Link}s are (optional)
+     * 
+     * @param content
+     *            must not be {@literal null}.
+     * @param includeCurie
+     * @param metadata
+     *            true if curies should be included
+     * @param links
+     */
+    public PagedResources(Collection<T> content, boolean includeCurie, PageMetadata metadata, Link... links) {
+        this(content, metadata, Arrays.asList(links));
+
+        // Non IANA defined relation type is used to trigger curies during serialization
+        if (includeCurie && metadata.getTotalElements() > 0) {
+            this.add(CURIE_REQUIRED_LINK);
+        }
+    }
 
 	/**
 	 * Creates a new {@link PagedResources} from the given content {@link PageMetadata} and {@link Link}s.

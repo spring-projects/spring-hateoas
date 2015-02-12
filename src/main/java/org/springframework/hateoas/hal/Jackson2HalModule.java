@@ -141,6 +141,11 @@ public class Jackson2HalModule extends SimpleModule {
 
 			for (Link link : value) {
 
+                if (link.equals(PagedResources.CURIE_REQUIRED_LINK)) {
+                    curiedLinkPresent = true;
+                    continue;
+                }
+
 				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
 
 				if (!link.getRel().equals(rel)) {
