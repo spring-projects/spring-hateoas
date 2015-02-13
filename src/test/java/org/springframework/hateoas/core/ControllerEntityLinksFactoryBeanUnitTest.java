@@ -15,20 +15,19 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.hateoas.core.ControllerEntityLinksUnitTest.Person;
 import org.springframework.hateoas.core.ControllerEntityLinksUnitTest.SampleController;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderFactory;
 import org.springframework.stereotype.Controller;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link ControllerEntityLinksFactoryBean}.
@@ -56,7 +55,8 @@ public class ControllerEntityLinksFactoryBeanUnitTest {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("controller", new RootBeanDefinition(SampleController.class));
 
-		ApplicationContext context = new GenericApplicationContext(factory);
+        GenericApplicationContext context = new GenericApplicationContext(factory);
+        context.refresh();
 
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
 		builder.setAnnotation(Controller.class);
