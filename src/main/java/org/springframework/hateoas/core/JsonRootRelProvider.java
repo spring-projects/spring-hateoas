@@ -17,8 +17,7 @@ public class JsonRootRelProvider implements RelProvider {
     @Override
     public String getCollectionResourceRelFor(Class<?> type) {
         JsonRootName rootName = type.getAnnotation(JsonRootName.class);
-        return rootName != null ? (rootName.value() + "s").toString() : defaultRelProvider
-                .getCollectionResourceRelFor(type);
+        return rootName != null ? rootName.value() : defaultRelProvider.getCollectionResourceRelFor(type);
     }
 
     @Override
