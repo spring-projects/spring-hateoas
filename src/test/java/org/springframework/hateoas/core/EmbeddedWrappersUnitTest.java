@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.junit.Test;
+import org.springframework.hateoas.hal.HalCollectionRels;
 
 /**
  * Unit tests for {@link EmbeddedWrappers}.
@@ -30,7 +31,17 @@ import org.junit.Test;
  */
 public class EmbeddedWrappersUnitTest {
 
-	EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
+	private static EmbeddedWrappers wrappers() {
+		return new EmbeddedWrappers(false);
+	}
+
+	private static EmbeddedWrappers collectionPreferredWrappers() {
+		return new EmbeddedWrappers(true);
+	}
+
+	private static EmbeddedWrappers collectionRelsWrappers() {
+		return new EmbeddedWrappers(false);
+	}
 
 	/**
 	 * @see #286
@@ -39,7 +50,7 @@ public class EmbeddedWrappersUnitTest {
 	@SuppressWarnings("rawtypes")
 	public void createsWrapperForEmptyCollection() {
 
-		EmbeddedWrapper wrapper = wrappers.emptyCollectionOf(String.class);
+		EmbeddedWrapper wrapper = wrappers().emptyCollectionOf(String.class);
 
 		assertEmptyCollectionValue(wrapper);
 		assertThat(wrapper.getRel(), is(nullValue()));
@@ -52,7 +63,7 @@ public class EmbeddedWrappersUnitTest {
 	@Test
 	public void createsWrapperForEmptyCollectionAndExplicitRel() {
 
-		EmbeddedWrapper wrapper = wrappers.wrap(Collections.emptySet(), "rel");
+		EmbeddedWrapper wrapper = wrappers().wrap(Collections.emptySet(), "rel");
 
 		assertEmptyCollectionValue(wrapper);
 		assertThat(wrapper.getRel(), is("rel"));
@@ -64,7 +75,7 @@ public class EmbeddedWrappersUnitTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsEmptyCollectionWithoutExplicitRel() {
-		wrappers.wrap(Collections.emptySet());
+		wrappers().wrap(Collections.emptySet());
 	}
 
 	private static void assertEmptyCollectionValue(EmbeddedWrapper wrapper) {

@@ -53,6 +53,7 @@ import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
+import org.springframework.hateoas.hal.HalCollectionRels;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -288,6 +289,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			}
 
 			CurieProvider curieProvider = getCurieProvider(beanFactory);
+			HalCollectionRels halCollectionRels = getHalMultipleLinkRels(beanFactory);
 			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
 			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 			MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
@@ -295,7 +297,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
 			halObjectMapper.setHandlerInstantiator(
-					new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider, linkRelationMessageSource));
+					new Jackson2HalModule.HalHandlerInstantiator(
+						relProvider, curieProvider, halCollectionRels, linkRelationMessageSource
+					)
+			);
 
 			MappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 					ResourceSupport.class);
@@ -313,6 +318,14 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			try {
 				return factory.getBean(CurieProvider.class);
 			} catch (NoSuchBeanDefinitionException e) {
+				return null;
+			}
+		}
+
+		private static HalCollectionRels getHalMultipleLinkRels(BeanFactory factory) {
+			try {
+				return factory.getBean(HalCollectionRels.class);
+			} catch(NoSuchBeanDefinitionException e) {
 				return null;
 			}
 		}

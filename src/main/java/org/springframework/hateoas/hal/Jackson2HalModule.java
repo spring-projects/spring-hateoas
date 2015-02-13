@@ -120,20 +120,22 @@ public class Jackson2HalModule extends SimpleModule {
 		private final CurieProvider curieProvider;
 		private final EmbeddedMapper mapper;
 		private final MessageSourceAccessor messageSource;
+		private final HalCollectionRels halCollectionRels;
 
 		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageSourceAccessor messageSource) {
-			this(null, curieProvider, mapper, messageSource);
+									 HalCollectionRels halCollectionRels, MessageSourceAccessor messageSource) {
+			this(null, curieProvider, mapper, halCollectionRels, messageSource);
 		}
 
 		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageSourceAccessor messageSource) {
+									 HalCollectionRels halCollectionRels, MessageSourceAccessor messageSource) {
 
 			super(List.class, false);
 			this.property = property;
 			this.curieProvider = curieProvider;
 			this.mapper = mapper;
 			this.messageSource = messageSource;
+			this.halCollectionRels = halCollectionRels;
 		}
 
 		/*
@@ -195,7 +197,7 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halCollectionRels), null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -244,7 +246,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinkListSerializer(property, curieProvider, mapper, messageSource);
+			return new HalLinkListSerializer(property, curieProvider, mapper, halCollectionRels, messageSource);
 		}
 
 		/*
@@ -394,21 +396,24 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final BeanProperty property;
 		private final Map<Class<?>, JsonSerializer<Object>> serializers;
+		private final HalCollectionRels halCollectionRels;
 
 		public OptionalListJackson2Serializer() {
-			this(null);
+			this(null, new HalCollectionRels());
 		}
 
 		/**
-		 * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty}.
-		 * 
+		 * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty} and
+		 * {@link HalCollectionRels}.
+		 *
 		 * @param property
 		 */
-		public OptionalListJackson2Serializer(BeanProperty property) {
+		public OptionalListJackson2Serializer(BeanProperty property, HalCollectionRels halCollectionRels) {
 
 			super(List.class, false);
 			this.property = property;
 			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
+			this.halCollectionRels = halCollectionRels;
 		}
 
 		/*
@@ -435,6 +440,18 @@ public class Jackson2HalModule extends SimpleModule {
 			}
 
 			if (list.size() == 1) {
+				Object element = list.get(0);
+				if(element instanceof HalLink) {
+					HalLink link = (HalLink) element;
+					if(halCollectionRels.containsRel(link.getLink().getRel())) {
+						jgen.writeStartArray();
+						serializeContents(list.iterator(), jgen, provider);
+						jgen.writeEndArray();
+
+						return;
+					}
+				}
+
 				serializeContents(list.iterator(), jgen, provider);
 				return;
 			}
@@ -523,7 +540,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new OptionalListJackson2Serializer(property);
+			return new OptionalListJackson2Serializer(property, halCollectionRels);
 		}
 	}
 
@@ -679,18 +696,23 @@ public class Jackson2HalModule extends SimpleModule {
 
 		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
 				MessageSourceAccessor messageSource) {
-			this(resolver, curieProvider, messageSource, true);
+			this(resolver, curieProvider, new HalCollectionRels(), messageSource, true);
 		}
 
 		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections) {
+				HalCollectionRels halCollectionRels, MessageSourceAccessor messageSource) {
+			this(resolver, curieProvider, halCollectionRels, messageSource, true);
+		}
 
-			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
+		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
+				HalCollectionRels halCollectionRels, MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections) {
+
+			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, halCollectionRels, enforceEmbeddedCollections);
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
 			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
 			this.instanceMap.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, messageSource));
+				new HalLinkListSerializer(curieProvider, mapper, halCollectionRels, messageSource));
 		}
 
 		private Object findInstance(Class<?> type) {
@@ -817,6 +839,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private RelProvider relProvider;
 		private CurieProvider curieProvider;
+		private HalCollectionRels halCollectionRels;
 		private boolean preferCollectionRels;
 
 		/**
@@ -827,12 +850,14 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param curieProvider can be {@literal null}.
 		 * @param preferCollectionRels
 		 */
-		public EmbeddedMapper(RelProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
+		public EmbeddedMapper(RelProvider relProvider, CurieProvider curieProvider,
+				HalCollectionRels halCollectionRels, boolean preferCollectionRels) {
 
 			Assert.notNull(relProvider, "RelProvider must not be null!");
 
 			this.relProvider = relProvider;
 			this.curieProvider = curieProvider;
+			this.halCollectionRels = halCollectionRels;
 			this.preferCollectionRels = preferCollectionRels;
 		}
 

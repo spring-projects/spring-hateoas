@@ -33,7 +33,7 @@ public class EmbeddedWrappers {
 
 	/**
 	 * Creates a new {@link EmbeddedWrappers}.
-	 * 
+	 *
 	 * @param preferCollections whether wrappers for single elements should rather treat the value as collection.
 	 */
 	public EmbeddedWrappers(boolean preferCollections) {
