@@ -101,7 +101,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		boolean found = false;
 
-		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers().getResolvers()) {
+		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers()) {
 
 			if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
 
