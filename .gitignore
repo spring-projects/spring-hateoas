@@ -2,3 +2,10 @@ target/
 .settings/
 .project
 .classpath
+.bin
+build
+*.iml
+.idea
+out
+.springBeans
+.gradle
