@@ -195,7 +195,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
      * 
      * @return
      */
-    public static UriComponentsBuilder getBuilder() {
+    static UriComponentsBuilder getBuilder() {
 
         HttpServletRequest request = getCurrentRequest();
         ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
