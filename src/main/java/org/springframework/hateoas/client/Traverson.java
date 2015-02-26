@@ -83,18 +83,47 @@ public class Traverson {
 	 * @param mediaType must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, MediaType... mediaTypes) {
+		this(baseUri, Arrays.asList(mediaTypes));
+	}
+
+	/**
+	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
+	 * interact with the service.
+	 * 
+	 * @param baseUri must not be {@literal null}.
+	 * @param mediaType must not be {@literal null} or empty.
+	 */
+	public Traverson(URI baseUri, List<MediaType> mediaTypes) {
 
 		Assert.notNull(baseUri, "Base URI must not be null!");
 		Assert.notEmpty(mediaTypes, "At least one media type must be given!");
 
-		this.mediaTypes = Arrays.asList(mediaTypes);
+		this.mediaTypes = mediaTypes;
 		this.baseUri = baseUri;
 		this.discoverers = DEFAULT_LINK_DISCOVERERS;
 
 		setRestOperations(createDefaultTemplate(this.mediaTypes));
 	}
 
-	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
+	/**
+	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
+	 * 
+	 * @param mediaTypes must not be {@literal null}.
+	 * @return
+	 */
+	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(MediaType... mediaTypes) {
+		return getDefaultMessageConverters(Arrays.asList(mediaTypes));
+	}
+
+	/**
+	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
+	 * 
+	 * @param mediaTypes must not be {@literal null}.
+	 * @return
+	 */
+	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(List<MediaType> mediaTypes) {
+
+		Assert.notNull(mediaTypes, "Media types must not be null!");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
@@ -103,8 +132,13 @@ public class Traverson {
 			converters.add(getHalConverter());
 		}
 
+		return converters;
+	}
+
+	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
+
 		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(converters);
+		template.setMessageConverters(getDefaultMessageConverters(mediaTypes));
 
 		return template;
 	}
