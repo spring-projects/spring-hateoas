@@ -176,6 +176,7 @@ public class TraversonTests {
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList(interceptor));
+		restTemplate.setMessageConverters(Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON));
 
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
 		this.traverson.setRestOperations(restTemplate);
