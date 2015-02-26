@@ -81,6 +81,14 @@ public class Server implements Closeable {
 				respond(). //
 				withBody("{ \"key\" : \"value\"}"). //
 				withContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		// For templated link access
+
+		onRequest(). //
+				havingPathEqualTo("/link"). //
+				respond(). //
+				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
+				withContentType(MediaTypes.HAL_JSON.toString());
 	}
 
 	public String rootResource() {

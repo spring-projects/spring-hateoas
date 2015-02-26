@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -254,7 +254,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -268,7 +268,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), String.class)
+			String forObject = operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), String.class)
 					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
@@ -282,25 +282,42 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type);
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type);
 		}
 
 		/**
-		 * Returns the {@link Link} found for the last rel int the rels configured to follow.
+		 * Returns the {@link Link} found for the last rel in the rels configured to follow. Will expand the final
+		 * {@link Link} using the
 		 * 
 		 * @return
+		 * @see #withTemplateParameters(Map)
 		 * @since 0.15
 		 */
 		public Link asLink() {
-
-			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(traverseToFinalUrl(), rels.get(rels.size() - 1));
+			return traverseToLink(true);
 		}
 
-		private String traverseToFinalUrl() {
+		/**
+		 * Returns the templated {@link Link} found for the last rel in the rels configured to follow.
+		 * 
+		 * @return
+		 * @since 0.17
+		 */
+		public Link asTemplatedLink() {
+			return traverseToLink(false);
+		}
+
+		private Link traverseToLink(boolean expandFinalUrl) {
+
+			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
+			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1));
+		}
+
+		private String traverseToFinalUrl(boolean expandFinalUrl) {
 
 			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).expand(templateParameters).toString();
+			UriTemplate uriTemplate = new UriTemplate(uri);
+			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
 		}
 
 		private String getAndFindLinkWithRel(String uri, Iterator<String> rels) {

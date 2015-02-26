@@ -30,6 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -207,6 +208,25 @@ public class TraversonTests {
 
 		assertThat(result.getHref(), endsWith("/movies"));
 		assertThat(result.getRel(), is("movies"));
+	}
+
+	/**
+	 * @see #307
+	 */
+	@Test
+	public void returnsTemplatedLinkIfRequested() {
+
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
+				.follow("self");
+
+		Link link = follow.asTemplatedLink();
+
+		assertThat(link.isTemplated(), is(true));
+		assertThat(link.getVariableNames(), hasItem("template"));
+
+		link = follow.asLink();
+
+		assertThat(link.isTemplated(), is(false));
 	}
 
 	private void setUpActors() {
