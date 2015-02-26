@@ -13,7 +13,7 @@
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2014</inceptionYear>
+	<inceptionYear>2012-2015</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
@@ -24,7 +24,7 @@
 		<developer>
 			<id>ogierke</id>
 			<name>Oliver Gierke</name>
-			<email>ogierke(at)gopivotal.com</email>
+			<email>ogierke(at)pivotal.io</email>
 			<organization>Pivotal, Inc.</organization>
 			<roles>
 				<role>Project lead</role>
@@ -69,6 +69,62 @@
 		<evo.version>1.2</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 	</properties>
+
+	<profiles>
+
+		<profile>
+			<id>spring40</id>
+			<properties>
+				<spring.version>4.0.9.RELEASE</spring.version>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>spring40-next</id>
+			<properties>
+				<spring.version>4.0.10.BUILD-SNAPSHOT</spring.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<url>http://repo.spring.io/libs-snapshot</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>spring41</id>
+			<properties>
+				<spring.version>4.1.5.RELEASE</spring.version>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>spring41-next</id>
+			<properties>
+				<spring.version>4.1.6.BUILD-SNAPSHOT</spring.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<url>http://repo.spring.io/libs-snapshot</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>spring42-next</id>
+			<properties>
+				<spring.version>4.2.0.BUILD-SNAPSHOT</spring.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<url>http://repo.spring.io/libs-snapshot</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
 
 	<dependencies>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.hateoas.core.ControllerEntityLinksUnitTest.Person;
 import org.springframework.hateoas.core.ControllerEntityLinksUnitTest.SampleController;
@@ -37,8 +37,7 @@ import org.springframework.stereotype.Controller;
  */
 public class ControllerEntityLinksFactoryBeanUnitTest {
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	@Rule public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void rejectsFactoryBeanIfAnnotationNotSet() throws Exception {
@@ -56,7 +55,8 @@ public class ControllerEntityLinksFactoryBeanUnitTest {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("controller", new RootBeanDefinition(SampleController.class));
 
-		ApplicationContext context = new GenericApplicationContext(factory);
+		ConfigurableApplicationContext context = new GenericApplicationContext(factory);
+		context.refresh();
 
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
 		builder.setAnnotation(Controller.class);

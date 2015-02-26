@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +46,10 @@ import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessage
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -101,7 +104,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		boolean found = false;
 
-		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers().getResolvers()) {
+		for (HandlerMethodArgumentResolver resolver : getResolvers(adapter)) {
 
 			if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
 
@@ -159,6 +162,29 @@ public class EnableHypermediaSupportIntegrationTest {
 		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
 		assertThat(Arrays.asList(amha.getMessageConverters()),
 				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
+	}
+
+	/**
+	 * Method to mitigate API changes between Spring 3.2 and 4.0.
+	 * 
+	 * @param adapter
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private static List<HandlerMethodArgumentResolver> getResolvers(RequestMappingHandlerAdapter adapter) {
+
+		Method method = ReflectionUtils.findMethod(RequestMappingHandlerAdapter.class, "getArgumentResolvers");
+		Object result = ReflectionUtils.invokeMethod(method, adapter);
+
+		if (result instanceof List) {
+			return (List<HandlerMethodArgumentResolver>) result;
+		}
+
+		if (result instanceof HandlerMethodArgumentResolverComposite) {
+			return ((HandlerMethodArgumentResolverComposite) result).getResolvers();
+		}
+
+		throw new IllegalStateException("Unexpected result when looking up argument resolvers!");
 	}
 
 	@Configuration

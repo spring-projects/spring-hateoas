@@ -1,0 +1,17 @@
+language: java
+jdk:
+  - oraclejdk8
+env:
+  matrix:
+    - PROFILE=non-existant
+    - PROFILE=spring40
+#   - PROFILE=spring40-next
+    - PROFILE=spring41
+    - PROFILE=spring41-next
+    - PROFILE=spring42-next
+cache:
+  directories:
+    - $HOME/.m2
+sudo: false
+install: true
+script: "mvn clean dependency:list test -P${PROFILE} -Dsort"
