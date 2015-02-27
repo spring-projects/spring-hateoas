@@ -58,7 +58,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.2.13.RELEASE</spring.version>
+		<spring.version>4.0.9.RELEASE</spring.version>
 		<logback.version>1.1.2</logback.version>
 		<jackson.version>2.4.3</jackson.version>
 		<jaxrs.version>1.0</jaxrs.version>
@@ -72,13 +72,6 @@
 	</properties>
 
 	<profiles>
-
-		<profile>
-			<id>spring40</id>
-			<properties>
-				<spring.version>4.0.9.RELEASE</spring.version>
-			</properties>
-		</profile>
 
 		<profile>
 			<id>spring40-next</id>
@@ -652,7 +645,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
