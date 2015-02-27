@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,5 +142,18 @@ public class ResourceSupportUnitTest {
 
 		ResourceSupport support = new ResourceSupport();
 		assertThat(support.equals(null), is(false));
+	}
+
+	/**
+	 * @see #267
+	 */
+	@Test
+	public void addsLinksViaVarargs() {
+
+		ResourceSupport support = new ResourceSupport();
+		support.add(new Link("/self", "self"), new Link("/another", "another"));
+
+		assertThat(support.hasLink("self"), is(true));
+		assertThat(support.hasLink("another"), is(true));
 	}
 }
