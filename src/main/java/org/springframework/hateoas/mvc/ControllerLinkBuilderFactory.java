@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,26 @@
  */
 package org.springframework.hateoas.mvc;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
-import org.springframework.hateoas.core.*;
+import org.springframework.hateoas.core.AnnotationAttribute;
+import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.hateoas.core.LinkBuilderSupport;
+import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -31,9 +45,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
-import java.lang.reflect.Method;
-import java.util.*;
-
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
  * 
@@ -41,6 +52,7 @@ import java.util.*;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Kamill Sokol
+ * @author Ross Turner
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
@@ -119,29 +131,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		for (BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation)) {
-
-			Object value = parameter.getValue();
-			String key = parameter.getVariableName();
-
-			if (value instanceof MultiValueMap<?, ?>) {
-				MultiValueMap<String, String> requestParams = (MultiValueMap<String, String>)value;
-				for (Map.Entry<String, List<String>> multiValueEntry : requestParams.entrySet()) {
-					for (String singleEntryValue : multiValueEntry.getValue()) {
-						builder.queryParam(multiValueEntry.getKey(), singleEntryValue);
-					}
-				}
-			} else if (value instanceof Map<?, ?>) {
-				Map<String, String> requestParams = (Map<String, String>)value;
-				for (Map.Entry<String, String> requestParamEntry : requestParams.entrySet()) {
-					builder.queryParam(requestParamEntry.getKey(), requestParamEntry.getValue());
-				}
-			} else if (value instanceof Collection) {
-				for (Object element : (Collection<?>) value) {
-					builder.queryParam(key, element);
-				}
-			} else {
-				builder.queryParam(key, parameter.asString());
-			}
+			bindRequestParameters(builder, parameter);
 		}
 
 		UriComponents components = applyUriComponentsContributer(builder, invocation).buildAndExpand(values);
@@ -179,6 +169,48 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		return builder;
+	}
+
+	/**
+	 * Populates the given {@link UriComponentsBuilder} with request parameters found in the given
+	 * {@link BoundMethodParameter}.
+	 * 
+	 * @param builder must not be {@literal null}.
+	 * @param parameter must not be {@literal null}.
+	 */
+	@SuppressWarnings("unchecked")
+	private static void bindRequestParameters(UriComponentsBuilder builder, BoundMethodParameter parameter) {
+
+		Object value = parameter.getValue();
+		String key = parameter.getVariableName();
+
+		if (value instanceof MultiValueMap) {
+
+			MultiValueMap<String, String> requestParams = (MultiValueMap<String, String>) value;
+
+			for (Map.Entry<String, List<String>> multiValueEntry : requestParams.entrySet()) {
+				for (String singleEntryValue : multiValueEntry.getValue()) {
+					builder.queryParam(multiValueEntry.getKey(), singleEntryValue);
+				}
+			}
+
+		} else if (value instanceof Map) {
+
+			Map<String, String> requestParams = (Map<String, String>) value;
+
+			for (Map.Entry<String, String> requestParamEntry : requestParams.entrySet()) {
+				builder.queryParam(requestParamEntry.getKey(), requestParamEntry.getValue());
+			}
+
+		} else if (value instanceof Collection) {
+
+			for (Object element : (Collection<?>) value) {
+				builder.queryParam(key, element);
+			}
+
+		} else {
+			builder.queryParam(key, parameter.asString());
+		}
 	}
 
 	/**
