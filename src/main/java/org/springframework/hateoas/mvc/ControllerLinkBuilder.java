@@ -93,7 +93,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
 	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {
-		return linkTo(method.getDeclaringClass(), method);
+		return linkTo(method.getDeclaringClass(), method, parameters);
 	}
 
 	/*
