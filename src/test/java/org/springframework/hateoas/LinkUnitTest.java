@@ -73,6 +73,69 @@ public class LinkUnitTest {
 		TestUtils.assertEqualAndSameHashCode(left, right);
 	}
 
+    @Test
+   	public void sameEverythingMakeSameLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withName("name").withTitle("title").withDeprecation("deprecation").withHreflang("hreflang").withProfile("profile").withType("type");
+   		Link right = new Link("foo", Link.REL_SELF).withName("name").withTitle("title").withDeprecation("deprecation").withHreflang("hreflang").withProfile("profile").withType("type");
+
+   		TestUtils.assertEqualAndSameHashCode(left, right);
+   	}
+
+    @Test
+   	public void sameRelAndHrefDifferentTitleMakeDifferentLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withTitle("Title One");
+   		Link right = new Link("foo", Link.REL_SELF).withTitle("Title Two");
+
+   		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+   	}
+
+    @Test
+   	public void sameRelAndHrefDifferentNameMakeDifferentLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withName("Name One");
+   		Link right = new Link("foo", Link.REL_SELF).withName("Name Two");
+
+   		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+   	}
+
+    @Test
+   	public void sameRelAndHrefDifferentDeprecationMakeDifferentLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withDeprecation("Deprecation One");
+   		Link right = new Link("foo", Link.REL_SELF).withDeprecation("Deprecation Two");
+
+   		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+   	}
+
+    @Test
+   	public void sameRelAndHrefDifferentHreflangMakeDifferentLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withHreflang("Hreflang One");
+   		Link right = new Link("foo", Link.REL_SELF).withHreflang("Hreflang Two");
+
+   		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+   	}
+
+    @Test
+   	public void sameRelAndHrefDifferentProfileMakeDifferentLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withProfile("Profile One");
+   		Link right = new Link("foo", Link.REL_SELF).withProfile("Profile Two");
+
+   		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+   	}
+
+    @Test
+   	public void sameRelAndHrefDifferentTypeMakeDifferentLink() {
+
+   		Link left = new Link("foo", Link.REL_SELF).withType("Type One");
+   		Link right = new Link("foo", Link.REL_SELF).withType("Type Two");
+
+   		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
+   	}
+
 	@Test
 	public void differentRelMakesDifferentLink() {
 
@@ -163,4 +226,15 @@ public class LinkUnitTest {
 		stream.writeObject(link);
 		stream.close();
 	}
+
+    @Test
+    public void withTitleAndNameWork() {
+
+        Link link = new Link("/foo", "myRel").withTitle("The Title").withName("The Name");
+
+        assertThat(link.getHref(), is("/foo"));
+        assertThat(link.getRel(), is("myRel"));
+        assertThat(link.getTitle(), is("The Title"));
+        assertThat(link.getName(), is("The Name"));
+    }
 }

@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -53,7 +54,13 @@ public class Link implements Serializable {
 	public static final String REL_LAST = "last";
 
 	@XmlAttribute private String rel;
-	@XmlAttribute private String href;
+	 @XmlAttribute private String href;
+    @XmlAttribute private String title;
+    @XmlAttribute private String name;
+    @XmlAttribute private String type;
+    @XmlAttribute private String deprecation;
+    @XmlAttribute private String profile;
+    @XmlAttribute private String hreflang;
 	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
@@ -98,6 +105,22 @@ public class Link implements Serializable {
 	protected Link() {
 
 	}
+
+    /**
+     * Copy constructor for use by the additional with methods.
+     * @param copyLink The link to copy.
+     */
+    private Link(Link copyLink) {
+        rel = copyLink.rel;
+        href = copyLink.href;
+        template = copyLink.template;
+        name = copyLink.name;
+        title = copyLink.title;
+        type = copyLink.type;
+        deprecation = copyLink.deprecation;
+        profile = copyLink.profile;
+        hreflang = copyLink.hreflang;
+    }
 
 	/**
 	 * Returns the actual URI the link is pointing to.
@@ -194,6 +217,142 @@ public class Link implements Serializable {
 		return template;
 	}
 
+    /**
+     * Returns the title of the link.
+     *
+     * @return
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Returns the name of the link.
+     *
+     * @return
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Returns the type of the link.
+     *
+     * @return
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getType() {
+
+        return type;
+    }
+
+    /**
+     * Returns the deprecation of the link.
+     *
+     * @return
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getDeprecation() {
+
+        return deprecation;
+    }
+
+    /**
+     * Returns the profile of the link.
+     *
+     * @return
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getProfile() {
+
+        return profile;
+    }
+
+    /**
+     * Returns the hreflang of the link.
+     *
+     * @return
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public String getHreflang() {
+
+        return hreflang;
+    }
+
+    /**
+     * Returns a new Link with the title changed.
+     *
+     * @param title The title of the link.
+     * @return
+     */
+    public Link withTitle(String title) {
+        Link link = new Link(this);
+        link.title = title;
+        return link;
+    }
+
+    /**
+     * Returns a new Link with the name changed.
+     *
+     * @param name The name of the link.
+     * @return
+     */
+    public Link withName(String name) {
+        Link link = new Link(this);
+        link.name = name;
+        return link;
+    }
+
+    /**
+     * Returns a new Link with the type changed.
+     *
+     * @param type The type of the link.
+     * @return
+     */
+    public Link withType(String type) {
+        Link link = new Link(this);
+        link.type = type;
+        return link;
+    }
+
+    /**
+     * Returns a new Link with the deprecation changed.
+     *
+     * @param deprecation The deprecation of the link.
+     * @return
+     */
+    public Link withDeprecation(String deprecation) {
+        Link link = new Link(this);
+        link.deprecation = deprecation;
+        return link;
+    }
+
+    /**
+     * Returns a new Link with the profile changed.
+     *
+     * @param profile The profile of the link.
+     * @return
+     */
+    public Link withProfile(String profile) {
+        Link link = new Link(this);
+        link.profile = profile;
+        return link;
+    }
+
+    /**
+     * Returns a new Link with the hreflang changed.
+     *
+     * @param hreflang The hreflang of the link.
+     * @return
+     */
+    public Link withHreflang(String hreflang) {
+        Link link = new Link(this);
+        link.hreflang = hreflang;
+        return link;
+    }
+
 	/* 
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -201,17 +360,41 @@ public class Link implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 
-		if (this == obj) {
-			return true;
-		}
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Link)) {
+            return false;
+        }
 
-		if (!(obj instanceof Link)) {
-			return false;
-		}
+        Link that = (Link)obj;
 
-		Link that = (Link) obj;
+        if (!href.equals(that.href)) {
+            return false;
+        }
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
+        if (!rel.equals(that.rel)) {
+            return false;
+        }
+        if (title != null ? !title.equals(that.title) : that.title != null) {
+            return false;
+        }
+        if (type != null ? !type.equals(that.type) : that.type != null) {
+            return false;
+        }
+        if (deprecation != null ? !deprecation.equals(that.deprecation) : that.deprecation != null) {
+            return false;
+        }
+        if (profile != null ? !profile.equals(that.profile) : that.profile != null) {
+            return false;
+        }
+        if (hreflang != null ? !hreflang.equals(that.hreflang) : that.hreflang != null) {
+            return false;
+        }
 
-		return this.href.equals(that.href) && this.rel.equals(that.rel);
+        return true;
 	}
 
 	/* 
@@ -224,6 +407,12 @@ public class Link implements Serializable {
 		int result = 17;
 		result += 31 * href.hashCode();
 		result += 31 * rel.hashCode();
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (deprecation != null ? deprecation.hashCode() : 0);
+        result = 31 * result + (profile != null ? profile.hashCode() : 0);
+        result = 31 * result + (hreflang != null ? hreflang.hashCode() : 0);
 		return result;
 	}
 
@@ -233,7 +422,45 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return String.format("<%s>;rel=\"%s\"", href, rel);
+        StringBuilder str = new StringBuilder(String.format("<%s>;rel=\"%s\"", href, rel));
+
+        if (title != null) {
+            str.append(";title=\"");
+            str.append(title);
+            str.append("\"");
+        }
+
+        if (name != null) {
+            str.append(";name=\"");
+            str.append(name);
+            str.append("\"");
+        }
+
+        if (type != null) {
+            str.append(";type=\"");
+            str.append(type);
+            str.append("\"");
+        }
+
+        if (deprecation != null) {
+            str.append(";deprecation=\"");
+            str.append(deprecation);
+            str.append("\"");
+        }
+
+        if (profile != null) {
+            str.append(";profile=\"");
+            str.append(profile);
+            str.append("\"");
+        }
+
+        if (hreflang != null) {
+            str.append(";hreflang=\"");
+            str.append(hreflang);
+            str.append("\"");
+        }
+
+        return str.toString();
 	}
 
 	/**
