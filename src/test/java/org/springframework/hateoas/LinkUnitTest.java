@@ -163,4 +163,14 @@ public class LinkUnitTest {
 		stream.writeObject(link);
 		stream.close();
 	}
+
+	/**
+	 * @see #312
+	 */
+	@Test
+	public void keepsCompleteBaseUri() {
+
+		Link link = new Link("/customer/{customerId}/programs", "programs");
+		assertThat(link.getHref(), is("/customer/{customerId}/programs"));
+	}
 }
