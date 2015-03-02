@@ -40,7 +40,8 @@ public class TypeReferences {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class Resource<T> extends SyntheticParameterizedTypeReference<org.springframework.hateoas.Resource<T>> {}
+	public static class ResourceType<T> extends
+			SyntheticParameterizedTypeReference<org.springframework.hateoas.Resource<T>> {}
 
 	/**
 	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.Resources} of some type.
@@ -48,7 +49,7 @@ public class TypeReferences {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class Resources<T> extends
+	public static class ResourcesType<T> extends
 			SyntheticParameterizedTypeReference<org.springframework.hateoas.Resources<T>> {}
 
 	/**
@@ -57,7 +58,7 @@ public class TypeReferences {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class PagedResources<T> extends
+	public static class PagedResourcesType<T> extends
 			SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedResources<T>> {}
 
 	/**
@@ -71,7 +72,7 @@ public class TypeReferences {
 
 		private final Type type;
 
-		@SuppressWarnings("rawtypes")
+		@SuppressWarnings({ "rawtypes", "deprecation" })
 		protected SyntheticParameterizedTypeReference() {
 
 			Class<? extends SyntheticParameterizedTypeReference> foo = getClass();

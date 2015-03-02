@@ -34,6 +34,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.mvc.TypeReferences.ResourceType;
+import org.springframework.hateoas.mvc.TypeReferences.ResourcesType;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -83,7 +85,7 @@ public class TypeReferencesIntegrationTests {
 		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON));
 
 		ResponseEntity<Resource<User>> response = template.exchange("/resource", HttpMethod.GET, null,
-				new TypeReferences.Resource<User>() {});
+				new ResourceType<User>() {});
 
 		assertExpectedUserResource(response.getBody());
 	}
@@ -97,7 +99,7 @@ public class TypeReferencesIntegrationTests {
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON));
 
 		ResponseEntity<Resources<User>> response = template.exchange("/resources", HttpMethod.GET, null,
-				new TypeReferences.Resources<User>() {});
+				new ResourcesType<User>() {});
 		Resources<User> body = response.getBody();
 
 		assertThat(body.hasLink("self"), is(true));
@@ -117,7 +119,7 @@ public class TypeReferencesIntegrationTests {
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON));
 
 		ResponseEntity<Resources<Resource<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
-				new TypeReferences.Resources<Resource<User>>() {});
+				new ResourcesType<Resource<User>>() {});
 		Resources<Resource<User>> body = response.getBody();
 
 		assertThat(body.hasLink("self"), is(true));
