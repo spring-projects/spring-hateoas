@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>0.17.0.BUILD-SNAPSHOT</version>
+	<version>0.17.0.RELEASE</version>
 
 	<name>Spring HATEOAS</name>
 	<url>http://github.com/SpringSource/spring-hateoas</url>
@@ -315,17 +315,17 @@
 									<target>
 										<copy todir="${project.root}/target/site/reference/html">
 											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css"/>
+												<include name="**/*.css" />
 											</fileset>
-											<flattenmapper/>
+											<flattenmapper />
 										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
-												<include name="**/*.png"/>
-												<include name="**/*.gif"/>
-												<include name="**/*.jpg"/>
+												<include name="**/*.png" />
+												<include name="**/*.gif" />
+												<include name="**/*.jpg" />
 											</fileset>
-											<flattenmapper/>
+											<flattenmapper />
 										</copy>
 									</target>
 								</configuration>
