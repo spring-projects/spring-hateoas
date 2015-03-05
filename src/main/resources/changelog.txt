@@ -1,6 +1,39 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.17.0.RELEASE (2015-03-05)
+----------------------------------------------
+- #313 - Assert compatibility with both JSONPath 0.9 and 1.2.
+- #312 - UriTemplate cuts off uri part after last path variable.
+- #311 - Upgrade to latest Spring 4.0.x.
+- #310 - Add package-info.java files.
+- #309 - Incorrect calculation of totalPages in PageMetadata.
+- #308 - Release 0.17.0.
+- #307 - Traverson should allow to access final templated link.
+- #306 - Add convenience types to create ParameterizedTypeReferences.
+- #305 - Update dependencies.
+- #304 - Add build profiles for Spring 4.x.
+- #302 - Simple Boot Client doesn't handle hal links properly.
+- #300 - Added missing variable in call to ControllerLinkBuilder.linkTo(Class<?>controller, Method method, Object... parameters).
+- #297 - Upgrade JsonPath Version.
+- #293 - EnableHypermediaSupport should augment HttpMessageConverters of registered RestTemplates.
+- #286 - Allow EmbeddedWrappers.wrap to wrap empty collections.
+- #281 - Enhance UriTemplate builder to build links for request param based urls.
+- #278 - Publish JavaDoc and reference documentation.
+- #273 - Fix Assert, forgot to pass the parameter that was being checked.
+- #272 - Fix reference to non-existing interface.
+- #271 - UriTemplate doesn't seem to expand simple path variables.
+- #267 - Added varargs variant for ResourceSupport.add().
+- #257 - Add support for X-Forwarded-Proto headers.
+- #237 - Missing variable values in call to ControllerLinkBuilder.linkTo(Method, Object... parameters).
+- #233 - Add support for curies to HalEmbeddedBuilder.
+- #229 - HalEmbeddedBuilder needs to support curie for the embedded resources.
+- #228 - TemplateVariable Constructor does not check Parameter.
+- #224 - Typo in README: toResource should be toResources.
+- #221 - HalEmbeddedBuilder should consider curies for relation types.
+- #210 - #209 - Added support for Map<String, String> and MultiValueMap<String, S...
+- #209 - ControllerLinkBuilder fails on Map<> RequestParams.
+
 Changes in version 0.16.0.RELEASE (2014-07-28)
 ----------------------------------------------
 - #219 - Registration of HttpMessageConverter for HAL should restrict rendering to subtypes of ResourceSupport.
