@@ -27,6 +27,6 @@ import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 
 	public HalLinkDiscoverer() {
-		super("$._links..%s..href", MediaTypes.HAL_JSON);
+		super("$._links..['%s']..href", MediaTypes.HAL_JSON);
 	}
 }
