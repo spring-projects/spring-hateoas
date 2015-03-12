@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -33,8 +35,11 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.ControllerW
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddressesController;
 import org.springframework.http.HttpEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -43,6 +48,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Kamill Sokol
+ * @author Ross Turner
  */
 public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
@@ -119,6 +125,41 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
 	}
 
+	/**
+	 * @see #209
+	 */
+	@Test
+	public void createsLinkToControllerMethodWithMapRequestParam() {
+
+		Map<String, String> queryParams = new LinkedHashMap<String, String>();
+		queryParams.put("firstKey", "firstValue");
+		queryParams.put("secondKey", "secondValue");
+
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithMap(queryParams)).withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/sample/mapsupport?firstKey=firstValue&secondKey=secondValue"));
+	}
+
+	/**
+	 * @see #209
+	 */
+	@Test
+	public void createsLinkToControllerMethodWithMultiValueMapRequestParam() {
+
+		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+		queryParams.put("key1", Arrays.asList("value1a", "value1b"));
+		queryParams.put("key2", Arrays.asList("value2a", "value2b"));
+
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithMap(queryParams)).withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(),
+				endsWith("/sample/multivaluemapsupport?key1=value1a&key1=value1b&key2=value2a&key2=value2b"));
+	}
+
 	static interface SampleController {
 
 		@RequestMapping("/sample/{id}")
@@ -126,6 +167,12 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		@RequestMapping("/sample/{time}")
 		HttpEntity<?> sampleMethod(@PathVariable("time") @DateTimeFormat(iso = ISO.DATE) DateTime time);
+
+		@RequestMapping("/sample/mapsupport")
+		HttpEntity<?> sampleMethodWithMap(@RequestParam Map<String, String> queryParams);
+
+		@RequestMapping("/sample/multivaluemapsupport")
+		HttpEntity<?> sampleMethodWithMap(@RequestParam MultiValueMap<String, String> queryParams);
 	}
 
 	static class SampleUriComponentsContributor implements UriComponentsContributor {

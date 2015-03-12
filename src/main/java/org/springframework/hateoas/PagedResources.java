@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public class PagedResources<T> extends Resources<T> {
 		 * @param totalElements the total number of elements available
 		 */
 		public PageMetadata(long size, long number, long totalElements) {
-			this(size, number, totalElements, size == 0 ? 0 : totalElements / size);
+			this(size, number, totalElements, size == 0 ? 0 : (long) Math.ceil((double) totalElements / (double) size));
 		}
 
 		/**

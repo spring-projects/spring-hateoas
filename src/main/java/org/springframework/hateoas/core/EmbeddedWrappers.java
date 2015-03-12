@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,16 @@ public class EmbeddedWrappers {
 	 */
 	public EmbeddedWrapper wrap(Object source) {
 		return wrap(source, AbstractEmbeddedWrapper.NO_REL);
+	}
+
+	/**
+	 * Creates an {@link EmbeddedWrapper} for an empty {@link Collection} with the given element type.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @return
+	 */
+	public EmbeddedWrapper emptyCollectionOf(Class<?> type) {
+		return new EmptyCollectionEmbeddedWrapper(type);
 	}
 
 	/**
@@ -123,6 +133,11 @@ public class EmbeddedWrappers {
 		public Class<?> getRelTargetType() {
 
 			Object peek = peek();
+
+			if (peek == null) {
+				return null;
+			}
+
 			peek = peek instanceof Resource ? ((Resource<Object>) peek).getContent() : peek;
 
 			return AopUtils.getTargetClass(peek);
@@ -204,7 +219,10 @@ public class EmbeddedWrappers {
 			super(rel);
 
 			Assert.notNull(value, "Collection must not be null!");
-			Assert.notEmpty(value, "Collection must not be empty");
+
+			if (AbstractEmbeddedWrapper.NO_REL.equals(rel) && value.isEmpty()) {
+				throw new IllegalArgumentException("Cannot wrap an empty collection with no rel given!");
+			}
 
 			this.value = value;
 		}
@@ -224,7 +242,7 @@ public class EmbeddedWrappers {
 		 */
 		@Override
 		protected Object peek() {
-			return value.iterator().next();
+			return value.isEmpty() ? null : value.iterator().next();
 		}
 
 		/*
@@ -234,6 +252,73 @@ public class EmbeddedWrappers {
 		@Override
 		public boolean isCollectionValue() {
 			return true;
+		}
+	}
+
+	/**
+	 * An {@link EmbeddedWrapper} to simulate a {@link Collection} of a given element type.
+	 *
+	 * @author Oliver Gierke
+	 * @since 0.17
+	 */
+	private static class EmptyCollectionEmbeddedWrapper implements EmbeddedWrapper {
+
+		private final Class<?> type;
+
+		/**
+		 * Creates a new {@link EmptyCollectionEmbeddedWrapper}.
+		 * 
+		 * @param type must not be {@literal null}.
+		 */
+		public EmptyCollectionEmbeddedWrapper(Class<?> type) {
+
+			Assert.notNull(type, "Element type must not be null!");
+			this.type = type;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getRel()
+		 */
+		@Override
+		public String getRel() {
+			return null;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getValue()
+		 */
+		@Override
+		public Object getValue() {
+			return Collections.emptySet();
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getRelTargetType()
+		 */
+		@Override
+		public Class<?> getRelTargetType() {
+			return type;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#isCollectionValue()
+		 */
+		@Override
+		public boolean isCollectionValue() {
+			return true;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#hasRel(java.lang.String)
+		 */
+		@Override
+		public boolean hasRel(String rel) {
+			return false;
 		}
 	}
 }

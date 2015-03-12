@@ -85,7 +85,7 @@ public class DefaultCurieProvider implements CurieProvider {
 		return getNamespacedRelFor(link.getRel());
 	}
 
-	/*
+	/* 
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.hal.CurieProvider#getNamespacedRelFrom(java.lang.String)
 	 */

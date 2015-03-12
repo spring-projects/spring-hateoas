@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
 class HalEmbeddedBuilder {
 
 	private static final String DEFAULT_REL = "content";
+	private static final String INVALID_EMBEDDED_WRAPPER = "Embedded wrapper %s returned null for both the static rel and the rel target type! Make sure one of the two returns a non-null value!";
 
 	private final Map<String, Object> embeddeds = new HashMap<String, Object>();
 	private final RelProvider provider;
@@ -116,6 +117,10 @@ class HalEmbeddedBuilder {
 		}
 
 		Class<?> type = wrapper.getRelTargetType();
+
+		if (type == null) {
+			throw new IllegalStateException(String.format(INVALID_EMBEDDED_WRAPPER, wrapper));
+		}
 
 		String rel = forCollection ? provider.getCollectionResourceRelFor(type) : provider.getItemResourceRelFor(type);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public UriTemplate(String baseUri, TemplateVariables variables) {
 
-		Assert.hasText("Base URI must not be null or empty!");
+		Assert.hasText(baseUri, "Base URI must not be null or empty!");
 
 		this.baseUri = baseUri;
 		this.variables = variables == null ? TemplateVariables.NONE : variables;
@@ -99,7 +99,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * Creates a new {@link UriTemplate} with the current {@link TemplateVariable}s augmented with the given ones.
 	 * 
 	 * @param variables can be {@literal null}.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
 	public UriTemplate with(TemplateVariables variables) {
 
@@ -127,6 +127,17 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		return new UriTemplate(baseUri, this.variables.concat(result));
+	}
+
+	/**
+	 * Creates a new {@link UriTemplate} with a {@link TemplateVariable} with the given name and type added.
+	 * 
+	 * @param variableName must not be {@literal null} or empty.
+	 * @param type must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public UriTemplate with(String variableName, TemplateVariable.VariableType type) {
+		return with(new TemplateVariables(new TemplateVariable(variableName, type)));
 	}
 
 	/**
@@ -183,10 +194,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
+		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
 
-		for (TemplateVariable variable : variables) {
+		for (TemplateVariable variable : getOptionalVariables()) {
 
 			Object value = iterator.hasNext() ? iterator.next() : null;
 			appendToBuilder(builder, variable, value);
@@ -208,9 +220,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		Assert.notNull(parameters, "Parameters must not be null!");
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
 
-		for (TemplateVariable variable : variables) {
+		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+
+		for (TemplateVariable variable : getOptionalVariables()) {
 			appendToBuilder(builder, variable, parameters.get(variable.getName()));
 		}
 

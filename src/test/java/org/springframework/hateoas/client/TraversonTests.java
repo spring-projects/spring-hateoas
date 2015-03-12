@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 package org.springframework.hateoas.client;
 
 import static net.jadler.Jadler.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +32,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -37,6 +40,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -207,6 +213,51 @@ public class TraversonTests {
 
 		assertThat(result.getHref(), endsWith("/movies"));
 		assertThat(result.getRel(), is("movies"));
+	}
+
+	/**
+	 * @see #307
+	 */
+	@Test
+	public void returnsTemplatedLinkIfRequested() {
+
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
+				.follow("self");
+
+		Link link = follow.asTemplatedLink();
+
+		assertThat(link.isTemplated(), is(true));
+		assertThat(link.getVariableNames(), hasItem("template"));
+
+		link = follow.asLink();
+
+		assertThat(link.isTemplated(), is(false));
+	}
+
+	/**
+	 * @see #258
+	 */
+	@Test
+	public void returnsDefaultMessageConvertersForHal() {
+
+		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON);
+
+		assertThat(converters, hasSize(2));
+		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
+		assertThat(converters.get(1), is(instanceOf(MappingJackson2HttpMessageConverter.class)));
+	}
+
+	/**
+	 * @see #258
+	 */
+	@Test
+	public void returnsDefaultMessageConverters() {
+
+		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(Collections
+				.<MediaType> emptyList());
+
+		assertThat(converters, hasSize(1));
+		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
 	}
 
 	private void setUpActors() {

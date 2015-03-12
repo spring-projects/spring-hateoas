@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,18 +83,47 @@ public class Traverson {
 	 * @param mediaType must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, MediaType... mediaTypes) {
+		this(baseUri, Arrays.asList(mediaTypes));
+	}
+
+	/**
+	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
+	 * interact with the service.
+	 * 
+	 * @param baseUri must not be {@literal null}.
+	 * @param mediaType must not be {@literal null} or empty.
+	 */
+	public Traverson(URI baseUri, List<MediaType> mediaTypes) {
 
 		Assert.notNull(baseUri, "Base URI must not be null!");
 		Assert.notEmpty(mediaTypes, "At least one media type must be given!");
 
-		this.mediaTypes = Arrays.asList(mediaTypes);
+		this.mediaTypes = mediaTypes;
 		this.baseUri = baseUri;
 		this.discoverers = DEFAULT_LINK_DISCOVERERS;
 
 		setRestOperations(createDefaultTemplate(this.mediaTypes));
 	}
 
-	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
+	/**
+	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
+	 * 
+	 * @param mediaTypes must not be {@literal null}.
+	 * @return
+	 */
+	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(MediaType... mediaTypes) {
+		return getDefaultMessageConverters(Arrays.asList(mediaTypes));
+	}
+
+	/**
+	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
+	 * 
+	 * @param mediaTypes must not be {@literal null}.
+	 * @return
+	 */
+	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(List<MediaType> mediaTypes) {
+
+		Assert.notNull(mediaTypes, "Media types must not be null!");
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
@@ -103,8 +132,13 @@ public class Traverson {
 			converters.add(getHalConverter());
 		}
 
+		return converters;
+	}
+
+	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
+
 		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(converters);
+		template.setMessageConverters(getDefaultMessageConverters(mediaTypes));
 
 		return template;
 	}
@@ -241,7 +275,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -254,7 +288,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -268,7 +302,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), String.class)
+			String forObject = operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), String.class)
 					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
@@ -282,25 +316,42 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(), GET, prepareRequest(headers), type);
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type);
 		}
 
 		/**
-		 * Returns the {@link Link} found for the last rel int the rels configured to follow.
+		 * Returns the {@link Link} found for the last rel in the rels configured to follow. Will expand the final
+		 * {@link Link} using the
 		 * 
 		 * @return
+		 * @see #withTemplateParameters(Map)
 		 * @since 0.15
 		 */
 		public Link asLink() {
-
-			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(traverseToFinalUrl(), rels.get(rels.size() - 1));
+			return traverseToLink(true);
 		}
 
-		private String traverseToFinalUrl() {
+		/**
+		 * Returns the templated {@link Link} found for the last rel in the rels configured to follow.
+		 * 
+		 * @return
+		 * @since 0.17
+		 */
+		public Link asTemplatedLink() {
+			return traverseToLink(false);
+		}
+
+		private Link traverseToLink(boolean expandFinalUrl) {
+
+			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
+			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1));
+		}
+
+		private String traverseToFinalUrl(boolean expandFinalUrl) {
 
 			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).expand(templateParameters).toString();
+			UriTemplate uriTemplate = new UriTemplate(uri);
+			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
 		}
 
 		private String getAndFindLinkWithRel(String uri, Iterator<String> rels) {

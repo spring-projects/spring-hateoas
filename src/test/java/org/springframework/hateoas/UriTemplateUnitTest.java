@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,6 +230,35 @@ public class UriTemplateUnitTest {
 		UriTemplate template = new UriTemplate("/#fragment");
 		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("fragment", VariableType.FRAGMENT)));
 		assertThat(result.getVariableNames(), is(empty()));
+	}
+
+	/**
+	 * @see #271
+	 */
+	@Test
+	public void expandASimplePathVariable() {
+
+		UriTemplate template = new UriTemplate("/foo/{id}");
+		assertThat(template.expand(2).toString(), is("/foo/2"));
+	}
+
+	/**
+	 * @see #273
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsEmptyBaseUri() {
+		new UriTemplate(null, TemplateVariables.NONE);
+	}
+
+	/**
+	 * @see #281
+	 */
+	@Test
+	public void allowsAddingTemplateVariable() {
+
+		UriTemplate template = new UriTemplate("/").with("q", VariableType.REQUEST_PARAM);
+
+		assertThat(template.toString(), is("/{?q}"));
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {

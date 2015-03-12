@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 package org.springframework.hateoas.hal;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 
@@ -26,10 +30,17 @@ import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
-	static final String SAMPLE = "{ _links : { " + //
-			"self : { href : 'selfHref' }, " + //
-			"relation : [ " + //
-			"{ href : 'firstHref' }, { href : 'secondHref' }]}}";
+	static final String SAMPLE = "{ _links : { self : { href : 'selfHref' }, " + //
+			"relation : [ { href : 'firstHref' }, { href : 'secondHref' }], " + //
+			"'http://foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
+
+	/**
+	 * @see #314
+	 */
+	@Test
+	public void discoversFullyQualifiedRel() {
+		assertThat(getDiscoverer().findLinkWithRel("http://foo.com/bar", SAMPLE), is(notNullValue()));
+	}
 
 	@Override
 	protected LinkDiscoverer getDiscoverer() {

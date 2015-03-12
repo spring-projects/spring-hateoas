@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,10 @@ import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessage
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -100,7 +104,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		boolean found = false;
 
-		for (HandlerMethodArgumentResolver resolver : adapter.getArgumentResolvers()) {
+		for (HandlerMethodArgumentResolver resolver : getResolvers(adapter)) {
 
 			if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
 
@@ -116,6 +120,19 @@ public class EnableHypermediaSupportIntegrationTest {
 		}
 
 		assertThat(found, is(true));
+	}
+
+	/**
+	 * @see #293
+	 */
+	@Test
+	public void registersHttpMessageConvertersForRestTemplate() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+		RestTemplate template = context.getBean(RestTemplate.class);
+
+		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		context.close();
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -147,6 +164,29 @@ public class EnableHypermediaSupportIntegrationTest {
 				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
 	}
 
+	/**
+	 * Method to mitigate API changes between Spring 3.2 and 4.0.
+	 * 
+	 * @param adapter
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private static List<HandlerMethodArgumentResolver> getResolvers(RequestMappingHandlerAdapter adapter) {
+
+		Method method = ReflectionUtils.findMethod(RequestMappingHandlerAdapter.class, "getArgumentResolvers");
+		Object result = ReflectionUtils.invokeMethod(method, adapter);
+
+		if (result instanceof List) {
+			return (List<HandlerMethodArgumentResolver>) result;
+		}
+
+		if (result instanceof HandlerMethodArgumentResolverComposite) {
+			return ((HandlerMethodArgumentResolverComposite) result).getResolvers();
+		}
+
+		throw new IllegalStateException("Unexpected result when looking up argument resolvers!");
+	}
+
 	@Configuration
 	@Import(DelegateConfig.class)
 	static class HalConfig {
@@ -166,6 +206,11 @@ public class EnableHypermediaSupportIntegrationTest {
 			AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
 			numberOfMessageConvertersLegacy = adapter.getMessageConverters().length;
 			return adapter;
+		}
+
+		@Bean
+		public RestTemplate restTemplate() {
+			return new RestTemplate();
 		}
 	}
 

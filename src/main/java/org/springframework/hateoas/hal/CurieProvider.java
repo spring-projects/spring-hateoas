@@ -42,7 +42,7 @@ public interface CurieProvider {
 	/**
 	 * Returns the rel to be rendered for the given rel. Will potentially prefix the rel but also might decide not to,
 	 * depending on the actual rel.
-	 *
+	 * 
 	 * @param rel
 	 * @return
 	 * @since 0.17

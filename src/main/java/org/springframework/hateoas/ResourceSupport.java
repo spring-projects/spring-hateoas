@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.hateoas;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -66,6 +67,16 @@ public class ResourceSupport implements Identifiable<Link> {
 		for (Link candidate : links) {
 			add(candidate);
 		}
+	}
+
+	/**
+	 * Adds all given {@link Link}s to the resource.
+	 *
+	 * @param links must not be {@literal null}.
+	 */
+	public void add(Link... links) {
+		Assert.notNull(links, "Given links must not be null!");
+		add(Arrays.asList(links));
 	}
 
 	/**

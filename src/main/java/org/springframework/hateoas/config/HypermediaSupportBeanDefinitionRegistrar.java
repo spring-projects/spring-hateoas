@@ -55,6 +55,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
@@ -249,6 +250,12 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 						.getMessageConverters()));
 				adapter
 						.setMessageConverters(augmentedConverters.toArray(new HttpMessageConverter<?>[augmentedConverters.size()]));
+			}
+
+			if (bean instanceof RestTemplate) {
+
+				RestTemplate template = (RestTemplate) bean;
+				template.setMessageConverters(potentiallyRegisterModule(template.getMessageConverters()));
 			}
 
 			return bean;

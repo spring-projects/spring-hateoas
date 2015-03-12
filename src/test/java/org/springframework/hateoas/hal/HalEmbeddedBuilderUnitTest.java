@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.core.EmbeddedWrapper;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 
@@ -166,6 +167,14 @@ public class HalEmbeddedBuilderUnitTest {
 
 		assertThat(builder.asMap().get("curie:string"), is(nullValue()));
 		assertHasValues(builder.asMap(), "curie:strings", "Sample");
+	}
+
+	/**
+	 * @see #286
+	 */
+	@Test(expected = IllegalStateException.class)
+	public void rejectsInvalidEmbeddedWrapper() {
+		new HalEmbeddedBuilder(provider, curieProvider, false).add(mock(EmbeddedWrapper.class));
 	}
 
 	@SuppressWarnings("unchecked")
