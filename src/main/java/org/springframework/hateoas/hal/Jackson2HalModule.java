@@ -146,6 +146,7 @@ public class Jackson2HalModule extends SimpleModule {
                     continue;
                 }
 
+                // Apply curie prefix
 				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
 
 				if (!link.getRel().equals(rel)) {
@@ -277,6 +278,7 @@ public class Jackson2HalModule extends SimpleModule {
 			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, enforceEmbeddedCollections);
 
 			for (Object resource : value) {
+                // Curie prefix applied inside add method
 				builder.add(resource);
 			}
 
@@ -367,9 +369,21 @@ public class Jackson2HalModule extends SimpleModule {
 				return;
 			}
 
+            // If we only have one element, check whether it is a Link with preferCollections NOT set to true
 			if (list.size() == 1) {
-				serializeContents(list.iterator(), jgen, provider);
-				return;
+
+                if (list.get(0) instanceof Link) {
+
+                    if (!((Link) list.get(0)).getPreferCollections()) {
+                        serializeContents(list.iterator(), jgen, provider);
+                        return;
+                    }
+
+                } else {
+                    serializeContents(list.iterator(), jgen, provider);
+                    return;
+                }
+
 			}
 
 			jgen.writeStartArray();

@@ -54,6 +54,11 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
+    /**
+     * Whether rel types with a single Link instance should be serialized as a collection
+     */
+    private boolean preferCollections = false;
+
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
     @JsonInclude(value = Include.NON_EMPTY)
@@ -106,6 +111,19 @@ public class Link implements Serializable {
 	protected Link() {
 
 	}
+
+    public Link preferCollections() {
+        this.preferCollections = true;
+        return this;
+    }
+
+    /**
+     * Returns whether collections should be preferred when there is only a single Link of a give rel type
+     */
+    @JsonIgnore
+    public boolean getPreferCollections() {
+        return preferCollections;
+    }
 
 	/**
 	 * Returns the actual URI the link is pointing to.
