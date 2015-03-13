@@ -57,7 +57,7 @@ public class Link implements Serializable {
     /**
      * Whether rel types with a single Link instance should be serialized as a collection
      */
-    private boolean preferCollections = false;
+    private boolean preferCollections;
 
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
@@ -111,11 +111,6 @@ public class Link implements Serializable {
 	protected Link() {
 
 	}
-
-    public Link preferCollections() {
-        this.preferCollections = true;
-        return this;
-    }
 
     /**
      * Returns whether collections should be preferred when there is only a single Link of a give rel type
@@ -343,6 +338,7 @@ public class Link implements Serializable {
         private String name;
         private String title;
         private UriTemplate template;
+        private boolean preferCollections;
 
         public Builder rel(String rel) {
             this.rel = rel;
@@ -369,6 +365,11 @@ public class Link implements Serializable {
             return this;
         }
 
+        public Builder preferCollections() {
+            this.preferCollections = true;
+            return this;
+        }
+
         public Link build() {
             Link link = null;
 
@@ -382,6 +383,7 @@ public class Link implements Serializable {
 
             link.title = title;
             link.name = name;
+            link.preferCollections = preferCollections;
 
             return link;
         }
