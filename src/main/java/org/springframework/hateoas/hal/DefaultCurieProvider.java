@@ -64,6 +64,7 @@ public class DefaultCurieProvider implements CurieProvider {
                 .href(uriTemplate.toString())
                 .rel("curies")
                 .title(title)
+				.preferCollections()
                 .build();
 	}
 

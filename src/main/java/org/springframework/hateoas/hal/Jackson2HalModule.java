@@ -66,9 +66,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.ser.std.NonTypedScalarSerializerBase;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Jackson 2 module implementation to render {@link Link} and {@link ResourceSupport} instances in HAL compatible JSON.
@@ -163,21 +161,28 @@ public class Jackson2HalModule extends SimpleModule {
 
 			if (prefixingRequired && curiedLinkPresent) {
 
-				ArrayList<Object> curies = new ArrayList<Object>();
-				curies.add(curieProvider.getCurieInformation(new Links(links)));
-
-				sortedLinks.put("curies", curies);
+				sortedLinks.put("curies", new ArrayList<Object>(curieProvider.getCurieInformation(new Links(links))));
 			}
 
-			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
-			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
-			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
+			provider.findValueSerializer(Map.class, property).serialize(unwrapValues(sortedLinks), jgen, provider);
+		}
 
-			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
+		private Map<String, Object> unwrapValues(Map<String, List<Object>> sortedLinks) {
+			Map<String, Object> serializableLinks = new LinkedHashMap<String, Object>(sortedLinks.size());
+			for (Map.Entry<String, List<Object>> entry : sortedLinks.entrySet()) {
+				List<Object> values = entry.getValue();
+				Object unwrappedValue = values;
+				if (values.size() == 1) {
+					Object value = values.get(0);
+					if ((value instanceof Link && !((Link) value).getPreferCollections())) {
+						unwrappedValue = value;
+					}
+				}
 
-			serializer.serialize(sortedLinks, jgen, provider);
+				serializableLinks.put(entry.getKey(), unwrappedValue);
+			}
+
+			return serializableLinks;
 		}
 
 		/*
