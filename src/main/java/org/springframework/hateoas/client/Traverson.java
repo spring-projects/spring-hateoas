@@ -320,7 +320,7 @@ public class Traverson {
 		}
 
    		/**
-		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given {@link ParameterizedTypeReference}.
+		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the type wrapped by the given {@link ParameterizedTypeReference}.
 		 * 
 		 * @param type must not be {@literal null}.
 		 * @return
