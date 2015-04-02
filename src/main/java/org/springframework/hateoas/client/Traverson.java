@@ -319,6 +319,18 @@ public class Traverson {
 			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type);
 		}
 
+   		/**
+		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given {@link ParameterizedTypeReference}.
+		 * 
+		 * @param type must not be {@literal null}.
+		 * @return
+		 */
+		public <T> ResponseEntity<T> toEntity(ParameterizedTypeReference<T> type) {
+
+			Assert.notNull(type, "Target type must not be null!");
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type);
+		}
+
 		/**
 		 * Returns the {@link Link} found for the last rel in the rels configured to follow. Will expand the final
 		 * {@link Link} using the
