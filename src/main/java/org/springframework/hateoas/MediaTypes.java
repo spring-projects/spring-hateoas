@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,17 @@ import org.springframework.http.MediaType;
  * Constants for well-known hypermedia types.
  * 
  * @author Oliver Gierke
+ * @author Przemek Nowak
  */
 public class MediaTypes {
 
-	public static final MediaType HAL_JSON = MediaType.valueOf("application/hal+json");
+	/**
+	 * A String equivalent of {@link MediaTypes#HAL_JSON}.
+	 */
+	public static final String HAL_JSON_VALUE = "application/hal+json";
+
+	/**
+	 * Public constant media type for {@code application/hal+json}.
+	 */
+	public static final MediaType HAL_JSON = MediaType.valueOf(HAL_JSON_VALUE);
 }
