@@ -21,8 +21,17 @@ import org.springframework.http.MediaType;
  * Constants for well-known hypermedia types.
  * 
  * @author Oliver Gierke
+ * @author Przemek Nowak
  */
 public class MediaTypes {
 
+	/**
+	 * Public constant media type for {@code application/hal+json}.
+	 */
 	public static final MediaType HAL_JSON = MediaType.valueOf("application/hal+json");
+
+	/**
+	 * A String equivalent of {@link MediaTypes#HAL_JSON}.
+	 */
+	public static final String HAL_JSON_VALUE = "application/hal+json";
 }
