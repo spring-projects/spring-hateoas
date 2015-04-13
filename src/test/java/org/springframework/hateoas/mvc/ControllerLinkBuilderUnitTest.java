@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Kamill Sokol
+ * @author Oemer Yildiz
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -423,6 +424,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("bar://"));
 	}
 
+	/**
+	 * @see #331
+	 */
+	@Test
+	public void linksToMethodWithRequestParamImplicitlySetToFalse() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
+
+		assertThat(link.getHref(), endsWith("/bar"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
@@ -492,6 +504,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(value = "/foo")
 		HttpEntity<Void> methodForOptionalNextPage(@RequestParam(required = false) Integer offset) {
+			return null;
+		}
+
+		@RequestMapping(value = "/bar")
+		HttpEntity<Void> methodForOptionalSizeWithDefaultValue(@RequestParam(defaultValue = "10") Integer size) {
 			return null;
 		}
 	}

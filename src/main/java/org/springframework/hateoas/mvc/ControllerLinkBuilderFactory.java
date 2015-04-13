@@ -41,6 +41,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -53,6 +54,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Dietrich Schulten
  * @author Kamill Sokol
  * @author Ross Turner
+ * @author Oemer Yildiz
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
@@ -233,7 +235,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
-			return annotation.required() ? super.verifyParameterValue(parameter, value) : value;
+			return annotation.required() && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? super
+					.verifyParameterValue(parameter, value) : value;
 		}
 	}
 }
