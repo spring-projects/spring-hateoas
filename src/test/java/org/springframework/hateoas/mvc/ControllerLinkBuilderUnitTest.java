@@ -423,6 +423,16 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("bar://"));
 	}
 
+	/**
+	 * @see #331
+	 */
+	@Test
+	public void linksToMethodWithRequestParamImplicitlySetToFalse() {
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
+
+		assertThat(link.getHref(), endsWith("/bar"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
 	}
@@ -492,6 +502,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(value = "/foo")
 		HttpEntity<Void> methodForOptionalNextPage(@RequestParam(required = false) Integer offset) {
+			return null;
+		}
+
+		@RequestMapping(value = "/bar")
+		HttpEntity<Void> methodForOptionalSizeWithDefaultValue(@RequestParam(defaultValue = "10") Integer size) {
 			return null;
 		}
 	}
