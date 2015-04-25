@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -288,7 +289,15 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		switch (variable.getType()) {
 			case REQUEST_PARAM:
 			case REQUEST_PARAM_CONTINUED:
-				builder.queryParam(variable.getName(), value);
+				if (value instanceof Collection) {
+					builder.queryParam(variable.getName(), ((Collection<?>) value).toArray());
+				}
+				else if (value instanceof Object[]) {
+					builder.queryParam(variable.getName(), (Object[]) value);
+				}
+				else {
+					builder.queryParam(variable.getName(), value);
+				}
 				break;
 			case PATH_VARIABLE:
 			case SEGMENT:
