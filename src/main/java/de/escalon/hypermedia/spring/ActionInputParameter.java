@@ -15,7 +15,7 @@ package de.escalon.hypermedia.spring;
 
 import de.escalon.hypermedia.affordance.AnnotatedParameter;
 import de.escalon.hypermedia.affordance.AnnotatedParameters;
-import de.escalon.hypermedia.DataType;
+import de.escalon.hypermedia.affordance.DataType;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
@@ -381,7 +381,7 @@ public class ActionInputParameter implements AnnotatedParameter {
     /**
      * Gets the input constraints defined for this action input parameter.
      *
-     * @return
+     * @return constraints
      */
     public Map<String, Object> getInputConstraints() {
         return inputConstraints;
