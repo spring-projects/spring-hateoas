@@ -17,10 +17,9 @@ package org.springframework.hateoas.mvc;
 
 import static org.springframework.util.StringUtils.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.net.URI;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
@@ -237,7 +236,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	private static HttpServletRequest getCurrentRequest() {
 
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
+		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?");
 		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
