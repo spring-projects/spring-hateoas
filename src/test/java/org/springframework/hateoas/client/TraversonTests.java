@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.client;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 import static net.jadler.Jadler.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -24,6 +26,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -258,6 +261,41 @@ public class TraversonTests {
 
 		assertThat(converters, hasSize(1));
 		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
+	}
+
+	@Test
+	public void singleTemplateRequestParameters() {
+		Map<String,Object> parameters = singletonMap("template", (Object)"1");
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
+			.follow("self").withTemplateParameters(parameters);
+
+		Link link = follow.asLink();
+
+		assertThat(link.getHref(), containsString("?template=1"));
+	}
+
+	@Test
+	public void multipleTemplateRequestParametersUsingArray() {
+		Map<String, Object> parameters = singletonMap("template", (Object) new String[] { "1", "2" });
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
+			.follow("self").withTemplateParameters(parameters);
+
+		Link link = follow.asLink();
+
+		assertThat(link.getHref(), containsString("template=1"));
+		assertThat(link.getHref(), containsString("template=2"));
+	}
+
+	@Test
+	public void multipleTemplateRequestParametersUsingCollection() {
+		Map<String, Object> parameters = singletonMap("template", (Object) asList("1", "2"));
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
+			.follow("self").withTemplateParameters(parameters);
+
+		Link link = follow.asLink();
+
+		assertThat(link.getHref(), containsString("template=1"));
+		assertThat(link.getHref(), containsString("template=2"));
 	}
 
 	private void setUpActors() {
