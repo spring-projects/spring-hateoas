@@ -15,13 +15,12 @@
  */
 package org.springframework.hateoas.client;
 
+import com.jayway.jsonpath.JsonPath;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Helper class to find {@link Link} instances in representations.
@@ -102,6 +101,10 @@ class Rels {
 			}
 
 			return discoverer.findLinkWithRel(rel, response);
+		}
+
+		public String toString() {
+			return this.rel;
 		}
 	}
 
