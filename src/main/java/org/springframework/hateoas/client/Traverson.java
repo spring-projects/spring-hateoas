@@ -202,6 +202,15 @@ public class Traverson {
 		return new TraversalBuilder().follow(rels);
 	}
 
+	/**
+	 * Sets up a {@link TraversalBuilder} for a single rel with customized details
+	 * @param hop must not be {@literal null}
+	 * @return
+	 */
+	public TraversalBuilder follow(Hop hop) {
+		return new TraversalBuilder().follow(hop);
+	}
+
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
 
 		HttpHeaders toSend = new HttpHeaders();
@@ -221,7 +230,7 @@ public class Traverson {
 	 */
 	public class TraversalBuilder {
 
-		private List<String> rels = new ArrayList<String>();
+		private List<Hop> rels = new ArrayList<Hop>();
 		private Map<String, Object> templateParameters = new HashMap<String, Object>();
 		private HttpHeaders headers = new HttpHeaders();
 
@@ -238,7 +247,23 @@ public class Traverson {
 
 			Assert.notNull(rels, "Rels must not be null!");
 
-			this.rels.addAll(Arrays.asList(rels));
+			for (String rel : rels) {
+				this.rels.add(new Hop(rel));
+			}
+			return this;
+		}
+
+		/**
+		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
+		 * line.
+		 *
+		 * @param hop must not be {@literal null}
+		 * @return
+		 */
+		public TraversalBuilder follow(Hop hop) {
+
+			Assert.notNull(hop, "Hop must not be null!");
+			this.rels.add(hop);
 			return this;
 		}
 
@@ -289,7 +314,8 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
+			final String url = traverseToFinalUrl(true);
+			return operations.exchange(url, GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -345,7 +371,7 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1));
+			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1).getRel());
 		}
 
 		private String traverseToFinalUrl(boolean expandFinalUrl) {
@@ -355,7 +381,7 @@ public class Traverson {
 			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
 		}
 
-		private String getAndFindLinkWithRel(String uri, List<String> rels) {
+		private String getAndFindLinkWithRel(String uri, List<Hop> rels) {
 
 			if (rels.size() == 0) {
 				return uri;
@@ -369,7 +395,9 @@ public class Traverson {
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
-			Rel rel = Rels.getRelFor(rels.get(0), discoverers);
+			Hop head = head(rels);
+
+			Rel rel = Rels.getRelFor(head.getRel(), discoverers);
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
@@ -377,10 +405,43 @@ public class Traverson {
 						responseBody));
 			}
 
-			if (rels.size() == 1) {
-				return getAndFindLinkWithRel(link.getHref(), Collections.EMPTY_LIST);
+			/**
+			 * Don't expand if the parameters are empty
+			 */
+			if (head.getParams().isEmpty()) {
+				return getAndFindLinkWithRel(link.getHref(), tail(rels));
 			} else {
-				return getAndFindLinkWithRel(link.getHref(), rels.subList(1, rels.size()));
+				Map<String, Object> combinedParams = new HashMap<String, Object>();
+				combinedParams.putAll(templateParameters);
+				combinedParams.putAll(head.getParams());
+				return getAndFindLinkWithRel(link.expand(combinedParams).getHref(), tail(rels));
+			}
+		}
+
+		/**
+		 * Grab the first item in a list
+		 * @param list must not be empty or {@literal null}
+		 * @param <T> first item from the list
+		 * @return
+		 */
+		private <T> T head(List<T> list) {
+			Assert.notNull(list, "List must not be null!");
+			Assert.isTrue(list.size() > 0, "List must have entries!");
+			return list.get(0);
+		}
+
+		/**
+		 * Grab the rest of the list minus the head. If list is empty or just has one item, return an empty list
+		 * @param list
+		 * @param <T>
+		 * @return
+		 */
+		private <T> List<T> tail(List<T> list) {
+			Assert.notNull(list, "List must not be null!");
+			if (list.size() == 0 || list.size() == 1) {
+				return Collections.EMPTY_LIST;
+			} else {
+				return list.subList(1, list.size());
 			}
 		}
 

@@ -21,9 +21,12 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,6 +35,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
@@ -272,6 +276,54 @@ public class TraversonTests {
 				.follow("actor").toObject(typeReference);
 
 		assertThat(result.getContent().name, is("Keanu Reaves"));
+	}
+
+	/**
+	 * @see #346
+	 */
+	@Test
+	public void allowAlteringTheDetailsOfASingleHop() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
+				new ParameterizedTypeReference<Resource<Item>>() {};
+		Resource<Item> itemResource = traverson.follow(new Hop("items").withParam("projection", "noImages"))
+				.follow("$._embedded.items[0]._links.self.href")
+				.toObject(resourceParameterizedTypeReference);
+
+		assertThat(itemResource.hasLink("self"), is(true));
+		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items/1"));
+
+		final Item item = itemResource.getContent();
+		assertThat(item.image, equalTo(server.rootResource() + "/springagram/file/cat"));
+		assertThat(item.description, equalTo("cat"));
+	}
+
+	/**
+	 * @see #346
+	 */
+	@Test
+	public void allowGlobalsToImpactSingleHops() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("projection", "thisShouldGetOverwrittenByLocalHop");
+
+		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
+				new ParameterizedTypeReference<Resource<Item>>() {};
+		Resource<Item> itemResource = traverson.follow(new Hop("items").withParam("projection", "noImages"))
+				.follow("$._embedded.items[0]._links.self.href") // retrieve first Item in the collection
+				.withTemplateParameters(params)
+				.toObject(resourceParameterizedTypeReference);
+
+		assertThat(itemResource.hasLink("self"), is(true));
+		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items/1"));
+
+		final Item item = itemResource.getContent();
+		assertThat(item.image, equalTo(server.rootResource() + "/springagram/file/cat"));
+		assertThat(item.description, equalTo("cat"));
 	}
 
 	private void setUpActors() {

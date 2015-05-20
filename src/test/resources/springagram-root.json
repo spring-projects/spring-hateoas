@@ -1,0 +1,11 @@
+{
+  "_links" : {
+    "items" : {
+      "href" : "%s/springagram/items{?projection}",
+      "templated" : true
+    },
+    "profile" : {
+      "href" : "%s/springagram/alps"
+    }
+  }
+}
