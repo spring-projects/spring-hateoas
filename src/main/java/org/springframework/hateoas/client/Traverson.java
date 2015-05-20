@@ -58,6 +58,7 @@ import com.jayway.jsonpath.JsonPath;
  * @see https://github.com/basti1302/traverson
  * @author Oliver Gierke
  * @author Dietrich Schulten
+ * @author Greg Turnquist
  * @since 0.11
  */
 public class Traverson {
@@ -201,6 +202,16 @@ public class Traverson {
 		return new TraversalBuilder().follow(rels);
 	}
 
+	/**
+	 * Sets up a {@link TraversalBuilder} for a single rel with customized details.
+	 *
+	 * @param hop must not be {@literal null}
+	 * @return
+	 */
+	public TraversalBuilder follow(Hop hop) {
+		return new TraversalBuilder().follow(hop);
+	}
+
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
 
 		HttpHeaders toSend = new HttpHeaders();
@@ -220,7 +231,7 @@ public class Traverson {
 	 */
 	public class TraversalBuilder {
 
-		private List<String> rels = new ArrayList<String>();
+		private List<Hop> rels = new ArrayList<Hop>();
 		private Map<String, Object> templateParameters = new HashMap<String, Object>();
 		private HttpHeaders headers = new HttpHeaders();
 
@@ -233,11 +244,27 @@ public class Traverson {
 		 * @param rels must not be {@literal null}.
 		 * @return
 		 */
-		private TraversalBuilder follow(String... rels) {
+		public TraversalBuilder follow(String... rels) {
 
 			Assert.notNull(rels, "Rels must not be null!");
 
-			this.rels.addAll(Arrays.asList(rels));
+			for (String rel : rels) {
+				this.rels.add(Hop.rel(rel));
+			}
+			return this;
+		}
+
+		/**
+		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
+		 * line.
+		 *
+		 * @param hop must not be {@literal null}
+		 * @return
+		 */
+		public TraversalBuilder follow(Hop hop) {
+
+			Assert.notNull(hop, "Hop must not be null!");
+			this.rels.add(hop);
 			return this;
 		}
 
@@ -344,7 +371,7 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1));
+			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1).getRel());
 		}
 
 		private String traverseToFinalUrl(boolean expandFinalUrl) {
@@ -354,21 +381,21 @@ public class Traverson {
 			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
 		}
 
-		private String getAndFindLinkWithRel(String uri, Iterator<String> rels) {
+		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
 
 			if (!rels.hasNext()) {
 				return uri;
 			}
 
 			HttpEntity<?> request = prepareRequest(headers);
-			UriTemplate uriTemplate = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = operations.exchange(uriTemplate.expand(templateParameters), GET, request,
-					String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(uri, GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
-			Rel rel = Rels.getRelFor(rels.next(), discoverers);
+			Hop thisHop = rels.next();
+
+			Rel rel = Rels.getRelFor(thisHop.getRel(), discoverers);
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
@@ -376,7 +403,14 @@ public class Traverson {
 						responseBody));
 			}
 
-			return getAndFindLinkWithRel(link.getHref(), rels);
+			/**
+			 * Don't expand if the parameters are empty
+			 */
+			if (thisHop.getParams().isEmpty()) {
+				return getAndFindLinkWithRel(link.getHref(), rels);
+			} else {
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameteres(templateParameters)).getHref(), rels);
+			}
 		}
 	}
 }
