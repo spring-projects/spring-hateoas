@@ -234,7 +234,7 @@ public class Traverson {
 		 * @param rels must not be {@literal null}.
 		 * @return
 		 */
-		private TraversalBuilder follow(String... rels) {
+		public TraversalBuilder follow(String... rels) {
 
 			Assert.notNull(rels, "Rels must not be null!");
 
@@ -383,5 +383,6 @@ public class Traverson {
 				return getAndFindLinkWithRel(link.getHref(), rels.subList(1, rels.size()));
 			}
 		}
+
 	}
 }

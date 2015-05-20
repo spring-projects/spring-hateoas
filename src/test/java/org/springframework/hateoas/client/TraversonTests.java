@@ -108,7 +108,7 @@ public class TraversonTests {
 	 */
 	@Test
 	public void readsTraversalIntoJsonPathExpression() {
-		assertThat(traverson.follow("movies", "movie", "actor").<String> toObject("$.name"), is("Keanu Reaves"));
+		assertThat(traverson.follow("movies", "movie", "actor").<String>toObject("$.name"), is("Keanu Reaves"));
 	}
 
 	/**
@@ -258,6 +258,20 @@ public class TraversonTests {
 
 		assertThat(converters, hasSize(1));
 		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
+	}
+
+	/**
+	 * @see #346
+	 */
+	@Test
+	public void chainMultipleFollowOperations() {
+
+		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
+		Resource<Actor> result = traverson.follow("movies")
+				.follow("movie")
+				.follow("actor").toObject(typeReference);
+
+		assertThat(result.getContent().name, is("Keanu Reaves"));
 	}
 
 	private void setUpActors() {
