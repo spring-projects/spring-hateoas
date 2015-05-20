@@ -21,8 +21,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +58,7 @@ import com.jayway.jsonpath.JsonPath;
  * @see https://github.com/basti1302/traverson
  * @author Oliver Gierke
  * @author Dietrich Schulten
+ * @author Greg Turnquist
  * @since 0.11
  */
 public class Traverson {
@@ -349,14 +350,14 @@ public class Traverson {
 
 		private String traverseToFinalUrl(boolean expandFinalUrl) {
 
-			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
+			String uri = getAndFindLinkWithRel(baseUri.toString(), rels);
 			UriTemplate uriTemplate = new UriTemplate(uri);
 			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
 		}
 
-		private String getAndFindLinkWithRel(String uri, Iterator<String> rels) {
+		private String getAndFindLinkWithRel(String uri, List<String> rels) {
 
-			if (!rels.hasNext()) {
+			if (rels.size() == 0) {
 				return uri;
 			}
 
@@ -368,7 +369,7 @@ public class Traverson {
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
-			Rel rel = Rels.getRelFor(rels.next(), discoverers);
+			Rel rel = Rels.getRelFor(rels.get(0), discoverers);
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
@@ -376,7 +377,11 @@ public class Traverson {
 						responseBody));
 			}
 
-			return getAndFindLinkWithRel(link.getHref(), rels);
+			if (rels.size() == 1) {
+				return getAndFindLinkWithRel(link.getHref(), Collections.EMPTY_LIST);
+			} else {
+				return getAndFindLinkWithRel(link.getHref(), rels.subList(1, rels.size()));
+			}
 		}
 	}
 }
