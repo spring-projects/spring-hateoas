@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas.mvc;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.lang.reflect.Method;
@@ -24,7 +24,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hamcrest.Matchers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -45,8 +48,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Dietrich Schulten
  * @author Kamill Sokol
  * @author Oemer Yildiz
+ * @author Greg Turnquist
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
+
+	public @Rule ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void createsLinkToControllerRoot() {
@@ -433,6 +439,22 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
 
 		assertThat(link.getHref(), endsWith("/bar"));
+	}
+
+	/**
+	 * @see #342
+	 */
+	@Test
+	public void mentionsRequiredUsageWithinWebRequestInException() {
+
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage("request");
+		exception.expectMessage("Spring MVC");
+
+		RequestContextHolder.setRequestAttributes(null);
+
+		linkTo(methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
+				.withSelfRel();
 	}
 
 	private static UriComponents toComponents(Link link) {
