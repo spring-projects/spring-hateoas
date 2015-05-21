@@ -11,7 +11,7 @@ import java.util.Map;
 public class Hop {
 
 	private final String rel;
-	private final Map<String, String> params = new HashMap<String, String>();
+	private Map<String, String> params = new HashMap<String, String>();
 
 	/**
 	 * Every hop requires a rel
@@ -43,4 +43,8 @@ public class Hop {
 		return params;
 	}
 
+	public Hop setParams(Map<String, String> params) {
+		this.params = params;
+		return this;
+	}
 }

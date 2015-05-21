@@ -317,8 +317,11 @@ public class TraversonTests {
 		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
 				new ParameterizedTypeReference<Resource<Item>>() {};
 
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("projection", "noImages");
+
 		Resource<Item> itemResource = traverson
-				.follow(new Hop("items").getParams().put("projection", "noImages"))
+				.follow(new Hop("items").setParams(params))
 				.follow("$._embedded.items[0]._links.self.href")
 				.toObject(resourceParameterizedTypeReference);
 		// end::hop-put[]
