@@ -53,6 +53,7 @@ import org.springframework.web.client.RestTemplate;
  * Integration tests for {@link Traverson}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.11
  */
 public class TraversonTests {
@@ -286,11 +287,41 @@ public class TraversonTests {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
+		// tag::hop-with-param[]
 		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
 				new ParameterizedTypeReference<Resource<Item>>() {};
-		Resource<Item> itemResource = traverson.follow(new Hop("items").withParam("projection", "noImages"))
+
+		Resource<Item> itemResource = traverson
+				.follow(new Hop("items").withParam("projection", "noImages"))
 				.follow("$._embedded.items[0]._links.self.href")
 				.toObject(resourceParameterizedTypeReference);
+		// end::hop-with-param[]
+
+		assertThat(itemResource.hasLink("self"), is(true));
+		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items/1"));
+
+		final Item item = itemResource.getContent();
+		assertThat(item.image, equalTo(server.rootResource() + "/springagram/file/cat"));
+		assertThat(item.description, equalTo("cat"));
+	}
+
+	/**
+	 * @see #346
+	 */
+	@Test
+	public void allowAlteringTheDetailsOfASingleHopByMapOperations() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		// tag::hop-put[]
+		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
+				new ParameterizedTypeReference<Resource<Item>>() {};
+
+		Resource<Item> itemResource = traverson
+				.follow(new Hop("items").getParams().put("projection", "noImages"))
+				.follow("$._embedded.items[0]._links.self.href")
+				.toObject(resourceParameterizedTypeReference);
+		// end::hop-put[]
 
 		assertThat(itemResource.hasLink("self"), is(true));
 		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items/1"));
