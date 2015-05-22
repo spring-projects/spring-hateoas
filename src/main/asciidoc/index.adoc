@@ -381,12 +381,14 @@ There are more options to customize template parameters at each level.
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-with-param]
 ----
 
-The `.withParam(key, value)` make it simple to add URI Template variables. Underneath, it's just a `Map`, so you can also grab it and add variables like this:
+The `.withParam(key, value)` make it simple to add URI Template variables.
 
 [source,java,indent=0]
 ----
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-put]
 ----
+
+It's also possible to load an entire `Map` of parameters via `.withParams(Map)`.
 
 NOTE: `follow()` is chainable, meaning you can string together multiple hops as shown above. You can either put multiple, simple string-based rels (`follow("items", "item")`) or a single hop with specific parameters.
 

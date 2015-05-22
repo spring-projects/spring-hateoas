@@ -18,10 +18,10 @@ package org.springframework.hateoas.client;
 import static net.jadler.Jadler.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.hateoas.client.Hop.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,11 +31,11 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
@@ -113,7 +113,7 @@ public class TraversonTests {
 	 */
 	@Test
 	public void readsTraversalIntoJsonPathExpression() {
-		assertThat(traverson.follow("movies", "movie", "actor").<String>toObject("$.name"), is("Keanu Reaves"));
+		assertThat(traverson.follow("movies", "movie", "actor").<String> toObject("$.name"), is("Keanu Reaves"));
 	}
 
 	/**
@@ -292,7 +292,7 @@ public class TraversonTests {
 				new ParameterizedTypeReference<Resource<Item>>() {};
 
 		Resource<Item> itemResource = traverson
-				.follow(new Hop("items").withParam("projection", "noImages"))
+				.follow(rel("items").withParam("projection", "noImages"))
 				.follow("$._embedded.items[0]._links.self.href")
 				.toObject(resourceParameterizedTypeReference);
 		// end::hop-with-param[]
@@ -321,7 +321,7 @@ public class TraversonTests {
 		params.put("projection", "noImages");
 
 		Resource<Item> itemResource = traverson
-				.follow(new Hop("items").setParams(params))
+				.follow(rel("items").withParams(params))
 				.follow("$._embedded.items[0]._links.self.href")
 				.toObject(resourceParameterizedTypeReference);
 		// end::hop-put[]
@@ -347,7 +347,7 @@ public class TraversonTests {
 
 		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
 				new ParameterizedTypeReference<Resource<Item>>() {};
-		Resource<Item> itemResource = traverson.follow(new Hop("items").withParam("projection", "noImages"))
+		Resource<Item> itemResource = traverson.follow(rel("items").withParam("projection", "noImages"))
 				.follow("$._embedded.items[0]._links.self.href") // retrieve first Item in the collection
 				.withTemplateParameters(params)
 				.toObject(resourceParameterizedTypeReference);

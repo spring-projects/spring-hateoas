@@ -21,8 +21,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -203,7 +203,8 @@ public class Traverson {
 	}
 
 	/**
-	 * Sets up a {@link TraversalBuilder} for a single rel with customized details
+	 * Sets up a {@link TraversalBuilder} for a single rel with customized details.
+	 *
 	 * @param hop must not be {@literal null}
 	 * @return
 	 */
@@ -248,7 +249,7 @@ public class Traverson {
 			Assert.notNull(rels, "Rels must not be null!");
 
 			for (String rel : rels) {
-				this.rels.add(new Hop(rel));
+				this.rels.add(Hop.rel(rel));
 			}
 			return this;
 		}
@@ -314,8 +315,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			final String url = traverseToFinalUrl(true);
-			return operations.exchange(url, GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -376,27 +376,26 @@ public class Traverson {
 
 		private String traverseToFinalUrl(boolean expandFinalUrl) {
 
-			String uri = getAndFindLinkWithRel(baseUri.toString(), rels);
+			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
 			UriTemplate uriTemplate = new UriTemplate(uri);
 			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
 		}
 
-		private String getAndFindLinkWithRel(String uri, List<Hop> rels) {
+		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
 
-			if (rels.size() == 0) {
+			if (!rels.hasNext()) {
 				return uri;
 			}
 
 			HttpEntity<?> request = prepareRequest(headers);
 
-			ResponseEntity<String> responseEntity = operations.exchange(uri, GET, request,
-					String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(uri, GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
-			Hop head = head(rels);
+			Hop thisHop = rels.next();
 
-			Rel rel = Rels.getRelFor(head.getRel(), discoverers);
+			Rel rel = Rels.getRelFor(thisHop.getRel(), discoverers);
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
@@ -407,42 +406,11 @@ public class Traverson {
 			/**
 			 * Don't expand if the parameters are empty
 			 */
-			if (head.getParams().isEmpty()) {
-				return getAndFindLinkWithRel(link.getHref(), tail(rels));
+			if (thisHop.getParams().isEmpty()) {
+				return getAndFindLinkWithRel(link.getHref(), rels);
 			} else {
-				Map<String, Object> combinedParams = new HashMap<String, Object>();
-				combinedParams.putAll(templateParameters);
-				combinedParams.putAll(head.getParams());
-				return getAndFindLinkWithRel(link.expand(combinedParams).getHref(), tail(rels));
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameteres(templateParameters)).getHref(), rels);
 			}
 		}
-
-		/**
-		 * Grab the first item in a list
-		 * @param list must not be empty or {@literal null}
-		 * @param <T> first item from the list
-		 * @return
-		 */
-		private <T> T head(List<T> list) {
-			Assert.notNull(list, "List must not be null!");
-			Assert.isTrue(list.size() > 0, "List must have entries!");
-			return list.get(0);
-		}
-
-		/**
-		 * Grab the rest of the list minus the head. If list is empty or just has one item, return an empty list
-		 * @param list
-		 * @param <T>
-		 * @return
-		 */
-		private <T> List<T> tail(List<T> list) {
-			Assert.notNull(list, "List must not be null!");
-			if (list.size() == 0 || list.size() == 1) {
-				return Collections.EMPTY_LIST;
-			} else {
-				return list.subList(1, list.size());
-			}
-		}
-
 	}
 }

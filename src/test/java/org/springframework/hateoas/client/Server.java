@@ -24,8 +24,6 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
@@ -39,6 +37,9 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for integration tests.
@@ -105,6 +106,7 @@ public class Server implements Closeable {
 		String springagramItemsTemplate;
 		String springagramItemTemplate;
 		String springagramItemWithoutImageTemplate;
+
 		try {
 			springagramRootTemplate = StreamUtils.copyToString(springagramRoot.getInputStream(), Charset.forName("UTF-8"));
 			springagramItemsTemplate = StreamUtils.copyToString(springagramItems.getInputStream(), Charset.forName("UTF-8"));
@@ -114,6 +116,7 @@ public class Server implements Closeable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
 		String springagramRootHalDocument = String.format(springagramRootTemplate, rootResource(), rootResource());
 		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(), rootResource());
 		String springagramItemHalDocument = String.format(springagramItemTemplate, rootResource(), rootResource());
@@ -142,7 +145,7 @@ public class Server implements Closeable {
 				havingPathEqualTo("/springagram/items/1"). //
 				havingQueryString(equalTo("projection=noImages")). //
 				respond(). //
-				withBody(springagramItemHalDocument). //
+				withBody(springagramItemWithoutImageHalDocument). //
 				withContentType(MediaTypes.HAL_JSON.toString());
 	}
 

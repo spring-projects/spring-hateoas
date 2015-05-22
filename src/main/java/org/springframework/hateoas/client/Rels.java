@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  */
 package org.springframework.hateoas.client;
 
-import com.jayway.jsonpath.JsonPath;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * Helper class to find {@link Link} instances in representations.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.11
  */
 class Rels {
@@ -103,9 +105,15 @@ class Rels {
 			return discoverer.findLinkWithRel(rel, response);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
 		public String toString() {
 			return this.rel;
 		}
+
 	}
 
 	/**
