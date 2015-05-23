@@ -15,17 +15,28 @@
  */
 package org.springframework.hateoas.client;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.experimental.Wither;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.Value;
+import org.springframework.util.Assert;
 
 /**
- * Container for cuztomizations to a single traverson "hop"
+ * Container for customizations to a single traverson "hop"
  *
  * @author Greg Turnquist
+ * @author Oliver Gierke
+ * @since 0.18
  */
-@Value(staticConstructor="rel")
+@Value
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter(AccessLevel.PACKAGE)
 public class Hop {
 
 	/**
@@ -36,42 +47,54 @@ public class Hop {
 	/**
 	 * Collection of URI Template parameters.
 	 */
-	private final Map<String, String> params = new HashMap<String, String>();
+	private final @Wither Map<String, ? extends Object> parameters;
+
+	/**
+	 * Creates a new {@link Hop} for the given relation name.
+	 * 
+	 * @param rel must not be {@literal null} or empty.
+	 * @return
+	 */
+	public static Hop rel(String rel) {
+
+		Assert.hasText(rel, "Relation must not be null or empty!");
+
+		return new Hop(rel, Collections.<String, Object> emptyMap());
+	}
 
 	/**
 	 * Add one parameter to the map of parameters.
 	 *
-	 * @param name
-	 * @param value
-	 * @return fluent DSL (Lombok @Wither didn't seem to work)
+	 * @param name must not be {@literal null} or empty.
+	 * @param value can be {@literal null}.
+	 * @return
 	 */
-	public Hop withParam(String name, String value) {
-		this.params.put(name, value);
-		return this;
-	}
+	public Hop withParameter(String name, Object value) {
 
-	/**
-	 * Add a collection of parameters (does NOT clear out existing ones).
-	 *
-	 * @param newParams
-	 * @return fluent DSL (Lombok @Wither didn't seem to work)
-	 */
-	public Hop withParams(Map<String, String> newParams) {
-		this.params.putAll(newParams);
-		return this;
+		Assert.hasText(name, "Name must not be null or empty!");
+
+		HashMap<String, Object> parameters = new HashMap<String, Object>(this.parameters);
+		parameters.put(name, value);
+
+		return new Hop(rel, parameters);
 	}
 
 	/**
 	 * Create a new {@link Map} starting with the supplied template parameters. Then add the ones for this hop. This
 	 * allows a local hop to override global parameters.
 	 *
-	 * @param globalParameters
-	 * @return a merged map of URI Template parameters
+	 * @param globalParameters must not be {@literal null}.
+	 * @return a merged map of URI Template parameters, will never be {@literal null}.
 	 */
-	public Map<String, Object> getMergedParameteres(Map<String, Object> globalParameters) {
+	Map<String, Object> getMergedParameters(Map<String, Object> globalParameters) {
+
+		Assert.notNull(globalParameters, "Global parameters must not be null!");
+
 		Map<String, Object> mergedParameters = new HashMap<String, Object>();
+
 		mergedParameters.putAll(globalParameters);
-		mergedParameters.putAll(this.params);
+		mergedParameters.putAll(this.parameters);
+
 		return mergedParameters;
 	}
 }

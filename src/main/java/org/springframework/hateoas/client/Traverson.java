@@ -185,8 +185,8 @@ public class Traverson {
 	 */
 	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
 
-		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS : new LinkDiscoverers(
-				OrderAwarePluginRegistry.create(discoverer));
+		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS
+				: new LinkDiscoverers(OrderAwarePluginRegistry.create(discoverer));
 
 		return this;
 	}
@@ -258,13 +258,16 @@ public class Traverson {
 		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
 		 * line.
 		 *
-		 * @param hop must not be {@literal null}
+		 * @param hop must not be {@literal null}.
 		 * @return
+		 * @see Hop#rel(String)
 		 */
 		public TraversalBuilder follow(Hop hop) {
 
 			Assert.notNull(hop, "Hop must not be null!");
+
 			this.rels.add(hop);
+
 			return this;
 		}
 
@@ -399,17 +402,17 @@ public class Traverson {
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
-				throw new IllegalStateException(String.format("Expected to find link with rel '%s' in response %s!", rel,
-						responseBody));
+				throw new IllegalStateException(
+						String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody));
 			}
 
 			/**
 			 * Don't expand if the parameters are empty
 			 */
-			if (thisHop.getParams().isEmpty()) {
+			if (thisHop.getParameters().isEmpty()) {
 				return getAndFindLinkWithRel(link.getHref(), rels);
 			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameteres(templateParameters)).getHref(), rels);
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels);
 			}
 		}
 	}
