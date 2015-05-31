@@ -50,7 +50,7 @@ public @interface Input {
     int step() default 0;
 
     /**
-     * Dot separated property names or paths of read-only properties on input bean. Allows to define expected input bean
+     * Property names or dot-separated property paths of read-only properties on input bean. Allows to define expected input bean
      * attributes with read-only values, so that a media type can render them as read-only attribute. This allows to use
      * the same bean for input and output in different contexts. E.g. all product attributes should be editable when a
      * new product is added, but not when an order is created which contains that product. Thus, if a POST expects an
@@ -68,7 +68,7 @@ public @interface Input {
     String[] readOnly() default {};
 
     /**
-     * Dot separated property names or paths of properties that should be ignored on input bean. This allows to use the
+     * Property names or dot-separated property paths of properties that should be ignored on input bean. This allows to use the
      * same bean for input and output in different contexts. If a POST expects an object Product without certain values,
      * you can annotate the POST handler:
      * <pre>
@@ -82,7 +82,7 @@ public @interface Input {
     String[] exclude() default {};
 
     /**
-     * Dot separated property names or paths of properties that are expected on input bean. If a POST expects an object
+     * Property names or dot-separated property paths of properties that are expected on input bean. If a POST expects an object
      * Review having only certain attributes, you can annotate the POST handler:
      * <pre>
      *     public void addReview(include={"rating.ratingValue", "reviewBody"}) Review review} {...}
