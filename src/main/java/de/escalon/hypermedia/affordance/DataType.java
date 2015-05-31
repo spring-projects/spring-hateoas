@@ -10,10 +10,6 @@
 
 package de.escalon.hypermedia.affordance;
 
-import org.omg.CORBA.Current;
-import org.springframework.format.number.NumberFormatter;
-import org.springframework.util.NumberUtils;
-
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
 import java.math.BigInteger;

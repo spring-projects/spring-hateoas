@@ -10,9 +10,9 @@
 
 package de.escalon.hypermedia.spring;
 
+import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.AnnotatedParameter;
-import de.escalon.hypermedia.affordance.ActionDescriptor;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;

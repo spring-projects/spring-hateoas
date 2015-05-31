@@ -10,7 +10,6 @@
 
 package de.escalon.hypermedia.affordance;
 
-import de.escalon.hypermedia.affordance.Affordance;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
