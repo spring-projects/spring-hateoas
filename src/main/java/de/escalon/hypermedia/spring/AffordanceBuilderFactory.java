@@ -10,7 +10,9 @@
 
 package de.escalon.hypermedia.spring;
 
-import de.escalon.hypermedia.action.*;
+import de.escalon.hypermedia.action.Action;
+import de.escalon.hypermedia.action.Cardinality;
+import de.escalon.hypermedia.action.ResourceHandler;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.PartialUriTemplate;
 import org.springframework.core.MethodParameter;
@@ -28,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.lang.reflect.Type;
 import java.util.*;
 
 /**
