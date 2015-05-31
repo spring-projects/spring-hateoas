@@ -1,5 +1,7 @@
 package de.escalon.hypermedia.affordance;
 
+import de.escalon.hypermedia.action.Type;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -10,18 +12,12 @@ import java.util.Map;
  * Created by Dietrich on 05.04.2015.
  */
 public interface AnnotatedParameter {
-    String MIN = "min";
-    String MAX = "max";
-    String STEP = "step";
-    String MIN_LENGTH = "minLength";
-    String MAX_LENGTH = "maxLength";
-    String PATTERN = "pattern";
 
     Object getCallValue();
 
     String getCallValueFormatted();
 
-    String getHtmlInputFieldType();
+    Type getHtmlInputFieldType();
 
     boolean isRequestBody();
 

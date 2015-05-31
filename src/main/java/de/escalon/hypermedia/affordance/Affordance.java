@@ -412,7 +412,7 @@ public class Affordance extends Link {
 
     /**
      * Retrieves all revs for this affordance.
-     * @return
+     * @return revs
      */
     @JsonIgnore
     public List<String> getRevs() {
@@ -463,7 +463,7 @@ public class Affordance extends Link {
 
     /**
      * Determines if the affordance is a self rel.
-     * @return
+     * @return true if the affordance is a self rel
      */
     @JsonIgnore
     public boolean isSelfRel() {
