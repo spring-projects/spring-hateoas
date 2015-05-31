@@ -14,7 +14,6 @@ import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
 import org.springframework.util.Assert;
 
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;

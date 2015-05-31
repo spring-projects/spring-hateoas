@@ -13,13 +13,13 @@
 
 package de.escalon.hypermedia.spring;
 
-import de.escalon.hypermedia.affordance.AnnotatedParameter;
-import de.escalon.hypermedia.affordance.AnnotatedParameters;
-import de.escalon.hypermedia.affordance.DataType;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.action.Type;
+import de.escalon.hypermedia.affordance.AnnotatedParameter;
+import de.escalon.hypermedia.affordance.AnnotatedParameters;
+import de.escalon.hypermedia.affordance.DataType;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;

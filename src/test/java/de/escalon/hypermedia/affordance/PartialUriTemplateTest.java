@@ -10,8 +10,6 @@
 
 package de.escalon.hypermedia.affordance;
 
-import de.escalon.hypermedia.affordance.PartialUriTemplate;
-import de.escalon.hypermedia.affordance.PartialUriTemplateComponents;
 import org.junit.Assert;
 import org.junit.Test;
 
