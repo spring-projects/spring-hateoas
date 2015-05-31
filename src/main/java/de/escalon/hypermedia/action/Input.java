@@ -19,10 +19,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Allows to define the input characteristics for an input field. E.g. this is useful to specify possible value ranges
- * as in <code>&#64;Input(min=0)</code>, and it can also be used to mark a method parameter as
- * <code>&#64;Input(Type.HIDDEN)</code>, e.g. when used as a POST parameter for a form which is not supposed to be
- * changed by the client.
+ * Allows to define input characteristics of an input value. E.g. this is useful to specify possible value ranges as in
+ * <code>&#64;Input(min=0)</code>, and it can also be used to mark a method parameter as
+ * <code>&#64;Input(Type.HIDDEN)</code> when used as a GET parameter for a form.
+ *
+ * <p>Can also be used to specify input characteristics for bean properties if the input value is an object.</p>
  *
  * @author Dietrich Schulten
  */
@@ -30,8 +31,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface Input {
 
+    String MIN = "min";
+    String MAX = "max";
+    String STEP = "step";
+    String MIN_LENGTH = "minLength";
+    String MAX_LENGTH = "maxLength";
+    String PATTERN = "pattern";
+
     /**
-     * Input type. With the default type FROM_JAVA the type will be number or text, depending on the parameter type.
+     * Input type. With the default type FROM_JAVA the type will be number or text for scalar values (depending on the
+     * parameter type), and null for arrays, collections or beans.
      *
      * @return input type
      */
@@ -50,11 +59,11 @@ public @interface Input {
     int step() default 0;
 
     /**
-     * Property names or dot-separated property paths of read-only properties on input bean. Allows to define expected input bean
-     * attributes with read-only values, so that a media type can render them as read-only attribute. This allows to use
-     * the same bean for input and output in different contexts. E.g. all product attributes should be editable when a
-     * new product is added, but not when an order is created which contains that product. Thus, if a POST expects an
-     * object Product with certain fixed values, you can annotate the POST handler:
+     * Property names or dot-separated property paths of read-only properties on input bean. Allows to define expected
+     * input bean attributes with read-only values, so that a media type can render them as read-only attribute. This
+     * allows to use the same bean for input and output in different contexts. E.g. all product attributes should be
+     * editable when a new product is added, but not when an order is created which contains that product. Thus, if a
+     * POST expects an object Product with certain fixed values, you can annotate the POST handler:
      * <pre>
      *     public void makeOrder(@Input(readOnly={"productID"}) Product orderedProduct} {...}
      * </pre>
@@ -68,9 +77,9 @@ public @interface Input {
     String[] readOnly() default {};
 
     /**
-     * Property names or dot-separated property paths of properties that should be ignored on input bean. This allows to use the
-     * same bean for input and output in different contexts. If a POST expects an object Product without certain values,
-     * you can annotate the POST handler:
+     * Property names or dot-separated property paths of properties that should be ignored on input bean. This allows to
+     * use the same bean for input and output in different contexts. If a POST expects an object Product without certain
+     * values, you can annotate the POST handler:
      * <pre>
      *     public void makeOrder(@Input(exclude={"name"}) Product orderedProduct} {...}
      * </pre>
@@ -82,8 +91,8 @@ public @interface Input {
     String[] exclude() default {};
 
     /**
-     * Property names or dot-separated property paths of properties that are expected on input bean. If a POST expects an object
-     * Review having only certain attributes, you can annotate the POST handler:
+     * Property names or dot-separated property paths of properties that are expected on input bean. If a POST expects
+     * an object Review having only certain attributes, you can annotate the POST handler:
      * <pre>
      *     public void addReview(include={"rating.ratingValue", "reviewBody"}) Review review} {...}
      * </pre>

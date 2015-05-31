@@ -11,7 +11,7 @@
 package de.escalon.hypermedia.action;
 
 /**
- * Specifies explicit HTML5 input types.
+ * Allows to specify explicit HTML5 input types.
  *
  * @author Dietrich Schulten
  */
@@ -24,8 +24,7 @@ public enum Type {
      * input type text
      */
     TEXT("text"),
-//    /** input type checkbox */
-//    CHECKBOX("checkbox"),
+
     /**
      * input type hidden
      */

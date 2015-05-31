@@ -80,7 +80,7 @@ public class ActionInputParameterTest {
         assertEquals(String.class, actionInputParameter.getParameterType());
         assertEquals(0, actionInputParameter.getPossibleValues(new ActionDescriptor("post",
                 RequestMethod.POST.name())).length);
-        assertEquals(Type.TEXT.toString(), actionInputParameter.getHtmlInputFieldType());
+        assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
         assertNull(actionInputParameter.getRequestHeaderName());
 
         assertFalse(actionInputParameter.isArrayOrCollection());
@@ -112,7 +112,7 @@ public class ActionInputParameterTest {
         assertEquals(String.class, actionInputParameter.getParameterType());
         assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptor("post",
                 RequestMethod.POST.name())).length);
-        assertEquals(Type.TEXT.toString(), actionInputParameter.getHtmlInputFieldType());
+        assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
 
         assertFalse(actionInputParameter.isArrayOrCollection());
         assertFalse(actionInputParameter.isRequestBody());
@@ -191,7 +191,7 @@ public class ActionInputParameterTest {
         assertEquals(ShadeOfBlue.class, actionInputParameter.getGenericParameterType());
         assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptor("get",
                 RequestMethod.GET.name())).length);
-        assertEquals(Type.TEXT.toString(), actionInputParameter.getHtmlInputFieldType());
+        assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
 
         assertTrue(actionInputParameter.isRequestParam());
         assertTrue(actionInputParameter.isRequired());

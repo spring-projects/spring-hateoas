@@ -39,12 +39,6 @@ import java.util.*;
  */
 public class ActionInputParameter implements AnnotatedParameter {
 
-    public static final String MIN = "min";
-    public static final String MAX = "max";
-    public static final String STEP = "step";
-    public static final String MIN_LENGTH = "minLength";
-    public static final String MAX_LENGTH = "maxLength";
-    public static final String PATTERN = "pattern";
     private final TypeDescriptor typeDescriptor;
     private final RequestBody requestBody;
     private final RequestParam requestParam;
@@ -76,12 +70,12 @@ public class ActionInputParameter implements AnnotatedParameter {
         // might be a nested property which is neither requestBody, requestParam nor pathVariable
         this.inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
         if (inputAnnotation != null) {
-            putInputConstraint(MIN, Integer.MIN_VALUE, inputAnnotation.min());
-            putInputConstraint(MAX, Integer.MAX_VALUE, inputAnnotation.max());
-            putInputConstraint(MIN_LENGTH, Integer.MIN_VALUE, inputAnnotation.minLength());
-            putInputConstraint(MAX_LENGTH, Integer.MAX_VALUE, inputAnnotation.maxLength());
-            putInputConstraint(STEP, 0, inputAnnotation.step());
-            putInputConstraint(PATTERN, "", inputAnnotation.pattern());
+            putInputConstraint(Input.MIN, Integer.MIN_VALUE, inputAnnotation.min());
+            putInputConstraint(Input.MAX, Integer.MAX_VALUE, inputAnnotation.max());
+            putInputConstraint(Input.MIN_LENGTH, Integer.MIN_VALUE, inputAnnotation.minLength());
+            putInputConstraint(Input.MAX_LENGTH, Integer.MAX_VALUE, inputAnnotation.maxLength());
+            putInputConstraint(Input.STEP, 0, inputAnnotation.step());
+            putInputConstraint(Input.PATTERN, "", inputAnnotation.pattern());
         }
         this.conversionService = conversionService;
         this.typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
@@ -134,7 +128,7 @@ public class ActionInputParameter implements AnnotatedParameter {
      * @return the type
      */
     @Override
-    public String getHtmlInputFieldType() {
+    public Type getHtmlInputFieldType() {
         final Type ret;
         if (inputAnnotation == null || inputAnnotation.value() == Type.FROM_JAVA) {
             if (isArrayOrCollection() || isRequestBody()) {
@@ -147,7 +141,7 @@ public class ActionInputParameter implements AnnotatedParameter {
         } else {
             ret = inputAnnotation.value();
         }
-        return ret == null ? null : ret.toString();
+        return ret;
     }
 
 
