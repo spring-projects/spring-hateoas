@@ -122,7 +122,7 @@ public class PartialUriTemplate {
 
     /**
      * Expands the template using given parameters
-     * @param parameters for expansion in the order of appearance in the template, may be empty
+     * @param parameters for expansion in the order of appearance in the template, must not be empty
      * @return expanded template
      */
     public PartialUriTemplateComponents expand(Object... parameters) {
@@ -143,7 +143,7 @@ public class PartialUriTemplate {
 
     /**
      * Expands the template using given parameters
-     * @param parameters for expansion, may be empty
+     * @param parameters for expansion, must not be empty
      * @return expanded template
      */
     public PartialUriTemplateComponents expand(Map<String, Object> parameters) {

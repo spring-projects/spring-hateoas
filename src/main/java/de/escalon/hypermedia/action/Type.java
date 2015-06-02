@@ -34,7 +34,7 @@ public enum Type {
      */
     PASSWORD("password"), COLOR("color"), DATE("date"), DATETIME("datetime"), DATETIME_LOCAL("datetime-local"), EMAIL(
             "email"), MONTH("month"), NUMBER("number"), RANGE("range"), SEARCH("search"), TEL("tel"), TIME("time"), URL("url"), WEEK(
-            "week"), SUBMIT("submit");
+            "week"), SUBMIT("submit"), RESET("reset");
 
     private String value;
 

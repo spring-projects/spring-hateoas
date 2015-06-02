@@ -17,9 +17,6 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
-/**
- * Created by Dietrich on 16.05.2015.
- */
 public class ActionInputParameterTest {
 
 
