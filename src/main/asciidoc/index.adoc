@@ -381,16 +381,36 @@ There are more options to customize template parameters at each level.
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-with-param]
 ----
 
-The `.withParam(key, value)` make it simple to add URI Template variables.
+The static `rel(...)` function is a convenient way to create define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI Template variables.
+
+NOTE: `.withParameter()` returns a new Hop object that is chainable. You can string together as many `.withParameter` as you like. The result is a single Hop definition.
 
 [source,java,indent=0]
 ----
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-put]
 ----
 
-It's also possible to load an entire `Map` of parameters via `.withParams(Map)`.
+It's also possible to load an entire `Map` of parameters via `.withParameters(Map)`.
 
 NOTE: `follow()` is chainable, meaning you can string together multiple hops as shown above. You can either put multiple, simple string-based rels (`follow("items", "item")`) or a single hop with specific parameters.
+
+==== `Resource<T>` vs. `Resources<T>`
+
+The examples shown so far demonstrate how to side step Java's type erasure and convert a single JSON-formatted resource into a `Resource<Item>` object. But what if you get a collection like an *_embedded* HAL collection?
+
+One slight twak and you're set.
+
+[source,java]
+----
+ParameterizedTypeReference<Resources<Item>> resourceParameterizedTypeReference =
+        new ParameterizedTypeReference<Resources<Item>>() {};
+
+Resources<Item> itemResource = traverson.//
+        follow(rel("items")).//
+        toObject(resourceParameterizedTypeReference);
+----
+
+Instead of fetching a single resource, this one deserializes a collection into `Resources`.
 
 [[client.link-discoverer]]
 === LinkDiscoverers
@@ -408,3 +428,4 @@ Link link = discoverer.findLinkWithRel("foo", content);
 assertThat(link.getRel(), is("foo"));
 assertThat(link.getHref(), is("/foo/bar"));
 ----
+

@@ -285,7 +285,8 @@ public class TraversonTests {
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		// tag::hop-with-param[]
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
+				new ParameterizedTypeReference<Resource<Item>>() {};
 
 		Resource<Item> itemResource = traverson.//
 				follow(rel("items").withParameter("projection", "noImages")).//
@@ -311,7 +312,8 @@ public class TraversonTests {
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		// tag::hop-put[]
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference =
+				new ParameterizedTypeReference<Resource<Item>>() {};
 
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("projection", "noImages");
