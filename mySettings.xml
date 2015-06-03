@@ -1,0 +1,15 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+	<servers>
+		<!-- Only snapshot configuration is listed, because releases are done manually -->
+		<server>
+			<id>spring-snapshots</id>
+			<username>${env.USERNAME}</username>
+			<password>${env.PASSWORD}</password>
+		</server>
+	</servers>
+
+</settings>

@@ -12,4 +12,6 @@ cache:
     - $HOME/.m2
 sudo: false
 install: true
-script: "mvn clean dependency:list test -P${PROFILE} -Dsort"
+script:
+- if [ "${TRAVIS_PULL_REQUEST}" = "false" -a "${TRAVIS_BRANCH}" = "master" ]; then mvn clean deploy -Pdistribute --settings mySettings.xml;
+  else mvn clean dependency:list test -P${PROFILE} -Dsort; fi
