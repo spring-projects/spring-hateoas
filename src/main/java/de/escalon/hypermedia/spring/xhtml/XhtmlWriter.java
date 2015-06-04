@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Type;
-import de.escalon.hypermedia.affordance.*;
+import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.Affordance;
+import de.escalon.hypermedia.affordance.AnnotatedParameter;
+import de.escalon.hypermedia.affordance.DataType;
 import de.escalon.hypermedia.spring.ActionInputParameter;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -61,6 +64,9 @@ public class XhtmlWriter extends Writer {
     private String methodParam = "_method";
     private DocumentationProvider documentationProvider;
 
+    private String formControlClass = "form-control";
+    private String formGroupClass = "form-group";
+    private String controlLabelClass = "control-label";
 
     public XhtmlWriter(Writer writer) {
         this.writer = writer;
@@ -85,6 +91,12 @@ public class XhtmlWriter extends Writer {
 
     public void beginDiv() throws IOException {
         writer.write("<div>");
+    }
+
+    public void beginDiv(OptionalAttributes attributes) throws IOException {
+        writer.write("<div ");
+        writeAttributes(attributes);
+        endTag();
     }
 
     public void endDiv() throws IOException {
@@ -232,79 +244,120 @@ public class XhtmlWriter extends Writer {
                 Affordance affordance = (Affordance) link;
                 List<ActionDescriptor> actionDescriptors = affordance.getActionDescriptors();
                 if (actionDescriptors.isEmpty()) {
-                    writeLinkWithoutActionDescriptor(affordance);
+                    // treat like simple link
+                    appendLinkWithoutActionDescriptor(affordance);
                 } else {
                     if (affordance.isTemplated()) {
-                        // TODO ensure that template expansion takes place for base uri
-
-                        if (!(affordance.isBaseUriTemplated())) {
-
-                            // TODO using appendForm here would require to calculate the baseUri in appendForm
-                            // so that it is no longer templated
-                            // (strip optional params and resolve plain base uri,
-                            // partial uritemplate query must become hidden field
-                            // can't render the form if base uri isn't plain)
-                            // html does not allow templated action attr for POST or GET
-
-                            // GET form for template
-                            if (actionDescriptors.isEmpty()) {
-                                List<TemplateVariable> variables = link.getVariables();
-                                for (TemplateVariable variable : variables) {
-                                    String variableName = variable.getName();
-                                    writeLabelWithDoc(variableName, variableName, null);
-                                    input(variableName, Type.TEXT);
+                        // TODO ensure that template expansion always takes place for base uri
+                        if (!affordance.isBaseUriTemplated()) {
+                            for (ActionDescriptor actionDescriptor : actionDescriptors) {
+                                RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
+                                // html does not allow templated action attr for forms, only render GET form
+                                if (RequestMethod.GET == httpMethod) {
+                                    // TODO: partial uritemplate query must become hidden field
+                                    appendForm(affordance, actionDescriptor);
                                 }
-                            } else {
-                                for (ActionDescriptor actionDescriptor : actionDescriptors) {
-                                    RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
-                                    if (RequestMethod.GET == httpMethod) {
-                                        // TODO duplicate in writeLinkWithoutActionDescriptor
-                                        String formName = actionDescriptor.getActionName();
-
-                                        beginForm(OptionalAttributes.attr("action", affordance.getHref())
-                                                .and("method", "GET")
-                                                .and("name", formName));
-
-                                        write("<h3>");
-                                        String formH1 = "Form " + formName;
-                                        write(formH1);
-                                        write("</h3>");
-
-                                        Collection<String> requestParamNames = actionDescriptor.getRequestParamNames();
-                                        for (String variableName : requestParamNames) {
-                                            AnnotatedParameter actionInputParameter =
-                                                    actionDescriptor.getAnnotatedParameter(variableName);
-                                            String documentationUrl = documentationProvider.getDocumentationUrl(
-                                                    actionInputParameter, actionInputParameter.getCallValue());
-                                            writeLabelWithDoc(variableName, variableName, documentationUrl);
-                                            input(variableName, Type.TEXT);
-                                        }
-                                        inputButton(Type.SUBMIT, "Query");
-                                        endForm();
-                                    }
-                                }
+                                // TODO write human-readable description of additional methods?
                             }
                         }
-                        // TODO write human-readable description of additional methods?
                     } else {
-
                         for (ActionDescriptor actionDescriptor : actionDescriptors) {
                             // TODO write documentation about the supported action and maybe fields?
-                            // especially to make PUT and DELETE obvious
-                            appendForm(affordance, actionDescriptor);
+                            if ("GET".equals(actionDescriptor.getHttpMethod()) &&
+                                    actionDescriptor.getRequestParamNames()
+                                            .isEmpty()) {
+                                // GET without params is simple <a href>
+                                writeAnchor(OptionalAttributes.attr("href", affordance.expand()
+                                        .getHref())
+                                        .and("rel", affordance.getRel()), actionDescriptor.getActionName());
+                            } else {
+                                appendForm(affordance, actionDescriptor);
+                            }
                         }
                     }
                 }
             } else { // simple link, may be templated
-                writeLinkWithoutActionDescriptor(link);
+                appendLinkWithoutActionDescriptor(link);
             }
         }
     }
 
-    private void writeLinkWithoutActionDescriptor(Link link) throws IOException {
+    /**
+     * Appends form and squashes non-GET or POST to POST. If required, adds _method field for handling by an appropriate
+     * filter such as Spring's HiddenHttpMethodFilter.
+     *
+     * @param affordance
+     *         to make into a form
+     * @param actionDescriptor
+     *         describing the form action
+     * @throws IOException
+     * @see <a href="http://docs.spring.io/spring/docs/3.0
+     * .x/javadoc-api/org/springframework/web/filter/HiddenHttpMethodFilter.html">Spring
+     * MVC HiddenHttpMethodFilter</a>
+     */
+    private void appendForm(Affordance affordance, ActionDescriptor actionDescriptor) throws IOException {
+        String formName = actionDescriptor.getActionName();
+        RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
+
+        // Link's expand method removes non-required variables from URL
+        String actionUrl = affordance.expand()
+                .getHref();
+        beginForm(OptionalAttributes.attr("action", actionUrl)
+                .and("method", getHtmlConformingHttpMethod(httpMethod))
+                .and("name", formName));
+        write("<h4>");
+        write("Form " + formName);
+        write("</h4>");
+
+        writeHiddenHttpMethodField(httpMethod);
+        // build the form
+        if (actionDescriptor.hasRequestBody()) {
+            AnnotatedParameter requestBody = actionDescriptor.getRequestBody();
+            Class<?> parameterType = requestBody.getParameterType();
+            recurseBeanProperties(parameterType, actionDescriptor, requestBody, requestBody.getCallValue());
+        } else {
+            Collection<String> requestParams = actionDescriptor.getRequestParamNames();
+            for (String requestParamName : requestParams) {
+                AnnotatedParameter actionInputParameter = actionDescriptor.getAnnotatedParameter(requestParamName);
+
+                // TODO support list and matrix parameters?
+                Object[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
+                if (possibleValues.length > 0) {
+                    if (actionInputParameter.isArrayOrCollection()) {
+                        appendSelectMulti(requestParamName, possibleValues, actionInputParameter);
+                    } else {
+                        appendSelectOne(requestParamName, possibleValues, actionInputParameter);
+                    }
+                } else {
+                    if (actionInputParameter.isArrayOrCollection()) {
+                        // TODO support for free list input?
+                        Object[] callValues = actionInputParameter.getCallValues();
+                        int items = callValues.length;
+                        for (int i = 0; i < items; i++) {
+                            Object value;
+                            if (i < callValues.length) {
+                                value = callValues[i];
+                            } else {
+                                value = null;
+                            }
+                            appendInput(requestParamName, actionInputParameter, value);
+                        }
+                    } else {
+                        String callValueFormatted = actionInputParameter.getCallValueFormatted();
+                        appendInput(requestParamName, actionInputParameter, callValueFormatted);
+                    }
+                }
+            }
+        }
+        inputButton(Type.SUBMIT, capitalize(httpMethod.name()
+                .toLowerCase()));
+        endForm();
+    }
+
+    private void appendLinkWithoutActionDescriptor(Link link) throws IOException {
         if (link.isTemplated()) {
             // TODO ensure that template expansion takes place for base uri
-            Link expanded = link.expand();
+            Link expanded = link.expand(); // remove query variables
             beginForm(OptionalAttributes.attr("action", expanded.getHref())
                     .and("method", "GET"));
             List<TemplateVariable> variables = link.getVariables();
@@ -319,6 +372,8 @@ public class XhtmlWriter extends Writer {
             String title = (rel != null ? rel : link.getHref());
             // TODO: write link instead of anchor here?
             writeAnchor(OptionalAttributes.attr("href", link.getHref()), title);
+            writeAnchor(OptionalAttributes.attr("href", link.getHref())
+                    .and("rel", link.getRel()), title);
         }
     }
 
@@ -348,6 +403,8 @@ public class XhtmlWriter extends Writer {
         write(fieldName);
         write("\" type=\"");
         write(type.toString());
+        write("\" class=\"");
+        write(formControlClass);
         write("\" ");
         writeAttributes(attributes);
         write("/>");
@@ -419,75 +476,6 @@ public class XhtmlWriter extends Writer {
         endAnchor();
     }
 
-    /**
-     * Appends form and squashes non-GET or POST to POST. Always adds _method field for handling by an appropriate
-     * filter such as Spring's HiddenHttpMethodFilter.
-     *
-     * @param affordance
-     *         to make into a form
-     * @param actionDescriptor
-     *         describing the form action
-     * @throws IOException
-     * @see <a href="http://docs.spring.io/spring/docs/3.0.x/javadoc-api/org/springframework/web/filter/HiddenHttpMethodFilter.html">Spring
-     * MVC HiddenHttpMethodFilter</a>
-     */
-    private void appendForm(Affordance affordance, ActionDescriptor actionDescriptor) throws IOException {
-        String formName = actionDescriptor.getActionName();
-        RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
-
-        beginForm(OptionalAttributes.attr("action", affordance.getHref())
-                .and("method", getHtmlConformingHttpMethod(httpMethod))
-                .and("name", formName));
-        write("<h4>");
-        String formH1 = "Form " + formName;
-        write(formH1);
-        write("</h4>");
-
-        writeHiddenHttpMethodField(httpMethod);
-        // build the form
-        if (actionDescriptor.hasRequestBody()) {
-            AnnotatedParameter requestBody = actionDescriptor.getRequestBody();
-            Class<?> parameterType = requestBody.getParameterType();
-            recurseBeanProperties(parameterType, actionDescriptor, requestBody, requestBody.getCallValue());
-        } else {
-            Collection<String> requestParams = actionDescriptor.getRequestParamNames();
-            for (String requestParamName : requestParams) {
-                AnnotatedParameter actionInputParameter = actionDescriptor.getAnnotatedParameter(requestParamName);
-
-                // TODO support list and matrix parameters?
-                Object[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
-                if (possibleValues.length > 0) {
-                    if (actionInputParameter.isArrayOrCollection()) {
-                        appendSelectMulti(requestParamName, possibleValues, actionInputParameter);
-                    } else {
-                        appendSelectOne(requestParamName, possibleValues, actionInputParameter);
-                    }
-                } else {
-                    if (actionInputParameter.isArrayOrCollection()) {
-                        // TODO support for free list input?
-                        Object[] callValues = actionInputParameter.getCallValues();
-                        int items = callValues.length;
-                        for (int i = 0; i < items; i++) {
-                            Object value;
-                            if (i < callValues.length) {
-                                value = callValues[i];
-                            } else {
-                                value = null;
-                            }
-                            appendInput(requestParamName, actionInputParameter, value);
-                        }
-                    } else {
-                        String callValueFormatted = actionInputParameter.getCallValueFormatted();
-                        appendInput(requestParamName, actionInputParameter, callValueFormatted);
-                    }
-                }
-            }
-        }
-
-        inputButton(Type.SUBMIT, capitalize(httpMethod.name()
-                .toLowerCase()));
-        endForm();
-    }
 
     public static String capitalize(String name) {
         if (name != null && name.length() != 0) {
@@ -670,7 +658,8 @@ public class XhtmlWriter extends Writer {
                     MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
                     ActionInputParameter propertySetterInputParameter = new ActionInputParameter(methodParameter,
                             propertyValue);
-                    final Object[] possibleValues = actionInputParameter.getPossibleValues(propertyDescriptor.getWriteMethod(), 0,
+                    final Object[] possibleValues = actionInputParameter.getPossibleValues(propertyDescriptor
+                                    .getWriteMethod(), 0,
                             actionDescriptor);
                     if (possibleValues.length > 0) {
                         if (actionInputParameter.isArrayOrCollection()) {
@@ -785,7 +774,7 @@ public class XhtmlWriter extends Writer {
         Type htmlInputFieldType = actionInputParameter.getHtmlInputFieldType();
         Assert.notNull(htmlInputFieldType);
         String val = value == null ? "" : value.toString();
-        beginDiv();
+        beginDiv(OptionalAttributes.attr("class", formGroupClass));
         if (Type.HIDDEN.equals(htmlInputFieldType)) {
             input(requestParamName, htmlInputFieldType, OptionalAttributes.attr("value", val));
         } else {
@@ -810,7 +799,8 @@ public class XhtmlWriter extends Writer {
     }
 
     private void writeLabelWithDoc(String label, String fieldName, String documentationUrl) throws IOException {
-        beginLabel(OptionalAttributes.attr("for", fieldName));
+        beginLabel(OptionalAttributes.attr("for", fieldName)
+                .and("class", controlLabelClass));
         if (documentationUrl == null) {
             write(label);
         } else {
@@ -823,13 +813,15 @@ public class XhtmlWriter extends Writer {
     }
 
 
-    private void appendSelectOne(String requestParamName, Object[] possibleValues, AnnotatedParameter actionInputParameter)
+    private void appendSelectOne(String requestParamName, Object[] possibleValues, AnnotatedParameter
+            actionInputParameter)
             throws IOException {
-        beginDiv();
+        beginDiv(OptionalAttributes.attr("class", formGroupClass));
         Object callValue = actionInputParameter.getCallValue();
         String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, callValue);
         writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
-        beginSelect(requestParamName, requestParamName, possibleValues.length);
+        beginSelect(requestParamName, requestParamName, possibleValues.length,
+                OptionalAttributes.attr("class", formControlClass));
         for (Object possibleValue : possibleValues) {
             if (possibleValue.equals(callValue)) {
                 option(possibleValue.toString(), attr("selected", "selected"));
@@ -843,8 +835,9 @@ public class XhtmlWriter extends Writer {
     }
 
 
-    private void appendSelectMulti(String requestParamName, Object[] possibleValues, AnnotatedParameter actionInputParameter) throws IOException {
-        beginDiv();
+    private void appendSelectMulti(String requestParamName, Object[] possibleValues, AnnotatedParameter
+            actionInputParameter) throws IOException {
+        beginDiv(OptionalAttributes.attr("class", formGroupClass));
         Object[] actualValues = actionInputParameter.getCallValues();
         final Object aCallValue;
         if (actualValues.length > 0) {
@@ -854,7 +847,9 @@ public class XhtmlWriter extends Writer {
         }
         String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, aCallValue);
         writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
-        beginSelect(requestParamName, requestParamName, possibleValues.length, attr("multiple", "multiple"));
+        beginSelect(requestParamName, requestParamName, possibleValues.length,
+                OptionalAttributes.attr("multiple", "multiple")
+                        .and("class", formControlClass));
         for (Object possibleValue : possibleValues) {
             if (arrayContains(actualValues, possibleValue)) {
                 option(possibleValue.toString(), attr("selected", "selected"));

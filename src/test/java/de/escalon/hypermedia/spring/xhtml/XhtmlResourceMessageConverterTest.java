@@ -95,10 +95,12 @@ public class XhtmlResourceMessageConverterTest {
         MvcResult result = this.mockMvc.perform(get("http://localhost/events").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
-//                .andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET']", namespaces).exists())
-//                        // TODO: form name
-//                .andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET']/h:input/@name",
-//                        namespaces).string("eventName"))
+                .andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET' and " +
+                        "@name='findEventByName']", namespaces).exists())
+                        // TODO: form name
+                .andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET' and " +
+                                "@name='findEventByName']/h:div/h:input/@name",
+                        namespaces).string("eventName"))
                 .andReturn();
         LOG.debug(result.getResponse()
                 .getContentAsString());
@@ -112,11 +114,25 @@ public class XhtmlResourceMessageConverterTest {
                 .andExpect(xpath("//h:form[@name='addEvent']/@action", namespaces).string("http://localhost/events"))
                 .andExpect(xpath("//h:form[@name='addEvent']/@method", namespaces).string("POST"))
                 .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='eventStatus']", namespaces).exists())
-                .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='typicalAgeRange']", namespaces).exists())
+                .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='typicalAgeRange']", namespaces)
+                        .exists())
                 .andReturn();
         LOG.debug(result.getResponse()
                 .getContentAsString());
 
+    }
+
+    @Test
+    public void testCreatesSimpleLinkForGetAffordanceWithoutRequestParams() throws Exception {
+        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.TEXT_HTML))
+                .andExpect(xpath("//h:a[@href='http://localhost/events/1']", namespaces).exists())
+                .andExpect(xpath("//h:a[@href='http://localhost/events/2']", namespaces).exists())
+                .andReturn();
+
+        LOG.debug(result.getResponse()
+                .getContentAsString());
     }
 
     @Test
@@ -127,8 +143,10 @@ public class XhtmlResourceMessageConverterTest {
         MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/@action", namespaces).string("http://localhost/events/1"))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:input[@name='_method']/@value", namespaces).string("PUT"))
+                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/@action", namespaces).string
+                        ("http://localhost/events/1"))
+                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:input[@name='_method']/@value",
+                        namespaces).string("PUT"))
                 .andReturn();
 
         LOG.debug(result.getResponse()
@@ -166,8 +184,9 @@ public class XhtmlResourceMessageConverterTest {
     }
 
     /**
-     * Tests if the form contains a personId input field with default value.
-     * TODO make use of Input(readOnly, include, exclude), maybe add hidden there, too
+     * Tests if the form contains a personId input field with default value. TODO make use of Input(readOnly, include,
+     * exclude), maybe add hidden there, too
+     *
      * @throws Exception
      */
     @Test
@@ -196,11 +215,16 @@ public class XhtmlResourceMessageConverterTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
                 .andExpect(xpath("//h:select[@name='eventStatus']", namespaces).exists())
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[1]/text()", namespaces).string("EVENT_CANCELLED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[2]/text()", namespaces).string("EVENT_POSTPONED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[3]/text()", namespaces).string("EVENT_SCHEDULED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[4]/text()", namespaces).string("EVENT_RESCHEDULED"))
-                .andExpect(xpath("(//h:select[@name='eventStatus']/h:option)[@selected]/text()", namespaces).string("EVENT_SCHEDULED"))
+                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[1]/text()", namespaces).string
+                        ("EVENT_CANCELLED"))
+                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[2]/text()", namespaces).string
+                        ("EVENT_POSTPONED"))
+                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[3]/text()", namespaces).string
+                        ("EVENT_SCHEDULED"))
+                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[4]/text()", namespaces).string
+                        ("EVENT_RESCHEDULED"))
+                .andExpect(xpath("(//h:select[@name='eventStatus']/h:option)[@selected]/text()", namespaces).string
+                        ("EVENT_SCHEDULED"))
                 .andReturn();
 
         LOG.debug(result.getResponse()
@@ -217,9 +241,12 @@ public class XhtmlResourceMessageConverterTest {
         MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']", namespaces).exists())
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']/h:option[1]", namespaces).string("7-10"))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']/h:option[2]", namespaces).string("11-"))
+                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange" +
+                        "']", namespaces).exists())
+                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange" +
+                        "']/h:option[1]", namespaces).string("7-10"))
+                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange" +
+                        "']/h:option[2]", namespaces).string("11-"))
                 .andReturn();
         LOG.debug(result.getResponse()
                 .getContentAsString());
@@ -234,7 +261,8 @@ public class XhtmlResourceMessageConverterTest {
 //    @Test
 //    public void testCreatesMultiSelectFieldForEnumArray() throws Exception {
 //
-//        this.mockMvc.perform(get("/people/customer/123/editor").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+//        this.mockMvc.perform(get("/people/customer/123/editor").accept(MediaType.TEXT_HTML)).andExpect(status()
+// .isOk())
 //                .andExpect(content().contentType(MediaType.TEXT_HTML))
 //                .andExpect(xpath("//h:select[@name='sports' and @multiple]", namespaces).exists())
 //                .andExpect(xpath("//h:select[@name='sports']/h:option", namespaces).nodeCount(Sport.values().length))
@@ -249,10 +277,12 @@ public class XhtmlResourceMessageConverterTest {
 //    @Test
 //    public void testCreatesMultiSelectFieldForEnumList() throws Exception {
 //
-//        this.mockMvc.perform(get("/people/customer/123/editor").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+//        this.mockMvc.perform(get("/people/customer/123/editor").accept(MediaType.TEXT_HTML)).andExpect(status()
+// .isOk())
 //                .andExpect(content().contentType(MediaType.TEXT_HTML))
 //                .andExpect(xpath("//h:select[@name='gadgets' and @multiple]", namespaces).exists())
-//                .andExpect(xpath("//h:select[@name='gadgets']/h:option", namespaces).nodeCount(Gadget.values().length))
+//                .andExpect(xpath("//h:select[@name='gadgets']/h:option", namespaces).nodeCount(Gadget.values()
+// .length))
 //                .andExpect(xpath("(//h:select[@name='gadgets']/h:option)[@selected]", namespaces).nodeCount(0));
 //    }
 //    /**
