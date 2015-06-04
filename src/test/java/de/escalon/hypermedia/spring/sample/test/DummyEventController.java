@@ -54,7 +54,7 @@ public class DummyEventController {
             eventResource.add(linkTo(methodOn(this.getClass())
                     .getEvent(event.id))
                     .and(linkTo(methodOn(this.getClass())
-                    .updateEventWithRequestBody(event.id, event)))
+                            .updateEventWithRequestBody(event.id, event)))
                     .and(linkTo(methodOn(this.getClass())
                             .deleteEvent(event.id)))
                     .withSelfRel());
@@ -67,7 +67,7 @@ public class DummyEventController {
 
         // the resources have templated links to methods
         // specify method by reflection
-        final Method getEventMethod = ReflectionUtils.findMethod(this.getClass(), "getEvent", String.class);
+        final Method getEventMethod = ReflectionUtils.findMethod(this.getClass(), "findEventByName", String.class);
         final Affordance eventByNameAffordance = linkTo(getEventMethod, new Object[0])
                 .withRel("hydra:search");
         final Affordance eventWithRegexAffordance = linkTo(
@@ -117,7 +117,7 @@ public class DummyEventController {
     @RequestMapping(method = RequestMethod.GET, params = {"eventName"})
     public
     @ResponseBody
-    Resource<Event> getEvent(@RequestParam String eventName) {
+    Resource<Event> findEventByName(@RequestParam String eventName) {
         Resource<Event> ret = null;
         for (Event event : getEvents()) {
             if (event.getWorkPerformed()
