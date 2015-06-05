@@ -77,6 +77,24 @@ public @interface Input {
     String[] readOnly() default {};
 
     /**
+     * Property names or dot-separated property paths of hidden properties on input bean. Allows to define expected
+     * input bean attributes with hidden values, so that a media type can render them as hidden attribute. This
+     * allows to use the same bean for input and output in different contexts. E.g. all product attributes should be
+     * editable when a new product is added, but not when an order is created which contains that product. Thus, if a
+     * POST expects an object Product with certain fixed values, you can annotate the POST handler:
+     * <pre>
+     *     public void makeOrder(@Input(hidden={"productID"}) Product orderedProduct} {...}
+     * </pre>
+     * Typically, a hidden attribute should have a predefined value. Defining a hidden property effectively makes
+     * that property an {@link #include} property, i.e. other attributes are ignored by default.
+     *
+     * @return property paths which should be shown as read-only
+     * @see #include
+     * @see #exclude
+     */
+    String[] hidden() default {};
+
+    /**
      * Property names or dot-separated property paths of properties that should be ignored on input bean. This allows to
      * use the same bean for input and output in different contexts. If a POST expects an object Product without certain
      * values, you can annotate the POST handler:

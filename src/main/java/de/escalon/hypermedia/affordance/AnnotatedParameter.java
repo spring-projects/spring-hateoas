@@ -31,6 +31,8 @@ public interface AnnotatedParameter {
 
     <T extends Annotation> T getAnnotation(Class<T> annotation);
 
+    boolean isHidden(String property);
+
     Object[] getPossibleValues(AnnotatedParameters annotatedParameters);
 
     Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters annotatedParameters);

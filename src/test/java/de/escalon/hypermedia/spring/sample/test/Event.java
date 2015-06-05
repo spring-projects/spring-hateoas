@@ -36,6 +36,14 @@ public class Event {
         this.eventStatus = eventStatus;
     }
 
+    /**
+     * For usage as RequestBody.
+     * @param performer performing at the event
+     * @param workPerformed at the event
+     * @param location where event takes place
+     * @param eventStatus showing if event is scheduled, cancelled etc.
+     * @param typicalAgeRange of attendees
+     */
     @JsonCreator
     public Event(@JsonProperty("performer") String performer,
                  @JsonProperty("workPerformed") CreativeWork workPerformed,
@@ -50,12 +58,12 @@ public class Event {
         this.typicalAgeRange = typicalAgeRange;
     }
 
-    public void setEventStatus(EventStatusType eventStatus) {
-        this.eventStatus = eventStatus;
-    }
-
     public Resource<CreativeWork> getWorkPerformed() {
         return workPerformed;
+    }
+
+    public void setEventStatus(EventStatusType eventStatus) {
+        this.eventStatus = eventStatus;
     }
 
     public EventStatusType getEventStatus() {

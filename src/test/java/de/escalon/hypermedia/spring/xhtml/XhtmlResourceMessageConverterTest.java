@@ -183,25 +183,40 @@ public class XhtmlResourceMessageConverterTest {
                 .getContentAsString());
     }
 
-    /**
-     * Tests if the form contains a personId input field with default value. TODO make use of Input(readOnly, include,
-     * exclude), maybe add hidden there, too
-     *
-     * @throws Exception
-     */
     @Test
-    @Ignore
-    public void testCreatesHiddenInputField() throws Exception {
+    public void testCreatesHiddenInputFieldForHiddenRequestBodyProperty() throws Exception {
 
-        this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:input[@name='personId']", namespaces).exists())
-                .andExpect(xpath("//h:input[@name='personId']/@type", namespaces).string("hidden"))
-                .andExpect(xpath("//h:input[@name='personId']/@value", namespaces).string("123"))
-                .andExpect(xpath("//h:input[@name='firstname']/@value", namespaces).string("Bilbo"));
+                .andExpect(xpath("//h:form[@name='addEvent']", namespaces).exists())
+                .andExpect(xpath("//h:form[@name='addEvent']/h:input[@name='eventStatus']/@type", namespaces)
+                        .string("hidden"))
+                .andExpect(xpath("//h:form[@name='addEvent']/h:input[@name='eventStatus']/@value", namespaces)
+                        .string("EVENT_SCHEDULED"))
+                .andReturn();
+
+        LOG.debug(result.getResponse()
+                .getContentAsString());
     }
+
+    @Test
+    public void testCreatesReadOnlyInputFieldForHiddenRequestBodyProperty() throws Exception {
+
+        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .contentType(MediaType.TEXT_HTML))
+                .andExpect(xpath("//h:form[@name='addEvent']", namespaces).exists())
+                .andExpect(xpath("//h:form[@name='addEvent']/h:input/@type", namespaces).string("hidden"))
+                .andExpect(xpath("//h:form[@name='addEvent']/h:input/@value", namespaces).string("EVENT_SCHEDULED"))
+                .andReturn();
+
+        LOG.debug(result.getResponse()
+                .getContentAsString());
+    }
+
 
     /**
      * Tests if the form contains a select field.
