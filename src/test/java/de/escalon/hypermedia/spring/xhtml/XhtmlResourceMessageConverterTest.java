@@ -113,7 +113,7 @@ public class XhtmlResourceMessageConverterTest {
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
                 .andExpect(xpath("//h:form[@name='addEvent']/@action", namespaces).string("http://localhost/events"))
                 .andExpect(xpath("//h:form[@name='addEvent']/@method", namespaces).string("POST"))
-                .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='eventStatus']", namespaces).exists())
+                .andExpect(xpath("//h:form[@name='addEvent']/h:input[@name='eventStatus']", namespaces).exists())
                 .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='typicalAgeRange']", namespaces)
                         .exists())
                 .andReturn();
@@ -202,15 +202,20 @@ public class XhtmlResourceMessageConverterTest {
     }
 
     @Test
-    public void testCreatesReadOnlyInputFieldForHiddenRequestBodyProperty() throws Exception {
+    public void testCreatesReadOnlySelectFieldForReadOnlyRequestBodyProperty() throws Exception {
 
         MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@name='addEvent']", namespaces).exists())
-                .andExpect(xpath("//h:form[@name='addEvent']/h:input/@type", namespaces).string("hidden"))
-                .andExpect(xpath("//h:form[@name='addEvent']/h:input/@value", namespaces).string("EVENT_SCHEDULED"))
+                .andExpect(xpath("//h:form[@name='addEventReadOnlyStatus']", namespaces).exists())
+                .andExpect(xpath("//h:form[@name='addEventReadOnlyStatus']/@action", namespaces)
+                        .string("http://localhost/events/readOnlyStatus"))
+                .andExpect(xpath("//h:form[@name='addEventReadOnlyStatus']/h:div/h:select/@readonly", namespaces)
+                        .string("readonly"))
+                .andExpect(xpath("(//h:form[@name='addEventReadOnlyStatus']/h:div/h:select/h:option)[@selected]/text()",
+                        namespaces).string
+                        ("EVENT_SCHEDULED"))
                 .andReturn();
 
         LOG.debug(result.getResponse()
@@ -226,20 +231,18 @@ public class XhtmlResourceMessageConverterTest {
     @Test
     public void testCreatesSelectFieldForEnum() throws Exception {
 
+        String statusSelect = "//h:form[@name='updateEventWithRequestBody']//h:select[@name='eventStatus']";
+        String option = statusSelect + "/h:option";
+
         MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:select[@name='eventStatus']", namespaces).exists())
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[1]/text()", namespaces).string
-                        ("EVENT_CANCELLED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[2]/text()", namespaces).string
-                        ("EVENT_POSTPONED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[3]/text()", namespaces).string
-                        ("EVENT_SCHEDULED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[4]/text()", namespaces).string
-                        ("EVENT_RESCHEDULED"))
-                .andExpect(xpath("(//h:select[@name='eventStatus']/h:option)[@selected]/text()", namespaces).string
-                        ("EVENT_SCHEDULED"))
+                .andExpect(xpath(statusSelect, namespaces).exists())
+                .andExpect(xpath(option + "[1]/text()", namespaces).string("EVENT_CANCELLED"))
+                .andExpect(xpath(option + "[2]/text()", namespaces).string("EVENT_POSTPONED"))
+                .andExpect(xpath(option + "[3]/text()", namespaces).string("EVENT_SCHEDULED"))
+                .andExpect(xpath(option + "[4]/text()", namespaces).string("EVENT_RESCHEDULED"))
+                .andExpect(xpath("(" + option + ")[@selected]/text()", namespaces).string("EVENT_SCHEDULED"))
                 .andReturn();
 
         LOG.debug(result.getResponse()

@@ -198,6 +198,18 @@ public class ActionInputParameter implements AnnotatedParameter {
         return inputAnnotation != null && arrayContains(inputAnnotation.hidden(), property);
     }
 
+    /**
+     * Determines if request body input parameter has a hidden input property.
+     * @param property name or property path
+     * @return true if hidden
+     */
+    @Override
+    public boolean isReadOnly(String property) {
+        Annotation[] paramAnnotations = methodParameter.getParameterAnnotations();
+        Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
+        return inputAnnotation != null && arrayContains(inputAnnotation.readOnly(), property);
+    }
+
     private boolean arrayContains(String[] array, String toFind) {
         for (String item : array) {
             if (toFind.equals(item)) {

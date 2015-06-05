@@ -46,6 +46,12 @@ public class DummyEventController {
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
+    @RequestMapping(value = "/readOnlyStatus", method = RequestMethod.POST)
+    public ResponseEntity<Void> addEventReadOnlyStatus(@RequestBody @Input(readOnly = "eventStatus",
+            include = {"performer, workPerformed.name, location"}) Event event) {
+        return new ResponseEntity(HttpStatus.CREATED);
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
@@ -76,13 +82,17 @@ public class DummyEventController {
         final Affordance eventWithRegexAffordance = linkTo(
                 methodOn(this.getClass()).getEventWithRegexPathVariableMapping(null)).withRel("ex:regex");
         final Affordance postEventAffordance = linkTo(methodOn(this.getClass()).addEvent(
-                createSampleEvent())).withSelfRel();
+                aSampleEvent())).withSelfRel();
+
+        final Affordance postEventWithReadOnlyStatusAffordance = linkTo(methodOn(this.getClass())
+                .addEventReadOnlyStatus(aSampleEvent())).withSelfRel();
 
         return new Resources<Resource<Event>>(eventResourcesList,
-                eventByNameAffordance, eventWithRegexAffordance, postEventAffordance);
+                eventByNameAffordance, eventWithRegexAffordance, postEventAffordance,
+                postEventWithReadOnlyStatusAffordance);
     }
 
-    private Event createSampleEvent() {
+    private Event aSampleEvent() {
         return new Event(0, null, new CreativeWork(null), null, EventStatusType.EVENT_SCHEDULED);
     }
 

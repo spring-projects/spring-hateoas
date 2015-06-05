@@ -325,9 +325,9 @@ public class XhtmlWriter extends Writer {
                 Object[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
                 if (possibleValues.length > 0) {
                     if (actionInputParameter.isArrayOrCollection()) {
-                        appendSelectMulti(requestParamName, possibleValues, actionInputParameter);
+                        appendSelectMulti(requestParamName, possibleValues, actionInputParameter, actionInputParameter);
                     } else {
-                        appendSelectOne(requestParamName, possibleValues, actionInputParameter);
+                        appendSelectOne(requestParamName, possibleValues, actionInputParameter, actionInputParameter);
                     }
                 } else {
                     if (actionInputParameter.isArrayOrCollection()) {
@@ -603,10 +603,11 @@ public class XhtmlWriter extends Writer {
                                     if (possibleValues.length > 0 && !rootInputParameter.isHidden(paramName)) {
                                         if (rootInputParameter.isArrayOrCollection()) {
                                             // TODO multiple formatted callvalues
-                                            appendSelectMulti(paramName, possibleValues,
+                                            appendSelectMulti(paramName, possibleValues, rootInputParameter,
                                                     constructorParamInputParameter);
                                         } else {
-                                            appendSelectOne(paramName, possibleValues, constructorParamInputParameter);
+                                            appendSelectOne(paramName, possibleValues, rootInputParameter,
+                                                    constructorParamInputParameter);
                                         }
                                     } else {
                                         appendInput(paramName, rootInputParameter, constructorParamInputParameter,
@@ -672,9 +673,11 @@ public class XhtmlWriter extends Writer {
                     if (possibleValues.length > 0 || rootInputParameter.isHidden(propertyName)) {
                         if (rootInputParameter.isArrayOrCollection()) {
                             // TODO multiple formatted callvalues
-                            appendSelectMulti(propertyName, possibleValues, propertySetterInputParameter);
+                            appendSelectMulti(propertyName, possibleValues, rootInputParameter,
+                                    propertySetterInputParameter);
                         } else {
-                            appendSelectOne(propertyName, possibleValues, propertySetterInputParameter);
+                            appendSelectOne(propertyName, possibleValues, rootInputParameter,
+                                    propertySetterInputParameter);
                         }
                     } else {
                         //String callValueFormatted = rootInputParameter.getCallValueFormatted();
@@ -794,6 +797,9 @@ public class XhtmlWriter extends Writer {
                     attrs.and(entry.getKey(), entry.getValue()
                             .toString());
                 }
+                if (rootInputParameter.isReadOnly(requestParamName)) {
+                    attrs.and("readonly", "readonly");
+                }
                 input(requestParamName, htmlInputFieldType, attrs);
             } else {
                 writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
@@ -820,14 +826,20 @@ public class XhtmlWriter extends Writer {
 
 
     private void appendSelectOne(String requestParamName, Object[] possibleValues, AnnotatedParameter
-            actionInputParameter)
+            rootInputParameter, AnnotatedParameter actionInputParameter)
             throws IOException {
         beginDiv(OptionalAttributes.attr("class", formGroupClass));
         Object callValue = actionInputParameter.getCallValue();
         String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, callValue);
         writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
-        beginSelect(requestParamName, requestParamName, possibleValues.length,
-                OptionalAttributes.attr("class", formControlClass));
+
+        OptionalAttributes attrs = OptionalAttributes.attr("multiple", "multiple")
+                .and("class", formControlClass);
+        if (rootInputParameter.isReadOnly(requestParamName)) {
+            attrs.and("readonly", "readonly");
+        }
+
+        beginSelect(requestParamName, requestParamName, possibleValues.length, attrs);
         for (Object possibleValue : possibleValues) {
             if (possibleValue.equals(callValue)) {
                 option(possibleValue.toString(), attr("selected", "selected"));
@@ -842,7 +854,7 @@ public class XhtmlWriter extends Writer {
 
 
     private void appendSelectMulti(String requestParamName, Object[] possibleValues, AnnotatedParameter
-            actionInputParameter) throws IOException {
+            rootInputParameter, AnnotatedParameter actionInputParameter) throws IOException {
         beginDiv(OptionalAttributes.attr("class", formGroupClass));
         Object[] actualValues = actionInputParameter.getCallValues();
         final Object aCallValue;
@@ -853,9 +865,13 @@ public class XhtmlWriter extends Writer {
         }
         String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, aCallValue);
         writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
+        OptionalAttributes attrs = OptionalAttributes.attr("multiple", "multiple")
+                .and("class", formControlClass);
+        if (rootInputParameter.isReadOnly(requestParamName)) {
+            attrs.and("readonly", "readonly");
+        }
         beginSelect(requestParamName, requestParamName, possibleValues.length,
-                OptionalAttributes.attr("multiple", "multiple")
-                        .and("class", formControlClass));
+                attrs);
         for (Object possibleValue : possibleValues) {
             if (arrayContains(actualValues, possibleValue)) {
                 option(possibleValue.toString(), attr("selected", "selected"));
