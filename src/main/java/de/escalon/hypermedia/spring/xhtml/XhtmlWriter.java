@@ -43,23 +43,23 @@ public class XhtmlWriter extends Writer {
             //"<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
             "<!DOCTYPE html>" + //
             "<html xmlns='http://www.w3.org/1999/xhtml'>" + //
-            "  <head>" + //
-            "    <title>%s</title>";
+            "<head>" + //
+            "<title>%s</title>";
 
 
     public static final String HTML_STYLESHEET = "" + //
-            "    <link rel=\"stylesheet\" href=\"%s\"  />";
+            "<link rel=\"stylesheet\" href=\"%s\"  />";
 
     public static final String HTML_HEAD_END = "" + //
-            "  </head>" + //
-            "  <body>" + //
-            "    <div class=\"container\">\n" + //
-            "      <div class=\"row\">";
+            "</head>" + //
+            "<body>" + //
+            "<div class=\"container\">\n" + //
+            "<div class=\"row\">";
 
     public static final String HTML_END = "" + //
-            "      </div>" +
-            "    </div>" +
-            "  </body>" + //
+            "</div>" +
+            "</div>" +
+            "</body>" + //
             "</html>";
 
     private String methodParam = "_method";
@@ -670,7 +670,7 @@ public class XhtmlWriter extends Writer {
                     final Object[] possibleValues = rootInputParameter.getPossibleValues(propertyDescriptor
                                     .getWriteMethod(), 0,
                             actionDescriptor);
-                    if (possibleValues.length > 0 || rootInputParameter.isHidden(propertyName)) {
+                    if (possibleValues.length > 0 && !rootInputParameter.isHidden(propertyName)) {
                         if (rootInputParameter.isArrayOrCollection()) {
                             // TODO multiple formatted callvalues
                             appendSelectMulti(propertyName, possibleValues, rootInputParameter,
@@ -700,10 +700,8 @@ public class XhtmlWriter extends Writer {
                     }
                 } else {
                     beginDiv();
-                    write(propertyName + ":");
+                    write(propertyName + ":"); // caption for nested bean
                     Object propertyValue = PropertyUtils.getPropertyValue(currentCallValue, propertyDescriptor);
-
-
                     recurseBeanProperties(propertyType, actionDescriptor, rootInputParameter, propertyValue);
                     endDiv();
                 }
