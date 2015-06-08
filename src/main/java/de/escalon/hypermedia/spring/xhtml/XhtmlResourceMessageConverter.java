@@ -176,7 +176,7 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
             }
         }
 
-        return recursivelyCreateObject(new ArrayDeque(), clazz, formValues);
+        return recursivelyCreateObject(new ArrayDeque<String>(), clazz, formValues);
 
 
     }
@@ -324,7 +324,6 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
             return;
         }
         try {
-//            beginListGroupWithItem(writer);
             if (object instanceof Resource) {
                 Resource<?> resource = (Resource<?>) object;
                 writer.beginListItem();
@@ -360,10 +359,6 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 for (Object item : collection) {
                     writeResource(writer, item);
                 }
-//            } else if (!DataType.isSingleValueType(object.getClass())) {
-//                writer.beginListItem();
-//                writeObject(writer, object);
-//                writer.endListItem();
             } else { // TODO: write li for simple objects in Resources Collection
                 writeObject(writer, object);
             }
@@ -371,16 +366,6 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
             throw new RuntimeException("failed to transform object " + object, ex);
         }
 
-    }
-
-    private void beginListGroupWithItem(XhtmlWriter writer) throws IOException {
-        writer.beginUnorderedList();
-        writer.beginListItem();
-    }
-
-    private void endListGroupWithItem(XhtmlWriter writer) throws IOException {
-        writer.endListItem();
-        writer.endUnorderedList();
     }
 
     private void writeObject(XhtmlWriter writer, Object object) throws IOException, IllegalAccessException,
@@ -398,16 +383,9 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 writeObjectAttributeRecursively(writer, name, content, docUrl);
             }
         } else if (object instanceof Enum) {
-            String name = ((Enum) object).name();
-            String docUrl = documentationProvider.getDocumentationUrl(name, object);
-//            writeDtWithDoc(writer, name, docUrl);
             writeDdForScalarValue(writer, object);
         } else if (object instanceof Currency) {
             // TODO configurable classes which should be rendered with toString
-            // or use JsonSerializer or DataType?
-            String name = object.toString();
-            String docUrl = documentationProvider.getDocumentationUrl(name, object);
-//            writeDtWithDoc(writer, name, docUrl);
             writeDdForScalarValue(writer, object);
         } else {
             Class<?> aClass = object.getClass();
@@ -419,7 +397,6 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 if (!propertyDescriptors.containsKey(name)) {
                     Object content = field.get(object);
                     String docUrl = documentationProvider.getDocumentationUrl(field, content);
-                    //<a href="http://schema.org/review">http://schema.org/performer</a>
                     writeObjectAttributeRecursively(writer, name, content, docUrl);
                 }
             }
