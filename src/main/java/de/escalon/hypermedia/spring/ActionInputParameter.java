@@ -188,7 +188,9 @@ public class ActionInputParameter implements AnnotatedParameter {
 
     /**
      * Determines if request body input parameter has a hidden input property.
-     * @param property name or property path
+     *
+     * @param property
+     *         name or property path
      * @return true if hidden
      */
     @Override
@@ -199,18 +201,59 @@ public class ActionInputParameter implements AnnotatedParameter {
     }
 
     /**
-     * Determines if request body input parameter has a hidden input property.
-     * @param property name or property path
-     * @return true if hidden
+     * Determines if request body input parameter has a read-only input property.
+     *
+     * @param property
+     *         name or property path
+     * @return true if read-only
      */
     @Override
     public boolean isReadOnly(String property) {
-        Annotation[] paramAnnotations = methodParameter.getParameterAnnotations();
-        Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
         return inputAnnotation != null && arrayContains(inputAnnotation.readOnly(), property);
     }
 
+    /**
+     * Determines if request body input parameter should be included, considering all of {@link Input#include}, {@link
+     * Input#hidden} and {@link Input#readOnly}.
+     *
+     * @param property
+     *         name or property path
+     * @return true if included or no include statements found
+     */
+    @Override
+    public boolean isIncluded(String property) {
+        return inputAnnotation == null
+                || (hasExplicitOrImplicitPropertyIncludeValue() && containsPropertyIncludeValue(property));
+    }
+
+    private boolean containsPropertyIncludeValue(String property) {
+        return arrayContains(inputAnnotation.readOnly(), property)
+                || arrayContains(inputAnnotation.hidden(), property)
+                || arrayContains(inputAnnotation.include(), property);
+    }
+
+    private boolean hasExplicitOrImplicitPropertyIncludeValue() {
+        return inputAnnotation != null && inputAnnotation.readOnly().length > 0
+                || inputAnnotation.hidden().length > 0
+                || inputAnnotation.include().length > 0;
+    }
+
+    /**
+     * Determines if request body input parameter should be excluded, considering {@link Input#exclude}.
+     *
+     * @param property
+     *         name or property path
+     * @return true if excluded, false if no include statement found or not excluded
+     */
+    @Override
+    public boolean isExcluded(String property) {
+        return inputAnnotation != null && arrayContains(inputAnnotation.exclude(), property);
+    }
+
     private boolean arrayContains(String[] array, String toFind) {
+        if (array.length == 0) {
+            return false;
+        }
         for (String item : array) {
             if (toFind.equals(item)) {
                 return true;

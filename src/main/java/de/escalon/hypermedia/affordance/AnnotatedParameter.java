@@ -35,6 +35,10 @@ public interface AnnotatedParameter {
 
     boolean isReadOnly(String property);
 
+    boolean isIncluded(String property);
+
+    boolean isExcluded(String property);
+
     Object[] getPossibleValues(AnnotatedParameters annotatedParameters);
 
     Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters annotatedParameters);

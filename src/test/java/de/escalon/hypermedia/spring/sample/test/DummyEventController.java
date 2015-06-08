@@ -41,16 +41,10 @@ import static de.escalon.hypermedia.spring.AffordanceBuilder.methodOn;
 public class DummyEventController {
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<Void> addEvent(@RequestBody @Input(hidden = "eventStatus",
-            include = {"performer, workPerformed.name, location"}) Event event) {
+    public ResponseEntity<Void> addEvent(@RequestBody Event event) {
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/readOnlyStatus", method = RequestMethod.POST)
-    public ResponseEntity<Void> addEventReadOnlyStatus(@RequestBody @Input(readOnly = "eventStatus",
-            include = {"performer, workPerformed.name, location"}) Event event) {
-        return new ResponseEntity(HttpStatus.CREATED);
-    }
 
     @RequestMapping(method = RequestMethod.GET)
     public
@@ -84,12 +78,9 @@ public class DummyEventController {
         final Affordance postEventAffordance = linkTo(methodOn(this.getClass()).addEvent(
                 aSampleEvent())).withSelfRel();
 
-        final Affordance postEventWithReadOnlyStatusAffordance = linkTo(methodOn(this.getClass())
-                .addEventReadOnlyStatus(aSampleEvent())).withSelfRel();
 
         return new Resources<Resource<Event>>(eventResourcesList,
-                eventByNameAffordance, eventWithRegexAffordance, postEventAffordance,
-                postEventWithReadOnlyStatusAffordance);
+                eventByNameAffordance, eventWithRegexAffordance, postEventAffordance);
     }
 
     private Event aSampleEvent() {

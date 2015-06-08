@@ -45,12 +45,11 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * Message converter which represents a restful API as xhtml which can be used by the browser or a rest client.
- * Converts java beans and spring-hateoas Resources to xhtml and maps the body of x-www-form-urlencoded
- * requests to RequestBody method parameters.
- * The media-type xhtml does not officially support methods other than GET or POST, therefore we must &quot;tunnel&quot;
- * other methods when this converter is used with the browser.
- * Spring's {@link org.springframework.web.filter.HiddenHttpMethodFilter} allows to do that with relative ease.
+ * Message converter which represents a restful API as xhtml which can be used by the browser or a rest client. Converts
+ * java beans and spring-hateoas Resources to xhtml and maps the body of x-www-form-urlencoded requests to RequestBody
+ * method parameters. The media-type xhtml does not officially support methods other than GET or POST, therefore we must
+ * &quot;tunnel&quot; other methods when this converter is used with the browser. Spring's {@link
+ * org.springframework.web.filter.HiddenHttpMethodFilter} allows to do that with relative ease.
  *
  * @author Dietrich Schulten
  */
@@ -121,11 +120,9 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
     }
 
     /**
-     * From {@link ServletServerHttpRequest}:
-     * Use {@link javax.servlet.ServletRequest#getParameterMap()} to reconstruct the
-     * body of a form 'POST' providing a predictable outcome as opposed to reading
-     * from the body, which can fail if any other code has used ServletRequest
-     * to access a parameter thus causing the input stream to be "consumed".
+     * From {@link ServletServerHttpRequest}: Use {@link javax.servlet.ServletRequest#getParameterMap()} to reconstruct
+     * the body of a form 'POST' providing a predictable outcome as opposed to reading from the body, which can fail if
+     * any other code has used ServletRequest to access a parameter thus causing the input stream to be "consumed".
      */
     private InputStream getBodyFromServletRequestParameters(HttpServletRequest request, String charset) throws
             IOException {
@@ -179,12 +176,13 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
             }
         }
 
-        return recursivelyCreateObject(clazz, formValues);
+        return recursivelyCreateObject(new ArrayDeque(), clazz, formValues);
 
 
     }
 
-    private Object recursivelyCreateObject(Class<?> clazz, MultiValueMap<String, String> formValues) {
+    Object recursivelyCreateObject(Deque<String> propertyPath, Class<?> clazz, MultiValueMap<String, String>
+            formValues) {
 
         if (Map.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException("Map not supported");
@@ -209,9 +207,12 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                             if (JsonProperty.class == annotation.annotationType()) {
                                 JsonProperty jsonProperty = (JsonProperty) annotation;
                                 String paramName = jsonProperty.value();
-                                List<String> formValue = formValues.get(paramName);
+
                                 Class<?> parameterType = parameters[paramIndex];
                                 if (DataType.isSingleValueType(parameterType)) {
+                                    String pathPrefix = propertyPath.isEmpty() ? "" :
+                                            StringUtils.collectionToDelimitedString(propertyPath, ".") + ".";
+                                    List<String> formValue = formValues.get(pathPrefix + paramName);
                                     if (formValue != null) {
                                         if (formValue.size() == 1) {
                                             args[paramIndex++] = DataType.asType(parameterType, formValue.get(0));
@@ -228,7 +229,10 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                                         args[paramIndex++] = null;
                                     }
                                 } else {
-                                    args[paramIndex++] = recursivelyCreateObject(parameterType, formValues);
+                                    propertyPath.add(paramName);
+                                    args[paramIndex++] = recursivelyCreateObject(propertyPath, parameterType,
+                                            formValues);
+                                    propertyPath.removeLast();
                                 }
                             }
                         }
@@ -241,11 +245,14 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
                 for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
                     Method writeMethod = propertyDescriptor.getWriteMethod();
-                    String name = propertyDescriptor.getName();
-                    List<String> strings = formValues.get(name);
-                    if (writeMethod != null && strings != null && strings.size() == 1) {
-                        writeMethod.invoke(ret, DataType.asType(propertyDescriptor.getPropertyType(), strings.get(0))
-                        ); // TODO lists, consume values from ctor
+                    if (writeMethod != null) {
+                        String name = propertyDescriptor.getName();
+                        List<String> formValue = formValues.get(name);
+                        if (formValue != null && formValue.size() == 1) {
+                            writeMethod.invoke(ret, DataType.asType(propertyDescriptor.getPropertyType(),
+                                    formValue.get(0)));
+                        }
+                        // TODO list formvalue, consume ctor args
                     }
                 }
                 return ret;
@@ -303,11 +310,14 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
         writeResource(writer, object);
         writer.endUnorderedList();
     }
+
     /**
      * Recursively converts object to xhtml data.
      *
-     * @param object to convert
-     * @param writer to write to
+     * @param object
+     *         to convert
+     * @param writer
+     *         to write to
      */
     private void writeResource(XhtmlWriter writer, Object object) {
         if (object == null) {
@@ -431,7 +441,8 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
         }
     }
 
-    private void writeObjectAttributeRecursively(XhtmlWriter writer, String name, Object content, String documentationUrl)
+    private void writeObjectAttributeRecursively(XhtmlWriter writer, String name, Object content, String
+            documentationUrl)
             throws IOException {
         writeDtWithDoc(writer, name, documentationUrl);
         Object value = getContentAsScalarValue(content);
@@ -478,7 +489,8 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
     /**
      * Sets method param name for HTML PUT/DELETE/PATCH workaround.
      *
-     * @param methodParam to use
+     * @param methodParam
+     *         to use
      * @see org.springframework.web.filter.HiddenHttpMethodFilter
      */
     public void setMethodParam(String methodParam) {
@@ -488,8 +500,9 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
     /**
      * Sets css stylesheets to apply to the form.
      *
-     * @param stylesheets urls of css stylesheets to include,
-     *                    e.g. &quot;https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css&quot;
+     * @param stylesheets
+     *         urls of css stylesheets to include, e.g. &quot;https://maxcdn.bootstrapcdn.com/bootstrap/3.3
+     *         .4/css/bootstrap.min.css&quot;
      */
     public void setStylesheets(List<String> stylesheets) {
         Assert.notNull(stylesheets);
