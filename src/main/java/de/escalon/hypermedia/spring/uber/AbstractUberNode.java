@@ -13,12 +13,9 @@ package de.escalon.hypermedia.spring.uber;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.affordance.PartialUriTemplate;
-import de.escalon.hypermedia.affordance.PartialUriTemplateComponents;
 import org.springframework.hateoas.Link;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,7 +39,6 @@ public abstract class AbstractUberNode implements Iterable<UberNode> {
     public void addLink(Link link) {
         List<ActionDescriptor> actionDescriptors = UberUtils.getActionDescriptors(link);
         List<String> rels = UberUtils.getRels(link);
-        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplate(link.getHref()).expand(Collections.<String, Object>emptyMap());
         for (ActionDescriptor actionDescriptor : actionDescriptors) {
             UberNode uberLink = UberUtils.toUberLink(link.getHref(), actionDescriptor, rels);
             data.add(uberLink);

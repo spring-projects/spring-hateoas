@@ -171,9 +171,15 @@ public class UberUtils {
         Assert.notNull(actionDescriptor, "actionDescriptor must not be null");
         UberNode uberLink = new UberNode();
         uberLink.setRel(rels);
-        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplate(href).expand(Collections.<String, Object>emptyMap());
+        PartialUriTemplate partialUriTemplate = new PartialUriTemplate(href);
+        PartialUriTemplateComponents partialUriTemplateComponents = partialUriTemplate.asComponents();
         uberLink.setUrl(partialUriTemplateComponents.getBaseUri());
-        uberLink.setModel(getModelProperty(href, actionDescriptor));
+
+        uberLink.setModel(getModelProperty(partialUriTemplate, actionDescriptor));
+        if (partialUriTemplateComponents.hasVariables()) {
+            uberLink.setTemplated(true);
+        }
+        // TODO set transclude based on ResourceHandler#transclude
         if (actionDescriptor != null) {
             RequestMethod requestMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
             uberLink.setAction(UberAction.forRequestMethod(requestMethod));
@@ -181,17 +187,17 @@ public class UberUtils {
         return uberLink;
     }
 
-    private static String getModelProperty(String href, ActionDescriptor actionDescriptor) {
+    private static String getModelProperty(PartialUriTemplate uriTemplate, ActionDescriptor actionDescriptor) {
+//        Collection<String> requestParamNames = actionDescriptor.getRequestParamNames();
+//        if (actionDescriptor.hasRequestBody()) {
+//            AnnotatedParameter requestBody = actionDescriptor.getRequestBody();
+//            // TODO recursively build model for request body
+//            // what to do with property paths - the name for model SHOULD come from UberData name
+//        }
 
-        PartialUriTemplate uriTemplate = new PartialUriTemplate(href);
         RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
         final String model;
         switch (httpMethod) {
-            case GET:
-            case DELETE: {
-                model = buildModel(uriTemplate.getVariableNames(), "{?", ",", "}", "%s");
-                break;
-            }
             case POST:
             case PUT:
             case PATCH: {

@@ -43,6 +43,8 @@ public class UberNode extends AbstractUberNode {
 
 	private UberAction action;
 
+    private Boolean templated;
+
 	/**
 	 * Defines if the {@link #url} content should be embedded within the currently loaded document or treated as a
 	 * navigation to a new document. Default is false (navigate).
@@ -105,7 +107,7 @@ public class UberNode extends AbstractUberNode {
 		return transclude;
 	}
 
-	public void setTransclude(Boolean transclude) {
+	public void setTransclude(boolean transclude) {
 		this.transclude = transclude;
 	}
 
@@ -141,7 +143,18 @@ public class UberNode extends AbstractUberNode {
 		this.value = value;
 	}
 
-	@Override
+    public Boolean isTemplated() {
+        return templated;
+    }
+
+    public void setTemplated(boolean templated) {
+        this.templated = templated;
+    }
+
+
+
+
+    @Override
 	public String toString() {
 		return "UberNode [name=" + name + ", value=" + value + ", data=" + data + ", id=" + id + ", rel=" + rel + ", url="
 				+ url + ", action=" + action + ", transclude=" + transclude + ", model=" + model + ", sending=" + sending
