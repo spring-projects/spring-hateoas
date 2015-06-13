@@ -105,6 +105,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
 	@JsonProperty("links")
+	@JsonView(Link.LinkView.class)
 	public List<Link> getLinks() {
 		return links;
 	}
