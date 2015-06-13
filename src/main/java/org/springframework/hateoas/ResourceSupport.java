@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * Base class for DTOs to collect links.
@@ -34,8 +33,6 @@ import com.fasterxml.jackson.annotation.JsonView;
  */
 public class ResourceSupport implements Identifiable<Link> {
 
-	public interface ResourceSupportView {}
-	
 	private final List<Link> links;
 
 	public ResourceSupport() {
@@ -108,7 +105,6 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
 	@JsonProperty("links")
-	@JsonView(ResourceSupportView.class)
 	public List<Link> getLinks() {
 		return links;
 	}
