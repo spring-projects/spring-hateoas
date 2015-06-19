@@ -694,10 +694,11 @@
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
-			<!--  <url>http://nexus.nbcuext.com:8081/nexus/content/repositories/snapshots</url> -->
+			<url>http://nexus.nbcuext.com:8081/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
+  <!-- copy and paste from https://github.com/NBCUOTS/AppBackBone_AppTrends/blob/master/pom.xml -->
 	<repositories>
 			<repository>
 					<id>nbcu-nexus-releases</id>
