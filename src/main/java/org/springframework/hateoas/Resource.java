@@ -74,7 +74,7 @@ public class Resource<T> extends ResourceSupport {
 	 */
 	@JsonUnwrapped
 	@XmlAnyElement
-	@JsonView(Link.LinkView.class)
+	@JsonView(ResourcesLinksVisible.class)
 	public T getContent() {
 		return content;
 	}

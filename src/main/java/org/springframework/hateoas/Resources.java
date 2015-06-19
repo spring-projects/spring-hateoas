@@ -28,7 +28,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonView;
 
 /**
@@ -103,7 +102,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	@XmlAnyElement
 	@XmlElementWrapper
 	@JsonProperty("content")
-	@JsonView(Link.LinkView.class)
+	@JsonView(ResourcesLinksVisible.class)
 	public Collection<T> getContent() {
 		return Collections.unmodifiableCollection(content);
 	}
