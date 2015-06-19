@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 
 /**
@@ -65,5 +66,17 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 		assertThat(converter.canWrite(Object.class, MediaType.APPLICATION_JSON), is(false));
 		assertThat(converter.canWrite(ResourceSupport.class, MediaType.APPLICATION_JSON), is(true));
 		assertThat(converter.canWrite(Resource.class, MediaType.APPLICATION_JSON), is(true));
+	}
+
+	/**
+	 * @see #360
+	 */
+	@Test
+	public void doesNotSupportAnythingButTheConfiguredClassForCanReadWithContextClass() {
+
+		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+				ResourceSupport.class);
+
+		assertThat(converter.canRead(String.class, Object.class, MediaType.APPLICATION_JSON), is(false));
 	}
 }
