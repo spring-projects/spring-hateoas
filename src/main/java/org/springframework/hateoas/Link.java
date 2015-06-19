@@ -43,8 +43,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 @JsonIgnoreProperties("templated")
 public class Link implements Serializable {
 
-	public interface LinkView {}
-	
 	private static final long serialVersionUID = -9037755944661782121L;
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
@@ -107,7 +105,7 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	@JsonView(LinkView.class)
+	@JsonView(ResourcesLinksVisible.class)
 	public String getHref() {
 		return href;
 	}
@@ -117,7 +115,7 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
-	@JsonView(LinkView.class)
+	@JsonView(ResourcesLinksVisible.class)
 	public String getRel() {
 		return rel;
 	}
