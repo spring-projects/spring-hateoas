@@ -674,12 +674,12 @@
 		</pluginRepository>
 	</pluginRepositories>
 
-	<repositories>
+  <!-- <repositories>
 		<repository>
 			<id>spring-libs-release</id>
 			<url>http://repo.spring.io/libs-release</url>
 		</repository>
-	</repositories>
+  </repositories> -->
 
     <scm>
 		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</connection>
