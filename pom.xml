@@ -682,9 +682,9 @@
 	</repositories>
 
     <scm>
-		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_news-ingest-platform.git</connection>
-		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_news-ingest-platform.git</developerConnection>
-		<url>scm:git:git@github.com:NBCUOTS/appbackbone_news-ingest-platform.git</url>
+		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</connection>
+		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</developerConnection>
+		<url>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</url>
 	</scm>
 	
 	<distributionManagement>
