@@ -686,7 +686,7 @@
 		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</developerConnection>
 		<url>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</url>
 	</scm>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
@@ -694,8 +694,22 @@
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
-			<url>http://nexus.nbcuext.com:8081/nexus/content/repositories/snapshots</url>
+			<!--  <url>http://nexus.nbcuext.com:8081/nexus/content/repositories/snapshots</url> -->
 		</snapshotRepository>
 	</distributionManagement>
+
+	<repositories>
+			<repository>
+					<id>nbcu-nexus-releases</id>
+					<name>NBCU Nexus Releases</name>
+					<releases>
+							<enabled>true</enabled>
+					</releases>
+					<snapshots>
+							<enabled>false</enabled>
+					</snapshots>
+					<url>http://nexus.nbcuext.com:8081/nexus/content/repositories/releases</url>
+			</repository>
+	</repositories>
 
 </project>
