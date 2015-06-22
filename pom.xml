@@ -4,14 +4,22 @@
 
 	<groupId>com.nbcuni.external.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-  <version>1.0.16</version>
-
+	<version>1.0.16-SNAPSHOT</version>
+	<name>Spring Hateoas</name>
+	<url>http://github.com/NBCUOTS/appbackbone_spring-hateoas</url>
 	<name>Spring HATEOAS</name>
 	<url>http://github.com/SpringSource/spring-hateoas</url>
 	<description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
 	</description>
+
+  <scm>
+		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</connection>
+		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</developerConnection>
+		<url>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</url>
+	</scm>
+
 
 	<inceptionYear>2012-2015</inceptionYear>
 
@@ -667,12 +675,14 @@
 		</plugins>
 	</build>
 
+  <!---
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-plugins-release</id>
 			<url>http://repo.spring.io/plugins-release</url>
 		</pluginRepository>
 	</pluginRepositories>
+  -->
 
   <!-- <repositories>
 		<repository>
@@ -681,7 +691,32 @@
 		</repository>
   </repositories> -->
 
-    <scm>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>autoincrement-versions-maven-plugin</id>
+			<name>autoincrement-versions-maven-plugin</name>
+			<url>http://autoincrement-versions-maven-plugin.googlecode.com/svn/repo</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<repositories>
+		<repository>
+			<id>nbcu-nexus-releases</id>
+			<name>NBCU Nexus Releases</name>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<url>http://nexus.nbcuext.com:8081/nexus/content/repositories/releases</url>
+		</repository>
+	</repositories>
+
+  <scm>
 		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</connection>
 		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</developerConnection>
 		<url>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</url>
