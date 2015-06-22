@@ -5,10 +5,8 @@
 	<groupId>com.nbcuni.external.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
 	<version>1.0.16-SNAPSHOT</version>
-	<name>Spring Hateoas</name>
 	<url>http://github.com/NBCUOTS/appbackbone_spring-hateoas</url>
 	<name>Spring HATEOAS</name>
-	<url>http://github.com/SpringSource/spring-hateoas</url>
 	<description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
@@ -716,12 +714,6 @@
 		</repository>
 	</repositories>
 
-  <scm>
-		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</connection>
-		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</developerConnection>
-		<url>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</url>
-	</scm>
-
 	<distributionManagement>
 		<repository>
 			<id>releases</id>
@@ -732,20 +724,5 @@
 			<url>http://nexus.nbcuext.com:8081/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
-
-  <!-- copy and paste from https://github.com/NBCUOTS/AppBackBone_AppTrends/blob/master/pom.xml -->
-	<repositories>
-			<repository>
-					<id>nbcu-nexus-releases</id>
-					<name>NBCU Nexus Releases</name>
-					<releases>
-							<enabled>true</enabled>
-					</releases>
-					<snapshots>
-							<enabled>false</enabled>
-					</snapshots>
-					<url>http://nexus.nbcuext.com:8081/nexus/content/repositories/releases</url>
-			</repository>
-	</repositories>
 
 </project>
