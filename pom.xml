@@ -673,22 +673,6 @@
 		</plugins>
 	</build>
 
-  <!---
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-plugins-release</id>
-			<url>http://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-	</pluginRepositories>
-  -->
-
-  <!-- <repositories>
-		<repository>
-			<id>spring-libs-release</id>
-			<url>http://repo.spring.io/libs-release</url>
-		</repository>
-  </repositories> -->
-
 	<pluginRepositories>
 		<pluginRepository>
 			<id>autoincrement-versions-maven-plugin</id>
