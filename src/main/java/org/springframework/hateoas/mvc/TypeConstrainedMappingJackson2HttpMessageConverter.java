@@ -51,7 +51,7 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 	 */
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return type.isAssignableFrom(clazz) && super.canRead(mediaType);
+		return type.isAssignableFrom(clazz) && super.canRead(clazz, mediaType);
 	}
 
 	/* 
@@ -60,12 +60,8 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 	 */
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-
-		if (type instanceof Class) {
-			return canRead((Class<?>) type, mediaType);
-		}
-
-		return super.canRead(type, contextClass, mediaType);
+		return this.type.isAssignableFrom(getJavaType(type, contextClass).getRawClass())
+				&& super.canRead(type, contextClass, mediaType);
 	}
 
 	/* 
