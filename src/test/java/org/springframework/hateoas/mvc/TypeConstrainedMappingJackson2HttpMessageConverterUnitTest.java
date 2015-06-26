@@ -76,6 +76,5 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	private static void assertCanWrite(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
 
 		assertThat(converter.canWrite(type, APPLICATION_JSON), is(expected));
-		assertThat(converter.canWrite(type, type, APPLICATION_JSON), is(expected));
 	}
 }
