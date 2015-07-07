@@ -158,9 +158,9 @@ public class PagedResources<T> extends Resources<T> {
 	}
 
 	/*
-         * (non-Javadoc)
-         * @see org.springframework.hateoas.ResourceSupport#toString()
-         */
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceSupport#toString()
+	 */
 	@Override
 	public String toString() {
 		return String.format("PagedResource { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
