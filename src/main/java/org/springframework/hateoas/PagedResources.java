@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
  * DTO to implement binding response representations of pageable collections.
@@ -41,6 +42,9 @@ public class PagedResources<T> extends Resources<T> {
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
 	private PageMetadata metadata;
+
+	@JsonUnwrapped
+	private Object pageProperties;
 
 	/**
 	 * Default constructor to allow instantiation by reflection.
@@ -145,7 +149,15 @@ public class PagedResources<T> extends Resources<T> {
 		return getLink(Link.REL_PREVIOUS);
 	}
 
-	/* 
+	public Object getPageProperties() {
+		return pageProperties;
+	}
+
+	public void setPageProperties(Object pageProperties) {
+		this.pageProperties = pageProperties;
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#toString()
 	 */
