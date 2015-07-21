@@ -127,8 +127,8 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
-				JsonGenerationException {
+		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
 
 			// sort links according to their relation
 			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
@@ -200,12 +200,12 @@ public class Jackson2HalModule extends SimpleModule {
 			return null;
 		}
 
-		/*
+		/* 
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
 		@Override
-		public boolean isEmpty(List<Link> value) {
+		public boolean isEmpty(SerializerProvider provider, List<Link> value) {
 			return value.isEmpty();
 		}
 
@@ -293,7 +293,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean isEmpty(Collection<?> value) {
+		public boolean isEmpty(SerializerProvider provider, Collection<?> value) {
 			return value.isEmpty();
 		}
 
@@ -424,13 +424,12 @@ public class Jackson2HalModule extends SimpleModule {
 			return false;
 		}
 
-		/*
+		/* 
 		 * (non-Javadoc)
-		 * 
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
 		@Override
-		public boolean isEmpty(Object arg0) {
+		public boolean isEmpty(SerializerProvider provider, Object value) {
 			return false;
 		}
 
