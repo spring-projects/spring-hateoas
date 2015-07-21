@@ -391,8 +391,9 @@ public class Traverson {
 			}
 
 			HttpEntity<?> request = prepareRequest(headers);
+			UriTemplate template = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = operations.exchange(uri, GET, request, String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
@@ -409,7 +410,7 @@ public class Traverson {
 			/**
 			 * Don't expand if the parameters are empty
 			 */
-			if (thisHop.getParameters().isEmpty()) {
+			if (!thisHop.hasParameters()) {
 				return getAndFindLinkWithRel(link.getHref(), rels);
 			} else {
 				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels);

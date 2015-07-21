@@ -80,6 +80,15 @@ public class Hop {
 	}
 
 	/**
+	 * Returns whether the {@link Hop} has parameters declared.
+	 * 
+	 * @return
+	 */
+	boolean hasParameters() {
+		return !this.parameters.isEmpty();
+	}
+
+	/**
 	 * Create a new {@link Map} starting with the supplied template parameters. Then add the ones for this hop. This
 	 * allows a local hop to override global parameters.
 	 *
