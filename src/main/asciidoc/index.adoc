@@ -87,7 +87,7 @@ You can also easily access links contained in that resource:
 [source, java]
 ----
 Link selfLink = new Link("http://myhost/people");
-assertThat(resource.getId(), is(selfLink);
+assertThat(resource.getId(), is(selfLink));
 assertThat(resource.getLink(Link.SELF), is(selfLink));
 ----
 [[fundamentals.obtaining-links]]
