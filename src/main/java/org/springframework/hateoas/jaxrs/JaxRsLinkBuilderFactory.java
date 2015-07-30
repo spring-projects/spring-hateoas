@@ -18,6 +18,8 @@ package org.springframework.hateoas.jaxrs;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.LinkBuilderFactory;
 
+import java.util.Map;
+
 /**
  * Factory for {@link LinkBuilder} instances based on the path mapping annotated on the given JAX-RS service.
  * 
@@ -40,6 +42,15 @@ public class JaxRsLinkBuilderFactory implements LinkBuilderFactory<JaxRsLinkBuil
 	 */
 	@Override
 	public JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
+		return JaxRsLinkBuilder.linkTo(service, parameters);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.util.Map)
+	 */
+	@Override
+	public JaxRsLinkBuilder linkTo(Class<?> service, Map<String, ?> parameters) {
 		return JaxRsLinkBuilder.linkTo(service, parameters);
 	}
 }
