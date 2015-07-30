@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import java.util.Map;
+
 /**
  * Factory for {@link LinkBuilder} instances.
  * 
@@ -41,4 +43,15 @@ public interface LinkBuilderFactory<T extends LinkBuilder> {
 	 * @return
 	 */
 	T linkTo(Class<?> target, Object... parameters);
+
+	/**
+	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target class (controller,
+	 * service, etc.). Parameter map is used to fill up potentially available path variables in the class scope request
+	 * mapping.
+	 *
+	 * @param target must not be {@literal null}.
+	 * @param parameters must not be {@literal null}.
+	 * @return
+	 */
+	T linkTo(Class<?> target, Map<String, ?> parameters);
 }

@@ -75,6 +75,18 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	}
 
 	@Test
+	public void createsLinkToParameterizedControllerRootWithParameterMap() {
+		Map<String, String> pathParams = new LinkedHashMap<String, String>();
+		pathParams.put("id", "17");
+
+		Link link = factory.linkTo(PersonsAddressesController.class, pathParams).withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/17/addresses"));
+	}
+
+	@Test
 	public void appliesParameterValueIfContributorConfigured() {
 
 		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();

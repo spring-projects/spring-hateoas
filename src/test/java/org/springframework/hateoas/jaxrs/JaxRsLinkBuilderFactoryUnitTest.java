@@ -24,6 +24,9 @@ import org.junit.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Unit test for {@link JaxRsLinkBuilderFactory}.
  * 
@@ -63,6 +66,17 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
+	}
+
+	@Test
+	public void createsLinkToParameterizedServiceRootWithParameterMap() {
+		Map<String, String> pathParams = new LinkedHashMap<String, String>();
+		pathParams.put("id", "17");
+
+		Link link = factory.linkTo(PersonsAddressesService.class, pathParams).withSelfRel();
+
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/17/addresses"));
 	}
 
 	@Path("/people")

@@ -25,6 +25,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Map;
+
 /**
  * {@link LinkBuilder} to derive URI mappings from a JAX-RS {@link Path} annotation.
  * 
@@ -64,6 +66,24 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	 * @return
 	 */
 	public static JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
+
+		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(service)).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+		return builder.slash(expandedComponents);
+	}
+
+	/**
+	 * Creates a new {@link JaxRsLinkBuilder} instance to link to the {@link Path} mapping tied to the given class binding
+	 * the given parameters to the URI template.
+	 *
+	 * @param service the class to discover the annotation on, must not be {@literal null}.
+	 * @param parameters map of additional parameters to bind to the URI template declared in the annotation, must not be
+	 *          {@literal null}.
+	 * @return
+	 */
+	public static JaxRsLinkBuilder linkTo(Class<?> service, Map<String, ?> parameters) {
 
 		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
 
