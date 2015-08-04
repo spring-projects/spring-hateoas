@@ -1,6 +1,26 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.18.0.RELEASE (2015-08-04)
+----------------------------------------------
+- #369 - Traverson's getAndFindLinkWithRel(…) needs to expand given URI defensively.
+- #368 - Assert Jackson 2.6 compatibility.
+- #364 - Added missing parentheses in reference documentation.
+- #360 - TypeConstrainedMappingJackson2HttpMessageConverter needs to override canRead(Type, Class<?>, MediaType).
+- #356 - #355 - Clean up Traverson section and explain Resources vs. Resource.
+- #355 - Traverson docs need more cleanup.
+- #353 - Release 0.18.0.
+- #347 - Augment .gitignore to contain exclusions for Intellij.
+- #342 - Augment error message when building links outside of an MVC request.
+- #341 - ObjectMapper used for default HAL converter should not fail on unknown properties.
+- #332 - Inconsistent behavior when using linkTo(methodOn()) on handler methods.
+- #331 - Inconsistent behavior when using linkTo(methodOn()) on handler methods with defaultValue attribute set on @RequestParam.
+- #329 - #247 - Added HAL_JSON_VALUE in MediaTypes class.
+- #322 - Upgrade to Spring Plugin 1.2.0.
+- #321 - Remove dependency to Objenesis.
+- #314 - JSON-Path in HalLinkDiscoverer doesn't work for URI rels.
+- #247 - Add HAL_JSON_VALUE in MediaTypes class.
+
 Changes in version 0.17.0.RELEASE (2015-03-05)
 ----------------------------------------------
 - #313 - Assert compatibility with both JSONPath 0.9 and 1.2.
