@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +41,7 @@ import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -53,13 +56,14 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
 
 	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[\"first\",\"second\"]}}";
-	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
-	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+	static final String SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test1\",\"number\":1}]}}";
+	static final String LIST_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"content\":[{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test1\",\"number\":1},{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test2\",\"number\":2}]}}";
+	static final String SIMPLE_POJO_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test1\",\"number\":1}";
 
-	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
-	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+	static final String ANNOTATED_EMBEDDED_RESOURCE_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"pojos\":[{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test1\",\"number\":1}]}}";
+	static final String ANNOTATED_EMBEDDED_RESOURCES_REFERENCE = "{\"_embedded\":{\"pojos\":[{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test1\",\"number\":1},{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test2\",\"number\":2}]}}";
 
-	static final String ANNOTATED_PAGED_RESOURCES = "{\"_links\":{\"next\":{\"href\":\"foo\"},\"prev\":{\"href\":\"bar\"}},\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]},\"page\":{\"size\":2,\"totalElements\":4,\"totalPages\":2,\"number\":0}}";
+	static final String ANNOTATED_PAGED_RESOURCES = "{\"_links\":{\"next\":{\"href\":\"foo\"},\"prev\":{\"href\":\"bar\"}},\"_embedded\":{\"pojos\":[{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test1\",\"number\":1},{\"_links\":{\"self\":{\"href\":\"localhost\"}},\"text\":\"test2\",\"number\":2}]},\"page\":{\"size\":2,\"totalElements\":4,\"totalPages\":2,\"number\":0}}";
 
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
 
@@ -215,6 +219,91 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources), is(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	/**
+	 * @see #191
+	 */
+	@Test
+	public void serializesResourceOfSimplePojo() throws Exception {
+
+		Resource<SimplePojo> pojo = new Resource<SimplePojo>(new SimplePojo("test1", 1));
+		pojo.add(new Link("localhost"));
+
+		assertThat(write(pojo), is(SIMPLE_POJO_RESOURCE_REFERENCE));
+	}
+
+	/**
+	 * @see #191
+	 */
+	@Test
+	public void serializesResourceOfJsonNode() throws Exception {
+
+		SimplePojo simplePojo = new SimplePojo("test1", 1);
+		JsonNode jsonNode = new ObjectMapper().valueToTree(simplePojo);
+		Resource<JsonNode> pojo = new Resource<JsonNode>(jsonNode);
+		pojo.add(new Link("localhost"));
+
+		assertThat(write(pojo), is(SIMPLE_POJO_RESOURCE_REFERENCE));
+	}
+
+	/**
+	 * @see #191
+	 */
+	@Test
+	public void serializesResourcesOfArrayNodeAsEmbedded() throws Exception {
+
+		List<String> content = new ArrayList<String>();
+		content.add("first");
+		content.add("second");
+		JsonNode arrayNode = new ObjectMapper().valueToTree(content);
+
+		Resources<JsonNode> resources = new Resources<JsonNode>(arrayNode);
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(SIMPLE_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	/**
+	 * @see #191
+	 */
+	@Test
+	public void rendersResourceResourcesOfJsonNodeAsEmbedded() throws Exception {
+
+		Resources<Resource<JsonNode>> resources = setupResourcesOfJsonNode();
+		resources.add(new Link("localhost"));
+
+		assertThat(write(resources), is(LIST_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	/**
+	 * @see #191
+	 */
+	@Test
+	public void serializesEmbeddedResourceOfJsonNode() throws Exception {
+
+		SimplePojo simplePojo = new SimplePojo("test1", 1);
+		JsonNode jsonNode = new ObjectMapper().valueToTree(simplePojo);
+		Resource<JsonNode> pojo = new Resource<JsonNode>(jsonNode);
+		pojo.add(new Link("localhost"));
+
+		assertThat(write(pojo), is(SIMPLE_POJO_RESOURCE_REFERENCE));
+	}
+
+	/**
+	 * @see #191
+	 */
+	@Test
+	public void serializesResourceOfMap() throws Exception {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("text", "test1");
+		map.put("number", 1);
+		JsonNode jsonNode = new ObjectMapper().valueToTree(map);
+		Resource<JsonNode> pojo = new Resource<JsonNode>(jsonNode);
+		pojo.add(new Link("localhost"));
+
+		assertThat(write(pojo), is(SIMPLE_POJO_RESOURCE_REFERENCE));
 	}
 
 	/**
@@ -386,6 +475,16 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		content.add(new Resource<SimplePojo>(new SimplePojo("test2", 2), new Link("localhost")));
 
 		return new Resources<Resource<SimplePojo>>(content);
+	}
+
+	private static Resources<Resource<JsonNode>> setupResourcesOfJsonNode() {
+
+		ObjectMapper mapper = new ObjectMapper();
+		List<Resource<JsonNode>> content = new ArrayList<Resource<JsonNode>>();
+		content.add(new Resource<JsonNode>(mapper.valueToTree(new SimplePojo("test1", 1)), new Link("localhost")));
+		content.add(new Resource<JsonNode>(mapper.valueToTree(new SimplePojo("test2", 2)), new Link("localhost")));
+
+		return new Resources<Resource<JsonNode>>(content);
 	}
 
 	private static ObjectMapper getCuriedObjectMapper() {

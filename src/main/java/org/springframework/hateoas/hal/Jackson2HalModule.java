@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.Link;
@@ -63,6 +64,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
@@ -86,6 +88,7 @@ public class Jackson2HalModule extends SimpleModule {
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
+		setMixInAnnotation(Resource.class, ResourceMixin.class);
 	}
 
 	/**
@@ -228,6 +231,54 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 	}
 
+	/**
+	 * Custom {@link JsonSerializer to render a {@link Resource} in HAL compatible JSON. Renders content unwrapped even
+	 * if it is a JsonNode.
+	 * 
+	 * @author Dietrich Schulten
+	 */
+	public static class HalResourceSerializer extends JsonSerializer<Object> implements ContextualSerializer {
+
+		@Override
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+
+			final SerializationConfig config = provider.getConfig();
+			JavaType javaType = config.constructType(value.getClass());
+
+			JsonSerializer<Object> serializer = BeanSerializerFactory.instance.createSerializer(provider, javaType);
+			if (value instanceof JsonNode) {
+				JsonNode jsonNode = (JsonNode) value;
+
+				if (jsonNode.isArray()) {
+					serializer.serialize(value, jgen, provider);
+				} else {
+					Iterator<Entry<String, JsonNode>> fields = jsonNode.fields();
+					while (fields.hasNext()) {
+						Entry<String, JsonNode> field = fields.next();
+						jgen.writeFieldName(field.getKey());
+						serializer.serialize(field.getValue(), jgen, provider);
+					}
+				}
+			} else {
+				serializer.unwrappingSerializer(null).serialize(value, jgen, provider);
+			}
+
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
+			return this;
+		}
+
+		@Override
+		public boolean isUnwrappingSerializer() {
+			return true;
+		}
+
+	}
+	
 	/**
 	 * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
 	 * 
