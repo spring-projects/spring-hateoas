@@ -675,22 +675,47 @@ public class Jackson2HalModule extends SimpleModule {
 			super(Boolean.class);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(java.lang.Object)
+		 */
 		@Override
 		public boolean isEmpty(Boolean value) {
+			return isEmpty(null, value);
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
+		 */
+		@Override
+		public boolean isEmpty(SerializerProvider provider, Boolean value) {
 			return value == null || Boolean.FALSE.equals(value);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 		@Override
-		public void serialize(Boolean value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
-				JsonGenerationException {
+		public void serialize(Boolean value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
 			jgen.writeBoolean(value.booleanValue());
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdScalarSerializer#getSchema(com.fasterxml.jackson.databind.SerializerProvider, java.lang.reflect.Type)
+		 */
 		@Override
 		public JsonNode getSchema(SerializerProvider provider, Type typeHint) {
 			return createSchemaNode("boolean", true);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdScalarSerializer#acceptJsonFormatVisitor(com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper, com.fasterxml.jackson.databind.JavaType)
+		 */
 		@Override
 		public void acceptJsonFormatVisitor(JsonFormatVisitorWrapper visitor, JavaType typeHint)
 				throws JsonMappingException {
