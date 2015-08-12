@@ -76,6 +76,7 @@
 			<id>spring42</id>
 			<properties>
 				<spring.version>4.2.0.RELEASE</spring.version>
+				<jackson.version>2.6.1</jackson.version>
 			</properties>
 		</profile>
 
@@ -83,6 +84,7 @@
 			<id>spring42-next</id>
 			<properties>
 				<spring.version>4.2.1.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.6.1</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
