@@ -17,12 +17,16 @@ package org.springframework.hateoas.hal;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.hateoas.IanaRels;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of {@link CurieProvider} rendering a single configurable {@link UriTemplate} based curie.
@@ -33,22 +37,63 @@ import org.springframework.util.Assert;
  */
 public class DefaultCurieProvider implements CurieProvider {
 
-	private final Curie curie;
+	private final Map<String, Curie> curies;
+	private final Curie defaultCurie;
 
 	/**
-	 * Creates a new {@link DefaultCurieProvider} for the given name and {@link UriTemplate}.
+	 * Creates a new {@link DefaultCurieProvider} for the given name and {@link UriTemplate}. The curie will be used to
+	 * expand previously unprefixed, non-IANA link relations.
 	 * 
 	 * @param name must not be {@literal null} or empty.
 	 * @param uriTemplate must not be {@literal null} and contain exactly one template variable.
 	 */
 	public DefaultCurieProvider(String name, UriTemplate uriTemplate) {
+		this(Collections.singletonMap(name, uriTemplate));
+	}
 
-		Assert.hasText(name, "Name must not be null or empty!");
-		Assert.notNull(uriTemplate, "UriTemplate must not be null!");
-		Assert.isTrue(uriTemplate.getVariableNames().size() == 1,
-				String.format("Expected a single template variable in the UriTemplate %s!", uriTemplate.toString()));
+	/**
+	 * Creates a new {@link DefaultCurieProvider} for the given curies. If more than one curie is given, no default curie
+	 * will be registered. Use {@link #DefaultCurieProvider(Map, String)} to define which of the provided curies shall be
+	 * used as the default one.
+	 * 
+	 * @param curies must not be {@literal null}.
+	 * @see #DefaultCurieProvider(String, UriTemplate)
+	 * @since 0.19
+	 */
+	public DefaultCurieProvider(Map<String, UriTemplate> curies) {
+		this(curies, null);
+	}
 
-		this.curie = new Curie(name, uriTemplate.toString());
+	/**
+	 * Creates a new {@link DefaultCurieProvider} for the given curies using the one with the given name as default, which
+	 * means to expand unprefixed, non-IANA link relations.
+	 * 
+	 * @param curies must not be {@literal null}.
+	 * @param defaultCurieName can be {@literal null}.
+	 * @since 0.19
+	 */
+	public DefaultCurieProvider(Map<String, UriTemplate> curies, String defaultCurieName) {
+
+		Assert.notNull(curies, "Curies must not be null!");
+
+		Map<String, Curie> map = new HashMap<String, Curie>(curies.size());
+
+		for (Entry<String, UriTemplate> entry : curies.entrySet()) {
+
+			String name = entry.getKey();
+			UriTemplate template = entry.getValue();
+
+			Assert.hasText(name, "Curie name must not be null or empty!");
+			Assert.notNull(template, "UriTemplate must not be null!");
+			Assert.isTrue(template.getVariableNames().size() == 1,
+					String.format("Expected a single template variable in the UriTemplate %s!", template.toString()));
+
+			map.put(name, new Curie(name, template.toString()));
+		}
+
+		this.defaultCurie = StringUtils.hasText(defaultCurieName) ? map.get(defaultCurieName)
+				: map.size() == 1 ? map.values().iterator().next() : null;
+		this.curies = Collections.unmodifiableMap(map);
 	}
 
 	/* 
@@ -57,7 +102,7 @@ public class DefaultCurieProvider implements CurieProvider {
 	 */
 	@Override
 	public Collection<? extends Object> getCurieInformation(Links links) {
-		return Collections.singleton(curie);
+		return Collections.unmodifiableCollection(curies.values());
 	}
 
 	/* 
@@ -76,8 +121,8 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public String getNamespacedRelFor(String rel) {
 
-		boolean prefixingNeeded = !IanaRels.isIanaRel(rel) && !rel.contains(":");
-		return prefixingNeeded ? String.format("%s:%s", curie.name, rel) : rel;
+		boolean prefixingNeeded = defaultCurie != null && !IanaRels.isIanaRel(rel) && !rel.contains(":");
+		return prefixingNeeded ? String.format("%s:%s", defaultCurie.name, rel) : rel;
 	}
 
 	/**
