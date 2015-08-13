@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.util.StringUtils.*;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 
@@ -192,13 +190,23 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
 		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
-		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
-		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
 
+		String proto = forwarded.getProto();
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+		String forwardedProto = request.getHeader("X-Forwarded-Proto");
+		// We want to use this order of preference: Forwarded, X-Forwarded-Ssl, X-Forwarded-Proto
 		if (hasText(proto)) {
 			builder.scheme(proto);
-		} else if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
-			builder.scheme("https");
+		} else if (hasText(forwardedSsl)) {
+			builder.scheme(forwardedSsl.equalsIgnoreCase("on") ? "https" : "http");
+		} else if (hasText(forwardedProto)) {
+			builder.scheme(forwardedProto);
+		}
+
+		// We want port from Forwarded and X-Forwarded-Host to take preference over X-Forwarded-Port
+		String port = request.getHeader("X-Forwarded-Port");
+		if (hasText(port)) {
+			builder.port(Integer.parseInt(port));
 		}
 
 		String host = forwarded.getHost();
@@ -221,12 +229,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		} else {
 			builder.host(hostToUse);
 			builder.port(-1); // reset port if it was forwarded from default port
-		}
-
-		String port = request.getHeader("X-Forwarded-Port");
-
-		if (hasText(port)) {
-			builder.port(Integer.parseInt(port));
 		}
 
 		return builder;
