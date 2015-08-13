@@ -139,6 +139,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			for (Link link : value) {
 
+				// CURIE_REQUIRED_LINK link is used to trigger curies on paginated resources. We don't serialize it.
                 if (link.equals(PagedResources.CURIE_REQUIRED_LINK)) {
                     curiedLinkPresent = true;
                     continue;
