@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
@@ -70,11 +72,39 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final String LINK_TEMPLATE = "{\"_links\":{\"search\":{\"href\":\"/foo{?bar}\",\"templated\":true}}}";
 
+	static final String USER_WITH_ID = "{\n" +
+			" \"_embedded\" : {\n" +
+			"  \"users\" : [ {\n" +
+			"    \"id\" : 5,\n" +
+			"    \"number\" : 2,\n" +
+			"    \"text\" : \"text\",\n" +
+			"    \"_links\" : {\n" +
+			"      \"self\" : {\n" +
+			"        \"href\" : \"http://localhost:8080/api/users/1\"\n" +
+			"      }\n" +
+			"    }\n" +
+			"  } ]\n" +
+			" }\n" +
+			"}";
+
 	@Before
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null));
+	}
+
+	@Test
+	public void userWithIdDeserialisation() throws Exception {
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		PagedResources<IdSimplePojo> paged = mapper.readValue(USER_WITH_ID, new TypeReference<PagedResources<IdSimplePojo>>() {});
+		assertNotNull(paged.getContent().iterator().next().getId());
+	}
+
+	@Test
+	public void userResourceWithIdDeserialisation() throws Exception {
+		PagedResources<Resource<IdSimplePojo>> paged = mapper.readValue(USER_WITH_ID, new TypeReference<PagedResources<Resource<IdSimplePojo>>>() {});
+		assertNotNull(paged.getContent().iterator().next().getContent().getId());
 	}
 
 	/**
