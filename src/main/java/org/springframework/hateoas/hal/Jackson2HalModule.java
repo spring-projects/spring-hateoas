@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 public class Jackson2HalModule extends SimpleModule {
 
 	private static final long serialVersionUID = 7806951456457932384L;
+	private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = new Link("__rel__", "¯\\_(ツ)_/¯");
 
 	public Jackson2HalModule() {
 
@@ -106,20 +107,22 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
+	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>>implements ContextualSerializer {
 
 		private final BeanProperty property;
 		private final CurieProvider curieProvider;
+		private final EmbeddedMapper mapper;
 
-		public HalLinkListSerializer(CurieProvider curieProvider) {
-			this(null, curieProvider);
+		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper) {
+			this(null, curieProvider, mapper);
 		}
 
-		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider) {
+		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper) {
 
 			super(List.class, false);
 			this.property = property;
 			this.curieProvider = curieProvider;
+			this.mapper = mapper;
 		}
 
 		/*
@@ -136,8 +139,21 @@ public class Jackson2HalModule extends SimpleModule {
 
 			boolean prefixingRequired = curieProvider != null;
 			boolean curiedLinkPresent = false;
+			boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
+
+			Object currentValue = jgen.getCurrentValue();
+
+			if (currentValue instanceof Resources) {
+				if (mapper.hasCuriedEmbed((Resources<?>) currentValue)) {
+					curiedLinkPresent = true;
+				}
+			}
 
 			for (Link link : value) {
+
+				if (link.equals(CURIES_REQUIRED_DUE_TO_EMBEDS)) {
+					continue;
+				}
 
 				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
 
@@ -153,7 +169,7 @@ public class Jackson2HalModule extends SimpleModule {
 				sortedLinks.get(rel).add(link);
 			}
 
-			if (prefixingRequired && curiedLinkPresent) {
+			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
 				ArrayList<Object> curies = new ArrayList<Object>();
 				curies.add(curieProvider.getCurieInformation(new Links(links)));
@@ -179,7 +195,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinkListSerializer(property, curieProvider);
+			return new HalLinkListSerializer(property, curieProvider, mapper);
 		}
 
 		/*
@@ -234,27 +250,21 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>> implements ContextualSerializer {
+	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>>implements ContextualSerializer {
 
 		private final BeanProperty property;
-		private final RelProvider relProvider;
-		private final CurieProvider curieProvider;
-		private final boolean enforceEmbeddedCollections;
+		private final EmbeddedMapper embeddedMapper;
 
-		public HalResourcesSerializer(RelProvider relPorvider, CurieProvider curieProvider,
-				boolean enforceEmbeddedCollections) {
-			this(null, relPorvider, curieProvider, enforceEmbeddedCollections);
+		public HalResourcesSerializer(EmbeddedMapper embeddedMapper) {
+			this(null, embeddedMapper);
 		}
 
-		public HalResourcesSerializer(BeanProperty property, RelProvider relProvider, CurieProvider curieProvider,
-				boolean enforceEmbeddedCollections) {
+		public HalResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
 
 			super(Collection.class, false);
 
 			this.property = property;
-			this.relProvider = relProvider;
-			this.curieProvider = curieProvider;
-			this.enforceEmbeddedCollections = enforceEmbeddedCollections;
+			this.embeddedMapper = embeddedMapper;
 		}
 
 		/*
@@ -264,22 +274,27 @@ public class Jackson2HalModule extends SimpleModule {
 		 * org.codehaus.jackson.map.SerializerProvider)
 		 */
 		@Override
-		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
-				JsonGenerationException {
+		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
 
-			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, enforceEmbeddedCollections);
+			Map<String, Object> embeddeds = embeddedMapper.map(value);
 
-			for (Object resource : value) {
-				builder.add(resource);
+			Object currentValue = jgen.getCurrentValue();
+
+			if (currentValue instanceof ResourceSupport) {
+
+				if (embeddedMapper.hasCuriedEmbed(value)) {
+					((ResourceSupport) currentValue).add(CURIES_REQUIRED_DUE_TO_EMBEDS);
+				}
 			}
 
-			provider.findValueSerializer(Map.class, property).serialize(builder.asMap(), jgen, provider);
+			provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
 		}
 
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, relProvider, curieProvider, enforceEmbeddedCollections);
+			return new HalResourcesSerializer(property, embeddedMapper);
 		}
 
 		@Override
@@ -554,8 +569,8 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
-				JsonProcessingException {
+		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt)
+				throws IOException, JsonProcessingException {
 
 			List<Object> result = new ArrayList<Object>();
 			JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
@@ -600,12 +615,14 @@ public class Jackson2HalModule extends SimpleModule {
 			this(resolver, curieProvider, true);
 		}
 
-		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider, boolean enforceEmbeddedCollections) {
+		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
+				boolean enforceEmbeddedCollections) {
+
+			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
-			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(resolver, curieProvider,
-					enforceEmbeddedCollections));
-			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider));
+			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
+			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider, mapper));
 		}
 
 		private Object findInstance(Class<?> type) {
@@ -722,6 +739,71 @@ public class Jackson2HalModule extends SimpleModule {
 			if (visitor != null) {
 				visitor.expectBooleanFormat(typeHint);
 			}
+		}
+	}
+
+	/**
+	 * Helper to easily map embedded resources and find out whether they were curied.
+	 *
+	 * @author Oliver Gierke
+	 */
+	private static class EmbeddedMapper {
+
+		private RelProvider relProvider;
+		private CurieProvider curieProvider;
+		private boolean preferCollectionRels;
+
+		/**
+		 * Creates a new {@link EmbeddedMapper} for the given {@link RelProvider}, {@link CurieProvider} and flag whether to
+		 * prefer collection relations.
+		 * 
+		 * @param relProvider must not be {@literal null}.
+		 * @param curieProvider can be {@literal null}.
+		 * @param preferCollectionRels
+		 */
+		public EmbeddedMapper(RelProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
+
+			Assert.notNull(relProvider, "RelProvider must not be null!");
+
+			this.relProvider = relProvider;
+			this.curieProvider = curieProvider;
+			this.preferCollectionRels = preferCollectionRels;
+		}
+
+		/**
+		 * Maps the given source elements as embedded values.
+		 * 
+		 * @param source must not be {@literal null}.
+		 * @return
+		 */
+		public Map<String, Object> map(Iterable<?> source) {
+
+			Assert.notNull(source, "Elements must not be null!");
+
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, preferCollectionRels);
+
+			for (Object resource : source) {
+				builder.add(resource);
+			}
+
+			return builder.asMap();
+		}
+
+		/**
+		 * Returns whether the given source elements will be namespaced.
+		 * 
+		 * @param source must not be {@literal null}.
+		 * @return
+		 */
+		public boolean hasCuriedEmbed(Iterable<?> source) {
+
+			for (String rel : map(source).keySet()) {
+				if (rel.contains(":")) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 	}
 }
