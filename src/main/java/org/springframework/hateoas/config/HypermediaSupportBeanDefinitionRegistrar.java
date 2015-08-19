@@ -39,6 +39,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
@@ -80,6 +81,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
 	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
 	private static final String HAL_OBJECT_MAPPER_BEAN_NAME = "_halObjectMapper";
+	private static final String MESSAGE_SOURCE_BEAN_NAME = "linkRelationMessageSource";
 
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 			null);
@@ -288,9 +290,12 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			CurieProvider curieProvider = getCurieProvider(beanFactory);
 			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
 			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
+			MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
+					MessageSourceAccessor.class);
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
-			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider));
+			halObjectMapper.setHandlerInstantiator(
+					new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider, linkRelationMessageSource));
 
 			MappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 					ResourceSupport.class);

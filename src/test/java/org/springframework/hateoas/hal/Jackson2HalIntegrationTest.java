@@ -23,9 +23,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
@@ -70,11 +75,13 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final String LINK_TEMPLATE = "{\"_links\":{\"search\":{\"href\":\"/foo{?bar}\",\"templated\":true}}}";
 
+	static final String LINK_WITH_TITLE = "{\"_links\":{\"ns:foobar\":{\"href\":\"target\",\"title\":\"Foobar's title!\"}}}";
+
 	@Before
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null));
 	}
 
 	/**
@@ -337,7 +344,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 			}
 		};
 
-		assertThat(getCuriedObjectMapper(provider).writeValueAsString(resources), is(MULTIPLE_CURIES_DOCUMENT));
+		assertThat(getCuriedObjectMapper(provider, null).writeValueAsString(resources), is(MULTIPLE_CURIES_DOCUMENT));
 	}
 
 	/**
@@ -354,6 +361,37 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		Resources<Object> resources = new Resources<Object>(values);
 
 		assertThat(write(resources), is("{\"_embedded\":{\"pojos\":[]}}"));
+	}
+
+	/**
+	 * @see #378
+	 */
+	@Test
+	public void rendersTitleIfMessageSourceResolvesNamespacedKey() throws Exception {
+		verifyResolvedTitle("_links.ns:foobar.title");
+	}
+
+	/**
+	 * @see #378
+	 */
+	@Test
+	public void rendersTitleIfMessageSourceResolvesLocalKey() throws Exception {
+		verifyResolvedTitle("_links.foobar.title");
+	}
+
+	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {
+
+		LocaleContextHolder.setLocale(Locale.US);
+
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(resourceBundleKey, Locale.US, "Foobar's title!");
+
+		ObjectMapper objectMapper = getCuriedObjectMapper(null, messageSource);
+
+		ResourceSupport resource = new ResourceSupport();
+		resource.add(new Link("target", "ns:foobar"));
+
+		assertThat(objectMapper.writeValueAsString(resource), is(LINK_WITH_TITLE));
 	}
 
 	private static Resources<Resource<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
@@ -385,14 +423,16 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	private static ObjectMapper getCuriedObjectMapper() {
 
-		return getCuriedObjectMapper(new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}")));
+		return getCuriedObjectMapper(new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}")),
+				null);
 	}
 
-	private static ObjectMapper getCuriedObjectMapper(CurieProvider provider) {
+	private static ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), provider));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), provider,
+				messageSource == null ? null : new MessageSourceAccessor(messageSource)));
 
 		return mapper;
 	}

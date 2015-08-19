@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RelProvider;
@@ -34,6 +36,9 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -109,20 +114,26 @@ public class Jackson2HalModule extends SimpleModule {
 	 */
 	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>>implements ContextualSerializer {
 
+		private static final String RELATION_MESSAGE_TEMPLATE = "_links.%s.title";
+
 		private final BeanProperty property;
 		private final CurieProvider curieProvider;
 		private final EmbeddedMapper mapper;
+		private final MessageSourceAccessor messageSource;
 
-		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper) {
-			this(null, curieProvider, mapper);
+		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper,
+				MessageSourceAccessor messageSource) {
+			this(null, curieProvider, mapper, messageSource);
 		}
 
-		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper) {
+		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
+				MessageSourceAccessor messageSource) {
 
 			super(List.class, false);
 			this.property = property;
 			this.curieProvider = curieProvider;
 			this.mapper = mapper;
+			this.messageSource = messageSource;
 		}
 
 		/*
@@ -166,7 +177,8 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 
 				links.add(link);
-				sortedLinks.get(rel).add(link);
+
+				sortedLinks.get(rel).add(toHalLink(link));
 			}
 
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
@@ -188,6 +200,43 @@ public class Jackson2HalModule extends SimpleModule {
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
 
+		/**
+		 * Wraps the given link into a HAL specifc extension.
+		 * 
+		 * @param link must not be {@literal null}.
+		 * @return
+		 */
+		private HalLink toHalLink(Link link) {
+
+			String rel = link.getRel();
+			String title = getTitle(rel);
+
+			if (title == null) {
+				title = getTitle(rel.contains(":") ? rel.substring(rel.indexOf(":") + 1) : rel);
+			}
+
+			return new HalLink(link, title);
+		}
+
+		/**
+		 * Returns the title for the given local link relation resolved through the configured {@link MessageSourceAccessor}
+		 * .
+		 * 
+		 * @param localRel must not be {@literal null} or empty.
+		 * @return
+		 */
+		private String getTitle(String localRel) {
+
+			Assert.hasText(localRel, "Local relation must not be null or empty!");
+
+			try {
+				return messageSource == null ? null
+						: messageSource.getMessage(String.format(RELATION_MESSAGE_TEMPLATE, localRel));
+			} catch (NoSuchMessageException o_O) {
+				return null;
+			}
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
@@ -195,7 +244,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinkListSerializer(property, curieProvider, mapper);
+			return new HalLinkListSerializer(property, curieProvider, mapper, messageSource);
 		}
 
 		/*
@@ -611,18 +660,20 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
 
-		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider) {
-			this(resolver, curieProvider, true);
+		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
+				MessageSourceAccessor messageSource) {
+			this(resolver, curieProvider, messageSource, true);
 		}
 
 		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
-				boolean enforceEmbeddedCollections) {
+				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections) {
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
 			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
-			this.instanceMap.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider, mapper));
+			this.instanceMap.put(HalLinkListSerializer.class,
+					new HalLinkListSerializer(curieProvider, mapper, messageSource));
 		}
 
 		private Object findInstance(Class<?> type) {
@@ -804,6 +855,27 @@ public class Jackson2HalModule extends SimpleModule {
 			}
 
 			return false;
+		}
+	}
+
+	static class HalLink {
+
+		private final Link link;
+		private final String title;
+
+		public HalLink(Link link, String title) {
+			this.link = link;
+			this.title = title;
+		}
+
+		@JsonUnwrapped
+		public Link getLink() {
+			return link;
+		}
+
+		@JsonInclude(Include.NON_NULL)
+		public String getTitle() {
+			return title;
 		}
 	}
 }

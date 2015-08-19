@@ -61,7 +61,7 @@ public class Server implements Closeable {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null));
+		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
 
 		initJadler(). //
 				that().//
