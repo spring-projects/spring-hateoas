@@ -4,7 +4,7 @@
 
 	<groupId>com.nbcuni.external.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>1.1.6-SNAPSHOT</version>
+	<version>1.1.6</version>
 	<url>http://github.com/NBCUOTS/appbackbone_spring-hateoas</url>
 	<name>Spring HATEOAS</name>
 	<description>
@@ -16,7 +16,7 @@
 		<connection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</connection>
 		<developerConnection>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</developerConnection>
 		<url>scm:git:git@github.com:NBCUOTS/appbackbone_spring-hateoas.git</url>
-		<tag>HEAD</tag>
+		<tag>spring-hateoas-1.1.6</tag>
 	</scm>
 
 	<inceptionYear>2012-2015</inceptionYear>
