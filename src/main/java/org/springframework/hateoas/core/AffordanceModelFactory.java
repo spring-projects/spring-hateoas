@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.core;
 
+import java.util.Optional;
+
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
@@ -31,6 +33,15 @@ import org.springframework.web.util.UriComponents;
 public interface AffordanceModelFactory extends Plugin<MediaType> {
 
 	/**
+	 * Declare the {@link MediaType} this factory supports.
+	 * 
+	 * @return
+	 */
+	default MediaType getMediaType() {
+		return null;
+	};
+
+	/**
 	 * Look up the {@link AffordanceModel} for this factory.
 	 * 
 	 * @param affordance
@@ -39,4 +50,17 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 	 * @return
 	 */
 	AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components);
+
+	/**
+	 * Returns if a plugin should be invoked according to the given delimiter.
+	 *
+	 * @param delimiter
+	 * @return if the plugin should be invoked
+	 */
+	@Override
+	default boolean supports(MediaType delimiter) {
+		return Optional.ofNullable(getMediaType())
+			.map(mediaType -> mediaType.equals(delimiter))
+			.orElse(false);
+	}
 }

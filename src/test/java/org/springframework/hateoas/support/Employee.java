@@ -13,18 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal.forms;
+package org.springframework.hateoas.support;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Wither;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Greg Turnquist
  */
 @Data
 @Wither
-class Employee {
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Employee {
 
-	private final String name;
-	private final String role;
+	private String name;
+	private String role;
+
+	Employee() {
+		this(null, null);
+	}
 }

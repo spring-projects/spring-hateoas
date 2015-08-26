@@ -1,0 +1,29 @@
+{
+  "collection" : {
+    "version" : "1.0",
+    "href" : "localhost",
+    "links" : [ {
+      "rel" : "next",
+      "href" : "/page/2"
+    } ],
+    "items" : [ {
+      "href" : "localhost",
+      "data" : [ {
+        "value" : "first"
+      } ],
+      "links" : [ {
+        "rel" : "orders",
+        "href" : "orders"
+      } ]
+    }, {
+      "href" : "remotehost",
+      "data" : [ {
+        "value" : "second"
+      } ],
+      "links" : [ {
+        "rel" : "orders",
+        "href" : "order"
+      } ]
+    } ]
+  }
+}

@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas;
 
+import java.util.List;
+
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -47,4 +50,17 @@ public interface Affordance {
 	 * @return
 	 */
 	<T extends AffordanceModel> T getAffordanceModel(MediaType mediaType);
+
+	/**
+	 * Get a listing of {@link MethodParameter}s.
+	 *
+	 * @return
+	 */
+	List<MethodParameter> getInputMethodParameters();
+
+	/**
+	 * Get a listing of {@link QueryParameter}s.
+	 * @return
+	 */
+	List<QueryParameter> getQueryMethodParameters();
 }

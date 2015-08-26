@@ -33,6 +33,7 @@ import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.collectionjson.CollectionJsonWebMvcConfigurer;
 import org.springframework.hateoas.hal.forms.HalFormsWebMvcConfigurer;
 
 /**
@@ -85,7 +86,15 @@ public @interface EnableHypermediaSupport {
 		 * 
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
-		HAL_FORMS(HalFormsWebMvcConfigurer.class);
+		HAL_FORMS(HalFormsWebMvcConfigurer.class),
+
+		/**
+		 * Collection+JSON
+		 *
+		 * @see http://amundsen.com/media-types/collection/format/
+		 */
+		COLLECTION_JSON(CollectionJsonWebMvcConfigurer.class);
+
 
 		private final List<Class<?>> configurations;
 

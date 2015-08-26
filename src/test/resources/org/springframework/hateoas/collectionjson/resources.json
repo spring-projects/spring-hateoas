@@ -1,0 +1,17 @@
+{
+  "collection" : {
+    "version" : "1.0",
+    "href" : "localhost",
+    "items" : [ {
+      "href" : null,
+      "data" : [ {
+        "value" : "first"
+      } ]
+    }, {
+      "href" : null,
+      "data" : [ {
+        "value" : "second"
+      } ]
+    } ]
+  }
+}

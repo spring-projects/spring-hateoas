@@ -16,12 +16,9 @@
 package org.springframework.hateoas.hal.forms;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
@@ -224,18 +221,12 @@ class HalFormsSerializers {
 	 */
 	private static void validate(ResourceSupport resource, Affordance affordance, HalFormsAffordanceModel model) {
 
-		try {
+		String affordanceUri = model.getURI();
+		String selfLinkUri = resource.getRequiredLink(Link.REL_SELF).getHref();
 
-			Optional<Link> selfLink = resource.getLink(Link.REL_SELF);
-			URI selfLinkUri = new URI(selfLink.map(link -> link.expand().getHref()).orElse(""));
-
-			if (!model.hasPath(selfLinkUri.getPath())) {
-				throw new IllegalStateException("Affordance's URI " + model.getPath() + " doesn't match self link "
-						+ selfLinkUri.getPath() + " as expected in HAL-FORMS");
-			}
-
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
+		if (!affordanceUri.equals(selfLinkUri)) {
+			throw new IllegalStateException("Affordance's URI " + affordanceUri + " doesn't match self link "
+				+ selfLinkUri + " as expected in HAL-FORMS");
 		}
 	}
 }

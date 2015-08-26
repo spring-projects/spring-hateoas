@@ -363,7 +363,7 @@ Since the purpose of the `CurieProvider` API is to allow for automatic curie cre
 [[client.traverson]]
 === Traverson
 
-As of version 0.11 Spring HATEOAS provides an API for client side service traversal inspired by the https://blog.codecentric.de/en/2013/11/traverson/[Traverson JavaScript library].
+Spring HATEOAS provides an API for client side service traversal inspired by the https://blog.codecentric.de/en/2013/11/traverson/[Traverson JavaScript library].
 
 [source, java]
 ----

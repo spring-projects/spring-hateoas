@@ -21,14 +21,21 @@ import lombok.Value;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
+import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Spring MVC-based representation of an {@link Affordance}.
@@ -88,5 +95,31 @@ class SpringMvcAffordance implements Affordance {
 		for (MediaType mediaType : affordanceModel.getMediaTypes()) {
 			this.affordanceModels.put(mediaType, affordanceModel);
 		}
+	}
+
+	/**
+	 * Get a listing of {@link MethodParameter}s based on Spring MVC's {@link RequestBody}s.
+	 *
+	 * @return
+	 */
+	@Override
+	public List<MethodParameter> getInputMethodParameters() {
+		return new MethodParameters(this.method).getParametersWith(RequestBody.class);
+	}
+
+	/**
+	 * Get a listing of {@link MethodParameter}s based on Spring MVC's {@link RequestParam}s.
+	 *
+	 * @return
+	 */
+	@Override
+	public List<QueryParameter> getQueryMethodParameters() {
+
+		MethodParameters parameters = new MethodParameters(this.method);
+
+		return parameters.getParametersWith(RequestParam.class).stream()
+			.map(methodParameter -> methodParameter.getParameterAnnotation(RequestParam.class))
+			.map(requestParam -> new QueryParameter(requestParam.name(), requestParam.required(), requestParam.value()))
+			.collect(Collectors.toList());
 	}
 }

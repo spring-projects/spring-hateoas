@@ -1,0 +1,21 @@
+image:https://spring.io/badges/spring-hateoas/ga.svg[http://projects.spring.io/spring-hateoas/#quick-start]
+image:https://spring.io/badges/spring-hateoas/snapshot.svg[http://projects.spring.io/spring-hateoas/#quick-start]
+
+= Spring HATEOAS
+
+This project provides some APIs to ease creating REST representations that follow the http://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+
+== Working with Spring HATEOAS
+
+Since all commits are headlined with its github issue, git will treat it as a comment. To get around this, apply the following configuration to your clone:
+
+[source]
+----
+git config core.commentchar "/"
+----
+
+== Resources
+
+* Reference documentation - http://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], http://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
+* http://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/api/[JavaDoc]
+* https://spring.io/guides/gs/rest-hateoas/[Getting started guide]

@@ -1,0 +1,27 @@
+{
+  "version" : "1.0",
+  "href" : "localhost",
+  "links" : [ {
+    "rel" : "self",
+    "href" : "foo"
+  } ],
+  "items" : [ {
+    "href" : "localhost",
+    "data" : [ {
+      "value" : "Greetings programs"
+    } ],
+    "links" : [ {
+      "rel" : "self",
+      "href" : "localhost"
+    } ]
+  }, {
+    "href" : "localhost",
+    "data" : [ {
+      "value" : "Yo"
+    } ],
+    "links" : [ {
+      "rel" : "orders",
+      "href" : "localhost/orders"
+    } ]
+  } ]
+}

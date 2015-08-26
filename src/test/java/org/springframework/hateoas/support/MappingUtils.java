@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
  * Copyright 2015-2017 the original author or authors.
+=======
+ * Copyright 2015 the original author or authors.
+>>>>>>> 0c39f92... #482 - Add support for Collection+JSON media type
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +55,7 @@ public final class MappingUtils {
 			}
 
 			return builder.toString();
+
 		} finally {
 			if (scanner != null) {
 				scanner.close();
