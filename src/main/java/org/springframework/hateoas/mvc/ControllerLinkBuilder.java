@@ -306,7 +306,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * 
 	 * @return
 	 */
-	static UriComponentsBuilder getBuilder() {
+	public static UriComponentsBuilder getBuilder() {
 
 		if (RequestContextHolder.getRequestAttributes() == null) {
 			return UriComponentsBuilder.fromPath("/");

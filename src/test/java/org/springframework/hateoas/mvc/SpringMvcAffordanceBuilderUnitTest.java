@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 

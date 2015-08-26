@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * A simple {@link Resource} wrapping a domain object and adding links to it.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @XmlRootElement
 public class Resource<T> extends ResourceSupport {
@@ -38,7 +39,7 @@ public class Resource<T> extends ResourceSupport {
 	/**
 	 * Creates an empty {@link Resource}.
 	 */
-	Resource() {
+	protected Resource() {
 		this.content = null;
 	}
 

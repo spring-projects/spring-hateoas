@@ -36,6 +36,7 @@ import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
@@ -63,6 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Integration tests for {@link EnableHypermediaSupport}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @RunWith(MockitoJUnitRunner.class)
 public class EnableHypermediaSupportIntegrationTest {
@@ -77,8 +79,12 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertHalFormsSetupForConfigClass(HalFormsConfig.class);
 	}
 
+	public void bootstrapJsonCollectionConfiguration() {
+		assertCollectionJsonSetupForConfigClass(CollectionJsonConfig.class);
+	}
+
 	@Test
-	public void registersLinkDiscoverers() {
+	public void registersHalLinkDiscoverers() {
 
 		withContext(HalConfig.class, context -> {
 
@@ -105,6 +111,19 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
+	public void registersCollectionJsonLinkDiscoverers() {
+
+		withContext(CollectionJsonConfig.class, context -> {
+
+			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+			assertThat(discoverers).isNotNull();
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.COLLECTION_JSON)).isInstanceOf(CollectionJsonLinkDiscoverer.class);
+			assertRelProvidersSetUp(context);
+		});
+	}
+
+	@Test
 	public void bootstrapsHalConfigurationForSubclass() {
 		assertHalSetupForConfigClass(ExtendedHalConfig.class);
 	}
@@ -112,6 +131,11 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void bootstrapsHalFormsConfigurationForSubclass() {
 		assertHalFormsSetupForConfigClass(ExtendedHalFormsConfig.class);
+	}
+
+	@Test
+	public void bootstrapsCollectionJsonConfigurationForSubclass() {
+		assertCollectionJsonSetupForConfigClass(ExtendedCollectionJsonConfig.class);
 	}
 
 	/**
@@ -190,6 +214,44 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void collectionJsonSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+
+		withContext(CollectionJsonConfig.class, context -> {
+
+			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+			postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
+
+			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+
+			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes())
+				.hasSize(1)
+				.contains(MediaTypes.COLLECTION_JSON);
+
+			boolean found = false;
+
+			for (HandlerMethodArgumentResolver resolver : getResolvers(adapter)) {
+
+				if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
+
+					found = true;
+
+					AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
+					List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils
+						.getField(processor, "messageConverters");
+
+					assertThat(converters.get(0)).isInstanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class);
+					assertThat(converters.get(0).getSupportedMediaTypes())
+						.hasSize(1)
+						.contains(MediaTypes.COLLECTION_JSON);
+				}
+			}
+
+			assertThat(found).isTrue();
+		});
+	}
+
 	/**
 	 * @see #293
 	 */
@@ -217,6 +279,18 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	@Test
+	public void registersCollectionJsonHttpMessageConvertersForRestTemplate() {
+
+		withContext(CollectionJsonConfig.class, context -> {
+			RestTemplate template = context.getBean(RestTemplate.class);
+
+			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes())
+				.hasSize(1)
+				.contains(MediaTypes.COLLECTION_JSON);
+		});
+	}
+
 	/**
 	 * @see #341
 	 */
@@ -226,6 +300,31 @@ public class EnableHypermediaSupportIntegrationTest {
 		withContext(HalConfig.class, context -> {
 
 			ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+
+			assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+		});
+	}
+
+	/**
+	 * @see #341
+	 */
+	@Test
+	public void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
+
+		withContext(HalFormsConfig.class, context -> {
+
+			ObjectMapper mapper = context.getBean("_halFormsObjectMapper", ObjectMapper.class);
+
+			assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+		});
+	}
+
+	@Test
+	public void configuresDefaultObjectMapperForCollectionJsonToIgnoreUnknownProperties() {
+
+		withContext(CollectionJsonConfig.class, context -> {
+
+			ObjectMapper mapper = context.getBean("_collectionJsonObjectMapper", ObjectMapper.class);
 
 			assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 		});
@@ -266,21 +365,8 @@ public class EnableHypermediaSupportIntegrationTest {
 			ConsumerWithException<AnnotationConfigApplicationContext, E> consumer) throws E {
 
 		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(configuration)) {
-			if (context.containsBean("_halFormsObjectMapper")) {
-				ObjectMapper mapper = context.getBean("_halFormsObjectMapper", ObjectMapper.class);
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			}
 			consumer.accept(context);
 		}
-	}
-
-	public void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
-
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalFormsConfig.class);
-		ObjectMapper mapper = context.getBean("_halFormsObjectMapper", ObjectMapper.class);
-
-		assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-		context.close();
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -315,6 +401,21 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			assertEntityLinksSetUp(context);
 			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(HalFormsLinkDiscoverer.class);
+			assertThat(context.getBean(ObjectMapper.class)).isNotNull();
+
+			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
+			assertThat(rmha.getMessageConverters().get(0)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
+
+		});
+	}
+
+	@SuppressWarnings({ "unchecked" })
+	private static void assertCollectionJsonSetupForConfigClass(Class<?> configClass) {
+
+		withContext(configClass, context -> {
+
+			assertEntityLinksSetUp(context);
+			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(CollectionJsonLinkDiscoverer.class);
 			assertThat(context.getBean(ObjectMapper.class)).isNotNull();
 
 			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
@@ -436,5 +537,34 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		void accept(T element) throws E;
 	}
-	
+
+	@Configuration
+	@Import(AlternateDelegateConfig.class)
+	static class CollectionJsonConfig {
+
+		static int numberOfMessageConverters = 0;
+		static int numberOfMessageConvertersLegacy = 0;
+
+		@Bean
+		public RequestMappingHandlerAdapter rmh() {
+			RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+			numberOfMessageConverters = adapter.getMessageConverters().size();
+			return adapter;
+		}
+
+		@Bean
+		public RestTemplate restTemplate() {
+			return new RestTemplate();
+		}
+	}
+
+	@Configuration
+	static class ExtendedCollectionJsonConfig extends CollectionJsonConfig {
+
+	}
+
+	@EnableHypermediaSupport(type = HypermediaType.COLLECTION_JSON)
+	static class AlternateDelegateConfig {
+
+	}
 }

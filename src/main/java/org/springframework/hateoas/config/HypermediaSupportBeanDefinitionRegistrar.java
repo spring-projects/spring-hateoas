@@ -48,6 +48,8 @@ import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
+import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.DefaultRelProvider;
@@ -88,6 +90,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
 	private static final String HAL_OBJECT_MAPPER_BEAN_NAME = "_halObjectMapper";
 	private static final String HAL_FORMS_OBJECT_MAPPER_BEAN_NAME = "_halFormsObjectMapper";
+	private static final String COLLECTION_JSON_OBJECT_MAPPER_BEAN_NAME = "_collectionJsonObjectMapper";
 	private static final String MESSAGE_SOURCE_BEAN_NAME = "linkRelationMessageSource";
 
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
@@ -127,6 +130,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 		if (types.contains(HypermediaType.HAL_FORMS)) {
 			registerHypermediaComponents(metadata, registry, HAL_FORMS_OBJECT_MAPPER_BEAN_NAME);
+		}
+
+		if (types.contains(HypermediaType.COLLECTION_JSON)) {
+			registerHypermediaComponents(metadata, registry, COLLECTION_JSON_OBJECT_MAPPER_BEAN_NAME);
 		}
 
 		if (!types.isEmpty()) {
@@ -213,6 +220,9 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				break;
 			case HAL_FORMS:
 				definition = new RootBeanDefinition(HalFormsLinkDiscoverer.class);
+				break;
+			case COLLECTION_JSON:
+				definition = new RootBeanDefinition(CollectionJsonLinkDiscoverer.class);
 				break;
 			default:
 				throw new IllegalStateException(String.format("Unsupported hypermedia type %s!", type));
@@ -316,7 +326,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 				MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
-						MessageSourceAccessor.class);
+					MessageSourceAccessor.class);
 
 				halObjectMapper.registerModule(new Jackson2HalModule());
 
@@ -340,7 +350,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				ObjectMapper halFormsObjectMapper = beanFactory.getBean(HAL_FORMS_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 				MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
-						MessageSourceAccessor.class);
+					MessageSourceAccessor.class);
 
 				halFormsObjectMapper.registerModule(new Jackson2HalFormsModule());
 
@@ -354,10 +364,28 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				}
 
 				MappingJackson2HttpMessageConverter halFormsConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-						ResourceSupport.class);
+					ResourceSupport.class);
 				halFormsConverter.setSupportedMediaTypes(Arrays.asList(HAL_FORMS_JSON));
 				halFormsConverter.setObjectMapper(halFormsObjectMapper);
 				result.add(halFormsConverter);
+			}
+
+			if (beanFactory.containsBean(COLLECTION_JSON_OBJECT_MAPPER_BEAN_NAME)) {
+
+				ObjectMapper collectionJsonObjectMapper = beanFactory.getBean(COLLECTION_JSON_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
+				MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
+						MessageSourceAccessor.class);
+
+				collectionJsonObjectMapper.registerModule(new Jackson2CollectionJsonModule());
+				
+				collectionJsonObjectMapper.setHandlerInstantiator(
+						new Jackson2CollectionJsonModule.CollectionJsonHandlerInstantiator(linkRelationMessageSource));
+
+				MappingJackson2HttpMessageConverter jsonCollectionConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+						ResourceSupport.class);
+				jsonCollectionConverter.setSupportedMediaTypes(Arrays.asList(COLLECTION_JSON));
+				jsonCollectionConverter.setObjectMapper(collectionJsonObjectMapper);
+				result.add(jsonCollectionConverter);
 			}
 
 			result.addAll(converters);
@@ -390,7 +418,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-			if (HAL_OBJECT_MAPPER_BEAN_NAME.equals(beanName) || HAL_FORMS_OBJECT_MAPPER_BEAN_NAME.equals(beanName)) {
+			if (HAL_OBJECT_MAPPER_BEAN_NAME.equals(beanName) || HAL_FORMS_OBJECT_MAPPER_BEAN_NAME.equals(beanName) || COLLECTION_JSON_OBJECT_MAPPER_BEAN_NAME.equals(beanName)) {
 				ObjectMapper mapper = (ObjectMapper) bean;
 				mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 				return mapper;

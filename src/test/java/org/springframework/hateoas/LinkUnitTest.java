@@ -19,9 +19,11 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -294,6 +296,16 @@ public class LinkUnitTest {
 		 */
 		@Override
 		public String getName() {
+			return null;
+		}
+
+		@Override
+		public List<MethodParameter> getInputMethodParameters() {
+			return null;
+		}
+
+		@Override
+		public List<QueryParameter> getQueryMethodParameters() {
 			return null;
 		}
 	}

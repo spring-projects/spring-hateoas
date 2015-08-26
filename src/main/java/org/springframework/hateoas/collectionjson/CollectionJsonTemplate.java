@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal.forms;
+package org.springframework.hateoas.collectionjson;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Value;
+import lombok.experimental.Wither;
 
-import org.springframework.hateoas.ResourceSupport;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Greg Turnquist
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
-class EmployeeResource extends ResourceSupport {
+@Value
+@Wither
+class CollectionJsonTemplate {
 
-	private String name;
+	private List<CollectionJsonData> data;
+
+	@JsonCreator
+	CollectionJsonTemplate(@JsonProperty("data") List<CollectionJsonData> data) {
+		this.data = data;
+	}
+
+	CollectionJsonTemplate() {
+		this(null);
+	}
 }

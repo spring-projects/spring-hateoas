@@ -67,4 +67,13 @@ public class MediaTypes {
 	 */
 	public static final MediaType HAL_FORMS_JSON = MediaType.parseMediaType(HAL_FORMS_JSON_VALUE);
 
+	/**
+	 * A String equivalent of {@link MediaTypes#COLLECTION_JSON}.
+	 */
+	public static final String COLLECTION_JSON_VALUE = "application/vnd.collection+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.collection+json}.
+	 */
+	public static final MediaType COLLECTION_JSON = MediaType.valueOf(COLLECTION_JSON_VALUE);
 }

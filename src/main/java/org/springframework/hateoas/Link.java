@@ -49,7 +49,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties("templated")
+@JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "deprecation", "affordances" })

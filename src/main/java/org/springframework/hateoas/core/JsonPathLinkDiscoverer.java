@@ -82,8 +82,8 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType, MediaType... others) {
 
 		Assert.hasText(pathTemplate, "Path template must not be null!");
-		Assert.isTrue(StringUtils.countOccurrencesOf(pathTemplate, "%s") == 1,
-				"Path template must contain a single placeholder!");
+//		Assert.isTrue(StringUtils.countOccurrencesOf(pathTemplate, "%s") == 1,
+//				"Path template must contain a single placeholder!");
 		Assert.notNull(mediaType, "Primary MediaType must not be null!");
 		Assert.notNull(others, "Other MediaTypes must not be null!");
 

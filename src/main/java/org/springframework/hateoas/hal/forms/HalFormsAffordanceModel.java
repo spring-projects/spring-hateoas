@@ -15,29 +15,21 @@
  */
 package org.springframework.hateoas.hal.forms;
 
-import lombok.extern.slf4j.Slf4j;
-
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MethodParameters;
+import org.springframework.hateoas.support.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriComponents;
 
 /**
@@ -45,40 +37,41 @@ import org.springframework.web.util.UriComponents;
  * 
  * @author Greg Turnquist
  */
-@Slf4j
 class HalFormsAffordanceModel implements AffordanceModel {
 
 	private static final List<HttpMethod> METHODS_FOR_INPUT_DETECTTION = Arrays.asList(HttpMethod.POST, HttpMethod.PUT,
 			HttpMethod.PATCH);
 
+	private final Affordance affordance;
 	private final UriComponents components;
 	private final boolean required;
-	private final Map<String, Class<?>> properties;
+	private final List<String> properties;
 
-	public HalFormsAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components) {
+	public HalFormsAffordanceModel(Affordance affordance, UriComponents components) {
 
+		this.affordance = affordance;
 		this.components = components;
 		this.required = determineRequired(affordance.getHttpMethod());
 		this.properties = METHODS_FOR_INPUT_DETECTTION.contains(affordance.getHttpMethod()) //
-				? determineAffordanceInputs(invocationValue.getMethod()) //
-				: Collections.<String, Class<?>> emptyMap();
+				? determineAffordanceInputs() //
+				: Collections.emptyList();
 	}
 
 	/**
-	 * Transform the details of the Spring MVC method's {@link RequestBody} into a collection of
+	 * Transform the details of the REST method's {@link MethodParameters} into
 	 * {@link HalFormsProperty}s.
 	 * 
 	 * @return
 	 */
 	public List<HalFormsProperty> getProperties() {
 
-		return properties.entrySet().stream() //
-				.map(entry -> entry.getKey()) //
-				.map(key -> HalFormsProperty.named(key).withRequired(required)).collect(Collectors.toList());
+		return properties.stream() //
+			.map(name -> HalFormsProperty.named(name).withRequired(required)) //
+			.collect(Collectors.toList());
 	}
 
-	public String getPath() {
-		return components.getPath();
+	public String getURI() {
+		return components.toUriString();
 	}
 
 	/**
@@ -91,7 +84,7 @@ class HalFormsAffordanceModel implements AffordanceModel {
 
 		Assert.notNull(path, "Path must not be null!");
 
-		return getPath().equals(path);
+		return getURI().equals(path);
 	}
 
 	/* 
@@ -115,39 +108,15 @@ class HalFormsAffordanceModel implements AffordanceModel {
 
 	/**
 	 * Look at the inputs for a Spring MVC controller method to decide the {@link Affordance}'s properties.
-	 *
-	 * @param method - {@link Method} of the Spring MVC controller tied to this affordance
 	 */
-	private Map<String, Class<?>> determineAffordanceInputs(Method method) {
+	private List<String> determineAffordanceInputs() {
 
-		if (method == null) {
-			return Collections.emptyMap();
-		}
-
-		LOG.debug("Gathering details about " + method.getDeclaringClass().getCanonicalName() + "." + method.getName());
-
-		Map<String, Class<?>> properties = new TreeMap<>();
-		MethodParameters parameters = new MethodParameters(method);
-
-		for (MethodParameter parameter : parameters.getParametersWith(RequestBody.class)) {
-
-			Class<?> parameterType = parameter.getParameterType();
-
-			LOG.debug("\tRequest body: " + parameterType.getCanonicalName() + "(");
-
-			for (PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(parameterType)) {
-
-				if (!descriptor.getName().equals("class")) {
-
-					LOG.debug("\t\t" + descriptor.getPropertyType().getCanonicalName() + " " + descriptor.getName());
-					properties.put(descriptor.getName(), descriptor.getPropertyType());
-				}
-			}
-
-			LOG.debug(")");
-		}
-
-		LOG.debug("Assembled " + this.toString());
-		return properties;
+		return this.affordance.getInputMethodParameters().stream()
+			.findFirst()
+			.map(methodParameter -> {
+				ResolvableType resolvableType = ResolvableType.forMethodParameter(methodParameter);
+				return PropertyUtils.findProperties(resolvableType);
+			})
+			.orElse(Collections.emptyList());
 	}
 }
