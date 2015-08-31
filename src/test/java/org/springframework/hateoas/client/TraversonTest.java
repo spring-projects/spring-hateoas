@@ -355,6 +355,23 @@ public class TraversonTest {
 		assertThat(item.image, equalTo(server.rootResource() + "/springagram/file/cat"));
 		assertThat(item.description, equalTo("cat"));
 	}
+	
+	/**
+	 * @see #337
+	 */
+	@Test
+	public void doesNotDoubleEncodeURI() {
+		
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		Resource<?> itemResource = traverson.//
+				follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))).//
+				toObject(Resource.class);
+
+		assertThat(itemResource.hasLink("self"), is(true));
+		assertThat(itemResource.getLink("self").expand().getHref(),
+				equalTo(server.rootResource() + "/springagram/items"));
+	}
 
 	private void setUpActors() {
 

@@ -59,6 +59,7 @@ import com.jayway.jsonpath.JsonPath;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Greg Turnquist
+ * @author Tom Bunting
  * @since 0.11
  */
 public class Traverson {
@@ -305,7 +306,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -318,7 +319,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -332,7 +333,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), String.class)
+			String forObject = operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), String.class)
 					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
@@ -346,7 +347,7 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type);
+			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type);
 		}
 
 		/**
@@ -374,14 +375,20 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1).getRel());
+			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().toString() : traverseToFinalUrl(),
+					rels.get(rels.size() - 1).getRel());
 		}
 
-		private String traverseToFinalUrl(boolean expandFinalUrl) {
+		private String traverseToFinalUrl() {
 
 			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			UriTemplate uriTemplate = new UriTemplate(uri);
-			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
+			return new UriTemplate(uri).toString();
+		}
+
+		private URI traverseToExpandedFinalUrl() {
+
+			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
+			return new UriTemplate(uri).expand(templateParameters);
 		}
 
 		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
