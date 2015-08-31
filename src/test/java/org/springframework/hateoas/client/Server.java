@@ -147,6 +147,16 @@ public class Server implements Closeable {
 				respond(). //
 				withBody(springagramItemWithoutImageHalDocument). //
 				withContentType(MediaTypes.HAL_JSON.toString());
+		
+		// For Traverson URI double encoding test
+		
+		onRequest(). //
+				havingPathEqualTo("/springagram/items"). //
+				havingQueryString(equalTo("projection=no%20images")). //
+				respond(). //
+				withBody(springagramItemsHalDocument). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+		
 	}
 
 	public String rootResource() {
