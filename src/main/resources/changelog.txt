@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.19.0.RELEASE (2015-09-01)
+----------------------------------------------
+- #379 - Release 0.19.0.
+- #378 - Add title attributes for HAL links derived from resource bundle.
+- #376 - Compile against latest JAX-RS API.
+- #375 - TrueOnlyBooleanSerializer.isEmpty(…) not honored on Jackson 2.6.
+- #363 - Support for multiple Curie namespaces in the same application.
+- #320 - Improve curie rendering in case no namespaced links are present.
+
 Changes in version 0.18.0.RELEASE (2015-08-04)
 ----------------------------------------------
 - #369 - Traverson's getAndFindLinkWithRel(…) needs to expand given URI defensively.
