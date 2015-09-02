@@ -30,7 +30,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType
  * 
  * @author Oliver Gierke
  */
-public class XmlConfigurationIntegrationTests {
+public class XmlConfigurationIntegrationTest {
 
 	/**
 	 * @see #259

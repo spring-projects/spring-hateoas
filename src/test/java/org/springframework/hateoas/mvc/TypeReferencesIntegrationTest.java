@@ -50,7 +50,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class TypeReferencesIntegrationTests {
+public class TypeReferencesIntegrationTest {
 
 	private static final String USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
 	private static final String RESOURCE = String.format("{ \"_links\" : { \"self\" : \"/resource\" }, %s }", USER);

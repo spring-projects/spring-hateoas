@@ -29,7 +29,7 @@ import org.junit.Test;
  * @author Oliver Gierke
  * @soundtrack Dave Matthews Band - The Stone (Before These Crowded Streets)
  */
-public class HopUnitTests {
+public class HopUnitTest {
 
 	/**
 	 * @see #346

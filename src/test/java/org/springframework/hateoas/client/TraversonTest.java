@@ -55,7 +55,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Greg Turnquist
  * @since 0.11
  */
-public class TraversonTests {
+public class TraversonTest {
 
 	URI baseUri;
 	Server server;

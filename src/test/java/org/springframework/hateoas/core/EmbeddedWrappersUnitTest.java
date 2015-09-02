@@ -28,7 +28,7 @@ import org.junit.Test;
  * 
  * @author Oliver Gierke
  */
-public class EmbeddedWrappersUnitTests {
+public class EmbeddedWrappersUnitTest {
 
 	EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
