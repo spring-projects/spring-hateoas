@@ -267,9 +267,16 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/* 
 		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
+		 */
+		public boolean isEmpty(List<Link> value) {
+			return isEmpty(null, value);
+		}
+
+		/* 
+		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
-		@Override
 		public boolean isEmpty(SerializerProvider provider, List<Link> value) {
 			return value.isEmpty();
 		}
@@ -356,7 +363,10 @@ public class Jackson2HalModule extends SimpleModule {
 			return null;
 		}
 
-		@Override
+		public boolean isEmpty(Collection<?> value) {
+			return isEmpty(null, value);
+		}
+
 		public boolean isEmpty(SerializerProvider provider, Collection<?> value) {
 			return value.isEmpty();
 		}
@@ -379,8 +389,8 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public static class OptionalListJackson2Serializer extends ContainerSerializer<Object> implements
-			ContextualSerializer {
+	public static class OptionalListJackson2Serializer extends ContainerSerializer<Object>
+			implements ContextualSerializer {
 
 		private final BeanProperty property;
 		private final Map<Class<?>, JsonSerializer<Object>> serializers;
@@ -415,8 +425,8 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
-				JsonGenerationException {
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
 
 			List<?> list = (List<?>) value;
 
@@ -490,9 +500,16 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/* 
 		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
+		 */
+		public boolean isEmpty(Object value) {
+			return isEmpty(null, value);
+		}
+
+		/* 
+		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
-		@Override
 		public boolean isEmpty(SerializerProvider provider, Object value) {
 			return false;
 		}
@@ -542,8 +559,8 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
-				JsonProcessingException {
+		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt)
+				throws IOException, JsonProcessingException {
 
 			List<Link> result = new ArrayList<Link>();
 			String relation;
@@ -573,8 +590,8 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 	}
 
-	public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements
-			ContextualDeserializer {
+	public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>>
+			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 4755806754621032622L;
 
@@ -747,7 +764,6 @@ public class Jackson2HalModule extends SimpleModule {
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(java.lang.Object)
 		 */
-		@Override
 		public boolean isEmpty(Boolean value) {
 			return isEmpty(null, value);
 		}
@@ -756,7 +772,6 @@ public class Jackson2HalModule extends SimpleModule {
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
-		@Override
 		public boolean isEmpty(SerializerProvider provider, Boolean value) {
 			return value == null || Boolean.FALSE.equals(value);
 		}
