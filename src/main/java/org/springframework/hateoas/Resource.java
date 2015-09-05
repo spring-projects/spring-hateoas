@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * A simple {@link Resource} wrapping a domain object and adding links to it.
@@ -73,6 +74,7 @@ public class Resource<T> extends ResourceSupport {
 	 */
 	@JsonUnwrapped
 	@XmlAnyElement
+	@JsonView(ResourcesLinksVisible.class)
 	public T getContent() {
 		return content;
 	}
