@@ -235,6 +235,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	private static HttpServletRequest getCurrentRequest() {
 
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
