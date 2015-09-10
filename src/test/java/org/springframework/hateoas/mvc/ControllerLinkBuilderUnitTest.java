@@ -301,7 +301,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #170
 	 */
 	@Test
-	public void usesForwardedPortFromHeader() {
+	public void usesPortFromForwardedHostHeader() {
 
 		request.addHeader("X-Forwarded-Host", "foobarhost");
 		request.addHeader("X-Forwarded-Port", "9090");
@@ -309,7 +309,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 
-		assertThat(link.getHref(), startsWith("http://foobarhost:9090/"));
+		assertThat(link.getHref(), startsWith("http://foobarhost/"));
 	}
 
 	/**

@@ -67,6 +67,9 @@ public class Link implements Serializable {
     @JsonInclude(value = Include.NON_EMPTY)
     @XmlAttribute
     private String title;
+	@JsonInclude(value = Include.NON_EMPTY)
+	@XmlAttribute
+	private String profile;
 	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
@@ -147,7 +150,16 @@ public class Link implements Serializable {
         return name;
     }
 
-    /**
+	/**
+	 * Returns the profile of the link.
+	 *
+	 * @return
+	 */
+	public String getProfile() {
+		return profile;
+	}
+
+	/**
      * Returns the title of the link
      * 
      * @return
@@ -337,6 +349,7 @@ public class Link implements Serializable {
         private String href;
         private String name;
         private String title;
+		private String profile;
         private UriTemplate template;
         private boolean preferCollections;
 
@@ -360,7 +373,12 @@ public class Link implements Serializable {
             return this;
         }
 
-        public Builder template(UriTemplate template) {
+		public Builder profile(String profile) {
+			this.profile = profile;
+			return this;
+		}
+
+		public Builder template(UriTemplate template) {
             this.template = template;
             return this;
         }
@@ -383,6 +401,7 @@ public class Link implements Serializable {
 
             link.title = title;
             link.name = name;
+			link.profile = profile;
             link.preferCollections = preferCollections;
 
             return link;

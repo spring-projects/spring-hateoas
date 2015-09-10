@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
  * DTO to implement binding response representations of pageable collections.
@@ -41,6 +42,9 @@ public class PagedResources<T> extends Resources<T> {
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
 	private PageMetadata metadata;
+
+	@JsonUnwrapped
+	private Object pageProperties;
 
 	/**
 	 * Default constructor to allow instantiation by reflection.
@@ -75,7 +79,13 @@ public class PagedResources<T> extends Resources<T> {
     public PagedResources(Collection<T> content, boolean includeCurie, PageMetadata metadata, Link... links) {
         this(content, metadata, Arrays.asList(links));
 
-        // Non IANA defined relation type is used to trigger curies during serialization
+		// A curies link relation is added during serialization when there are custom link relations in the resource
+		// being serialized.
+		//
+		// Paginated resources often have only IANA defined link relations (prev, next, etc) and thus don't get curies.
+		// However, we may want curies if the resources being paginated are embedded with custom relations.
+		//
+		// To enable this, we add a non IANA relation Link that does not get rendered during serialization.
         if (includeCurie && metadata.getTotalElements() > 0) {
             this.add(CURIE_REQUIRED_LINK);
         }
@@ -145,7 +155,15 @@ public class PagedResources<T> extends Resources<T> {
 		return getLink(Link.REL_PREVIOUS);
 	}
 
-	/* 
+	public Object getPageProperties() {
+		return pageProperties;
+	}
+
+	public void setPageProperties(Object pageProperties) {
+		this.pageProperties = pageProperties;
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#toString()
 	 */
