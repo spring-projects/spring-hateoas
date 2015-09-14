@@ -112,8 +112,37 @@ public class ResourceLinksVisibleTest {
 		assertDoesNotContains("invisible field found", serializedResources, "true");
 
 		assertHasSeveralOf("text field expected three times", serializedResources, 3,
-				"number");
+				"1.5");
 		assertContains("links missing", serializedResources, "localhost");
+	}
+
+	/**
+	 * Under normal processing, {@link PagedResources} map to a JSON array with a links and a page
+	 * field added.
+	 *
+	 * @throws JsonProcessingException Treat JSON processing errors as test failures.
+	 */
+	@Test
+	public void pagedResourcesSerializationHasVisibleMetadata()
+			throws JsonProcessingException {
+
+		SomeBean someBean = new SomeBean();
+		Collection<SomeBean> someBeans = Arrays.asList(someBean, someBean, someBean);
+		PagedResources.PageMetadata someMetadata =
+				new PagedResources.PageMetadata(3, 0, 3);
+
+		String serializedPagedResources = mapper.writeValueAsString(
+				new PagedResources<SomeBean>(someBeans, someMetadata, someLink));
+
+		assertContains("text field missing", serializedPagedResources, "content");
+		assertContains("number field missing", serializedPagedResources, "1.5");
+		assertDoesNotContains("invisible field found", serializedPagedResources, "true");
+
+		assertHasSeveralOf("text field expected three times", serializedPagedResources, 3,
+				"1.5");
+		assertContains("links missing", serializedPagedResources, "localhost");
+
+		assertContains("meta data missing", serializedPagedResources, "page");
 	}
 
 	/**
@@ -178,6 +207,36 @@ public class ResourceLinksVisibleTest {
 	}
 
 	/**
+	 * Under processing with a view, however, {@link PagedResources} just map to the empty object
+	 * and are thus not very useful.
+	 *
+	 * Annotation based usage would be something like
+	 *
+	 * <pre>
+	 * &#64;RestController
+	 * &#64;JsonView(NewJsonView.class)
+	 * public PagedResources<BeanWithView> viewToSomeBean() { ... }
+	 * </pre>
+	 *
+	 * @throws JsonProcessingException Treat JSON processing errors as test failures.
+	 */
+	@Test
+	public void pagedResourcesSerializationOfViewMissesMetadata() throws JsonProcessingException {
+
+		ObjectWriter newJsonViewBasedWriter = mapper.writerWithView(NewJsonView.class);
+
+		BeanWithView someBean = new BeanWithView();
+		Collection<BeanWithView> someBeans = Arrays.asList(someBean, someBean, someBean);
+		PagedResources.PageMetadata someMetadata =
+				new PagedResources.PageMetadata(3, 0, 3);
+
+		String serializedPagedResources = newJsonViewBasedWriter.writeValueAsString(
+				new PagedResources<BeanWithView>(someBeans, someMetadata, someLink));
+
+		assertEquals("Empty JSON object expected", "{}", serializedPagedResources);
+	}
+
+	/**
 	 * Using views which inherit from the {@link ResourcesLinksVisible} marker interface, however,
 	 * views to objects are processed in more a sensible way.
 	 * 
@@ -232,8 +291,40 @@ public class ResourceLinksVisibleTest {
 		assertDoesNotContains("invisible field found", serializedResources, "true");
 
 		assertHasSeveralOf("text field expected three times", serializedResources, 3,
-				"number");
+				"1.5");
 		assertContains("links missing", serializedResources, "localhost");
+	}
+
+	/**
+	 * Using views which inherit from the {@link ResourcesLinksVisible} marker interface, however,
+	 * views to objects are processed in more a sensible way.
+	 *
+	 * @throws JsonProcessingException Treat JSON processing errors as test failures.
+	 */
+	@Test
+	public void pagedResourcesSerializationWithResourcesLinksVisibleSeesMetadata()
+			throws JsonProcessingException {
+
+		ObjectWriter jsonViewWithLinksBasedWriter =
+				mapper.writerWithView(JSonViewWithLinks.class);
+
+		BeanWithView someBean = new BeanWithView();
+		Collection<BeanWithView> someBeans = Arrays.asList(someBean, someBean, someBean);
+		PagedResources.PageMetadata someMetadata =
+				new PagedResources.PageMetadata(3, 0, 3);
+
+		String serializedPagedResources = jsonViewWithLinksBasedWriter.writeValueAsString(
+				new PagedResources<BeanWithView>(someBeans, someMetadata, someLink));
+
+		assertContains("text field missing", serializedPagedResources, "content");
+		assertContains("number field missing", serializedPagedResources, "1.5");
+		assertDoesNotContains("invisible field found", serializedPagedResources, "true");
+
+		assertHasSeveralOf("text field expected three times", serializedPagedResources, 3,
+				"1.5");
+		assertContains("links missing", serializedPagedResources, "localhost");
+
+		assertContains("meta data missing", serializedPagedResources, "page");
 	}
 
 	public static interface NewJsonView {}
