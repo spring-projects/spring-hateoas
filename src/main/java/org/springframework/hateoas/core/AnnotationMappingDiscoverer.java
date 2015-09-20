@@ -20,12 +20,15 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link MappingDiscoverer} implementation that inspects mappings from a particular annotation.
  * 
  * @author Oliver Gierke
+ * @author Josh Ghiloni
  */
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
@@ -62,6 +65,10 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 */
 	@Override
 	public String getMapping(Class<?> type) {
+		return getMapping(null, type);
+	}
+	
+	public String getMapping(Environment environment, Class<?> type) {
 
 		Assert.notNull(type, "Type must not be null!");
 
@@ -72,7 +79,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 					type.getName()));
 		}
 
-		return mapping.length == 0 ? null : mapping[0];
+		return mapping.length == 0 ? null : maybeResolveValue(environment, mapping[0]);
 	}
 
 	/* 
@@ -81,9 +88,12 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 */
 	@Override
 	public String getMapping(Method method) {
-
+		return getMapping(method, null);
+	}
+	
+	public String getMapping(Method method, Environment environment) {
 		Assert.notNull(method, "Method must not be null!");
-		return getMapping(method.getDeclaringClass(), method);
+		return getMapping(method.getDeclaringClass(), method, environment);
 	}
 
 	/* 
@@ -92,6 +102,10 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 */
 	@Override
 	public String getMapping(Class<?> type, Method method) {
+		return getMapping(type, method, null);
+	}
+	
+	public String getMapping(Class<?> type, Method method, Environment environment) {
 
 		Assert.notNull(type, "Type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
@@ -109,7 +123,8 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			return typeMapping;
 		}
 
-		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : typeMapping + mapping[0];
+		String returnValue = (typeMapping == null || "/".equals(typeMapping) ? mapping[0] : typeMapping + mapping[0]);
+		return maybeResolveValue(environment, returnValue);
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {
@@ -126,5 +141,13 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		throw new IllegalStateException(String.format(
 				"Unsupported type for the mapping attribute! Support String and String[] but got %s!", value.getClass()));
+	}
+	
+	private String maybeResolveValue(Environment environment, String value) {
+		if (environment != null && StringUtils.hasText(value)) {
+			value = environment.resolvePlaceholders(value);
+		}
+		
+		return value;
 	}
 }

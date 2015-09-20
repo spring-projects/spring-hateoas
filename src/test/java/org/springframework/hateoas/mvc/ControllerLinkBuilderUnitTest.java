@@ -21,13 +21,17 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
@@ -456,6 +460,31 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		linkTo(methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
 				.withSelfRel();
 	}
+	
+	/**
+	 * @see #361
+	 */
+	@Test
+	public void linksToDynamicEndpoints() throws Exception {
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("test.variable", "/dynamicparent");
+		source.put("test.child", "/dynamicchild");
+		
+		StandardEnvironment env = new StandardEnvironment();
+		env.getPropertySources().addLast(new MapPropertySource("mapping-env", source));
+		
+		Method method = DynamicEndpointControllerWithMethod.class.getMethod("method");
+		
+		Link link = linkTo(env, DynamicEndpointControllerWithMethod.class).withSelfRel();
+		assertThat(link.getHref(), endsWith("/dynamicparent"));
+		
+		// explicitly add new Object[0] here to avoid conflict with (env, Object invocationValue)
+		link = linkTo(env, method, new Object[0]).withSelfRel();
+		assertThat(link.getHref(), endsWith("/dynamicparent/dynamicchild"));
+		
+		link = linkTo(env, DynamicEndpointControllerWithMethod.class, method).withSelfRel();
+		assertThat(link.getHref(), endsWith("/dynamicparent/dynamicchild"));
+	}
 
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.getHref()).build();
@@ -562,5 +591,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@RequestMapping("/root")
 	interface ChildControllerWithRootMapping extends ParentControllerWithoutRootMapping {
 
+	}
+	
+	@RequestMapping("${test.variable}")
+	interface DynamicEndpointControllerWithMethod {
+		@RequestMapping("${test.child}")
+		void method();
 	}
 }

@@ -22,6 +22,7 @@ import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
@@ -43,6 +44,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Greg Turnquist
+ * @author Josh Ghiloni
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -66,7 +68,18 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller) {
-		return linkTo(controller, new Object[0]);
+		return linkTo(null, controller, new Object[0]);
+	}
+
+	/**
+	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
+	 * 
+	 * @param env If not {@literal null}, it will attempt to resolve placeholders in mappings
+	 * @param controller the class to discover the annotation on, must not be {@literal null}.
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(Environment environment, Class<?> controller) {
+		return linkTo(environment, controller, new Object[0]);
 	}
 
 	/**
@@ -79,11 +92,26 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
+		return linkTo(null, controller, parameters);
+	}
+	
+	/**
+	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
+	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
+	 * 
+	 * If the env parameter is non-null, it will attempt to resolve any placeholders found in mappings
+	 * 
+	 * @param env
+	 * @param controller
+	 * @param parameters
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(Environment env, Class<?> controller, Object... parameters) {
 
 		Assert.notNull(controller);
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
-		String mapping = DISCOVERER.getMapping(controller);
+		String mapping = ((AnnotationMappingDiscoverer)DISCOVERER).getMapping(env, controller);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
 		UriComponents expandedComponents = uriComponents.expand(parameters);
@@ -95,18 +123,49 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
 	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {
-		return linkTo(method.getDeclaringClass(), method, parameters);
+		return linkTo(null, method.getDeclaringClass(), method, parameters);
+	}
+	
+	/**
+	 * Similar to {@link org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)}
+	 * but takes an optional {@link Environment} parameter. If it is non-null, it will attempt to resolve
+	 * any placeholders in requestMappings that were found.
+	 *
+	 * @param env
+	 * @param method
+	 * @param parameters
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(Environment env, Method method, Object... parameters) {
+		return linkTo(env, method.getDeclaringClass(), method, parameters);
 	}
 
 	/*
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
+		return linkTo(null, controller, method, parameters);
+	}
+	
+	/**
+	 * Similar to {@link org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)}
+	 * but takes an optional {@link Environment} parameter. If it is non-null, it will attempt to resolve
+	 * any placeholders in requestMappings that were found.
+	 * 
+	 * @param env
+	 * @param controller
+	 * @param method
+	 * @param parameters
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(Environment env, Class<?> controller, Method method, Object... parameters) {
 
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(controller, method));
+		UriTemplate template = new UriTemplate(((AnnotationMappingDiscoverer)DISCOVERER).getMapping(controller, method, env));
 		URI uri = template.expand(parameters);
 
 		return new ControllerLinkBuilder(getBuilder()).slash(uri);
@@ -135,7 +194,37 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	public static ControllerLinkBuilder linkTo(Object invocationValue) {
-		return FACTORY.linkTo(invocationValue);
+		return FACTORY.linkTo(null, invocationValue);
+	}
+	
+	/**
+	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
+	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * 
+	 * <pre>
+	 * @RequestMapping("/customers")
+	 * class CustomerController {
+	 * 
+	 *   @RequestMapping("/{id}/addresses")
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 * }
+	 * 
+	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
+	 * </pre>
+	 * 
+	 * If the {@link Environment} parameter is non-null, it will attempt to resolve any placeholders
+	 * found in the mapping 
+	 * 
+	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
+	 * {@code addresses}. For more details on the method invocation constraints, see
+	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * 
+	 * @param environment
+	 * @param invocationValue
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(Environment environment, Object invocationValue) {
+		return FACTORY.linkTo(environment, invocationValue);
 	}
 
 	/**

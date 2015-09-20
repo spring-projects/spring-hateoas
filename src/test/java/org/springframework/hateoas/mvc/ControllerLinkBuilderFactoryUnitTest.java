@@ -15,11 +15,14 @@
  */
 package org.springframework.hateoas.mvc;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,6 +30,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.Link;
@@ -159,9 +164,40 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref(),
 				endsWith("/sample/multivaluemapsupport?key1=value1a&key1=value1b&key2=value2a&key2=value2b"));
 	}
+	
+	/**
+	 * @see #361
+	 */
+	@Test
+	public void createsLinkToControllerMethodWithDynamicMapping() throws Exception {
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("test.variable", "/dynamicparent");
+		source.put("test.child", "/dynamicchild");
+		source.put("dynamicendpoint", "foo");
+		
+		StandardEnvironment env = new StandardEnvironment();
+		env.getPropertySources().addLast(new MapPropertySource("mapping-env", source));
+		
+		Link link = factory.linkTo(env, methodOn(SampleController.class).sampleMethodWithDynamicEndpoint()).withSelfRel();
+		assertPointsToMockServer(link);
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/sample/foo"));
+			
+		Method method = DynamicEndpointControllerWithMethod.class.getMethod("method");
+		
+		link = factory.linkTo(env, DynamicEndpointControllerWithMethod.class).withSelfRel();
+		assertThat(link.getHref(), endsWith("/dynamicparent"));
+		
+		// explicitly add new Object[0] here to avoid conflict with (env, Object invocationValue)
+		link = factory.linkTo(env, method, new Object[0]).withSelfRel();
+		assertThat(link.getHref(), endsWith("/dynamicparent/dynamicchild"));
+		
+		link = factory.linkTo(env, DynamicEndpointControllerWithMethod.class, method).withSelfRel();
+		assertThat(link.getHref(), endsWith("/dynamicparent/dynamicchild"));
+	}
+
 
 	static interface SampleController {
-
 		@RequestMapping("/sample/{id}")
 		HttpEntity<?> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);
 
@@ -173,6 +209,15 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		@RequestMapping("/sample/multivaluemapsupport")
 		HttpEntity<?> sampleMethodWithMap(@RequestParam MultiValueMap<String, String> queryParams);
+		
+		@RequestMapping("/sample/${dynamicendpoint}")
+		HttpEntity<?> sampleMethodWithDynamicEndpoint();
+	}
+	
+	@RequestMapping("${test.variable}")
+	interface DynamicEndpointControllerWithMethod {
+		@RequestMapping("${test.child}")
+		void method();
 	}
 
 	static class SampleUriComponentsContributor implements UriComponentsContributor {

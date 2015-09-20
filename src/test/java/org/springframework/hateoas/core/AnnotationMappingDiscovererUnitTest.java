@@ -19,8 +19,12 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -96,6 +100,34 @@ public class AnnotationMappingDiscovererUnitTest {
 		Method method = ParentWithMethod.class.getMethod("mapping");
 		assertThat(discoverer.getMapping(ChildWithTypeMapping.class, method), is("/child/parent"));
 	}
+	
+	/**
+	 * @see #361
+	 */
+	@Test
+	public void resolvesVariablesInMappings() throws Exception {
+		Map<String, Object> source = new HashMap<String, Object>();
+		source.put("test.variable", "/dynamicparent");
+		source.put("test.child", "/dynamicchild");
+		
+		StandardEnvironment env = new StandardEnvironment();
+		env.getPropertySources().addLast(new MapPropertySource("mapping-env", source));
+		
+		Method method = DynamicEndpointControllerWithMethod.class.getMethod("method");
+		
+		// test regression first
+		assertThat(discoverer.getMapping(DynamicEndpointController.class), is("${test.variable}"));
+		assertThat(discoverer.getMapping(DynamicEndpointControllerWithMethod.class, method), 
+				is("${test.variable}${test.child}"));
+		
+		// test new feature
+		AnnotationMappingDiscoverer concreteDiscoverer = (AnnotationMappingDiscoverer)discoverer;
+		assertThat(concreteDiscoverer.getMapping(env, DynamicEndpointController.class),
+				is("/dynamicparent"));
+		assertThat(concreteDiscoverer.getMapping(method, env), is("/dynamicparent/dynamicchild"));
+		assertThat(concreteDiscoverer.getMapping(DynamicEndpointControllerWithMethod.class, method, env),
+				is("/dynamicparent/dynamicchild"));
+	}
 
 	@RequestMapping("/type")
 	interface MyController {
@@ -139,4 +171,13 @@ public class AnnotationMappingDiscovererUnitTest {
 
 	@RequestMapping("/child")
 	interface ChildWithTypeMapping extends ParentWithMethod {}
+	
+	@RequestMapping("${test.variable}")
+	interface DynamicEndpointController {}
+	
+	@RequestMapping("${test.variable}")
+	interface DynamicEndpointControllerWithMethod {
+		@RequestMapping("${test.child}")
+		void method();
+	}
 }
