@@ -25,7 +25,7 @@ import org.junit.Test;
  * 
  * @author Oliver Gierke
  */
-public class ForwardedHeaderUnitTests {
+public class ForwardedHeaderUnitTest {
 
 	/**
 	 * @see #257
