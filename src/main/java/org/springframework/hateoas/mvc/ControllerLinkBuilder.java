@@ -22,7 +22,7 @@ import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
@@ -78,8 +78,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Environment environment, Class<?> controller) {
-		return linkTo(environment, controller, new Object[0]);
+	public static ControllerLinkBuilder linkTo(PropertyResolver resolver, Class<?> controller) {
+		return linkTo(resolver, controller, new Object[0]);
 	}
 
 	/**
@@ -106,12 +106,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @param parameters
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Environment env, Class<?> controller, Object... parameters) {
+	public static ControllerLinkBuilder linkTo(PropertyResolver resolver, Class<?> controller, Object... parameters) {
 
 		Assert.notNull(controller);
 
 		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
-		String mapping = ((AnnotationMappingDiscoverer)DISCOVERER).getMapping(env, controller);
+		String mapping = ((AnnotationMappingDiscoverer)DISCOVERER).getMapping(resolver, controller);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
 		UriComponents expandedComponents = uriComponents.expand(parameters);
@@ -128,17 +128,17 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	
 	/**
 	 * Similar to {@link org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)}
-	 * but takes an optional {@link Environment} parameter. If it is non-null, it will attempt to resolve
+	 * but takes an optional {@link PropertyResolver} parameter. If it is non-null, it will attempt to resolve
 	 * any placeholders in requestMappings that were found.
 	 *
-	 * @param env
+	 * @param resolver
 	 * @param method
 	 * @param parameters
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Environment env, Method method, Object... parameters) {
-		return linkTo(env, method.getDeclaringClass(), method, parameters);
+	public static ControllerLinkBuilder linkTo(PropertyResolver resolver, Method method, Object... parameters) {
+		return linkTo(resolver, method.getDeclaringClass(), method, parameters);
 	}
 
 	/*
@@ -150,22 +150,22 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	
 	/**
 	 * Similar to {@link org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)}
-	 * but takes an optional {@link Environment} parameter. If it is non-null, it will attempt to resolve
+	 * but takes an optional {@link PropertyResolver} parameter. If it is non-null, it will attempt to resolve
 	 * any placeholders in requestMappings that were found.
 	 * 
-	 * @param env
+	 * @param resolver
 	 * @param controller
 	 * @param method
 	 * @param parameters
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Environment env, Class<?> controller, Method method, Object... parameters) {
+	public static ControllerLinkBuilder linkTo(PropertyResolver resolver, Class<?> controller, Method method, Object... parameters) {
 
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		UriTemplate template = new UriTemplate(((AnnotationMappingDiscoverer)DISCOVERER).getMapping(controller, method, env));
+		UriTemplate template = new UriTemplate(((AnnotationMappingDiscoverer)DISCOVERER).getMapping(controller, method, resolver));
 		URI uri = template.expand(parameters);
 
 		return new ControllerLinkBuilder(getBuilder()).slash(uri);
@@ -212,19 +212,19 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
 	 * </pre>
 	 * 
-	 * If the {@link Environment} parameter is non-null, it will attempt to resolve any placeholders
+	 * If the {@link PropertyResolver} parameter is non-null, it will attempt to resolve any placeholders
 	 * found in the mapping 
 	 * 
 	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
 	 * {@code addresses}. For more details on the method invocation constraints, see
 	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 * 
-	 * @param environment
+	 * @param resolver
 	 * @param invocationValue
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Environment environment, Object invocationValue) {
-		return FACTORY.linkTo(environment, invocationValue);
+	public static ControllerLinkBuilder linkTo(PropertyResolver resolver, Object invocationValue) {
+		return FACTORY.linkTo(resolver, invocationValue);
 	}
 
 	/**

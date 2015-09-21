@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
 import org.springframework.hateoas.core.AnnotationAttribute;
@@ -86,8 +86,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller);
 	}
 	
-	public ControllerLinkBuilder linkTo(Environment env, Class<?> controller) {
-		return ControllerLinkBuilder.linkTo(env, controller);
+	public ControllerLinkBuilder linkTo(PropertyResolver resolver, Class<?> controller) {
+		return ControllerLinkBuilder.linkTo(resolver, controller);
 	}
 
 	/*
@@ -99,8 +99,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 	
-	public ControllerLinkBuilder linkTo(Environment env, Class<?> controller, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(env, controller, parameters);
+	public ControllerLinkBuilder linkTo(PropertyResolver resolver, Class<?> controller, Object... parameters) {
+		return ControllerLinkBuilder.linkTo(resolver, controller, parameters);
 	}
 
 	/* 
@@ -112,8 +112,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, method, parameters);
 	}
 	
-	public ControllerLinkBuilder linkTo(Environment env, Class<?> controller, Method method, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(env, controller, method, parameters);
+	public ControllerLinkBuilder linkTo(PropertyResolver resolver, Class<?> controller, Method method, Object... parameters) {
+		return ControllerLinkBuilder.linkTo(resolver, controller, method, parameters);
 	}
 
 	/* 
@@ -125,7 +125,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return linkTo(null, invocationValue);
 	}
 	
-	public ControllerLinkBuilder linkTo(Environment env, Object invocationValue) {
+	public ControllerLinkBuilder linkTo(PropertyResolver resolver, Object invocationValue) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
@@ -134,7 +134,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 		Method method = invocation.getMethod();
 
-		String mapping = ((AnnotationMappingDiscoverer)DISCOVERER).getMapping(invocation.getTargetType(), method, env);
+		String mapping = ((AnnotationMappingDiscoverer)DISCOVERER).getMapping(invocation.getTargetType(), method, resolver);
 		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
 
 		UriTemplate template = new UriTemplate(mapping);
@@ -166,8 +166,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(method, parameters);
 	}
 	
-	public ControllerLinkBuilder linkTo(Environment env, Method method, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(env, method, parameters);
+	public ControllerLinkBuilder linkTo(PropertyResolver resolver, Method method, Object... parameters) {
+		return ControllerLinkBuilder.linkTo(resolver, method, parameters);
 	}
 
 	/**

@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -68,7 +69,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return getMapping(null, type);
 	}
 	
-	public String getMapping(Environment environment, Class<?> type) {
+	public String getMapping(PropertyResolver resolver, Class<?> type) {
 
 		Assert.notNull(type, "Type must not be null!");
 
@@ -79,7 +80,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 					type.getName()));
 		}
 
-		return mapping.length == 0 ? null : maybeResolveValue(environment, mapping[0]);
+		return mapping.length == 0 ? null : maybeResolveValue(resolver, mapping[0]);
 	}
 
 	/* 
@@ -91,9 +92,9 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return getMapping(method, null);
 	}
 	
-	public String getMapping(Method method, Environment environment) {
+	public String getMapping(Method method, PropertyResolver resolver) {
 		Assert.notNull(method, "Method must not be null!");
-		return getMapping(method.getDeclaringClass(), method, environment);
+		return getMapping(method.getDeclaringClass(), method, resolver);
 	}
 
 	/* 
@@ -105,7 +106,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return getMapping(type, method, null);
 	}
 	
-	public String getMapping(Class<?> type, Method method, Environment environment) {
+	public String getMapping(Class<?> type, Method method, PropertyResolver resolver) {
 
 		Assert.notNull(type, "Type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
@@ -124,7 +125,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		}
 
 		String returnValue = (typeMapping == null || "/".equals(typeMapping) ? mapping[0] : typeMapping + mapping[0]);
-		return maybeResolveValue(environment, returnValue);
+		return maybeResolveValue(resolver, returnValue);
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {
@@ -143,9 +144,9 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 				"Unsupported type for the mapping attribute! Support String and String[] but got %s!", value.getClass()));
 	}
 	
-	private String maybeResolveValue(Environment environment, String value) {
-		if (environment != null && StringUtils.hasText(value)) {
-			value = environment.resolvePlaceholders(value);
+	private String maybeResolveValue(PropertyResolver resolver, String value) {
+		if (resolver != null && StringUtils.hasText(value)) {
+			value = resolver.resolvePlaceholders(value);
 		}
 		
 		return value;
