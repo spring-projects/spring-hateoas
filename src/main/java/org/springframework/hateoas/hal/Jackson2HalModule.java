@@ -707,7 +707,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
 				HalCollectionRels halCollectionRels, MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections) {
 
-			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, halCollectionRels, enforceEmbeddedCollections);
+			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
 			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
@@ -839,7 +839,6 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private RelProvider relProvider;
 		private CurieProvider curieProvider;
-		private HalCollectionRels halCollectionRels;
 		private boolean preferCollectionRels;
 
 		/**
@@ -850,14 +849,12 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param curieProvider can be {@literal null}.
 		 * @param preferCollectionRels
 		 */
-		public EmbeddedMapper(RelProvider relProvider, CurieProvider curieProvider,
-				HalCollectionRels halCollectionRels, boolean preferCollectionRels) {
+		public EmbeddedMapper(RelProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
 			Assert.notNull(relProvider, "RelProvider must not be null!");
 
 			this.relProvider = relProvider;
 			this.curieProvider = curieProvider;
-			this.halCollectionRels = halCollectionRels;
 			this.preferCollectionRels = preferCollectionRels;
 		}
 
