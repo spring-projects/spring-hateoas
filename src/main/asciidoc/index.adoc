@@ -190,7 +190,7 @@ assertThat(link.getHref(), is("/people/2")));
 
 So far we have created links by pointing to the web-framework implementations (i.e. Spring MVC controllers or JAX-RS resource classes) and inspected the mapping. In many cases these classes essentially read and write representations backed by a model class.
 
-The `EntityLinks` interfaces now exposes API to lookup `Link`s or `LinkBuilder`s based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
+The `EntityLinks` interface now exposes an API to lookup a `Link` or `LinkBuilder` based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
 
 ----
 EntityLinks links = …;
@@ -233,7 +233,7 @@ class PaymentController {
 }
 ----
 
-As you can see you can refer to the link `Order` instances are handled at without even referring to the `OrderController`.
+As you can see you can refer to the `Order` instances without even referring to the `OrderController`.
 
 [[fundamentals.resource-assembler]]
 === Resource assembler
@@ -263,7 +263,7 @@ class PersonResourceAssembler extends ResourceAssemblerSupport<Person, PersonRes
 }
 ----
 
-Setting the class up like this gives you the following benefits: there are a hand full of `createResource(…)` methods that will allow you to create an instance of the resource and have it a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controllers request mapping plus the id of the `Identifiable` (e.g. `/people/1` in our case). The resource type gets instantiated by reflection and expects a no-arg constructor. Simply override `instantiateResource(…)` in case you'd like to use a dedicated constructor or avoid the reflection performance overhead.
+Setting the class up like this gives you the following benefits: there are a handful of `createResource(…)` methods that will allow you to create an instance of the resource and have a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controller's request mapping plus the id of the `Identifiable` (e.g. `/people/1` in our case). The resource type gets instantiated by reflection and expects a no-arg constructor. Simply override `instantiateResource(…)` in case you'd like to use a dedicated constructor or avoid the reflection performance overhead.
 
 The assembler can then be used to either assemble a single resource or an `Iterable` of them:
 
@@ -285,7 +285,7 @@ List<PersonResource> resources = assembler.toResources(people);
 To enable the `ResourceSupport` subtypes be rendered according to the specification of various hypermedia representations types, the support for a particular hypermedia representation format can be activated through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as argument. Currently we support http://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
 
 * registers necessary Jackson modules to render `Resource`/`Resources` in the hypermedia specific format.
-* if JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to lookup links by their `rel`s in plain JSON representations (see <<client.link-discoverer>>).
+* if JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to lookup links by their `rel` in plain JSON representations (see <<client.link-discoverer>>).
 * enables `@EnableEntityLinks` by default (see <<fundamentals.obtaining-links.entity-links>>), will automatically pick up `EntityLinks` implementations and bundle them into a `DelegatingEntityLinks` instance available for autowiring.
 * automatically picks up all `RelProvider` implementations in the `ApplicationContext` and bundles them into a `DelegatingRelProvider` available for autowiring. Registers providers to consider `@Relation` on domain types as well as Spring MVC controllers. If https://github.com/atteo/evo-inflector[EVO inflector] is on the classpath collection rels are derived using the pluralizing algorithm implemented in the library (see <<spis.rel-provider>>).
 
@@ -381,7 +381,7 @@ There are more options to customize template parameters at each level.
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-with-param]
 ----
 
-The static `rel(...)` function is a convenient way to create define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI Template variables.
+The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI Template variables.
 
 NOTE: `.withParameter()` returns a new Hop object that is chainable. You can string together as many `.withParameter` as you like. The result is a single Hop definition.
 
