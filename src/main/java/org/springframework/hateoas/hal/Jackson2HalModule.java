@@ -121,6 +121,10 @@ public class Jackson2HalModule extends SimpleModule {
 		private final EmbeddedMapper mapper;
 		private final MessageSourceAccessor messageSource;
 
+		public HalLinkListSerializer() {
+		  this(null, null, null);
+		}
+
 		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper,
 				MessageSourceAccessor messageSource) {
 			this(null, curieProvider, mapper, messageSource);
