@@ -43,6 +43,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Greg Turnquist
+ * @author Nick Grealy
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -225,6 +226,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		if (hasText(port)) {
 			builder.port(Integer.parseInt(port));
+		}
+
+		String path = request.getHeader("X-Forwarded-Path");
+
+		if (hasText(path)){
+			builder.path(path);
 		}
 
 		return builder;
