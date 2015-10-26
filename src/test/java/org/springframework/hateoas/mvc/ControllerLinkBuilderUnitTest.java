@@ -447,14 +447,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void mentionsRequiredUsageWithinWebRequestInException() {
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("request");
-		exception.expectMessage("Spring MVC");
-
 		RequestContextHolder.setRequestAttributes(null);
 
-		linkTo(methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
+		Link link = linkTo(methodOn(PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
 				.withSelfRel();
+		assertThat(link.getHref(), endsWith("/people/15/addresses/DE"));
 	}
 
 	private static UriComponents toComponents(Link link) {
