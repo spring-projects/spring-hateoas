@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Extension of {@link LinkBuilderFactory} for implementations that also support creating {@link LinkBuilder}s by
@@ -59,4 +60,16 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 	 * @return
 	 */
 	T linkTo(Object methodInvocationResult);
+
+	/**
+	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the method the result is handed into this method. Use
+	 * {@link DummyInvocationUtils#methodOn(Class, Object...)} to obtain a dummy instance of a controller to record a
+	 * dummy method invocation on. See {@link ControllerLinkBuilder#linkTo(Object)} for an example.
+	 *
+	 * @see ControllerLinkBuilder#linkTo(Object)
+	 * @param builder must not be {@literal null}.
+	 * @param methodInvocationResult must not be {@literal null}.
+	 * @return
+	 */
+	T linkTo(UriComponentsBuilder builder, Object methodInvocationResult);
 }
