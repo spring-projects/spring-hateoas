@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.core;
 
+import java.io.Serializable;
+
 import org.springframework.hateoas.Resource;
 
 /**
@@ -22,7 +24,7 @@ import org.springframework.hateoas.Resource;
  * 
  * @author Oliver Gierke
  */
-public interface EmbeddedWrapper {
+public interface EmbeddedWrapper extends Serializable {
 
 	/**
 	 * Returns the rel to be used when embedding. If this returns {@literal null}, the rel will be calculated based on the

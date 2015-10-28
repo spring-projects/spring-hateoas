@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.core;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -157,7 +156,7 @@ public class EmbeddedWrappers {
 	 *
 	 * @author Oliver Gierke
 	 */
-	private static class EmbeddedElement extends AbstractEmbeddedWrapper implements Serializable {
+	private static class EmbeddedElement extends AbstractEmbeddedWrapper {
 
 		private static final long serialVersionUID = 1L;
 
@@ -209,7 +208,7 @@ public class EmbeddedWrappers {
 	 *
 	 * @author Oliver Gierke
 	 */
-	private static class EmbeddedCollection extends AbstractEmbeddedWrapper implements Serializable {
+	private static class EmbeddedCollection extends AbstractEmbeddedWrapper {
 
 		private static final long serialVersionUID = 1L;
 
@@ -266,7 +265,7 @@ public class EmbeddedWrappers {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	private static class EmptyCollectionEmbeddedWrapper implements EmbeddedWrapper, Serializable {
+	private static class EmptyCollectionEmbeddedWrapper implements EmbeddedWrapper {
 
 		private static final long serialVersionUID = 1L;
 
