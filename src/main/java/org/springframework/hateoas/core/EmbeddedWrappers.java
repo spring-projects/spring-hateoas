@@ -158,6 +158,8 @@ public class EmbeddedWrappers {
 	 */
 	private static class EmbeddedElement extends AbstractEmbeddedWrapper {
 
+		private static final long serialVersionUID = 1L;
+
 		private final Object value;
 
 		/**
@@ -207,6 +209,8 @@ public class EmbeddedWrappers {
 	 * @author Oliver Gierke
 	 */
 	private static class EmbeddedCollection extends AbstractEmbeddedWrapper {
+
+		private static final long serialVersionUID = 1L;
 
 		private final Collection<Object> value;
 
@@ -262,6 +266,8 @@ public class EmbeddedWrappers {
 	 * @since 0.17
 	 */
 	private static class EmptyCollectionEmbeddedWrapper implements EmbeddedWrapper {
+
+		private static final long serialVersionUID = 1L;
 
 		private final Class<?> type;
 
