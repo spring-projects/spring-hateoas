@@ -30,7 +30,7 @@ The `Link` value object follows the Atom link definition and consists of a `rel`
 ----
 Link link = new Link("http://localhost:8080/something");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
-assertThat(link.getRel(), is(Link.SELF));
+assertThat(link.getRel(), is(Link.REL_SELF));
 
 Link link = new Link("http://localhost:8080/something", "my-rel");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
@@ -88,7 +88,7 @@ You can also easily access links contained in that resource:
 ----
 Link selfLink = new Link("http://myhost/people");
 assertThat(resource.getId(), is(selfLink));
-assertThat(resource.getLink(Link.SELF), is(selfLink));
+assertThat(resource.getLink(Link.REL_SELF), is(selfLink));
 ----
 [[fundamentals.obtaining-links]]
 === Obtaining links
@@ -136,7 +136,7 @@ The `ControllerLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under th
 Person person = new Person(1L, "Dave", "Matthews");
 //                 /person                 /     1
 Link link = linkTo(PersonController.class).slash(person.getId()).withSelfRel();
-assertThat(link.getRel(), is(Link.SELF));
+assertThat(link.getRel(), is(Link.REL_SELF));
 assertThat(link.getHref(), endsWith("/people/1"));
 ----
 
@@ -169,7 +169,7 @@ As of version 0.4 you can even easily build links pointing to methods or creatin
 Method method = PersonController.class.getMethod("show", Long.class);
 Link link = linkTo(method, 2L).withSelfRel();
 
-assertThat(link.getHref(), is("/people/2")));
+assertThat(link.getHref(), endsWith("/people/2")));
 ----
 
 This is still a bit dissatisfying as we have to get a `Method` instance first, which throws an exception and is generally quite cumbersome. At least we don't repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy we can create easily using the `methodOn(…)` helper.
@@ -177,7 +177,7 @@ This is still a bit dissatisfying as we have to get a `Method` instance first, w
 [source, java]
 ----
 Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
-assertThat(link.getHref(), is("/people/2")));
+assertThat(link.getHref(), endsWith("/people/2")));
 ----
 
 `methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
