@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.springframework.hateoas.hal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -27,6 +28,7 @@ import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * Default implementation of {@link CurieProvider} rendering a single configurable {@link UriTemplate} based curie.
@@ -37,8 +39,8 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultCurieProvider implements CurieProvider {
 
-	private final Map<String, Curie> curies;
-	private final Curie defaultCurie;
+	private final Map<String, UriTemplate> curies;
+	private final String defaultCurie;
 
 	/**
 	 * Creates a new {@link DefaultCurieProvider} for the given name and {@link UriTemplate}. The curie will be used to
@@ -76,8 +78,6 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		Assert.notNull(curies, "Curies must not be null!");
 
-		Map<String, Curie> map = new HashMap<String, Curie>(curies.size());
-
 		for (Entry<String, UriTemplate> entry : curies.entrySet()) {
 
 			String name = entry.getKey();
@@ -87,13 +87,11 @@ public class DefaultCurieProvider implements CurieProvider {
 			Assert.notNull(template, "UriTemplate must not be null!");
 			Assert.isTrue(template.getVariableNames().size() == 1,
 					String.format("Expected a single template variable in the UriTemplate %s!", template.toString()));
-
-			map.put(name, new Curie(name, template.toString()));
 		}
 
-		this.defaultCurie = StringUtils.hasText(defaultCurieName) ? map.get(defaultCurieName)
-				: map.size() == 1 ? map.values().iterator().next() : null;
-		this.curies = Collections.unmodifiableMap(map);
+		this.defaultCurie = StringUtils.hasText(defaultCurieName) ? defaultCurieName
+				: curies.size() == 1 ? curies.keySet().iterator().next() : null;
+		this.curies = Collections.unmodifiableMap(curies);
 	}
 
 	/* 
@@ -102,7 +100,18 @@ public class DefaultCurieProvider implements CurieProvider {
 	 */
 	@Override
 	public Collection<? extends Object> getCurieInformation(Links links) {
-		return Collections.unmodifiableCollection(curies.values());
+
+		List<Curie> result = new ArrayList<Curie>(curies.size());
+
+		for (Entry<String, UriTemplate> source : curies.entrySet()) {
+
+			String name = source.getKey();
+			UriTemplate template = source.getValue();
+
+			result.add(new Curie(name, getCurieHref(name, template)));
+		}
+
+		return Collections.unmodifiableCollection(result);
 	}
 
 	/* 
@@ -122,7 +131,25 @@ public class DefaultCurieProvider implements CurieProvider {
 	public String getNamespacedRelFor(String rel) {
 
 		boolean prefixingNeeded = defaultCurie != null && !IanaRels.isIanaRel(rel) && !rel.contains(":");
-		return prefixingNeeded ? String.format("%s:%s", defaultCurie.name, rel) : rel;
+		return prefixingNeeded ? String.format("%s:%s", defaultCurie, rel) : rel;
+	}
+
+	/**
+	 * Returns the href for the {@link Curie} instance to be created. Will prepend the current application URI (servlet
+	 * mapping) in case the template is not an absolute one in the first place.
+	 * 
+	 * @param name will never be {@literal null} or empty.
+	 * @param template will never be {@literal null}.
+	 * @return the {@link String} to be used as href in the {@link Curie} to be created, must not be {@literal null}.
+	 */
+	protected String getCurieHref(String name, UriTemplate template) {
+
+		if (template.toString().startsWith("http")) {
+			return template.toString();
+		}
+
+		String applicationUri = ServletUriComponentsBuilder.fromCurrentServletMapping().build().expand().toString();
+		return applicationUri.concat(template.toString());
 	}
 
 	/**
