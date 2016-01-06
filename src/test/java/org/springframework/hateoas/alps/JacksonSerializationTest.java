@@ -70,7 +70,9 @@ public class JacksonSerializationTest {
 								).build())//
 				).build();
 
-		assertThat(mapper.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
+		assertThat(mapper.writeValueAsString(alps).replaceAll("\r\n", "\n"), is(read(new ClassPathResource("reference" +
+						".json", getClass())
+		)));
 	}
 
 	private static String read(Resource resource) throws IOException {

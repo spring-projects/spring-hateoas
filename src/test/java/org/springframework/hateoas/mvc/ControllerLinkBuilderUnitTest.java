@@ -49,6 +49,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kamill Sokol
  * @author Oemer Yildiz
  * @author Greg Turnquist
+ * @author Nick Grealy
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -193,6 +194,19 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("https://somethingDifferent"));
+	}
+
+	/**
+	 * @see #143
+	 */
+	@Test
+	public void usesForwardedPathAndHostIfHeaderIsSet() {
+
+		request.addHeader("X-Forwarded-Host", "somethingDifferent");
+		request.addHeader("X-Forwarded-Path", "/foo/bar");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://somethingDifferent/foo/bar"));
 	}
 
 	/**
