@@ -137,7 +137,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		UriComponents components = applyUriComponentsContributer(builder, invocation).buildAndExpand(values);
-		return new ControllerLinkBuilder(UriComponentsBuilder.fromUriString(components.toUriString()));
+		return new ControllerLinkBuilder(components);
 	}
 
 	/* 

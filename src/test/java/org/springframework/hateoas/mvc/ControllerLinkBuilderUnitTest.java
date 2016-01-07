@@ -81,6 +81,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/people/15/addresses/DE"));
 	}
 
+	/**
+	 * @see #398
+	 */
+	@Test
+	public void encodesRequestParameterWithSpecialValue() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam("Spring#\n")).withSelfRel();
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/something/foo?id=Spring%23%0A"));
+	}
+
 	@Test
 	public void createsLinkToSubResource() {
 
