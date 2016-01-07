@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Greg Turnquist
+ * @author Kevin Conaway
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -126,10 +127,10 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 * 
 	 * <pre>
-	 * @RequestMapping("/customers")
+	 * &#64;RequestMapping("/customers")
 	 * class CustomerController {
 	 * 
-	 *   @RequestMapping("/{id}/addresses")
+	 *   &#64;RequestMapping("/{id}/addresses")
 	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
 	 * }
 	 * 
