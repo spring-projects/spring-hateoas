@@ -49,6 +49,11 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 		this.uriComponents = builder.build();
 	}
 
+	public LinkBuilderSupport(UriComponents uriComponents) {
+		Assert.notNull(uriComponents);
+		this.uriComponents = uriComponents;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)

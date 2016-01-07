@@ -60,6 +60,15 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
+	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponents}.
+	 *
+	 * @param uriComponents must not be {@literal null}.
+	 */
+	ControllerLinkBuilder(UriComponents uriComponents) {
+		super(uriComponents);
+	}
+
+	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
 	 * 
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
