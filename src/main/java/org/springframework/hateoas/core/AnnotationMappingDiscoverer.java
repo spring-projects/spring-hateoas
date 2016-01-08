@@ -109,7 +109,17 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			return typeMapping;
 		}
 
-		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : typeMapping + mapping[0];
+		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : join(typeMapping, mapping[0]);
+	}
+
+	private String join(String typeMapping, String mapping) {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append(typeMapping.endsWith("/") ? typeMapping.substring(0, typeMapping.length() - 1) : typeMapping);
+		builder.append('/');
+		builder.append(mapping.startsWith("/") ? mapping.substring(1) : mapping);
+
+		return builder.toString();
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {
