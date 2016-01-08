@@ -21,7 +21,9 @@ import static org.junit.Assert.*;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Unit tests for {@link AnnotationMappingDiscoverer}.
@@ -97,6 +99,25 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(ChildWithTypeMapping.class, method), is("/child/parent"));
 	}
 
+	/**
+	 * @see #269
+	 */
+	@Test
+	public void handlesSlashes() throws Exception {
+
+		Method method = ControllerWithoutSlashes.class.getMethod("noslash");
+		assertThat(discoverer.getMapping(method), is("slashes/noslash"));
+
+		method = ControllerWithoutSlashes.class.getMethod("withslash");
+		assertThat(discoverer.getMapping(method), is("slashes/withslash"));
+
+		method = ControllerWithTrailingSlashes.class.getMethod("noslash");
+		assertThat(discoverer.getMapping(method), is("trailing/noslash"));
+
+		method = ControllerWithTrailingSlashes.class.getMethod("withslash");
+		assertThat(discoverer.getMapping(method), is("trailing/withslash"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -139,4 +160,24 @@ public class AnnotationMappingDiscovererUnitTest {
 
 	@RequestMapping("/child")
 	interface ChildWithTypeMapping extends ParentWithMethod {}
+
+	@RequestMapping("slashes")
+	interface ControllerWithoutSlashes {
+
+		@RequestMapping("noslash")
+		void noslash();
+
+		@RequestMapping("/withslash")
+		void withslash();
+	}
+
+	@RequestMapping("trailing/")
+	interface ControllerWithTrailingSlashes {
+
+		@RequestMapping("noslash")
+		void noslash();
+
+		@RequestMapping("/withslash")
+		void withslash();
+	}
 }
