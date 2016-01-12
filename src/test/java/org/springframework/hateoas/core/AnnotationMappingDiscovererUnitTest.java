@@ -128,6 +128,17 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method), is("trailing/withslash"));
 	}
 
+	/**
+	 * @see #186
+	 */
+	@Test
+	public void usesFirstMappingInCaseMultipleOnesAreDefined() throws Exception {
+
+		Method method = MultipleMappingsController.class.getMethod("method");
+
+		assertThat(discoverer.getMapping(method), is("/type/method"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -196,5 +207,12 @@ public class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping("////withslash")
 		void withslash();
+	}
+
+	@RequestMapping({ "/type", "/typeAlias" })
+	interface MultipleMappingsController {
+
+		@RequestMapping({ "/method", "/methodAlias" })
+		void method();
 	}
 }

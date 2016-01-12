@@ -70,11 +70,6 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		String[] mapping = getMappingFrom(findAnnotation(type, annotationType));
 
-		if (mapping.length > 1) {
-			throw new IllegalStateException(
-					String.format("Multiple class level mappings defined on class %s!", type.getName()));
-		}
-
 		return mapping.length == 0 ? null : mapping[0];
 	}
 
@@ -100,12 +95,6 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		Assert.notNull(method, "Method must not be null!");
 
 		String[] mapping = getMappingFrom(findAnnotation(method, annotationType));
-
-		if (mapping.length > 1) {
-			throw new IllegalStateException(
-					String.format("Multiple method level mappings defined on method %s!", method.toString()));
-		}
-
 		String typeMapping = getMapping(type);
 
 		if (mapping == null || mapping.length == 0) {

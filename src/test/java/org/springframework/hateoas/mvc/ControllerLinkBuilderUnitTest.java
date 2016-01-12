@@ -98,9 +98,12 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/people"));
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void rejectsControllerWithMultipleMappings() {
-		linkTo(InvalidController.class);
+	/**
+	 * @see #186
+	 */
+	@Test
+	public void usesFirstMappingInCaseMultipleOnesAreDefined() {
+		assertThat(linkTo(InvalidController.class).withSelfRel().getHref(), endsWith("/persons"));
 	}
 
 	@Test
