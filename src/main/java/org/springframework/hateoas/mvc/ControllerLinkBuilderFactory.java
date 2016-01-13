@@ -56,6 +56,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Ross Turner
  * @author Oemer Yildiz
  * @author Kevin Conaway
+ * @author Andrew Naydyonock
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 

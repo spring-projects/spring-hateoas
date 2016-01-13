@@ -45,6 +45,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Kamill Sokol
  * @author Greg Turnquist
  * @author Kevin Conaway
+ * @author Andrew Naydyonock
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -91,21 +92,20 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
 
-		Assert.notNull(controller);
+		Assert.notNull(controller, "Controller must not be null!");
+		Assert.notNull(parameters, "Parameters must not be null!");
 
-		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
 		UriComponents expandedComponents = uriComponents.expand(parameters);
 
-		return builder.slash(expandedComponents);
+		return new ControllerLinkBuilder(getBuilder()).slash(expandedComponents);
 	}
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
-	 * Parameter map is used to fill up potentially available path variables in the class scope request
-	 * mapping.
+	 * Parameter map is used to fill up potentially available path variables in the class scope request mapping.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
@@ -114,15 +114,15 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
 
-		Assert.notNull(controller);
+		Assert.notNull(controller, "Controller must not be null!");
+		Assert.notNull(parameters, "Parameters must not be null!");
 
-		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
 		UriComponents expandedComponents = uriComponents.expand(parameters);
 
-		return builder.slash(expandedComponents);
+		return new ControllerLinkBuilder(getBuilder()).slash(expandedComponents);
 	}
 
 	/*

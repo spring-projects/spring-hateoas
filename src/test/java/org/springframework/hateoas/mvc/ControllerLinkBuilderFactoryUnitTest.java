@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -72,18 +73,6 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertPointsToMockServer(link);
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people/15/addresses"));
-	}
-
-	@Test
-	public void createsLinkToParameterizedControllerRootWithParameterMap() {
-		Map<String, String> pathParams = new LinkedHashMap<String, String>();
-		pathParams.put("id", "17");
-
-		Link link = factory.linkTo(PersonsAddressesController.class, pathParams).withSelfRel();
-
-		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/17/addresses"));
 	}
 
 	@Test
@@ -170,6 +159,19 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(),
 				endsWith("/sample/multivaluemapsupport?key1=value1a&key1=value1b&key2=value2a&key2=value2b"));
+	}
+
+	/**
+	 * @see #372
+	 */
+	@Test
+	public void createsLinkToParameterizedControllerRootWithParameterMap() {
+
+		Link link = factory.linkTo(PersonsAddressesController.class, Collections.singletonMap("id", "17")).withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/17/addresses"));
 	}
 
 	static interface SampleController {
