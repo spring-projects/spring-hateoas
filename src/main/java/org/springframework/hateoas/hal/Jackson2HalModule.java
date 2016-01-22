@@ -28,6 +28,7 @@ import java.util.Map;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.hateoas.EmbeddedResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RelProvider;
@@ -383,6 +384,75 @@ public class Jackson2HalModule extends SimpleModule {
 	}
 
 	/**
+	 * Custom {@link JsonSerializer} to render {@link EmbeddedResource}s in HAL compatible JSON. Renders the list as a Map.
+	 *
+	 * @author Tomasz Wielga
+	 */
+	public static class HalEmbeddedResourcesSerializer extends ContainerSerializer<Collection<EmbeddedResource>> implements ContextualSerializer {
+
+		private final BeanProperty property;
+
+		public HalEmbeddedResourcesSerializer() {
+			this(null);
+		}
+
+		public HalEmbeddedResourcesSerializer(BeanProperty property) {
+
+			super(Collection.class, false);
+
+			this.property = property;
+		}
+
+		@Override
+		public void serialize(Collection<EmbeddedResource> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
+
+			Map<String, Object> embeddeds = new HashMap<String, Object>();
+			for (EmbeddedResource embedded : value) {
+				embeddeds.put(embedded.getRel(), embedded.getResource());
+			}
+
+			Object currentValue = jgen.getCurrentValue();
+
+			provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
+			return new HalEmbeddedResourcesSerializer(property);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<EmbeddedResource> getContentSerializer() {
+			return null;
+		}
+
+		public boolean isEmpty(Collection<EmbeddedResource> value) {
+			return isEmpty(null, value);
+		}
+
+		public boolean isEmpty(SerializerProvider provider, Collection<EmbeddedResource> value) {
+			return value.isEmpty();
+		}
+
+		@Override
+		public boolean hasSingleElement(Collection<EmbeddedResource> value) {
+			return value.size() == 1;
+		}
+
+		@Override
+		protected ContainerSerializer<EmbeddedResource> _withValueTypeSerializer(TypeSerializer vts) {
+			return null;
+		}
+	}
+
+	/**
 	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the {@link Link} as
 	 * immediate object if we have a single one or as array if we have multiple ones.
 	 * 
@@ -689,6 +759,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Assert.notNull(resolver, "RelProvider must not be null!");
 			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
+			this.instanceMap.put(HalEmbeddedResourcesSerializer.class, new HalEmbeddedResourcesSerializer());
 			this.instanceMap.put(HalLinkListSerializer.class,
 					new HalLinkListSerializer(curieProvider, mapper, messageSource));
 		}

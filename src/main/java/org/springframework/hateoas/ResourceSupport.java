@@ -17,14 +17,18 @@ package org.springframework.hateoas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for DTOs to collect links.
@@ -35,8 +39,11 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	private final List<Link> links;
 
+	private final List<EmbeddedResource> embeddedResources;
+
 	public ResourceSupport() {
 		this.links = new ArrayList<Link>();
+		embeddedResources = new ArrayList<EmbeddedResource>();
 	}
 
 	/**
@@ -58,14 +65,21 @@ public class ResourceSupport implements Identifiable<Link> {
 	}
 
 	/**
-	 * Adds all given {@link Link}s to the resource.
+	 * Adds all given {@link Link}s or {@link EmbeddedResource}s to the resource.
 	 * 
-	 * @param links
+	 * @param linksOrEmdeddedResource
 	 */
-	public void add(Iterable<Link> links) {
-		Assert.notNull(links, "Given links must not be null!");
-		for (Link candidate : links) {
-			add(candidate);
+	public void add(Iterable linksOrEmdeddedResource) {
+		Assert.notNull(linksOrEmdeddedResource, "Given objects must not be null!");
+		for (Object candidate : linksOrEmdeddedResource) {
+			if (candidate instanceof Link) {
+				add((Link) candidate);
+			} else if (candidate instanceof EmbeddedResource) {
+				add((EmbeddedResource) candidate);
+			} else {
+				throw new ClassCastException(
+						"Only " + Link.class.getName() + " or " + EmbeddedResource.class.getName() + " allowed");
+			}
 		}
 	}
 
@@ -133,7 +147,22 @@ public class ResourceSupport implements Identifiable<Link> {
 		return null;
 	}
 
-	/* 
+	public void add(EmbeddedResource embedded) {
+		Assert.notNull(embedded, "Resource must not be null!");
+		this.embeddedResources.add(embedded);
+	}
+
+	public void add(EmbeddedResource... embeddedResources) {
+		this.embeddedResources.addAll(Arrays.asList(embeddedResources));
+	}
+
+	@JsonProperty("embedded")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	public List<EmbeddedResource> getEmbeddedResources() {
+		return embeddedResources;
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
