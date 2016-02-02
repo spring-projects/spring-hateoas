@@ -261,6 +261,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			builder.port(Integer.parseInt(port));
 		}
 
+		String path = request.getHeader("X-Forwarded-Path");
+
+		if (hasText(path)) {
+			builder.path(path);
+		}
+
 		return builder;
 	}
 
