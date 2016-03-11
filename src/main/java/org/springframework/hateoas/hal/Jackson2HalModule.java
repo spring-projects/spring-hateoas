@@ -531,9 +531,8 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private static final long serialVersionUID = 6420432361123210955L;
 
-		@SuppressWarnings("deprecation")
 		public HalLinkListDeserializer() {
-			super(List.class);
+			super(TypeFactory.defaultInstance().constructType(List.class));
 		}
 
 		/*
@@ -598,17 +597,12 @@ public class Jackson2HalModule extends SimpleModule {
 		private JavaType contentType;
 
 		public HalResourcesDeserializer() {
-			this(List.class, null);
+			this(TypeFactory.defaultInstance().constructType(List.class));
 		}
 
-		public HalResourcesDeserializer(JavaType vc) {
-			this(null, vc);
-		}
+		public HalResourcesDeserializer(JavaType contentType) {
 
-		@SuppressWarnings("deprecation")
-		private HalResourcesDeserializer(Class<?> type, JavaType contentType) {
-
-			super(type);
+			super(contentType);
 			this.contentType = contentType;
 		}
 
@@ -651,7 +645,6 @@ public class Jackson2HalModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						object = deser.deserialize(jp, ctxt);
-						;
 						result.add(object);
 					}
 				} else {
