@@ -249,6 +249,7 @@ public class ControllerFormBuilderUnitTest {
 		public Resource<Order> create(@RequestBody Order order);
 	}
 
+	@SuppressWarnings("unused")
 	public class Size implements Identifiable<String> {
 
 		private String name;
@@ -268,6 +269,7 @@ public class ControllerFormBuilderUnitTest {
 
 	}
 
+	@SuppressWarnings("unused")
 	public class Item implements Identifiable<Long> {
 
 		private Long id;
@@ -281,6 +283,7 @@ public class ControllerFormBuilderUnitTest {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public class LineItem {
 
 		private String name;
@@ -297,6 +300,7 @@ public class ControllerFormBuilderUnitTest {
 		WHOLE, SEMI;
 	}
 
+	@SuppressWarnings("unused")
 	public class Order {
 		private final Set<LineItem> lineItems = new HashSet<LineItem>();
 
