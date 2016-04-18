@@ -61,10 +61,36 @@ public class TemplatedResources<T> extends Resources<T> {
 		String rel = template.getRel();
 		Link link = new Link(href, rel);
 
-		// TODO Don't add default link to links. Override self?
-
-		super.add(link);
+		if (!alreadyExists(link)) {
+			super.add(link);
+		}
 
 		this.templates.add(template);
+	}
+
+	private boolean alreadyExists(Link link) {
+
+		String rel = link.getRel();
+		String href = link.getHref();
+
+		if (rel.equals("default")) {
+			Link self = getLink("self");
+			if (self != null && self.getHref().equals(href)) {
+				return true;
+			}
+		}
+
+		for (Link prev : getLinks()) {
+			if (rel.equals(prev.getRel())) {
+				if (href.equals(prev.getHref())) {
+					return true;
+				}
+				else {
+					throw new IllegalStateException("Already exists an state with same 'rel' and different 'href' :"
+							+ prev);
+				}
+			}
+		}
+		return false;
 	}
 }
