@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * @see http://mamund.site44.com/misc/hal-forms/
  * 
  */
-@JsonInclude(Include.NON_EMPTY)
+@JsonInclude(Include.NON_DEFAULT)
 public class Property {
 
 	private String name;
@@ -26,6 +26,9 @@ public class Property {
 	private boolean templated;
 
 	private Suggest suggest;
+
+	public Property() {
+	}
 
 	public Property(String name, Boolean readOnly, boolean templated, String value, String prompt, String regex,
 			Suggest suggest) {
