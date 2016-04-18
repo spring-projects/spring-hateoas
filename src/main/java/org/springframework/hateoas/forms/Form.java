@@ -12,6 +12,9 @@ public class Form extends Template {
 
 	private Object body;
 
+	public Form() {
+	}
+
 	public Form(String href, String rel) {
 		super(href, rel);
 	}
