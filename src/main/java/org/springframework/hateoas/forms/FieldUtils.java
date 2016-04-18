@@ -82,16 +82,16 @@ public class FieldUtils {
 	 */
 	private static Class<?> getActualType(ResolvableType resolvableType) {
 		if (resolvableType.isArray()) {
-			return resolvableType.getComponentType().getRawClass();
+			return resolvableType.getComponentType().resolve();
 		}
 		else if (resolvableType.asCollection() != ResolvableType.NONE) {
-			return resolvableType.getGeneric(0).getRawClass();
+			return resolvableType.getGeneric(0).resolve();
 		}
 		else if (resolvableType.asMap() != ResolvableType.NONE) {
-			throw new NotSupportedException(resolvableType.getRawClass() + " is not supported");
+			throw new NotSupportedException(resolvableType.resolve() + " is not supported");
 		}
 		else {
-			return resolvableType.getRawClass();
+			return resolvableType.resolve();
 		}
 	}
 }
