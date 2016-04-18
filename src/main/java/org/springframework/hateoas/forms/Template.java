@@ -19,6 +19,9 @@ public class Template extends Link {
 
 	private RequestMethod[] method;
 
+	public Template() {
+	}
+
 	public Template(String href, String rel) {
 		super(href, rel);
 	}
