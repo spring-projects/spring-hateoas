@@ -1,5 +1,6 @@
 package org.springframework.hateoas.forms;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,6 +22,11 @@ public class SuggestBuilderProvider {
 	 */
 	public <D> SuggestBuilder values(Collection<D> values) {
 		this.suggestBuilder = new ValueSuggestBuilder<D>(values);
+		return suggestBuilder;
+	}
+
+	public <D> SuggestBuilder values(D[] values) {
+		this.suggestBuilder = new ValueSuggestBuilder<D>(Arrays.asList(values));
 		return suggestBuilder;
 	}
 
