@@ -176,6 +176,10 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 
 	public static class TextValueSerializer extends JsonSerializer<Object> {
 
+		private static final String VALUE_FIELD_NAME = "value";
+
+		private static final String PROMPT_FIELD_NAME = "prompt";
+
 		private String valueField;
 
 		private String textField;
@@ -187,8 +191,12 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			BeanWrapper beanWrapper = new BeanWrapperImpl(value);
 
 			gen.writeStartObject();
-			gen.writeObjectField("value", beanWrapper.getPropertyValue(valueField));
-			gen.writeObjectField("prompt", beanWrapper.getPropertyValue(textField));
+			if (valueField != null) {
+				gen.writeObjectField(VALUE_FIELD_NAME, beanWrapper.getPropertyValue(valueField));
+			}
+			if (textField != null) {
+				gen.writeObjectField(PROMPT_FIELD_NAME, beanWrapper.getPropertyValue(textField));
+			}
 			gen.writeEndObject();
 		}
 
