@@ -12,10 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties({ "type" })
 public class AbstractSuggest implements Suggest {
 
-	@JsonProperty("prompt-field")
 	protected final String textFieldName;
 
-	@JsonProperty("value-field")
 	protected final String valueFieldName;
 
 	public AbstractSuggest(String textFieldName, String valueFieldName) {
@@ -24,11 +22,13 @@ public class AbstractSuggest implements Suggest {
 	}
 
 	@Override
+	@JsonProperty("value-field")
 	public String getValueField() {
 		return valueFieldName;
 	}
 
 	@Override
+	@JsonProperty("prompt-field")
 	public String getTextField() {
 		return textFieldName;
 	}
