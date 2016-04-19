@@ -263,7 +263,7 @@ public class ControllerFormBuilderUnitTest {
 	}
 
 	@SuppressWarnings("unused")
-	public class Size implements Identifiable<String> {
+	public static class Size implements Identifiable<String> {
 
 		private String name;
 
@@ -273,11 +273,20 @@ public class ControllerFormBuilderUnitTest {
 		}
 
 		public Size(String name) {
+			this(name, null);
+		}
+
+		public Size(String name, String desc) {
 			this.name = name;
+			this.desc = desc;
 		}
 
 		public String getId() {
 			return name;
+		}
+
+		public String getDesc() {
+			return desc;
 		}
 
 	}
