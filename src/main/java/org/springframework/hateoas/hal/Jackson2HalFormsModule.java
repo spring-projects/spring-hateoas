@@ -2,6 +2,7 @@ package org.springframework.hateoas.hal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.forms.Template;
 import org.springframework.hateoas.forms.ValueSuggestSerializer;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
@@ -46,6 +48,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 public class Jackson2HalFormsModule extends SimpleModule {
 
 	private static final long serialVersionUID = -4496351128468451196L;
+	private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = new Link("__rel__", "¯\\_(ツ)_/¯");
 
 	public Jackson2HalFormsModule() {
 		super("json-hal-forms-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
@@ -238,6 +241,82 @@ public class Jackson2HalFormsModule extends SimpleModule {
 			return title;
 		}
 	}
+	
+	public static class HalEmbeddedResourcesSerializer extends ContainerSerializer<Iterable<?>>implements ContextualSerializer {
+
+		private final BeanProperty property;
+		private final EmbeddedMapper embeddedMapper;
+
+		public HalEmbeddedResourcesSerializer(EmbeddedMapper embeddedMapper) {
+			this(null, embeddedMapper);
+		}
+
+		public HalEmbeddedResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
+
+			super(Collection.class, false);
+
+			this.property = property;
+			this.embeddedMapper = embeddedMapper;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
+		 * org.codehaus.jackson.map.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Iterable<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
+
+			Map<String, Object> embeddeds = embeddedMapper.map(value);
+
+			Object currentValue = jgen.getCurrentValue();
+
+			if (currentValue instanceof ResourceSupport) {
+
+				if (embeddedMapper.hasCuriedEmbed(value)) {
+					((ResourceSupport) currentValue).add(CURIES_REQUIRED_DUE_TO_EMBEDS);
+				}
+			}
+
+			provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
+			return new HalEmbeddedResourcesSerializer(property, embeddedMapper);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		public boolean isEmpty(Collection<?> value) {
+			return isEmpty(null, value);
+		}
+
+		public boolean isEmpty(SerializerProvider provider, Collection<?> value) {
+			return value.isEmpty();
+		}
+
+		@Override
+		public boolean hasSingleElement(Iterable<?> value) {
+			return value.iterator().hasNext();
+		}
+
+		@Override
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+			return null;
+		}
+	}
 
 	public static class HalFormsHandlerInstantiator extends HalHandlerInstantiator {
 		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
@@ -250,6 +329,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 			this.instanceMap.put(HalTemplateListSerializer.class, new HalTemplateListSerializer(mapper, messageSource));
 			this.instanceMap.put(ValueSuggestSerializer.class, new ValueSuggestSerializer(resolver, null));
+			this.instanceMap.put(HalEmbeddedResourcesSerializer.class, new HalEmbeddedResourcesSerializer(mapper));
 		}
 
 		private Object findInstance(Class<?> type) {

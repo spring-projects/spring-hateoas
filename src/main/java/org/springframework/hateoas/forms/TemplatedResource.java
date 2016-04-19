@@ -2,20 +2,21 @@ package org.springframework.hateoas.forms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 import org.springframework.hateoas.hal.Jackson2HalFormsModule;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class TemplatedResources<T> extends ResourceSupport {
+public class TemplatedResource<T> extends Resource<T> {
 
 	@JsonProperty("_templates")
 	@JsonInclude(Include.NON_EMPTY)
@@ -28,31 +29,26 @@ public class TemplatedResources<T> extends ResourceSupport {
 	private List<Iterable<?>> embeddedContent = new ArrayList<Iterable<?>>();
 
 	/**
-	 * Creates an empty {@link TemplatedResources} instance.
-	 */
-	protected TemplatedResources() {
-		this(new ArrayList<T>());
-	}
-
-	/**
-	 * Creates a {@link TemplatedResources} instance with the given content and {@link Link}s (optional).
+	 * Creates a new {@link Resource} with the given content and {@link Link}s (optional).
 	 * 
 	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link Resources}.
+	 * @param links the links to add to the {@link Resource}.
 	 */
-	public TemplatedResources(Iterable<T> content, Link... links) {
+	public TemplatedResource(T content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
 
 	/**
-	 * Creates a {@link TemplatedResources} instance with the given content and {@link Link}s.
+	 * Creates a new {@link Resource} with the given content and {@link Link}s.
 	 * 
 	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link Resources}.
+	 * @param links the links to add to the {@link Resource}.
 	 */
-	public TemplatedResources(Iterable<T> content, Iterable<Link> links) {
+	public TemplatedResource(T content, Iterable<Link> links) {
 
-		this.embeddedContent.add(content);
+		super(content, new Link[] {});
+		Assert.notNull(content, "Content must not be null!");
+		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
 
 		for (Link link : links) {
 			if (link instanceof Template) {
