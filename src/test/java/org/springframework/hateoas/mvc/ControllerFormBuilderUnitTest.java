@@ -283,7 +283,7 @@ public class ControllerFormBuilderUnitTest {
 	}
 
 	@SuppressWarnings("unused")
-	public class Item implements Identifiable<Long> {
+	public static class Item implements Identifiable<Long> {
 
 		private Long id;
 
@@ -291,8 +291,20 @@ public class ControllerFormBuilderUnitTest {
 
 		private Size size;
 
+		public Item() {
+		}
+
+		public Item(Long id, String name) {
+			this.id = id;
+			this.name = name;
+		}
+
 		public Long getId() {
 			return id;
+		}
+
+		public String getName() {
+			return name;
 		}
 	}
 
