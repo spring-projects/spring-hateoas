@@ -1,18 +1,16 @@
 package org.springframework.hateoas.forms;
 
-import java.util.Collection;
-
 import org.springframework.util.Assert;
 
 public class ValueSuggestBuilder<D> extends AbstractSuggestBuilder {
 
-	protected Collection<D> values;
+	protected Iterable<D> values;
 
 	private Class<?> componentType;
 
-	public ValueSuggestBuilder(Collection<D> values) {
+	public ValueSuggestBuilder(Iterable<D> values) {
 		this.values = values;
-		if (!values.isEmpty()) {
+		if (values.iterator().hasNext()) {
 			this.componentType = values.iterator().next().getClass();
 		}
 	}

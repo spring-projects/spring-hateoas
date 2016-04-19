@@ -2,7 +2,6 @@ package org.springframework.hateoas.forms;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
@@ -35,8 +34,18 @@ public class SuggestBuilderProvider {
 	 * @param values
 	 * @return
 	 */
-	public <D> SuggestBuilder embedded(List<D> values) {
+	public <D> SuggestBuilder embedded(Iterable<D> values) {
 		this.suggestBuilder = new EmbeddedSuggestBuilder<D>(values);
+		return suggestBuilder;
+	}
+
+	/**
+	 * Returns a {@link SuggestBuilder} to construct a {@link ValueSuggest} of type {@link ValueSuggestType#EMBEDDED}
+	 * @param values
+	 * @return
+	 */
+	public <D> SuggestBuilder embedded(D[] values) {
+		this.suggestBuilder = new EmbeddedSuggestBuilder<D>(Arrays.asList(values));
 		return suggestBuilder;
 	}
 

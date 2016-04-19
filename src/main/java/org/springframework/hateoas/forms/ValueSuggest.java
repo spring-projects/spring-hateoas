@@ -1,8 +1,8 @@
 package org.springframework.hateoas.forms;
 
-import java.util.Collection;
-
 import org.springframework.hateoas.Resource;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Suggested values of a {@link Property} that are included into the response. There are two ways: include text/value
@@ -12,17 +12,18 @@ import org.springframework.hateoas.Resource;
  * 
  * @param <D>
  */
+@JsonSerialize(using = ValueSuggestSerializer.class)
 public class ValueSuggest<D> extends AbstractSuggest {
 
-	private Collection<D> values;
+	private Iterable<D> values;
 
 	private ValueSuggestType type;
 
-	public ValueSuggest(Collection<D> values, String textFieldName, String valueFieldName) {
+	public ValueSuggest(Iterable<D> values, String textFieldName, String valueFieldName) {
 		this(values, textFieldName, valueFieldName, ValueSuggestType.DIRECT);
 	}
 
-	public ValueSuggest(Collection<D> values, String textFieldName, String valueFieldName, ValueSuggestType type) {
+	public ValueSuggest(Iterable<D> values, String textFieldName, String valueFieldName, ValueSuggestType type) {
 		super(textFieldName, valueFieldName);
 		this.values = values;
 		this.type = type;
@@ -32,7 +33,7 @@ public class ValueSuggest<D> extends AbstractSuggest {
 		return type;
 	}
 
-	public Collection<D> getValues() {
+	public Iterable<D> getValues() {
 		return values;
 	}
 

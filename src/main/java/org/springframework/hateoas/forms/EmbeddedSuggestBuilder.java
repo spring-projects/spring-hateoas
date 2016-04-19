@@ -1,7 +1,5 @@
 package org.springframework.hateoas.forms;
 
-import java.util.List;
-
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 
 /**
@@ -10,7 +8,7 @@ import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
  */
 public class EmbeddedSuggestBuilder<D> extends ValueSuggestBuilder<D> {
 
-	public EmbeddedSuggestBuilder(List<D> values) {
+	public EmbeddedSuggestBuilder(Iterable<D> values) {
 		super(values);
 	}
 
