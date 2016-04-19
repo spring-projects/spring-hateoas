@@ -8,6 +8,8 @@ import org.springframework.hateoas.LinkBuilder;
 /**
  * Adds possibility of building {@link Template} instances
  * 
+ * FIXME: duplicated code from {@link LinkBuilder}
+ * 
  */
 public interface TemplateBuilder {
 
