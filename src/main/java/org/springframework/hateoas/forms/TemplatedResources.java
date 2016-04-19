@@ -59,7 +59,7 @@ public class TemplatedResources<T> extends Resources<T> {
 		// TODO Create a getter in template to obtain Link instance.
 		String href = template.getHref();
 		String rel = template.getRel();
-		Link link = new Link(href, rel);
+		Link link = new Link(href, Template.DEFAULT_KEY.equals(rel) ? Link.REL_SELF : rel);
 
 		if (!alreadyExists(link)) {
 			super.add(link);
@@ -73,11 +73,9 @@ public class TemplatedResources<T> extends Resources<T> {
 		String rel = link.getRel();
 		String href = link.getHref();
 
-		if (rel.equals("default")) {
-			Link self = getLink("self");
-			if (self != null && self.getHref().equals(href)) {
-				return true;
-			}
+		Link self = getLink(Link.REL_SELF);
+		if (self != null && self.getHref().equals(href)) {
+			return true;
 		}
 
 		for (Link prev : getLinks()) {
@@ -86,8 +84,8 @@ public class TemplatedResources<T> extends Resources<T> {
 					return true;
 				}
 				else {
-					throw new IllegalStateException("Already exists an state with same 'rel' and different 'href' :"
-							+ prev);
+					throw new IllegalStateException(
+							"Already exists an state with same 'rel' and different 'href' :" + prev);
 				}
 			}
 		}
