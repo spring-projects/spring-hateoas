@@ -173,7 +173,6 @@ public class ControllerFormBuilderUnitTest {
 
 		ValueSuggest<Size> suggest = (ValueSuggest<Size>) size.getSuggest();
 		assertThat(suggest.getType(), is(ValueSuggestType.DIRECT));
-		assertThat(suggest.getValues().size(), is(2));
 		assertThat(suggest.getValues().iterator().next().getId(), is("big"));
 	}
 
@@ -197,7 +196,6 @@ public class ControllerFormBuilderUnitTest {
 
 		ValueSuggest<Size> suggest = (ValueSuggest<Size>) size.getSuggest();
 		assertThat(suggest.getType(), is(ValueSuggestType.EMBEDDED));
-		assertThat(suggest.getValues().size(), is(2));
 		assertThat(suggest.getValues().iterator().next().getId(), is("big"));
 	}
 
