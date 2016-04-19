@@ -22,6 +22,7 @@ public abstract class FormBuilderSupport<T extends FormBuilder> extends LinkBuil
 		form.setBody(getBody());
 		form.setProperties(getProperties());
 		form.setMethod(getMethod());
+		form.setContentType(getContentType());
 		return form;
 	}
 
@@ -35,5 +36,7 @@ public abstract class FormBuilderSupport<T extends FormBuilder> extends LinkBuil
 	public abstract List<Property> getProperties();
 
 	public abstract RequestMethod[] getMethod();
+
+	public abstract String getContentType();
 
 }

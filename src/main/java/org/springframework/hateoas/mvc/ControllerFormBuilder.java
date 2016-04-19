@@ -19,6 +19,7 @@ import org.springframework.hateoas.forms.FormBuilderSupport;
 import org.springframework.hateoas.forms.Property;
 import org.springframework.hateoas.forms.PropertyBuilder;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,14 +47,17 @@ public class ControllerFormBuilder extends FormBuilderSupport<ControllerFormBuil
 
 	private Object requestBody;
 
+	private String contentType;
+
 	public ControllerFormBuilder(UriComponentsBuilder builder) {
 		super(builder);
 	}
 
-	public ControllerFormBuilder(UriComponentsBuilder builder, RequestMethod[] method, Object requestBody,
-			List<PropertyBuilder> propertyBuilders) {
+	public ControllerFormBuilder(UriComponentsBuilder builder, RequestMethod[] method, String contentType,
+			Object requestBody, List<PropertyBuilder> propertyBuilders) {
 		super(builder);
 		this.method = method;
+		this.contentType = contentType;
 		this.requestBody = requestBody;
 		this.propertyBuilders = propertyBuilders;
 	}
@@ -107,7 +111,7 @@ public class ControllerFormBuilder extends FormBuilderSupport<ControllerFormBuil
 		}
 		formBuilder.body(requestBody);
 		formBuilder.method(getMethod(invocation.getMethod()));
-
+		formBuilder.contentType(getContentType(invocation.getMethod()));
 		return formBuilder;
 	}
 
@@ -123,6 +127,20 @@ public class ControllerFormBuilder extends FormBuilderSupport<ControllerFormBuil
 		return new RequestMethod[] { RequestMethod.GET };
 	}
 
+	private static String getContentType(Method method) {
+		RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		if (requestMapping != null && requestMapping.consumes().length > 0) {
+			for (String consume : requestMapping.consumes()) {
+				if (MediaType.APPLICATION_JSON_VALUE.equals(consume)
+						|| MediaType.APPLICATION_FORM_URLENCODED_VALUE.equals(consume)) {
+					return consume;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	@Override
 	protected ControllerFormBuilder getThis() {
 		return this;
@@ -130,7 +148,7 @@ public class ControllerFormBuilder extends FormBuilderSupport<ControllerFormBuil
 
 	@Override
 	protected ControllerFormBuilder createNewInstance(UriComponentsBuilder builder) {
-		return new ControllerFormBuilder(builder, method, requestBody, propertyBuilders);
+		return new ControllerFormBuilder(builder, method, contentType, requestBody, propertyBuilders);
 	}
 
 	static UriComponentsBuilder getBuilder() {
@@ -199,8 +217,9 @@ public class ControllerFormBuilder extends FormBuilderSupport<ControllerFormBuil
 		return requestBody;
 	}
 
-	public void body(Object requestBody) {
+	public ControllerFormBuilder body(Object requestBody) {
 		this.requestBody = requestBody;
+		return this;
 	}
 
 	@Override
@@ -208,8 +227,18 @@ public class ControllerFormBuilder extends FormBuilderSupport<ControllerFormBuil
 		return method;
 	}
 
-	public void method(RequestMethod[] method) {
+	public ControllerFormBuilder method(RequestMethod[] method) {
 		this.method = method;
+		return this;
 	}
 
+	@Override
+	public String getContentType() {
+		return contentType;
+	}
+
+	public ControllerFormBuilder contentType(String contentType) {
+		this.contentType = contentType;
+		return this;
+	}
 }
