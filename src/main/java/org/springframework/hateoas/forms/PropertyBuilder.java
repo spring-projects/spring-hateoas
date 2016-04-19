@@ -23,11 +23,11 @@ public class PropertyBuilder {
 
 	private Class<?> declaringClass;
 
-	protected FormBuilder formBuilder;
+	protected TemplateBuilder formBuilder;
 
 	private SuggestBuilderProvider suggestBuilderConfigurer;
 
-	public PropertyBuilder(String name, Class<?> declaringClass, FormBuilder formBuilder) {
+	public PropertyBuilder(String name, Class<?> declaringClass, TemplateBuilder formBuilder) {
 		this.name = name;
 		this.declaringClass = declaringClass;
 		this.formBuilder = formBuilder;

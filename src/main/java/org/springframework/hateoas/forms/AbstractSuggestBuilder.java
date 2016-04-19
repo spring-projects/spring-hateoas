@@ -3,7 +3,7 @@ package org.springframework.hateoas.forms;
 /**
  * Abstract class that helps to construct {@link Suggest}
  * @see PropertyBuilder
- * @see FormBuilder
+ * @see TemplateBuilder
  */
 public abstract class AbstractSuggestBuilder implements SuggestBuilder {
 

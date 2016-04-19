@@ -1,16 +1,8 @@
 package org.springframework.hateoas.forms;
 
-import java.util.List;
-
-import org.springframework.hateoas.core.LinkBuilderSupport;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/**
- * Base class to implement {@link FormBuilder}s based on a Spring MVC {@link UriComponentsBuilder}.
- * 
- */
-public abstract class FormBuilderSupport<T extends FormBuilder> extends LinkBuilderSupport<T> implements FormBuilder {
+public abstract class FormBuilderSupport<T extends TemplateBuilder> extends TemplateBuilderSupport<T> {
 
 	public FormBuilderSupport(UriComponentsBuilder builder) {
 		super(builder);
@@ -18,7 +10,7 @@ public abstract class FormBuilderSupport<T extends FormBuilder> extends LinkBuil
 
 	@Override
 	public Form withKey(String key) {
-		Form form = new Form(toUri().normalize().toASCIIString(), key);
+		Form form = new Form(toString(), key);
 		form.setBody(getBody());
 		form.setProperties(getProperties());
 		form.setMethod(getMethod());
@@ -32,10 +24,6 @@ public abstract class FormBuilderSupport<T extends FormBuilder> extends LinkBuil
 	}
 
 	public abstract Object getBody();
-
-	public abstract List<Property> getProperties();
-
-	public abstract RequestMethod[] getMethod();
 
 	public abstract String getContentType();
 

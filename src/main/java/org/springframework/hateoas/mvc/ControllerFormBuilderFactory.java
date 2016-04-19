@@ -17,7 +17,7 @@ import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.forms.FormBuilderFactory;
-import org.springframework.hateoas.forms.FormBuilderSupport;
+import org.springframework.hateoas.forms.TemplateBuilderSupport;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * Factory for {@link FormBuilderSupport} instances based on the request mapping annotated on the given controller.
+ * Factory for {@link TemplateBuilderSupport} instances based on the request mapping annotated on the given controller.
  */
 public class ControllerFormBuilderFactory implements FormBuilderFactory<ControllerFormBuilder> {
 

@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.mvc.ControllerFormBuilder;
 
-public interface FormBuilderFactory<T extends FormBuilder> {
+public interface FormBuilderFactory<T extends TemplateBuilder> {
 	/**
 	 * Returns a {@link ControllerFormBuilder} pointing to the URI mapped to the given {@link Method} and expanding this
 	 * mapping using the given parameters.
