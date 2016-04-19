@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 
@@ -182,6 +184,12 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 		public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers)
 				throws IOException, JsonProcessingException {
 
+			BeanWrapper beanWrapper = new BeanWrapperImpl(value);
+
+			gen.writeStartObject();
+			gen.writeObjectField("value", beanWrapper.getPropertyValue(valueField));
+			gen.writeObjectField("prompt", beanWrapper.getPropertyValue(textField));
+			gen.writeEndObject();
 		}
 
 		public void setValueField(String valueField) {
