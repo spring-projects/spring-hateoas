@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -27,6 +28,7 @@ import org.springframework.hateoas.forms.Template;
 import org.springframework.hateoas.forms.ValueSuggest;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -104,6 +106,19 @@ public class ControllerFormBuilderUnitTest {
 
 		// TODO: identify @RequestBody from parameters
 		// assertNotNull(createItemForm.getBody());
+	}
+
+	@Test
+	public void testFormContentType() {
+		ControllerFormBuilder formBuilder = ControllerFormBuilder
+				.formTo(ControllerFormBuilder.methodOn(OrderController.class).create(new Order()));
+
+		assertThat(formBuilder.getContentType(), is(MediaType.APPLICATION_FORM_URLENCODED_VALUE));
+
+		ControllerFormBuilder formBuilder2 = ControllerFormBuilder
+				.formTo(ControllerFormBuilder.methodOn(ItemController.class).create(new Item()));
+
+		assertNull(formBuilder2.getContentType());
 	}
 
 	@Test
@@ -243,7 +258,7 @@ public class ControllerFormBuilderUnitTest {
 
 	@RequestMapping("/orders")
 	private interface OrderController {
-		@RequestMapping(method = RequestMethod.POST)
+		@RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 		public Resource<Order> create(@RequestBody Order order);
 	}
 
