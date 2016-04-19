@@ -12,6 +12,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.forms.Template;
+import org.springframework.hateoas.forms.ValueSuggestSerializer;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.hal.Jackson2HalModule.OptionalListJackson2Serializer;
 import org.springframework.util.Assert;
@@ -248,7 +249,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			this.instanceMap.put(HalTemplateListSerializer.class, new HalTemplateListSerializer(mapper, messageSource));
-
+			this.instanceMap.put(ValueSuggestSerializer.class, new ValueSuggestSerializer(resolver, null));
 		}
 
 		private Object findInstance(Class<?> type) {
