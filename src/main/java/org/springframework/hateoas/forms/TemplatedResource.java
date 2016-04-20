@@ -9,6 +9,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 import org.springframework.hateoas.hal.Jackson2HalFormsModule;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,14 +19,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class TemplatedResource<T> extends Resource<T> {
 
-	@JsonProperty("_templates")
-	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalFormsModule.HalTemplateListSerializer.class)
 	private List<Template> templates = new ArrayList<Template>();
 
-	@JsonProperty("_embedded")
-	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalFormsModule.HalEmbeddedResourcesSerializer.class)
 	private List<Iterable<?>> embeddedContent = new ArrayList<Iterable<?>>();
 
 	/**
@@ -58,6 +53,20 @@ public class TemplatedResource<T> extends Resource<T> {
 				add(link);
 			}
 		}
+	}
+
+	@JsonProperty("_templates")
+	@JsonInclude(Include.NON_EMPTY)
+	@JsonSerialize(using = Jackson2HalFormsModule.HalTemplateListSerializer.class)
+	public List<Template> getTemplates() {
+		return templates;
+	}
+
+	@JsonProperty("_embedded")
+	@JsonInclude(Include.NON_EMPTY)
+	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
+	public List<Iterable<?>> getEmbeddedContent() {
+		return embeddedContent;
 	}
 
 	public void add(Template template) {
