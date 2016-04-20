@@ -10,6 +10,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
+import org.springframework.hateoas.hal.Jackson2HalModule.EmbeddedMapper;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -28,10 +29,14 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 
 	private RelProvider relProvider;
 
+	private EmbeddedMapper mapper;
+
 	private ValueSuggestDirectSerializer directSerializer;
 
-	public ValueSuggestSerializer(RelProvider relProvider, ValueSuggestDirectSerializer directSerializer) {
+	public ValueSuggestSerializer(EmbeddedMapper mapper, RelProvider relProvider,
+			ValueSuggestDirectSerializer directSerializer) {
 		this.relProvider = relProvider;
+		this.mapper = mapper;
 		this.directSerializer = directSerializer;
 	}
 
@@ -49,8 +54,16 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 		else {
 			gen.writeStartObject();
 
-			gen.writeStringField("embedded",
-					relProvider.getCollectionResourceRelFor(value.getValues().iterator().next().getClass()));
+			Map<String, Object> curiedMap = mapper.map(value.getValues());
+
+			String embeddedRel = null;
+			if (!curiedMap.isEmpty()) {
+				embeddedRel = curiedMap.keySet().iterator().next();
+			}
+			else {
+				embeddedRel = relProvider.getCollectionResourceRelFor(value.getValues().iterator().next().getClass());
+			}
+			gen.writeStringField("embedded", embeddedRel);
 
 			// FIXME: debería delegar en el serializador por defecto??
 			if (value.getTextField() != null) {
@@ -68,7 +81,7 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 	public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 			throws JsonMappingException {
 
-		return new ValueSuggestSerializer(relProvider, new ValueSuggestDirectSerializer(property));
+		return new ValueSuggestSerializer(mapper, relProvider, new ValueSuggestDirectSerializer(property));
 	}
 
 	public static class ValueSuggestDirectSerializer extends ContainerSerializer<Object>
