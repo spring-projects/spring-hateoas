@@ -7,21 +7,31 @@ import java.util.List;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.core.EmbeddedWrapper;
+import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 import org.springframework.hateoas.hal.Jackson2HalFormsModule;
-import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class TemplatedResource<T> extends Resource<T> {
 
 	private List<Template> templates = new ArrayList<Template>();
 
-	private List<Iterable<?>> embeddedContent = new ArrayList<Iterable<?>>();
+	private EmbeddedWrappers wrappers;
+
+	private List<EmbeddedWrapper> embeddedWrappers;
+
+	@JsonUnwrapped
+	private Resources<EmbeddedWrapper> getEmbeddeds() {
+		return new Resources<EmbeddedWrapper>(embeddedWrappers);
+	}
 
 	/**
 	 * Creates a new {@link Resource} with the given content and {@link Link}s (optional).
@@ -62,13 +72,6 @@ public class TemplatedResource<T> extends Resource<T> {
 		return templates;
 	}
 
-	@JsonProperty("_embedded")
-	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
-	public List<Iterable<?>> getEmbeddedContent() {
-		return embeddedContent;
-	}
-
 	public void add(Template template) {
 		// TODO Create a getter in template to obtain Link instance.
 		String href = template.getHref();
@@ -81,13 +84,23 @@ public class TemplatedResource<T> extends Resource<T> {
 
 		this.templates.add(template);
 
+		if (template.getProperties() == null) {
+			return;
+		}
+
 		for (Property prop : template.getProperties()) {
 			Suggest suggest = prop.getSuggest();
 			if (suggest != null && suggest instanceof ValueSuggest<?>) {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
 				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
-					embeddedContent.add(valueSuggest.getValues());
+					if (wrappers == null) {
+						wrappers = new EmbeddedWrappers(true);
+						embeddedWrappers = new ArrayList<EmbeddedWrapper>();
+					}
+					for (Object value : valueSuggest.getValues()) {
+						embeddedWrappers.add(wrappers.wrap(value));
+					}
 				}
 			}
 		}
