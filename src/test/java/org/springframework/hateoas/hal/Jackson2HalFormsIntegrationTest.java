@@ -46,7 +46,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 	private static final String TEMPLATE_AND_PROPERTY_WITH_DIRECT_SUGGEST = "{\"_embedded\":{\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"suggest\":[{\"value\":\"big\",\"prompt\":\"Big size\"},{\"value\":\"small\",\"prompt\":\"Small size\"}]}]}}}";
 
-	private static final String TEMPLATE_AND_PROPERTY_WITH_EMBEDDED_SUGGEST = "{\"_embedded\":{\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"suggest\":{\"embedded\":\"sizeList\",\"prompt-field\":\"desc\",\"value-field\":\"id\"}}]}}}";
+	private static final String TEMPLATE_AND_PROPERTY_WITH_EMBEDDED_SUGGEST = "{\"_embedded\":{\"sizeList\":[{\"desc\":\"Big size\",\"id\":\"big\"},{\"desc\":\"Small size\",\"id\":\"small\"}],\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"suggest\":{\"embedded\":\"sizeList\",\"prompt-field\":\"desc\",\"value-field\":\"id\"}}]}}}";
 
 	private static final String TEMPLATE_AND_PROPERTY_WITH_LINK_SUGGEST = "{\"_embedded\":{\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"suggest\":{\"href\":\"localhost\",\"value-field\":\"id\",\"prompt-field\":\"name\"}}]}}}";
 
