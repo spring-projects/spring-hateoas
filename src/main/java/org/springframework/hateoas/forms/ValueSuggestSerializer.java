@@ -2,7 +2,6 @@ package org.springframework.hateoas.forms;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -101,9 +100,9 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 
 			super(List.class, false);
 			this.property = property;
-			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
+			serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
 
-			this.textValueSerializer = new TextValueSerializer();
+			textValueSerializer = new TextValueSerializer();
 		}
 
 		@Override
@@ -129,9 +128,8 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			textValueSerializer.setTextField(suggest.getTextField());
 			textValueSerializer.setValueField(suggest.getValueField());
 
-			Iterator<?> values = suggest.getValues().iterator();
-			while (values.hasNext()) {
-				Object elem = values.next();
+			
+			for (Object elem : suggest.getValues()) {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
 				}
