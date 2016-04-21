@@ -92,8 +92,8 @@ public class Template extends Link {
 		for (RequestMethod rm : method) {
 			sb.append(rm.toString()).append(',');
 		}
-		String methodStr = sb.toString();
-		return methodStr.substring(0, methodStr.length() - 1);
+		sb.setLength(sb.length() - 1);
+		return sb.toString();
 	}
 
 }
