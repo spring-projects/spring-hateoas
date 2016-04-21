@@ -7,19 +7,22 @@ package org.springframework.hateoas.forms;
  */
 public abstract class AbstractSuggestBuilder implements SuggestBuilder {
 
-	protected String textFieldName;
+	String textFieldName;
 
-	protected String valueFieldName;
+	String valueFieldName;
 
+	@Override
 	public AbstractSuggestBuilder textField(String textFieldName) {
 		this.textFieldName = textFieldName;
 		return this;
 	}
 
+	@Override
 	public AbstractSuggestBuilder valueField(String valueFieldName) {
 		this.valueFieldName = valueFieldName;
 		return this;
 	}
 
+	@Override
 	public abstract Suggest build();
 }
