@@ -2,34 +2,25 @@ package org.springframework.hateoas.forms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.core.EmbeddedWrapper;
-import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
 import org.springframework.hateoas.hal.Jackson2HalFormsModule;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class TemplatedResources<T> extends ResourceSupport {
+public class TemplatedResources<T> extends Resources<T> {
 
 	private List<Template> templates = new ArrayList<Template>();
 
-	private EmbeddedWrappers wrappers = new EmbeddedWrappers(true);
-
-	private List<EmbeddedWrapper> embeddedWrappers = new ArrayList<EmbeddedWrapper>();
-
-	@JsonUnwrapped
-	private Resources<EmbeddedWrapper> getEmbeddeds() {
-		return new Resources<EmbeddedWrapper>(embeddedWrappers);
-	}
+	private List<Iterable<?>> embeddedContent = new ArrayList<Iterable<?>>();
 
 	/**
 	 * Creates an empty {@link TemplatedResources} instance.
@@ -56,9 +47,7 @@ public class TemplatedResources<T> extends ResourceSupport {
 	 */
 	public TemplatedResources(Iterable<T> content, Iterable<Link> links) {
 
-		for (Object value : content) {
-			embeddedWrappers.add(wrappers.wrap(value));
-		}
+		this.embeddedContent.add(content);
 
 		for (Link link : links) {
 			if (link instanceof Template) {
@@ -75,6 +64,18 @@ public class TemplatedResources<T> extends ResourceSupport {
 	@JsonSerialize(using = Jackson2HalFormsModule.HalTemplateListSerializer.class)
 	public List<Template> getTemplates() {
 		return templates;
+	}
+
+	@JsonProperty("_embedded")
+	@JsonInclude(Include.NON_EMPTY)
+	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
+	public List<Iterable<?>> getEmbeddedContent() {
+		return embeddedContent;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Iterator iterator() {
+		return embeddedContent.iterator();
 	}
 
 	public void add(Template template) {
@@ -99,9 +100,7 @@ public class TemplatedResources<T> extends ResourceSupport {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
 				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
-					for (Object value : valueSuggest.getValues()) {
-						embeddedWrappers.add(wrappers.wrap(value));
-					}
+					embeddedContent.add(valueSuggest.getValues());
 				}
 			}
 		}
