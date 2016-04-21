@@ -93,9 +93,6 @@ public class Template extends Link {
 			sb.append(rm.toString()).append(',');
 		}
 		String methodStr = sb.toString();
-		/**
-		 * ANDER Esto es un bug creo no?
-		 */
 		return methodStr.substring(0, methodStr.length() - 1);
 	}
 
