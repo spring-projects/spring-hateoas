@@ -2,6 +2,7 @@ package org.springframework.hateoas.forms;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,8 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 	public void serialize(ValueSuggest<?> value, JsonGenerator gen, SerializerProvider provider)
 			throws IOException, JsonProcessingException {
 
-		if (!value.getValues().iterator().hasNext()) {
+		Iterator<?> iterator = value.getValues().iterator();
+		if (!iterator.hasNext()) {
 			return;
 		}
 
@@ -60,7 +62,7 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 				embeddedRel = curiedMap.keySet().iterator().next();
 			}
 			else {
-				embeddedRel = relProvider.getCollectionResourceRelFor(value.getValues().iterator().next().getClass());
+				embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
 			}
 			gen.writeStringField("embedded", embeddedRel);
 
@@ -128,7 +130,6 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			textValueSerializer.setTextField(suggest.getTextField());
 			textValueSerializer.setValueField(suggest.getValueField());
 
-			
 			for (Object elem : suggest.getValues()) {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
