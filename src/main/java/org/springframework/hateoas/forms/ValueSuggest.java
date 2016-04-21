@@ -30,9 +30,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(using = ValueSuggestSerializer.class)
 public class ValueSuggest<D> extends AbstractSuggest {
 
-	private Iterable<D> values;
+	private final Iterable<D> values;
 
-	private ValueSuggestType type;
+	private final ValueSuggestType type;
 
 	public ValueSuggest(Iterable<D> values, String textFieldName, String valueFieldName) {
 		this(values, textFieldName, valueFieldName, ValueSuggestType.DIRECT);

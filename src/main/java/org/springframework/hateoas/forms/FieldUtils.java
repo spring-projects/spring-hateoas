@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * 
  */
 public class FieldUtils {
-	public static final String DOT = ".";
+	private static final char DOT = '.';
 
 	/**
 	 * Attempt to find the {@link Class} of the {@link Field} on the supplied class by the especified path.
@@ -39,8 +39,8 @@ public class FieldUtils {
 	 * @return
 	 */
 	public static Class<?> findFieldClass(Class<?> type, String path) {
-		if (path.contains(DOT)) {
-			int firstDot = path.indexOf(DOT);
+		int firstDot = path.indexOf(DOT);
+		if (firstDot!=-1) {
 			String propertyName = path.substring(0, firstDot);
 			Class<?> childType = findSimpleFieldClass(type, propertyName);
 			if (childType == null) {

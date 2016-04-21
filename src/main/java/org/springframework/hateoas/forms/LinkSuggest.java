@@ -28,7 +28,7 @@ public class LinkSuggest extends AbstractSuggest {
 
 	@JsonSerialize(using = LinkSuggestSerializer.class)
 	@JsonProperty("href")
-	private Link link;
+	private final Link link;
 
 	public LinkSuggest(Link link, String textFieldName, String valueFieldName) {
 		super(textFieldName, valueFieldName);

@@ -23,9 +23,9 @@ public class FieldNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = 2591233443652872298L;
 
-	private Class<?> targetClass;
+	private final Class<?> targetClass;
 
-	private String field;
+	private final String field;
 
 	public FieldNotFoundException(Class<?> targetClass, String field) {
 		this.targetClass = targetClass;

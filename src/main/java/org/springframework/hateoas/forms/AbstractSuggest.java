@@ -27,9 +27,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties({ "type" })
 public class AbstractSuggest implements Suggest {
 
-	protected final String textFieldName;
+	private final String textFieldName;
 
-	protected final String valueFieldName;
+	private final String valueFieldName;
 
 	public AbstractSuggest(String textFieldName, String valueFieldName) {
 		this.textFieldName = textFieldName;

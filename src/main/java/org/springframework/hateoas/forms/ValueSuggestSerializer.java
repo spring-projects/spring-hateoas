@@ -59,7 +59,8 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 	public void serialize(ValueSuggest<?> value, JsonGenerator gen, SerializerProvider provider)
 			throws IOException, JsonProcessingException {
 
-		if (!value.getValues().iterator().hasNext()) {
+		Iterator<?> iterator = value.getValues().iterator();
+		if (!iterator.hasNext()) {
 			return;
 		}
 
@@ -76,7 +77,7 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 				embeddedRel = curiedMap.keySet().iterator().next();
 			}
 			else {
-				embeddedRel = relProvider.getCollectionResourceRelFor(value.getValues().iterator().next().getClass());
+				embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
 			}
 			gen.writeStringField("embedded", embeddedRel);
 
@@ -116,9 +117,9 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 
 			super(List.class, false);
 			this.property = property;
-			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
+			serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
 
-			this.textValueSerializer = new TextValueSerializer();
+			textValueSerializer = new TextValueSerializer();
 		}
 
 		@Override
@@ -144,9 +145,7 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			textValueSerializer.setTextField(suggest.getTextField());
 			textValueSerializer.setValueField(suggest.getValueField());
 
-			Iterator<?> values = suggest.getValues().iterator();
-			while (values.hasNext()) {
-				Object elem = values.next();
+			for (Object elem : suggest.getValues()) {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
 				}

@@ -64,6 +64,7 @@ public abstract class TemplateBuilderSupport<T extends TemplateBuilder> implemen
 	 * 
 	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
 	 */
+	@Override
 	public T slash(Object object) {
 
 		if (object == null) {
@@ -106,6 +107,7 @@ public abstract class TemplateBuilderSupport<T extends TemplateBuilder> implemen
 	 * 
 	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
 	 */
+	@Override
 	public T slash(Identifiable<?> identifyable) {
 
 		if (identifyable == null) {
@@ -120,6 +122,7 @@ public abstract class TemplateBuilderSupport<T extends TemplateBuilder> implemen
 	 * 
 	 * @see org.springframework.hateoas.LinkBuilder#toUri()
 	 */
+	@Override
 	public URI toUri() {
 		return uriComponents.encode().toUri();
 	}

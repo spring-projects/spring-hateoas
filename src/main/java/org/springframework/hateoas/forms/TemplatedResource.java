@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class TemplatedResource<T> extends Resource<T> {
 
-	private List<Template> templates = new ArrayList<Template>();
+	private final List<Template> templates = new ArrayList<Template>();
 
 	private EmbeddedWrappers wrappers;
 
@@ -66,7 +66,7 @@ public class TemplatedResource<T> extends Resource<T> {
 	 */
 	public TemplatedResource(T content, Iterable<Link> links) {
 
-		super(content, new Link[] {});
+		super(content, new Link[0]);
 		Assert.notNull(content, "Content must not be null!");
 		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
 
@@ -105,7 +105,7 @@ public class TemplatedResource<T> extends Resource<T> {
 
 		for (Property prop : template.getProperties()) {
 			Suggest suggest = prop.getSuggest();
-			if (suggest != null && suggest instanceof ValueSuggest<?>) {
+			if (suggest instanceof ValueSuggest<?>) {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
 				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
