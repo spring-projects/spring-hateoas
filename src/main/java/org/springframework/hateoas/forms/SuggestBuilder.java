@@ -6,9 +6,9 @@ package org.springframework.hateoas.forms;
  * @see TemplateBuilder
  */
 public interface SuggestBuilder {
-	public SuggestBuilder textField(String textFieldName);
+	SuggestBuilder textField(String textFieldName);
 
-	public SuggestBuilder valueField(String valueFieldName);
+	SuggestBuilder valueField(String valueFieldName);
 
-	public Suggest build();
+	Suggest build();
 }

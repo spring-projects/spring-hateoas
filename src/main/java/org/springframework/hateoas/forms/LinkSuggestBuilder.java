@@ -8,7 +8,7 @@ import org.springframework.hateoas.Link;
  */
 public class LinkSuggestBuilder extends AbstractSuggestBuilder {
 
-	private Link link;
+	private final Link link;
 
 	public LinkSuggestBuilder(Link link) {
 		this.link = link;

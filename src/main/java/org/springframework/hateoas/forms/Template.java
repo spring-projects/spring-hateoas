@@ -84,14 +84,18 @@ public class Template extends Link {
 
 	@JsonProperty("method")
 	public String getMethodStr() {
-		if (method == null)
+		if (method == null) {
 			return null;
+		}
 
 		StringBuilder sb = new StringBuilder();
 		for (RequestMethod rm : method) {
-			sb.append(rm.toString()).append(",");
+			sb.append(rm.toString()).append(',');
 		}
 		String methodStr = sb.toString();
+		/**
+		 * ANDER Esto es un bug creo no?
+		 */
 		return methodStr.substring(0, methodStr.length() - 1);
 	}
 
