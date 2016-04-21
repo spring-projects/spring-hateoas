@@ -25,7 +25,7 @@ public class PropertyBuilder {
 
 	protected TemplateBuilder formBuilder;
 
-	private SuggestBuilderProvider suggestBuilderConfigurer;
+	private SuggestBuilderFactory suggestBuilderFactory;
 
 	public PropertyBuilder(String name, Class<?> declaringClass, TemplateBuilder formBuilder) {
 		this.name = name;
@@ -38,14 +38,14 @@ public class PropertyBuilder {
 		return this;
 	}
 
-	public SuggestBuilderProvider suggest() {
-		this.suggestBuilderConfigurer = new SuggestBuilderProvider();
-		return this.suggestBuilderConfigurer;
+	public SuggestBuilderFactory suggest() {
+		this.suggestBuilderFactory = new SuggestBuilderFactory();
+		return this.suggestBuilderFactory;
 	}
 
 	public Property build() {
 		return new Property(name, readonly, templated, value, prompt, regex,
-				suggestBuilderConfigurer != null ? suggestBuilderConfigurer.build() : null);
+				suggestBuilderFactory != null ? suggestBuilderFactory.build() : null);
 	}
 
 	public Class<?> getDeclaringClass() {

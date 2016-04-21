@@ -9,7 +9,7 @@ import org.springframework.hateoas.forms.ValueSuggest.ValueSuggestType;
  * Builder returned by {@link PropertyBuilder#suggest()} that provides different types of {@link SuggestBuilder}
  *
  */
-public class SuggestBuilderProvider {
+public class SuggestBuilderFactory {
 
 	private SuggestBuilder suggestBuilder;
 
