@@ -85,7 +85,7 @@ public class ControllerFormBuilderUnitTest {
 				.formTo(ControllerFormBuilder.methodOn(ItemController.class).create(new Item()));
 		PropertyBuilder propertyBuilder = formBuilder.property("size.id");
 
-		assertEquals(String.class, propertyBuilder.getDeclaringClass());
+		assertTrue(propertyBuilder.getDeclaringClass().isAssignableFrom(String.class));
 	}
 
 	@Test
@@ -111,9 +111,9 @@ public class ControllerFormBuilderUnitTest {
 	}
 
 	@Test
-	public void testFormToMethod() {
+	public void testFormToMethod() throws NoSuchMethodException{
 		ControllerFormBuilder formBuilder = ControllerFormBuilder.formTo(ItemController.class,
-				ItemController.class.getMethods()[1], new Item());
+				ItemController.class.getMethod("create", Item.class), new Item());
 
 		Template createItemForm = formBuilder.withKey(CREATE_ITEM_FORM_KEY);
 
@@ -277,7 +277,6 @@ public class ControllerFormBuilderUnitTest {
 		public Resource<Order> create(@RequestBody Order order);
 	}
 
-	@SuppressWarnings("unused")
 	public static class Size implements Identifiable<String> {
 
 		private String name;
