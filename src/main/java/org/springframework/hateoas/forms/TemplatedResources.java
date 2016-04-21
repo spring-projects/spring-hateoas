@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class TemplatedResources<T> extends ResourceSupport {
 
-	private List<Template> templates = new ArrayList<Template>();
+	private final List<Template> templates = new ArrayList<Template>();
 
 	private EmbeddedWrappers wrappers;
 
@@ -95,10 +95,10 @@ public class TemplatedResources<T> extends ResourceSupport {
 
 		for (Property prop : template.getProperties()) {
 			Suggest suggest = prop.getSuggest();
-			if (suggest != null && suggest instanceof ValueSuggest<?>) {
+			if (suggest instanceof ValueSuggest<?>) {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
-				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
+				if (valueSuggest.getType()==ValueSuggestType.EMBEDDED) {
 					if (wrappers == null) {
 						wrappers = new EmbeddedWrappers(true);
 						embeddedWrappers = new ArrayList<EmbeddedWrapper>();
