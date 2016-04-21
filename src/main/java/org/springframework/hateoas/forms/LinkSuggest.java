@@ -18,12 +18,13 @@ package org.springframework.hateoas.forms;
 import org.springframework.hateoas.Link;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Suggested values of a {@link Property} that are loaded by a url returning a list of values.
- * 
  */
+@JsonPropertyOrder({ "link", "valueField", "textField" })
 public class LinkSuggest extends AbstractSuggest {
 
 	@JsonSerialize(using = LinkSuggestSerializer.class)

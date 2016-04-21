@@ -27,25 +27,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties({ "type" })
 public class AbstractSuggest implements Suggest {
 
-	private final String textFieldName;
+	private final String textField;
 
-	private final String valueFieldName;
+	private final String valueField;
 
-	public AbstractSuggest(String textFieldName, String valueFieldName) {
-		this.textFieldName = textFieldName;
-		this.valueFieldName = valueFieldName;
+	public AbstractSuggest(String textField, String valueField) {
+		this.textField = textField;
+		this.valueField = valueField;
 	}
 
 	@Override
 	@JsonProperty("value-field")
 	public String getValueField() {
-		return valueFieldName;
+		return valueField;
 	}
 
 	@Override
 	@JsonProperty("prompt-field")
 	public String getTextField() {
-		return textFieldName;
+		return textField;
 	}
 
 }
