@@ -22,9 +22,9 @@ public class TemplatedResources<T> extends ResourceSupport {
 
 	private List<Template> templates = new ArrayList<Template>();
 
-	private EmbeddedWrappers wrappers;
+	private EmbeddedWrappers wrappers = new EmbeddedWrappers(true);
 
-	private List<EmbeddedWrapper> embeddedWrappers;
+	private List<EmbeddedWrapper> embeddedWrappers = new ArrayList<EmbeddedWrapper>();
 
 	@JsonUnwrapped
 	private Resources<EmbeddedWrapper> getEmbeddeds() {
@@ -99,10 +99,6 @@ public class TemplatedResources<T> extends ResourceSupport {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
 				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
-					if (wrappers == null) {
-						wrappers = new EmbeddedWrappers(true);
-						embeddedWrappers = new ArrayList<EmbeddedWrapper>();
-					}
 					for (Object value : valueSuggest.getValues()) {
 						embeddedWrappers.add(wrappers.wrap(value));
 					}
