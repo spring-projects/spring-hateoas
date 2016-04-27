@@ -44,6 +44,8 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 	private static final String TEMPLATE_AND_SIMPLE_PROPERTY = "{\"_embedded\":{\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"readOnly\":true,\"prompt\":\"Item Name\"}]}}}";
 
+	private static final String TEMPLATE_AND_REQUIRED_PROPERTY = "{\"_embedded\":{\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"readOnly\":true,\"prompt\":\"Item Name\",\"required\":true}]}}}";
+
 	private static final String TEMPLATE_AND_PROPERTY_WITH_DIRECT_SUGGEST = "{\"_embedded\":{\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"suggest\":[{\"value\":\"big\",\"prompt\":\"Big size\"},{\"value\":\"small\",\"prompt\":\"Small size\"}]}]}}}";
 
 	private static final String TEMPLATE_AND_PROPERTY_WITH_EMBEDDED_SUGGEST = "{\"_embedded\":{\"sizeList\":[{\"desc\":\"Big size\",\"id\":\"big\"},{\"desc\":\"Small size\",\"id\":\"small\"}],\"itemList\":[{\"id\":1,\"name\":\"item1\"},{\"id\":2,\"name\":\"item2\"}]},\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_templates\":{\"default\":{\"method\":\"POST\",\"properties\":[{\"name\":\"name\",\"suggest\":{\"embedded\":\"sizeList\",\"prompt-field\":\"desc\",\"value-field\":\"id\"}}]}}}";
@@ -124,12 +126,28 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		Template template = new Template("localhost", "default");
 		template.setMethod(new RequestMethod[] { RequestMethod.POST });
 
-		List<Property> properties = Arrays.asList(new Property("name", true, false, null, "Item Name", null, null));
+		List<Property> properties = Arrays
+				.asList(new Property("name", true, false, null, "Item Name", null, false, null));
 		template.setProperties(properties);
 
 		resources.add(template);
 
 		assertThat(write(resources), is(TEMPLATE_AND_SIMPLE_PROPERTY));
+	}
+
+	@Test
+	public void testTemplateWithPropertyRequired() throws Exception {
+
+		Template template = new Template("localhost", "default");
+		template.setMethod(new RequestMethod[] { RequestMethod.POST });
+
+		List<Property> properties = Arrays
+				.asList(new Property("name", true, false, null, "Item Name", null, true, null));
+		template.setProperties(properties);
+
+		resources.add(template);
+
+		assertThat(write(resources), is(TEMPLATE_AND_REQUIRED_PROPERTY));
 	}
 
 	@Test
@@ -140,7 +158,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 		ValueSuggest<Size> suggest = new ValueSuggest<Size>(
 				Arrays.asList(new Size("big", "Big size"), new Size("small", "Small size")), "desc", "id");
-		List<Property> properties = Arrays.asList(new Property("name", null, false, null, null, null, suggest));
+		List<Property> properties = Arrays.asList(new Property("name", null, false, null, null, null, false, suggest));
 		template.setProperties(properties);
 
 		resources.add(template);
@@ -157,7 +175,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		ValueSuggest<Size> suggest = new ValueSuggest<Size>(
 				Arrays.asList(new Size("big", "Big size"), new Size("small", "Small size")), "desc", "id",
 				ValueSuggestType.EMBEDDED);
-		List<Property> properties = Arrays.asList(new Property("name", null, false, null, null, null, suggest));
+		List<Property> properties = Arrays.asList(new Property("name", null, false, null, null, null, false, suggest));
 		template.setProperties(properties);
 
 		resources.add(template);
@@ -172,7 +190,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		template.setMethod(new RequestMethod[] { RequestMethod.POST });
 
 		LinkSuggest suggest = new LinkSuggest(new Link("localhost", "sizes"), "name", "id");
-		List<Property> properties = Arrays.asList(new Property("name", null, false, null, null, null, suggest));
+		List<Property> properties = Arrays.asList(new Property("name", null, false, null, null, null, false, suggest));
 		template.setProperties(properties);
 
 		resources.add(template);
