@@ -29,7 +29,7 @@ public class LinkSuggest extends AbstractSuggest {
 
 	@JsonSerialize(using = LinkSuggestSerializer.class)
 	@JsonProperty("href")
-	private final Link link;
+	private Link link;
 
 	public LinkSuggest(Link link, String textFieldName, String valueFieldName) {
 		super(textFieldName, valueFieldName);
@@ -38,6 +38,10 @@ public class LinkSuggest extends AbstractSuggest {
 
 	public Link getLink() {
 		return link;
+	}
+
+	public void setLink(Link link) {
+		this.link = link;
 	}
 
 }
