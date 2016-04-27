@@ -40,19 +40,22 @@ public class Property {
 
 	private boolean templated;
 
+	private boolean required;
+
 	private Suggest suggest;
 
 	public Property() {
 	}
 
 	public Property(String name, Boolean readOnly, boolean templated, String value, String prompt, String regex,
-			Suggest suggest) {
+			boolean required, Suggest suggest) {
 		this.name = name;
 		this.readOnly = readOnly;
 		this.templated = templated;
 		this.value = value;
 		this.prompt = prompt;
 		this.regex = regex;
+		this.required = required;
 		this.suggest = suggest;
 	}
 
@@ -78,6 +81,10 @@ public class Property {
 
 	public boolean isTemplated() {
 		return templated;
+	}
+
+	public boolean isRequired() {
+		return required;
 	}
 
 	public Suggest getSuggest() {

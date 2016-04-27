@@ -36,6 +36,8 @@ public class PropertyBuilder {
 
 	private String regex;
 
+	private boolean required;
+
 	private Class<?> declaringClass;
 
 	protected TemplateBuilder formBuilder;
@@ -59,7 +61,7 @@ public class PropertyBuilder {
 	}
 
 	public Property build() {
-		return new Property(name, readonly, templated, value, prompt, regex,
+		return new Property(name, readonly, templated, value, prompt, regex, required,
 				suggestBuilderFactory != null ? suggestBuilderFactory.build() : null);
 	}
 
@@ -74,6 +76,11 @@ public class PropertyBuilder {
 
 	public PropertyBuilder prompt(String prompt) {
 		this.prompt = prompt;
+		return this;
+	}
+
+	public PropertyBuilder required(boolean required) {
+		this.required = required;
 		return this;
 	}
 
