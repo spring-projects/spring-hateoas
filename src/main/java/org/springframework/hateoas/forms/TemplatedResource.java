@@ -35,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class TemplatedResource<T> extends Resource<T> {
+public class TemplatedResource<T> extends Resource<T> implements TemplatesSupport {
 
 	private final List<Template> templates = new ArrayList<Template>();
 
@@ -44,7 +44,7 @@ public class TemplatedResource<T> extends Resource<T> {
 	private List<EmbeddedWrapper> embeddedWrappers;
 
 	@JsonUnwrapped
-	private Resources<EmbeddedWrapper> getEmbeddeds() {
+	public Resources<EmbeddedWrapper> getEmbeddeds() {
 		return new Resources<EmbeddedWrapper>(embeddedWrappers);
 	}
 
@@ -80,6 +80,7 @@ public class TemplatedResource<T> extends Resource<T> {
 		}
 	}
 
+	@Override
 	@JsonProperty("_templates")
 	@JsonInclude(Include.NON_EMPTY)
 	@JsonSerialize(using = Jackson2HalFormsModule.HalTemplateListSerializer.class)
