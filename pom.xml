@@ -60,7 +60,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.1.7.RELEASE</spring.version>
 		<logback.version>1.1.3</logback.version>
-		<jackson.version>2.5.4</jackson.version>
+		<jackson.version>2.7.2</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2</minidevjson.version>
 		<jsonpath.version>2.0.0</jsonpath.version>
@@ -76,7 +76,7 @@
 			<id>spring42</id>
 			<properties>
 				<spring.version>4.2.1.RELEASE</spring.version>
-				<jackson.version>2.6.1</jackson.version>
+				<jackson.version>2.7.2</jackson.version>
 			</properties>
 		</profile>
 
@@ -84,7 +84,7 @@
 			<id>spring42-next</id>
 			<properties>
 				<spring.version>4.2.2.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.6.1</jackson.version>
+				<jackson.version>2.7.2</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
