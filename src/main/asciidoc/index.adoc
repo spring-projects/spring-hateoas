@@ -1,5 +1,5 @@
 = Spring HATEOAS - Reference Documentation
-Oliver Gierke;
+Oliver Gierke, Greg Turnquist;
 :revnumber: {version}
 :revdate: {localdate}
 :toc:
@@ -87,7 +87,7 @@ You can also easily access links contained in that resource:
 [source, java]
 ----
 Link selfLink = new Link("http://myhost/people");
-assertThat(resource.getId(), is(selfLink);
+assertThat(resource.getId(), is(selfLink));
 assertThat(resource.getLink(Link.SELF), is(selfLink));
 ----
 [[fundamentals.obtaining-links]]
@@ -355,7 +355,7 @@ Since the purpose of the `CurieProvider` API is to allow for automatic curie cre
 [[client.traverson]]
 === Traverson
 
-As of version 0.11 Spring HATEOAS provides an API for client side service traversal inspired by the [Traverson](https://blog.codecentric.de/en/2013/11/traverson/) JavaScript library.
+As of version 0.11 Spring HATEOAS provides an API for client side service traversal inspired by the https://blog.codecentric.de/en/2013/11/traverson/[Traverson JavaScript library].
 
 [source, java]
 ----
@@ -371,6 +371,46 @@ String name = traverson.follow("movies", "movie", "actor").
 You set up a `Traverson` instance by pointing it to a REST server and configure the media types you want to set as `Accept` header. You then go ahead and define the relation names you want to discover and follow. relation names can either be simple names or JSONPath expressions (starting with an `$`).
 
 The sample then hands a parameter map into the execution. The parameters will be used to expand URIs found during the traversal that are templated. The traversal is concluded by accessing the representation of the final traversal. In the case of the sample we evaluate a JSONPath expression to access the actor's name.
+
+The example listed above is the simplest version of traversal, where the rels are strings, and at each hop, the same template parameters are applied.
+
+There are more options to customize template parameters at each level.
+
+[source,java,indent=0]
+----
+include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-with-param]
+----
+
+The static `rel(...)` function is a convenient way to create define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI Template variables.
+
+NOTE: `.withParameter()` returns a new Hop object that is chainable. You can string together as many `.withParameter` as you like. The result is a single Hop definition.
+
+[source,java,indent=0]
+----
+include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-put]
+----
+
+It's also possible to load an entire `Map` of parameters via `.withParameters(Map)`.
+
+NOTE: `follow()` is chainable, meaning you can string together multiple hops as shown above. You can either put multiple, simple string-based rels (`follow("items", "item")`) or a single hop with specific parameters.
+
+==== `Resource<T>` vs. `Resources<T>`
+
+The examples shown so far demonstrate how to side step Java's type erasure and convert a single JSON-formatted resource into a `Resource<Item>` object. But what if you get a collection like an *_embedded* HAL collection?
+
+One slight twak and you're set.
+
+[source,java]
+----
+ParameterizedTypeReference<Resources<Item>> resourceParameterizedTypeReference =
+        new ParameterizedTypeReference<Resources<Item>>() {};
+
+Resources<Item> itemResource = traverson.//
+        follow(rel("items")).//
+        toObject(resourceParameterizedTypeReference);
+----
+
+Instead of fetching a single resource, this one deserializes a collection into `Resources`.
 
 [[client.link-discoverer]]
 === LinkDiscoverers
@@ -388,3 +428,4 @@ Link link = discoverer.findLinkWithRel("foo", content);
 assertThat(link.getRel(), is("foo"));
 assertThat(link.getHref(), is("/foo/bar"));
 ----
+

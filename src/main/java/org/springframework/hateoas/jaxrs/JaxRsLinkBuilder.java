@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@
  */
 package org.springframework.hateoas.jaxrs;
 
+import java.util.Map;
+
 import javax.ws.rs.Path;
 
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -30,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  * @author Oliver Gierke
  * @author Kamill Sokol
+ * @author Andrew Naydyonock
  */
 public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
@@ -58,18 +62,40 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	 * Creates a new {@link JaxRsLinkBuilder} instance to link to the {@link Path} mapping tied to the given class binding
 	 * the given parameters to the URI template.
 	 * 
-	 * @param service the class to discover the annotation on, must not be {@literal null}.
+	 * @param resourceType the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
 	 *          {@literal null}.
 	 * @return
 	 */
-	public static JaxRsLinkBuilder linkTo(Class<?> service, Object... parameters) {
+	public static JaxRsLinkBuilder linkTo(Class<?> resourceType, Object... parameters) {
 
-		JaxRsLinkBuilder builder = new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+		Assert.notNull(resourceType, "Controller type must not be null!");
+		Assert.notNull(parameters, "Parameters must not be null!");
 
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(service)).build();
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(resourceType)).build();
 		UriComponents expandedComponents = uriComponents.expand(parameters);
-		return builder.slash(expandedComponents);
+
+		return new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expandedComponents);
+	}
+
+	/**
+	 * Creates a new {@link JaxRsLinkBuilder} instance to link to the {@link Path} mapping tied to the given class binding
+	 * the given parameters to the URI template.
+	 *
+	 * @param resourceType the class to discover the annotation on, must not be {@literal null}.
+	 * @param parameters map of additional parameters to bind to the URI template declared in the annotation, must not be
+	 *          {@literal null}.
+	 * @return
+	 */
+	public static JaxRsLinkBuilder linkTo(Class<?> resourceType, Map<String, ?> parameters) {
+
+		Assert.notNull(resourceType, "Controller type must not be null!");
+		Assert.notNull(parameters, "Parameters must not be null!");
+
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(resourceType)).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+
+		return new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expandedComponents);
 	}
 
 	/* 

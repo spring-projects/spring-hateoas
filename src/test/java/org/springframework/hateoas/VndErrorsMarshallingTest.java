@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class VndErrorsMarshallingTest {
 
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
-		jackson2Mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null));
+		jackson2Mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
 		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
 		JAXBContext context = JAXBContext.newInstance(VndErrors.class);

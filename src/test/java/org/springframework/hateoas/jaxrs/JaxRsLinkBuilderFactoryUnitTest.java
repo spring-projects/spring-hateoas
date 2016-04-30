@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 the original author or authors.
+ * Copyright 2011-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.hateoas.jaxrs;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+
 import javax.ws.rs.Path;
 
 import org.junit.Test;
@@ -30,6 +32,7 @@ import org.springframework.hateoas.TestUtils;
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Kamill Sokol
+ * @author Andrew Naydyonock
  */
 public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
@@ -63,6 +66,18 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
 		assertThat(link.getRel(), is(Link.REL_SELF));
 		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
+	}
+
+	/**
+	 * @see #372
+	 */
+	@Test
+	public void createsLinkToParameterizedServiceRootWithParameterMap() {
+
+		Link link = factory.linkTo(PersonsAddressesService.class, Collections.singletonMap("id", "17")).withSelfRel();
+
+		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref(), endsWith("/people/17/addresses"));
 	}
 
 	@Path("/people")

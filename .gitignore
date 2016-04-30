@@ -2,5 +2,6 @@ target/
 .settings/
 .project
 .classpath
-/.idea
-/spring-hateoas.iml
+*.iml
+.idea
+*.orig

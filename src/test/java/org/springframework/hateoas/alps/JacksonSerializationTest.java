@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * 
  * @author Oliver Gierke
  */
-public class JacksonSerializationTests {
+public class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 

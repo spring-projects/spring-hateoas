@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ import org.springframework.hateoas.LinkDiscoverer;
  * components will be registered:
  * <ul>
  * <li>{@link LinkDiscoverer}</li>
- * <li>a Jackson (1 or 2, dependning on what is on the classpath) module to correctly marshal the resource model classes
- * into the appropriate representation.
+ * <li>a Jackson 2 module to correctly marshal the resource model classes into the appropriate representation.
  * </ul>
  * 
  * @see LinkDiscoverer
@@ -44,7 +43,7 @@ import org.springframework.hateoas.LinkDiscoverer;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(HypermediaSupportBeanDefinitionRegistrar.class)
+@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class })
 public @interface EnableHypermediaSupport {
 
 	/**

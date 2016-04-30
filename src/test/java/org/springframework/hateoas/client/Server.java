@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.hateoas.client;
 
 import static net.jadler.Jadler.*;
+import static org.hamcrest.Matchers.*;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.UUID;
 
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
@@ -33,6 +36,7 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Helper class for integration tests.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class Server implements Closeable {
 
@@ -48,6 +53,7 @@ public class Server implements Closeable {
 	private final RelProvider relProvider;
 
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<Link, Link>();
+	private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public Server() {
 
@@ -55,7 +61,7 @@ public class Server implements Closeable {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null));
+		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
 
 		initJadler(). //
 				that().//
@@ -89,6 +95,68 @@ public class Server implements Closeable {
 				respond(). //
 				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
 				withContentType(MediaTypes.HAL_JSON.toString());
+
+		// Sample traversal of HAL docs based on Spring-a-Gram showcase
+		org.springframework.core.io.Resource springagramRoot = resourceLoader.getResource("classpath:springagram-root.json");
+		org.springframework.core.io.Resource springagramItems = resourceLoader.getResource("classpath:springagram-items.json");
+		org.springframework.core.io.Resource springagramItem = resourceLoader.getResource("classpath:springagram-item.json");
+		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader.getResource("classpath:springagram-item-without-image.json");
+
+		String springagramRootTemplate;
+		String springagramItemsTemplate;
+		String springagramItemTemplate;
+		String springagramItemWithoutImageTemplate;
+
+		try {
+			springagramRootTemplate = StreamUtils.copyToString(springagramRoot.getInputStream(), Charset.forName("UTF-8"));
+			springagramItemsTemplate = StreamUtils.copyToString(springagramItems.getInputStream(), Charset.forName("UTF-8"));
+			springagramItemTemplate = StreamUtils.copyToString(springagramItem.getInputStream(), Charset.forName("UTF-8"));
+			springagramItemWithoutImageTemplate = StreamUtils.copyToString(springagramItemWithoutImage.getInputStream(),
+					Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		String springagramRootHalDocument = String.format(springagramRootTemplate, rootResource(), rootResource());
+		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(), rootResource());
+		String springagramItemHalDocument = String.format(springagramItemTemplate, rootResource(), rootResource());
+		String springagramItemWithoutImageHalDocument = String.format(springagramItemWithoutImageTemplate, rootResource());
+
+		onRequest(). //
+				havingPathEqualTo("/springagram"). //
+				respond(). //
+				withBody(springagramRootHalDocument). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
+		onRequest(). //
+				havingPathEqualTo("/springagram/items"). //
+				havingQueryString(equalTo("projection=noImages")). //
+				respond(). //
+				withBody(springagramItemsHalDocument). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
+		onRequest(). //
+				havingPathEqualTo("/springagram/items/1"). //
+				respond(). //
+				withBody(springagramItemHalDocument). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
+		onRequest(). //
+				havingPathEqualTo("/springagram/items/1"). //
+				havingQueryString(equalTo("projection=noImages")). //
+				respond(). //
+				withBody(springagramItemWithoutImageHalDocument). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
+		// For Traverson URI double encoding test
+
+		onRequest(). //
+				havingPathEqualTo("/springagram/items"). //
+				havingQueryString(equalTo("projection=no%20images")). //
+				respond(). //
+				withBody(springagramItemsHalDocument). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
 	}
 
 	public String rootResource() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ import org.springframework.web.util.UriTemplate;
  * @author Kamill Sokol
  * @author Ross Turner
  * @author Oemer Yildiz
+ * @author Kevin Conaway
+ * @author Andrew Naydyonock
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
@@ -91,6 +93,15 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 */
 	@Override
 	public ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
+		return ControllerLinkBuilder.linkTo(controller, parameters);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.util.Map)
+	 */
+	@Override
+	public ControllerLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 
@@ -137,7 +148,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 
 		UriComponents components = applyUriComponentsContributer(builder, invocation).buildAndExpand(values);
-		return new ControllerLinkBuilder(UriComponentsBuilder.fromUriString(components.toUriString()));
+		return new ControllerLinkBuilder(components);
 	}
 
 	/* 
@@ -156,7 +167,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @param invocation will never be {@literal null}.
 	 * @return
 	 */
-	protected UriComponentsBuilder applyUriComponentsContributer(UriComponentsBuilder builder, MethodInvocation invocation) {
+	protected UriComponentsBuilder applyUriComponentsContributer(UriComponentsBuilder builder,
+			MethodInvocation invocation) {
 
 		MethodParameters parameters = new MethodParameters(invocation.getMethod());
 		Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
@@ -235,8 +247,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
-			return annotation.required() && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? super
-					.verifyParameterValue(parameter, value) : value;
+			return annotation.required() && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE)
+					? super.verifyParameterValue(parameter, value) : value;
 		}
 	}
 }

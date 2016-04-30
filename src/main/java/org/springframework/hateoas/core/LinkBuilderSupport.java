@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Kamill Sokol
+ * @author Kevin Conaway
  */
 public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkBuilder {
 
@@ -45,8 +46,19 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 */
 	public LinkBuilderSupport(UriComponentsBuilder builder) {
 
-		Assert.notNull(builder);
+		Assert.notNull(builder, "UriComponentsBuilder must not be null!");
 		this.uriComponents = builder.build();
+	}
+
+	/**
+	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponents}.
+	 * 
+	 * @param uriComponents must not be {@literal null}.
+	 */
+	public LinkBuilderSupport(UriComponents uriComponents) {
+
+		Assert.notNull(uriComponents, "UriComponents must not be null!");
+		this.uriComponents = uriComponents;
 	}
 
 	/*
@@ -74,8 +86,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 		}
 
 		String uriString = uriComponents.toUriString();
-		UriComponentsBuilder builder = uriString.isEmpty() ? fromUri(uriComponents.toUri())
-				: fromUriString(uriString);
+		UriComponentsBuilder builder = uriString.isEmpty() ? fromUri(uriComponents.toUri()) : fromUriString(uriString);
 
 		UriComponents components = UriComponentsBuilder.fromUriString(path).build();
 
