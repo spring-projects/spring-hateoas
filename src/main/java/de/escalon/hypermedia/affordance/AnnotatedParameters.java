@@ -5,5 +5,6 @@ package de.escalon.hypermedia.affordance;
  * Created by Dietrich on 17.05.2015.
  */
 public interface AnnotatedParameters {
-    AnnotatedParameter getAnnotatedParameter(String name);
+
+	AnnotatedParameter getAnnotatedParameter(String name);
 }

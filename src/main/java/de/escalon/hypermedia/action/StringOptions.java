@@ -17,9 +17,7 @@ public class StringOptions implements Options {
 	/**
 	 * Allows to specify possible values for an argument. This allows an {@link ActionDescriptor} to determine possible
 	 * values for an action argument.
-	 * <p>
 	 * The example below defines four possible values for the <code>mood</code> parameter.
-	 * 
 	 * <pre>
 	 * &#0064;RequestMapping(value = "/customer", method = RequestMethod.GET, params = { "mood" })
 	 * public HttpEntity&lt;SamplePersonResourcegt; showPersonByMood(
@@ -36,5 +34,4 @@ public class StringOptions implements Options {
 	public Object[] get(String[] value, Object... args) {
 		return value;
 	}
-
 }

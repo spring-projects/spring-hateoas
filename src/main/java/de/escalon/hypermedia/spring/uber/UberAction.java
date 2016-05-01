@@ -14,15 +14,25 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 public enum UberAction {
 
-	/** POST */
+	/**
+	 * POST
+	 */
 	APPEND(RequestMethod.POST),
-	/** PATCH */
+	/**
+	 * PATCH
+	 */
 	PARTIAL(RequestMethod.PATCH),
-	/** GET */
+	/**
+	 * GET
+	 */
 	READ(RequestMethod.GET),
-	/** DELETE */
+	/**
+	 * DELETE
+	 */
 	REMOVE(RequestMethod.DELETE),
-	/** PUT */
+	/**
+	 * PUT
+	 */
 	REPLACE(RequestMethod.PUT);
 
 	public final RequestMethod httpMethod;
@@ -33,6 +43,7 @@ public enum UberAction {
 
 	/**
 	 * Maps given request method to uber action, GET will be mapped as null since it is the default.
+	 *
 	 * @param method to map
 	 * @return action, or null for GET
 	 */

@@ -10,6 +10,11 @@
 
 package de.escalon.hypermedia.spring.uber;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,11 +29,6 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Map;
 
 public class UberJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
@@ -78,7 +78,6 @@ public class UberJackson2HttpMessageConverter extends AbstractHttpMessageConvert
 		} catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
-
 	}
 
 	/**
@@ -102,13 +101,13 @@ public class UberJackson2HttpMessageConverter extends AbstractHttpMessageConvert
 	/**
 	 * Set the {@code ObjectMapper} for this view. If not set, a default {@link com.fasterxml.jackson.databind.ObjectMapper#ObjectMapper() ObjectMapper}
 	 * is used.
-	 * <p>
 	 * Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON serialization
 	 * process. For example, an extended {@link com.fasterxml.jackson.databind.ser.SerializerFactory} can be configured that
 	 * provides custom serializers for specific types. The other option for refining the serialization process is to use
 	 * Jackson's provided annotations on the types to be serialized, in which case a custom-configured ObjectMapper is
 	 * unnecessary.
-     * @param objectMapper used for json mapping
+	 *
+	 * @param objectMapper used for json mapping
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
@@ -121,5 +120,4 @@ public class UberJackson2HttpMessageConverter extends AbstractHttpMessageConvert
 			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
 		}
 	}
-
 }

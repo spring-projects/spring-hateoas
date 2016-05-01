@@ -25,11 +25,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Action {
 
-    /**
-     * The semantic type of the action.
-     *
-     * @return action type
-     */
-    String value();
-
+	/**
+	 * The semantic type of the action.
+	 *
+	 * @return action type
+	 */
+	String value();
 }

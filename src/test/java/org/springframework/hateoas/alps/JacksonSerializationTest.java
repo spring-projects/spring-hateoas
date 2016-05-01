@@ -23,6 +23,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -39,14 +43,17 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class JacksonSerializationTest {
 
-	ObjectMapper mapper;
+	ObjectWriter writer;
 
 	@Before
 	public void setUp() {
 
-		mapper = new ObjectMapper();
+		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		PrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+				.withObjectIndenter(new DefaultIndenter().withLinefeed("\n"));
+		writer = mapper.writer(prettyPrinter);
 	}
 
 	/**
@@ -70,7 +77,7 @@ public class JacksonSerializationTest {
 								).build())//
 				).build();
 
-		assertThat(mapper.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
+		assertThat(writer.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
 	}
 
 	private static String read(Resource resource) throws IOException {

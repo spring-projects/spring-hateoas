@@ -7,5 +7,5 @@ package de.escalon.hypermedia.action;
  * @see ResourceHandler
  */
 public enum Cardinality {
-    COLLECTION, SINGLE
+	COLLECTION, SINGLE
 }

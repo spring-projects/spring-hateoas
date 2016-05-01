@@ -10,12 +10,12 @@
 
 package de.escalon.hypermedia.spring.uber;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonRootName;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonRootName("uber")
 public class UberMessageModel extends AbstractUberNode {
@@ -36,5 +36,4 @@ public class UberMessageModel extends AbstractUberNode {
 	public List<UberNode> getError() {
 		return error;
 	}
-
 }

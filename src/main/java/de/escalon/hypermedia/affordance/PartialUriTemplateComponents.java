@@ -19,84 +19,84 @@ import org.springframework.util.StringUtils;
  */
 public class PartialUriTemplateComponents {
 
-    private String baseUri;
-    private String queryHead;
-    private String queryTail;
-    private String fragmentIdentifier;
+	private String baseUri;
+	private String queryHead;
+	private String queryTail;
+	private String fragmentIdentifier;
 
-    /**
-     * Represents components of a Uri Template with variables.
-     * @param baseUri may be relative or absolute, and may contain {xxx} or {/xxx} style variables
-     * @param queryHead start of query containing expanded key-value pairs (no variables), beginning with ?, may be empty
-     * @param queryTail comma-separated list of unexpanded query keys, may be empty
-     * @param fragmentIdentifier, beginning with #, may contain a fragment variable, may also be empty
-     */
-    public PartialUriTemplateComponents(String baseUri, String queryHead, String queryTail, String fragmentIdentifier) {
-        Assert.notNull(baseUri);
-        Assert.notNull(queryHead);
-        Assert.notNull(queryTail);
-        Assert.notNull(fragmentIdentifier);
-        this.baseUri = baseUri;
-        this.queryHead = queryHead;
-        this.queryTail = queryTail;
-        this.fragmentIdentifier = fragmentIdentifier;
-    }
+	/**
+	 * Represents components of a Uri Template with variables.
+	 *
+	 * @param baseUri may be relative or absolute, and may contain {xxx} or {/xxx} style variables
+	 * @param queryHead start of query containing expanded key-value pairs (no variables), beginning with ?, may be empty
+	 * @param queryTail comma-separated list of unexpanded query keys, may be empty
+	 * @param fragmentIdentifier, beginning with #, may contain a fragment variable, may also be empty
+	 */
+	public PartialUriTemplateComponents(String baseUri, String queryHead, String queryTail, String fragmentIdentifier) {
+		Assert.notNull(baseUri);
+		Assert.notNull(queryHead);
+		Assert.notNull(queryTail);
+		Assert.notNull(fragmentIdentifier);
+		this.baseUri = baseUri;
+		this.queryHead = queryHead;
+		this.queryTail = queryTail;
+		this.fragmentIdentifier = fragmentIdentifier;
+	}
 
-    public boolean isBaseUriTemplated() {
-        return hasVariables(baseUri);
-    }
+	public boolean isBaseUriTemplated() {
+		return hasVariables(baseUri);
+	}
 
-    private boolean hasVariables(String component) {
-        return component.matches(".*\\{.+\\}.*");
-    }
+	private boolean hasVariables(String component) {
+		return component.matches(".*\\{.+\\}.*");
+	}
 
-    public String getBaseUri() {
-        return baseUri;
-    }
+	public String getBaseUri() {
+		return baseUri;
+	}
 
-    public String getQueryHead() {
-        return queryHead;
-    }
+	public String getQueryHead() {
+		return queryHead;
+	}
 
-    public String getQueryTail() {
-        return queryTail;
-    }
+	public String getQueryTail() {
+		return queryTail;
+	}
 
-    public String getQuery() {
-        StringBuilder query = new StringBuilder();
-        if (queryTail.length() > 0) {
-            if (queryHead.length() == 0) {
-                query.append("{?")
-                        .append(queryTail)
-                        .append("}");
-            } else if (queryHead.length() > 0) {
-                query.append(queryHead)
-                        .append("{&")
-                        .append(queryTail)
-                        .append("}");
-            }
-        } else {
-            query.append(queryHead);
-        }
-        return query.toString();
-    }
-
-
-    public String getFragmentIdentifier() {
-        return fragmentIdentifier;
-    }
-
-    /**
-     * Concatenates all components to uri String.
-     * @return uri String
-     */
-    public String toString() {
-        return baseUri + getQuery() + fragmentIdentifier;
-    }
-
-    public boolean hasVariables() {
-        return hasVariables(baseUri) || !StringUtils.isEmpty(queryTail) || hasVariables(fragmentIdentifier);
-    }
+	public String getQuery() {
+		StringBuilder query = new StringBuilder();
+		if (queryTail.length() > 0) {
+			if (queryHead.length() == 0) {
+				query.append("{?")
+						.append(queryTail)
+						.append("}");
+			} else if (queryHead.length() > 0) {
+				query.append(queryHead)
+						.append("{&")
+						.append(queryTail)
+						.append("}");
+			}
+		} else {
+			query.append(queryHead);
+		}
+		return query.toString();
+	}
 
 
+	public String getFragmentIdentifier() {
+		return fragmentIdentifier;
+	}
+
+	/**
+	 * Concatenates all components to uri String.
+	 *
+	 * @return uri String
+	 */
+	public String toString() {
+		return baseUri + getQuery() + fragmentIdentifier;
+	}
+
+	public boolean hasVariables() {
+		return hasVariables(baseUri) || !StringUtils.isEmpty(queryTail) || hasVariables(fragmentIdentifier);
+	}
 }

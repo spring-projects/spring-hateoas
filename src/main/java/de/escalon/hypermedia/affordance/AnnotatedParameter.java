@@ -1,11 +1,11 @@
 package de.escalon.hypermedia.affordance;
 
-import de.escalon.hypermedia.action.Type;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Map;
+
+import de.escalon.hypermedia.action.Type;
 
 /**
  * Interface to represent an input parameter to a resource handler method, independent of a particular ReST framework.
@@ -13,54 +13,55 @@ import java.util.Map;
  */
 public interface AnnotatedParameter {
 
-    Object getCallValue();
+	Object getCallValue();
 
-    String getCallValueFormatted();
+	String getCallValueFormatted();
 
-    Type getHtmlInputFieldType();
+	Type getHtmlInputFieldType();
 
-    boolean isRequestBody();
+	boolean isRequestBody();
 
-    boolean isRequestParam();
+	boolean isRequestParam();
 
-    boolean isPathVariable();
+	boolean isPathVariable();
 
-    String getRequestHeaderName();
+	String getRequestHeaderName();
 
-    boolean hasInputConstraints();
+	boolean hasInputConstraints();
 
-    <T extends Annotation> T getAnnotation(Class<T> annotation);
+	<T extends Annotation> T getAnnotation(Class<T> annotation);
 
-    boolean isHidden(String property);
+	boolean isHidden(String property);
 
-    boolean isReadOnly(String property);
+	boolean isReadOnly(String property);
 
-    boolean isIncluded(String property);
+	boolean isIncluded(String property);
 
-    boolean isExcluded(String property);
+	boolean isExcluded(String property);
 
-    Object[] getPossibleValues(AnnotatedParameters annotatedParameters);
+	Object[] getPossibleValues(AnnotatedParameters annotatedParameters);
 
-    Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters annotatedParameters);
+	Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters annotatedParameters);
 
-    Object[] getPossibleValues(Constructor constructor, int parameterIndex, AnnotatedParameters annotatedParameters);
+	Object[] getPossibleValues(Constructor constructor, int parameterIndex, AnnotatedParameters annotatedParameters);
 
-    boolean isArrayOrCollection();
+	boolean isArrayOrCollection();
 
-    boolean isRequired();
+	boolean isRequired();
 
-    String getDefaultValue();
+	String getDefaultValue();
 
-    Object[] getCallValues();
+	Object[] getCallValues();
 
-    boolean hasCallValue();
+	boolean hasCallValue();
 
-    String getParameterName();
-    Class<?> getDeclaringClass();
+	String getParameterName();
 
-    Class<?> getParameterType();
+	Class<?> getDeclaringClass();
 
-    java.lang.reflect.Type getGenericParameterType();
+	Class<?> getParameterType();
 
-    Map<String, Object> getInputConstraints();
+	java.lang.reflect.Type getGenericParameterType();
+
+	Map<String, Object> getInputConstraints();
 }

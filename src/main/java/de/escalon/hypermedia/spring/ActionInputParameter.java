@@ -13,6 +13,11 @@
 
 package de.escalon.hypermedia.spring;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.*;
+
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
@@ -27,11 +32,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.*;
-
 /**
  * Describes a Spring MVC rest services method parameter value with recorded sample call value and input constraints.
  *
@@ -39,430 +39,419 @@ import java.util.*;
  */
 public class ActionInputParameter implements AnnotatedParameter {
 
-    private final TypeDescriptor typeDescriptor;
-    private final RequestBody requestBody;
-    private final RequestParam requestParam;
-    private final PathVariable pathVariable;
-    private final RequestHeader requestHeader;
-    private MethodParameter methodParameter;
-    private Object value;
-    private Boolean arrayOrCollection = null;
-    private Input inputAnnotation;
-    private Map<String, Object> inputConstraints = new HashMap<String, Object>();
+	private final TypeDescriptor typeDescriptor;
+	private final RequestBody requestBody;
+	private final RequestParam requestParam;
+	private final PathVariable pathVariable;
+	private final RequestHeader requestHeader;
+	private MethodParameter methodParameter;
+	private Object value;
+	private Boolean arrayOrCollection = null;
+	private Input inputAnnotation;
+	private Map<String, Object> inputConstraints = new HashMap<String, Object>();
 
-    private ConversionService conversionService = new DefaultFormattingConversionService();
+	private ConversionService conversionService = new DefaultFormattingConversionService();
 
-    /**
-     * Creates action input parameter.
-     *
-     * @param methodParameter
-     *         to describe
-     * @param value
-     *         used during sample invocation
-     * @param conversionService
-     *         to apply to value
-     */
-    public ActionInputParameter(MethodParameter methodParameter, Object value, ConversionService conversionService) {
-        this.methodParameter = methodParameter;
-        this.value = value;
-        this.requestBody = methodParameter.getParameterAnnotation(RequestBody.class);
-        this.requestParam = methodParameter.getParameterAnnotation(RequestParam.class);
-        this.pathVariable = methodParameter.getParameterAnnotation(PathVariable.class);
-        this.requestHeader = methodParameter.getParameterAnnotation(RequestHeader.class);
-        // always determine input constraints,
-        // might be a nested property which is neither requestBody, requestParam nor pathVariable
-        this.inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
-        if (inputAnnotation != null) {
-            putInputConstraint(Input.MIN, Integer.MIN_VALUE, inputAnnotation.min());
-            putInputConstraint(Input.MAX, Integer.MAX_VALUE, inputAnnotation.max());
-            putInputConstraint(Input.MIN_LENGTH, Integer.MIN_VALUE, inputAnnotation.minLength());
-            putInputConstraint(Input.MAX_LENGTH, Integer.MAX_VALUE, inputAnnotation.maxLength());
-            putInputConstraint(Input.STEP, 0, inputAnnotation.step());
-            putInputConstraint(Input.PATTERN, "", inputAnnotation.pattern());
-        }
-        this.conversionService = conversionService;
-        this.typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
-    }
+	/**
+	 * Creates action input parameter.
+	 *
+	 * @param methodParameter to describe
+	 * @param value used during sample invocation
+	 * @param conversionService to apply to value
+	 */
+	public ActionInputParameter(MethodParameter methodParameter, Object value, ConversionService conversionService) {
+		this.methodParameter = methodParameter;
+		this.value = value;
+		this.requestBody = methodParameter.getParameterAnnotation(RequestBody.class);
+		this.requestParam = methodParameter.getParameterAnnotation(RequestParam.class);
+		this.pathVariable = methodParameter.getParameterAnnotation(PathVariable.class);
+		this.requestHeader = methodParameter.getParameterAnnotation(RequestHeader.class);
+		// always determine input constraints,
+		// might be a nested property which is neither requestBody, requestParam nor pathVariable
+		this.inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
+		if (inputAnnotation != null) {
+			putInputConstraint(Input.MIN, Integer.MIN_VALUE, inputAnnotation.min());
+			putInputConstraint(Input.MAX, Integer.MAX_VALUE, inputAnnotation.max());
+			putInputConstraint(Input.MIN_LENGTH, Integer.MIN_VALUE, inputAnnotation.minLength());
+			putInputConstraint(Input.MAX_LENGTH, Integer.MAX_VALUE, inputAnnotation.maxLength());
+			putInputConstraint(Input.STEP, 0, inputAnnotation.step());
+			putInputConstraint(Input.PATTERN, "", inputAnnotation.pattern());
+		}
+		this.conversionService = conversionService;
+		this.typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
+	}
 
-    /**
-     * Creates new ActionInputParameter with default formatting conversion service.
-     *
-     * @param methodParameter
-     *         holding metadata about the parameter
-     * @param value
-     *         during sample method invocation
-     */
-    public ActionInputParameter(MethodParameter methodParameter, Object value) {
-        this(methodParameter, value, new DefaultFormattingConversionService());
-    }
+	/**
+	 * Creates new ActionInputParameter with default formatting conversion service.
+	 *
+	 * @param methodParameter holding metadata about the parameter
+	 * @param value during sample method invocation
+	 */
+	public ActionInputParameter(MethodParameter methodParameter, Object value) {
+		this(methodParameter, value, new DefaultFormattingConversionService());
+	}
 
 
-    private void putInputConstraint(String key, Object defaultValue, Object value) {
-        if (!value.equals(defaultValue)) {
-            inputConstraints.put(key, value);
-        }
-    }
+	private void putInputConstraint(String key, Object defaultValue, Object value) {
+		if (!value.equals(defaultValue)) {
+			inputConstraints.put(key, value);
+		}
+	}
 
-    /**
-     * The value of the parameter at sample invocation time.
-     *
-     * @return value, may be null
-     */
-    public Object getCallValue() {
-        return value;
-    }
+	/**
+	 * The value of the parameter at sample invocation time.
+	 *
+	 * @return value, may be null
+	 */
+	public Object getCallValue() {
+		return value;
+	}
 
-    /**
-     * The value of the parameter at sample invocation time, formatted according to conversion configuration.
-     *
-     * @return value, may be null
-     */
-    public String getCallValueFormatted() {
-        String ret;
-        if (value == null) {
-            ret = null;
-        } else {
-            ret = (String) conversionService.convert(value, typeDescriptor, TypeDescriptor.valueOf(String.class));
-        }
-        return ret;
-    }
+	/**
+	 * The value of the parameter at sample invocation time, formatted according to conversion configuration.
+	 *
+	 * @return value, may be null
+	 */
+	public String getCallValueFormatted() {
+		String ret;
+		if (value == null) {
+			ret = null;
+		} else {
+			ret = (String) conversionService.convert(value, typeDescriptor, TypeDescriptor.valueOf(String.class));
+		}
+		return ret;
+	}
 
-    /**
-     * Gets HTML5 parameter type for input field according to {@link Type} annotation.
-     *
-     * @return the type
-     */
-    @Override
-    public Type getHtmlInputFieldType() {
-        final Type ret;
-        if (inputAnnotation == null || inputAnnotation.value() == Type.FROM_JAVA) {
-            if (isArrayOrCollection() || isRequestBody()) {
-                ret = null;
-            } else if (DataType.isNumber(getParameterType())) {
-                ret = Type.NUMBER;
-            } else {
-                ret = Type.TEXT;
-            }
-        } else {
-            ret = inputAnnotation.value();
-        }
-        return ret;
-    }
-
-
-    public boolean isRequestBody() {
-        return requestBody != null;
-    }
-
-    public boolean isRequestParam() {
-        return requestParam != null;
-    }
-
-    public boolean isPathVariable() {
-        return pathVariable != null;
-    }
-
-    public boolean isRequestHeader() {
-        return requestHeader != null;
-    }
-
-    @Override
-    public String getRequestHeaderName() {
-        return isRequestHeader() ? requestHeader.value() : null;
-    }
-
-    /**
-     * Has constraints defined via <code>@Input</code> annotation. Note that there might also be other kinds of
-     * constraints, e.g. <code>@Select</code> may define values for {@link #getPossibleValues}.
-     *
-     * @return true if parameter is constrained
-     */
-    public boolean hasInputConstraints() {
-        return !inputConstraints.isEmpty();
-    }
-
-    public <T extends Annotation> T getAnnotation(Class<T> annotation) {
-        return methodParameter.getParameterAnnotation(annotation);
-    }
+	/**
+	 * Gets HTML5 parameter type for input field according to {@link Type} annotation.
+	 *
+	 * @return the type
+	 */
+	@Override
+	public Type getHtmlInputFieldType() {
+		final Type ret;
+		if (inputAnnotation == null || inputAnnotation.value() == Type.FROM_JAVA) {
+			if (isArrayOrCollection() || isRequestBody()) {
+				ret = null;
+			} else if (DataType.isNumber(getParameterType())) {
+				ret = Type.NUMBER;
+			} else {
+				ret = Type.TEXT;
+			}
+		} else {
+			ret = inputAnnotation.value();
+		}
+		return ret;
+	}
 
 
-    /**
-     * Determines if request body input parameter has a hidden input property.
-     *
-     * @param property
-     *         name or property path
-     * @return true if hidden
-     */
-    @Override
-    public boolean isHidden(String property) {
-        Annotation[] paramAnnotations = methodParameter.getParameterAnnotations();
-        Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
-        return inputAnnotation != null && arrayContains(inputAnnotation.hidden(), property);
-    }
+	public boolean isRequestBody() {
+		return requestBody != null;
+	}
 
-    /**
-     * Determines if request body input parameter has a read-only input property.
-     *
-     * @param property
-     *         name or property path
-     * @return true if read-only
-     */
-    @Override
-    public boolean isReadOnly(String property) {
-        return inputAnnotation != null && arrayContains(inputAnnotation.readOnly(), property);
-    }
+	public boolean isRequestParam() {
+		return requestParam != null;
+	}
 
-    /**
-     * Determines if request body input parameter should be included, considering all of {@link Input#include}, {@link
-     * Input#hidden} and {@link Input#readOnly}.
-     *
-     * @param property
-     *         name or property path
-     * @return true if included or no include statements found
-     */
-    @Override
-    public boolean isIncluded(String property) {
-        return inputAnnotation == null
-                || (hasExplicitOrImplicitPropertyIncludeValue() && containsPropertyIncludeValue(property));
-    }
+	public boolean isPathVariable() {
+		return pathVariable != null;
+	}
 
-    private boolean containsPropertyIncludeValue(String property) {
-        return arrayContains(inputAnnotation.readOnly(), property)
-                || arrayContains(inputAnnotation.hidden(), property)
-                || arrayContains(inputAnnotation.include(), property);
-    }
+	public boolean isRequestHeader() {
+		return requestHeader != null;
+	}
 
-    private boolean hasExplicitOrImplicitPropertyIncludeValue() {
-        return inputAnnotation != null && inputAnnotation.readOnly().length > 0
-                || inputAnnotation.hidden().length > 0
-                || inputAnnotation.include().length > 0;
-    }
+	@Override
+	public String getRequestHeaderName() {
+		return isRequestHeader() ? requestHeader.value() : null;
+	}
 
-    /**
-     * Determines if request body input parameter should be excluded, considering {@link Input#exclude}.
-     *
-     * @param property
-     *         name or property path
-     * @return true if excluded, false if no include statement found or not excluded
-     */
-    @Override
-    public boolean isExcluded(String property) {
-        return inputAnnotation != null && arrayContains(inputAnnotation.exclude(), property);
-    }
+	/**
+	 * Has constraints defined via <code>@Input</code> annotation. Note that there might also be other kinds of
+	 * constraints, e.g. <code>@Select</code> may define values for {@link #getPossibleValues}.
+	 *
+	 * @return true if parameter is constrained
+	 */
+	public boolean hasInputConstraints() {
+		return !inputConstraints.isEmpty();
+	}
 
-    private boolean arrayContains(String[] array, String toFind) {
-        if (array.length == 0) {
-            return false;
-        }
-        for (String item : array) {
-            if (toFind.equals(item)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public <T extends Annotation> T getAnnotation(Class<T> annotation) {
+		return methodParameter.getParameterAnnotation(annotation);
+	}
 
 
-    @Override
-    public Object[] getPossibleValues(AnnotatedParameters actionDescriptor) {
-        return getPossibleValues(methodParameter, actionDescriptor);
-    }
+	/**
+	 * Determines if request body input parameter has a hidden input property.
+	 *
+	 * @param property name or property path
+	 * @return true if hidden
+	 */
+	@Override
+	public boolean isHidden(String property) {
+		Annotation[] paramAnnotations = methodParameter.getParameterAnnotations();
+		Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
+		return inputAnnotation != null && arrayContains(inputAnnotation.hidden(), property);
+	}
 
-    @Override
-    public Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters actionDescriptor) {
-        MethodParameter methodParameter = new MethodParameter(method, parameterIndex);
-        return getPossibleValues(methodParameter, actionDescriptor);
-    }
+	/**
+	 * Determines if request body input parameter has a read-only input property.
+	 *
+	 * @param property name or property path
+	 * @return true if read-only
+	 */
+	@Override
+	public boolean isReadOnly(String property) {
+		return inputAnnotation != null && arrayContains(inputAnnotation.readOnly(), property);
+	}
 
-    @Override
-    public Object[] getPossibleValues(Constructor constructor, int parameterIndex, AnnotatedParameters
-            actionDescriptor) {
-        MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex);
-        return getPossibleValues(methodParameter, actionDescriptor);
-    }
+	/**
+	 * Determines if request body input parameter should be included, considering all of {@link Input#include}, {@link
+	 * Input#hidden} and {@link Input#readOnly}.
+	 *
+	 * @param property name or property path
+	 * @return true if included or no include statements found
+	 */
+	@Override
+	public boolean isIncluded(String property) {
+		return inputAnnotation == null
+				|| (hasExplicitOrImplicitPropertyIncludeValue() && containsPropertyIncludeValue(property));
+	}
 
-    private Object[] getPossibleValues(MethodParameter methodParameter, AnnotatedParameters actionDescriptor) {
-        try {
-            Class<?> parameterType = methodParameter.getNestedParameterType();
-            Object[] possibleValues;
-            Class<?> nested;
-            if (Enum[].class.isAssignableFrom(parameterType)) {
-                possibleValues = parameterType.getComponentType()
-                        .getEnumConstants();
-            } else if (Enum.class.isAssignableFrom(parameterType)) {
-                possibleValues = parameterType.getEnumConstants();
-            } else if (Collection.class.isAssignableFrom(parameterType)
-                    && Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1)
-                    .getType())) {
-                possibleValues = nested.getEnumConstants();
-            } else {
-                Select select = methodParameter.getParameterAnnotation(Select.class);
-                if (select != null) {
-                    Class<? extends Options> optionsClass = select.options();
-                    Options options = optionsClass.newInstance();
-                    // collect call values to pass to options.get
-                    List<Object> from = new ArrayList<Object>();
-                    for (String paramName : select.args()) {
-                        AnnotatedParameter parameterValue = actionDescriptor.getAnnotatedParameter(paramName);
-                        if (parameterValue != null) {
-                            from.add(parameterValue.getCallValue());
-                        }
-                    }
+	private boolean containsPropertyIncludeValue(String property) {
+		return arrayContains(inputAnnotation.readOnly(), property)
+				|| arrayContains(inputAnnotation.hidden(), property)
+				|| arrayContains(inputAnnotation.include(), property);
+	}
 
-                    Object[] args = from.toArray();
-                    possibleValues = options.get(select.value(), args);
-                } else {
-                    possibleValues = new Object[0];
-                }
-            }
-            return possibleValues;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+	private boolean hasExplicitOrImplicitPropertyIncludeValue() {
+		return inputAnnotation != null && inputAnnotation.readOnly().length > 0
+				|| inputAnnotation.hidden().length > 0
+				|| inputAnnotation.include().length > 0;
+	}
 
-    /**
-     * Determines if action input parameter is an array or collection.
-     *
-     * @return true if array or collection
-     */
-    public boolean isArrayOrCollection() {
-        if (arrayOrCollection == null) {
-            arrayOrCollection = DataType.isArrayOrCollection(getParameterType());
-        }
-        return arrayOrCollection;
-    }
+	/**
+	 * Determines if request body input parameter should be excluded, considering {@link Input#exclude}.
+	 *
+	 * @param property name or property path
+	 * @return true if excluded, false if no include statement found or not excluded
+	 */
+	@Override
+	public boolean isExcluded(String property) {
+		return inputAnnotation != null && arrayContains(inputAnnotation.exclude(), property);
+	}
+
+	private boolean arrayContains(String[] array, String toFind) {
+		if (array.length == 0) {
+			return false;
+		}
+		for (String item : array) {
+			if (toFind.equals(item)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 
-    /**
-     * Is this action input parameter required.
-     *
-     * @return true if required
-     */
-    public boolean isRequired() {
-        boolean ret;
-        if (isRequestBody()) {
-            ret = requestBody.required();
-        } else if (isRequestParam()) {
-            ret = !(isDefined(requestParam.defaultValue()) || !requestParam.required());
-        } else if (isRequestHeader()) {
-            ret = !(isDefined(requestHeader.defaultValue()) || !requestHeader.required());
-        } else {
-            ret = true;
-        }
-        return ret;
-    }
+	@Override
+	public Object[] getPossibleValues(AnnotatedParameters actionDescriptor) {
+		return getPossibleValues(methodParameter, actionDescriptor);
+	}
 
-    private boolean isDefined(String defaultValue) {
-        return !ValueConstants.DEFAULT_NONE.equals(defaultValue);
-    }
+	@Override
+	public Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters actionDescriptor) {
+		MethodParameter methodParameter = new MethodParameter(method, parameterIndex);
+		return getPossibleValues(methodParameter, actionDescriptor);
+	}
 
-    /**
-     * Determines default value of request param or request header, if available.
-     *
-     * @return value or null
-     */
-    public String getDefaultValue() {
-        String ret;
-        if (isRequestParam()) {
-            ret = isDefined(requestParam.defaultValue()) ?
-                    requestParam.defaultValue() : null;
-        } else if (isRequestHeader()) {
-            ret = !(ValueConstants.DEFAULT_NONE.equals(requestHeader.defaultValue())) ?
-                    requestHeader.defaultValue() : null;
-        } else {
-            ret = null;
-        }
-        return ret;
-    }
+	@Override
+	public Object[] getPossibleValues(Constructor constructor, int parameterIndex, AnnotatedParameters
+			actionDescriptor) {
+		MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex);
+		return getPossibleValues(methodParameter, actionDescriptor);
+	}
 
-    /**
-     * Allows convenient access to multiple call values in case that this input parameter is an array or collection.
-     * Make sure to check {@link #isArrayOrCollection()} before calling this method.
-     *
-     * @return call values
-     * @throws UnsupportedOperationException
-     *         if this input parameter is not an array or collection
-     */
-    public Object[] getCallValues() {
-        Object[] callValues;
-        if (!isArrayOrCollection()) {
-            throw new UnsupportedOperationException("parameter is not an array or collection");
-        }
-        Object callValue = getCallValue();
-        if (callValue == null) {
-            callValues = new Object[0];
-        } else {
-            Class<?> parameterType = getParameterType();
-            if (parameterType.isArray()) {
-                callValues = (Object[]) callValue;
-            } else {
-                callValues = ((Collection<?>) callValue).toArray();
-            }
-        }
-        return callValues;
-    }
+	private Object[] getPossibleValues(MethodParameter methodParameter, AnnotatedParameters actionDescriptor) {
+		try {
+			Class<?> parameterType = methodParameter.getNestedParameterType();
+			Object[] possibleValues;
+			Class<?> nested;
+			if (Enum[].class.isAssignableFrom(parameterType)) {
+				possibleValues = parameterType.getComponentType()
+						.getEnumConstants();
+			} else if (Enum.class.isAssignableFrom(parameterType)) {
+				possibleValues = parameterType.getEnumConstants();
+			} else if (Collection.class.isAssignableFrom(parameterType)
+					&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1)
+					.getType())) {
+				possibleValues = nested.getEnumConstants();
+			} else {
+				Select select = methodParameter.getParameterAnnotation(Select.class);
+				if (select != null) {
+					Class<? extends Options> optionsClass = select.options();
+					Options options = optionsClass.newInstance();
+					// collect call values to pass to options.get
+					List<Object> from = new ArrayList<Object>();
+					for (String paramName : select.args()) {
+						AnnotatedParameter parameterValue = actionDescriptor.getAnnotatedParameter(paramName);
+						if (parameterValue != null) {
+							from.add(parameterValue.getCallValue());
+						}
+					}
 
-    /**
-     * Was a sample call value recorded for this parameter?
-     *
-     * @return if call value is present
-     */
-    public boolean hasCallValue() {
-        return value != null;
-    }
+					Object[] args = from.toArray();
+					possibleValues = options.get(select.value(), args);
+				} else {
+					possibleValues = new Object[0];
+				}
+			}
+			return possibleValues;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    /**
-     * Gets parameter name of this action input parameter.
-     *
-     * @return name
-     */
-    public String getParameterName() {
-        String ret;
-        String parameterName = methodParameter.getParameterName();
-        if (parameterName == null) {
-            methodParameter.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-            ret = methodParameter.getParameterName();
-        } else {
-            ret = parameterName;
-        }
-        return ret;
-    }
+	/**
+	 * Determines if action input parameter is an array or collection.
+	 *
+	 * @return true if array or collection
+	 */
+	public boolean isArrayOrCollection() {
+		if (arrayOrCollection == null) {
+			arrayOrCollection = DataType.isArrayOrCollection(getParameterType());
+		}
+		return arrayOrCollection;
+	}
 
-    /**
-     * Class which declares the method to which this input parameter belongs.
-     *
-     * @return class
-     */
-    public Class<?> getDeclaringClass() {
-        return methodParameter.getDeclaringClass();
-    }
 
-    /**
-     * Type of parameter.
-     *
-     * @return type
-     */
-    public Class<?> getParameterType() {
-        return methodParameter.getParameterType();
-    }
+	/**
+	 * Is this action input parameter required.
+	 *
+	 * @return true if required
+	 */
+	public boolean isRequired() {
+		boolean ret;
+		if (isRequestBody()) {
+			ret = requestBody.required();
+		} else if (isRequestParam()) {
+			ret = !(isDefined(requestParam.defaultValue()) || !requestParam.required());
+		} else if (isRequestHeader()) {
+			ret = !(isDefined(requestHeader.defaultValue()) || !requestHeader.required());
+		} else {
+			ret = true;
+		}
+		return ret;
+	}
 
-    /**
-     * Generic type of parameter.
-     *
-     * @return generic type
-     */
-    public java.lang.reflect.Type getGenericParameterType() {
-        return methodParameter.getGenericParameterType();
-    }
+	private boolean isDefined(String defaultValue) {
+		return !ValueConstants.DEFAULT_NONE.equals(defaultValue);
+	}
 
-    /**
-     * Gets the input constraints defined for this action input parameter.
-     *
-     * @return constraints
-     */
-    public Map<String, Object> getInputConstraints() {
-        return inputConstraints;
-    }
+	/**
+	 * Determines default value of request param or request header, if available.
+	 *
+	 * @return value or null
+	 */
+	public String getDefaultValue() {
+		String ret;
+		if (isRequestParam()) {
+			ret = isDefined(requestParam.defaultValue()) ?
+					requestParam.defaultValue() : null;
+		} else if (isRequestHeader()) {
+			ret = !(ValueConstants.DEFAULT_NONE.equals(requestHeader.defaultValue())) ?
+					requestHeader.defaultValue() : null;
+		} else {
+			ret = null;
+		}
+		return ret;
+	}
 
+	/**
+	 * Allows convenient access to multiple call values in case that this input parameter is an array or collection.
+	 * Make sure to check {@link #isArrayOrCollection()} before calling this method.
+	 *
+	 * @return call values
+	 * @throws UnsupportedOperationException if this input parameter is not an array or collection
+	 */
+	public Object[] getCallValues() {
+		Object[] callValues;
+		if (!isArrayOrCollection()) {
+			throw new UnsupportedOperationException("parameter is not an array or collection");
+		}
+		Object callValue = getCallValue();
+		if (callValue == null) {
+			callValues = new Object[0];
+		} else {
+			Class<?> parameterType = getParameterType();
+			if (parameterType.isArray()) {
+				callValues = (Object[]) callValue;
+			} else {
+				callValues = ((Collection<?>) callValue).toArray();
+			}
+		}
+		return callValues;
+	}
+
+	/**
+	 * Was a sample call value recorded for this parameter?
+	 *
+	 * @return if call value is present
+	 */
+	public boolean hasCallValue() {
+		return value != null;
+	}
+
+	/**
+	 * Gets parameter name of this action input parameter.
+	 *
+	 * @return name
+	 */
+	public String getParameterName() {
+		String ret;
+		String parameterName = methodParameter.getParameterName();
+		if (parameterName == null) {
+			methodParameter.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+			ret = methodParameter.getParameterName();
+		} else {
+			ret = parameterName;
+		}
+		return ret;
+	}
+
+	/**
+	 * Class which declares the method to which this input parameter belongs.
+	 *
+	 * @return class
+	 */
+	public Class<?> getDeclaringClass() {
+		return methodParameter.getDeclaringClass();
+	}
+
+	/**
+	 * Type of parameter.
+	 *
+	 * @return type
+	 */
+	public Class<?> getParameterType() {
+		return methodParameter.getParameterType();
+	}
+
+	/**
+	 * Generic type of parameter.
+	 *
+	 * @return generic type
+	 */
+	public java.lang.reflect.Type getGenericParameterType() {
+		return methodParameter.getGenericParameterType();
+	}
+
+	/**
+	 * Gets the input constraints defined for this action input parameter.
+	 *
+	 * @return constraints
+	 */
+	public Map<String, Object> getInputConstraints() {
+		return inputConstraints;
+	}
 }
