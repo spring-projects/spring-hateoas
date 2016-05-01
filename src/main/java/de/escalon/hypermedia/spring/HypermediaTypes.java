@@ -23,6 +23,7 @@ public final class HypermediaTypes {
 
 	public static final String APPLICATION_JSONLD_STR = "application/ld+json";
 	public static final MediaType APPLICATION_JSONLD = MediaType.parseMediaType(APPLICATION_JSONLD_STR);
-	public static final MediaType UBER_XML = MediaType.parseMediaType("application/vnd.uber+xml");
-	public static final MediaType UBER_JSON = MediaType.parseMediaType("application/vnd.uber+json");
+	public static final MediaType UBER_XML = MediaType.parseMediaType("application/vnd.amundsen-uber+xml");
+	public static final MediaType UBER_JSON = MediaType.parseMediaType("application/vnd.amundsen-uber+json");
+	public static final MediaType SIREN_JSON = MediaType.parseMediaType("application/vnd.siren+json");
 }
