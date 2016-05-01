@@ -55,8 +55,7 @@ import org.springframework.util.*;
  *
  * @author Dietrich Schulten
  */
-public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<Object> implements
-		GenericHttpMessageConverter<Object> {
+public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<Object> {
 
 	private Charset charset = Charset.forName("UTF-8");
 	private String methodParam = "_method";
@@ -452,12 +451,6 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
 		writer.beginDd();
 		writer.write(value.toString());
 		writer.endDd();
-	}
-
-
-	@Override
-	public boolean canRead(java.lang.reflect.Type type, Class<?> contextClass, MediaType mediaType) {
-		return MediaType.APPLICATION_FORM_URLENCODED == mediaType;
 	}
 
 	/**
