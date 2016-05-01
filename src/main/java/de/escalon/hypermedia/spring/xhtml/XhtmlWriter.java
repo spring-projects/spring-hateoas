@@ -9,6 +9,7 @@ import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
 import org.springframework.core.MethodParameter;
@@ -64,7 +65,7 @@ public class XhtmlWriter extends Writer {
             "</html>";
 
     private String methodParam = "_method";
-    private DocumentationProvider documentationProvider;
+    private DocumentationProvider documentationProvider = new DefaultDocumentationProvider();
 
     private String formControlClass = "form-control";
     private String formGroupClass = "form-group";
@@ -323,7 +324,7 @@ public class XhtmlWriter extends Writer {
         if (actionDescriptor.hasRequestBody()) { // parameter bean
             ActionInputParameter requestBody = actionDescriptor.getRequestBody();
             Class<?> parameterType = requestBody.getParameterType();
-            recurseBeanProperties(parameterType, actionDescriptor, requestBody, requestBody.getValue());
+            recurseBeanProperties(parameterType, actionDescriptor, requestBody, requestBody.getValue(), "");
         } else { // plain parameter list
             Collection<String> requestParams = actionDescriptor.getRequestParamNames();
             for (String requestParamName : requestParams) {
@@ -538,7 +539,7 @@ public class XhtmlWriter extends Writer {
      * @throws IOException
      */
     private void recurseBeanProperties(Class<?> beanType, ActionDescriptor actionDescriptor, ActionInputParameter
-            actionInputParameter, Object currentCallValue) throws IOException {
+            actionInputParameter, Object currentCallValue, String parentParamName) throws IOException {
         // TODO support Option provider by other method args?
         final BeanInfo beanInfo = getBeanInfo(beanType);
         final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
@@ -587,7 +588,7 @@ public class XhtmlWriter extends Writer {
                                                 actionInputParameter.getPossibleValues(
                                                         constructor, paramIndex, actionDescriptor);
 
-                                        appendInputOrSelect(actionInputParameter, paramName,
+                                        appendInputOrSelect(actionInputParameter, parentParamName + paramName,
                                                 constructorParamInputParameter, possibleValues);
                                     }
                                 } else if (DataType.isArrayOrCollection(parameterType)) {
@@ -601,7 +602,7 @@ public class XhtmlWriter extends Writer {
                                             value = null;
                                         }
                                         recurseBeanProperties(actionInputParameter.getParameterType(),
-                                                actionDescriptor, actionInputParameter, value);
+                                                actionDescriptor, actionInputParameter, value, parentParamName);
                                     }
                                 } else {
                                     beginDiv();
@@ -609,7 +610,7 @@ public class XhtmlWriter extends Writer {
                                     Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue,
                                             paramName);
                                     recurseBeanProperties(parameterType, actionDescriptor, actionInputParameter,
-                                            propertyValue);
+                                            propertyValue, paramName + ".");
                                     endDiv();
                                 }
                                 paramIndex++; // increase for each @JsonProperty
@@ -660,13 +661,13 @@ public class XhtmlWriter extends Writer {
                             value = null;
                         }
                         recurseBeanProperties(actionInputParameter.getParameterType(), actionDescriptor,
-                                actionInputParameter, value);
+                                actionInputParameter, value, parentParamName);
                     }
                 } else {
                     beginDiv();
                     write(propertyName + ":");
                     Object propertyValue = PropertyUtils.getPropertyValue(currentCallValue, propertyDescriptor);
-                    recurseBeanProperties(propertyType, actionDescriptor, actionInputParameter, propertyValue);
+                    recurseBeanProperties(propertyType, actionDescriptor, actionInputParameter, propertyValue, parentParamName);
                     endDiv();
                 }
             }

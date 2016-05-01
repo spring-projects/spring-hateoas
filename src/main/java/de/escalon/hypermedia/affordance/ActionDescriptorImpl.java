@@ -181,7 +181,7 @@ public class ActionDescriptorImpl implements ActionDescriptor {
         }
         if (ret == null) {
             for (ActionInputParameter annotatedParameter : getInputParameters()) {
-                // TODO create AnnotatedParameter for bean property at property path
+                // TODO create ActionInputParameter for bean property at property path
                 // TODO field access in addition to bean?
                 PropertyDescriptor pd = getPropertyDescriptorForPropertyPath(name,
                         annotatedParameter.getParameterType());

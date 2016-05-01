@@ -60,7 +60,6 @@ public class PropertyUtils {
     }
 
     public static Constructor findJsonCreator(Constructor[] constructors, Class creatorAnnotation) {
-        // TODO duplicate on HtmlResourceMessageConverter
         Constructor constructor = null;
         for (Constructor ctor : constructors) {
             if (AnnotationUtils.findAnnotation(ctor, creatorAnnotation) != null) {

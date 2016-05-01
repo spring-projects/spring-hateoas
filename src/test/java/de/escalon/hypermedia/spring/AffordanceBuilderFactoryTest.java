@@ -66,7 +66,7 @@ public class AffordanceBuilderFactoryTest {
     public void testLinkToMethod() throws Exception {
         final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent", String.class);
         final Affordance affordance = factory.linkTo(getEventMethod, new Object[0])
-                .build("foo");
+                .rel("foo").build();
         assertEquals("http://example.com/events/{eventId}", affordance.getHref());
     }
 
@@ -75,14 +75,14 @@ public class AffordanceBuilderFactoryTest {
         final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent", String.class);
         final Affordance affordance = factory.linkTo(AffordanceBuilder.methodOn(EventControllerSample.class)
                 .getEvent((String) null))
-                .build("foo");
+                .rel("foo").build();
         assertEquals("http://example.com/events/{eventId}", affordance.getHref());
     }
 
     @Test
     public void testLinkToControllerClass() throws Exception {
         final Affordance affordance = factory.linkTo(EventControllerSample.class, new Object[0])
-                .build("foo");
+                .rel("foo").build();
         assertEquals("http://example.com/events", affordance.getHref());
     }
 

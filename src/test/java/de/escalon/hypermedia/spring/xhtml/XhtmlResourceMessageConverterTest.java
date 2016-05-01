@@ -157,11 +157,11 @@ public class XhtmlResourceMessageConverterTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:input[@name='ratingValue']", namespaces).exists())
-                .andExpect(xpath("//h:input[@name='ratingValue']/@type", namespaces).string("number"))
-                .andExpect(xpath("//h:input[@name='ratingValue']/@min", namespaces).string("1"))
-                .andExpect(xpath("//h:input[@name='ratingValue']/@max", namespaces).string("5"))
-                .andExpect(xpath("//h:input[@name='ratingValue']/@value", namespaces).string("3"))
+                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']", namespaces).exists())
+                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@type", namespaces).string("number"))
+                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@min", namespaces).string("1"))
+                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@max", namespaces).string("5"))
+                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@value", namespaces).string("3"))
                 .andReturn();
         LOG.debug(result.getResponse()
                 .getContentAsString());
@@ -174,7 +174,7 @@ public class XhtmlResourceMessageConverterTest {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:input[@name='ratingValue']/@value", namespaces).string("3"))
+                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@value", namespaces).string("3"))
                 .andReturn();
         LOG.debug(result.getResponse()
                 .getContentAsString());

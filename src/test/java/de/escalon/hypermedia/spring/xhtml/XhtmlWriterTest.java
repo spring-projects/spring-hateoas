@@ -192,7 +192,7 @@ public class XhtmlWriterTest {
         String xml = writer.toString();
         System.out.println(xml);
 
-        XMLAssert.assertXpathEvaluatesTo("EVENT_SCHEDULED", "//input[@name='eventStatus']/@value", xml);
+        XMLAssert.assertXpathEvaluatesTo("EVENT_SCHEDULED", "//option[@selected='selected']/text()", xml);
 
         XMLAssert.assertXpathNotExists("//input[@name='performer']", xml);
         XMLAssert.assertXpathNotExists("//select[@name='typicalAgeRange']", xml);
@@ -224,7 +224,7 @@ public class XhtmlWriterTest {
         String xml = writer.toString();
         System.out.println(xml);
 
-        XMLAssert.assertXpathEvaluatesTo("EVENT_SCHEDULED", "//input[@name='eventStatus']/@value", xml);
+        XMLAssert.assertXpathEvaluatesTo("EVENT_SCHEDULED", "//option[@selected='selected']/text()", xml);
         XMLAssert.assertXpathExists("//input[@name='workPerformed.name']", xml);
 
         XMLAssert.assertXpathNotExists("//input[@name='performer']", xml);

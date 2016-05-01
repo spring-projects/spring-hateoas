@@ -22,7 +22,7 @@ public class XhtmlResourceMessageConverterReadTest {
         LinkedMultiValueMap<String, String> formValues = new LinkedMultiValueMap<String, String>();
         formValues.add("workPerformed.name", "foo");
         formValues.add("location", "Harmonie Heilbronn");
-        Event event = (Event) converter.recursivelyCreateObject(Event.class, formValues);
+        Event event = (Event) converter.recursivelyCreateObject(Event.class, formValues, "");
         assertEquals("foo", event.getWorkPerformed()
                 .getContent().name);
         assertEquals("Harmonie Heilbronn", event.location);

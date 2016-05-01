@@ -86,7 +86,7 @@ public class SirenUtilsTest {
         assertThat(json, hasJsonPath("$.properties.customerId", equalTo("pj123")));
         assertThat(json, hasJsonPath("$.properties.name", equalTo("Peter Joseph")));
         assertThat(json, hasJsonPath("$.properties.address", Matchers.instanceOf(Map.class)));
-        assertThat(json, hasJsonPath("$.properties.address.street", Matchers.instanceOf(Map.class)));
+        assertThat(json, hasJsonPath("$.properties.address.street", equalTo("Grant Street")));
 
     }
 
@@ -173,7 +173,7 @@ public class SirenUtilsTest {
 
         assertThat(json, hasJsonPath("$.properties.name", equalTo("Peter Joseph")));
         assertThat(json, hasJsonPath("$.entities[0].properties.street", equalTo("Grant Street")));
-        assertThat(json, hasJsonPath("$.entities[0].rel", equalTo("address")));
+        assertThat(json, hasJsonPath("$.entities[0].rel", contains("address")));
 
     }
 
