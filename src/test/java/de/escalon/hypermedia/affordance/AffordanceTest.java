@@ -10,12 +10,16 @@
 
 package de.escalon.hypermedia.affordance;
 
+import de.escalon.hypermedia.affordance.Affordance;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 public class AffordanceTest {
 
@@ -76,6 +80,6 @@ public class AffordanceTest {
         Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put("id", 101);
 
-        Assert.assertEquals("http://localhost/things?id=101", affordance.expand(arguments).getHref());
+        Assert.assertEquals("http://localhost/things?id=101", affordance.expand(101).getHref());
     }
 }

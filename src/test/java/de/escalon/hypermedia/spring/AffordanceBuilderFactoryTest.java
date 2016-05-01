@@ -10,10 +10,7 @@
 
 package de.escalon.hypermedia.spring;
 
-import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.Affordance;
-import de.escalon.hypermedia.affordance.AnnotatedParameter;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.Resource;
@@ -22,7 +19,10 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -30,11 +30,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNull;
 
 public class AffordanceBuilderFactoryTest {
 
     AffordanceBuilderFactory factory = new AffordanceBuilderFactory();
+
+    private MockHttpServletRequest request;
 
     /**
      * Sample controller.
@@ -46,7 +48,7 @@ public class AffordanceBuilderFactoryTest {
         @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
         public
         @ResponseBody
-        Resource<Object> getEvent(@RequestHeader("Prefer") String preferHeader, @PathVariable String eventId) {
+        Resource<Object> getEvent(@PathVariable String eventId) {
             return null;
         }
 
@@ -54,8 +56,7 @@ public class AffordanceBuilderFactoryTest {
 
     @Before
     public void setUp() {
-        MockHttpServletRequest request = MockMvcRequestBuilders.get("http://example.com/")
-                .header("Prefer", "minimal")
+        request = MockMvcRequestBuilders.get("http://example.com/")
                 .buildRequest(new MockServletContext());
         final RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(requestAttributes);
@@ -63,41 +64,31 @@ public class AffordanceBuilderFactoryTest {
 
     @Test
     public void testLinkToMethod() throws Exception {
-        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent",
-                String.class, String.class);
+        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent", String.class);
         final Affordance affordance = factory.linkTo(getEventMethod, new Object[0])
-                .rel("foo")
-                .build();
+                .build("foo");
         assertEquals("http://example.com/events/{eventId}", affordance.getHref());
     }
 
     @Test
     public void testLinkToMethodInvocation() throws Exception {
+        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent", String.class);
         final Affordance affordance = factory.linkTo(AffordanceBuilder.methodOn(EventControllerSample.class)
-                .getEvent("minimal", null))
-                .rel("foo")
-                .build();
+                .getEvent((String) null))
+                .build("foo");
         assertEquals("http://example.com/events/{eventId}", affordance.getHref());
-        ActionDescriptor actionDescriptor = affordance.getActionDescriptors()
-                .get(0);
-        assertThat(actionDescriptor.getRequestHeaderNames(), Matchers.contains("preferHeader"));
-        AnnotatedParameter preferHeader = actionDescriptor.getRequestHeader("preferHeader");
-        assertEquals("minimal", preferHeader.getCallValue());
-        assertEquals("Prefer", preferHeader.getRequestHeaderName());
     }
 
     @Test
     public void testLinkToControllerClass() throws Exception {
         final Affordance affordance = factory.linkTo(EventControllerSample.class, new Object[0])
-                .rel("foo")
-                .build();
+                .build("foo");
         assertEquals("http://example.com/events", affordance.getHref());
     }
 
     @Test
     public void testLinkToMethodNoArgsBuild() throws Exception {
-        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent",
-                String.class, String.class);
+        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent", String.class);
         final Affordance affordance = factory.linkTo(getEventMethod, new Object[0])
                 .rel("foo")
                 .build();
@@ -107,8 +98,9 @@ public class AffordanceBuilderFactoryTest {
 
     @Test
     public void testLinkToMethodInvocationNoArgsBuild() throws Exception {
+        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "getEvent", String.class);
         final Affordance affordance = factory.linkTo(AffordanceBuilder.methodOn(EventControllerSample.class)
-                .getEvent(null, null))
+                .getEvent((String) null))
                 .rel("foo")
                 .build();
         assertEquals("http://example.com/events/{eventId}", affordance.getHref());
@@ -126,10 +118,10 @@ public class AffordanceBuilderFactoryTest {
 
     @Test
     public void testLinkToMethodInvocationReverseRel() throws Exception {
+        final Method getEventMethod = ReflectionUtils.findMethod(EventControllerSample.class, "findEventByName", String.class);
         final Affordance affordance = factory.linkTo(AffordanceBuilder.methodOn(EventControllerSample.class)
-                .getEvent(null, null))
-                .rel("ex:children")
-                .reverseRel("schema:parent")
+                .getEvent((String) null))
+                .reverseRel("schema:parent", "ex:children")
                 .build();
         assertEquals("http://example.com/events/{eventId}", affordance.getHref());
         assertEquals("schema:parent", affordance.getRev());

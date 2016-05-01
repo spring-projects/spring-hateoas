@@ -1,11 +1,14 @@
 /*
  * Copyright (c) 2014. Escalon System-Entwicklung, Dietrich Schulten
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
  */
 
 package de.escalon.hypermedia.spring.sample.test;
@@ -24,8 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Sample controller for reviews.
- * Created by dschulten on 16.09.2014.
+ * Sample controller for reviews. Created by dschulten on 16.09.2014.
  */
 @Controller
 @RequestMapping("/reviews")
@@ -37,7 +39,7 @@ public class ReviewController {
 
     @RequestMapping(value = "/events/{eventId}", method = RequestMethod.GET)
     @ResponseBody
-    public Resources<Review> getReviews(@PathVariable int eventId) {
+    public Resources<Review> getReviews(@PathVariable int eventId, @RequestParam(required = false) String ratingValue) {
         final Resources<Review> reviewResources = new Resources<Review>(reviews.get(eventId));
         reviewResources.add(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(DummyEventController.class)
                 .getEvent((Integer) null)) // pass null to create template
@@ -51,10 +53,11 @@ public class ReviewController {
     ResponseEntity<Void> addReview(@PathVariable int eventId, @RequestBody Review review) {
         Assert.notNull(review);
         Assert.notNull(review.getReviewRating());
-        Assert.notNull(review.getReviewRating().getRatingValue());
+        Assert.notNull(review.getReviewRating()
+                .getRatingValue());
         final HttpHeaders headers = new HttpHeaders();
         headers.setLocation(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(this.getClass())
-                .getReviews(eventId))
+                .getReviews(eventId, null))
                 .toUri());
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
@@ -66,7 +69,7 @@ public class ReviewController {
     ResponseEntity<Void> addReview(@PathVariable int eventId, @RequestParam String review, @RequestParam int rating) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setLocation(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(this.getClass())
-                .getReviews(eventId))
+                .getReviews(eventId, null))
                 .toUri());
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }

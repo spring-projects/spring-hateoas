@@ -171,7 +171,7 @@
 						</executions>
 						<configuration>
 							<includeGroupIds>org.springframework.data</includeGroupIds>
-							<includeArtifacIds>spring-data-build-resources</includeArtifacIds>
+							<includeArtifactIds>spring-data-build-resources</includeArtifactIds>
 							<includeTypes>zip</includeTypes>
 							<excludeTransitive>true</excludeTransitive>
 							<outputDirectory>${shared.resources}</outputDirectory>
@@ -541,6 +541,13 @@
 			<groupId>net.jadler</groupId>
 			<artifactId>jadler-all</artifactId>
 			<version>1.1.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path-assert</artifactId>
+			<version>2.2.0</version>
 			<scope>test</scope>
 		</dependency>
 

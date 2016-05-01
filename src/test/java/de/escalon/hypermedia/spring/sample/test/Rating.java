@@ -34,5 +34,4 @@ public class Rating {
     public Integer getRatingValue() {
         return ratingValue;
     }
-
 }

@@ -1,19 +1,15 @@
 /*
  * Copyright (c) 2014. Escalon System-Entwicklung, Dietrich Schulten
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
- * the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
 package de.escalon.hypermedia.spring.sample.test;
 
-import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.affordance.Affordance;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -33,20 +29,21 @@ import static de.escalon.hypermedia.spring.AffordanceBuilder.methodOn;
 
 
 /**
- * Sample controller demonstrating the use of AffordanceBuilder and hydra-core annotations such as @Expose on request
- * parameters. Created by dschulten on 11.09.2014.
+ * Sample controller demonstrating the use of AffordanceBuilder and hydra-core annotations such as @Expose on
+ * request parameters.
+ * Created by dschulten on 11.09.2014.
  */
 @Controller
 @RequestMapping("/events")
 public class DummyEventController {
 
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<Void> addEvent(@RequestBody Event event) {
+    @RequestMapping(method=RequestMethod.POST)
+    public
+    ResponseEntity<Void> addEvent(@RequestBody Event event) {
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
-
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method=RequestMethod.GET)
     public
     @ResponseBody
     Resources<Resource<Event>> getResourcesOfResourceOfEvent() {
@@ -57,7 +54,7 @@ public class DummyEventController {
             eventResource.add(linkTo(methodOn(this.getClass())
                     .getEvent(event.id))
                     .and(linkTo(methodOn(this.getClass())
-                            .updateEventWithRequestBody(event.id, event)))
+                    .updateEventWithRequestBody(event.id, event)))
                     .and(linkTo(methodOn(this.getClass())
                             .deleteEvent(event.id)))
                     .withSelfRel());
@@ -75,16 +72,10 @@ public class DummyEventController {
                 .withRel("hydra:search");
         final Affordance eventWithRegexAffordance = linkTo(
                 methodOn(this.getClass()).getEventWithRegexPathVariableMapping(null)).withRel("ex:regex");
-        final Affordance postEventAffordance = linkTo(methodOn(this.getClass()).addEvent(
-                aSampleEvent())).withSelfRel();
-
+        final Affordance postEventAffordance = linkTo(methodOn(this.getClass()).addEvent(null)).withSelfRel();
 
         return new Resources<Resource<Event>>(eventResourcesList,
                 eventByNameAffordance, eventWithRegexAffordance, postEventAffordance);
-    }
-
-    private Event aSampleEvent() {
-        return new Event(0, null, new CreativeWork(null), null, EventStatusType.EVENT_SCHEDULED);
     }
 
 
@@ -98,8 +89,10 @@ public class DummyEventController {
             eventResource.add(linkTo(this.getClass()).slash(event.id)
                     .withSelfRel());
             eventResource.add(linkTo(methodOn(ReviewController.class)
-                    .getReviews(event.id))
+                    .getReviews(event.id, null))
                     .withRel("review"));
+            // TODO how to express that the same method getReviews
+            // is also an IriTemplate if the variable is optional
             eventResourcesList.add(eventResource);
         }
         return eventResourcesList;
@@ -113,7 +106,7 @@ public class DummyEventController {
         resource.add(linkTo(ReviewController.class).withRel("review"));
         return resource;
     }
-
+    
     @RequestMapping(value = "/regex/{eventId:.+}", method = RequestMethod.GET)
     public
     @ResponseBody
@@ -163,10 +156,8 @@ public class DummyEventController {
 
 
     protected List<Event> getEvents() {
-        return Arrays.asList(new Event(1, "Walk off the Earth", new CreativeWork("Gang of Rhythm Tour"), "Wiesbaden",
-                        EventStatusType.EVENT_SCHEDULED),
-                new Event(2, "Cornelia Bielefeldt", new CreativeWork("Mein letzter Film"), "Heilbronn",
-                        EventStatusType.EVENT_SCHEDULED));
+        return Arrays.asList(new Event(1, "Walk off the Earth", new CreativeWork("Gang of Rhythm Tour"), "Wiesbaden", EventStatusType.EVENT_SCHEDULED),
+                new Event(2, "Cornelia Bielefeldt", new CreativeWork("Mein letzter Film"), "Heilbronn", EventStatusType.EVENT_SCHEDULED));
     }
 
     protected List<? extends EventResource> getEventResources() {

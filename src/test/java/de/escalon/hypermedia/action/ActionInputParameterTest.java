@@ -1,7 +1,7 @@
 package de.escalon.hypermedia.action;
 
-import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.spring.ActionInputParameter;
+import de.escalon.hypermedia.affordance.ActionDescriptorImpl;
+import de.escalon.hypermedia.spring.SpringActionInputParameter;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +17,9 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
+/**
+ * Created by Dietrich on 16.05.2015.
+ */
 public class ActionInputParameterTest {
 
 
@@ -57,13 +60,11 @@ public class ActionInputParameterTest {
         MethodParameter rating = new MethodParameter(addReview, 0);
         MethodParameter reviewBody = new MethodParameter(addReview, 1);
 
-        ActionInputParameter actionInputParameter =
-                new ActionInputParameter(reviewBody, "yada, yada");
+        SpringActionInputParameter actionInputParameter =
+                new SpringActionInputParameter(reviewBody, "yada, yada");
 
-        assertTrue(actionInputParameter.hasCallValue());
-        assertEquals("yada, yada", actionInputParameter.getCallValue());
-
-        assertEquals("excellent", actionInputParameter.getDefaultValue());
+        assertTrue(actionInputParameter.hasValue());
+        assertEquals("yada, yada", actionInputParameter.getValue());
 
         assertEquals(DummyController.class, actionInputParameter.getDeclaringClass());
 
@@ -75,7 +76,7 @@ public class ActionInputParameterTest {
 
         assertEquals("reviewBody", actionInputParameter.getParameterName());
         assertEquals(String.class, actionInputParameter.getParameterType());
-        assertEquals(0, actionInputParameter.getPossibleValues(new ActionDescriptor("post",
+        assertEquals(0, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("post",
                 RequestMethod.POST.name())).length);
         assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
         assertNull(actionInputParameter.getRequestHeaderName());
@@ -94,12 +95,12 @@ public class ActionInputParameterTest {
         Method addReview = DummyController.class.getMethod("addReview", String.class, String.class);
         MethodParameter rating = new MethodParameter(addReview, 0);
 
-        ActionInputParameter actionInputParameter =
-                new ActionInputParameter(rating, "excellent");
+        SpringActionInputParameter actionInputParameter =
+                new SpringActionInputParameter(rating, "excellent");
 
-        assertTrue(actionInputParameter.hasCallValue());
-        assertEquals("excellent", actionInputParameter.getCallValue());
-        assertEquals("excellent", actionInputParameter.getCallValueFormatted());
+        assertTrue(actionInputParameter.hasValue());
+        assertEquals("excellent", actionInputParameter.getValue());
+        assertEquals("excellent", actionInputParameter.getValueFormatted());
 
         assertEquals(DummyController.class, actionInputParameter.getDeclaringClass());
 
@@ -107,7 +108,7 @@ public class ActionInputParameterTest {
 
         assertEquals("rating", actionInputParameter.getParameterName());
         assertEquals(String.class, actionInputParameter.getParameterType());
-        assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptor("post",
+        assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("post",
                 RequestMethod.POST.name())).length);
         assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
 
@@ -126,11 +127,11 @@ public class ActionInputParameterTest {
         MethodParameter rating = new MethodParameter(addReview, 0);
 
         List<String> callValues = Arrays.asList("excellent", "mediocre");
-        ActionInputParameter actionInputParameter =
-                new ActionInputParameter(rating, callValues);
+        SpringActionInputParameter actionInputParameter =
+                new SpringActionInputParameter(rating, callValues);
 
-        assertTrue(actionInputParameter.hasCallValue());
-        assertEquals(callValues, actionInputParameter.getCallValue());
+        assertTrue(actionInputParameter.hasValue());
+        assertEquals(callValues, actionInputParameter.getValue());
         assertThat(callValues, Matchers.contains("excellent", "mediocre"));
 
         assertEquals(DummyController.class, actionInputParameter.getDeclaringClass());
@@ -142,7 +143,7 @@ public class ActionInputParameterTest {
         assertEquals(
                 new ParameterizedTypeReference<List<String>>() {
                 }.getType(), actionInputParameter.getGenericParameterType());
-        assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptor("post",
+        assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("post",
                 RequestMethod.POST.name())).length);
         assertNull(actionInputParameter.getHtmlInputFieldType());
 
@@ -173,11 +174,11 @@ public class ActionInputParameterTest {
         Method setShade = BlueController.class.getMethod("setShade", ShadeOfBlue.class);
         MethodParameter shade = new MethodParameter(setShade, 0);
 
-        ActionInputParameter actionInputParameter =
-                new ActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
+        SpringActionInputParameter actionInputParameter =
+                new SpringActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
 
-        assertTrue(actionInputParameter.hasCallValue());
-        assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getCallValue());
+        assertTrue(actionInputParameter.hasValue());
+        assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getValue());
 
         assertEquals(BlueController.class, actionInputParameter.getDeclaringClass());
 
@@ -186,7 +187,7 @@ public class ActionInputParameterTest {
         assertEquals("shade", actionInputParameter.getParameterName());
         assertEquals(ShadeOfBlue.class, actionInputParameter.getParameterType());
         assertEquals(ShadeOfBlue.class, actionInputParameter.getGenericParameterType());
-        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptor("get",
+        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("get",
                 RequestMethod.GET.name())).length);
         assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
 
@@ -214,11 +215,11 @@ public class ActionInputParameterTest {
         Method setShade = BlueController.class.getMethod("setShade", ShadeOfBlue[].class);
         MethodParameter shade = new MethodParameter(setShade, 0);
 
-        ActionInputParameter actionInputParameter =
-                new ActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
+        SpringActionInputParameter actionInputParameter =
+                new SpringActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
 
-        assertTrue(actionInputParameter.hasCallValue());
-        assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getCallValue());
+        assertTrue(actionInputParameter.hasValue());
+        assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getValue());
 
         assertEquals(BlueController.class, actionInputParameter.getDeclaringClass());
 
@@ -227,7 +228,7 @@ public class ActionInputParameterTest {
         assertEquals("shade", actionInputParameter.getParameterName());
         assertEquals(ShadeOfBlue[].class, actionInputParameter.getParameterType());
         assertEquals(ShadeOfBlue[].class, actionInputParameter.getGenericParameterType());
-        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptor("get",
+        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("get",
                 RequestMethod.GET.name())).length);
         assertNull(actionInputParameter.getHtmlInputFieldType());
 
@@ -254,11 +255,11 @@ public class ActionInputParameterTest {
         Method setShade = BlueController.class.getMethod("setShade", List.class);
         MethodParameter shade = new MethodParameter(setShade, 0);
 
-        ActionInputParameter actionInputParameter =
-                new ActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
+        SpringActionInputParameter actionInputParameter =
+                new SpringActionInputParameter(shade, ShadeOfBlue.DARK_BLUE);
 
-        assertTrue(actionInputParameter.hasCallValue());
-        assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getCallValue());
+        assertTrue(actionInputParameter.hasValue());
+        assertEquals(ShadeOfBlue.DARK_BLUE, actionInputParameter.getValue());
 
         assertEquals(BlueController.class, actionInputParameter.getDeclaringClass());
 
@@ -270,7 +271,7 @@ public class ActionInputParameterTest {
         assertEquals(
                 new ParameterizedTypeReference<List<ShadeOfBlue>>() {
                 }.getType(), actionInputParameter.getGenericParameterType());
-        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptor("get",
+        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("get",
                 RequestMethod.GET.name())).length);
         assertNull(actionInputParameter.getHtmlInputFieldType());
 

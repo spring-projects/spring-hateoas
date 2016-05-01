@@ -14,6 +14,8 @@ import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
 import de.escalon.hypermedia.action.ResourceHandler;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.ActionDescriptorImpl;
+import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.PartialUriTemplate;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -114,6 +116,13 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
     }
 
     @Override
+    public AffordanceBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
+        String mapping = MAPPING_DISCOVERER.getMapping(controller);
+        PartialUriTemplate partialUriTemplate = new PartialUriTemplate(mapping == null ? "/" : mapping);
+        return new AffordanceBuilder().slash(partialUriTemplate.expand(parameters));
+    }
+
+    @Override
     public AffordanceBuilder linkTo(Object invocationValue) {
 
         Assert.isInstanceOf(DummyInvocationUtils.LastInvocationAware.class, invocationValue);
@@ -171,8 +180,8 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
         Type genericReturnType = invokedMethod.getGenericReturnType();
 
 
-        ActionDescriptor actionDescriptor =
-                new ActionDescriptor(invokedMethod.getName(), httpMethod.name());
+        ActionDescriptorImpl actionDescriptor =
+                new ActionDescriptorImpl(invokedMethod.getName(), httpMethod.name());
 
         actionDescriptor.setCardinality(getCardinality(invokedMethod, httpMethod, genericReturnType));
 
@@ -197,7 +206,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
                 final String key = entry.getKey();
                 actionDescriptor.addRequestParam(key, value);
                 if (!value.isRequestBody()) {
-                    values.put(key, value.getCallValueFormatted());
+                    values.put(key, value.getValueFormatted());
                 }
             }
         }
@@ -210,7 +219,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
                 final String key = entry.getKey();
                 actionDescriptor.addPathVariable(key, actionInputParameter);
                 if (!actionInputParameter.isRequestBody()) {
-                    values.put(key, actionInputParameter.getCallValueFormatted());
+                    values.put(key, actionInputParameter.getValueFormatted());
                 }
             }
         }
@@ -224,7 +233,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
                 final String key = entry.getKey();
                 actionDescriptor.addRequestHeader(key, actionInputParameter);
                 if (!actionInputParameter.isRequestBody()) {
-                    values.put(key, actionInputParameter.getCallValueFormatted());
+                    values.put(key, actionInputParameter.getValueFormatted());
                 }
             }
         }
@@ -332,7 +341,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
             } else {
                 argument = null;
             }
-            result.put(parameter.getParameterName(), new ActionInputParameter(parameter, argument));
+            result.put(parameter.getParameterName(), new SpringActionInputParameter(parameter, argument));
         }
 
         return result;

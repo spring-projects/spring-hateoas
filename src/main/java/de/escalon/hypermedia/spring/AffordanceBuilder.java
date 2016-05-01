@@ -1,19 +1,19 @@
 /*
  * Copyright (c) 2014. Escalon System-Entwicklung, Dietrich Schulten
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
  */
 
 package de.escalon.hypermedia.spring;
 
-import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.affordance.Affordance;
-import de.escalon.hypermedia.affordance.PartialUriTemplate;
-import de.escalon.hypermedia.affordance.PartialUriTemplateComponents;
+import de.escalon.hypermedia.affordance.*;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Builder for hypermedia affordances, usable as rfc-5988 web links and optionally holding information about request body requirements.
- * Created by dschulten on 07.09.2014.
+ * Builder for hypermedia affordances, usable as rfc-5988 web links and optionally holding information about request
+ * body requirements. Created by dschulten on 07.09.2014.
  */
 public class AffordanceBuilder implements LinkBuilder {
 
@@ -50,11 +50,13 @@ public class AffordanceBuilder implements LinkBuilder {
     private MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<String, String>();
     private List<String> rels = new ArrayList<String>();
     private List<String> reverseRels = new ArrayList<String>();
+    private TypedResource collectionHolder;
 
     /**
      * Creates a new {@link AffordanceBuilder} with a base of the mapping annotated to the given controller class.
      *
-     * @param controller the class to discover the annotation on, must not be {@literal null}.
+     * @param controller
+     *         the class to discover the annotation on, must not be {@literal null}.
      * @return builder
      */
     public static AffordanceBuilder linkTo(Class<?> controller) {
@@ -63,11 +65,14 @@ public class AffordanceBuilder implements LinkBuilder {
 
     /**
      * Creates a new {@link AffordanceBuilder} with a base of the mapping annotated to the given controller class. The
-     * additional parameters are used to fill up potentially available path variables in the class scope request mapping.
+     * additional parameters are used to fill up potentially available path variables in the class scope request
+     * mapping.
      *
-     * @param controller the class to discover the annotation on, must not be {@literal null}.
-     * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
-     *                   {@literal null}.
+     * @param controller
+     *         the class to discover the annotation on, must not be {@literal null}.
+     * @param parameters
+     *         additional parameters to bind to the URI template declared in the annotation, must not be {@literal
+     *         null}.
      * @return builder
      */
     public static AffordanceBuilder linkTo(Class<?> controller, Object... parameters) {
@@ -94,7 +99,7 @@ public class AffordanceBuilder implements LinkBuilder {
      */
     AffordanceBuilder() {
         this(new PartialUriTemplate(getBuilder().build()
-                        .toString()).asComponents(),
+                        .toString()).expand(Collections.<String, Object>emptyMap()),
                 Collections.<ActionDescriptor>emptyList());
 
     }
@@ -102,10 +107,13 @@ public class AffordanceBuilder implements LinkBuilder {
     /**
      * Creates a new {@link AffordanceBuilder} using the given {@link ActionDescriptor}.
      *
-     * @param partialUriTemplateComponents must not be {@literal null}
-     * @param actionDescriptors            must not be {@literal null}
+     * @param partialUriTemplateComponents
+     *         must not be {@literal null}
+     * @param actionDescriptors
+     *         must not be {@literal null}
      */
-    public AffordanceBuilder(PartialUriTemplateComponents partialUriTemplateComponents, List<ActionDescriptor> actionDescriptors) {
+    public AffordanceBuilder(PartialUriTemplateComponents partialUriTemplateComponents, List<ActionDescriptor>
+            actionDescriptors) {
 
         Assert.notNull(partialUriTemplateComponents);
         Assert.notNull(actionDescriptors);
@@ -127,17 +135,33 @@ public class AffordanceBuilder implements LinkBuilder {
 
 
     /**
-     * Builds affordance with one or multiple rels which must have been defined previously using
-     * {@link #rel(String, String...)} or {@link #reverseRel(String, String...)}.
-     * <p>The motivation for multiple rels is this statement in the web linking rfc-5988:
-     * &quot;Note that link-values can convey multiple links between the same
-     * target and context IRIs; for example:</p>
+     * Builds affordance with one or multiple rels.
+     *
+     * @param rels
+     *         list of rels, must not be empty
+     * @return affordance
+     * @deprecated use {@link #rel(String)} together with {@link #build()} instead
+     */
+    public Affordance build(String... rels) {
+        Assert.notEmpty(rels);
+        for (String rel : rels) {
+            if (!this.rels.contains(rel)) {
+                this.rels.add(rel);
+            }
+        }
+        return this.build();
+    }
+
+    /**
+     * Builds affordance with one or multiple rels which must have been defined previously using {@link #rel(String)} or
+     * {@link #reverseRel(String, String)}. <p>The motivation for multiple rels is this statement in the web linking
+     * rfc-5988: &quot;Note that link-values can convey multiple links between the same target and context IRIs; for
+     * example:</p>
      * <pre>
      * Link: &lt;http://example.org/&gt;
      *       rel="start http://example.net/relation/other"
      * </pre>
-     * Here, the link to 'http://example.org/' has the registered relation
-     * type 'start' and the extension relation type
+     * Here, the link to 'http://example.org/' has the registered relation type 'start' and the extension relation type
      * 'http://example.net/relation/other'.&quot;
      *
      * @return affordance
@@ -145,7 +169,7 @@ public class AffordanceBuilder implements LinkBuilder {
      */
     public Affordance build() {
         Assert.state(!(rels.isEmpty() && reverseRels.isEmpty()),
-                "no rels or reverse rels found, call rel() or reverseRel() before building the affordance");
+                "no rels or reverse rels found, call rel() or rev() before building the affordance");
         final Affordance affordance;
         affordance = new Affordance(new PartialUriTemplate(this.toString()), actionDescriptors,
                 rels.toArray(new String[rels.size()]));
@@ -158,39 +182,87 @@ public class AffordanceBuilder implements LinkBuilder {
         for (String reverseRel : reverseRels) {
             affordance.addRev(reverseRel);
         }
-        //affordance.setActionDescriptors(actionDescriptors);
+        affordance.setCollectionHolder(collectionHolder);
         return affordance;
     }
 
     /**
-     * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988).
-     * <p>E.g. if you had a rel ex:parent which connects a child to its father,
-     * you could also use ex:parent on the father to point to the child
-     * by reverting the direction of ex:parent.
-     * This is mainly useful when you have no other way to express in your context that the direction
-     * of a relationship is reverted.
-     * </p>
+     * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988), where the resource that has
+     * the affordance will be considered the object in a subject-predicate-object statement. <p>E.g. if you had a rel
+     * <code>ex:parent</code> which connects a child to its father, you could also use ex:parent on the father to point
+     * to the child by reverting the direction of ex:parent. This is mainly useful when you have no other way to express
+     * in your context that the direction of a relationship is inverted. </p>
      *
-     * @param reverseRel            to be used as reverse relationship
-     * @param additionalReverseRels to be used as reverse relationship
+     * @param rev
+     *         to be used as reverse relationship
+     * @param revertedRel
+     *         to be used in contexts which have no notion of reverse relationships. E.g. for a reverse rel
+     *         <code>ex:parent</code> you can use a made-up rel name <code>ex:child</code> which will be used as rel
+     *         when rendering HAL.
      * @return builder
      */
-    public AffordanceBuilder reverseRel(String reverseRel, String... additionalReverseRels) {
-        this.reverseRels.add(reverseRel);
-        Collections.addAll(this.reverseRels, additionalReverseRels);
+    public AffordanceBuilder reverseRel(String rev, String revertedRel) {
+        this.rels.add(revertedRel);
+        this.reverseRels.add(rev);
+        return this;
+    }
+
+    /**
+     * Allows to define one or more reverse link relations (a "rev" in terms of rfc-5988) to collections in cases where
+     * the resource that has the affordance is not the object in a subject-predicate-object statement about each
+     * collection item. See {@link #rel(TypedResource, String)} for explanation.
+     *
+     * @param rev
+     *         to be used as reverse relationship
+     * @param revertedRel
+     *         to be used in contexts which have no notion of reverse relationships, e.g. HAL
+     * @param object
+     *         describing the object
+     * @return builder
+     */
+    public AffordanceBuilder reverseRel(String rev, String revertedRel, TypedResource object) {
+        this.collectionHolder = object;
+        this.rels.add(0, revertedRel);
+        this.reverseRels.add(rev);
         return this;
     }
 
     /**
      * Allows to define one or more link relations for the affordance.
      *
-     * @param rel            to be used as link relation
-     * @param additionalRels to be used as reverse property
+     * @param rel
+     *         to be used as link relation
      * @return builder
      */
-    public AffordanceBuilder rel(String rel, String... additionalRels) {
+    public AffordanceBuilder rel(String rel) {
         this.rels.add(rel);
-        Collections.addAll(this.rels, additionalRels);
+        return this;
+    }
+
+
+    /**
+     * Allows to define one or more link relations for affordances that point to collections in cases where the resource
+     * that has the affordance is not the subject in a subject-predicate-object statement about each collection item.
+     *
+     * E.g. a product might have a loose relationship to ordered items where it can be POSTed, but the ordered items do
+     * not belong to the product, but to an order. You can express that by saying:
+     * <pre>
+     * TypedResource order = new TypedResource("http://schema.org/Order"); // holds the ordered items
+     * Resource&lt;Product&gt; product = new Resource&lt;&gt;(); // has a loose relationship to ordered items
+     * product.add(linkTo(methodOn(OrderController.class).postOrderedItem()
+     *    .rel(order, "orderedItem")); // order has ordered items, not product has ordered items
+     * </pre>
+     * If the order doesn't exist yet, it cannot be identified. In that case you may pass null to express that
+     *
+     * @param rel
+     *         to be used as link relation
+     * @param subject
+     *         describing the subject
+     * @return builder
+     */
+    public AffordanceBuilder rel(TypedResource subject, String rel) {
+        this.collectionHolder = subject;
+        this.rels.add(rel);
         return this;
     }
 
@@ -208,8 +280,10 @@ public class AffordanceBuilder implements LinkBuilder {
     /**
      * Allows to define link header params (not UriTemplate variables).
      *
-     * @param name  of the link header param
-     * @param value of the link header param
+     * @param name
+     *         of the link header param
+     * @param value
+     *         of the link header param
      * @return builder
      */
     public AffordanceBuilder withLinkParam(String name, String value) {
@@ -261,7 +335,8 @@ public class AffordanceBuilder implements LinkBuilder {
             return this;
         }
 
-        final PartialUriTemplateComponents urlPartComponents = new PartialUriTemplate(urlPart).expand(Collections.<String, Object>emptyMap());
+        final PartialUriTemplateComponents urlPartComponents = new PartialUriTemplate(urlPart).expand(Collections
+                .<String, Object>emptyMap());
         final PartialUriTemplateComponents affordanceComponents = partialUriTemplateComponents;
 
         final String path = !affordanceComponents.getBaseUri()
@@ -282,8 +357,11 @@ public class AffordanceBuilder implements LinkBuilder {
                 urlPartComponents.getFragmentIdentifier() :
                 affordanceComponents.getFragmentIdentifier();
 
+        List<String> variableNames = new ArrayList<String>();
+        variableNames.addAll(affordanceComponents.getVariableNames());
+        variableNames.addAll(urlPartComponents.getVariableNames());
         final PartialUriTemplateComponents mergedUriComponents =
-                new PartialUriTemplateComponents(path, queryHead, queryTail, fragmentIdentifier);
+                new PartialUriTemplateComponents(path, queryHead, queryTail, fragmentIdentifier, variableNames);
 
         return new AffordanceBuilder(mergedUriComponents, actionDescriptors);
 
@@ -300,8 +378,12 @@ public class AffordanceBuilder implements LinkBuilder {
 
     @Override
     public URI toUri() {
-        final String actionLink = partialUriTemplateComponents.toString();
-        if (partialUriTemplateComponents.hasVariables()) {
+        PartialUriTemplate partialUriTemplate = new PartialUriTemplate(partialUriTemplateComponents.toString());
+
+        final String actionLink = partialUriTemplate.stripOptionalVariables(actionDescriptors)
+                .toString();
+
+        if (actionLink == null || actionLink.contains("{")) {
             throw new IllegalStateException("cannot convert template to URI");
         }
         return UriComponentsBuilder.fromUriString(actionLink)
@@ -311,12 +393,12 @@ public class AffordanceBuilder implements LinkBuilder {
 
     @Override
     public Affordance withRel(String rel) {
-        return rel(rel).build();
+        return build(rel);
     }
 
     @Override
     public Affordance withSelfRel() {
-        return rel(Link.REL_SELF).build();
+        return build(Link.REL_SELF);
     }
 
     @Override
@@ -325,8 +407,8 @@ public class AffordanceBuilder implements LinkBuilder {
     }
 
     /**
-     * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
-     * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
+     * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case
+     * the request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
      * {@code X-Forwarded-Ssl} header
      *
      * @return builder
@@ -375,7 +457,7 @@ public class AffordanceBuilder implements LinkBuilder {
     /**
      * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
      *
-     * @return current request
+     * @return request
      */
     private static HttpServletRequest getCurrentRequest() {
 
@@ -387,6 +469,13 @@ public class AffordanceBuilder implements LinkBuilder {
         return servletRequest;
     }
 
+    /**
+     * Adds actionDescriptors of the given AffordanceBuilder to this affordanceBuilder.
+     *
+     * @param affordanceBuilder
+     *         whose action descriptors should be added to this one
+     * @return builder
+     */
     public AffordanceBuilder and(AffordanceBuilder affordanceBuilder) {
         for (ActionDescriptor actionDescriptor : affordanceBuilder.actionDescriptors) {
             this.actionDescriptors.add(actionDescriptor);

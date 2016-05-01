@@ -1,20 +1,20 @@
 /*
  * Copyright (c) 2015. Escalon System-Entwicklung, Dietrich Schulten
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+ * the specific language governing permissions and limitations under the License.
  */
 
 package de.escalon.hypermedia.spring.uber;
 
 import de.escalon.hypermedia.affordance.*;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.*;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,8 +38,10 @@ public class UberUtils {
     /**
      * Recursively converts object to nodes of uber data.
      *
-     * @param objectNode to append to
-     * @param object     to convert
+     * @param objectNode
+     *         to append to
+     * @param object
+     *         to convert
      */
     public static void toUberData(AbstractUberNode objectNode, Object object) {
         Set<String> filtered = FILTER_RESOURCE_SUPPORT;
@@ -99,7 +101,8 @@ public class UberUtils {
                     }
                 }
             } else {
-                PropertyDescriptor[] propertyDescriptors = getPropertyDescriptors(object);// BeanUtils.getPropertyDescriptors(bean.getClass());
+                PropertyDescriptor[] propertyDescriptors = getPropertyDescriptors(object);// BeanUtils
+                // .getPropertyDescriptors(bean.getClass());
                 for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
                     String name = propertyDescriptor.getName();
                     if (filtered.contains(name)) {
@@ -124,7 +127,6 @@ public class UberUtils {
         } catch (Exception ex) {
             throw new RuntimeException("failed to transform object " + object, ex);
         }
-
     }
 
     private static PropertyDescriptor[] getPropertyDescriptors(Object bean) {
@@ -152,8 +154,12 @@ public class UberUtils {
     /**
      * Converts single link to uber node.
      *
-     * @param href             to use
-     * @param actionDescriptor to use for action and model, never null
+     * @param href
+     *         to use
+     * @param actionDescriptor
+     *         to use for action and model, never null
+     * @param rels
+     *         of the link
      * @return uber link
      */
     public static UberNode toUberLink(String href, ActionDescriptor actionDescriptor, String... rels) {
@@ -163,23 +169,22 @@ public class UberUtils {
     /**
      * Converts single link to uber node.
      *
-     * @param href             to use
-     * @param actionDescriptor to use for action and model, never null
+     * @param href
+     *         to use
+     * @param actionDescriptor
+     *         to use for action and model, never null
+     * @param rels
+     *         of the link
      * @return uber link
      */
     public static UberNode toUberLink(String href, ActionDescriptor actionDescriptor, List<String> rels) {
         Assert.notNull(actionDescriptor, "actionDescriptor must not be null");
         UberNode uberLink = new UberNode();
         uberLink.setRel(rels);
-        PartialUriTemplate partialUriTemplate = new PartialUriTemplate(href);
-        PartialUriTemplateComponents partialUriTemplateComponents = partialUriTemplate.asComponents();
+        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplate(href).expand(Collections
+                .<String, Object>emptyMap());
         uberLink.setUrl(partialUriTemplateComponents.getBaseUri());
-
-        uberLink.setModel(getModelProperty(partialUriTemplate, actionDescriptor));
-        if (partialUriTemplateComponents.hasVariables()) {
-            uberLink.setTemplated(true);
-        }
-        // TODO set transclude based on ResourceHandler#transclude
+        uberLink.setModel(getModelProperty(href, actionDescriptor));
         if (actionDescriptor != null) {
             RequestMethod requestMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
             uberLink.setAction(UberAction.forRequestMethod(requestMethod));
@@ -187,17 +192,17 @@ public class UberUtils {
         return uberLink;
     }
 
-    private static String getModelProperty(PartialUriTemplate uriTemplate, ActionDescriptor actionDescriptor) {
-//        Collection<String> requestParamNames = actionDescriptor.getRequestParamNames();
-//        if (actionDescriptor.hasRequestBody()) {
-//            AnnotatedParameter requestBody = actionDescriptor.getRequestBody();
-//            // TODO recursively build model for request body
-//            // what to do with property paths - the name for model SHOULD come from UberData name
-//        }
+    private static String getModelProperty(String href, ActionDescriptor actionDescriptor) {
 
+        PartialUriTemplate uriTemplate = new PartialUriTemplate(href);
         RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
         final String model;
         switch (httpMethod) {
+            case GET:
+            case DELETE: {
+                model = buildModel(uriTemplate.getVariableNames(), "{?", ",", "}", "%s");
+                break;
+            }
             case POST:
             case PUT:
             case PATCH: {
@@ -215,7 +220,7 @@ public class UberUtils {
         if (link instanceof Affordance) {
             actionDescriptors = ((Affordance) link).getActionDescriptors();
         } else {
-            actionDescriptors = Arrays.asList(new ActionDescriptor("get", RequestMethod.GET.name()));
+            actionDescriptors = Arrays.asList((ActionDescriptor)new ActionDescriptorImpl("get", RequestMethod.GET.name()));
         }
         return actionDescriptors;
     }
@@ -231,7 +236,8 @@ public class UberUtils {
     }
 
     private static String getUrlProperty(Link link) {
-        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplate(link.getHref()).expand(Collections.<String, Object>emptyMap());
+        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplate(link.getHref()).expand
+                (Collections.<String, Object>emptyMap());
         return partialUriTemplateComponents.getBaseUri();
 //		return UriComponentsBuilder.fromUriString(baseUri).build().normalize().toString();
     }

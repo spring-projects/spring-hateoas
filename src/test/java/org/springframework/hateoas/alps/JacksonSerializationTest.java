@@ -23,6 +23,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -34,69 +38,82 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Unit tests for serialization of ALPS documents.
- * 
+ *
  * @author Oliver Gierke
  */
 public class JacksonSerializationTest {
 
-	ObjectMapper mapper;
+    ObjectWriter writer;
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
 
-		mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(Include.NON_NULL);
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-	}
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        PrettyPrinter prettyPrinter = new DefaultPrettyPrinter()
+                .withObjectIndenter(new DefaultIndenter().withLinefeed("\n"));
+        writer = mapper.writer(prettyPrinter);
+    }
 
-	/**
-	 * @see #141
-	 */
-	@Test
-	public void writesSampleDocument() throws Exception {
+    /**
+     * @see #141
+     */
+    @Test
+    public void writesSampleDocument() throws Exception {
 
-		Alps alps = alps().//
-				doc(doc().href("http://example.org/samples/full/doc.html").build()). //
-				descriptors(Arrays.asList(//
-						descriptor().id("search").type(Type.SAFE).//
-								doc(new Doc("A search form with two inputs.", Format.TEXT)).//
-								descriptors(Arrays.asList( //
-										descriptor().href("#resultType").build(), //
-										descriptor().id("value").name("search").type(Type.SEMANTIC).build())//
-								).build(), //
-						descriptor().id("resultType").type(Type.SEMANTIC).//
-								doc(doc().value("results format").build()).//
-								ext(ext().href("http://alps.io/ext/range").value("summary,detail").build()//
-								).build())//
-				).build();
+        Alps alps = alps().//
+                doc(doc().href("http://example.org/samples/full/doc.html")
+                .build()). //
+                descriptors(Arrays.asList(//
+                descriptor().id("search")
+                        .type(Type.SAFE).//
+                        doc(new Doc("A search form with two inputs.", Format.TEXT)).//
+                        descriptors(Arrays.asList( //
+                        descriptor().href("#resultType")
+                                .build(), //
+                        descriptor().id("value")
+                                .name("search")
+                                .type(Type.SEMANTIC)
+                                .build())//
+                ).build(), //
+                descriptor().id("resultType")
+                        .type(Type.SEMANTIC).//
+                        doc(doc().value("results format")
+                        .build()).//
+                        ext(ext().href("http://alps.io/ext/range")
+                        .value("summary,detail")
+                        .build()//
+                ).build())//
+        ).build();
 
-		assertThat(mapper.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
-	}
+        assertThat(writer.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
+    }
 
-	private static String read(Resource resource) throws IOException {
+    private static String read(Resource resource) throws IOException {
 
-		Scanner scanner = null;
+        Scanner scanner = null;
 
-		try {
+        try {
 
-			scanner = new Scanner(resource.getInputStream());
-			StringBuilder builder = new StringBuilder();
+            scanner = new Scanner(resource.getInputStream());
+            StringBuilder builder = new StringBuilder();
 
-			while (scanner.hasNextLine()) {
+            while (scanner.hasNextLine()) {
 
-				builder.append(scanner.nextLine());
+                builder.append(scanner.nextLine());
 
-				if (scanner.hasNextLine()) {
-					builder.append("\n");
-				}
-			}
+                if (scanner.hasNextLine()) {
+                    builder.append("\n");
+                }
+            }
 
-			return builder.toString();
+            return builder.toString();
 
-		} finally {
-			if (scanner != null) {
-				scanner.close();
-			}
-		}
-	}
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+        }
+    }
 }

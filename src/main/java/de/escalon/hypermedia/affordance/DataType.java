@@ -122,6 +122,23 @@ public class DataType {
         return Currency.class.isAssignableFrom(clazz);
     }
 
+    public static Object asScalarValue(Object bean) {
+        Class<?> type = bean.getClass();
+        if (isBigInteger(type)) {
+            return ((BigInteger) bean).intValue();
+        } else if (isBigDecimal(type)) {
+            return ((BigDecimal) bean).doubleValue();
+        } else if (isCalendar(type)) {
+            return ((Calendar) bean).getTime();
+        } else if (isDate(type)) {
+            return ((Date) bean).getTime();
+        } else if (isCurrency(type)) {
+            return ((Currency) bean).toString();
+        } else {
+            return bean;
+        }
+    }
+
     public static Object asType(Class<?> type, String string) {
         if (isBoolean(type)) {
             return Boolean.parseBoolean(string);

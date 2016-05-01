@@ -94,12 +94,12 @@ public class DataTypeTest {
 
     @Test
     public void testAsTypeCurrency() {
-        assertEquals(Currency.getInstance("EUR"),DataType.asType(Currency.class, "EUR"));
+        assertEquals(Currency.getInstance("EUR"), DataType.asType(Currency.class, "EUR"));
     }
 
     @Test
     public void testAsTypeString() {
-        assertEquals("foo",DataType.asType(String.class, "foo"));
+        assertEquals("foo", DataType.asType(String.class, "foo"));
     }
 
     @Test
@@ -114,27 +114,27 @@ public class DataTypeTest {
 
     @Test
     public void testAsTypeDateLong() {
-        Date type = (Date)DataType.asType(Date.class, "1431762464134");
+        Date type = (Date) DataType.asType(Date.class, "1431762464134");
         assertEquals(1431762464134L, type.getTime());
     }
 
     @Test
     public void testAsTypeDateBoolean() {
-        assertTrue((Boolean)DataType.asType(Boolean.class, "true"));
-        assertTrue((Boolean)DataType.asType(Boolean.class, "TRUE"));
-        assertTrue((Boolean)DataType.asType(Boolean.class, "True"));
+        assertTrue((Boolean) DataType.asType(Boolean.class, "true"));
+        assertTrue((Boolean) DataType.asType(Boolean.class, "TRUE"));
+        assertTrue((Boolean) DataType.asType(Boolean.class, "True"));
 
-        assertFalse((Boolean)DataType.asType(Boolean.class, "false"));
-        assertFalse((Boolean)DataType.asType(Boolean.class, "FALSE"));
-        assertFalse((Boolean)DataType.asType(Boolean.class, "False"));
-        assertFalse((Boolean)DataType.asType(Boolean.class, "yes"));
-        assertFalse((Boolean)DataType.asType(Boolean.class, "foo"));
+        assertFalse((Boolean) DataType.asType(Boolean.class, "false"));
+        assertFalse((Boolean) DataType.asType(Boolean.class, "FALSE"));
+        assertFalse((Boolean) DataType.asType(Boolean.class, "False"));
+        assertFalse((Boolean) DataType.asType(Boolean.class, "yes"));
+        assertFalse((Boolean) DataType.asType(Boolean.class, "foo"));
         assertFalse((Boolean) DataType.asType(Boolean.class, null));
     }
 
     @Test
     public void testAsTypeDateISO8601() {
-        Date type = (Date)DataType.asType(Date.class, "2015-05-16T07:47:44Z");
+        Date type = (Date) DataType.asType(Date.class, "2015-05-16T07:47:44Z");
         assertEquals(1431762464000L, type.getTime());
     }
 

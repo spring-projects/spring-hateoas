@@ -28,9 +28,6 @@ public class StringOptions implements Options {
 	 *     ...
 	 * }
 	 * </pre>
-	 *
-	 * @param value possible values
-	 * @param args ignored by StringOptions, see {@link Options#get} for intended usage by other implementations
 	 */
 	@Override
 	public Object[] get(String[] value, Object... args) {

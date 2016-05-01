@@ -15,8 +15,10 @@ package de.escalon.hypermedia.spring.xhtml;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.PropertyUtils;
+import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
+import de.escalon.hypermedia.spring.DocumentationProvider;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
@@ -45,11 +47,12 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * Message converter which represents a restful API as xhtml which can be used by the browser or a rest client. Converts
- * java beans and spring-hateoas Resources to xhtml and maps the body of x-www-form-urlencoded requests to RequestBody
- * method parameters. The media-type xhtml does not officially support methods other than GET or POST, therefore we must
- * &quot;tunnel&quot; other methods when this converter is used with the browser. Spring's {@link
- * org.springframework.web.filter.HiddenHttpMethodFilter} allows to do that with relative ease.
+ * Message converter which represents a restful API as xhtml which can be used by the browser or a rest client.
+ * Converts java beans and spring-hateoas Resources to xhtml and maps the body of x-www-form-urlencoded
+ * requests to RequestBody method parameters.
+ * The media-type xhtml does not officially support methods other than GET or POST, therefore we must &quot;tunnel&quot;
+ * other methods when this converter is used with the browser.
+ * Spring's {@link org.springframework.web.filter.HiddenHttpMethodFilter} allows to do that with relative ease.
  *
  * @author Dietrich Schulten
  */
@@ -72,7 +75,7 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
         return true;
     }
 
-    public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws
+    public Object read(java.lang.reflect.Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws
             IOException, HttpMessageNotReadableException {
 
         final Class clazz;
@@ -120,9 +123,11 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
     }
 
     /**
-     * From {@link ServletServerHttpRequest}: Use {@link javax.servlet.ServletRequest#getParameterMap()} to reconstruct
-     * the body of a form 'POST' providing a predictable outcome as opposed to reading from the body, which can fail if
-     * any other code has used ServletRequest to access a parameter thus causing the input stream to be "consumed".
+     * From {@link ServletServerHttpRequest}:
+     * Use {@link javax.servlet.ServletRequest#getParameterMap()} to reconstruct the
+     * body of a form 'POST' providing a predictable outcome as opposed to reading
+     * from the body, which can fail if any other code has used ServletRequest
+     * to access a parameter thus causing the input stream to be "consumed".
      */
     private InputStream getBodyFromServletRequestParameters(HttpServletRequest request, String charset) throws
             IOException {
@@ -176,13 +181,12 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
             }
         }
 
-        return recursivelyCreateObject(new ArrayDeque<String>(), clazz, formValues);
+        return recursivelyCreateObject(clazz, formValues);
 
 
     }
 
-    Object recursivelyCreateObject(Deque<String> propertyPath, Class<?> clazz, MultiValueMap<String, String>
-            formValues) {
+    Object recursivelyCreateObject(Class<?> clazz, MultiValueMap<String, String> formValues) {
 
         if (Map.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException("Map not supported");
@@ -207,12 +211,9 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                             if (JsonProperty.class == annotation.annotationType()) {
                                 JsonProperty jsonProperty = (JsonProperty) annotation;
                                 String paramName = jsonProperty.value();
-
+                                List<String> formValue = formValues.get(paramName);
                                 Class<?> parameterType = parameters[paramIndex];
                                 if (DataType.isSingleValueType(parameterType)) {
-                                    String pathPrefix = propertyPath.isEmpty() ? "" :
-                                            StringUtils.collectionToDelimitedString(propertyPath, ".") + ".";
-                                    List<String> formValue = formValues.get(pathPrefix + paramName);
                                     if (formValue != null) {
                                         if (formValue.size() == 1) {
                                             args[paramIndex++] = DataType.asType(parameterType, formValue.get(0));
@@ -229,10 +230,7 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                                         args[paramIndex++] = null;
                                     }
                                 } else {
-                                    propertyPath.add(paramName);
-                                    args[paramIndex++] = recursivelyCreateObject(propertyPath, parameterType,
-                                            formValues);
-                                    propertyPath.removeLast();
+                                    args[paramIndex++] = recursivelyCreateObject(parameterType, formValues);
                                 }
                             }
                         }
@@ -245,14 +243,11 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
                 for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
                     Method writeMethod = propertyDescriptor.getWriteMethod();
-                    if (writeMethod != null) {
-                        String name = propertyDescriptor.getName();
-                        List<String> formValue = formValues.get(name);
-                        if (formValue != null && formValue.size() == 1) {
-                            writeMethod.invoke(ret, DataType.asType(propertyDescriptor.getPropertyType(),
-                                    formValue.get(0)));
-                        }
-                        // TODO list formvalue, consume ctor args
+                    String name = propertyDescriptor.getName();
+                    List<String> strings = formValues.get(name);
+                    if (writeMethod != null && strings != null && strings.size() == 1) {
+                        writeMethod.invoke(ret, DataType.asType(propertyDescriptor.getPropertyType(), strings.get(0))
+                        ); // TODO lists, consume values from ctor
                     }
                 }
                 return ret;
@@ -289,13 +284,13 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
     protected void writeInternal(Object t, HttpOutputMessage outputMessage) throws IOException,
             HttpMessageNotWritableException {
 
-        XhtmlWriter xhtmlWriter = new XhtmlWriter(new OutputStreamWriter(outputMessage.getBody()));
+        XhtmlWriter xhtmlWriter = new XhtmlWriter(new OutputStreamWriter(outputMessage.getBody(), "UTF-8"));
         xhtmlWriter.setMethodParam(methodParam);
         xhtmlWriter.setStylesheets(stylesheets);
         xhtmlWriter.setDocumentationProvider(documentationProvider);
 
 
-        xhtmlWriter.beginHtml("Input Data");
+        xhtmlWriter.beginHtml("Form");
         writeNewResource(xhtmlWriter, t);
         xhtmlWriter.endHtml();
         xhtmlWriter.flush();
@@ -310,14 +305,11 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
         writeResource(writer, object);
         writer.endUnorderedList();
     }
-
     /**
      * Recursively converts object to xhtml data.
      *
-     * @param object
-     *         to convert
-     * @param writer
-     *         to write to
+     * @param object to convert
+     * @param writer to write to
      */
     private void writeResource(XhtmlWriter writer, Object object) {
         if (object == null) {
@@ -368,6 +360,16 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
 
     }
 
+    private void beginListGroupWithItem(XhtmlWriter writer) throws IOException {
+        writer.beginUnorderedList();
+        writer.beginListItem();
+    }
+
+    private void endListGroupWithItem(XhtmlWriter writer) throws IOException {
+        writer.endListItem();
+        writer.endUnorderedList();
+    }
+
     private void writeObject(XhtmlWriter writer, Object object) throws IOException, IllegalAccessException,
             InvocationTargetException {
         if (!DataType.isSingleValueType(object.getClass())) {
@@ -383,9 +385,14 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 writeObjectAttributeRecursively(writer, name, content, docUrl);
             }
         } else if (object instanceof Enum) {
+            String name = ((Enum) object).name();
+            String docUrl = documentationProvider.getDocumentationUrl(name, object);
             writeDdForScalarValue(writer, object);
         } else if (object instanceof Currency) {
             // TODO configurable classes which should be rendered with toString
+            // or use JsonSerializer or DataType?
+            String name = object.toString();
+            String docUrl = documentationProvider.getDocumentationUrl(name, object);
             writeDdForScalarValue(writer, object);
         } else {
             Class<?> aClass = object.getClass();
@@ -397,6 +404,7 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
                 if (!propertyDescriptors.containsKey(name)) {
                     Object content = field.get(object);
                     String docUrl = documentationProvider.getDocumentationUrl(field, content);
+                    //<a href="http://schema.org/review">http://schema.org/performer</a>
                     writeObjectAttributeRecursively(writer, name, content, docUrl);
                 }
             }
@@ -418,11 +426,12 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
         }
     }
 
-    private void writeObjectAttributeRecursively(XhtmlWriter writer, String name, Object content, String
-            documentationUrl)
+    private void writeObjectAttributeRecursively(XhtmlWriter writer, String name, Object content, String documentationUrl)
             throws IOException {
-        writeDtWithDoc(writer, name, documentationUrl);
         Object value = getContentAsScalarValue(content);
+        if (!contentIsEmpty(content)) {
+            writeDtWithDoc(writer, name, documentationUrl);
+        }
         if (value != null) {
             if (value != NULL_VALUE) {
                 writeDdForScalarValue(writer, value);
@@ -434,6 +443,24 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
             writeNewResource(writer, content);
             writer.endDd();
         }
+    }
+
+    private boolean contentIsEmpty(Object content) {
+        final boolean ret;
+        if(content != null) {
+            if (content instanceof Collection) {
+                ret = ((Collection) content).isEmpty();
+            } else if (content instanceof Map) {
+                ret = ((Map) content).isEmpty();
+            } else if (content instanceof String) {
+                ret = ((String) content).isEmpty();
+            } else {
+                ret = false;
+            }
+        } else {
+            ret = true;
+        }
+        return ret;
     }
 
     private void writeDtWithDoc(XhtmlWriter writer, String name, String documentationUrl) throws IOException {
@@ -459,15 +486,14 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
 
 
     @Override
-    public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+    public boolean canRead(java.lang.reflect.Type type, Class<?> contextClass, MediaType mediaType) {
         return MediaType.APPLICATION_FORM_URLENCODED == mediaType;
     }
 
     /**
      * Sets method param name for HTML PUT/DELETE/PATCH workaround.
      *
-     * @param methodParam
-     *         to use
+     * @param methodParam to use
      * @see org.springframework.web.filter.HiddenHttpMethodFilter
      */
     public void setMethodParam(String methodParam) {
@@ -477,9 +503,8 @@ public class XhtmlResourceMessageConverter extends AbstractHttpMessageConverter<
     /**
      * Sets css stylesheets to apply to the form.
      *
-     * @param stylesheets
-     *         urls of css stylesheets to include, e.g. &quot;https://maxcdn.bootstrapcdn.com/bootstrap/3.3
-     *         .4/css/bootstrap.min.css&quot;
+     * @param stylesheets urls of css stylesheets to include,
+     *                    e.g. &quot;https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css&quot;
      */
     public void setStylesheets(List<String> stylesheets) {
         Assert.notNull(stylesheets);

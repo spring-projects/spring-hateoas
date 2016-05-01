@@ -19,10 +19,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies possible values for an argument on a controller method. Uses {@link StringOptions} by default, but custom
- * implementations can be configured as well.
- *
- * @see Options#get
+ * Specifies possible values for an argument on a controller method.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

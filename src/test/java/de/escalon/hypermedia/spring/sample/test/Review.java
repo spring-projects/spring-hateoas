@@ -42,7 +42,7 @@ public class Review {
         return reviewRating;
     }
 
-    public void setReviewRating(Rating rating) {
-        this.reviewRating = rating;
+    public void setReviewRating(Rating reviewRating) {
+        this.reviewRating = reviewRating;
     }
 }

@@ -16,8 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Allows to assign a semantic type such as a hydra Operation or an
- * <a href="http://schema.org/Action">http://schema.org/Action</a>
+ * Allows to assign a semantic type such as a hydra Operation or an http://schema.org/Action
  * subtype to a method.
  * Created by dschulten on 03.10.2014.
  */
@@ -26,7 +25,7 @@ import java.lang.annotation.Target;
 public @interface Action {
 
     /**
-     * The semantic type of the action.
+     * The type of the action.
      *
      * @return action type
      */

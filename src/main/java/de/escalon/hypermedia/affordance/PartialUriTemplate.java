@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public class PartialUriTemplate {
 
-    private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,]+)(:??.*?)\\}");
+    private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,\\.]+)(:??.*?)\\}");
 
     private final List<String> urlComponents = new ArrayList<String>();
 
@@ -86,7 +86,7 @@ public class PartialUriTemplate {
             // collect variablesInPart and track for each part which variables it contains
             // group(1) is the variable head without the leading {
             TemplateVariable.VariableType type = TemplateVariable.VariableType.from(matcher.group(1));
-            // group(2) is the
+            // group(2) are the variable names
             String[] names = matcher.group(2)
                     .split(",");
             List<Integer> variablesInPart = new ArrayList<Integer>();
@@ -113,7 +113,7 @@ public class PartialUriTemplate {
 
     /**
      * Returns the template as uri components, without variable expansion.
-     * @return components
+     * @return components of the Uri
      */
     public PartialUriTemplateComponents asComponents() {
         return getUriTemplateComponents(Collections.<String, Object>emptyMap(), Collections.<String>emptyList());
@@ -233,7 +233,7 @@ public class PartialUriTemplate {
 
 
         return new PartialUriTemplateComponents(baseUrl.toString(), queryHead.toString(), queryTail.toString(),
-                fragmentIdentifier.toString());
+                fragmentIdentifier.toString(), variableNames);
     }
 
     private String urlEncode(String s) {
@@ -258,7 +258,7 @@ public class PartialUriTemplate {
     private List<String> getRequiredArgNames(List<ActionDescriptor> actionDescriptors) {
         List<String> ret = new ArrayList<String>();
         for (ActionDescriptor actionDescriptor : actionDescriptors) {
-            Map<String, AnnotatedParameter> required = actionDescriptor.getRequiredParameters();
+            Map<String, ActionInputParameter> required = actionDescriptor.getRequiredParameters();
             ret.addAll(required.keySet());
         }
         return ret;

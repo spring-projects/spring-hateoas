@@ -13,7 +13,6 @@ package de.escalon.hypermedia.spring;
 import org.springframework.http.MediaType;
 
 /**
- * Pre-instantiated hypermedia types.
  * Created by dschulten on 12.11.2014.
  */
 public final class HypermediaTypes {
@@ -24,9 +23,7 @@ public final class HypermediaTypes {
 
     public static final String APPLICATION_JSONLD_STR = "application/ld+json";
     public static final MediaType APPLICATION_JSONLD = MediaType.parseMediaType(APPLICATION_JSONLD_STR);
-    public static final String UBER_XML_STR="application/vnd.uber+xml";
-    public static final MediaType UBER_XML = MediaType.parseMediaType(UBER_XML_STR);
-    public static final String UBER_JSON_STR="application/vnd.uber+json";
-    public static final MediaType UBER_JSON = MediaType.parseMediaType(UBER_JSON_STR);
+    public static final MediaType UBER_XML = MediaType.parseMediaType("application/vnd.uber+xml");
+    public static final MediaType UBER_JSON = MediaType.parseMediaType("application/vnd.uber+json");
 
 }

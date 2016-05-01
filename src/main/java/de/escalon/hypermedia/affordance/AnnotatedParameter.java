@@ -39,10 +39,39 @@ public interface AnnotatedParameter {
 
     boolean isExcluded(String property);
 
+    /**
+     * Gets possible values for this parameter.
+     *
+     * @param annotatedParameters
+     *         in case that access to the other parameters is necessary to determine the possible values.
+     * @return possible values
+     */
     Object[] getPossibleValues(AnnotatedParameters annotatedParameters);
 
+    /**
+     * Gets possible values for a method parameter.
+     *
+     * @param annotatedParameters
+     *         in case that access to the other parameters is necessary to determine the possible values.
+     * @param method
+     *         having parameter
+     * @param parameterIndex
+     *         of parameter
+     * @return possible values
+     */
     Object[] getPossibleValues(Method method, int parameterIndex, AnnotatedParameters annotatedParameters);
 
+    /**
+     * Gets possible values for a constructor parameter.
+     *
+     * @param annotatedParameters
+     *         in case that access to the other parameters is necessary to determine the possible values.
+     * @param constructor
+     *         having parameter
+     * @param parameterIndex
+     *         of parameter
+     * @return possible values
+     */
     Object[] getPossibleValues(Constructor constructor, int parameterIndex, AnnotatedParameters annotatedParameters);
 
     boolean isArrayOrCollection();
@@ -56,6 +85,7 @@ public interface AnnotatedParameter {
     boolean hasCallValue();
 
     String getParameterName();
+
     Class<?> getDeclaringClass();
 
     Class<?> getParameterType();
