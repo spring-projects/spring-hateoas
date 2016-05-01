@@ -11,7 +11,7 @@
  * the specific language governing permissions and limitations under the License.
  */
 
-package de.escalon.hypermedia.affordance;
+package de.escalon.hypermedia.spring;
 
 import java.beans.PropertyDescriptor;
 import java.util.Collection;
@@ -21,6 +21,8 @@ import java.util.Map;
 
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
+import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -38,7 +40,7 @@ import org.springframework.util.Assert;
  *
  * @author Dietrich Schulten
  */
-public class ActionDescriptorImpl implements ActionDescriptor {
+public class SpringActionDescriptor implements ActionDescriptor {
 
 	private String httpMethod;
 	private String actionName;
@@ -59,7 +61,7 @@ public class ActionDescriptorImpl implements ActionDescriptor {
 	 * e.g. to identify the action using a form name.
 	 * @param httpMethod used during submit
 	 */
-	public ActionDescriptorImpl(String actionName, String httpMethod) {
+	public SpringActionDescriptor(String actionName, String httpMethod) {
 		Assert.notNull(actionName);
 		Assert.notNull(httpMethod);
 		this.httpMethod = httpMethod;

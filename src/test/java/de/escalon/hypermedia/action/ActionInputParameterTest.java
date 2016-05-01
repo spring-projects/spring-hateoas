@@ -1,6 +1,6 @@
 package de.escalon.hypermedia.action;
 
-import de.escalon.hypermedia.affordance.ActionDescriptorImpl;
+import de.escalon.hypermedia.spring.SpringActionDescriptor;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -76,7 +76,7 @@ public class ActionInputParameterTest {
 
         assertEquals("reviewBody", actionInputParameter.getParameterName());
         assertEquals(String.class, actionInputParameter.getParameterType());
-        assertEquals(0, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("post",
+        assertEquals(0, actionInputParameter.getPossibleValues(new SpringActionDescriptor("post",
                 RequestMethod.POST.name())).length);
         assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
         assertNull(actionInputParameter.getRequestHeaderName());
@@ -108,7 +108,7 @@ public class ActionInputParameterTest {
 
         assertEquals("rating", actionInputParameter.getParameterName());
         assertEquals(String.class, actionInputParameter.getParameterType());
-        assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("post",
+        assertEquals(3, actionInputParameter.getPossibleValues(new SpringActionDescriptor("post",
                 RequestMethod.POST.name())).length);
         assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
 
@@ -143,7 +143,7 @@ public class ActionInputParameterTest {
         assertEquals(
                 new ParameterizedTypeReference<List<String>>() {
                 }.getType(), actionInputParameter.getGenericParameterType());
-        assertEquals(3, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("post",
+        assertEquals(3, actionInputParameter.getPossibleValues(new SpringActionDescriptor("post",
                 RequestMethod.POST.name())).length);
         assertNull(actionInputParameter.getHtmlInputFieldType());
 
@@ -187,7 +187,7 @@ public class ActionInputParameterTest {
         assertEquals("shade", actionInputParameter.getParameterName());
         assertEquals(ShadeOfBlue.class, actionInputParameter.getParameterType());
         assertEquals(ShadeOfBlue.class, actionInputParameter.getGenericParameterType());
-        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("get",
+        assertEquals(4, actionInputParameter.getPossibleValues(new SpringActionDescriptor("get",
                 RequestMethod.GET.name())).length);
         assertEquals(Type.TEXT, actionInputParameter.getHtmlInputFieldType());
 
@@ -228,7 +228,7 @@ public class ActionInputParameterTest {
         assertEquals("shade", actionInputParameter.getParameterName());
         assertEquals(ShadeOfBlue[].class, actionInputParameter.getParameterType());
         assertEquals(ShadeOfBlue[].class, actionInputParameter.getGenericParameterType());
-        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("get",
+        assertEquals(4, actionInputParameter.getPossibleValues(new SpringActionDescriptor("get",
                 RequestMethod.GET.name())).length);
         assertNull(actionInputParameter.getHtmlInputFieldType());
 
@@ -271,7 +271,7 @@ public class ActionInputParameterTest {
         assertEquals(
                 new ParameterizedTypeReference<List<ShadeOfBlue>>() {
                 }.getType(), actionInputParameter.getGenericParameterType());
-        assertEquals(4, actionInputParameter.getPossibleValues(new ActionDescriptorImpl("get",
+        assertEquals(4, actionInputParameter.getPossibleValues(new SpringActionDescriptor("get",
                 RequestMethod.GET.name())).length);
         assertNull(actionInputParameter.getHtmlInputFieldType());
 

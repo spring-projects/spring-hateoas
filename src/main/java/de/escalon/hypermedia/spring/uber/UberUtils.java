@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import de.escalon.hypermedia.affordance.*;
+import de.escalon.hypermedia.spring.SpringActionDescriptor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
@@ -214,7 +215,7 @@ public class UberUtils {
 		if (link instanceof Affordance) {
 			actionDescriptors = ((Affordance) link).getActionDescriptors();
 		} else {
-			actionDescriptors = Arrays.asList((ActionDescriptor) new ActionDescriptorImpl("get", RequestMethod.GET.name()));
+			actionDescriptors = Arrays.asList((ActionDescriptor) new SpringActionDescriptor("get", RequestMethod.GET.name()));
 		}
 		return actionDescriptors;
 	}

@@ -18,7 +18,6 @@ import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
 import de.escalon.hypermedia.action.ResourceHandler;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.affordance.ActionDescriptorImpl;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.PartialUriTemplate;
 import org.springframework.core.MethodParameter;
@@ -177,8 +176,8 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		RequestMethod httpMethod = getHttpMethod(invokedMethod);
 		Type genericReturnType = invokedMethod.getGenericReturnType();
 
-		ActionDescriptorImpl actionDescriptor =
-				new ActionDescriptorImpl(invokedMethod.getName(), httpMethod.name());
+		SpringActionDescriptor actionDescriptor =
+				new SpringActionDescriptor(invokedMethod.getName(), httpMethod.name());
 
 		actionDescriptor.setCardinality(getCardinality(invokedMethod, httpMethod, genericReturnType));
 
