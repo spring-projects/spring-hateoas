@@ -10,12 +10,12 @@
 
 package de.escalon.hypermedia.spring.uber;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.NonTypedScalarSerializerBase;
-
-import java.io.IOException;
 
 public class NullValueSerializer extends NonTypedScalarSerializerBase<UberNode.NullValue> {
 
@@ -28,5 +28,4 @@ public class NullValueSerializer extends NonTypedScalarSerializerBase<UberNode.N
 			JsonGenerationException {
 		jgen.writeNull();
 	}
-
 }

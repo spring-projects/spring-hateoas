@@ -7,17 +7,18 @@ import java.util.Map;
  * Created by Dietrich on 22.04.2016.
  */
 public interface SirenEntityContainer {
-    List<SirenSubEntity> getEntities();
 
-    void setLinks(List<SirenLink> links);
+	List<SirenSubEntity> getEntities();
 
-    void setProperties(Map<String, Object> properties);
+	void setLinks(List<SirenLink> links);
 
-    void setSirenClasses(List<String> sirenClasses);
+	void setProperties(Map<String, Object> properties);
 
-    void addSubEntity(SirenSubEntity sirenSubEntity);
+	void setSirenClasses(List<String> sirenClasses);
 
-    void setEmbeddedLinks(List<SirenEmbeddedLink> embeddedLinks);
+	void addSubEntity(SirenSubEntity sirenSubEntity);
 
-    void setActions(List<SirenAction> actions);
+	void setEmbeddedLinks(List<SirenEmbeddedLink> embeddedLinks);
+
+	void setActions(List<SirenAction> actions);
 }

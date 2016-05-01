@@ -7,18 +7,18 @@ import java.util.List;
  */
 public class SirenRelatedEntity extends AbstractSirenEntity {
 
-    private List<String> rel;
+	private List<String> rel;
 
-    SirenRelatedEntity() {
-        super();
-    }
+	SirenRelatedEntity() {
+		super();
+	}
 
-    public SirenRelatedEntity(List<String> rels, String title, List<String> sirenClasses) {
-        super(title,sirenClasses);
-        this.rel = rels;
-    }
+	public SirenRelatedEntity(List<String> rels, String title, List<String> sirenClasses) {
+		super(title, sirenClasses);
+		this.rel = rels;
+	}
 
-    public List<String> getRel() {
-        return rel;
-    }
+	public List<String> getRel() {
+		return rel;
+	}
 }

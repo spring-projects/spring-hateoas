@@ -16,107 +16,107 @@ package de.escalon.hypermedia.action;
  * @author Dietrich Schulten
  */
 public enum Type {
-    /**
-     * Determine input type text or number automatically, depending on the annotated parameter
-     */
-    FROM_JAVA(null),
-    /**
-     * input type text
-     */
-    TEXT("text"),
-    /**
-     * input type hidden
-     */
-    HIDDEN("hidden"),
-    /**
-     * input type password
-     */
-    PASSWORD("password"),
-    /**
-     * Color chooser
-     */
-    COLOR("color"),
-    /**
-     * Should contain a date, client may use date picker
-     */
-    DATE("date"),
-    /**
-     * Datetime widget, with timezone.
-     */
-    DATETIME("datetime"),
-    /**
-     * Datetime widget, no timezone.
-     */
-    DATETIME_LOCAL("datetime-local"),
-    /**
-     * Email address, may validate and improve touch entry.
-     */
-    EMAIL("email"),
-    /**
-     * Month/year selector.
-     */
-    MONTH("month"),
-    /**
-     * Numeric value, normally determined automatically. You can set restrictions on the numbers with {@link Input#max}, {@link Input#min} and {@link Input#step}.
-     */
-    NUMBER("number"),
-    /**
-     * Allowed range of values, use with {@link Input#max} and {@link Input#min}. Client may use slider.
-     */
-    RANGE("range"),
-    /**
-     * Search field, may add search entry support, e.g. a delete term widget.
-     */
-    SEARCH("search"),
-    /**
-     * Phone number
-     */
-    TEL("tel"),
-    /**
-     * Select time, may use time picker.
-     */
-    TIME("time"),
-    /**
-     * Field is a URL
-     */
-    URL("url"),
-    /**
-     * Week/Year selector
-     */
-    WEEK("week"),
-    /**
-     * Input type checkbox
-     */
-    CHECKBOX("checkbox"),
-    /**
-     * Input type radio
-     */
-    RADIO("radio"),
-    SUBMIT("submit");
+	/**
+	 * Determine input type text or number automatically, depending on the annotated parameter
+	 */
+	FROM_JAVA(null),
+	/**
+	 * input type text
+	 */
+	TEXT("text"),
+	/**
+	 * input type hidden
+	 */
+	HIDDEN("hidden"),
+	/**
+	 * input type password
+	 */
+	PASSWORD("password"),
+	/**
+	 * Color chooser
+	 */
+	COLOR("color"),
+	/**
+	 * Should contain a date, client may use date picker
+	 */
+	DATE("date"),
+	/**
+	 * Datetime widget, with timezone.
+	 */
+	DATETIME("datetime"),
+	/**
+	 * Datetime widget, no timezone.
+	 */
+	DATETIME_LOCAL("datetime-local"),
+	/**
+	 * Email address, may validate and improve touch entry.
+	 */
+	EMAIL("email"),
+	/**
+	 * Month/year selector.
+	 */
+	MONTH("month"),
+	/**
+	 * Numeric value, normally determined automatically. You can set restrictions on the numbers with {@link Input#max}, {@link Input#min} and {@link Input#step}.
+	 */
+	NUMBER("number"),
+	/**
+	 * Allowed range of values, use with {@link Input#max} and {@link Input#min}. Client may use slider.
+	 */
+	RANGE("range"),
+	/**
+	 * Search field, may add search entry support, e.g. a delete term widget.
+	 */
+	SEARCH("search"),
+	/**
+	 * Phone number
+	 */
+	TEL("tel"),
+	/**
+	 * Select time, may use time picker.
+	 */
+	TIME("time"),
+	/**
+	 * Field is a URL
+	 */
+	URL("url"),
+	/**
+	 * Week/Year selector
+	 */
+	WEEK("week"),
+	/**
+	 * Input type checkbox
+	 */
+	CHECKBOX("checkbox"),
+	/**
+	 * Input type radio
+	 */
+	RADIO("radio"),
+	SUBMIT("submit");
 
-    private String value;
+	private String value;
 
-    Type(String value) {
-        this.value = value;
-    }
+	Type(String value) {
+		this.value = value;
+	}
 
-    /**
-     * Returns the correct html input type string value, or null if type should be determined from Java type.
-     */
-    public String toString() {
-        return value;
-    }
+	/**
+	 * Returns the correct html input type string value, or null if type should be determined from Java type.
+	 */
+	public String toString() {
+		return value;
+	}
 
-    public static Type fromInputType(String inputType) {
-        Type[] values = Type.values();
-        Type ret = null;
-        for (Type type : values) {
-            if (inputType.equals(type.value)) {
-                ret = type;
-                break;
-            }
-        }
-        return ret;
-    }
+	public static Type fromInputType(String inputType) {
+		Type[] values = Type.values();
+		Type ret = null;
+		for (Type type : values) {
+			if (inputType.equals(type.value)) {
+				ret = type;
+				break;
+			}
+		}
+		return ret;
+	}
 
 }

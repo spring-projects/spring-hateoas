@@ -106,18 +106,14 @@ public class AffordanceBuilder implements LinkBuilder {
 	/**
 	 * Creates a {@link AffordanceBuilder} pointing to a controller method. Hand in a dummy method invocation result
 	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
-	 *
 	 * <pre>
 	 * &#64;RequestMapping("/customers")
 	 * class CustomerController {
-	 *
 	 *   &#64;RequestMapping("/{id}/addresses")
-	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … }
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { � }
 	 * }
-	 *
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
 	 * </pre>
-	 *
 	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
 	 * {@code addresses}. For more details on the method invocation constraints, see
 	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.

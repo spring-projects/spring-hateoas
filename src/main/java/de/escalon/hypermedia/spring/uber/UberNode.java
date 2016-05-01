@@ -10,17 +10,17 @@
 
 package de.escalon.hypermedia.spring.uber;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.http.MediaType;
 
-import java.util.List;
-
 @JsonInclude(Include.NON_NULL)
-@JsonPropertyOrder({ "id", "name", "rel", "url", "action", "transclude", "model", "sending", "accepting", "value",
-		"data" })
+@JsonPropertyOrder({"id", "name", "rel", "url", "action", "transclude", "model", "sending", "accepting", "value",
+		"data"})
 public class UberNode extends AbstractUberNode {
 
 	@JsonSerialize(using = NullValueSerializer.class)
@@ -49,16 +49,24 @@ public class UberNode extends AbstractUberNode {
 	 */
 	private Boolean transclude;
 
-	/** RFC6570 URI template */
+	/**
+	 * RFC6570 URI template
+	 */
 	private String model;
 
-	/** Default is formUrlEncoded */
+	/**
+	 * Default is formUrlEncoded
+	 */
 	private List<MediaType> sending;
 
-	/** Default is the mediatype of this data. */
+	/**
+	 * Default is the mediatype of this data.
+	 */
 	private List<MediaType> accepting;// = Arrays.asList(mediaType);
 
-	/** One of number, string, false, true, null */
+	/**
+	 * One of number, string, false, true, null
+	 */
 	private Object value;
 
 	public String getId() {
@@ -147,5 +155,4 @@ public class UberNode extends AbstractUberNode {
 				+ url + ", action=" + action + ", transclude=" + transclude + ", model=" + model + ", sending=" + sending
 				+ ", accepting=" + accepting + "]";
 	}
-
 }

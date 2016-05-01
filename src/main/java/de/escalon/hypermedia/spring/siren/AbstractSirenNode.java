@@ -10,17 +10,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({"class", "title", "rel", "properties", "entities", "actions", "links"})
 public class AbstractSirenNode {
 
-    private String title;
+	private String title;
 
-    public AbstractSirenNode(String title) {
-        this.title = title;
-    }
+	public AbstractSirenNode(String title) {
+		this.title = title;
+	}
 
-    public AbstractSirenNode() {
-    }
+	public AbstractSirenNode() {
+	}
 
-    public String getTitle() {
-        return title;
-    }
-
+	public String getTitle() {
+		return title;
+	}
 }

@@ -18,5 +18,4 @@ public class UberJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	public UberJsonLinkDiscoverer() {
 		super("$_links..%s.href", HypermediaTypes.UBER_JSON);
 	}
-
 }

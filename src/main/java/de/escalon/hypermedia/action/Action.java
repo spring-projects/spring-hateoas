@@ -24,11 +24,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Action {
 
-    /**
-     * The type of the action.
-     *
-     * @return action type
-     */
-    String value();
-
+	/**
+	 * @return action type
+	 */
+	String value();
 }

@@ -17,13 +17,12 @@ import org.springframework.http.MediaType;
  */
 public final class HypermediaTypes {
 
-    private HypermediaTypes() {
-        // prevent instantiation
-    }
+	private HypermediaTypes() {
+		// prevent instantiation
+	}
 
-    public static final String APPLICATION_JSONLD_STR = "application/ld+json";
-    public static final MediaType APPLICATION_JSONLD = MediaType.parseMediaType(APPLICATION_JSONLD_STR);
-    public static final MediaType UBER_XML = MediaType.parseMediaType("application/vnd.uber+xml");
-    public static final MediaType UBER_JSON = MediaType.parseMediaType("application/vnd.uber+json");
-
+	public static final String APPLICATION_JSONLD_STR = "application/ld+json";
+	public static final MediaType APPLICATION_JSONLD = MediaType.parseMediaType(APPLICATION_JSONLD_STR);
+	public static final MediaType UBER_XML = MediaType.parseMediaType("application/vnd.uber+xml");
+	public static final MediaType UBER_JSON = MediaType.parseMediaType("application/vnd.uber+json");
 }
