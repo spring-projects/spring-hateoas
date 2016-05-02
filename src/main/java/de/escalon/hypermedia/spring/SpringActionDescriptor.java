@@ -44,6 +44,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private String httpMethod;
 	private String actionName;
+	private String contentType;
 
 	private String semanticActionType;
 	private Map<String, ActionInputParameter> requestParams = new LinkedHashMap<String, ActionInputParameter>();
@@ -62,10 +63,15 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 * @param httpMethod used during submit
 	 */
 	public SpringActionDescriptor(String actionName, String httpMethod) {
+		this(actionName, httpMethod, null);
+	}
+	
+	public SpringActionDescriptor(String actionName, String httpMethod, String contentType) {
 		Assert.notNull(actionName);
 		Assert.notNull(httpMethod);
 		this.httpMethod = httpMethod;
 		this.actionName = actionName;
+		this.contentType = contentType;
 	}
 
 	/**
@@ -88,6 +94,11 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		return httpMethod;
 	}
 
+	@Override
+	public String getContentType(){
+		return contentType;
+	}
+	
 	/**
 	 * Gets the path variable names.
 	 *

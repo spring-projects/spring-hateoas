@@ -6,8 +6,7 @@ import java.util.Map;
 import de.escalon.hypermedia.action.Cardinality;
 
 /**
- * Represents a descriptor for a http method execution.
- * Created by Dietrich on 17.05.2015.
+ * Represents a descriptor for a http method execution. Created by Dietrich on 17.05.2015.
  */
 public interface ActionDescriptor {
 
@@ -24,6 +23,12 @@ public interface ActionDescriptor {
 	 * @return
 	 */
 	String getHttpMethod();
+
+	/**
+	 * Gets contentType of the action
+	 * @return
+	 */
+	String getContentType();
 
 	/**
 	 * Gets names of path variables, if URL has variables.

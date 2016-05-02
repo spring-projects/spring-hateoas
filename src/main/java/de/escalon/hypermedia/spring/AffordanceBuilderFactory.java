@@ -177,7 +177,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		Type genericReturnType = invokedMethod.getGenericReturnType();
 
 		SpringActionDescriptor actionDescriptor =
-				new SpringActionDescriptor(invokedMethod.getName(), httpMethod.name());
+				new SpringActionDescriptor(invokedMethod.getName(), httpMethod.name(), getContentType(invokedMethod));
 
 		actionDescriptor.setCardinality(getCardinality(invokedMethod, httpMethod, genericReturnType));
 
@@ -310,6 +310,21 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 			requestMethod = RequestMethod.GET; // default
 		}
 		return requestMethod;
+	}
+	
+	private static String getContentType(Method method) {
+		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		if (methodRequestMapping != null) {
+			StringBuilder sb = new StringBuilder();
+			for (String consume : methodRequestMapping.consumes()) {
+				sb.append(consume).append(",");
+			}
+			if (sb.length() > 1) {
+				sb.setLength(sb.length() - 1);
+				return sb.toString();
+			}
+		}
+		return null;
 	}
 
 	/**
