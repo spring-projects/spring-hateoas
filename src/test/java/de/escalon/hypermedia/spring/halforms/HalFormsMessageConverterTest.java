@@ -27,6 +27,7 @@ import org.springframework.hateoas.core.Relation;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.DefaultCurieProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
@@ -162,7 +163,8 @@ public class HalFormsMessageConverterTest {
 			return null;
 		}
 
-		@RequestMapping(value = "/{orderNumber}/items", method = RequestMethod.POST)
+		@RequestMapping(value = "/{orderNumber}/items", method = RequestMethod.POST,
+				consumes = MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<Void> addOrderItems(@PathVariable int orderNumber, @RequestBody OrderItem orderItem) {
 			return null;
 		}
