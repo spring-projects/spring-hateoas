@@ -54,6 +54,8 @@ public class Jackson2HalFormsModule extends SimpleModule {
 	public static class HalTemplateListSerializer extends ContainerSerializer<List<Template>>
 			implements ContextualSerializer {
 
+		private static final long serialVersionUID = 1L;
+
 		private static final String RELATION_MESSAGE_TEMPLATE = "_templates.%s.title";
 
 		private final BeanProperty property;

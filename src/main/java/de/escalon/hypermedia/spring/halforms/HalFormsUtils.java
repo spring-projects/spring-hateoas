@@ -19,7 +19,6 @@ import de.escalon.hypermedia.spring.BeanUtils.MethodParameterHandler;
 
 public class HalFormsUtils {
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Object toHalFormsDocument(Object object) {
 		if (object == null) {
 			return null;
@@ -96,10 +95,6 @@ public class HalFormsUtils {
 			return property.getName();
 		}
 
-	}
-
-	private List<Property> getTemplateProperties(ActionDescriptor actionDescriptor) {
-		return null;
 	}
 
 }

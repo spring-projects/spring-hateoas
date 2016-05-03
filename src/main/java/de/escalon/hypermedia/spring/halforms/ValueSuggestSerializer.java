@@ -67,8 +67,7 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 
 		if (value.getType().equals(ValueSuggestType.DIRECT)) {
 			directSerializer.serialize(value, gen, provider);
-		}
-		else {
+		} else {
 			gen.writeStartObject();
 
 			Map<String, Object> curiedMap = mapper.map(value.getValues());
@@ -76,8 +75,7 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			String embeddedRel = null;
 			if (!curiedMap.isEmpty()) {
 				embeddedRel = curiedMap.keySet().iterator().next();
-			}
-			else {
+			} else {
 				embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
 			}
 			gen.writeStringField("embedded", embeddedRel);
@@ -101,8 +99,9 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 		return new ValueSuggestSerializer(mapper, relProvider, new ValueSuggestDirectSerializer(property));
 	}
 
-	public static class ValueSuggestDirectSerializer extends ContainerSerializer<Object>
-			implements ContextualSerializer {
+	public static class ValueSuggestDirectSerializer extends ContainerSerializer<Object> implements ContextualSerializer {
+
+		private static final long serialVersionUID = 1L;
 
 		private final BeanProperty property;
 
@@ -149,13 +148,11 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			for (Object elem : suggest.getValues()) {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
-				}
-				else {
+				} else {
 					JsonSerializer<Object> serializer = getOrLookupSerializerFor(elem.getClass(), provider);
 					if (EnumSerializer.class.isAssignableFrom(serializer.getClass())) {
 						serializer.serialize(elem, jgen, provider);
-					}
-					else {
+					} else {
 						textValueSerializer.serialize(elem, jgen, provider);
 					}
 				}
