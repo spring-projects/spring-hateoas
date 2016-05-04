@@ -19,17 +19,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.PropertyAccessorUtils;
+import org.springframework.util.Assert;
+
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
-import de.escalon.hypermedia.spring.SpringActionInputParameter;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.PropertyAccessorUtils;
-import org.springframework.core.MethodParameter;
-import org.springframework.util.Assert;
 
 /**
  * Describes an HTTP method independently of a specific rest framework. Has knowledge about possible request data, i.e.
@@ -42,15 +39,14 @@ import org.springframework.util.Assert;
  */
 public class SpringActionDescriptor implements ActionDescriptor {
 
-	private String httpMethod;
-	private String actionName;
-	private String contentType;
+	private final String httpMethod;
+	private final String actionName;
+	private final String contentType;
 
 	private String semanticActionType;
-	private Map<String, ActionInputParameter> requestParams = new LinkedHashMap<String, ActionInputParameter>();
-	private Map<String, ActionInputParameter> pathVariables = new LinkedHashMap<String, ActionInputParameter>();
-	private Map<String, ActionInputParameter> requestHeaders = new LinkedHashMap<String, ActionInputParameter>();
-	private Map<String, ActionInputParameter> inputParams = new LinkedHashMap<String, ActionInputParameter>();
+	private final Map<String, ActionInputParameter> requestParams = new LinkedHashMap<String, ActionInputParameter>();
+	private final Map<String, ActionInputParameter> pathVariables = new LinkedHashMap<String, ActionInputParameter>();
+	private final Map<String, ActionInputParameter> requestHeaders = new LinkedHashMap<String, ActionInputParameter>();
 
 	private ActionInputParameter requestBody;
 	private Cardinality cardinality = Cardinality.SINGLE;
@@ -140,19 +136,6 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	}
 
 	/**
-	 * Adds descriptor for params annotated with <code>@Input</code> which are not also annotated as
-	 * <code>@RequestParam</code>, <code>@PathVariable</code>, <code>@RequestBody</code> or <code>@RequestHeader</code>. Input
-	 * parameter beans or maps are filled from query params by Spring, and this allows to describe them with
-	 * UriTemplates.
-	 *
-	 * @param key name of request param
-	 * @param actionInputParameter descriptor
-	 */
-	public void addInputParam(String key, ActionInputParameter actionInputParameter) {
-		inputParams.put(key, actionInputParameter);
-	}
-
-	/**
 	 * Adds descriptor for path variable.
 	 *
 	 * @param key name of path variable
@@ -186,29 +169,6 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		if (ret == null) {
 			ret = pathVariables.get(name);
 		}
-		if (ret == null) {
-			for (ActionInputParameter annotatedParameter : getInputParameters()) {
-				// TODO create ActionInputParameter for bean property at property path
-				// TODO field access in addition to bean?
-				PropertyDescriptor pd = getPropertyDescriptorForPropertyPath(name,
-						annotatedParameter.getParameterType());
-				if (pd != null) {
-					if (pd.getWriteMethod() != null) {
-
-						Object callValue = annotatedParameter.getValue();
-						Object propertyValue = null;
-						if (callValue != null) {
-							BeanWrapper beanWrapper = PropertyAccessorFactory
-									.forBeanPropertyAccess(callValue);
-							propertyValue = beanWrapper.getPropertyValue(name);
-						}
-						ret = new SpringActionInputParameter(new MethodParameter(pd
-								.getWriteMethod(), 0), propertyValue);
-					}
-					break;
-				}
-			}
-		}
 		return ret;
 	}
 
@@ -230,15 +190,6 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		} else {
 			return BeanUtils.getPropertyDescriptor(propertyType, propertyPath);
 		}
-	}
-
-	/**
-	 * Parameters annotated with <code>@Input</code>.
-	 *
-	 * @return parameters or empty list
-	 */
-	public Collection<ActionInputParameter> getInputParameters() {
-		return inputParams.values();
 	}
 
 	/**

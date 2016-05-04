@@ -39,7 +39,7 @@ public @interface Select {
 	 *
 	 * @return implementation class of {@link Options}
 	 */
-	Class<? extends Options> options() default StringOptions.class;
+	Class<? extends Options<?>> options() default StringOptions.class;
 
 	/**
 	 * When getting possible values using {@link Options#get}, pass the arguments having these names.
@@ -47,4 +47,16 @@ public @interface Select {
 	 * @return names of the arguments whose value should be passed to {@link Options#get}
 	 */
 	String[] args() default {};
+	
+	/**
+	 * Marks the type of select, in case of {@link Type#EXTERNAL} the data may be outside the select, for example as a variable in HAL response
+	 * rather than in HAL-FORMS document
+	 * @return
+	 */
+	Type type() default Type.INTERNAL;
+	
+	public enum Type {
+		INTERNAL, EXTERNAL
+	}
+	
 }

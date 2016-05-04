@@ -9,25 +9,42 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.core.DefaultRelProvider;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Type;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.affordance.Suggest;
 import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
-import org.springframework.core.MethodParameter;
-import org.springframework.hateoas.*;
-import org.springframework.hateoas.core.DefaultRelProvider;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Maps spring-hateoas response data to siren data.
@@ -38,7 +55,7 @@ public class SirenUtils {
 	private static final Set<String> FILTER_RESOURCE_SUPPORT = new HashSet<String>(Arrays.asList("class", "links", "id"));
 	private String requestMediaType;
 
-	private Set<String> navigationalRels = new HashSet<String>(Arrays.asList("self", "next", "previous", "prev"));
+	private final Set<String> navigationalRels = new HashSet<String>(Arrays.asList("self", "next", "previous", "prev"));
 
 	private RelProvider relProvider = new DefaultRelProvider();
 
@@ -51,28 +68,28 @@ public class SirenUtils {
 		try {
 			if (object instanceof Resource) {
 				Resource<?> resource = (Resource<?>) object;
-				objectNode.setLinks(this.toSirenLinks(
+				objectNode.setLinks(toSirenLinks(
 						getNavigationalLinks(resource.getLinks())));
-				objectNode.setEmbeddedLinks(this.toSirenEmbeddedLinks(
+				objectNode.setEmbeddedLinks(toSirenEmbeddedLinks(
 						getEmbeddedLinks(resource.getLinks())));
-				objectNode.setActions(this.toSirenActions(getActions(resource.getLinks())));
+				objectNode.setActions(toSirenActions(getActions(resource.getLinks())));
 				toSirenEntity(objectNode, resource.getContent());
 				return;
 			} else if (object instanceof Resources) {
 				Resources<?> resources = (Resources<?>) object;
 
-				objectNode.setLinks(this.toSirenLinks(getNavigationalLinks(resources.getLinks())));
+				objectNode.setLinks(toSirenLinks(getNavigationalLinks(resources.getLinks())));
 				Collection<?> content = resources.getContent();
 				toSirenEntity(objectNode, content);
-				objectNode.setActions(this.toSirenActions(getActions(resources.getLinks())));
+				objectNode.setActions(toSirenActions(getActions(resources.getLinks())));
 				return;
 			} else if (object instanceof ResourceSupport) {
 				ResourceSupport resource = (ResourceSupport) object;
-				objectNode.setLinks(this.toSirenLinks(
+				objectNode.setLinks(toSirenLinks(
 						getNavigationalLinks(resource.getLinks())));
-				objectNode.setEmbeddedLinks(this.toSirenEmbeddedLinks(
+				objectNode.setEmbeddedLinks(toSirenEmbeddedLinks(
 						getEmbeddedLinks(resource.getLinks())));
-				objectNode.setActions(this.toSirenActions(
+				objectNode.setActions(toSirenActions(
 						getActions(resource.getLinks())));
 
 				// wrap object attributes below to avoid endless loop
@@ -341,7 +358,7 @@ public class SirenUtils {
 			Collection<String> paramNames = actionDescriptor.getRequestParamNames();
 			for (String paramName : paramNames) {
 				ActionInputParameter inputParameter = actionDescriptor.getActionInputParameter(paramName);
-				Object[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
+				Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
 
 				ret.add(createSirenField(paramName, inputParameter.getValueFormatted(), inputParameter,
 						possibleValues));
@@ -454,8 +471,8 @@ public class SirenUtils {
 				ActionInputParameter constructorParamInputParameter =
 						new SpringActionInputParameter(methodParameter, propertyValue);
 
-				final Object[] possibleValues =
-						annotatedParameter.getPossibleValues(methodParameter, annotatedParameters);
+				final Suggest<?>[] possibleValues =
+						constructorParamInputParameter.getPossibleValues(annotatedParameters);
 
 				// dot-separated property path as field name
 				SirenField sirenField = createSirenField(parentParamName + paramName,
@@ -476,7 +493,7 @@ public class SirenUtils {
 	}
 
 	private SirenField createSirenField(String paramName, Object propertyValue,
-										ActionInputParameter inputParameter, Object[] possibleValues) {
+										ActionInputParameter inputParameter, Suggest<?>[] possibleValues) {
 		SirenField sirenField;
 		if (possibleValues.length == 0) {
 			String propertyValueAsString = propertyValue == null ? null : propertyValue
@@ -495,18 +512,18 @@ public class SirenUtils {
 			String type;
 			if (inputParameter.isArrayOrCollection()) {
 				type = "checkbox";
-				for (Object possibleValue : possibleValues) {
+				for (Suggest<?> possibleValue : possibleValues) {
 					boolean selected = ObjectUtils.containsElement(
 							inputParameter.getValues(),
-							possibleValue);
+							possibleValue.getValue());
 					// TODO have more useful value title
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue, selected));
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.getTextField(), possibleValue.getValue(), selected));
 				}
 			} else {
 				type = "radio";
-				for (Object possibleValue : possibleValues) {
-					boolean selected = possibleValue.equals(propertyValue);
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue, selected));
+				for (Suggest<?> possibleValue : possibleValues) {
+					boolean selected = possibleValue.getValue().equals(propertyValue);
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue.getValue(), selected));
 				}
 			}
 			sirenField = new SirenField(paramName,
@@ -582,6 +599,6 @@ public class SirenUtils {
 	}
 
 	public void setAdditionalNavigationalRels(Collection<String> additionalNavigationalRels) {
-		this.navigationalRels.addAll(additionalNavigationalRels);
+		navigationalRels.addAll(additionalNavigationalRels);
 	}
 }

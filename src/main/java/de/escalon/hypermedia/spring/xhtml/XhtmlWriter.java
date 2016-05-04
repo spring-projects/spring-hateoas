@@ -1,6 +1,6 @@
 package de.escalon.hypermedia.spring.xhtml;
 
-import static de.escalon.hypermedia.spring.xhtml.XhtmlWriter.OptionalAttributes.*;
+import static de.escalon.hypermedia.spring.xhtml.XhtmlWriter.OptionalAttributes.attr;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -11,20 +11,12 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import de.escalon.hypermedia.PropertyUtils;
-import de.escalon.hypermedia.action.Input;
-import de.escalon.hypermedia.action.Type;
-import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.affordance.ActionInputParameter;
-import de.escalon.hypermedia.affordance.Affordance;
-import de.escalon.hypermedia.affordance.DataType;
-import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
-import de.escalon.hypermedia.spring.DocumentationProvider;
-import de.escalon.hypermedia.spring.SpringActionInputParameter;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.Property;
 import org.springframework.hateoas.Link;
@@ -33,12 +25,27 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import de.escalon.hypermedia.PropertyUtils;
+import de.escalon.hypermedia.action.Input;
+import de.escalon.hypermedia.action.Type;
+import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.ActionInputParameter;
+import de.escalon.hypermedia.affordance.Affordance;
+import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.affordance.Suggest;
+import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
+import de.escalon.hypermedia.spring.DocumentationProvider;
+import de.escalon.hypermedia.spring.SpringActionInputParameter;
+
 /**
  * Created by Dietrich on 09.02.2015.
  */
 public class XhtmlWriter extends Writer {
 
-	private Writer writer;
+	private final Writer writer;
 	private List<String> stylesheets = Collections.emptyList();
 
 	public static final String HTML_HEAD_START = "" + //
@@ -68,9 +75,9 @@ public class XhtmlWriter extends Writer {
 	private String methodParam = "_method";
 	private DocumentationProvider documentationProvider = new DefaultDocumentationProvider();
 
-	private String formControlClass = "form-control";
-	private String formGroupClass = "form-group";
-	private String controlLabelClass = "control-label";
+	private final String formControlClass = "form-control";
+	private final String formGroupClass = "form-group";
+	private final String controlLabelClass = "control-label";
 
 	public XhtmlWriter(Writer writer) {
 		this.writer = writer;
@@ -196,7 +203,7 @@ public class XhtmlWriter extends Writer {
 
 	public static class OptionalAttributes {
 
-		private Map<String, String> attributes = new LinkedHashMap<String, String>();
+		private final Map<String, String> attributes = new LinkedHashMap<String, String>();
 
 		@Override
 		public String toString() {
@@ -326,7 +333,7 @@ public class XhtmlWriter extends Writer {
 			for (String requestParamName : requestParams) {
 				ActionInputParameter actionInputParameter = actionDescriptor.getActionInputParameter(requestParamName);
 
-				Object[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
+				Suggest<?>[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
 				// TODO duplication with appendInputOrSelect
 				if (possibleValues.length > 0) {
 					if (actionInputParameter.isArrayOrCollection()) {
@@ -574,9 +581,8 @@ public class XhtmlWriter extends Writer {
 										ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter
 												(new MethodParameter(constructor, paramIndex), propertyValue);
 
-										final Object[] possibleValues =
-												actionInputParameter.getPossibleValues(
-														constructor, paramIndex, actionDescriptor);
+										Suggest<?>[] possibleValues =
+												constructorParamInputParameter.getPossibleValues(actionDescriptor);
 
 										appendInputOrSelect(actionInputParameter, parentParamName + paramName,
 												constructorParamInputParameter, possibleValues);
@@ -636,9 +642,7 @@ public class XhtmlWriter extends Writer {
 					MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 					ActionInputParameter propertySetterInputParameter = new SpringActionInputParameter(methodParameter,
 							propertyValue);
-					final Object[] possibleValues = actionInputParameter.getPossibleValues(propertyDescriptor
-									.getWriteMethod(), 0,
-							actionDescriptor);
+					final Suggest<?>[] possibleValues = propertySetterInputParameter.getPossibleValues(actionDescriptor);
 					appendInputOrSelect(actionInputParameter, propertyName, propertySetterInputParameter, possibleValues);
 				} else if (actionInputParameter.isArrayOrCollection()) {
 					Object[] callValues = actionInputParameter.getValues();
@@ -674,7 +678,7 @@ public class XhtmlWriter extends Writer {
 	 * @throws IOException
 	 */
 	private void appendInputOrSelect(ActionInputParameter parentInputParameter, String paramName, ActionInputParameter
-			childInputParameter, Object[] possibleValues) throws IOException {
+			childInputParameter, Suggest<?>[] possibleValues) throws IOException {
 		if (possibleValues.length > 0) {
 			if (childInputParameter.isArrayOrCollection()) {
 				// TODO multiple formatted callvalues
@@ -748,7 +752,7 @@ public class XhtmlWriter extends Writer {
 	}
 
 
-	private void appendSelectOne(String requestParamName, Object[] possibleValues, ActionInputParameter
+	private void appendSelectOne(String requestParamName, Suggest<?>[] possibleValues, ActionInputParameter
 			actionInputParameter)
 			throws IOException {
 		beginDiv(OptionalAttributes.attr("class", formGroupClass));
@@ -757,11 +761,11 @@ public class XhtmlWriter extends Writer {
 		writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
 				OptionalAttributes.attr("class", formControlClass));
-		for (Object possibleValue : possibleValues) {
-			if (possibleValue.equals(callValue)) {
-				option(possibleValue.toString(), attr("selected", "selected"));
+		for (Suggest<?> possibleValue : possibleValues) {
+			if (possibleValue.getValue().equals(callValue)) {
+				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
 			} else {
-				option(possibleValue.toString());
+				option(possibleValue.toString(), attr("value", possibleValue.getValueField()));
 			}
 		}
 		endSelect();
@@ -770,7 +774,7 @@ public class XhtmlWriter extends Writer {
 	}
 
 
-	private void appendSelectMulti(String requestParamName, Object[] possibleValues, ActionInputParameter
+	private void appendSelectMulti(String requestParamName, Suggest<?>[] possibleValues, ActionInputParameter
 			actionInputParameter) throws IOException {
 		beginDiv(OptionalAttributes.attr("class", formGroupClass));
 		Object[] actualValues = actionInputParameter.getValues();
@@ -785,11 +789,11 @@ public class XhtmlWriter extends Writer {
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
 				OptionalAttributes.attr("multiple", "multiple")
 						.and("class", formControlClass));
-		for (Object possibleValue : possibleValues) {
-			if (ObjectUtils.containsElement(actualValues, possibleValue)) {
-				option(possibleValue.toString(), attr("selected", "selected"));
+		for (Suggest<?> possibleValue : possibleValues) {
+			if (ObjectUtils.containsElement(actualValues, possibleValue.getValue())) {
+				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
 			} else {
-				option(possibleValue.toString());
+				option(possibleValue.toString(), attr("value", possibleValue.getValueField()));
 			}
 		}
 		endForm();

@@ -13,12 +13,14 @@
 
 package de.escalon.hypermedia.action;
 
+import de.escalon.hypermedia.affordance.Suggest;
+
 /**
  * Allows to determine possible values for an argument annotated with {@link Select}.
  *
  * @author Dietrich Schulten
  */
-public interface Options {
+public interface Options<T> {
 
 	/**
 	 * Gets possible values for an argument annotated with {@link Select}. The default implementation {@link
@@ -53,5 +55,5 @@ public interface Options {
 	 * @return possible values
 	 * @see StringOptions
 	 */
-	public Object[] get(String[] value, Object... args);
+	public Suggest<T>[] get(String[] value, Object... args);
 }
