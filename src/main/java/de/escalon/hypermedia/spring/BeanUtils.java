@@ -66,14 +66,15 @@ public class BeanUtils {
 						if (JsonProperty.class == annotation.annotationType()) {
 							JsonProperty jsonProperty = (JsonProperty) annotation;
 
-							// TODO use required attribute of JsonProperty for required fields
+							// TODO use required attribute of JsonProperty for required fields ->
 							String paramName = jsonProperty.value();
 							Class<?> parameterType = parameters[paramIndex];
 							Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
 							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
-							String fieldName = methodHandler.onMethodParameter(methodParameter, annotatedParameter,
-									annotatedParameters, parentParamName, paramName, parameterType, propertyValue);
+							String fieldName = invokeHandlerOrFollorRecurse(methodParameter, annotatedParameter, annotatedParameters,
+									parentParamName, paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
+
 							if (fieldName != null) {
 								knownConstructorFields.add(fieldName);
 							}
