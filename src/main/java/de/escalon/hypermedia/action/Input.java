@@ -39,6 +39,8 @@ public @interface Input {
 	String MAX_LENGTH = "maxLength";
 	String PATTERN = "pattern";
 	String READONLY = "readonly";
+	String EDITABLE = "editable";
+	String REQUIRED = "required";
 
 	/**
 	 * Input type, to set the input type, e.g. hidden, password. With the default type FROM_JAVA the type will be number
