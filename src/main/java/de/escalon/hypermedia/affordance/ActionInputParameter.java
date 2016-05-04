@@ -124,7 +124,7 @@ public interface ActionInputParameter {
 	 * @param actionDescriptor in case that access to the other parameters is necessary to determine the possible values.
 	 * @return possible values or empty array
 	 */
-	Object[] getPossibleValues(ActionDescriptor actionDescriptor);
+	<T>Suggest<T>[] getPossibleValues(ActionDescriptor actionDescriptor);
 
 	/**
 	 * Parameter is an array or collection, think {?val*} in uri template.

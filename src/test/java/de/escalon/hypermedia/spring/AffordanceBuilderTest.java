@@ -10,9 +10,6 @@
 
 package de.escalon.hypermedia.spring;
 
-import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.affordance.Affordance;
-import de.escalon.hypermedia.affordance.ActionInputParameter;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,10 +19,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.ActionInputParameter;
+import de.escalon.hypermedia.affordance.Affordance;
+import de.escalon.hypermedia.affordance.Suggest;
 
 public class AffordanceBuilderTest {
 
@@ -164,8 +170,13 @@ public class AffordanceBuilderTest {
                 affordance.toString());
         final ActionDescriptor actionDescriptor = affordance.getActionDescriptors()
                 .get(0);
-        Assert.assertThat((EventStatusType[]) actionDescriptor.getActionInputParameter("eventStatus")
-                        .getPossibleValues(actionDescriptor),
+        Suggest<EventStatusType> [] values = actionDescriptor.getActionInputParameter("eventStatus")
+        .getPossibleValues(actionDescriptor);
+        EventStatusType [] types = new EventStatusType[values.length];
+        for (int i = 0; i < types.length; i++) {
+			types[i] = values[i].getValue();
+		}
+        Assert.assertThat(types,
                 Matchers.arrayContainingInAnyOrder(
                         EventStatusType.EVENT_CANCELLED,
                         EventStatusType.EVENT_POSTPONED,

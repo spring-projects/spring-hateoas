@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.escalon.hypermedia.spring.halforms;
+package de.escalon.hypermedia.affordance;
 
 /**
- * Define the "value" and "text" fields of an object included in a {@link Property} of a HAL-FORMS {@link Template}
+ * Define the "value" and "text" fields of an object
  * 
  */
-interface Suggest {
+public interface Suggest<T> {
+	
+	Suggest<?> [] EMPTY = new Suggest[0];
+	
+	T getValue();
+	
 	String getValueField();
 
 	String getTextField();
+	
 }

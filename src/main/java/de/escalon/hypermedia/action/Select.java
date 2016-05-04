@@ -39,7 +39,7 @@ public @interface Select {
 	 *
 	 * @return implementation class of {@link Options}
 	 */
-	Class<? extends Options> options() default StringOptions.class;
+	Class<? extends Options<?>> options() default StringOptions.class;
 
 	/**
 	 * When getting possible values using {@link Options#get}, pass the arguments having these names.

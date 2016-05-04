@@ -41,6 +41,7 @@ import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.affordance.Suggest;
 import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
@@ -357,7 +358,7 @@ public class SirenUtils {
 			Collection<String> paramNames = actionDescriptor.getRequestParamNames();
 			for (String paramName : paramNames) {
 				ActionInputParameter inputParameter = actionDescriptor.getActionInputParameter(paramName);
-				Object[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
+				Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
 
 				ret.add(createSirenField(paramName, inputParameter.getValueFormatted(), inputParameter,
 						possibleValues));
@@ -470,7 +471,7 @@ public class SirenUtils {
 				ActionInputParameter constructorParamInputParameter =
 						new SpringActionInputParameter(methodParameter, propertyValue);
 
-				final Object[] possibleValues =
+				final Suggest<?>[] possibleValues =
 						constructorParamInputParameter.getPossibleValues(annotatedParameters);
 
 				// dot-separated property path as field name
@@ -492,7 +493,7 @@ public class SirenUtils {
 	}
 
 	private SirenField createSirenField(String paramName, Object propertyValue,
-										ActionInputParameter inputParameter, Object[] possibleValues) {
+										ActionInputParameter inputParameter, Suggest<?>[] possibleValues) {
 		SirenField sirenField;
 		if (possibleValues.length == 0) {
 			String propertyValueAsString = propertyValue == null ? null : propertyValue
@@ -511,18 +512,18 @@ public class SirenUtils {
 			String type;
 			if (inputParameter.isArrayOrCollection()) {
 				type = "checkbox";
-				for (Object possibleValue : possibleValues) {
+				for (Suggest<?> possibleValue : possibleValues) {
 					boolean selected = ObjectUtils.containsElement(
 							inputParameter.getValues(),
-							possibleValue);
+							possibleValue.getValue());
 					// TODO have more useful value title
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue, selected));
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.getTextField(), possibleValue.getValue(), selected));
 				}
 			} else {
 				type = "radio";
-				for (Object possibleValue : possibleValues) {
-					boolean selected = possibleValue.equals(propertyValue);
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue, selected));
+				for (Suggest<?> possibleValue : possibleValues) {
+					boolean selected = possibleValue.getValue().equals(propertyValue);
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue.getValue(), selected));
 				}
 			}
 			sirenField = new SirenField(paramName,

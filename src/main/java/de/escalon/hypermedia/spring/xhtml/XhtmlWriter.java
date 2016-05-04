@@ -35,6 +35,7 @@ import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.affordance.Suggest;
 import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
@@ -332,7 +333,7 @@ public class XhtmlWriter extends Writer {
 			for (String requestParamName : requestParams) {
 				ActionInputParameter actionInputParameter = actionDescriptor.getActionInputParameter(requestParamName);
 
-				Object[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
+				Suggest<?>[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
 				// TODO duplication with appendInputOrSelect
 				if (possibleValues.length > 0) {
 					if (actionInputParameter.isArrayOrCollection()) {
@@ -580,7 +581,7 @@ public class XhtmlWriter extends Writer {
 										ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter
 												(new MethodParameter(constructor, paramIndex), propertyValue);
 
-										Object[] possibleValues =
+										Suggest<?>[] possibleValues =
 												constructorParamInputParameter.getPossibleValues(actionDescriptor);
 
 										appendInputOrSelect(actionInputParameter, parentParamName + paramName,
@@ -641,7 +642,7 @@ public class XhtmlWriter extends Writer {
 					MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 					ActionInputParameter propertySetterInputParameter = new SpringActionInputParameter(methodParameter,
 							propertyValue);
-					final Object[] possibleValues = propertySetterInputParameter.getPossibleValues(actionDescriptor);
+					final Suggest<?>[] possibleValues = propertySetterInputParameter.getPossibleValues(actionDescriptor);
 					appendInputOrSelect(actionInputParameter, propertyName, propertySetterInputParameter, possibleValues);
 				} else if (actionInputParameter.isArrayOrCollection()) {
 					Object[] callValues = actionInputParameter.getValues();
@@ -677,7 +678,7 @@ public class XhtmlWriter extends Writer {
 	 * @throws IOException
 	 */
 	private void appendInputOrSelect(ActionInputParameter parentInputParameter, String paramName, ActionInputParameter
-			childInputParameter, Object[] possibleValues) throws IOException {
+			childInputParameter, Suggest<?>[] possibleValues) throws IOException {
 		if (possibleValues.length > 0) {
 			if (childInputParameter.isArrayOrCollection()) {
 				// TODO multiple formatted callvalues
@@ -751,7 +752,7 @@ public class XhtmlWriter extends Writer {
 	}
 
 
-	private void appendSelectOne(String requestParamName, Object[] possibleValues, ActionInputParameter
+	private void appendSelectOne(String requestParamName, Suggest<?>[] possibleValues, ActionInputParameter
 			actionInputParameter)
 			throws IOException {
 		beginDiv(OptionalAttributes.attr("class", formGroupClass));
@@ -760,11 +761,11 @@ public class XhtmlWriter extends Writer {
 		writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
 				OptionalAttributes.attr("class", formControlClass));
-		for (Object possibleValue : possibleValues) {
-			if (possibleValue.equals(callValue)) {
-				option(possibleValue.toString(), attr("selected", "selected"));
+		for (Suggest<?> possibleValue : possibleValues) {
+			if (possibleValue.getValue().equals(callValue)) {
+				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
 			} else {
-				option(possibleValue.toString());
+				option(possibleValue.toString(), attr("value", possibleValue.getValueField()));
 			}
 		}
 		endSelect();
@@ -773,7 +774,7 @@ public class XhtmlWriter extends Writer {
 	}
 
 
-	private void appendSelectMulti(String requestParamName, Object[] possibleValues, ActionInputParameter
+	private void appendSelectMulti(String requestParamName, Suggest<?>[] possibleValues, ActionInputParameter
 			actionInputParameter) throws IOException {
 		beginDiv(OptionalAttributes.attr("class", formGroupClass));
 		Object[] actualValues = actionInputParameter.getValues();
@@ -788,11 +789,11 @@ public class XhtmlWriter extends Writer {
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
 				OptionalAttributes.attr("multiple", "multiple")
 						.and("class", formControlClass));
-		for (Object possibleValue : possibleValues) {
-			if (ObjectUtils.containsElement(actualValues, possibleValue)) {
-				option(possibleValue.toString(), attr("selected", "selected"));
+		for (Suggest<?> possibleValue : possibleValues) {
+			if (ObjectUtils.containsElement(actualValues, possibleValue.getValue())) {
+				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
 			} else {
-				option(possibleValue.toString());
+				option(possibleValue.toString(), attr("value", possibleValue.getValueField()));
 			}
 		}
 		endForm();

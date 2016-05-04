@@ -38,6 +38,8 @@ import de.escalon.hypermedia.action.Type;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.affordance.SimpleSuggest;
+import de.escalon.hypermedia.affordance.Suggest;
 
 /**
  * Describes a Spring MVC rest services method parameter value with recorded sample call value and input constraints.
@@ -56,7 +58,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	private final Object value;
 	private Boolean arrayOrCollection = null;
 	private final Map<String, Object> inputConstraints = new HashMap<String, Object>();
-	private Object [] possibleValues;
+	private Suggest [] possibleValues;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -287,27 +289,27 @@ public class SpringActionInputParameter implements ActionInputParameter {
 
 
 	@Override
-	public Object[] getPossibleValues(ActionDescriptor actionDescriptor) {
+	public Suggest[] getPossibleValues(ActionDescriptor actionDescriptor) {
 		return getPossibleValues(methodParameter, actionDescriptor);
 	}
 
-	private Object[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
+	private Suggest[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
 		try {
 			if(possibleValues!=null) {
 				return possibleValues;
 			}
 			Class<?> parameterType = methodParameter.getNestedParameterType();
-			Object[] possibleValues;
+			Suggest[] possibleValues;
 			Class<?> nested;
 			if (Enum[].class.isAssignableFrom(parameterType)) {
-				possibleValues = parameterType.getComponentType()
-						.getEnumConstants();
+				possibleValues = SimpleSuggest.wrap(parameterType.getComponentType()
+						.getEnumConstants());
 			} else if (Enum.class.isAssignableFrom(parameterType)) {
-				possibleValues = parameterType.getEnumConstants();
+				possibleValues = SimpleSuggest.wrap(parameterType.getEnumConstants());
 			} else if (Collection.class.isAssignableFrom(parameterType)
 					&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1)
 					.getType())) {
-				possibleValues = nested.getEnumConstants();
+				possibleValues = SimpleSuggest.wrap(nested.getEnumConstants());
 			} else {
 				Select select = methodParameter.getParameterAnnotation(Select.class);
 				if (select != null) {
@@ -325,7 +327,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 					Object[] args = from.toArray();
 					possibleValues = options.get(select.value(), args);
 				} else {
-					possibleValues = new Object[0];
+					possibleValues = Suggest.EMPTY;
 				}
 			}
 			return possibleValues;
@@ -334,7 +336,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		}
 	}
 
-	void setPossibleValues(Object[] possibleValues) {
+	void setPossibleValues(Suggest[] possibleValues) {
 		this.possibleValues = possibleValues;
 	}
 
