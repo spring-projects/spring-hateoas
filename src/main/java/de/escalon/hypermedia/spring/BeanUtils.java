@@ -72,7 +72,7 @@ public class BeanUtils {
 							Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
 							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
-							String fieldName = invokeHandlerOrFollorRecurse(methodParameter, annotatedParameter, annotatedParameters,
+							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, annotatedParameters,
 									parentParamName, paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
 
 							if (fieldName != null) {
@@ -104,7 +104,7 @@ public class BeanUtils {
 				Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, propertyName);
 				MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 
-				invokeHandlerOrFollorRecurse(methodParameter, annotatedParameter, annotatedParameters, parentParamName,
+				invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, annotatedParameters, parentParamName,
 						propertyName, propertyType, propertyValue, knownConstructorFields, methodHandler);
 
 			}
@@ -113,7 +113,7 @@ public class BeanUtils {
 		}
 	}
 
-	private static String invokeHandlerOrFollorRecurse(MethodParameter methodParameter,
+	private static String invokeHandlerOrFollowRecurse(MethodParameter methodParameter,
 			ActionInputParameter annotatedParameter, ActionDescriptor annotatedParameters, String parentParamName,
 			String paramName, Class<?> parameterType, Object propertyValue, Set<String> fields,
 			MethodParameterHandler handler) {
