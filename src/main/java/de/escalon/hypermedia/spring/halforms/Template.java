@@ -29,11 +29,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Value object for a HAL-FORMS template. Describes the available state transition details.
+ * 
  * @see http://mamund.site44.com/misc/hal-forms/
  */
 @JsonInclude(Include.NON_DEFAULT)
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
-@JsonIgnoreProperties({ "href", "rel" })
+@JsonIgnoreProperties({ "href", "rel", "templated" })
 public class Template extends Link {
 
 	private static final long serialVersionUID = 2593020248152501268L;
@@ -48,8 +49,7 @@ public class Template extends Link {
 
 	private String title;
 
-	public Template() {
-	}
+	public Template() {}
 
 	public Template(String href) {
 		this(href, Template.DEFAULT_KEY);
