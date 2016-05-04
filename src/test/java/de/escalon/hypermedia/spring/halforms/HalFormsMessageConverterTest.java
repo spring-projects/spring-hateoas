@@ -191,6 +191,15 @@ public class HalFormsMessageConverterTest {
 
 	}
 
+	static class OrderFilter {
+		private String status;
+
+		@JsonCreator
+		public OrderFilter(@JsonProperty("status") String status) {
+			this.status = status;
+		}
+	}
+
 	@RequestMapping("/orders")
 	static class DummyOrderController {
 
@@ -212,6 +221,11 @@ public class HalFormsMessageConverterTest {
 
 		@RequestMapping
 		public ResponseEntity<Resources<Order>> getOrders(@RequestParam List<String> attr) {
+			return null;
+		}
+
+		@RequestMapping
+		public ResponseEntity<Resources<Order>> getOrdersFiltered(OrderFilter filter) {
 			return null;
 		}
 
@@ -263,19 +277,11 @@ public class HalFormsMessageConverterTest {
 	}
 
 	@Test
-	public void testTemplates() throws JsonProcessingException {
+	public void testTemplatesWithRequestBody() throws JsonProcessingException {
 
 		Order order = new Order();
 		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null)))
 				.withRel("order-items"));
-				// order.add(linkTo(methodOn(DummyOrderController.class).getOrder(42)).withSelfRel());
-				// order.add(linkTo(methodOn(DummyOrderController.class).getOrder(43)).withRel("next"));
-				// order.add(linkTo(methodOn(DummyOrderController.class).getOrder(41)).withRel("previous"));
-				// order.add(linkTo(methodOn(DummyOrderController.class).getOrders(null)).withRel("orders"));
-
-		// no support for non-query links
-		// order.add(new Link("http://example.com/{foo}", "foo"));
-		// order.add(new Link("http://example.com{?bar}", "bar"));
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
@@ -285,5 +291,36 @@ public class HalFormsMessageConverterTest {
 		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("POST")));
 		assertThat(json, hasJsonPath("$._templates.default.contentType", equalTo("application/json")));
 		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(4)));
+	}
+
+	@Test
+	public void testTemplatesFromRequestParamSimple() throws JsonProcessingException {
+
+		Order order = new Order();
+		order.add(linkTo(methodOn(DummyOrderController.class).getOrders(null)).withRel("orders"));
+
+		Object entity = HalFormsUtils.toHalFormsDocument(order);
+		String json = objectMapper.valueToTree(entity).toString();
+
+		assertThat(json, hasJsonPath("$._templates"));
+		assertThat(json, hasJsonPath("$._templates.default"));
+		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("GET")));
+		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(1)));
+	}
+
+	@Test
+	public void testTemplatesFromRequestParamComplex() throws JsonProcessingException {
+
+		Order order = new Order();
+		order.add(
+				linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter("pending"))).withRel("orders"));
+
+		Object entity = HalFormsUtils.toHalFormsDocument(order);
+		String json = objectMapper.valueToTree(entity).toString();
+
+		assertThat(json, hasJsonPath("$._templates"));
+		assertThat(json, hasJsonPath("$._templates.default"));
+		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("GET")));
+		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(1)));
 	}
 }

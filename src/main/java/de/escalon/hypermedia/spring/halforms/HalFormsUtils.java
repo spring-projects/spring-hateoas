@@ -54,8 +54,13 @@ public class HalFormsUtils {
 								Collections.<String> emptySet(), new TemplateMethodParameterHandler(template));
 
 						// TODO: templated GETs
-					} else if (!actionDescriptor.getRequestParamNames().isEmpty()) {}
-
+					} else if (!actionDescriptor.getRequestParamNames().isEmpty()) {
+						template.setProperties(new ArrayList<Property>());
+						for (String paramName : actionDescriptor.getRequestParamNames()) {
+							ActionInputParameter actionInputParameter = actionDescriptor.getActionInputParameter(paramName);
+							template.getProperties().add(getProperty(actionInputParameter, actionDescriptor, null, paramName));
+						}
+					}
 					processed.add(template);
 				}
 			} else {
@@ -63,6 +68,40 @@ public class HalFormsUtils {
 			}
 		}
 		return processed;
+	}
+
+	public static Property getProperty(ActionInputParameter actionInputParameter, ActionDescriptor actionDescriptor,
+			Object propertyValue, String name) {
+		Map<String, Object> inputConstraints = actionInputParameter.getInputConstraints();
+
+		// TODO: templated comes from an Input attribute?
+		boolean templated = false;
+		// FIXME: input.readOnly or input.editable?
+		boolean readOnly = inputConstraints.containsKey(Input.EDITABLE) ? !((Boolean) inputConstraints.get(Input.EDITABLE))
+				: true;
+		String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
+		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
+				: false;
+
+		String value = propertyValue != null ? propertyValue.toString() : null;
+
+		// FIXME: we need suggest type!
+		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter
+				.getPossibleValues(actionDescriptor);
+		ValueSuggest<?> suggest = null;
+		if (possibleValues.length > 0) {
+			String textField = null;
+			String valueField = null;
+			List<Object> values = new ArrayList<Object>();
+			for (de.escalon.hypermedia.affordance.Suggest<Object> possibleValue : possibleValues) {
+				values.add(possibleValue.getValue());
+				textField = possibleValue.getTextField();
+				valueField = possibleValue.getValueField();
+			}
+			suggest = new ValueSuggest<Object>(values, textField, valueField);
+		}
+
+		return new Property(name, readOnly, templated, value, null, regex, required, suggest);
 	}
 
 	public static class TemplateMethodParameterHandler implements MethodParameterHandler {
@@ -81,41 +120,8 @@ public class HalFormsUtils {
 				ActionDescriptor actionDescriptor, String parentParamName, String paramName, Class<?> parameterType,
 				Object propertyValue) {
 
-			// TODO: templated comes from an Input attribute?
-			boolean templated = false;
-
-			ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter(methodParameter,
-					propertyValue);
-
-			Map<String, Object> inputConstraints = constructorParamInputParameter.getInputConstraints();
-
-			// FIXME: input.readOnly or input.editable?
-			boolean readOnly = inputConstraints.containsKey(Input.EDITABLE)
-					? !((Boolean) inputConstraints.get(Input.EDITABLE)) : true;
-			String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
-			boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
-					: false;
-
-			String value = propertyValue != null ? propertyValue.toString() : null;
-
-			final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = constructorParamInputParameter
-					.getPossibleValues(actionDescriptor);
-			ValueSuggest<?> suggest = null;
-			if (possibleValues.length > 0) {
-
-				String textField = null;
-				String valueField = null;
-				List<Object> values = new ArrayList<Object>();
-				for (de.escalon.hypermedia.affordance.Suggest<Object> possibleValue : possibleValues) {
-					values.add(possibleValue.getValue());
-					textField = possibleValue.getTextField();
-					valueField = possibleValue.getValueField();
-				}
-				suggest = new ValueSuggest<Object>(values, textField, valueField);
-			}
-
-			Property property = new Property(parentParamName + paramName, readOnly, templated, value, null, regex, required,
-					suggest);
+			Property property = getProperty(new SpringActionInputParameter(methodParameter, propertyValue), actionDescriptor,
+					propertyValue, parentParamName + paramName);
 
 			template.getProperties().add(property);
 
