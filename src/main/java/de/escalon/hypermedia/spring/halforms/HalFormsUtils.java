@@ -1,14 +1,13 @@
 package de.escalon.hypermedia.spring.halforms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import de.escalon.hypermedia.action.Input;
@@ -17,6 +16,7 @@ import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.spring.BeanUtils;
 import de.escalon.hypermedia.spring.BeanUtils.MethodParameterHandler;
+import de.escalon.hypermedia.spring.SpringActionInputParameter;
 
 public class HalFormsUtils {
 
@@ -78,30 +78,40 @@ public class HalFormsUtils {
 
 		@Override
 		public String onMethodParameter(MethodParameter methodParameter, ActionInputParameter annotatedParameter,
-				ActionDescriptor annotatedParameters, String parentParamName, String paramName, Class<?> parameterType,
+				ActionDescriptor actionDescriptor, String parentParamName, String paramName, Class<?> parameterType,
 				Object propertyValue) {
 
-			boolean readOnly = true;
-			String regex = null;
-			boolean required = false;
 			// TODO: templated comes from an Input attribute?
 			boolean templated = false;
 
-			// search only for annotations or mix with java api?
-			if (methodParameter.hasParameterAnnotation(Input.class)) {
-				Input input = methodParameter.getParameterAnnotation(Input.class);
+			ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter(methodParameter,
+					propertyValue);
 
-				// FIXME: input.readOnly or input.editable?
-				readOnly = !input.editable();
-				regex = StringUtils.isEmpty(input.pattern()) ? null : input.pattern();
-				required = input.required();
-			}
+			Map<String, Object> inputConstraints = constructorParamInputParameter.getInputConstraints();
+
+			// FIXME: input.readOnly or input.editable?
+			boolean readOnly = inputConstraints.containsKey(Input.EDITABLE)
+					? !((Boolean) inputConstraints.get(Input.EDITABLE)) : true;
+			String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
+			boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
+					: false;
+
 			String value = propertyValue != null ? propertyValue.toString() : null;
 
-			final Object[] possibleValues = annotatedParameter.getPossibleValues(methodParameter, annotatedParameters);
+			final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = constructorParamInputParameter
+					.getPossibleValues(actionDescriptor);
 			ValueSuggest<?> suggest = null;
 			if (possibleValues.length > 0) {
-				suggest = new ValueSuggest<Object>(Arrays.asList(possibleValues), "text", "value");
+
+				String textField = null;
+				String valueField = null;
+				List<Object> values = new ArrayList<Object>();
+				for (de.escalon.hypermedia.affordance.Suggest<Object> possibleValue : possibleValues) {
+					values.add(possibleValue.getValue());
+					textField = possibleValue.getTextField();
+					valueField = possibleValue.getValueField();
+				}
+				suggest = new ValueSuggest<Object>(values, textField, valueField);
 			}
 
 			Property property = new Property(parentParamName + paramName, readOnly, templated, value, null, regex, required,

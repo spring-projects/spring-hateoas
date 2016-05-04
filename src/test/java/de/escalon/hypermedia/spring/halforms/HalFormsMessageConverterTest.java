@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -56,6 +57,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
+import de.escalon.hypermedia.affordance.OptionSuggest;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import de.escalon.hypermedia.spring.siren.SirenMessageConverterTest;
 import de.escalon.hypermedia.spring.siren.SirenUtils;
@@ -117,24 +119,26 @@ public class HalFormsMessageConverterTest {
 
 	}
 
-	public static class SizeOptions implements Options {
+	public static class SizeOptions implements Options<Size> {
+
 		@Override
-		public Object[] get(String[] value, Object... args) {
-			return new Object[] { new Size("small", "Small"), new Size("big", "Big") };
+		public OptionSuggest<Size>[] get(String[] value, Object... args) {
+			return OptionSuggest.wrap(Arrays.asList(new Size("small", "Small"), new Size("big", "Big")), "value", "text");
 		}
+
 	}
 
 	public static class OrderItem {
 		private int orderNumber;
 		private String productCode;
 		private Integer quantity;
-		private Size size;
+		private String size;
 
 		@JsonCreator
 		public OrderItem(@Input(required = true) @JsonProperty("orderNumber") int orderNumber,
 				@Input(required = true) @JsonProperty("productCode") String productCode,
 				@Input(editable = true, pattern = "%d") @JsonProperty("quantity") Integer quantity,
-				@Select(options = SizeOptions.class) @JsonProperty("size") Size size) {
+				@Select(options = SizeOptions.class) @JsonProperty("size") String size) {
 			this.orderNumber = orderNumber;
 			this.productCode = productCode;
 			this.quantity = quantity;
@@ -153,7 +157,7 @@ public class HalFormsMessageConverterTest {
 			return quantity;
 		}
 
-		public Size getSize() {
+		public String getSize() {
 			return size;
 		}
 	}
@@ -280,6 +284,6 @@ public class HalFormsMessageConverterTest {
 		assertThat(json, hasJsonPath("$._templates.default"));
 		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("POST")));
 		assertThat(json, hasJsonPath("$._templates.default.contentType", equalTo("application/json")));
-		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(5)));
+		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(4)));
 	}
 }
