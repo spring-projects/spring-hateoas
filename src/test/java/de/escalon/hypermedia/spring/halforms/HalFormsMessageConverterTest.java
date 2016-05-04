@@ -54,6 +54,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import de.escalon.hypermedia.action.Input;
+import de.escalon.hypermedia.action.Options;
+import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import de.escalon.hypermedia.spring.siren.SirenMessageConverterTest;
 import de.escalon.hypermedia.spring.siren.SirenUtils;
@@ -95,18 +97,48 @@ public class HalFormsMessageConverterTest {
 		}
 	}
 
+	public static class Size {
+		private String value;
+		private String text;
+
+		@JsonCreator
+		public Size(@JsonProperty("value") String value, @JsonProperty("text") String text) {
+			this.value = value;
+			this.text = text;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public String getText() {
+			return text;
+		}
+
+	}
+
+	public static class SizeOptions implements Options {
+		@Override
+		public Object[] get(String[] value, Object... args) {
+			return new Object[] { new Size("small", "Small"), new Size("big", "Big") };
+		}
+	}
+
 	public static class OrderItem {
 		private int orderNumber;
 		private String productCode;
 		private Integer quantity;
+		private Size size;
 
 		@JsonCreator
 		public OrderItem(@Input(required = true) @JsonProperty("orderNumber") int orderNumber,
 				@Input(required = true) @JsonProperty("productCode") String productCode,
-				@Input(editable = true, pattern = "%d") @JsonProperty("quantity") Integer quantity) {
+				@Input(editable = true, pattern = "%d") @JsonProperty("quantity") Integer quantity,
+				@Select(options = SizeOptions.class) @JsonProperty("size") Size size) {
 			this.orderNumber = orderNumber;
 			this.productCode = productCode;
 			this.quantity = quantity;
+			this.size = size;
 		}
 
 		public int getOrderNumber() {
@@ -119,6 +151,10 @@ public class HalFormsMessageConverterTest {
 
 		public Integer getQuantity() {
 			return quantity;
+		}
+
+		public Size getSize() {
+			return size;
 		}
 	}
 
@@ -226,7 +262,7 @@ public class HalFormsMessageConverterTest {
 	public void testTemplates() throws JsonProcessingException {
 
 		Order order = new Order();
-		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null)))
+		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null)))
 				.withRel("order-items"));
 				// order.add(linkTo(methodOn(DummyOrderController.class).getOrder(42)).withSelfRel());
 				// order.add(linkTo(methodOn(DummyOrderController.class).getOrder(43)).withRel("next"));
@@ -244,6 +280,6 @@ public class HalFormsMessageConverterTest {
 		assertThat(json, hasJsonPath("$._templates.default"));
 		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("POST")));
 		assertThat(json, hasJsonPath("$._templates.default.contentType", equalTo("application/json")));
-		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(3)));
+		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(5)));
 	}
 }

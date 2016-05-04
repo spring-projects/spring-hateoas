@@ -1,6 +1,7 @@
 package de.escalon.hypermedia.spring.halforms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,6 +48,7 @@ public class HalFormsUtils {
 
 					if (actionDescriptor.hasRequestBody()) {
 
+						// TODO: add params to Template defined by Java API
 						BeanUtils.recurseBeanCreationParams(actionDescriptor.getRequestBody().getParameterType(), actionDescriptor,
 								actionDescriptor.getRequestBody(), actionDescriptor.getRequestBody().getValue(), "",
 								Collections.<String> emptySet(), new TemplateMethodParameterHandler(template));
@@ -78,23 +80,32 @@ public class HalFormsUtils {
 		public String onMethodParameter(MethodParameter methodParameter, ActionInputParameter annotatedParameter,
 				ActionDescriptor annotatedParameters, String parentParamName, String paramName, Class<?> parameterType,
 				Object propertyValue) {
+
 			boolean readOnly = true;
 			String regex = null;
 			boolean required = false;
+			// TODO: templated comes from an Input attribute?
 			boolean templated = false;
 
-			// TODO: templated comes from an Input attribute?
+			// search only for annotations or mix with java api?
 			if (methodParameter.hasParameterAnnotation(Input.class)) {
 				Input input = methodParameter.getParameterAnnotation(Input.class);
 
-				// input.readOnly or input.editable?
+				// FIXME: input.readOnly or input.editable?
 				readOnly = !input.editable();
 				regex = StringUtils.isEmpty(input.pattern()) ? null : input.pattern();
 				required = input.required();
 			}
-			String value = propertyValue != null ? propertyValue.toString() : "";
-			Property property = new Property(parentParamName + paramName, readOnly, templated, value, "", regex, required,
-					null);
+			String value = propertyValue != null ? propertyValue.toString() : null;
+
+			final Object[] possibleValues = annotatedParameter.getPossibleValues(methodParameter, annotatedParameters);
+			ValueSuggest<?> suggest = null;
+			if (possibleValues.length > 0) {
+				suggest = new ValueSuggest<Object>(Arrays.asList(possibleValues), "text", "value");
+			}
+
+			Property property = new Property(parentParamName + paramName, readOnly, templated, value, null, regex, required,
+					suggest);
 
 			template.getProperties().add(property);
 
