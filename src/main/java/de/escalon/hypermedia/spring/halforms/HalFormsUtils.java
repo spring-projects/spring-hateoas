@@ -81,14 +81,20 @@ public class HalFormsUtils {
 			boolean readOnly = true;
 			String regex = null;
 			boolean required = false;
+			boolean templated = false;
+
+			// TODO: templated comes from an Input attribute?
 			if (methodParameter.hasParameterAnnotation(Input.class)) {
 				Input input = methodParameter.getParameterAnnotation(Input.class);
+
+				// input.readOnly or input.editable?
 				readOnly = !input.editable();
 				regex = StringUtils.isEmpty(input.pattern()) ? null : input.pattern();
 				required = input.required();
 			}
 			String value = propertyValue != null ? propertyValue.toString() : "";
-			Property property = new Property(parentParamName + paramName, readOnly, false, value, "", regex, required, null);
+			Property property = new Property(parentParamName + paramName, readOnly, templated, value, "", regex, required,
+					null);
 
 			template.getProperties().add(property);
 

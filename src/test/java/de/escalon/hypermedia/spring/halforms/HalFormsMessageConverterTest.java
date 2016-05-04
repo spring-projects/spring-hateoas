@@ -3,6 +3,7 @@ package de.escalon.hypermedia.spring.halforms;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static de.escalon.hypermedia.spring.AffordanceBuilder.linkTo;
 import static de.escalon.hypermedia.spring.AffordanceBuilder.methodOn;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -239,6 +240,10 @@ public class HalFormsMessageConverterTest {
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
 
-		assertThat(json, hasJsonPath("$.actions", hasSize(3)));
+		assertThat(json, hasJsonPath("$._templates"));
+		assertThat(json, hasJsonPath("$._templates.default"));
+		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("POST")));
+		assertThat(json, hasJsonPath("$._templates.default.contentType", equalTo("application/json")));
+		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(3)));
 	}
 }
