@@ -1,13 +1,10 @@
 package de.escalon.hypermedia.affordance;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Type;
-import org.springframework.core.MethodParameter;
 
 /**
  * Interface to represent an input parameter to a resource handler method, independent of a particular ReST framework.
@@ -128,35 +125,6 @@ public interface ActionInputParameter {
 	 * @return possible values or empty array
 	 */
 	Object[] getPossibleValues(ActionDescriptor actionDescriptor);
-
-	/**
-	 * Gets possible values for a method parameter.
-	 *
-	 * @param actionDescriptor in case that access to the other parameters is necessary to determine the possible values.
-	 * @param method having parameter
-	 * @param parameterIndex of parameter
-	 * @return possible values or empty array
-	 */
-	Object[] getPossibleValues(Method method, int parameterIndex, ActionDescriptor actionDescriptor);
-
-	/**
-	 * Gets possible values for a constructor parameter.
-	 *
-	 * @param actionDescriptor in case that access to the other parameters is necessary to determine the possible values.
-	 * @param constructor having parameter
-	 * @param parameterIndex of parameter
-	 * @return possible values or empty array
-	 */
-	Object[] getPossibleValues(Constructor constructor, int parameterIndex, ActionDescriptor actionDescriptor);
-
-	/**
-	 * Gets possible values for a constructor parameter.
-	 *
-	 * @param actionDescriptor in case that access to the other parameters is necessary to determine the possible values.
-	 * @param methodParameter to get possible values for
-	 * @return possible values or empty array
-	 */
-	Object[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor);
 
 	/**
 	 * Parameter is an array or collection, think {?val*} in uri template.

@@ -1,6 +1,6 @@
 package de.escalon.hypermedia.spring.xhtml;
 
-import static de.escalon.hypermedia.spring.xhtml.XhtmlWriter.OptionalAttributes.*;
+import static de.escalon.hypermedia.spring.xhtml.XhtmlWriter.OptionalAttributes.attr;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -11,10 +11,23 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.Property;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Type;
@@ -25,20 +38,13 @@ import de.escalon.hypermedia.affordance.DataType;
 import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
 import de.escalon.hypermedia.spring.SpringActionInputParameter;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.Property;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.TemplateVariable;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Created by Dietrich on 09.02.2015.
  */
 public class XhtmlWriter extends Writer {
 
-	private Writer writer;
+	private final Writer writer;
 	private List<String> stylesheets = Collections.emptyList();
 
 	public static final String HTML_HEAD_START = "" + //
@@ -68,9 +74,9 @@ public class XhtmlWriter extends Writer {
 	private String methodParam = "_method";
 	private DocumentationProvider documentationProvider = new DefaultDocumentationProvider();
 
-	private String formControlClass = "form-control";
-	private String formGroupClass = "form-group";
-	private String controlLabelClass = "control-label";
+	private final String formControlClass = "form-control";
+	private final String formGroupClass = "form-group";
+	private final String controlLabelClass = "control-label";
 
 	public XhtmlWriter(Writer writer) {
 		this.writer = writer;
@@ -196,7 +202,7 @@ public class XhtmlWriter extends Writer {
 
 	public static class OptionalAttributes {
 
-		private Map<String, String> attributes = new LinkedHashMap<String, String>();
+		private final Map<String, String> attributes = new LinkedHashMap<String, String>();
 
 		@Override
 		public String toString() {
@@ -574,9 +580,8 @@ public class XhtmlWriter extends Writer {
 										ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter
 												(new MethodParameter(constructor, paramIndex), propertyValue);
 
-										final Object[] possibleValues =
-												actionInputParameter.getPossibleValues(
-														constructor, paramIndex, actionDescriptor);
+										Object[] possibleValues =
+												constructorParamInputParameter.getPossibleValues(actionDescriptor);
 
 										appendInputOrSelect(actionInputParameter, parentParamName + paramName,
 												constructorParamInputParameter, possibleValues);
@@ -636,9 +641,7 @@ public class XhtmlWriter extends Writer {
 					MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 					ActionInputParameter propertySetterInputParameter = new SpringActionInputParameter(methodParameter,
 							propertyValue);
-					final Object[] possibleValues = actionInputParameter.getPossibleValues(propertyDescriptor
-									.getWriteMethod(), 0,
-							actionDescriptor);
+					final Object[] possibleValues = propertySetterInputParameter.getPossibleValues(actionDescriptor);
 					appendInputOrSelect(actionInputParameter, propertyName, propertySetterInputParameter, possibleValues);
 				} else if (actionInputParameter.isArrayOrCollection()) {
 					Object[] callValues = actionInputParameter.getValues();

@@ -11,15 +11,20 @@
 package de.escalon.hypermedia.spring;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import de.escalon.hypermedia.action.Action;
-import de.escalon.hypermedia.action.Cardinality;
-import de.escalon.hypermedia.action.ResourceHandler;
-import de.escalon.hypermedia.affordance.ActionDescriptor;
-import de.escalon.hypermedia.affordance.ActionInputParameter;
-import de.escalon.hypermedia.affordance.PartialUriTemplate;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
@@ -31,7 +36,19 @@ import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.http.HttpEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import de.escalon.hypermedia.action.Action;
+import de.escalon.hypermedia.action.Cardinality;
+import de.escalon.hypermedia.action.ResourceHandler;
+import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.ActionInputParameter;
+import de.escalon.hypermedia.affordance.PartialUriTemplate;
 
 /**
  * Factory for {@link AffordanceBuilder}s in a Spring MVC rest service. Normally one should use the static methods
@@ -336,8 +353,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 	 * @return maps parameter names to parameter info
 	 */
 	private static Map<String, ActionInputParameter> getActionInputParameters(Class<? extends Annotation> annotation,
-																			  Method method, Object... arguments
-	) {
+																			  Method method, Object... arguments) {
 
 		Assert.notNull(method, "MethodInvocation must not be null!");
 

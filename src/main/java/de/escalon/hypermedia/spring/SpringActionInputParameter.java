@@ -14,9 +14,22 @@
 package de.escalon.hypermedia.spring;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ValueConstants;
 
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
@@ -25,12 +38,6 @@ import de.escalon.hypermedia.action.Type;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.DataType;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * Describes a Spring MVC rest services method parameter value with recorded sample call value and input constraints.
@@ -44,11 +51,12 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	private final RequestParam requestParam;
 	private final PathVariable pathVariable;
 	private final RequestHeader requestHeader;
-	private Input inputAnnotation;
-	private MethodParameter methodParameter;
-	private Object value;
+	private final Input inputAnnotation;
+	private final MethodParameter methodParameter;
+	private final Object value;
 	private Boolean arrayOrCollection = null;
-	private Map<String, Object> inputConstraints = new HashMap<String, Object>();
+	private final Map<String, Object> inputConstraints = new HashMap<String, Object>();
+	private Object [] possibleValues;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -62,13 +70,13 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	public SpringActionInputParameter(MethodParameter methodParameter, Object value, ConversionService conversionService) {
 		this.methodParameter = methodParameter;
 		this.value = value;
-		this.requestBody = methodParameter.getParameterAnnotation(RequestBody.class);
-		this.requestParam = methodParameter.getParameterAnnotation(RequestParam.class);
-		this.pathVariable = methodParameter.getParameterAnnotation(PathVariable.class);
-		this.requestHeader = methodParameter.getParameterAnnotation(RequestHeader.class);
+		requestBody = methodParameter.getParameterAnnotation(RequestBody.class);
+		requestParam = methodParameter.getParameterAnnotation(RequestParam.class);
+		pathVariable = methodParameter.getParameterAnnotation(PathVariable.class);
+		requestHeader = methodParameter.getParameterAnnotation(RequestHeader.class);
 		// always determine input constraints,
 		// might be a nested property which is neither requestBody, requestParam nor pathVariable
-		this.inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
+		inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
 		if (inputAnnotation != null) {
 			putInputConstraint(Input.MIN, Integer.MIN_VALUE, inputAnnotation.min());
 			putInputConstraint(Input.MAX, Integer.MAX_VALUE, inputAnnotation.max());
@@ -78,7 +86,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			putInputConstraint(Input.PATTERN, "", inputAnnotation.pattern());
 		}
 		this.conversionService = conversionService;
-		this.typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
+		typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
 	}
 
 	/**
@@ -103,6 +111,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return value, may be null
 	 */
+	@Override
 	public Object getValue() {
 		return value;
 	}
@@ -112,6 +121,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return value, may be null
 	 */
+	@Override
 	public String getValueFormatted() {
 		String ret;
 		if (value == null) {
@@ -145,18 +155,22 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	}
 
 
+	@Override
 	public boolean isRequestBody() {
 		return requestBody != null;
 	}
 
+	@Override
 	public boolean isRequestParam() {
 		return requestParam != null;
 	}
 
+	@Override
 	public boolean isPathVariable() {
 		return pathVariable != null;
 	}
 
+	@Override
 	public boolean isRequestHeader() {
 		return requestHeader != null;
 	}
@@ -181,10 +195,12 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return true if parameter is constrained
 	 */
+	@Override
 	public boolean hasInputConstraints() {
 		return !inputConstraints.isEmpty();
 	}
 
+	@Override
 	public <T extends Annotation> T getAnnotation(Class<T> annotation) {
 		return methodParameter.getParameterAnnotation(annotation);
 	}
@@ -275,21 +291,11 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		return getPossibleValues(methodParameter, actionDescriptor);
 	}
 
-	@Override
-	public Object[] getPossibleValues(Method method, int parameterIndex, ActionDescriptor actionDescriptor) {
-		MethodParameter methodParameter = new MethodParameter(method, parameterIndex);
-		return getPossibleValues(methodParameter, actionDescriptor);
-	}
-
-	@Override
-	public Object[] getPossibleValues(Constructor constructor, int parameterIndex, ActionDescriptor
-			actionDescriptor) {
-		MethodParameter methodParameter = new MethodParameter(constructor, parameterIndex);
-		return getPossibleValues(methodParameter, actionDescriptor);
-	}
-
-	public Object[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
+	private Object[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
 		try {
+			if(possibleValues!=null) {
+				return possibleValues;
+			}
 			Class<?> parameterType = methodParameter.getNestedParameterType();
 			Object[] possibleValues;
 			Class<?> nested;
@@ -328,11 +334,16 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		}
 	}
 
+	void setPossibleValues(Object[] possibleValues) {
+		this.possibleValues = possibleValues;
+	}
+
 	/**
 	 * Determines if action input parameter is an array or collection.
 	 *
 	 * @return true if array or collection
 	 */
+	@Override
 	public boolean isArrayOrCollection() {
 		if (arrayOrCollection == null) {
 			arrayOrCollection = DataType.isArrayOrCollection(getParameterType());
@@ -347,6 +358,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return true if required
 	 */
+	@Override
 	public boolean isRequired() {
 		boolean ret;
 		if (isRequestBody()) {
@@ -391,6 +403,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 * @return call values or empty array
 	 * @throws UnsupportedOperationException if this input parameter is not an array or collection
 	 */
+	@Override
 	public Object[] getValues() {
 		Object[] callValues;
 		if (!isArrayOrCollection()) {
@@ -415,6 +428,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return if call value is present
 	 */
+	@Override
 	public boolean hasValue() {
 		return value != null;
 	}
@@ -424,6 +438,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return name
 	 */
+	@Override
 	public String getParameterName() {
 		String ret;
 		String parameterName = methodParameter.getParameterName();
@@ -450,6 +465,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return type
 	 */
+	@Override
 	public Class<?> getParameterType() {
 		return methodParameter.getParameterType();
 	}
@@ -459,6 +475,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return generic type
 	 */
+	@Override
 	public java.lang.reflect.Type getGenericParameterType() {
 		return methodParameter.getGenericParameterType();
 	}
@@ -468,6 +485,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 *
 	 * @return constraints
 	 */
+	@Override
 	public Map<String, Object> getInputConstraints() {
 		return inputConstraints;
 	}
