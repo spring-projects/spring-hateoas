@@ -39,7 +39,7 @@ public class HalFormsUtils {
 				Affordance affordance = (Affordance) link;
 				for (ActionDescriptor actionDescriptor : affordance.getActionDescriptors()) {
 					Template template = new Template(link.getHref());
-					template.setContentType(actionDescriptor.getContentType());
+					template.setContentType(actionDescriptor.getConsumes());
 
 					// there is only one httpmethod??
 					template.setMethod(new RequestMethod[] { RequestMethod.valueOf(actionDescriptor.getHttpMethod()) });
