@@ -344,7 +344,7 @@ public class HalFormsMessageConverterTest {
 		assertThat(json, hasJsonPath("$._templates.default"));
 		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("POST")));
 		assertThat(json, hasJsonPath("$._templates.default.contentType", equalTo("application/json")));
-		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(4)));
+		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(5)));
 	}
 
 	@Test
@@ -377,7 +377,7 @@ public class HalFormsMessageConverterTest {
 		String json = objectMapper.valueToTree(entity).toString();
 
 		// If there are no @RequestParam AffordanceBuilder doesn't declare a UriTemplate variable
-		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filtered?count=0{&status}")));
+		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filtered{?count,status}")));
 	}
 
 	@Test
