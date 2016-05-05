@@ -38,13 +38,17 @@ public class HalFormsUtils {
 			if (link instanceof Affordance) {
 				Affordance affordance = (Affordance) link;
 				for (ActionDescriptor actionDescriptor : affordance.getActionDescriptors()) {
-					Template template = new Template(link.getHref());
-					template.setContentType(actionDescriptor.getConsumes());
+					if ("application/prs.hal-forms+json".equals(actionDescriptor.getProduces())) {
+						processed.add(affordance);
+					} else {
+						Template template = new Template(link.getHref());
+						template.setContentType(actionDescriptor.getConsumes());
 
-					// there is only one httpmethod??
-					template.setMethod(new RequestMethod[] { RequestMethod.valueOf(actionDescriptor.getHttpMethod()) });
-					actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
-					processed.add(template);
+						// there is only one httpmethod??
+						template.setMethod(new RequestMethod[] { RequestMethod.valueOf(actionDescriptor.getHttpMethod()) });
+						actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
+						processed.add(template);
+					}
 				}
 			} else {
 				processed.add(link);
