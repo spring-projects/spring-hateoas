@@ -14,7 +14,6 @@
 package de.escalon.hypermedia.spring;
 
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -337,7 +336,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 * @param annotatedParameter which requires the bean
 	 * @param currentCallValue sample call value
 	 */
-	public static void recurseBeanCreationParams(final Class<?> beanType,
+	static void recurseBeanCreationParams(final Class<?> beanType,
 			final ActionInputParameter annotatedParameter, final Object currentCallValue, final String parentParamName, final Set<String> knownFields,
 			final ActionInputParameterVisitor methodHandler) {
 
@@ -390,7 +389,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			}
 
 			// TODO support Option provider by other method args?
-			final BeanInfo beanInfo = getBeanInfo(beanType);
+			final BeanInfo beanInfo = Introspector.getBeanInfo(beanType);
 			final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 
 			// add input field for every setter
@@ -417,12 +416,21 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private static String invokeHandlerOrFollowRecurse(MethodParameter methodParameter,
 			ActionInputParameter annotatedParameter, String parentParamName,
-			String paramName, Class<?> parameterType, Object propertyValue, Set<String> fields,
+			String paramName, Class<?> parameterType, Object propertyValue, Set<String> knownFields,
 			ActionInputParameterVisitor handler) {
 		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)) {
-
-			if (annotatedParameter.isIncluded(paramName) && !fields.contains(parentParamName + paramName)) {
-				ActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
+			/**
+			 * TODO This is a temporal patch, to be reviewed...
+			 */
+			if(annotatedParameter==null) {
+				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
+				return handler.visit(inputParameter, parentParamName, paramName,
+						propertyValue);
+			}
+			else if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
+				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
+				// TODO We need to find a better solution for this
+				inputParameter.possibleValues = ((SpringActionInputParameter)annotatedParameter).possibleValues;
 				return handler.visit(inputParameter, parentParamName, paramName,
 						propertyValue);
 			}
@@ -435,18 +443,10 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				callValueBean = propertyValue;
 			}
 			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".",
-					fields, handler);
+					knownFields, handler);
 		}
 
 		return null;
-	}
-
-	private static BeanInfo getBeanInfo(Class<?> beanType) {
-		try {
-			return Introspector.getBeanInfo(beanType);
-		} catch (IntrospectionException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 }

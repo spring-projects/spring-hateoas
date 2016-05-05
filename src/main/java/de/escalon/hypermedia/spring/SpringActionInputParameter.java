@@ -59,7 +59,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	private final Object value;
 	private Boolean arrayOrCollection = null;
 	private final Map<String, Object> inputConstraints = new HashMap<String, Object>();
-	private Suggest[] possibleValues;
+	Suggest[] possibleValues;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -218,7 +218,6 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 */
 	@Override
 	public boolean isHidden(String property) {
-		Annotation[] paramAnnotations = methodParameter.getParameterAnnotations();
 		Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
 		return inputAnnotation != null && arrayContains(inputAnnotation.hidden(), property);
 	}
@@ -287,17 +286,17 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	}
 
 	@Override
-	public Suggest[] getPossibleValues(ActionDescriptor actionDescriptor) {
+	public <T> Suggest<T>[] getPossibleValues(ActionDescriptor actionDescriptor) {
 		return getPossibleValues(methodParameter, actionDescriptor);
 	}
 
-	private Suggest[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
+	private <T> Suggest<T>[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
 		try {
 			if (possibleValues != null) {
 				return possibleValues;
 			}
 			Class<?> parameterType = methodParameter.getNestedParameterType();
-			Suggest[] possibleValues;
+			Suggest<?>[] possibleValues;
 			Class<?> nested;
 			Select select = methodParameter.getParameterAnnotation(Select.class);
 			SuggestType type = select!=null?select.type():SuggestType.INTERNAL;
@@ -328,7 +327,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 					possibleValues = Suggest.EMPTY;
 				}
 			}
-			return possibleValues;
+			return (Suggest<T>[]) possibleValues;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

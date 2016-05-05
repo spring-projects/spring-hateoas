@@ -17,13 +17,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
+import de.escalon.hypermedia.action.DTORequestParam;
 import de.escalon.hypermedia.action.ResourceHandler;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
@@ -69,7 +70,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 
 		String pathMapping = MAPPING_DISCOVERER.getMapping(controller, method);
 
-		final List<String> params = getRequestParamNames(method);
+		final Set<String> params = getRequestParamNames(method, parameters);
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
 
@@ -94,7 +95,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		return new AffordanceBuilder(partialUriTemplate.expand(values), Collections.singletonList(actionDescriptor));
 	}
 
-	private String join(List<String> params) {
+	private String join(Set<String> params) {
 		StringBuilder sb = new StringBuilder();
 		for (String param : params) {
 			if (sb.length() > 0) {
@@ -149,7 +150,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 
 		String pathMapping = MAPPING_DISCOVERER.getMapping(invokedMethod);
 
-		List<String> params = getRequestParamNames(invokedMethod);
+		Set<String> params = getRequestParamNames(invokedMethod, invocation.getArguments());
 		String query = join(params);
 		String mapping = StringUtils.isEmpty(query) ? pathMapping : pathMapping + "{?" + query + "}";
 
@@ -177,15 +178,18 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 
 		return new AffordanceBuilder(partialUriTemplate.expand(values), Collections.singletonList(actionDescriptor));
 	}
+	
+	public Map<String, ActionInputParameter> getRequestParams(Method invokedMethod, Object [] arguments) {
+		// the action descriptor needs to know the param type, value and name
+			Map<String, ActionInputParameter> requestParamMap =
+					getActionInputParameters(RequestParam.class, invokedMethod, arguments);
+			requestParamMap.putAll(getDTOActionInputParameters(invokedMethod, arguments));
+			return requestParamMap;
+			
+	}
 
-	private List<String> getRequestParamNames(Method invokedMethod) {
-		MethodParameters parameters = new MethodParameters(invokedMethod);
-		final List<MethodParameter> requestParams = parameters.getParametersWith(RequestParam.class);
-		List<String> params = new ArrayList<String>(requestParams.size());
-		for (MethodParameter requestParam : requestParams) {
-			params.add(requestParam.getParameterName());
-		}
-		return params;
+	private Set<String> getRequestParamNames(Method invokedMethod, Object [] arguments) {
+		return getRequestParams(invokedMethod, arguments).keySet();
 	}
 
 	private ActionDescriptor createActionDescriptor(Method invokedMethod,
@@ -211,8 +215,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		}
 
 		// the action descriptor needs to know the param type, value and name
-		Map<String, ActionInputParameter> requestParamMap =
-				getActionInputParameters(RequestParam.class, invokedMethod, arguments);
+		Map<String, ActionInputParameter> requestParamMap = getRequestParams(invokedMethod, arguments);
 		for (Map.Entry<String, ActionInputParameter> entry : requestParamMap.entrySet()) {
 			ActionInputParameter value = entry.getValue();
 			if (value != null) {
@@ -358,7 +361,7 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 		Assert.notNull(method, "MethodInvocation must not be null!");
 
 		MethodParameters parameters = new MethodParameters(method);
-		Map<String, ActionInputParameter> result = new HashMap<String, ActionInputParameter>();
+		Map<String, ActionInputParameter> result = new LinkedHashMap<String, ActionInputParameter>();
 
 		for (MethodParameter parameter : parameters.getParametersWith(annotation)) {
 			final int parameterIndex = parameter.getParameterIndex();
@@ -368,6 +371,37 @@ public class AffordanceBuilderFactory implements MethodLinkBuilderFactory<Afford
 			} else {
 				argument = null;
 			}
+			result.put(parameter.getParameterName(), new SpringActionInputParameter(parameter, argument));
+		}
+
+		return result;
+	}
+	
+
+	/**
+	 * Returns {@link ActionInputParameter}s contained in the method link.
+	 *
+	 * @param annotation to inspect
+	 * @param method must not be {@literal null}.
+	 * @param arguments to the method link
+	 * @return maps parameter names to parameter info
+	 */
+	private Map<String, ActionInputParameter> getDTOActionInputParameters(Method method, Object... arguments) {
+
+		Assert.notNull(method, "MethodInvocation must not be null!");
+
+		MethodParameters parameters = new MethodParameters(method);
+		Map<String, ActionInputParameter> result = new HashMap<String, ActionInputParameter>();
+
+		for (MethodParameter parameter : parameters.getParametersWith(DTORequestParam.class)) {
+			final int parameterIndex = parameter.getParameterIndex();
+			final Object argument;
+			if (parameterIndex < arguments.length) {
+				argument = arguments[parameterIndex];
+			} else {
+				argument = null;
+			}
+
 			result.put(parameter.getParameterName(), new SpringActionInputParameter(parameter, argument));
 		}
 
