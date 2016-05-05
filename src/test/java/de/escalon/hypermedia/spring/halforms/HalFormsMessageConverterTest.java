@@ -194,9 +194,19 @@ public class HalFormsMessageConverterTest {
 
 	}
 
-	static class OrderFilter {
+	public static class OrderFilter {
 		private String status;
 		private int count;
+
+		public OrderFilter() {
+			// TODO Auto-generated constructor stub
+		}
+
+		@JsonCreator
+		public OrderFilter(@Input @JsonProperty("count") int count, @Input @JsonProperty("status") String status) {
+			this.status = status;
+			this.count = count;
+		}
 
 		public String getStatus() {
 			return status;
@@ -334,9 +344,11 @@ public class HalFormsMessageConverterTest {
 	public void testTemplatesFromRequestParamComplexWithoutRequestParamAnnotation() throws JsonProcessingException {
 
 		Order order = new Order();
-		Affordance affordance = linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter())).withRel("orders");
-		Assert.assertArrayEquals(new String[]{"status", "count"}, affordance.getActionDescriptors().get(0).getRequestParamNames().toArray(new String[0]));
-		
+		Affordance affordance = linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter()))
+				.withRel("orders");
+		Assert.assertArrayEquals(new String[] { "count", "status" },
+				affordance.getActionDescriptors().get(0).getRequestParamNames().toArray(new String[0]));
+
 		order.add(affordance);
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
@@ -350,7 +362,8 @@ public class HalFormsMessageConverterTest {
 	public void testTemplatesFromRequestParamComplexWithRequestParamAnnotation() throws JsonProcessingException {
 
 		Order order = new Order();
-		Affordance affordance = linkTo(methodOn(DummyOrderController.class).getOrdersFilteredWithRequestParam(null)).withRel("orders");
+		Affordance affordance = linkTo(methodOn(DummyOrderController.class).getOrdersFilteredWithRequestParam(null))
+				.withRel("orders");
 		order.add(affordance);
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
