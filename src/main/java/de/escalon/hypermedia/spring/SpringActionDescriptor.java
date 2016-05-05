@@ -51,6 +51,7 @@ import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
 import de.escalon.hypermedia.action.ResourceHandler;
+import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
@@ -366,8 +367,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 * @param annotatedParameter which requires the bean
 	 * @param currentCallValue sample call value
 	 */
-	static void recurseBeanCreationParams(final Class<?> beanType,
-			final ActionInputParameter annotatedParameter, final Object currentCallValue, final String parentParamName, final Set<String> knownFields,
+	static void recurseBeanCreationParams(final Class<?> beanType, final ActionInputParameter annotatedParameter,
+			final Object currentCallValue, final String parentParamName, final Set<String> knownFields,
 			final ActionInputParameterVisitor methodHandler) {
 
 		// TODO collection, map and object node creation are only describable by an annotation, not via type reflection
@@ -403,8 +404,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 							Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
 							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
-							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter,
-									parentParamName, paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
+							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName,
+									paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
 
 							if (fieldName != null) {
 								knownConstructorFields.add(fieldName);
@@ -447,21 +448,19 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	private static String invokeHandlerOrFollowRecurse(MethodParameter methodParameter,
 			ActionInputParameter annotatedParameter, String parentParamName, String paramName, Class<?> parameterType,
 			Object propertyValue, Set<String> knownFields, ActionInputParameterVisitor handler) {
-		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)) {
+		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)
+				|| methodParameter.hasParameterAnnotation(Select.class)) {
 			/**
 			 * TODO This is a temporal patch, to be reviewed...
 			 */
-			if(annotatedParameter==null) {
+			if (annotatedParameter == null) {
 				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
-				return handler.visit(inputParameter, parentParamName, paramName,
-						propertyValue);
-			}
-			else if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
+				return handler.visit(inputParameter, parentParamName, paramName, propertyValue);
+			} else if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
 				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
 				// TODO We need to find a better solution for this
-				inputParameter.possibleValues = ((SpringActionInputParameter)annotatedParameter).possibleValues;
-				return handler.visit(inputParameter, parentParamName, paramName,
-						propertyValue);
+				inputParameter.possibleValues = ((SpringActionInputParameter) annotatedParameter).possibleValues;
+				return handler.visit(inputParameter, parentParamName, paramName, propertyValue);
 			}
 
 		} else {
@@ -471,8 +470,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			} else {
 				callValueBean = propertyValue;
 			}
-			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".",
-					knownFields, handler);
+			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".", knownFields,
+					handler);
 		}
 
 		return null;

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
-@JsonPropertyOrder({ "links", "templates" })
+@JsonPropertyOrder({ "embeddeds", "links", "templates" })
 public class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 
 	private List<Template> templates = new ArrayList<Template>();
