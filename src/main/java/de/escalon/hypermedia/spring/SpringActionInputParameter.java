@@ -89,7 +89,10 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			putInputConstraint(Input.STEP, 0, inputAnnotation.step());
 			putInputConstraint(Input.PATTERN, "", inputAnnotation.pattern());
 			putInputConstraint(Input.EDITABLE, "", inputAnnotation.editable());
-			putInputConstraint(Input.READONLY, "", inputAnnotation.readOnly());
+			/**
+			 * I think this is not correct, or at least makes XmlHtmlWriter to write readonly="[java.lang.String"
+			 */
+			//putInputConstraint(Input.READONLY, "", inputAnnotation.readOnly());
 			putInputConstraint(Input.REQUIRED, "", inputAnnotation.required());
 
 		}
