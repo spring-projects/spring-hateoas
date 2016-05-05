@@ -765,7 +765,7 @@ public class XhtmlWriter extends Writer {
 			if (possibleValue.getValue().equals(callValue)) {
 				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
 			} else {
-				option(possibleValue.toString(), attr("value", possibleValue.getValueField()));
+				option(possibleValue.getTextField(), attr("value", possibleValue.getValueField()));
 			}
 		}
 		endSelect();
@@ -793,7 +793,7 @@ public class XhtmlWriter extends Writer {
 			if (ObjectUtils.containsElement(actualValues, possibleValue.getValue())) {
 				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
 			} else {
-				option(possibleValue.toString(), attr("value", possibleValue.getValueField()));
+				option(possibleValue.getTextField(), attr("value", possibleValue.getValueField()));
 			}
 		}
 		endForm();

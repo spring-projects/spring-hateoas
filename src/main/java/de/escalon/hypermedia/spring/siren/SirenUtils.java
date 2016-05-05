@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
@@ -32,14 +31,12 @@ import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Type;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
+import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.DataType;
 import de.escalon.hypermedia.affordance.Suggest;
-import de.escalon.hypermedia.spring.BeanUtils;
-import de.escalon.hypermedia.spring.BeanUtils.MethodParameterHandler;
 import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
-import de.escalon.hypermedia.spring.SpringActionInputParameter;
 
 /**
  * Maps spring-hateoas response data to siren data. Created by Dietrich on 17.04.2016.
@@ -326,52 +323,32 @@ public class SirenUtils {
 
 	private List<SirenField> toSirenFields(ActionDescriptor actionDescriptor) {
 		List<SirenField> ret = new ArrayList<SirenField>();
-		if (actionDescriptor.hasRequestBody()) {
-
-			SirenMethodParameterHandler parameterHandler = new SirenMethodParameterHandler();
-			BeanUtils.recurseBeanCreationParams(actionDescriptor.getRequestBody().getParameterType(), actionDescriptor,
-					actionDescriptor.getRequestBody(), actionDescriptor.getRequestBody().getValue(), "",
-					Collections.<String> emptySet(), parameterHandler);
-
-			ret.addAll(parameterHandler.getFields());
-
-		} else {
-			Collection<String> paramNames = actionDescriptor.getRequestParamNames();
-			for (String paramName : paramNames) {
-				ActionInputParameter inputParameter = actionDescriptor.getActionInputParameter(paramName);
-				Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
-
-				ret.add(createSirenField(paramName, inputParameter.getValueFormatted(), inputParameter, possibleValues));
-			}
-		}
+		actionDescriptor.accept(new SirenActionInputParameterVisitor(actionDescriptor, ret));
 		return ret;
 	}
 
-	private class SirenMethodParameterHandler implements MethodParameterHandler {
+	private class SirenActionInputParameterVisitor implements ActionInputParameterVisitor {
 
-		private List<SirenField> fields = new ArrayList<SirenField>();
+		private final List<SirenField> fields;
+		private final ActionDescriptor actionDescriptor;
+		
+		public SirenActionInputParameterVisitor(ActionDescriptor actionDescriptor, List<SirenField> fields) {
+			this.actionDescriptor = actionDescriptor;
+			this.fields = fields;
+		}
 
 		@Override
-		public String onMethodParameter(MethodParameter methodParameter, ActionInputParameter annotatedParameter,
-				ActionDescriptor annotatedParameters, String parentParamName, String paramName, Class<?> parameterType,
-				Object propertyValue) {
-			ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter(methodParameter,
-					propertyValue);
-
-			final Suggest<?>[] possibleValues = constructorParamInputParameter.getPossibleValues(annotatedParameters);
+		public String visit(ActionInputParameter inputParameter, 
+				String parentParamName, String paramName, Object propertyValue) {
+			final Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
 
 			// dot-separated property path as field name
 			SirenField sirenField = createSirenField(parentParamName + paramName, propertyValue,
-					constructorParamInputParameter, possibleValues);
+					inputParameter, possibleValues);
 
 			fields.add(sirenField);
 			return sirenField.getName();
 		}
-
-		public List<SirenField> getFields() {
-			return fields;
-		}
-
 	}
 
 	private SirenField createSirenField(String paramName, Object propertyValue, ActionInputParameter inputParameter,

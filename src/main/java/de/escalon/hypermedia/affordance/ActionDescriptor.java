@@ -93,4 +93,10 @@ public interface ActionDescriptor {
 	 * @return cardinality
 	 */
 	Cardinality getCardinality();
+
+	/**
+	 * Visits the body to find parameters
+	 * @param visitor
+	 */
+	void accept(ActionInputParameterVisitor visitor);
 }

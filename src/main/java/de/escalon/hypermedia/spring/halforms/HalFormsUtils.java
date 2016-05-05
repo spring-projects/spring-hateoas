@@ -1,11 +1,9 @@
 package de.escalon.hypermedia.spring.halforms;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,10 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
+import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
 import de.escalon.hypermedia.affordance.Affordance;
-import de.escalon.hypermedia.spring.BeanUtils;
-import de.escalon.hypermedia.spring.BeanUtils.MethodParameterHandler;
-import de.escalon.hypermedia.spring.SpringActionInputParameter;
 
 public class HalFormsUtils {
 
@@ -45,22 +41,7 @@ public class HalFormsUtils {
 
 					// there is only one httpmethod??
 					template.setMethod(new RequestMethod[] { RequestMethod.valueOf(actionDescriptor.getHttpMethod()) });
-
-					if (actionDescriptor.hasRequestBody()) {
-
-						// TODO: add params to Template defined by Java API
-						BeanUtils.recurseBeanCreationParams(actionDescriptor.getRequestBody().getParameterType(), actionDescriptor,
-								actionDescriptor.getRequestBody(), actionDescriptor.getRequestBody().getValue(), "",
-								Collections.<String> emptySet(), new TemplateMethodParameterHandler(template));
-
-						// TODO: templated GETs
-					} else if (!actionDescriptor.getRequestParamNames().isEmpty()) {
-						template.setProperties(new ArrayList<Property>());
-						for (String paramName : actionDescriptor.getRequestParamNames()) {
-							ActionInputParameter actionInputParameter = actionDescriptor.getActionInputParameter(paramName);
-							template.getProperties().add(getProperty(actionInputParameter, actionDescriptor, null, paramName));
-						}
-					}
+					actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
 					processed.add(template);
 				}
 			} else {
@@ -104,23 +85,21 @@ public class HalFormsUtils {
 		return new Property(name, readOnly, templated, value, null, regex, required, suggest);
 	}
 
-	public static class TemplateMethodParameterHandler implements MethodParameterHandler {
+	static class TemplateActionInputParameterVisitor implements ActionInputParameterVisitor {
 
 		private final Template template;
+		private final ActionDescriptor actionDescriptor;
 
-		public TemplateMethodParameterHandler(Template template) {
+		public TemplateActionInputParameterVisitor(Template template, ActionDescriptor actionDescriptor) {
 			this.template = template;
-			if (this.template.getProperties() == null) {
-				this.template.setProperties(new ArrayList<Property>());
-			}
+			this.actionDescriptor = actionDescriptor;
 		}
 
 		@Override
-		public String onMethodParameter(MethodParameter methodParameter, ActionInputParameter annotatedParameter,
-				ActionDescriptor actionDescriptor, String parentParamName, String paramName, Class<?> parameterType,
-				Object propertyValue) {
+		public String visit(ActionInputParameter inputParameter,
+				String parentParamName, String paramName, Object propertyValue) {
 
-			Property property = getProperty(new SpringActionInputParameter(methodParameter, propertyValue), actionDescriptor,
+			Property property = getProperty(inputParameter, actionDescriptor,
 					propertyValue, parentParamName + paramName);
 
 			template.getProperties().add(property);

@@ -15,6 +15,7 @@
  */
 package de.escalon.hypermedia.spring.halforms;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
@@ -41,7 +42,7 @@ public class Template extends Link {
 
 	public static final String DEFAULT_KEY = "default";
 
-	private List<Property> properties;
+	private final List<Property> properties = new ArrayList<Property>();
 
 	private RequestMethod[] method;
 
@@ -57,10 +58,6 @@ public class Template extends Link {
 
 	public Template(String href, String key) {
 		super(href, key);
-	}
-
-	public void setProperties(List<Property> properties) {
-		this.properties = properties;
 	}
 
 	public void setMethod(RequestMethod[] method) {
