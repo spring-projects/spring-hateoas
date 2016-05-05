@@ -59,7 +59,8 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 		Link link = new Link(href, Template.DEFAULT_KEY.equals(rel) ? Link.REL_SELF : rel);
 
 		if (!alreadyExists(link)) {
-			add(link);
+			// FIXME: only support one rel with multiple templates
+			// add(link);
 		}
 
 		this.templates.add(template);
