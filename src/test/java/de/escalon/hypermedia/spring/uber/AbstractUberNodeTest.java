@@ -10,14 +10,13 @@
 
 package de.escalon.hypermedia.spring.uber;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.hateoas.Link;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.hateoas.Link;
 
 public class AbstractUberNodeTest {
 
@@ -43,7 +42,6 @@ public class AbstractUberNodeTest {
 
 		bar.setName("bar");
 		bar.addData(new UberNode());
-
 	}
 
 	@Test
@@ -54,7 +52,7 @@ public class AbstractUberNodeTest {
 		dummyUberNode.addData(bar);
 
 		int i = 0;
-		String[] expected = { "foo", "bar" };
+		String[] expected = {"foo", "bar"};
 		for (UberNode uberNode : dummyUberNode) {
 			assertEquals(expected[i++], uberNode.getName());
 		}
@@ -67,7 +65,7 @@ public class AbstractUberNodeTest {
 		dummyUberNode.addData(bar);
 
 		int i = 0;
-		String[] expected = { "foo", "bar" };
+		String[] expected = {"foo", "bar"};
 		for (UberNode uberNode : dummyUberNode) {
 			assertEquals(expected[i++], uberNode.getName());
 		}
@@ -81,7 +79,7 @@ public class AbstractUberNodeTest {
 		dummyUberNode.addLink(linkNext);
 
 		int i = 0;
-		String[] expected = { "foo", "bar" };
+		String[] expected = {"foo", "bar"};
 		for (UberNode uberNode : dummyUberNode) {
 			assertEquals(expected[i++], uberNode.getName());
 		}
@@ -93,7 +91,7 @@ public class AbstractUberNodeTest {
 		dummyUberNode.addData(bar);
 
 		int i = 0;
-		String[] expected = { "foo", "bar", };
+		String[] expected = {"foo", "bar",};
 		for (UberNode uberNode : dummyUberNode) {
 			assertEquals(expected[i++], uberNode.getName());
 		}
@@ -106,7 +104,7 @@ public class AbstractUberNodeTest {
 		dummyUberNode.addData(baz);
 
 		int i = 0;
-		String[] expected = { "bar", "foo", "baz" };
+		String[] expected = {"bar", "foo", "baz"};
 		for (UberNode uberNode : dummyUberNode) {
 			assertEquals(expected[i++], uberNode.getName());
 		}
@@ -119,7 +117,7 @@ public class AbstractUberNodeTest {
 
 		assertNotNull("rel previous not found", dummyUberNode.getFirstByRel(Link.REL_PREVIOUS));
 	}
-	
+
 	@Test
 	public void getsFirstNodeByName() throws Exception {
 		dummyUberNode.addLink(linkPrevious);
@@ -137,6 +135,5 @@ public class AbstractUberNodeTest {
 		assertEquals(URL_NEXT, dummyUberNode.getFirstByRel(Link.REL_NEXT).getUrl());
 		assertEquals(URL_PREVIOUS, dummyUberNode.getFirstByRel(Link.REL_PREVIOUS).getUrl());
 		assertNull(dummyUberNode.getFirstByRel("noSuchRel"));
-		
 	}
 }

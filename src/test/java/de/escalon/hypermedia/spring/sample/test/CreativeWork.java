@@ -18,13 +18,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class CreativeWork {
 
-    public final String name;
+	public final String name;
 
-    @JsonCreator
-    public CreativeWork(@JsonProperty("name") String name) {
-        this.name = name;
-    }
-
-
-
+	@JsonCreator
+	public CreativeWork(@JsonProperty("name") String name) {
+		this.name = name;
+	}
 }

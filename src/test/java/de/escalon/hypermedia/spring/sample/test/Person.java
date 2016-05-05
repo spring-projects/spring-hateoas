@@ -15,13 +15,13 @@ package de.escalon.hypermedia.spring.sample.test;
  */
 public class Person {
 
-    private String name;
+	private String name;
 
-    public Person(String name) {
-        this.name = name;
-    }
+	public Person(String name) {
+		this.name = name;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 }

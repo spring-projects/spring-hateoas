@@ -10,23 +10,22 @@
 
 package de.escalon.hypermedia.affordance;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 public class PartialUriTemplateComponentsTest {
 
-    @Test
-    public void testToStringWithQueryContinuation() throws Exception {
-        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplateComponents("http://example.com", "?foo=bar", "baz,gnarf", "#fragmentIdentifier", Arrays.asList("baz", "gnarf"));
-        Assert.assertEquals("http://example.com?foo=bar{&baz,gnarf}#fragmentIdentifier", partialUriTemplateComponents.toString());
-    }
+	@Test
+	public void testToStringWithQueryContinuation() throws Exception {
+		PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplateComponents("http://example.com", "?foo=bar", "baz,gnarf", "#fragmentIdentifier", Arrays.asList("baz", "gnarf"));
+		Assert.assertEquals("http://example.com?foo=bar{&baz,gnarf}#fragmentIdentifier", partialUriTemplateComponents.toString());
+	}
 
-    @Test
-    public void testToStringWithQueryVariables() throws Exception {
-        PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplateComponents("http://example.com", "", "baz,gnarf", "#fragmentIdentifier", Arrays.asList("baz", "gnarf"));
-        Assert.assertEquals("http://example.com{?baz,gnarf}#fragmentIdentifier", partialUriTemplateComponents.toString());
-    }
-
+	@Test
+	public void testToStringWithQueryVariables() throws Exception {
+		PartialUriTemplateComponents partialUriTemplateComponents = new PartialUriTemplateComponents("http://example.com", "", "baz,gnarf", "#fragmentIdentifier", Arrays.asList("baz", "gnarf"));
+		Assert.assertEquals("http://example.com{?baz,gnarf}#fragmentIdentifier", partialUriTemplateComponents.toString());
+	}
 }

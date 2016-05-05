@@ -20,29 +20,29 @@ import de.escalon.hypermedia.action.Input;
  */
 public class Review {
 
-    private String reviewBody;
-    private Rating reviewRating;
+	private String reviewBody;
+	private Rating reviewRating;
 
-    @JsonCreator
-    public Review(@JsonProperty("reviewBody") String reviewBody, @JsonProperty("reviewRating") Rating reviewRating) {
-        this.reviewBody = reviewBody;
-        this.reviewRating = reviewRating;
-    }
+	@JsonCreator
+	public Review(@JsonProperty("reviewBody") String reviewBody, @JsonProperty("reviewRating") Rating reviewRating) {
+		this.reviewBody = reviewBody;
+		this.reviewRating = reviewRating;
+	}
 
-    @SuppressWarnings("unused")
-    public String getReviewBody() {
-        return reviewBody;
-    }
+	@SuppressWarnings("unused")
+	public String getReviewBody() {
+		return reviewBody;
+	}
 
-    public void setReviewBody(@Input(pattern=".{10,}") String reviewBody) {
-        this.reviewBody = reviewBody;
-    }
+	public void setReviewBody(@Input(pattern = ".{10,}") String reviewBody) {
+		this.reviewBody = reviewBody;
+	}
 
-    public Rating getReviewRating() {
-        return reviewRating;
-    }
+	public Rating getReviewRating() {
+		return reviewRating;
+	}
 
-    public void setReviewRating(Rating reviewRating) {
-        this.reviewRating = reviewRating;
-    }
+	public void setReviewRating(Rating reviewRating) {
+		this.reviewRating = reviewRating;
+	}
 }

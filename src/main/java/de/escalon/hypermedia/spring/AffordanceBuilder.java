@@ -59,7 +59,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * @return builder
 	 */
 	public static AffordanceBuilder linkTo(Class<?> controller) {
-		return linkTo(controller, new Object[0]);
+		return FACTORY.linkTo(controller, new Object[0]);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
 	public static AffordanceBuilder linkTo(Method method, Object... parameters) {
-		return linkTo(method.getDeclaringClass(), method, parameters);
+		return FACTORY.linkTo(method.getDeclaringClass(), method, parameters);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
 	 * {@literal null}.
-	 * @return
+	 * @return builder
 	 */
 	public static AffordanceBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
 		return FACTORY.linkTo(controller, parameters);
@@ -118,8 +118,8 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * {@code addresses}. For more details on the method invocation constraints, see
 	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 *
-	 * @param methodInvocation
-	 * @return
+	 * @param methodInvocation to use for link building
+	 * @return builder
 	 */
 	public static AffordanceBuilder linkTo(Object methodInvocation) {
 		return FACTORY.linkTo(methodInvocation);
@@ -251,7 +251,7 @@ public class AffordanceBuilder implements LinkBuilder {
 	 * product.add(linkTo(methodOn(OrderController.class).postOrderedItem()
 	 *    .rel(order, "orderedItem")); // order has ordered items, not product has ordered items
 	 * </pre>
-	 * If the order doesn't exist yet, it cannot be identified. In that case you may pass null to express that
+	 * If the order doesn't exist yet, it cannot be identified. In that case use a TypedResource without identifying URI.
 	 *
 	 * @param rel to be used as link relation
 	 * @param subject describing the subject

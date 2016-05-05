@@ -18,20 +18,21 @@ import de.escalon.hypermedia.action.Input;
  * Created by dschulten on 09.12.2014.
  */
 public class Rating {
-    public final String bestRating = "5";
-    public final String worstRating = "1";
-    private Integer ratingValue;
 
-    @JsonCreator
-    public Rating(@JsonProperty("ratingValue") @Input(min = 1, max = 5, step = 1) Integer ratingValue) {
-        this.ratingValue = ratingValue;
-    }
+	public final String bestRating = "5";
+	public final String worstRating = "1";
+	private Integer ratingValue;
 
-    public void setRatingValue(@Input(min = 1, max = 5, step = 1) Integer ratingValue) {
-        this.ratingValue = ratingValue;
-    }
+	@JsonCreator
+	public Rating(@JsonProperty("ratingValue") @Input(min = 1, max = 5, step = 1) Integer ratingValue) {
+		this.ratingValue = ratingValue;
+	}
 
-    public Integer getRatingValue() {
-        return ratingValue;
-    }
+	public void setRatingValue(@Input(min = 1, max = 5, step = 1) Integer ratingValue) {
+		this.ratingValue = ratingValue;
+	}
+
+	public Integer getRatingValue() {
+		return ratingValue;
+	}
 }

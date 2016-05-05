@@ -10,14 +10,13 @@
 
 package de.escalon.hypermedia.spring.uber;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 
 public class UberMessageModelTest {
 
@@ -35,16 +34,15 @@ public class UberMessageModelTest {
 		uberMessageModel = new UberMessageModel(map);
 		assertEquals("1.0", uberMessageModel.getVersion());
 		assertEquals(0, uberMessageModel.getData()
-                .size());
+				.size());
 		assertEquals(0, uberMessageModel.getError()
-                .size());
+				.size());
 	}
 
 	@Test
 	public void readsMapIntoData() throws Exception {
-        map.put("name", "Doe");
+		map.put("name", "Doe");
 		uberMessageModel = new UberMessageModel(map);
 		assertEquals(1, uberMessageModel.getData().size());
 	}
-
 }
