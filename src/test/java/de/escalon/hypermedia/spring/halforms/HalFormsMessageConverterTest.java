@@ -355,7 +355,7 @@ public class HalFormsMessageConverterTest {
 		String json = objectMapper.valueToTree(entity).toString();
 
 		// If there are no @RequestParam AffordanceBuilder doesn't declare a UriTemplate variable
-		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filtered")));
+		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filtered?count=0{&status}")));
 	}
 
 	@Test
