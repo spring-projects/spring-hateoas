@@ -6,6 +6,8 @@ import static de.escalon.hypermedia.spring.AffordanceBuilder.methodOn;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.util.Arrays;
@@ -34,9 +36,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,22 +63,18 @@ import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.affordance.SuggestImpl;
 import de.escalon.hypermedia.affordance.SuggestType;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
-import de.escalon.hypermedia.spring.siren.SirenMessageConverterTest;
-import de.escalon.hypermedia.spring.siren.SirenUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(loader = AnnotationConfigWebContextLoader.class)
+@ContextConfiguration
 public class HalFormsMessageConverterTest {
 
-	public static final Logger LOG = LoggerFactory.getLogger(SirenMessageConverterTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(HalFormsMessageConverterTest.class);
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final RelProvider relProvider = new DefaultRelProvider();
 
 	private final CurieProvider curieProvider = new DefaultCurieProvider("test",
 			new UriTemplate("http://localhost:8080/profile/{rel}"));
-
-	SirenUtils sirenUtils = new SirenUtils();
 
 	@Relation("customer")
 	class Customer {
@@ -193,12 +192,25 @@ public class HalFormsMessageConverterTest {
 	}
 
 	static class OrderFilter {
-		private final String status;
+		private String status;
+		private int count;
 
-		@JsonCreator
-		public OrderFilter(@JsonProperty("status") String status) {
+		public String getStatus() {
+			return status;
+		}
+
+		public void setStatus(String status) {
 			this.status = status;
 		}
+
+		public int getCount() {
+			return count;
+		}
+
+		public void setCount(int count) {
+			this.count = count;
+		}
+
 	}
 
 	@RequestMapping("/orders")
@@ -225,8 +237,13 @@ public class HalFormsMessageConverterTest {
 			return null;
 		}
 
-		@RequestMapping
+		@RequestMapping("/filtered")
 		public ResponseEntity<Resources<Order>> getOrdersFiltered(OrderFilter filter) {
+			return null;
+		}
+
+		@RequestMapping("/filteredWithRP")
+		public ResponseEntity<Resources<Order>> getOrdersFilteredWithRequestParam(@RequestParam OrderFilter filter) {
 			return null;
 		}
 
@@ -234,7 +251,7 @@ public class HalFormsMessageConverterTest {
 
 	@Configuration
 	@EnableWebMvc
-	class WebConfig extends WebMvcConfigurerAdapter {
+	static class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Bean
 		public DummyOrderController orderController() {
@@ -250,7 +267,8 @@ public class HalFormsMessageConverterTest {
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			super.configureMessageConverters(converters);
 
-			converters.add(new HalFormsMessageConverter(objectMapper, relProvider, curieProvider, null));
+			// TODO: enable converter for testing
+			// converters.add(new HalFormsMessageConverter(objectMapper, relProvider, curieProvider, null));
 		}
 
 		@Override
@@ -310,17 +328,57 @@ public class HalFormsMessageConverterTest {
 	}
 
 	@Test
-	public void testTemplatesFromRequestParamComplex() throws JsonProcessingException {
+	public void testTemplatesFromRequestParamComplexWithoutRequestParamAnnotation() throws JsonProcessingException {
 
 		Order order = new Order();
-		order.add(
-				linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter("pending"))).withRel("orders"));
+		order.add(linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter())).withRel("orders"));
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
 
-		assertThat(json, hasJsonPath("$._templates"));
-		assertThat(json, hasJsonPath("$._templates.default"));
-		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("GET")));
+		// If there are no @RequestParam AffordanceBuilder doesn't declare a UriTemplate variable
+		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filtered")));
+	}
+
+	@Test
+	public void testTemplatesFromRequestParamComplexWithRequestParamAnnotation() throws JsonProcessingException {
+
+		Order order = new Order();
+		order.add(linkTo(methodOn(DummyOrderController.class).getOrdersFilteredWithRequestParam(null)).withRel("orders"));
+
+		Object entity = HalFormsUtils.toHalFormsDocument(order);
+		String json = objectMapper.valueToTree(entity).toString();
+
+		// al anotar el método del controller con @RequestParam mete una variable en la url pero no es correcta ya que
+		// Spring espera dos parámetros derivados de los fields de OrderFilter: status y count. Por lo tanto la UriTemplate
+		// correcta debería ser http://localhost/orders/filteredWithRP{?status, count}
+		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filteredWithRP{?filter}")));
+
+	}
+
+	@Test
+	public void testRequestWithStatusRequestParamNotFound() throws Exception {
+		try {
+
+			MvcResult result = mockMvc.perform(get("http://localhost/orders/filteredWithRP?status=accepted"))
+					.andExpect(status().is5xxServerError()).andReturn();
+
+			// Spring waits a @RequestParam called "filter"
+		} catch (MissingServletRequestParameterException e) {
+			assertThat(e.getParameterName(), equalTo("filter"));
+		}
+
+	}
+
+	@Test
+	public void testRequestWithStatusFound() throws Exception {
+
+		// If @RequestParam annotation is not present the request is correct
+		MvcResult result = mockMvc
+				.perform(get("http://localhost/orders/filtered?status=accepted").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andReturn();
+
+		LOG.debug(result.getResponse().getContentAsString());
+
 	}
 }
