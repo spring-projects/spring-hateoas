@@ -43,11 +43,11 @@ import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
 public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements ContextualSerializer {
 
-	private RelProvider relProvider;
+	private final RelProvider relProvider;
 
-	private EmbeddedMapper mapper;
+	private final EmbeddedMapper mapper;
 
-	private ValueSuggestDirectSerializer directSerializer;
+	private final ValueSuggestDirectSerializer directSerializer;
 
 	public ValueSuggestSerializer(EmbeddedMapper mapper, RelProvider relProvider,
 			ValueSuggestDirectSerializer directSerializer) {
@@ -65,20 +65,24 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 			return;
 		}
 
-		if (value.getType().equals(ValueSuggestType.DIRECT)) {
+		if (value.getType() == ValueSuggestType.DIRECT) {
 			directSerializer.serialize(value, gen, provider);
 		} else {
 			gen.writeStartObject();
 
 			Map<String, Object> curiedMap = mapper.map(value.getValues());
 
-			String embeddedRel = null;
-			if (!curiedMap.isEmpty()) {
-				embeddedRel = curiedMap.keySet().iterator().next();
+			if (value.getType() == ValueSuggestType.EMBEDDED) {
+				String embeddedRel;
+				if (!curiedMap.isEmpty()) {
+					embeddedRel = curiedMap.keySet().iterator().next();
+				} else {
+					embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
+				}
+				gen.writeStringField("embedded", embeddedRel);
 			} else {
-				embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
+				gen.writeStringField("href", (String) value.getValues().iterator().next());
 			}
-			gen.writeStringField("embedded", embeddedRel);
 
 			// FIXME: debería delegar en el serializador por defecto??
 			if (value.getTextField() != null) {
@@ -105,9 +109,9 @@ public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> impl
 
 		private final BeanProperty property;
 
-		private Map<Class<?>, JsonSerializer<Object>> serializers;
+		private final Map<Class<?>, JsonSerializer<Object>> serializers;
 
-		private TextValueSerializer textValueSerializer;
+		private final TextValueSerializer textValueSerializer;
 
 		public ValueSuggestDirectSerializer() {
 			this(null);

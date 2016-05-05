@@ -19,12 +19,14 @@ import org.springframework.hateoas.Resource;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import de.escalon.hypermedia.affordance.SuggestType;
+
 /**
  * Suggested values of a {@link Property} that are included into the response. There are two ways: include text/value
  * pairs into the "suggest" attribute of {@link Property} or include a reference to a _embedded element of
  * {@link Resource}
- * @see ValueSuggestType
  * 
+ * @see ValueSuggestType
  * @param <D>
  */
 @JsonSerialize(using = ValueSuggestSerializer.class)
@@ -60,10 +62,27 @@ public class ValueSuggest<D> extends AbstractSuggest {
 		 * Values are serialized as a list into the "suggest" property {"suggest":[{"text":"...","value":"..."},...]}
 		 */
 		DIRECT,
+
 		/**
 		 * Values are serialized into the _embedded attribute of a {@link Resource} and "suggest.embedded" property
 		 * references _embedded attribute {"suggest":{"embedded":"","text-field":"","value-field":""}}
 		 */
-		EMBEDDED
+		EMBEDDED,
+
+		/**
+		 * Values will be retrieved from a remove URL
+		 */
+		REMOTE;
+
+		public static ValueSuggestType valueOf(SuggestType type) {
+			switch (type) {
+				case INTERNAL:
+					return DIRECT;
+				case EXTERNAL:
+					return EMBEDDED;
+				default:
+					return REMOTE;
+			}
+		}
 	}
 }

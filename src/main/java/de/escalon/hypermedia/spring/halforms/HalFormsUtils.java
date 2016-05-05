@@ -87,8 +87,7 @@ public class HalFormsUtils {
 				valueField = possibleValue.getValueField();
 				suggestType = possibleValue.getType();
 			}
-			ValueSuggestType valueSuggestType = suggestType.equals(SuggestType.INTERNAL) ? ValueSuggestType.DIRECT
-					: ValueSuggestType.EMBEDDED;
+			ValueSuggestType valueSuggestType = ValueSuggestType.valueOf(suggestType);
 			suggest = new ValueSuggest<Object>(values, textField, valueField, valueSuggestType);
 		}
 

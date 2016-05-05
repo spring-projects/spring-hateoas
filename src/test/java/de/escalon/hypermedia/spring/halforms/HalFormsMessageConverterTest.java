@@ -131,21 +131,34 @@ public class HalFormsMessageConverterTest {
 
 	}
 
+	public static class Country {
+		int id;
+		String name;
+	}
+
 	public static class OrderItem {
 		private final int orderNumber;
 		private final String productCode;
 		private final Integer quantity;
 		private final String size;
+		private final Country country;
+
+		public Country getCountry() {
+			return country;
+		}
 
 		@JsonCreator
 		public OrderItem(@Input(required = true) @JsonProperty("orderNumber") int orderNumber,
 				@Input(required = true) @JsonProperty("productCode") String productCode,
 				@Input(editable = true, pattern = "%d") @JsonProperty("quantity") Integer quantity,
-				@Select(options = SizeOptions.class, type = SuggestType.EXTERNAL) @JsonProperty("size") String size) {
+				@Select(options = SizeOptions.class, type = SuggestType.EXTERNAL) @JsonProperty("size") String size,
+				@Select(value = "http://localhost/orders/countries",
+						type = SuggestType.REMOTE) @JsonProperty("country") Country country) {
 			this.orderNumber = orderNumber;
 			this.productCode = productCode;
 			this.quantity = quantity;
 			this.size = size;
+			this.country = country;
 		}
 
 		public int getOrderNumber() {
@@ -196,7 +209,7 @@ public class HalFormsMessageConverterTest {
 
 	public static class OrderFilter {
 		private String status;
-		private int count;
+		private Integer count;
 
 		public OrderFilter() {
 			// TODO Auto-generated constructor stub
@@ -216,11 +229,11 @@ public class HalFormsMessageConverterTest {
 			this.status = status;
 		}
 
-		public int getCount() {
+		public Integer getCount() {
 			return count;
 		}
 
-		public void setCount(int count) {
+		public void setCount(Integer count) {
 			this.count = count;
 		}
 
@@ -312,7 +325,7 @@ public class HalFormsMessageConverterTest {
 	public void testTemplatesWithRequestBody() throws JsonProcessingException {
 
 		Order order = new Order();
-		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null)))
+		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null, null)))
 				.withRel("order-items"));
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
