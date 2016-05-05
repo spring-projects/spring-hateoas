@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
@@ -27,6 +28,7 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 			MessageSourceAccessor messageSourceAccessor) {
 		this.objectMapper = objectMapper;
 
+		objectMapper.registerModule(new Jackson2HalModule());
 		objectMapper.registerModule(new Jackson2HalFormsModule());
 		objectMapper.setHandlerInstantiator(
 				new HalFormsHandlerInstantiator(relProvider, curieProvider, messageSourceAccessor, true));
