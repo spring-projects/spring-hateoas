@@ -139,7 +139,7 @@ public class HalFormsMessageConverterTest {
 		public OrderItem(@Input(required = true) @JsonProperty("orderNumber") int orderNumber,
 				@Input(required = true) @JsonProperty("productCode") String productCode,
 				@Input(editable = true, pattern = "%d") @JsonProperty("quantity") Integer quantity,
-				@Select(options = SizeOptions.class) @JsonProperty("size") String size) {
+				@Select(options = SizeOptions.class, type = SuggestType.EXTERNAL) @JsonProperty("size") String size) {
 			this.orderNumber = orderNumber;
 			this.productCode = productCode;
 			this.quantity = quantity;
@@ -322,6 +322,5 @@ public class HalFormsMessageConverterTest {
 		assertThat(json, hasJsonPath("$._templates"));
 		assertThat(json, hasJsonPath("$._templates.default"));
 		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("GET")));
-		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(1)));
 	}
 }

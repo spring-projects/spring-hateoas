@@ -13,6 +13,8 @@ import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
 import de.escalon.hypermedia.affordance.Affordance;
+import de.escalon.hypermedia.affordance.SuggestType;
+import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
 public class HalFormsUtils {
 
@@ -70,6 +72,7 @@ public class HalFormsUtils {
 		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter
 				.getPossibleValues(actionDescriptor);
 		ValueSuggest<?> suggest = null;
+		SuggestType suggestType = SuggestType.INTERNAL;
 		if (possibleValues.length > 0) {
 			String textField = null;
 			String valueField = null;
@@ -78,8 +81,11 @@ public class HalFormsUtils {
 				values.add(possibleValue.getValue());
 				textField = possibleValue.getTextField();
 				valueField = possibleValue.getValueField();
+				suggestType = possibleValue.getType();
 			}
-			suggest = new ValueSuggest<Object>(values, textField, valueField);
+			ValueSuggestType valueSuggestType = suggestType.equals(SuggestType.INTERNAL) ? ValueSuggestType.DIRECT
+					: ValueSuggestType.EMBEDDED;
+			suggest = new ValueSuggest<Object>(values, textField, valueField, valueSuggestType);
 		}
 
 		return new Property(name, readOnly, templated, value, null, regex, required, suggest);
@@ -96,11 +102,10 @@ public class HalFormsUtils {
 		}
 
 		@Override
-		public String visit(ActionInputParameter inputParameter,
-				String parentParamName, String paramName, Object propertyValue) {
+		public String visit(ActionInputParameter inputParameter, String parentParamName, String paramName,
+				Object propertyValue) {
 
-			Property property = getProperty(inputParameter, actionDescriptor,
-					propertyValue, parentParamName + paramName);
+			Property property = getProperty(inputParameter, actionDescriptor, propertyValue, parentParamName + paramName);
 
 			template.getProperties().add(property);
 
