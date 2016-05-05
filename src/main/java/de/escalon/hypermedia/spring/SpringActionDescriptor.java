@@ -19,7 +19,12 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,8 +36,13 @@ import java.util.Set;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
+import org.springframework.http.HttpEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,6 +51,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
+import de.escalon.hypermedia.action.ResourceHandler;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
@@ -50,8 +61,13 @@ import de.escalon.hypermedia.affordance.DataType;
  * Describes an HTTP method independently of a specific rest framework. Has knowledge about possible request data, i.e.
  * which types and values are suitable for an action. For example, an action descriptor can be used to create a form
  * with select options and typed input fields that calls a POST handler. It has {@link ActionInputParameter}s which
- * represent method handler arguments. Supported method handler arguments are: <ul> <li>path variables</li> <li>request
- * params (url query params)</li> <li>request headers</li> <li>request body</li> </ul>
+ * represent method handler arguments. Supported method handler arguments are:
+ * <ul>
+ * <li>path variables</li>
+ * <li>request params (url query params)</li>
+ * <li>request headers</li>
+ * <li>request body</li>
+ * </ul>
  *
  * @author Dietrich Schulten
  */
@@ -59,7 +75,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private final String httpMethod;
 	private final String actionName;
-	private final String contentType;
+	private final String consumes;
+	private final String produces;
 
 	private String semanticActionType;
 	private final Map<String, ActionInputParameter> requestParams = new LinkedHashMap<String, ActionInputParameter>();
@@ -72,20 +89,30 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	/**
 	 * Creates an {@link ActionDescriptor}.
 	 *
-	 * @param actionName name of the action, e.g. the method name of the handler method. Can be used by an action representation,
-	 * e.g. to identify the action using a form name.
+	 * @param actionName name of the action, e.g. the method name of the handler method. Can be used by an action
+	 *          representation, e.g. to identify the action using a form name.
 	 * @param httpMethod used during submit
 	 */
 	public SpringActionDescriptor(String actionName, String httpMethod) {
-		this(actionName, httpMethod, null);
+		this(actionName, httpMethod, null, null);
 	}
-	
-	public SpringActionDescriptor(String actionName, String httpMethod, String contentType) {
+
+	public SpringActionDescriptor(String actionName, String httpMethod, String consumes, String produces) {
 		Assert.notNull(actionName);
 		Assert.notNull(httpMethod);
 		this.httpMethod = httpMethod;
 		this.actionName = actionName;
-		this.contentType = contentType;
+		this.consumes = consumes;
+		this.produces = produces;
+	}
+
+	public SpringActionDescriptor(Method method) {
+		RequestMethod requestMethod = getHttpMethod(method);
+		this.httpMethod = requestMethod.name();
+		this.actionName = method.getName();
+		this.consumes = getConsumes(method);
+		this.produces = getProduces(method);
+		this.cardinality = getCardinality(method, requestMethod, method.getReturnType());
 	}
 
 	/**
@@ -109,10 +136,15 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	}
 
 	@Override
-	public String getContentType(){
-		return contentType;
+	public String getConsumes() {
+		return consumes;
 	}
-	
+
+	@Override
+	public String getProduces() {
+		return produces;
+	}
+
 	/**
 	 * Gets the path variable names.
 	 *
@@ -175,8 +207,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	}
 
 	/**
-	 * Gets input parameter info which is part of the URL mapping,
-	 * be it request parameters, path variables or request body attributes.
+	 * Gets input parameter info which is part of the URL mapping, be it request parameters, path variables or request
+	 * body attributes.
 	 *
 	 * @param name to retrieve
 	 * @return parameter descriptor or null
@@ -203,7 +235,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
 			PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(propertyType, nestedProperty);
-//            BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
+			// BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
 			return getPropertyDescriptorForPropertyPath(nestedPath, propertyDescriptor.getPropertyType());
 		} else {
 			return BeanUtils.getPropertyDescriptor(propertyType, propertyPath);
@@ -291,7 +323,6 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		return ret;
 	}
 
-
 	/**
 	 * Allows to set the cardinality, i.e. specify if the action refers to a collection or a single resource. Default is
 	 * {@link Cardinality#SINGLE}
@@ -315,8 +346,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	@Override
 	public void accept(ActionInputParameterVisitor visitor) {
 		if (hasRequestBody()) {
-			recurseBeanCreationParams(getRequestBody().getParameterType(),
-					getRequestBody(), getRequestBody().getValue(), "",
+			recurseBeanCreationParams(getRequestBody().getParameterType(), getRequestBody(), getRequestBody().getValue(), "",
 					Collections.<String> emptySet(), visitor);
 		} else {
 			Collection<String> paramNames = getRequestParamNames();
@@ -325,9 +355,9 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				visitor.visit(inputParameter, "", paramName, inputParameter.getValueFormatted());
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Renders input fields for bean properties of bean to add or update or patch.
 	 *
@@ -337,8 +367,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 * @param annotatedParameter which requires the bean
 	 * @param currentCallValue sample call value
 	 */
-	public static void recurseBeanCreationParams(final Class<?> beanType,
-			final ActionInputParameter annotatedParameter, final Object currentCallValue, final String parentParamName, final Set<String> knownFields,
+	public static void recurseBeanCreationParams(final Class<?> beanType, final ActionInputParameter annotatedParameter,
+			final Object currentCallValue, final String parentParamName, final Set<String> knownFields,
 			final ActionInputParameterVisitor methodHandler) {
 
 		// TODO collection, map and object node creation are only describable by an annotation, not via type reflection
@@ -374,8 +404,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 							Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
 							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
-							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter,
-									parentParamName, paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
+							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName,
+									paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
 
 							if (fieldName != null) {
 								knownConstructorFields.add(fieldName);
@@ -406,8 +436,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, propertyName);
 				MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 
-				invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName,
-						propertyName, propertyType, propertyValue, knownConstructorFields, methodHandler);
+				invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName, propertyName, propertyType,
+						propertyValue, knownConstructorFields, methodHandler);
 
 			}
 		} catch (Exception e) {
@@ -416,15 +446,13 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	}
 
 	private static String invokeHandlerOrFollowRecurse(MethodParameter methodParameter,
-			ActionInputParameter annotatedParameter, String parentParamName,
-			String paramName, Class<?> parameterType, Object propertyValue, Set<String> fields,
-			ActionInputParameterVisitor handler) {
+			ActionInputParameter annotatedParameter, String parentParamName, String paramName, Class<?> parameterType,
+			Object propertyValue, Set<String> fields, ActionInputParameterVisitor handler) {
 		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)) {
 
 			if (annotatedParameter.isIncluded(paramName) && !fields.contains(parentParamName + paramName)) {
 				ActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
-				return handler.visit(inputParameter, parentParamName, paramName,
-						propertyValue);
+				return handler.visit(inputParameter, parentParamName, paramName, propertyValue);
 			}
 
 		} else {
@@ -434,8 +462,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			} else {
 				callValueBean = propertyValue;
 			}
-			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".",
-					fields, handler);
+			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".", fields, handler);
 		}
 
 		return null;
@@ -447,6 +474,109 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		} catch (IntrospectionException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static RequestMethod getHttpMethod(Method method) {
+		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		RequestMethod requestMethod;
+		if (methodRequestMapping != null) {
+			RequestMethod[] methods = methodRequestMapping.method();
+			if (methods.length == 0) {
+				requestMethod = RequestMethod.GET;
+			} else {
+				requestMethod = methods[0];
+			}
+		} else {
+			requestMethod = RequestMethod.GET; // default
+		}
+		return requestMethod;
+	}
+
+	private static String getConsumes(Method method) {
+		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		if (methodRequestMapping != null) {
+			StringBuilder sb = new StringBuilder();
+			for (String consume : methodRequestMapping.consumes()) {
+				sb.append(consume).append(",");
+			}
+			if (sb.length() > 1) {
+				sb.setLength(sb.length() - 1);
+				return sb.toString();
+			}
+		}
+		return null;
+	}
+
+	private static String getProduces(Method method) {
+		RequestMapping methodRequestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		if (methodRequestMapping != null) {
+			StringBuilder sb = new StringBuilder();
+			for (String produce : methodRequestMapping.produces()) {
+				sb.append(produce).append(",");
+			}
+			if (sb.length() > 1) {
+				sb.setLength(sb.length() - 1);
+				return sb.toString();
+			}
+		}
+		return null;
+	}
+
+	private Cardinality getCardinality(Method invokedMethod, RequestMethod httpMethod, Type genericReturnType) {
+		Cardinality cardinality;
+
+		ResourceHandler resourceAnn = AnnotationUtils.findAnnotation(invokedMethod, ResourceHandler.class);
+		if (resourceAnn != null) {
+			cardinality = resourceAnn.value();
+		} else {
+			if (RequestMethod.POST == httpMethod || containsCollection(genericReturnType)) {
+				cardinality = Cardinality.COLLECTION;
+			} else {
+				cardinality = Cardinality.SINGLE;
+			}
+		}
+		return cardinality;
+	}
+
+	private boolean containsCollection(Type genericReturnType) {
+		final boolean ret;
+		if (genericReturnType instanceof ParameterizedType) {
+			ParameterizedType t = (ParameterizedType) genericReturnType;
+			Type rawType = t.getRawType();
+			Assert.state(rawType instanceof Class<?>, "raw type is not a Class: " + rawType.toString());
+			Class<?> cls = (Class<?>) rawType;
+			if (HttpEntity.class.isAssignableFrom(cls)) {
+				Type[] typeArguments = t.getActualTypeArguments();
+				ret = containsCollection(typeArguments[0]);
+			} else if (Resources.class.isAssignableFrom(cls) || Collection.class.isAssignableFrom(cls)) {
+				ret = true;
+			} else {
+				ret = false;
+			}
+		} else if (genericReturnType instanceof GenericArrayType) {
+			ret = true;
+		} else if (genericReturnType instanceof WildcardType) {
+			WildcardType t = (WildcardType) genericReturnType;
+			ret = containsCollection(getBound(t.getLowerBounds())) || containsCollection(getBound(t.getUpperBounds()));
+		} else if (genericReturnType instanceof TypeVariable) {
+			ret = false;
+		} else if (genericReturnType instanceof Class) {
+			Class<?> cls = (Class<?>) genericReturnType;
+			ret = Resources.class.isAssignableFrom(cls) || Collection.class.isAssignableFrom(cls);
+		} else {
+			ret = false;
+		}
+		return ret;
+	}
+
+	private Type getBound(Type[] lowerBounds) {
+		Type ret;
+		if (lowerBounds != null && lowerBounds.length > 0) {
+			ret = lowerBounds[0];
+		} else {
+			ret = null;
+		}
+		return ret;
 	}
 
 }
