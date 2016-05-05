@@ -63,6 +63,7 @@ import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.affordance.Affordance;
+import de.escalon.hypermedia.affordance.Suggest;
 import de.escalon.hypermedia.affordance.SuggestImpl;
 import de.escalon.hypermedia.affordance.SuggestType;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
@@ -131,6 +132,15 @@ public class HalFormsMessageConverterTest {
 
 	}
 
+	public static class RemoteOptions implements Options<String> {
+
+		@Override
+		public Suggest<String>[] get(SuggestType type, String[] value, Object... args) {
+			return SuggestImpl.wrap(Arrays.asList("http://localhost/orders/countries"), "value", "text", type);
+		}
+
+	}
+
 	public static class Country {
 		int id;
 		String name;
@@ -152,8 +162,7 @@ public class HalFormsMessageConverterTest {
 				@Input(required = true) @JsonProperty("productCode") String productCode,
 				@Input(editable = true, pattern = "%d") @JsonProperty("quantity") Integer quantity,
 				@Select(options = SizeOptions.class, type = SuggestType.EXTERNAL) @JsonProperty("size") String size,
-				@Select(value = "http://localhost/orders/countries",
-						type = SuggestType.REMOTE) @JsonProperty("country") Country country) {
+				@Select(options = RemoteOptions.class, type = SuggestType.REMOTE) @JsonProperty("country") Country country) {
 			this.orderNumber = orderNumber;
 			this.productCode = productCode;
 			this.quantity = quantity;
