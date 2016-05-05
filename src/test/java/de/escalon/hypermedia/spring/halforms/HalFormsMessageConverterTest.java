@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,9 +58,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import de.escalon.hypermedia.action.DTORequestParam;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
+import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.SuggestImpl;
 import de.escalon.hypermedia.affordance.SuggestType;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
@@ -238,7 +241,7 @@ public class HalFormsMessageConverterTest {
 		}
 
 		@RequestMapping("/filtered")
-		public ResponseEntity<Resources<Order>> getOrdersFiltered(OrderFilter filter) {
+		public ResponseEntity<Resources<Order>> getOrdersFiltered(@DTORequestParam OrderFilter filter) {
 			return null;
 		}
 
@@ -331,7 +334,10 @@ public class HalFormsMessageConverterTest {
 	public void testTemplatesFromRequestParamComplexWithoutRequestParamAnnotation() throws JsonProcessingException {
 
 		Order order = new Order();
-		order.add(linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter())).withRel("orders"));
+		Affordance affordance = linkTo(methodOn(DummyOrderController.class).getOrdersFiltered(new OrderFilter())).withRel("orders");
+		Assert.assertArrayEquals(new String[]{"status", "count"}, affordance.getActionDescriptors().get(0).getRequestParamNames().toArray(new String[0]));
+		
+		order.add(affordance);
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
@@ -344,7 +350,8 @@ public class HalFormsMessageConverterTest {
 	public void testTemplatesFromRequestParamComplexWithRequestParamAnnotation() throws JsonProcessingException {
 
 		Order order = new Order();
-		order.add(linkTo(methodOn(DummyOrderController.class).getOrdersFilteredWithRequestParam(null)).withRel("orders"));
+		Affordance affordance = linkTo(methodOn(DummyOrderController.class).getOrdersFilteredWithRequestParam(null)).withRel("orders");
+		order.add(affordance);
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
