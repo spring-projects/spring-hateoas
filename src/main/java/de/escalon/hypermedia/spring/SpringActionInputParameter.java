@@ -40,6 +40,7 @@ import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.DataType;
 import de.escalon.hypermedia.affordance.SimpleSuggest;
 import de.escalon.hypermedia.affordance.Suggest;
+import de.escalon.hypermedia.affordance.SuggestType;
 
 /**
  * Describes a Spring MVC rest services method parameter value with recorded sample call value and input constraints.
@@ -295,15 +296,17 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			Class<?> parameterType = methodParameter.getNestedParameterType();
 			Suggest[] possibleValues;
 			Class<?> nested;
+			Select select = methodParameter.getParameterAnnotation(Select.class);
+			SuggestType type = select!=null?select.type():SuggestType.INTERNAL;
 			if (Enum[].class.isAssignableFrom(parameterType)) {
-				possibleValues = SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants());
+				possibleValues = SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants(), type);
 			} else if (Enum.class.isAssignableFrom(parameterType)) {
-				possibleValues = SimpleSuggest.wrap(parameterType.getEnumConstants());
+				possibleValues = SimpleSuggest.wrap(parameterType.getEnumConstants(), type);
 			} else if (Collection.class.isAssignableFrom(parameterType)
 					&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1).getType())) {
-				possibleValues = SimpleSuggest.wrap(nested.getEnumConstants());
+				possibleValues = SimpleSuggest.wrap(nested.getEnumConstants(), type);
 			} else {
-				Select select = methodParameter.getParameterAnnotation(Select.class);
+				
 				if (select != null) {
 					Class<? extends Options> optionsClass = select.options();
 					Options options = optionsClass.newInstance();
@@ -317,7 +320,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 					}
 
 					Object[] args = from.toArray();
-					possibleValues = options.get(select.value(), args);
+					possibleValues = options.get(type, select.value(), args);
 				} else {
 					possibleValues = Suggest.EMPTY;
 				}

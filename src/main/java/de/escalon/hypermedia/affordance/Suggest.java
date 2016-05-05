@@ -29,4 +29,6 @@ public interface Suggest<T> {
 
 	String getTextField();
 	
+	SuggestType getType();
+	
 }

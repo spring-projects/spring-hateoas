@@ -57,7 +57,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
-import de.escalon.hypermedia.affordance.OptionSuggest;
+import de.escalon.hypermedia.affordance.SuggestImpl;
+import de.escalon.hypermedia.affordance.SuggestType;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import de.escalon.hypermedia.spring.siren.SirenMessageConverterTest;
 import de.escalon.hypermedia.spring.siren.SirenUtils;
@@ -68,10 +69,10 @@ import de.escalon.hypermedia.spring.siren.SirenUtils;
 public class HalFormsMessageConverterTest {
 
 	public static final Logger LOG = LoggerFactory.getLogger(SirenMessageConverterTest.class);
-	private ObjectMapper objectMapper = new ObjectMapper();
-	private RelProvider relProvider = new DefaultRelProvider();
+	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final RelProvider relProvider = new DefaultRelProvider();
 
-	private CurieProvider curieProvider = new DefaultCurieProvider("test",
+	private final CurieProvider curieProvider = new DefaultCurieProvider("test",
 			new UriTemplate("http://localhost:8080/profile/{rel}"));
 
 	SirenUtils sirenUtils = new SirenUtils();
@@ -100,8 +101,8 @@ public class HalFormsMessageConverterTest {
 	}
 
 	public static class Size {
-		private String value;
-		private String text;
+		private final String value;
+		private final String text;
 
 		@JsonCreator
 		public Size(@JsonProperty("value") String value, @JsonProperty("text") String text) {
@@ -122,17 +123,17 @@ public class HalFormsMessageConverterTest {
 	public static class SizeOptions implements Options<Size> {
 
 		@Override
-		public OptionSuggest<Size>[] get(String[] value, Object... args) {
-			return OptionSuggest.wrap(Arrays.asList(new Size("small", "Small"), new Size("big", "Big")), "value", "text");
+		public de.escalon.hypermedia.affordance.Suggest<Size>[] get(SuggestType type, String[] value, Object... args) {
+			return SuggestImpl.wrap(Arrays.asList(new Size("small", "Small"), new Size("big", "Big")), "value", "text", type);
 		}
 
 	}
 
 	public static class OrderItem {
-		private int orderNumber;
-		private String productCode;
-		private Integer quantity;
-		private String size;
+		private final int orderNumber;
+		private final String productCode;
+		private final Integer quantity;
+		private final String size;
 
 		@JsonCreator
 		public OrderItem(@Input(required = true) @JsonProperty("orderNumber") int orderNumber,
@@ -192,7 +193,7 @@ public class HalFormsMessageConverterTest {
 	}
 
 	static class OrderFilter {
-		private String status;
+		private final String status;
 
 		@JsonCreator
 		public OrderFilter(@JsonProperty("status") String status) {
@@ -267,7 +268,7 @@ public class HalFormsMessageConverterTest {
 
 	@Before
 	public void setUp() {
-		this.mockMvc = webAppContextSetup(this.wac).build();
+		mockMvc = webAppContextSetup(wac).build();
 		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
 		objectMapper.registerModule(new Jackson2HalModule());

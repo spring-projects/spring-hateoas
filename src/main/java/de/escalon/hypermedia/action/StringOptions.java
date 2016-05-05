@@ -13,6 +13,7 @@ package de.escalon.hypermedia.action;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.SimpleSuggest;
 import de.escalon.hypermedia.affordance.Suggest;
+import de.escalon.hypermedia.affordance.SuggestType;
 
 public class StringOptions implements Options<String> {
 
@@ -30,7 +31,7 @@ public class StringOptions implements Options<String> {
 	 * </pre>
 	 */
 	@Override
-	public Suggest<String>[] get(String[] value, Object... args) {
-		return SimpleSuggest.wrap(value);
+	public Suggest<String>[] get(SuggestType type, String[] value, Object... args) {
+		return SimpleSuggest.wrap(value, type);
 	}
 }

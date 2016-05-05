@@ -18,6 +18,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import de.escalon.hypermedia.affordance.SuggestType;
+
 /**
  * Specifies possible values for an argument on a controller method.
  */
@@ -49,14 +51,10 @@ public @interface Select {
 	String[] args() default {};
 	
 	/**
-	 * Marks the type of select, in case of {@link Type#EXTERNAL} the data may be outside the select, for example as a variable in HAL response
+	 * Marks the type of select, in case of {@link SuggestType#EXTERNAL} the data may be outside the select, for example as a variable in HAL response
 	 * rather than in HAL-FORMS document
 	 * @return
 	 */
-	Type type() default Type.INTERNAL;
-	
-	public enum Type {
-		INTERNAL, EXTERNAL
-	}
+	SuggestType type() default SuggestType.INTERNAL;
 	
 }
