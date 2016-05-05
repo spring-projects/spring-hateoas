@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -30,6 +32,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
@@ -92,7 +99,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			/**
 			 * I think this is not correct, or at least makes XmlHtmlWriter to write readonly="[java.lang.String"
 			 */
-			//putInputConstraint(Input.READONLY, "", inputAnnotation.readOnly());
+			// putInputConstraint(Input.READONLY, "", inputAnnotation.readOnly());
 			putInputConstraint(Input.REQUIRED, "", inputAnnotation.required());
 
 		}
@@ -299,7 +306,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			Suggest<?>[] possibleValues;
 			Class<?> nested;
 			Select select = methodParameter.getParameterAnnotation(Select.class);
-			SuggestType type = select!=null?select.type():SuggestType.INTERNAL;
+			SuggestType type = select != null ? select.type() : SuggestType.INTERNAL;
 			if (Enum[].class.isAssignableFrom(parameterType)) {
 				possibleValues = SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants(), type);
 			} else if (Enum.class.isAssignableFrom(parameterType)) {
@@ -308,10 +315,10 @@ public class SpringActionInputParameter implements ActionInputParameter {
 					&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1).getType())) {
 				possibleValues = SimpleSuggest.wrap(nested.getEnumConstants(), type);
 			} else {
-				
+
 				if (select != null) {
-					Class<? extends Options> optionsClass = select.options();
-					Options options = optionsClass.newInstance();
+					Class<? extends Options<?>> optionsClass = select.options();
+					Options<?> options = getOptions(optionsClass);
 					// collect call values to pass to options.get
 					List<Object> from = new ArrayList<Object>();
 					for (String paramName : select.args()) {
@@ -502,5 +509,29 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		}
 		return kind + (getParameterName() != null ? " " + getParameterName() : "") + ": "
 				+ (value != null ? value.toString() : "no value");
+	}
+
+	private static <T extends Options<?>> Options<?> getOptions(Class<? extends Options<?>> beanType)
+			throws InstantiationException, IllegalAccessException {
+		Options<?> options = getBean(beanType);
+		if (options == null) {
+			options = beanType.newInstance();
+		}
+		return options;
+	}
+
+	private static <T> T getBean(Class<T> beanType) {
+		try {
+			RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+			HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
+
+			WebApplicationContext context = WebApplicationContextUtils
+					.getWebApplicationContext(servletRequest.getServletContext());
+			Map<String, T> beans = context.getBeansOfType(beanType);
+			if (!beans.isEmpty()) {
+				return beans.values().iterator().next();
+			}
+		} catch (Exception e) {}
+		return null;
 	}
 }
