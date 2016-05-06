@@ -526,7 +526,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 
 			WebApplicationContext context = WebApplicationContextUtils
-					.getWebApplicationContext(servletRequest.getServletContext());
+					.getWebApplicationContext(servletRequest.getSession().getServletContext());
 			Map<String, T> beans = context.getBeansOfType(beanType);
 			if (!beans.isEmpty()) {
 				return beans.values().iterator().next();
