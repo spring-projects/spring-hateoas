@@ -56,19 +56,28 @@ import de.escalon.hypermedia.affordance.SuggestType;
  */
 public class SpringActionInputParameter implements ActionInputParameter {
 
+	private static final String[] EMPTY = new String[0];
+	private static final Suggest<?>[] EMPTY_SUGGEST = new Suggest<?>[0];
 	private final TypeDescriptor typeDescriptor;
 	private final RequestBody requestBody;
 	private final RequestParam requestParam;
 	private final PathVariable pathVariable;
 	private final RequestHeader requestHeader;
-	private final Input inputAnnotation;
 	private final MethodParameter methodParameter;
 	private final Object value;
 	private Boolean arrayOrCollection = null;
 	private final Map<String, Object> inputConstraints = new HashMap<String, Object>();
 	Suggest[] possibleValues;
+	String[] excluded = EMPTY;
+	String[] readOnly = EMPTY;
+	String[] hidden = EMPTY;
+	String[] include = EMPTY;
+	boolean editable = true;
+	ParameterType type = ParameterType.UNKNOWN;
+	PossibleValuesResolver resolver = new FixedPossibleValuesResolver(EMPTY_SUGGEST);
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
+	private Type fieldType;
 
 	/**
 	 * Creates action input parameter.
@@ -87,7 +96,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		requestHeader = methodParameter.getParameterAnnotation(RequestHeader.class);
 		// always determine input constraints,
 		// might be a nested property which is neither requestBody, requestParam nor pathVariable
-		inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
+		Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
 		if (inputAnnotation != null) {
 			putInputConstraint(Input.MIN, Integer.MIN_VALUE, inputAnnotation.min());
 			putInputConstraint(Input.MAX, Integer.MAX_VALUE, inputAnnotation.max());
@@ -102,9 +111,45 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			// putInputConstraint(Input.READONLY, "", inputAnnotation.readOnly());
 			putInputConstraint(Input.REQUIRED, "", inputAnnotation.required());
 
+			editable = inputAnnotation.editable();
+			excluded = inputAnnotation.exclude();
+			readOnly = inputAnnotation.readOnly();
+			hidden = inputAnnotation.hidden();
+			include = inputAnnotation.include();
+			type = ParameterType.INPUT;
 		}
+		if (inputAnnotation == null || inputAnnotation.value() == Type.FROM_JAVA) {
+			if (isArrayOrCollection() || isRequestBody()) {
+				fieldType = null;
+			} else if (DataType.isNumber(getParameterType())) {
+				fieldType = Type.NUMBER;
+			} else {
+				fieldType = Type.TEXT;
+			}
+		} else {
+			fieldType = inputAnnotation.value();
+		}
+		createResolver(methodParameter);
 		this.conversionService = conversionService;
 		typeDescriptor = TypeDescriptor.nested(methodParameter, 0);
+	}
+
+	private void createResolver(MethodParameter methodParameter) {
+		Class<?> parameterType = methodParameter.getNestedParameterType();
+		Class<?> nested;
+		Select select = methodParameter.getParameterAnnotation(Select.class);
+		SuggestType type = select != null ? select.type() : SuggestType.INTERNAL;
+		if (Enum[].class.isAssignableFrom(parameterType)) {
+			resolver = new FixedPossibleValuesResolver(
+					SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants(), type));
+		} else if (Enum.class.isAssignableFrom(parameterType)) {
+			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(parameterType.getEnumConstants(), type));
+		} else if (Collection.class.isAssignableFrom(parameterType)
+				&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1).getType())) {
+			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(nested.getEnumConstants(), type));
+		} else if (select != null) {
+			resolver = new OptionsPossibleValuesResolver(select);
+		}
 	}
 
 	/**
@@ -156,19 +201,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 */
 	@Override
 	public Type getHtmlInputFieldType() {
-		final Type ret;
-		if (inputAnnotation == null || inputAnnotation.value() == Type.FROM_JAVA) {
-			if (isArrayOrCollection() || isRequestBody()) {
-				ret = null;
-			} else if (DataType.isNumber(getParameterType())) {
-				ret = Type.NUMBER;
-			} else {
-				ret = Type.TEXT;
-			}
-		} else {
-			ret = inputAnnotation.value();
-		}
-		return ret;
+		return fieldType;
 	}
 
 	@Override
@@ -192,7 +225,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	}
 
 	public boolean isInputParameter() {
-		return inputAnnotation != null && requestBody == null && pathVariable == null && requestHeader == null
+		return type == ParameterType.INPUT && requestBody == null && pathVariable == null && requestHeader == null
 				&& requestParam == null;
 	}
 
@@ -231,20 +264,12 @@ public class SpringActionInputParameter implements ActionInputParameter {
 
 	@Override
 	public boolean isReadOnly(String property) {
-		return inputAnnotation != null
-				&& (!inputAnnotation.editable() || arrayContains(inputAnnotation.readOnly(), property));
+		return (!editable || arrayContains(readOnly, property));
 	}
 
 	@Override
 	public boolean isIncluded(String property) {
-		boolean ret;
-		if (inputAnnotation == null) {
-			ret = true;
-		} else {
-			boolean hasExplicitOrImplicitIncludes = hasExplicitOrImplicitPropertyIncludeValue();
-			ret = !hasExplicitOrImplicitIncludes || containsPropertyIncludeValue(property);
-		}
-		return ret;
+		return !hasExplicitOrImplicitPropertyIncludeValue() || containsPropertyIncludeValue(property);
 	}
 
 	/**
@@ -254,8 +279,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 * @return
 	 */
 	private boolean containsPropertyIncludeValue(String property) {
-		return arrayContains(inputAnnotation.readOnly(), property) || arrayContains(inputAnnotation.hidden(), property)
-				|| arrayContains(inputAnnotation.include(), property);
+		return arrayContains(readOnly, property) || arrayContains(hidden, property) || arrayContains(include, property);
 	}
 
 	/**
@@ -265,8 +289,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 */
 	private boolean hasExplicitOrImplicitPropertyIncludeValue() {
 		// TODO maybe not a useful optimization
-		return inputAnnotation != null && inputAnnotation.readOnly().length > 0 || inputAnnotation.hidden().length > 0
-				|| inputAnnotation.include().length > 0;
+		return readOnly.length > 0 || hidden.length > 0 || include.length > 0;
 	}
 
 	/**
@@ -277,11 +300,11 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 */
 	@Override
 	public boolean isExcluded(String property) {
-		return inputAnnotation != null && arrayContains(inputAnnotation.exclude(), property);
+		return excluded != null && arrayContains(excluded, property);
 	}
 
 	private boolean arrayContains(String[] array, String toFind) {
-		if (array.length == 0) {
+		if (array == null || array.length == 0) {
 			return false;
 		}
 		for (String item : array) {
@@ -292,56 +315,24 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Suggest<T>[] getPossibleValues(ActionDescriptor actionDescriptor) {
-		return getPossibleValues(methodParameter, actionDescriptor);
-	}
-
-	private <T> Suggest<T>[] getPossibleValues(MethodParameter methodParameter, ActionDescriptor actionDescriptor) {
-		try {
-			if (possibleValues != null) {
-				return possibleValues;
+		List<Object> from = new ArrayList<Object>();
+		for (String paramName : resolver.getParams()) {
+			ActionInputParameter parameterValue = actionDescriptor.getActionInputParameter(paramName);
+			if (parameterValue != null) {
+				from.add(parameterValue.getValue());
 			}
-			Class<?> parameterType = methodParameter.getNestedParameterType();
-			Suggest<?>[] possibleValues;
-			Class<?> nested;
-			Select select = methodParameter.getParameterAnnotation(Select.class);
-			SuggestType type = select != null ? select.type() : SuggestType.INTERNAL;
-			if (Enum[].class.isAssignableFrom(parameterType)) {
-				possibleValues = SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants(), type);
-			} else if (Enum.class.isAssignableFrom(parameterType)) {
-				possibleValues = SimpleSuggest.wrap(parameterType.getEnumConstants(), type);
-			} else if (Collection.class.isAssignableFrom(parameterType)
-					&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1).getType())) {
-				possibleValues = SimpleSuggest.wrap(nested.getEnumConstants(), type);
-			} else {
-
-				if (select != null) {
-					Class<? extends Options<?>> optionsClass = select.options();
-					Options<?> options = getOptions(optionsClass);
-					// collect call values to pass to options.get
-					List<Object> from = new ArrayList<Object>();
-					for (String paramName : select.args()) {
-						ActionInputParameter parameterValue = actionDescriptor.getActionInputParameter(paramName);
-						if (parameterValue != null) {
-							from.add(parameterValue.getValue());
-						}
-					}
-
-					Object[] args = from.toArray();
-					possibleValues = options.get(type, select.value(), args);
-				} else {
-					possibleValues = Suggest.EMPTY;
-				}
-			}
-			return (Suggest<T>[]) possibleValues;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
 		}
+
+		Object[] args = from.toArray();
+		return resolver.getValues(args);
+
 	}
 
 	void setPossibleValues(Suggest[] possibleValues) {
-		this.possibleValues = possibleValues;
+		resolver = new FixedPossibleValuesResolver(possibleValues);
 	}
 
 	/**
@@ -511,11 +502,14 @@ public class SpringActionInputParameter implements ActionInputParameter {
 				+ (value != null ? value.toString() : "no value");
 	}
 
-	private static <T extends Options<?>> Options<?> getOptions(Class<? extends Options<?>> beanType)
-			throws InstantiationException, IllegalAccessException {
+	private static <T extends Options<?>> Options<?> getOptions(Class<? extends Options<?>> beanType) {
 		Options<?> options = getBean(beanType);
 		if (options == null) {
-			options = beanType.newInstance();
+			try {
+				options = beanType.newInstance();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return options;
 	}
@@ -533,5 +527,60 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			}
 		} catch (Exception e) {}
 		return null;
+	}
+
+	public void setExcluded(String[] excluded) {
+		this.excluded = excluded;
+	}
+
+	public enum ParameterType {
+		INPUT, SELECT, UNKNOWN
+	}
+
+	interface PossibleValuesResolver {
+		String[] getParams();
+
+		Suggest[] getValues(Object[] value);
+	}
+
+	class FixedPossibleValuesResolver implements PossibleValuesResolver {
+
+		private final Suggest<?>[] values;
+
+		public FixedPossibleValuesResolver(Suggest<?>[] values) {
+			this.values = values;
+		}
+
+		@Override
+		public String[] getParams() {
+			return EMPTY;
+		}
+
+		@Override
+		public Suggest<?>[] getValues(Object[] value) {
+			return values;
+		}
+
+	}
+
+	class OptionsPossibleValuesResolver implements PossibleValuesResolver {
+		private final Options<?> options;
+		private final Select select;
+
+		public OptionsPossibleValuesResolver(Select select) {
+			this.select = select;
+			options = getOptions(select.options());
+		}
+
+		@Override
+		public String[] getParams() {
+			return select.args();
+		}
+
+		@Override
+		public Suggest[] getValues(Object[] args) {
+
+			return options.get(select.type(), select.value(), args);
+		}
 	}
 }
