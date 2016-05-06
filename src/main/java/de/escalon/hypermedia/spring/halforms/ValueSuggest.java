@@ -30,7 +30,7 @@ import de.escalon.hypermedia.affordance.SuggestType;
  * @param <D>
  */
 @JsonSerialize(using = ValueSuggestSerializer.class)
-public class ValueSuggest<D> extends AbstractSuggest {
+class ValueSuggest<D> extends AbstractSuggest {
 
 	private final Iterable<D> values;
 

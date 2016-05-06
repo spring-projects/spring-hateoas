@@ -19,12 +19,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
 @JsonPropertyOrder({ "embeddeds", "links", "templates" })
-public class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
+class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 
-	private List<Template> templates = new ArrayList<Template>();
+	private final List<Template> templates = new ArrayList<Template>();
 
-	private EmbeddedWrappers wrappers;
-	private List<EmbeddedWrapper> embeddedWrappers;
+	private final EmbeddedWrappers wrappers;
+	private final List<EmbeddedWrapper> embeddedWrappers;
 
 	public HalFormsDocument(Iterable<Link> links) {
 
@@ -40,6 +40,7 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 		}
 	}
 
+	@Override
 	@JsonProperty("_templates")
 	@JsonInclude(Include.NON_EMPTY)
 	@JsonSerialize(using = Jackson2HalFormsModule.HalTemplateListSerializer.class)
@@ -63,7 +64,7 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 			add(link);
 		}
 
-		this.templates.add(template);
+		templates.add(template);
 
 		if (template.getProperties() == null) {
 			return;

@@ -25,11 +25,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * Suggested values of a {@link Property} that are loaded by a url returning a list of values.
  */
 @JsonPropertyOrder({ "link", "valueField", "textField" })
-public class LinkSuggest extends AbstractSuggest {
+class LinkSuggest extends AbstractSuggest {
 
-	@JsonSerialize(using = LinkSuggestSerializer.class)
-	@JsonProperty("href")
-	private Link link;
+	@JsonSerialize(using = LinkSuggestSerializer.class) @JsonProperty("href") private Link link;
 
 	public LinkSuggest(Link link, String textFieldName, String valueFieldName) {
 		super(textFieldName, valueFieldName);

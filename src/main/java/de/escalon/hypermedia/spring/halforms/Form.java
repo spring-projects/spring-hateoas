@@ -26,14 +26,13 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  */
 @JsonIgnoreProperties({ "body", "href", "rel" })
 @JsonInclude(Include.NON_EMPTY)
-public class Form extends Template {
+class Form extends Template {
 
 	private static final long serialVersionUID = -933494757445089955L;
 
 	private Object body;
 
-	public Form() {
-	}
+	public Form() {}
 
 	public Form(String href, String rel) {
 		super(href, rel);

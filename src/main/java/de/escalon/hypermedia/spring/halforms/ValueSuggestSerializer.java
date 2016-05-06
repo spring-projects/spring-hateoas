@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
 
 import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
-public class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements ContextualSerializer {
+class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements ContextualSerializer {
 
 	private final RelProvider relProvider;
 

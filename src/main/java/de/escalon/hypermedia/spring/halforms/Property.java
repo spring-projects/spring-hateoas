@@ -23,10 +23,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * list of {@link Property}
  * 
  * @see http://mamund.site44.com/misc/hal-forms/
- * 
  */
 @JsonInclude(Include.NON_DEFAULT)
-public class Property {
+class Property {
 
 	private String name;
 
@@ -44,8 +43,7 @@ public class Property {
 
 	private Suggest suggest;
 
-	public Property() {
-	}
+	public Property() {}
 
 	public Property(String name, Boolean readOnly, boolean templated, String value, String prompt, String regex,
 			boolean required, Suggest suggest) {

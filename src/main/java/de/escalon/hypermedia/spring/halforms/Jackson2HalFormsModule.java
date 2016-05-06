@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-public class Jackson2HalFormsModule extends SimpleModule {
+class Jackson2HalFormsModule extends SimpleModule {
 
 	private static final long serialVersionUID = -4496351128468451196L;
 
@@ -180,6 +180,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		 * 
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
 		 */
+		@Override
 		public boolean isEmpty(List<Template> value) {
 			return isEmpty(null, value);
 		}
@@ -190,6 +191,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider,
 		 * java.lang.Object)
 		 */
+		@Override
 		public boolean isEmpty(SerializerProvider provider, List<Template> value) {
 			return value.isEmpty();
 		}
@@ -247,8 +249,8 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
-			this.instanceMap.put(HalTemplateListSerializer.class, new HalTemplateListSerializer(mapper, messageSource));
-			this.instanceMap.put(ValueSuggestSerializer.class, new ValueSuggestSerializer(mapper, resolver, null));
+			instanceMap.put(HalTemplateListSerializer.class, new HalTemplateListSerializer(mapper, messageSource));
+			instanceMap.put(ValueSuggestSerializer.class, new ValueSuggestSerializer(mapper, resolver, null));
 		}
 
 		private Object findInstance(Class<?> type) {
