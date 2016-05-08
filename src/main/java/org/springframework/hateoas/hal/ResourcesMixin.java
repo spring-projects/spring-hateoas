@@ -32,7 +32,7 @@ public abstract class ResourcesMixin<T> extends Resources<T> {
 	@Override
 	@XmlElement(name = "embedded")
 	@JsonProperty("_embedded")
-	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY, using = Jackson2HalModule.HalResourcesSerializer.class)
+	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
 	@JsonDeserialize(using = Jackson2HalModule.HalResourcesDeserializer.class)
 	public abstract Collection<T> getContent();
 
