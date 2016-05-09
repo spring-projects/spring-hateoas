@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.core.EmbeddedWrapper;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 
@@ -52,8 +51,7 @@ class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY,
 			using = Jackson2HalFormsModule.HalEmbeddedResourcesSerializer.class)
 	public Collection<EmbeddedWrapper> getEmbeddeds() {
-		Resources<EmbeddedWrapper> resources = new Resources<EmbeddedWrapper>(embeddedWrappers);
-		return resources.getContent();
+		return embeddedWrappers;
 	}
 
 	@Override
