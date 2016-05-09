@@ -2,6 +2,7 @@ package de.escalon.hypermedia.spring.halforms;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,10 +11,13 @@ import java.util.Map;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.hal.Jackson2HalModule.OptionalListJackson2Serializer;
 import org.springframework.util.Assert;
 
@@ -240,6 +244,222 @@ class Jackson2HalFormsModule extends SimpleModule {
 		}
 	}
 
+	public static class HalEmbeddedResourcesSerializer extends ContainerSerializer<Collection<?>>
+			implements ContextualSerializer {
+
+		private static final long serialVersionUID = 1L;
+		private final BeanProperty property;
+		private final EmbeddedMapper embeddedMapper;
+
+		public HalEmbeddedResourcesSerializer(EmbeddedMapper embeddedMapper) {
+			this(null, embeddedMapper);
+		}
+
+		public HalEmbeddedResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
+			super(Collection.class, false);
+			this.embeddedMapper = embeddedMapper;
+			this.property = property;
+		}
+
+		@Override
+		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
+			Map<String, Object> embeddeds = embeddedMapper.map(value);
+
+			provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
+			return new HalEmbeddedResourcesSerializer(property, embeddedMapper);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		@Override
+		public boolean hasSingleElement(Collection<?> value) {
+			return value.size() == 1;
+		}
+
+		@Override
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+			return null;
+		}
+
+	}
+
+	public static class HalFormsLinkLinkSerializer extends HalLinkListSerializer {
+
+		private static final long serialVersionUID = 1L;
+
+		private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = new Link("__rel__", "¯\\_(ツ)_/¯");
+		private static final String RELATION_MESSAGE_TEMPLATE = "_links.%s.title";
+
+		private final BeanProperty property;
+		private final CurieProvider curieProvider;
+		private final EmbeddedMapper mapper;
+		private final MessageSourceAccessor messageSource;
+
+		public HalFormsLinkLinkSerializer(CurieProvider curieProvider, EmbeddedMapper mapper,
+				MessageSourceAccessor messageSource) {
+			this(null, curieProvider, mapper, messageSource);
+		}
+
+		public HalFormsLinkLinkSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
+				MessageSourceAccessor messageSource) {
+			super(property, curieProvider, mapper, messageSource);
+			this.property = property;
+			this.curieProvider = curieProvider;
+			this.mapper = mapper;
+			this.messageSource = messageSource;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
+		@Override
+		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException, JsonGenerationException {
+
+			// sort links according to their relation
+			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
+			List<Link> links = new ArrayList<Link>();
+
+			boolean prefixingRequired = curieProvider != null;
+			boolean curiedLinkPresent = false;
+			boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
+
+			Object currentValue = jgen.getCurrentValue();
+
+			if (currentValue instanceof Resources) {
+				if (mapper.hasCuriedEmbed((Resources<?>) currentValue)) {
+					curiedLinkPresent = true;
+				}
+			} else if (currentValue instanceof HalFormsDocument) {
+				if (mapper.hasCuriedEmbed(((HalFormsDocument) currentValue).getEmbeddeds())) {
+					curiedLinkPresent = true;
+				}
+			}
+
+			for (Link link : value) {
+
+				if (link.equals(CURIES_REQUIRED_DUE_TO_EMBEDS)) {
+					continue;
+				}
+
+				String rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
+
+				if (!link.getRel().equals(rel)) {
+					curiedLinkPresent = true;
+				}
+
+				if (sortedLinks.get(rel) == null) {
+					sortedLinks.put(rel, new ArrayList<Object>());
+				}
+
+				links.add(link);
+
+				sortedLinks.get(rel).add(toHalLink(link));
+			}
+
+			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
+
+				ArrayList<Object> curies = new ArrayList<Object>();
+				curies.add(curieProvider.getCurieInformation(new Links(links)));
+
+				sortedLinks.put("curies", curies);
+			}
+
+			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
+			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
+			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
+			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
+
+			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property), null);
+
+			serializer.serialize(sortedLinks, jgen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
+				throws JsonMappingException {
+			return new HalFormsLinkLinkSerializer(property, curieProvider, mapper, messageSource);
+		}
+
+		/**
+		 * Wraps the given link into a HAL specifc extension.
+		 * 
+		 * @param link must not be {@literal null}.
+		 * @return
+		 */
+		private HalLink toHalLink(Link link) {
+
+			String rel = link.getRel();
+			String title = getTitle(rel);
+
+			if (title == null) {
+				title = getTitle(rel.contains(":") ? rel.substring(rel.indexOf(":") + 1) : rel);
+			}
+
+			return new HalLink(link, title);
+		}
+
+		/**
+		 * Returns the title for the given local link relation resolved through the configured {@link MessageSourceAccessor}
+		 * .
+		 * 
+		 * @param localRel must not be {@literal null} or empty.
+		 * @return
+		 */
+		private String getTitle(String localRel) {
+
+			Assert.hasText(localRel, "Local relation must not be null or empty!");
+
+			try {
+				return messageSource == null ? null
+						: messageSource.getMessage(String.format(RELATION_MESSAGE_TEMPLATE, localRel));
+			} catch (NoSuchMessageException o_O) {
+				return null;
+			}
+		}
+	}
+
+	static class HalLink {
+
+		private final Link link;
+		private final String title;
+
+		public HalLink(Link link, String title) {
+			this.link = link;
+			this.title = title;
+		}
+
+		@JsonUnwrapped
+		public Link getLink() {
+			return link;
+		}
+
+		@JsonInclude(Include.NON_NULL)
+		public String getTitle() {
+			return title;
+		}
+	}
+
 	public static class HalFormsHandlerInstantiator extends HalHandlerInstantiator {
 		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
 
@@ -251,6 +471,9 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 			instanceMap.put(HalTemplateListSerializer.class, new HalTemplateListSerializer(mapper, messageSource));
 			instanceMap.put(ValueSuggestSerializer.class, new ValueSuggestSerializer(mapper, resolver, null));
+			instanceMap.put(HalEmbeddedResourcesSerializer.class, new HalEmbeddedResourcesSerializer(mapper));
+			instanceMap.put(HalFormsLinkLinkSerializer.class,
+					new HalFormsLinkLinkSerializer(curieProvider, mapper, messageSource));
 		}
 
 		private Object findInstance(Class<?> type) {

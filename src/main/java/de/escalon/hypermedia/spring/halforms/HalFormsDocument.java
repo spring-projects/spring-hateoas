@@ -1,6 +1,7 @@
 package de.escalon.hypermedia.spring.halforms;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
@@ -13,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
@@ -48,9 +48,19 @@ class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 		return templates;
 	}
 
-	@JsonUnwrapped
-	public Resources<EmbeddedWrapper> getEmbeddeds() {
-		return new Resources<EmbeddedWrapper>(embeddedWrappers);
+	@JsonProperty("_embedded")
+	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY,
+			using = Jackson2HalFormsModule.HalEmbeddedResourcesSerializer.class)
+	public Collection<EmbeddedWrapper> getEmbeddeds() {
+		Resources<EmbeddedWrapper> resources = new Resources<EmbeddedWrapper>(embeddedWrappers);
+		return resources.getContent();
+	}
+
+	@Override
+	@JsonProperty("_links")
+	@JsonSerialize(using = Jackson2HalFormsModule.HalFormsLinkLinkSerializer.class)
+	public List<Link> getLinks() {
+		return super.getLinks();
 	}
 
 	public void add(Template template) {
@@ -76,9 +86,7 @@ class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
 				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
-					for (Object value : valueSuggest.getValues()) {
-						embeddedWrappers.add(wrappers.wrap(value));
-					}
+					embeddedWrappers.add(wrappers.wrap(valueSuggest.getValues()));
 				}
 			}
 		}
