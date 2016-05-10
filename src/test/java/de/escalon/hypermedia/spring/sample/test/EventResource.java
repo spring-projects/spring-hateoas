@@ -17,15 +17,16 @@ import org.springframework.hateoas.ResourceSupport;
  * Created by dschulten on 13.09.2014.
  */
 public class EventResource extends ResourceSupport {
-    public int id;
-    public String performer;
-    public String name;
-    public String location;
 
-    public EventResource(int id, String performer, String name, String location) {
-        this.id = id;
-        this.performer = performer;
-        this.name = name;
-        this.location = location;
-    }
+	public int id;
+	public String performer;
+	public String name;
+	public String location;
+
+	public EventResource(int id, String performer, String name, String location) {
+		this.id = id;
+		this.performer = performer;
+		this.name = name;
+		this.location = location;
+	}
 }

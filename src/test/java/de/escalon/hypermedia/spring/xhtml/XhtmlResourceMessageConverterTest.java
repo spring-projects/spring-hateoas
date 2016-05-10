@@ -1,5 +1,13 @@
 package de.escalon.hypermedia.spring.xhtml;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.spring.sample.test.DummyEventController;
 import de.escalon.hypermedia.spring.sample.test.ReviewController;
@@ -26,226 +34,214 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
 public class XhtmlResourceMessageConverterTest {
 
-    public static final Logger LOG = LoggerFactory.getLogger(XhtmlResourceMessageConverterTest.class);
+	public static final Logger LOG = LoggerFactory.getLogger(XhtmlResourceMessageConverterTest.class);
 
-    @Autowired
-    private WebApplicationContext wac;
+	@Autowired
+	private WebApplicationContext wac;
 
-    private MockMvc mockMvc;
-    private static Map<String, String> namespaces = new HashMap<String, String>();
+	private MockMvc mockMvc;
+	private static Map<String, String> namespaces = new HashMap<String, String>();
 
-    static {
-        namespaces.put("h", "http://www.w3.org/1999/xhtml");
-    }
+	static {
+		namespaces.put("h", "http://www.w3.org/1999/xhtml");
+	}
 
-    @Configuration
-    @EnableWebMvc
-    static class WebConfig extends WebMvcConfigurerAdapter {
-
-
-        @Bean
-        public ReviewController reviewController() {
-            return new ReviewController();
-        }
-
-        @Bean
-        public DummyEventController eventController() {
-            return new DummyEventController();
-        }
-
-        @Override
-        public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-            super.configureMessageConverters(converters);
-            converters.add(new XhtmlResourceMessageConverter());
-        }
-
-        @Override
-        public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-            final ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
-            resolver.setWarnLogCategory(resolver.getClass()
-                    .getName());
-            exceptionResolvers.add(resolver);
-        }
-
-    }
+	@Configuration
+	@EnableWebMvc
+	static class WebConfig extends WebMvcConfigurerAdapter {
 
 
-    @Before
-    public void setup() {
-        this.mockMvc = webAppContextSetup(this.wac).build();
+		@Bean
+		public ReviewController reviewController() {
+			return new ReviewController();
+		}
 
-    }
+		@Bean
+		public DummyEventController eventController() {
+			return new DummyEventController();
+		}
 
-    @Test
-    public void testCreatesHtmlFormForGet() throws Exception {
-        MvcResult result = this.mockMvc.perform(get("http://localhost/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET' and " +
-                        "@name='findEventByName']", namespaces).exists())
-                        // TODO: form name
-                .andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET' and " +
-                                "@name='findEventByName']/h:div/h:input/@name",
-                        namespaces).string("eventName"))
-                .andReturn();
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
+		@Override
+		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+			super.configureMessageConverters(converters);
+			converters.add(new XhtmlResourceMessageConverter());
+		}
 
-    @Test
-    public void testCreatesSimpleLinkForGetAffordanceWithoutRequestParams() throws Exception {
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:a[@href='http://localhost/events/1']", namespaces).exists())
-                .andExpect(xpath("//h:a[@href='http://localhost/events/2']", namespaces).exists())
-                .andReturn();
-
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
-
-    @Test
-    public void testCreatesHtmlFormForPost() throws Exception {
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@name='addEvent']/@action", namespaces).string("http://localhost/events"))
-                .andExpect(xpath("//h:form[@name='addEvent']/@method", namespaces).string("POST"))
-                .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='eventStatus']", namespaces).exists())
-                .andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='typicalAgeRange']", namespaces).exists())
-                .andReturn();
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-
-    }
-
-    @Test
-    public void testCreatesHtmlFormForPut() throws Exception {
-        // TODO too many divs
-        // TODO GET form without input
-        // TODO GET iritemplate form has no name
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/@action", namespaces).string("http://localhost/events/1"))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:input[@name='_method']/@value", namespaces).string("PUT"))
-                .andReturn();
-
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
-
-    @Test
-    public void testCreatesInputFieldWithMinMaxNumber() throws Exception {
-
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']", namespaces).exists())
-                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@type", namespaces).string("number"))
-                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@min", namespaces).string("1"))
-                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@max", namespaces).string("5"))
-                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@value", namespaces).string("3"))
-                .andReturn();
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
-
-    @Test
-    public void testCreatesInputFieldWithDefaultText() throws Exception {
-
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@value", namespaces).string("3"))
-                .andReturn();
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
-
-    /**
-     * Tests if the form contains a personId input field with default value.
-     *
-     * @throws Exception
-     */
-    @Test
-    @Ignore
-    public void testCreatesHiddenInputField() throws Exception {
-
-        this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:input[@name='personId']", namespaces).exists())
-                .andExpect(xpath("//h:input[@name='personId']/@type", namespaces).string("hidden"))
-                .andExpect(xpath("//h:input[@name='personId']/@value", namespaces).string("123"))
-                .andExpect(xpath("//h:input[@name='firstname']/@value", namespaces).string("Bilbo"));
-    }
-
-    /**
-     * Tests if the form contains a select field.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testCreatesSelectFieldForEnum() throws Exception {
-
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:select[@name='eventStatus']", namespaces).exists())
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[1]/text()", namespaces).string("EVENT_CANCELLED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[2]/text()", namespaces).string("EVENT_POSTPONED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[3]/text()", namespaces).string("EVENT_SCHEDULED"))
-                .andExpect(xpath("//h:select[@name='eventStatus']/h:option[4]/text()", namespaces).string("EVENT_RESCHEDULED"))
-                .andExpect(xpath("(//h:select[@name='eventStatus']/h:option)[@selected]/text()", namespaces).string("EVENT_SCHEDULED"))
-                .andReturn();
-
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
-
-    /**
-     * Tests a list of possible values defined with {@link Select#options()} annotation.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testCreatesSelectFieldForSelectOptionsBasedPossibleValues() throws Exception {
-        MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.TEXT_HTML))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']", namespaces).exists())
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']/h:option[1]", namespaces).string("7-10"))
-                .andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']/h:option[2]", namespaces).string("11-"))
-                .andReturn();
-        LOG.debug(result.getResponse()
-                .getContentAsString());
-    }
+		@Override
+		public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+			final ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
+			resolver.setWarnLogCategory(resolver.getClass()
+					.getName());
+			exceptionResolvers.add(resolver);
+		}
+	}
 
 
-    /**
-     * Tests if the form contains a multiselect field with three preselected items, matching the person having id 123.
-     *
-     * @throws Exception
-     */
+	@Before
+	public void setup() {
+		this.mockMvc = webAppContextSetup(this.wac).build();
+	}
+
+	@Test
+	public void testCreatesHtmlFormForGet() throws Exception {
+		MvcResult result = this.mockMvc.perform(get("http://localhost/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET' and " +
+						"@name='findEventByName']", namespaces).exists())
+				// TODO: form name
+				.andExpect(xpath("//h:form[@action='http://localhost/events' and @method='GET' and " +
+								"@name='findEventByName']/h:div/h:input/@name",
+						namespaces).string("eventName"))
+				.andReturn();
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	@Test
+	public void testCreatesSimpleLinkForGetAffordanceWithoutRequestParams() throws Exception {
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:a[@href='http://localhost/events/1']", namespaces).exists())
+				.andExpect(xpath("//h:a[@href='http://localhost/events/2']", namespaces).exists())
+				.andReturn();
+
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	@Test
+	public void testCreatesHtmlFormForPost() throws Exception {
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:form[@name='addEvent']/@action", namespaces).string("http://localhost/events"))
+				.andExpect(xpath("//h:form[@name='addEvent']/@method", namespaces).string("POST"))
+				.andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='eventStatus']", namespaces).exists())
+				.andExpect(xpath("//h:form[@name='addEvent']/h:div/h:select[@name='typicalAgeRange']", namespaces).exists())
+				.andReturn();
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	@Test
+	public void testCreatesHtmlFormForPut() throws Exception {
+		// TODO too many divs
+		// TODO GET form without input
+		// TODO GET iritemplate form has no name
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/@action", namespaces).string("http://localhost/events/1"))
+				.andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:input[@name='_method']/@value", namespaces).string("PUT"))
+				.andReturn();
+
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	@Test
+	public void testCreatesInputFieldWithMinMaxNumber() throws Exception {
+
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(MockMvcResultMatchers.content()
+						.contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:input[@name='reviewRating.ratingValue']", namespaces).exists())
+				.andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@type", namespaces).string("number"))
+				.andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@min", namespaces).string("1"))
+				.andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@max", namespaces).string("5"))
+				.andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@value", namespaces).string("3"))
+				.andReturn();
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	@Test
+	public void testCreatesInputFieldWithDefaultText() throws Exception {
+
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(MockMvcResultMatchers.content()
+						.contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:input[@name='reviewRating.ratingValue']/@value", namespaces).string("3"))
+				.andReturn();
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	/**
+	 * Tests if the form contains a personId input field with default value.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	@Ignore
+	public void testCreatesHiddenInputField() throws Exception {
+
+		this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(MockMvcResultMatchers.content()
+						.contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:input[@name='personId']", namespaces).exists())
+				.andExpect(xpath("//h:input[@name='personId']/@type", namespaces).string("hidden"))
+				.andExpect(xpath("//h:input[@name='personId']/@value", namespaces).string("123"))
+				.andExpect(xpath("//h:input[@name='firstname']/@value", namespaces).string("Bilbo"));
+	}
+
+	/**
+	 * Tests if the form contains a select field.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreatesSelectFieldForEnum() throws Exception {
+
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:select[@name='eventStatus']", namespaces).exists())
+				.andExpect(xpath("//h:select[@name='eventStatus']/h:option[1]/text()", namespaces).string("EVENT_CANCELLED"))
+				.andExpect(xpath("//h:select[@name='eventStatus']/h:option[2]/text()", namespaces).string("EVENT_POSTPONED"))
+				.andExpect(xpath("//h:select[@name='eventStatus']/h:option[3]/text()", namespaces).string("EVENT_SCHEDULED"))
+				.andExpect(xpath("//h:select[@name='eventStatus']/h:option[4]/text()", namespaces).string("EVENT_RESCHEDULED"))
+				.andExpect(xpath("(//h:select[@name='eventStatus']/h:option)[@selected]/text()", namespaces).string("EVENT_SCHEDULED"))
+				.andReturn();
+
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	/**
+	 * Tests a list of possible values defined with {@link Select#options()} annotation.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreatesSelectFieldForSelectOptionsBasedPossibleValues() throws Exception {
+		MvcResult result = this.mockMvc.perform(get("/events").accept(MediaType.TEXT_HTML))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.TEXT_HTML))
+				.andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']", namespaces).exists())
+				.andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']/h:option[1]", namespaces).string("7-10"))
+				.andExpect(xpath("//h:form[@name='updateEventWithRequestBody']/h:div/h:select[@name='typicalAgeRange']/h:option[2]", namespaces).string("11-"))
+				.andReturn();
+		LOG.debug(result.getResponse()
+				.getContentAsString());
+	}
+
+	/**
+	 * Tests if the form contains a multiselect field with three preselected items, matching the person having id 123.
+	 *
+	 * @throws Exception
+	 */
 //    @Test
 //    public void testCreatesMultiSelectFieldForEnumArray() throws Exception {
 //
@@ -325,5 +321,4 @@ public class XhtmlResourceMessageConverterTest {
 //        // expect code-on-demand here
 //
 //    }
-
 }

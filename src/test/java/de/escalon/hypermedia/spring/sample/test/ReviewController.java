@@ -13,6 +13,9 @@
 
 package de.escalon.hypermedia.spring.sample.test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.spring.AffordanceBuilder;
 import org.springframework.hateoas.Resources;
@@ -23,9 +26,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Sample controller for reviews. Created by dschulten on 16.09.2014.
  */
@@ -33,44 +33,44 @@ import java.util.List;
 @RequestMapping("/reviews")
 public class ReviewController {
 
-    @SuppressWarnings("unchecked")
-    List<List<Review>> reviews = Arrays.asList(Arrays.asList(new Review("Five peeps, one guitar", new Rating(5))),
-            Arrays.asList(new Review("Great actress, special atmosphere", new Rating(5))));
+	@SuppressWarnings("unchecked")
+	List<List<Review>> reviews = Arrays.asList(Arrays.asList(new Review("Five peeps, one guitar", new Rating(5))),
+			Arrays.asList(new Review("Great actress, special atmosphere", new Rating(5))));
 
-    @RequestMapping(value = "/events/{eventId}", method = RequestMethod.GET)
-    @ResponseBody
-    public Resources<Review> getReviews(@PathVariable int eventId, @RequestParam(required = false) String ratingValue) {
-        final Resources<Review> reviewResources = new Resources<Review>(reviews.get(eventId));
-        reviewResources.add(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(DummyEventController.class)
-                .getEvent((Integer) null)) // pass null to create template
-                .withRel("hydra:search"));
-        return reviewResources;
-    }
+	@RequestMapping(value = "/events/{eventId}", method = RequestMethod.GET)
+	@ResponseBody
+	public Resources<Review> getReviews(@PathVariable int eventId, @RequestParam(required = false) String ratingValue) {
+		final Resources<Review> reviewResources = new Resources<Review>(reviews.get(eventId));
+		reviewResources.add(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(DummyEventController.class)
+				.getEvent((Integer) null)) // pass null to create template
+				.withRel("hydra:search"));
+		return reviewResources;
+	}
 
-    @RequestMapping(value = "/events/{eventId}", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    ResponseEntity<Void> addReview(@PathVariable int eventId, @RequestBody Review review) {
-        Assert.notNull(review);
-        Assert.notNull(review.getReviewRating());
-        Assert.notNull(review.getReviewRating()
-                .getRatingValue());
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(this.getClass())
-                .getReviews(eventId, null))
-                .toUri());
-        return new ResponseEntity(headers, HttpStatus.CREATED);
-    }
+	@RequestMapping(value = "/events/{eventId}", method = RequestMethod.POST)
+	public
+	@ResponseBody
+	ResponseEntity<Void> addReview(@PathVariable int eventId, @RequestBody Review review) {
+		Assert.notNull(review);
+		Assert.notNull(review.getReviewRating());
+		Assert.notNull(review.getReviewRating()
+				.getRatingValue());
+		final HttpHeaders headers = new HttpHeaders();
+		headers.setLocation(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(this.getClass())
+				.getReviews(eventId, null))
+				.toUri());
+		return new ResponseEntity(headers, HttpStatus.CREATED);
+	}
 
-    @Action("ReviewAction")
-    @RequestMapping(value = "/events/{eventId}", method = RequestMethod.POST, params = {"review", "rating"})
-    public
-    @ResponseBody
-    ResponseEntity<Void> addReview(@PathVariable int eventId, @RequestParam String review, @RequestParam int rating) {
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(this.getClass())
-                .getReviews(eventId, null))
-                .toUri());
-        return new ResponseEntity(headers, HttpStatus.CREATED);
-    }
+	@Action("ReviewAction")
+	@RequestMapping(value = "/events/{eventId}", method = RequestMethod.POST, params = {"review", "rating"})
+	public
+	@ResponseBody
+	ResponseEntity<Void> addReview(@PathVariable int eventId, @RequestParam String review, @RequestParam int rating) {
+		final HttpHeaders headers = new HttpHeaders();
+		headers.setLocation(AffordanceBuilder.linkTo(AffordanceBuilder.methodOn(this.getClass())
+				.getReviews(eventId, null))
+				.toUri());
+		return new ResponseEntity(headers, HttpStatus.CREATED);
+	}
 }

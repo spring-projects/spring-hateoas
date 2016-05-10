@@ -13,14 +13,14 @@ public interface ActionDescriptor {
 	/**
 	 * Gets action name. Could be used as form name.
 	 *
-	 * @return
+	 * @return name
 	 */
 	String getActionName();
 
 	/**
 	 * Gets method on uniform interface.
 	 *
-	 * @return
+	 * @return method
 	 */
 	String getHttpMethod();
 
@@ -41,21 +41,21 @@ public interface ActionDescriptor {
 	/**
 	 * Gets names of path variables, if URL has variables.
 	 *
-	 * @return
+	 * @return names or empty collection
 	 */
 	Collection<String> getPathVariableNames();
 
 	/**
 	 * Gets names of expected request headers, if any.
 	 *
-	 * @return
+	 * @return names or empty collection
 	 */
 	Collection<String> getRequestHeaderNames();
 
 	/**
 	 * Gets names of expected request parameters, if any.
 	 *
-	 * @return
+	 * @return names or empty collection
 	 */
 	Collection<String> getRequestParamNames();
 
@@ -63,35 +63,35 @@ public interface ActionDescriptor {
 	 * Gets action parameter by name.
 	 *
 	 * @param name
-	 * @return
+	 * @return parameter
 	 */
 	ActionInputParameter getActionInputParameter(String name);
 
 	/**
 	 * Request body descriptor, if the action expects a complex request body.
 	 *
-	 * @return
+	 * @return request body parameter
 	 */
 	ActionInputParameter getRequestBody();
 
 	/**
 	 * Does the action expect a complex request body?
 	 *
-	 * @return
+	 * @return true if applicable
 	 */
 	boolean hasRequestBody();
 
 	/**
 	 * Gets well-defined semantic action type, e.g. http://schema.org/Action subtype.
 	 *
-	 * @return
+	 * @return semantic action type
 	 */
 	String getSemanticActionType();
 
 	/**
 	 * Gets required parameters.
 	 *
-	 * @return
+	 * @return required parameters, may be empty
 	 */
 	Map<String, ActionInputParameter> getRequiredParameters();
 

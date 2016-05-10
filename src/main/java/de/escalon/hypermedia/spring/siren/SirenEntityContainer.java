@@ -10,6 +10,8 @@ public interface SirenEntityContainer {
 
 	List<SirenSubEntity> getEntities();
 
+	public Map<String, Object> getProperties();
+
 	void setLinks(List<SirenLink> links);
 
 	void setProperties(Map<String, Object> properties);

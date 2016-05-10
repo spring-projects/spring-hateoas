@@ -13,7 +13,6 @@ package de.escalon.hypermedia.spring.uber;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -24,7 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class NullValueSerializerTest {
 
 	private NullValueSerializer nullValueSerializer;
-	
+
 	@Mock
 	private JsonGenerator jgen;
 	@Mock
@@ -40,5 +39,4 @@ public class NullValueSerializerTest {
 		nullValueSerializer.serialize(UberNode.NULL_VALUE, jgen, serializerProvider);
 		Mockito.verify(jgen).writeNull();
 	}
-
 }
