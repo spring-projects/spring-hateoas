@@ -18,6 +18,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import de.escalon.hypermedia.affordance.SuggestType;
+
 /**
  * Specifies possible values for an argument on a controller method.
  */
@@ -39,7 +41,7 @@ public @interface Select {
 	 *
 	 * @return implementation class of {@link Options}
 	 */
-	Class<? extends Options> options() default StringOptions.class;
+	Class<? extends Options<?>> options() default StringOptions.class;
 
 	/**
 	 * When getting possible values using {@link Options#get}, pass the arguments having these names.
@@ -47,4 +49,12 @@ public @interface Select {
 	 * @return names of the arguments whose value should be passed to {@link Options#get}
 	 */
 	String[] args() default {};
+	
+	/**
+	 * Marks the type of select, in case of {@link SuggestType#EXTERNAL} the data may be outside the select, for example as a variable in HAL response
+	 * rather than in HAL-FORMS document
+	 * @return
+	 */
+	SuggestType type() default SuggestType.INTERNAL;
+	
 }

@@ -18,8 +18,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.escalon.hypermedia.action.Cardinality;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.UriTemplate;
@@ -27,6 +25,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import de.escalon.hypermedia.action.Cardinality;
 
 /**
  * Represents an http affordance for purposes of a ReST service as described by <a
@@ -41,10 +43,12 @@ import org.springframework.util.StringUtils;
  */
 public class Affordance extends Link {
 
+	private static final long serialVersionUID = 3256465945939099914L;
+	
 	private boolean selfRel = false;
 	private List<ActionDescriptor> actionDescriptors = new ArrayList<ActionDescriptor>();
 	private MultiValueMap<String, String> linkParams = new LinkedMultiValueMap<String, String>();
-	private PartialUriTemplate partialUriTemplate;
+	private final PartialUriTemplate partialUriTemplate;
 	private Cardinality cardinality = Cardinality.SINGLE;
 	private TypedResource collectionHolder;
 
@@ -87,7 +91,7 @@ public class Affordance extends Link {
 		// They can access the base uri, query etc. via getUriTemplateComponents.
 		super(uriTemplate.stripOptionalVariables(actionDescriptors)
 				.toString());
-		this.partialUriTemplate = uriTemplate;
+		partialUriTemplate = uriTemplate;
 
 		Assert.noNullElements(rels, "null rels are not allowed");
 
@@ -100,7 +104,7 @@ public class Affordance extends Link {
 		// if any action refers to a collection resource, make the affordance a collection affordance
 		for (ActionDescriptor actionDescriptor : actionDescriptors) {
 			if (Cardinality.COLLECTION == actionDescriptor.getCardinality()) {
-				this.cardinality = Cardinality.COLLECTION;
+				cardinality = Cardinality.COLLECTION;
 				break;
 			}
 		}
@@ -134,10 +138,12 @@ public class Affordance extends Link {
 	 * @param mediaType to set
 	 */
 	public void setType(String mediaType) {
-		if (mediaType != null)
+		if (mediaType != null) {
 			linkParams.set("type", mediaType);
-		else
+		}
+		else {
 			linkParams.remove("type");
+		}
 	}
 
 	/**
@@ -162,8 +168,9 @@ public class Affordance extends Link {
 	 * @param title to set
 	 */
 	public void setTitle(String title) {
-		if (title != null)
+		if (title != null) {
 			linkParams.set("title", title);
+		}
 		else {
 			linkParams.remove("title");
 		}
@@ -193,10 +200,12 @@ public class Affordance extends Link {
 	 * @param titleStar to set
 	 */
 	public void setTitleStar(String titleStar) {
-		if (titleStar != null)
+		if (titleStar != null) {
 			linkParams.set("title*", titleStar);
-		else
+		}
+		else {
 			linkParams.remove("title*");
+		}
 	}
 
 	/**
@@ -208,10 +217,12 @@ public class Affordance extends Link {
 	 * @param mediaDesc to set
 	 */
 	public void setMedia(String mediaDesc) {
-		if (mediaDesc != null)
+		if (mediaDesc != null) {
 			linkParams.set("media", mediaDesc);
-		else
+		}
+		else {
 			linkParams.remove("media");
+		}
 	}
 
 	/**
@@ -237,10 +248,12 @@ public class Affordance extends Link {
 	 * @param anchor base uri to define
 	 */
 	public void setAnchor(String anchor) {
-		if (anchor != null)
+		if (anchor != null) {
 			linkParams.set("anchor", anchor);
-		else
+		}
+		else {
 			linkParams.remove("anchor");
+		}
 	}
 
 	/**
@@ -337,7 +350,7 @@ public class Affordance extends Link {
 	@Override
 	public Affordance withRel(String rel) {
 		linkParams.set("rel", rel);
-		return new Affordance(this.getHref(), linkParams, actionDescriptors);
+		return new Affordance(getHref(), linkParams, actionDescriptors);
 	}
 
 	@Override
@@ -346,7 +359,7 @@ public class Affordance extends Link {
 				.contains(Link.REL_SELF)) {
 			linkParams.add("rel", Link.REL_SELF);
 		}
-		return new Affordance(this.getHref(), linkParams, actionDescriptors);
+		return new Affordance(getHref(), linkParams, actionDescriptors);
 	}
 
 	/**
@@ -412,6 +425,7 @@ public class Affordance extends Link {
 	 * @param arguments for expansion
 	 * @return partially expanded affordance
 	 */
+	@SuppressWarnings("unchecked")
 	public Affordance expandPartially(Map<String, ? extends Object> arguments) {
 		return new Affordance(partialUriTemplate.expand((Map<String, Object>) arguments)
 				.toString(), linkParams, actionDescriptors);

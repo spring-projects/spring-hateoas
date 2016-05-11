@@ -25,6 +25,20 @@ public interface ActionDescriptor {
 	String getHttpMethod();
 
 	/**
+	 * Gets contentType consumed by the action
+	 * 
+	 * @return
+	 */
+	String getConsumes();
+
+	/**
+	 * Gets contentType produced by the action
+	 * 
+	 * @return
+	 */
+	String getProduces();
+
+	/**
 	 * Gets names of path variables, if URL has variables.
 	 *
 	 * @return names or empty collection
@@ -87,4 +101,11 @@ public interface ActionDescriptor {
 	 * @return cardinality
 	 */
 	Cardinality getCardinality();
+
+	/**
+	 * Visits the body to find parameters
+	 * 
+	 * @param visitor
+	 */
+	void accept(ActionInputParameterVisitor visitor);
 }

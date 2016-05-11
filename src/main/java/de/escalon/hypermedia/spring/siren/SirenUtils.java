@@ -4,30 +4,39 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.core.DefaultRelProvider;
+import org.springframework.util.ObjectUtils;
+
 import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Type;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
+import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.DataType;
+import de.escalon.hypermedia.affordance.Suggest;
 import de.escalon.hypermedia.spring.DefaultDocumentationProvider;
 import de.escalon.hypermedia.spring.DocumentationProvider;
-import de.escalon.hypermedia.spring.SpringActionInputParameter;
-import org.springframework.core.MethodParameter;
-import org.springframework.hateoas.*;
-import org.springframework.hateoas.core.DefaultRelProvider;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Maps spring-hateoas response data to siren data. Created by Dietrich on 17.04.2016.
@@ -38,7 +47,7 @@ public class SirenUtils {
 			"id"));
 	private String requestMediaType;
 
-	private Set<String> navigationalRels = new HashSet<String>(Arrays.asList("self", "next", "previous", "prev"));
+	private final Set<String> navigationalRels = new HashSet<String>(Arrays.asList("self", "next", "previous", "prev"));
 
 	private RelProvider relProvider = new DefaultRelProvider();
 
@@ -51,29 +60,24 @@ public class SirenUtils {
 		try {
 			if (object instanceof Resource) {
 				Resource<?> resource = (Resource<?>) object;
-				objectNode.setLinks(this.toSirenLinks(
-						getNavigationalLinks(resource.getLinks())));
-				objectNode.setEmbeddedLinks(this.toSirenEmbeddedLinks(
-						getEmbeddedLinks(resource.getLinks())));
-				objectNode.setActions(this.toSirenActions(getActions(resource.getLinks())));
+				objectNode.setLinks(toSirenLinks(getNavigationalLinks(resource.getLinks())));
+				objectNode.setEmbeddedLinks(toSirenEmbeddedLinks(getEmbeddedLinks(resource.getLinks())));
+				objectNode.setActions(toSirenActions(getActions(resource.getLinks())));
 				toSirenEntity(objectNode, resource.getContent());
 				return;
 			} else if (object instanceof Resources) {
 				Resources<?> resources = (Resources<?>) object;
 
-				objectNode.setLinks(this.toSirenLinks(getNavigationalLinks(resources.getLinks())));
+				objectNode.setLinks(toSirenLinks(getNavigationalLinks(resources.getLinks())));
 				Collection<?> content = resources.getContent();
 				toSirenEntity(objectNode, content);
-				objectNode.setActions(this.toSirenActions(getActions(resources.getLinks())));
+				objectNode.setActions(toSirenActions(getActions(resources.getLinks())));
 				return;
 			} else if (object instanceof ResourceSupport) {
 				ResourceSupport resource = (ResourceSupport) object;
-				objectNode.setLinks(this.toSirenLinks(
-						getNavigationalLinks(resource.getLinks())));
-				objectNode.setEmbeddedLinks(this.toSirenEmbeddedLinks(
-						getEmbeddedLinks(resource.getLinks())));
-				objectNode.setActions(this.toSirenActions(
-						getActions(resource.getLinks())));
+				objectNode.setLinks(toSirenLinks(getNavigationalLinks(resource.getLinks())));
+				objectNode.setEmbeddedLinks(toSirenEmbeddedLinks(getEmbeddedLinks(resource.getLinks())));
+				objectNode.setActions(toSirenActions(getActions(resource.getLinks())));
 
 				// wrap object attributes below to avoid endless loop
 
@@ -91,8 +95,7 @@ public class SirenUtils {
 				Map<String, Object> propertiesNode = new HashMap<String, Object>();
 				objectNode.setProperties(propertiesNode);
 				for (Map.Entry<?, ?> entry : map.entrySet()) {
-					String key = entry.getKey()
-							.toString();
+					String key = entry.getKey().toString();
 					Object content = entry.getValue();
 
 					String docUrl = documentationProvider.getDocumentationUrl(key, content);
@@ -175,10 +178,9 @@ public class SirenUtils {
 	}
 
 
+
 	private void createRecursiveSirenEntitiesFromPropertiesAndFields(SirenEntityContainer objectNode, Map<String,
-			Object> propertiesNode,
-																	 Object object) throws InvocationTargetException,
-			IllegalAccessException {
+			Object> propertiesNode, Object object) throws InvocationTargetException, IllegalAccessException {
 		Map<String, PropertyDescriptor> propertyDescriptors = PropertyUtils.getPropertyDescriptors(object);
 		for (PropertyDescriptor propertyDescriptor : propertyDescriptors.values()) {
 			String name = propertyDescriptor.getName();
@@ -188,15 +190,13 @@ public class SirenUtils {
 
 			Method readMethod = propertyDescriptor.getReadMethod();
 			if (readMethod != null) {
-				Object content = readMethod
-						.invoke(object);
+				Object content = readMethod.invoke(object);
 				String docUrl = documentationProvider.getDocumentationUrl(readMethod, content);
 				traverseAttribute(objectNode, propertiesNode, name, docUrl, content);
 			}
 		}
 
-		Field[] fields = object.getClass()
-				.getFields();
+		Field[] fields = object.getClass().getFields();
 		for (Field field : fields) {
 			String name = field.getName();
 			if (!propertyDescriptors.containsKey(name)) {
@@ -207,9 +207,8 @@ public class SirenUtils {
 		}
 	}
 
-	private void traverseAttribute(SirenEntityContainer objectNode, Map<String, Object> propertiesNode,
-								   String name, String docUrl, Object content) throws
-			InvocationTargetException, IllegalAccessException {
+	private void traverseAttribute(SirenEntityContainer objectNode, Map<String, Object> propertiesNode, String name,
+			String docUrl, Object content) throws InvocationTargetException, IllegalAccessException {
 		Object value = getContentAsScalarValue(content);
 
 		if (value != NULL_VALUE) {
@@ -272,6 +271,7 @@ public class SirenUtils {
 
 		Map<String, Object> properties = new HashMap<String, Object>();
 		List<String> rels = Collections.singletonList(docUrl != null ? docUrl : name);
+
 		SirenEmbeddedRepresentation subEntity = new SirenEmbeddedRepresentation(
 				getSirenClasses(bean), properties, null, toSirenActions(getActions(links)),
 				toSirenLinks(getNavigationalLinks(links)), rels, null);
@@ -297,8 +297,7 @@ public class SirenUtils {
 					if (!"GET".equals(actionDescriptor.getHttpMethod()) || affordance.isTemplated()) {
 						String href;
 						if (affordance.isTemplated()) {
-							href = affordance.getUriTemplateComponents()
-									.getBaseUri();
+							href = affordance.getUriTemplateComponents().getBaseUri();
 						} else {
 							href = affordance.getHref();
 						}
@@ -317,15 +316,12 @@ public class SirenUtils {
 					if (!queryOnly) {
 						break;
 					}
-					fields.add(new SirenField(variable.getName(), "text", (String) null, variable.getDescription(),
-							null));
+					fields.add(new SirenField(variable.getName(), "text", (String) null, variable.getDescription(), null));
 				}
 				// no support for non-query fields in siren
 				if (queryOnly) {
-					String baseUri = new UriTemplate(link.getHref()).expand()
-							.toASCIIString();
-					SirenAction sirenAction = new SirenAction(null, null, null, "GET",
-							baseUri, null, fields);
+					String baseUri = new UriTemplate(link.getHref()).expand().toASCIIString();
+					SirenAction sirenAction = new SirenAction(null, null, null, "GET", baseUri, null, fields);
 					ret.add(sirenAction);
 				}
 			}
@@ -348,186 +344,62 @@ public class SirenUtils {
 
 	private List<SirenField> toSirenFields(ActionDescriptor actionDescriptor) {
 		List<SirenField> ret = new ArrayList<SirenField>();
-		if (actionDescriptor.hasRequestBody()) {
-			recurseBeanCreationParams(ret, actionDescriptor.getRequestBody()
-					.getParameterType(), actionDescriptor, actionDescriptor.getRequestBody(), actionDescriptor
-					.getRequestBody()
-					.getValue(), "", Collections.<String>emptySet());
-		} else {
-			Collection<String> paramNames = actionDescriptor.getRequestParamNames();
-			for (String paramName : paramNames) {
-				ActionInputParameter inputParameter = actionDescriptor.getActionInputParameter(paramName);
-				Object[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
-
-				ret.add(createSirenField(paramName, inputParameter.getValueFormatted(), inputParameter,
-						possibleValues));
-			}
-		}
+		actionDescriptor.accept(new SirenActionInputParameterVisitor(actionDescriptor, ret));
 		return ret;
 	}
 
-	/**
-	 * Renders input fields for bean properties of bean to add or update or patch.
-	 *
-	 * @param sirenFields to add to
-	 * @param beanType to render
-	 * @param annotatedParameters which describes the method
-	 * @param annotatedParameter which requires the bean
-	 * @param currentCallValue sample call value
-	 */
-	private void recurseBeanCreationParams(List<SirenField> sirenFields, Class<?> beanType,
-										   ActionDescriptor annotatedParameters,
-										   ActionInputParameter annotatedParameter, Object currentCallValue,
-										   String parentParamName, Set<String> knownFields) {
-		// TODO collection, map and object node creation are only describable by an annotation, not via type reflection
-		if (ObjectNode.class.isAssignableFrom(beanType) || Map.class.isAssignableFrom(beanType)
-				|| Collection.class.isAssignableFrom(beanType) || beanType.isArray()) {
-			return; // use @Input(include) to list parameter names, at least? Or mix with hdiv's form builder?
+	private class SirenActionInputParameterVisitor implements ActionInputParameterVisitor {
+
+		private final List<SirenField> fields;
+		private final ActionDescriptor actionDescriptor;
+		
+		public SirenActionInputParameterVisitor(ActionDescriptor actionDescriptor, List<SirenField> fields) {
+			this.actionDescriptor = actionDescriptor;
+			this.fields = fields;
 		}
-		try {
-			Constructor[] constructors = beanType.getConstructors();
-			// find default ctor
-			Constructor constructor = PropertyUtils.findDefaultCtor(constructors);
-			// find ctor with JsonCreator ann
-			if (constructor == null) {
-				constructor = PropertyUtils.findJsonCreator(constructors, JsonCreator.class);
-			}
-			Assert.notNull(constructor, "no default constructor or JsonCreator found for type " + beanType
-					.getName());
-			int parameterCount = constructor.getParameterTypes().length;
 
-			if (parameterCount > 0) {
-				Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
+		@Override
+		public String visit(ActionInputParameter inputParameter, 
+				String parentParamName, String paramName, Object propertyValue) {
+			final Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
 
-				Class[] parameters = constructor.getParameterTypes();
-				int paramIndex = 0;
-				for (Annotation[] annotationsOnParameter : annotationsOnParameters) {
-					for (Annotation annotation : annotationsOnParameter) {
-						if (JsonProperty.class == annotation.annotationType()) {
-							JsonProperty jsonProperty = (JsonProperty) annotation;
+			// dot-separated property path as field name
+			SirenField sirenField = createSirenField(parentParamName + paramName, propertyValue,
+					inputParameter, possibleValues);
 
-							// TODO use required attribute of JsonProperty for required fields
-							String paramName = jsonProperty.value();
-							Class parameterType = parameters[paramIndex];
-							Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue,
-									paramName);
-							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
-
-							addSirenFieldsForMethodParameter(sirenFields, methodParameter, annotatedParameter,
-									annotatedParameters,
-									parentParamName, paramName, parameterType, propertyValue,
-									knownFields);
-							paramIndex++; // increase for each @JsonProperty
-						}
-					}
-				}
-				Assert.isTrue(parameters.length == paramIndex,
-						"not all constructor arguments of @JsonCreator " + constructor.getName() +
-								" are annotated with @JsonProperty");
-			}
-
-			Set<String> knownConstructorFields = new HashSet<String>(sirenFields.size());
-			for (SirenField sirenField : sirenFields) {
-				knownConstructorFields.add(sirenField.getName());
-			}
-
-			// TODO support Option provider by other method args?
-			final BeanInfo beanInfo = getBeanInfo(beanType);
-			final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-
-			// add input field for every setter
-			for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-				final Method writeMethod = propertyDescriptor.getWriteMethod();
-				String propertyName = propertyDescriptor.getName();
-
-				if (writeMethod == null || knownFields.contains(parentParamName + propertyName)) {
-					continue;
-				}
-				final Class<?> propertyType = propertyDescriptor.getPropertyType();
-
-				Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, propertyName);
-				MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
-
-				addSirenFieldsForMethodParameter(sirenFields, methodParameter, annotatedParameter,
-						annotatedParameters,
-						parentParamName, propertyName, propertyType, propertyValue, knownConstructorFields);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to write input fields for constructor", e);
+			fields.add(sirenField);
+			return sirenField.getName();
 		}
 	}
 
-	private void addSirenFieldsForMethodParameter(List<SirenField> sirenFields, MethodParameter
-			methodParameter, ActionInputParameter annotatedParameter, ActionDescriptor annotatedParameters, String
-														  parentParamName, String paramName, Class
-														  parameterType, Object propertyValue, Set<String>
-														  knownFields) {
-		if (DataType.isSingleValueType(parameterType)
-				|| DataType.isArrayOrCollection(parameterType)) {
-
-			if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
-
-				ActionInputParameter constructorParamInputParameter =
-						new SpringActionInputParameter(methodParameter, propertyValue);
-
-				final Object[] possibleValues =
-						annotatedParameter.getPossibleValues(methodParameter, annotatedParameters);
-
-				// dot-separated property path as field name
-				SirenField sirenField = createSirenField(parentParamName + paramName,
-						propertyValue, constructorParamInputParameter, possibleValues);
-				sirenFields.add(sirenField);
-			}
-		} else {
-			Object callValueBean;
-			if (propertyValue instanceof Resource) {
-				callValueBean = ((Resource) propertyValue).getContent();
-			} else {
-				callValueBean = propertyValue;
-			}
-			recurseBeanCreationParams(sirenFields, parameterType, annotatedParameters,
-					annotatedParameter,
-					callValueBean, paramName + ".", knownFields);
-		}
-	}
-
-	private SirenField createSirenField(String paramName, Object propertyValue,
-										ActionInputParameter inputParameter, Object[] possibleValues) {
+	private SirenField createSirenField(String paramName, Object propertyValue, ActionInputParameter inputParameter,
+			Suggest<?>[] possibleValues) {
 		SirenField sirenField;
 		if (possibleValues.length == 0) {
-			String propertyValueAsString = propertyValue == null ? null : propertyValue
-					.toString();
+			String propertyValueAsString = propertyValue == null ? null : propertyValue.toString();
 			Type htmlInputFieldType = inputParameter.getHtmlInputFieldType();
 			// TODO: null -> array or bean parameter without possible values
-			String type = htmlInputFieldType == null ? "text" :
-					htmlInputFieldType
-							.name()
-							.toLowerCase();
-			sirenField = new SirenField(paramName,
-					type,
-					propertyValueAsString, null, null);
+			String type = htmlInputFieldType == null ? "text" : htmlInputFieldType.name().toLowerCase();
+			sirenField = new SirenField(paramName, type, propertyValueAsString, null, null);
 		} else {
 			List<SirenFieldValue> sirenPossibleValues = new ArrayList<SirenFieldValue>();
 			String type;
 			if (inputParameter.isArrayOrCollection()) {
 				type = "checkbox";
-				for (Object possibleValue : possibleValues) {
-					boolean selected = ObjectUtils.containsElement(
-							inputParameter.getValues(),
-							possibleValue);
+				for (Suggest<?> possibleValue : possibleValues) {
+					boolean selected = ObjectUtils.containsElement(inputParameter.getValues(), possibleValue.getValue());
 					// TODO have more useful value title
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue, selected));
+					sirenPossibleValues
+							.add(new SirenFieldValue(possibleValue.getTextField(), possibleValue.getValue(), selected));
 				}
 			} else {
 				type = "radio";
-				for (Object possibleValue : possibleValues) {
-					boolean selected = possibleValue.equals(propertyValue);
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue, selected));
+				for (Suggest<?> possibleValue : possibleValues) {
+					boolean selected = possibleValue.getValue().equals(propertyValue);
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue.getValue(), selected));
 				}
 			}
-			sirenField = new SirenField(paramName,
-					type,
-					sirenPossibleValues, null, null);
+			sirenField = new SirenField(paramName, type, sirenPossibleValues, null, null);
 		}
 		return sirenField;
 	}
@@ -557,16 +429,13 @@ public class SirenUtils {
 		for (Link link : links) {
 			if (link instanceof Affordance) {
 				// TODO: how to determine classes? type of target resource? collection/item?
-				ret.add(new SirenEmbeddedLink(null, ((Affordance) link).getRels(), link
-						.getHref(), null, null));
+				ret.add(new SirenEmbeddedLink(null, ((Affordance) link).getRels(), link.getHref(), null, null));
 			} else {
-				ret.add(new SirenEmbeddedLink(null, Collections.singletonList(link.getRel()), link
-						.getHref(), null, null));
+				ret.add(new SirenEmbeddedLink(null, Collections.singletonList(link.getRel()), link.getHref(), null, null));
 			}
 		}
 		return ret;
 	}
-
 
 	static class NullValue {
 
@@ -598,6 +467,6 @@ public class SirenUtils {
 	}
 
 	public void setAdditionalNavigationalRels(Collection<String> additionalNavigationalRels) {
-		this.navigationalRels.addAll(additionalNavigationalRels);
+		navigationalRels.addAll(additionalNavigationalRels);
 	}
 }

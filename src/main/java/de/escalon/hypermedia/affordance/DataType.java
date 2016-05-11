@@ -10,13 +10,14 @@
 
 package de.escalon.hypermedia.affordance;
 
-import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
+
+import javax.xml.bind.DatatypeConverter;
 
 
 /**
@@ -138,6 +139,7 @@ public class DataType {
 		}
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Object asType(Class<?> type, String string) {
 		if (isBoolean(type)) {
 			return Boolean.parseBoolean(string);
@@ -184,17 +186,21 @@ public class DataType {
 	 * @see Character#isDigit Examples for non-ISO-Latin-1-Digits
 	 */
 	public static boolean isIsoLatin1Number(String str) {
-		if (str == null)
+		if (str == null) {
 			return false;
+		}
 		char[] data = str.toCharArray();
-		if (data.length == 0)
+		if (data.length == 0) {
 			return false;
+		}
 		int index = 0;
-		if (data.length > 1 && (data[0] == '-' || data[0] == '+'))
+		if (data.length > 1 && (data[0] == '-' || data[0] == '+')) {
 			index = 1;
+		}
 		for (; index < data.length; index++) {
-			if (data[index] < '0' || data[index] > '9')
+			if (data[index] < '0' || data[index] > '9') {
 				return false;
+			}
 		}
 		return true;
 	}
