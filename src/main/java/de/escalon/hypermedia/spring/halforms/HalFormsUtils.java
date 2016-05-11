@@ -38,6 +38,8 @@ public class HalFormsUtils {
 			if (link instanceof Affordance) {
 				Affordance affordance = (Affordance) link;
 				for (ActionDescriptor actionDescriptor : affordance.getActionDescriptors()) {
+
+					// TODO: revisar!
 					if ("application/prs.hal-forms+json".equals(actionDescriptor.getProduces())) {
 						processed.add(affordance);
 					} else {

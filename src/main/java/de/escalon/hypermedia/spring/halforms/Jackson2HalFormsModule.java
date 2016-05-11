@@ -295,6 +295,16 @@ class Jackson2HalFormsModule extends SimpleModule {
 			return null;
 		}
 
+		@Override
+		public boolean isEmpty(Collection<?> value) {
+			return isEmpty(null, value);
+		}
+
+		@Override
+		public boolean isEmpty(SerializerProvider provider, Collection<?> value) {
+			return value.isEmpty();
+		}
+
 	}
 
 	public static class HalFormsLinkLinkSerializer extends HalLinkListSerializer {
