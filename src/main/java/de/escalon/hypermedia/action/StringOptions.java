@@ -11,8 +11,11 @@
 package de.escalon.hypermedia.action;
 
 import de.escalon.hypermedia.affordance.ActionDescriptor;
+import de.escalon.hypermedia.affordance.SimpleSuggest;
+import de.escalon.hypermedia.affordance.Suggest;
+import de.escalon.hypermedia.affordance.SuggestType;
 
-public class StringOptions implements Options {
+public class StringOptions implements Options<String> {
 
 	/**
 	 * Allows to specify possible values for an argument. This allows an {@link ActionDescriptor} to determine possible
@@ -28,7 +31,7 @@ public class StringOptions implements Options {
 	 * </pre>
 	 */
 	@Override
-	public Object[] get(String[] value, Object... args) {
-		return value;
+	public Suggest<String>[] get(SuggestType type, String[] value, Object... args) {
+		return SimpleSuggest.wrap(value, type);
 	}
 }

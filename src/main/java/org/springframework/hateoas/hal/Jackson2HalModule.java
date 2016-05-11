@@ -813,7 +813,7 @@ public class Jackson2HalModule extends SimpleModule {
 	 *
 	 * @author Oliver Gierke
 	 */
-	private static class EmbeddedMapper {
+	public static class EmbeddedMapper {
 
 		private RelProvider relProvider;
 		private CurieProvider curieProvider;

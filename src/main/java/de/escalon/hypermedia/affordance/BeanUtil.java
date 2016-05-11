@@ -30,7 +30,7 @@ public class BeanUtil {
 	private static List<String> addClassPropertyPaths(List<String> ret, String currentPath, Class<?> clazz) {
 		PropertyDescriptor[] propertyDescriptors = getPropertyDescriptors(clazz);
 		for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-			List<String> propertyPaths = addPropertyPaths(ret, currentPath, propertyDescriptor);
+			addPropertyPaths(ret, currentPath, propertyDescriptor);
 		}
 		return ret;
 	}
