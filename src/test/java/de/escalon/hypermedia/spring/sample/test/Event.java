@@ -20,53 +20,54 @@ import org.springframework.hateoas.Resource;
  * Created by dschulten on 11.09.2014.
  */
 public class Event {
-    public final int id;
-    public final String performer;
-    public final String location;
 
-    private EventStatusType eventStatus;
-    private final Resource<CreativeWork> workPerformed;
-    private String typicalAgeRange;
+	public final int id;
+	public final String performer;
+	public final String location;
 
-    public Event(int id, String performer, CreativeWork workPerformed, String location, EventStatusType eventStatus) {
-        this.id = id;
-        this.performer = performer;
-        this.workPerformed = new Resource<CreativeWork>(workPerformed);
-        this.location = location;
-        this.eventStatus = eventStatus;
-    }
+	private EventStatusType eventStatus;
+	private final Resource<CreativeWork> workPerformed;
+	private String typicalAgeRange;
 
-    @JsonCreator
-    public Event(@JsonProperty("performer") String performer,
-                 @JsonProperty("workPerformed") CreativeWork workPerformed,
-                 @JsonProperty("location") String location,
-                 @JsonProperty("eventStatus") EventStatusType eventStatus,
-                 @JsonProperty("typicalAgeRange") @Select({"7-10", "11-"}) String typicalAgeRange) {
-        this.id = 0;
-        this.performer = performer;
-        this.location = location;
-        this.workPerformed = new Resource<CreativeWork>(workPerformed);
-        this.eventStatus = eventStatus;
-        this.typicalAgeRange = typicalAgeRange;
-    }
+	public Event(int id, String performer, CreativeWork workPerformed, String location, EventStatusType eventStatus) {
+		this.id = id;
+		this.performer = performer;
+		this.workPerformed = new Resource<CreativeWork>(workPerformed);
+		this.location = location;
+		this.eventStatus = eventStatus;
+	}
 
-    public void setEventStatus(EventStatusType eventStatus) {
-        this.eventStatus = eventStatus;
-    }
+	@JsonCreator
+	public Event(@JsonProperty("performer") String performer,
+				 @JsonProperty("workPerformed") CreativeWork workPerformed,
+				 @JsonProperty("location") String location,
+				 @JsonProperty("eventStatus") EventStatusType eventStatus,
+				 @JsonProperty("typicalAgeRange") @Select({"7-10", "11-"}) String typicalAgeRange) {
+		this.id = 0;
+		this.performer = performer;
+		this.location = location;
+		this.workPerformed = new Resource<CreativeWork>(workPerformed);
+		this.eventStatus = eventStatus;
+		this.typicalAgeRange = typicalAgeRange;
+	}
 
-    public Resource<CreativeWork> getWorkPerformed() {
-        return workPerformed;
-    }
+	public void setEventStatus(EventStatusType eventStatus) {
+		this.eventStatus = eventStatus;
+	}
 
-    public EventStatusType getEventStatus() {
-        return eventStatus;
-    }
+	public Resource<CreativeWork> getWorkPerformed() {
+		return workPerformed;
+	}
 
-    public String getTypicalAgeRange() {
-        return typicalAgeRange;
-    }
+	public EventStatusType getEventStatus() {
+		return eventStatus;
+	}
 
-    public void setTypicalAgeRange(@Select({"7-10", "11-"}) String typicalAgeRange) {
-        this.typicalAgeRange = typicalAgeRange;
-    }
+	public String getTypicalAgeRange() {
+		return typicalAgeRange;
+	}
+
+	public void setTypicalAgeRange(@Select({"7-10", "11-"}) String typicalAgeRange) {
+		this.typicalAgeRange = typicalAgeRange;
+	}
 }
