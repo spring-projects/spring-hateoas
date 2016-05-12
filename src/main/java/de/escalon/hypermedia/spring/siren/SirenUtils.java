@@ -43,8 +43,7 @@ import de.escalon.hypermedia.spring.DocumentationProvider;
  */
 public class SirenUtils {
 
-	private static final Set<String> FILTER_RESOURCE_SUPPORT = new HashSet<String>(Arrays.asList("class", "links",
-			"id"));
+	private static final Set<String> FILTER_RESOURCE_SUPPORT = new HashSet<String>(Arrays.asList("class", "links", "id"));
 	private String requestMediaType;
 
 	private final Set<String> navigationalRels = new HashSet<String>(Arrays.asList("self", "next", "previous", "prev"));
@@ -177,10 +176,8 @@ public class SirenUtils {
 		return ret;
 	}
 
-
-
-	private void createRecursiveSirenEntitiesFromPropertiesAndFields(SirenEntityContainer objectNode, Map<String,
-			Object> propertiesNode, Object object) throws InvocationTargetException, IllegalAccessException {
+	private void createRecursiveSirenEntitiesFromPropertiesAndFields(SirenEntityContainer objectNode,
+			Map<String, Object> propertiesNode, Object object) throws InvocationTargetException, IllegalAccessException {
 		Map<String, PropertyDescriptor> propertyDescriptors = PropertyUtils.getPropertyDescriptors(object);
 		for (PropertyDescriptor propertyDescriptor : propertyDescriptors.values()) {
 			String name = propertyDescriptor.getName();
@@ -252,8 +249,7 @@ public class SirenUtils {
 		}
 	}
 
-	private void traverseSingleSubEntity(SirenEntityContainer objectNode, Object content,
-										 String name, String docUrl)
+	private void traverseSingleSubEntity(SirenEntityContainer objectNode, Object content, String name, String docUrl)
 			throws InvocationTargetException, IllegalAccessException {
 
 		Object bean;
@@ -272,10 +268,9 @@ public class SirenUtils {
 		Map<String, Object> properties = new HashMap<String, Object>();
 		List<String> rels = Collections.singletonList(docUrl != null ? docUrl : name);
 
-		SirenEmbeddedRepresentation subEntity = new SirenEmbeddedRepresentation(
-				getSirenClasses(bean), properties, null, toSirenActions(getActions(links)),
-				toSirenLinks(getNavigationalLinks(links)), rels, null);
-		//subEntity.setProperties(properties);
+		SirenEmbeddedRepresentation subEntity = new SirenEmbeddedRepresentation(getSirenClasses(bean), properties, null,
+				toSirenActions(getActions(links)), toSirenLinks(getNavigationalLinks(links)), rels, null);
+		// subEntity.setProperties(properties);
 		objectNode.addSubEntity(subEntity);
 		List<SirenEmbeddedLink> sirenEmbeddedLinks = toSirenEmbeddedLinks(getEmbeddedLinks(links));
 		for (SirenEmbeddedLink sirenEmbeddedLink : sirenEmbeddedLinks) {
@@ -352,20 +347,19 @@ public class SirenUtils {
 
 		private final List<SirenField> fields;
 		private final ActionDescriptor actionDescriptor;
-		
+
 		public SirenActionInputParameterVisitor(ActionDescriptor actionDescriptor, List<SirenField> fields) {
 			this.actionDescriptor = actionDescriptor;
 			this.fields = fields;
 		}
 
 		@Override
-		public String visit(ActionInputParameter inputParameter, 
-				String parentParamName, String paramName, Object propertyValue) {
+		public String visit(ActionInputParameter inputParameter) {
 			final Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
 
 			// dot-separated property path as field name
-			SirenField sirenField = createSirenField(parentParamName + paramName, propertyValue,
-					inputParameter, possibleValues);
+			SirenField sirenField = createSirenField(inputParameter.getName(), inputParameter.getValue(), inputParameter,
+					possibleValues);
 
 			fields.add(sirenField);
 			return sirenField.getName();

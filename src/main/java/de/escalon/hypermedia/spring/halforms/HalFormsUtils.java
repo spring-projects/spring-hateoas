@@ -107,10 +107,10 @@ public class HalFormsUtils {
 		}
 
 		@Override
-		public String visit(ActionInputParameter inputParameter, String parentParamName, String paramName,
-				Object propertyValue) {
+		public String visit(ActionInputParameter inputParameter) {
 
-			Property property = getProperty(inputParameter, actionDescriptor, propertyValue, parentParamName + paramName);
+			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(),
+					inputParameter.getName());
 
 			template.getProperties().add(property);
 

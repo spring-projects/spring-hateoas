@@ -79,6 +79,8 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 	private Type fieldType;
 
+	private final String name;
+
 	/**
 	 * Creates action input parameter.
 	 *
@@ -86,10 +88,11 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 * @param value used during sample invocation
 	 * @param conversionService to apply to value
 	 */
-	public SpringActionInputParameter(MethodParameter methodParameter, Object value,
-			ConversionService conversionService) {
+	public SpringActionInputParameter(MethodParameter methodParameter, Object value, ConversionService conversionService,
+			String name) {
 		this.methodParameter = methodParameter;
 		this.value = value;
+		this.name = name;
 		requestBody = methodParameter.getParameterAnnotation(RequestBody.class);
 		requestParam = methodParameter.getParameterAnnotation(RequestParam.class);
 		pathVariable = methodParameter.getParameterAnnotation(PathVariable.class);
@@ -152,14 +155,19 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		}
 	}
 
+	public SpringActionInputParameter(MethodParameter methodParameter, Object value, String name) {
+		this(methodParameter, value, new DefaultFormattingConversionService(), name);
+	}
+
 	/**
 	 * Creates new ActionInputParameter with default formatting conversion service.
 	 *
 	 * @param methodParameter holding metadata about the parameter
 	 * @param value during sample method invocation
 	 */
+
 	public SpringActionInputParameter(MethodParameter methodParameter, Object value) {
-		this(methodParameter, value, new DefaultFormattingConversionService());
+		this(methodParameter, value, null);
 	}
 
 	private void putInputConstraint(String key, Object defaultValue, Object value) {
@@ -534,6 +542,10 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		this.excluded = excluded;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	public enum ParameterType {
 		INPUT, SELECT, UNKNOWN
 	}
@@ -584,4 +596,5 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			return options.get(select.type(), select.value(), args);
 		}
 	}
+
 }

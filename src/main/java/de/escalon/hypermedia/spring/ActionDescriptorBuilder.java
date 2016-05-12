@@ -2,6 +2,7 @@ package de.escalon.hypermedia.spring;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -140,12 +141,11 @@ public class ActionDescriptorBuilder {
 					new ActionInputParameterVisitor() {
 
 						@Override
-						public String visit(ActionInputParameter inputParameter, String parentParamName, String paramName,
-								Object propertyValue) {
+						public String visit(ActionInputParameter inputParameter) {
 							result.put(inputParameter.getParameterName(), inputParameter);
 							return "";
 						}
-					});
+					}, Collections.<ActionInputParameter> emptyList());
 
 		}
 

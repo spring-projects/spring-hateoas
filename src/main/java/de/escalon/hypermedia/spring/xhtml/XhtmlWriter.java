@@ -49,13 +49,12 @@ public class XhtmlWriter extends Writer {
 	private List<String> stylesheets = Collections.emptyList();
 
 	public static final String HTML_HEAD_START = "" + //
-			//"<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
-			"<!DOCTYPE html>" + //
+	// "<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
+	"<!DOCTYPE html>" + //
 			"<html xmlns='http://www.w3.org/1999/xhtml'>" + //
 			"  <head>" + //
 			"    <meta charset=\"utf-8\"/>" + //
 			"    <title>%s</title>";
-
 
 	public static final String HTML_STYLESHEET = "" + //
 			"    <link rel=\"stylesheet\" href=\"%s\"  />";
@@ -67,9 +66,7 @@ public class XhtmlWriter extends Writer {
 			"      <div class=\"row\">";
 
 	public static final String HTML_END = "" + //
-			"      </div>" +
-			"    </div>" +
-			"  </body>" + //
+			"      </div>" + "    </div>" + "  </body>" + //
 			"</html>";
 
 	private String methodParam = "_method";
@@ -94,7 +91,6 @@ public class XhtmlWriter extends Writer {
 		}
 		write(String.format(HTML_HEAD_END, title));
 	}
-
 
 	public void endHtml() throws IOException {
 		write(HTML_END);
@@ -145,7 +141,6 @@ public class XhtmlWriter extends Writer {
 		writer.write("</li>");
 	}
 
-
 	public void beginSpan() throws IOException {
 		writer.write("<span>");
 	}
@@ -162,7 +157,6 @@ public class XhtmlWriter extends Writer {
 	public void endDl() throws IOException {
 		writer.write("</dl>");
 	}
-
 
 	public void beginDt() throws IOException {
 		writer.write("<dt>");
@@ -230,7 +224,6 @@ public class XhtmlWriter extends Writer {
 			}
 		}
 
-
 		public OptionalAttributes and(String name, String value) {
 			addAttributeIfValueNotNull(name, value, this);
 			return this;
@@ -249,7 +242,6 @@ public class XhtmlWriter extends Writer {
 			return attr(null, null);
 		}
 	}
-
 
 	public void writeLinks(List<Link> links) throws IOException {
 		for (Link link : links) {
@@ -277,14 +269,12 @@ public class XhtmlWriter extends Writer {
 					} else {
 						for (ActionDescriptor actionDescriptor : actionDescriptors) {
 							// TODO write documentation about the supported action and maybe fields?
-							if ("GET".equals(actionDescriptor.getHttpMethod()) &&
-									actionDescriptor.getRequestParamNames()
-											.isEmpty()) {
+							if ("GET".equals(actionDescriptor.getHttpMethod()) && actionDescriptor.getRequestParamNames().isEmpty()) {
 								beginDiv();
 								// GET without params is simple <a href>
-								writeAnchor(OptionalAttributes.attr("href", affordance.expand()
-										.getHref())
-										.and("rel", affordance.getRel()), affordance.getRel());
+								writeAnchor(
+										OptionalAttributes.attr("href", affordance.expand().getHref()).and("rel", affordance.getRel()),
+										affordance.getRel());
 								endDiv();
 							} else {
 								appendForm(affordance, actionDescriptor);
@@ -305,18 +295,17 @@ public class XhtmlWriter extends Writer {
 	 * @param affordance to make into a form
 	 * @param actionDescriptor describing the form action
 	 * @throws IOException
-	 * @see <a href="http://docs.spring.io/spring/docs/3.0 .x/javadoc-api/org/springframework/web/filter/HiddenHttpMethodFilter.html">Spring
-	 * MVC HiddenHttpMethodFilter</a>
+	 * @see <a href=
+	 *      "http://docs.spring.io/spring/docs/3.0 .x/javadoc-api/org/springframework/web/filter/HiddenHttpMethodFilter.html"
+	 *      >Spring MVC HiddenHttpMethodFilter</a>
 	 */
 	private void appendForm(Affordance affordance, ActionDescriptor actionDescriptor) throws IOException {
 		String formName = actionDescriptor.getActionName();
 		RequestMethod httpMethod = RequestMethod.valueOf(actionDescriptor.getHttpMethod());
 
 		// Link's expand method removes non-required variables from URL
-		String actionUrl = affordance.expand()
-				.getHref();
-		beginForm(OptionalAttributes.attr("action", actionUrl)
-				.and("method", getHtmlConformingHttpMethod(httpMethod))
+		String actionUrl = affordance.expand().getHref();
+		beginForm(OptionalAttributes.attr("action", actionUrl).and("method", getHtmlConformingHttpMethod(httpMethod))
 				.and("name", formName));
 		write("<h4>");
 		write("Form " + formName);
@@ -354,17 +343,18 @@ public class XhtmlWriter extends Writer {
 							} else {
 								value = null;
 							}
-							appendInput(requestParamName, actionInputParameter, value, actionInputParameter.isReadOnly(requestParamName)); // not readonly
+							appendInput(requestParamName, actionInputParameter, value,
+									actionInputParameter.isReadOnly(requestParamName)); // not readonly
 						}
 					} else {
 						String callValueFormatted = actionInputParameter.getValueFormatted();
-						appendInput(requestParamName, actionInputParameter, callValueFormatted, actionInputParameter.isReadOnly(requestParamName)); // not readonly
+						appendInput(requestParamName, actionInputParameter, callValueFormatted,
+								actionInputParameter.isReadOnly(requestParamName)); // not readonly
 					}
 				}
 			}
 		}
-		inputButton(Type.SUBMIT, capitalize(httpMethod.name()
-				.toLowerCase()));
+		inputButton(Type.SUBMIT, capitalize(httpMethod.name().toLowerCase()));
 		endForm();
 	}
 
@@ -372,8 +362,7 @@ public class XhtmlWriter extends Writer {
 		if (link.isTemplated()) {
 			// TODO ensure that template expansion takes place for base uri
 			Link expanded = link.expand(); // remove query variables
-			beginForm(OptionalAttributes.attr("action", expanded.getHref())
-					.and("method", "GET"));
+			beginForm(OptionalAttributes.attr("action", expanded.getHref()).and("method", "GET"));
 			List<TemplateVariable> variables = link.getVariables();
 			for (TemplateVariable variable : variables) {
 				String variableName = variable.getName();
@@ -384,9 +373,8 @@ public class XhtmlWriter extends Writer {
 		} else {
 			String rel = link.getRel();
 			String title = (rel != null ? rel : link.getHref());
-			// TODO: write html <link> instead of anchor  <a> here?
-			writeAnchor(OptionalAttributes.attr("href", link.getHref())
-					.and("rel", link.getRel()), title);
+			// TODO: write html <link> instead of anchor <a> here?
+			writeAnchor(OptionalAttributes.attr("href", link.getHref()).and("rel", link.getRel()), title);
 		}
 	}
 
@@ -425,14 +413,14 @@ public class XhtmlWriter extends Writer {
 		input(fieldName, type, OptionalAttributes.attr());
 	}
 
-//    private void beginLabel(String label) throws IOException {
-//        beginLabel(label, attr());
-//    }
+	// private void beginLabel(String label) throws IOException {
+	// beginLabel(label, attr());
+	// }
 
-//    private void beginLabel(String label, OptionalAttributes attributes) throws IOException {
-//        beginLabel(attributes);
-//        write(label);
-//    }
+	// private void beginLabel(String label, OptionalAttributes attributes) throws IOException {
+	// beginLabel(attributes);
+	// write(label);
+	// }
 
 	private void beginLabel(OptionalAttributes attributes) throws IOException {
 		write("<label");
@@ -443,7 +431,6 @@ public class XhtmlWriter extends Writer {
 	private void endLabel() throws IOException {
 		write("</label>");
 	}
-
 
 	private void beginForm(OptionalAttributes attrs) throws IOException {
 		write("<form class=\"well\" ");
@@ -491,7 +478,6 @@ public class XhtmlWriter extends Writer {
 		endAnchor();
 	}
 
-
 	public static String capitalize(String name) {
 		if (name != null && name.length() != 0) {
 			char[] chars = name.toCharArray();
@@ -525,7 +511,6 @@ public class XhtmlWriter extends Writer {
 		return ret;
 	}
 
-
 	/**
 	 * Renders input fields for bean properties of bean to add or update or patch.
 	 *
@@ -535,8 +520,8 @@ public class XhtmlWriter extends Writer {
 	 * @param currentCallValue sample call value
 	 * @throws IOException
 	 */
-	private void recurseBeanProperties(Class<?> beanType, ActionDescriptor actionDescriptor, ActionInputParameter
-			actionInputParameter, Object currentCallValue, String parentParamName) throws IOException {
+	private void recurseBeanProperties(Class<?> beanType, ActionDescriptor actionDescriptor,
+			ActionInputParameter actionInputParameter, Object currentCallValue, String parentParamName) throws IOException {
 		// TODO support Option provider by other method args?
 		final BeanInfo beanInfo = getBeanInfo(beanType);
 		final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
@@ -554,8 +539,7 @@ public class XhtmlWriter extends Writer {
 				if (constructor == null) {
 					constructor = PropertyUtils.findJsonCreator(constructors, JsonCreator.class);
 				}
-				Assert.notNull(constructor, "no default constructor or JsonCreator found for type " + beanType
-						.getName());
+				Assert.notNull(constructor, "no default constructor or JsonCreator found for type " + beanType.getName());
 				int parameterCount = constructor.getParameterTypes().length;
 				if (parameterCount > 0) {
 					Annotation[][] annotationsOnParameters = constructor.getParameterAnnotations();
@@ -575,14 +559,12 @@ public class XhtmlWriter extends Writer {
 
 									if (actionInputParameter.isIncluded(paramName)) {
 
-										Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue,
-												paramName);
+										Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
 
-										ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter
-												(new MethodParameter(constructor, paramIndex), propertyValue);
+										ActionInputParameter constructorParamInputParameter = new SpringActionInputParameter(
+												new MethodParameter(constructor, paramIndex), propertyValue, parentParamName + paramName);
 
-										Suggest<?>[] possibleValues =
-												constructorParamInputParameter.getPossibleValues(actionDescriptor);
+										Suggest<?>[] possibleValues = constructorParamInputParameter.getPossibleValues(actionDescriptor);
 
 										appendInputOrSelect(actionInputParameter, parentParamName + paramName,
 												constructorParamInputParameter, possibleValues);
@@ -597,25 +579,23 @@ public class XhtmlWriter extends Writer {
 										} else {
 											value = null;
 										}
-										recurseBeanProperties(actionInputParameter.getParameterType(),
-												actionDescriptor, actionInputParameter, value, parentParamName);
+										recurseBeanProperties(actionInputParameter.getParameterType(), actionDescriptor,
+												actionInputParameter, value, parentParamName);
 									}
 								} else {
 									beginDiv();
 									write(paramName + ":");
-									Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue,
-											paramName);
-									recurseBeanProperties(parameterType, actionDescriptor, actionInputParameter,
-											propertyValue, paramName + ".");
+									Object propertyValue = PropertyUtils.getPropertyOrFieldValue(currentCallValue, paramName);
+									recurseBeanProperties(parameterType, actionDescriptor, actionInputParameter, propertyValue,
+											paramName + ".");
 									endDiv();
 								}
 								paramIndex++; // increase for each @JsonProperty
 							}
 						}
 					}
-					Assert.isTrue(parameters.length == paramIndex,
-							"not all constructor arguments of @JsonCreator " + constructor.getName() +
-									" are annotated with @JsonProperty");
+					Assert.isTrue(parameters.length == paramIndex, "not all constructor arguments of @JsonCreator "
+							+ constructor.getName() + " are annotated with @JsonProperty");
 				}
 			} catch (Exception e) {
 				throw new RuntimeException("Failed to write input fields for constructor", e);
@@ -654,8 +634,8 @@ public class XhtmlWriter extends Writer {
 						} else {
 							value = null;
 						}
-						recurseBeanProperties(actionInputParameter.getParameterType(), actionDescriptor,
-								actionInputParameter, value, parentParamName);
+						recurseBeanProperties(actionInputParameter.getParameterType(), actionDescriptor, actionInputParameter,
+								value, parentParamName);
 					}
 				} else {
 					beginDiv();
@@ -677,24 +657,20 @@ public class XhtmlWriter extends Writer {
 	 * @param possibleValues suitable for childInputParameter
 	 * @throws IOException
 	 */
-	private void appendInputOrSelect(ActionInputParameter parentInputParameter, String paramName, ActionInputParameter
-			childInputParameter, Suggest<?>[] possibleValues) throws IOException {
+	private void appendInputOrSelect(ActionInputParameter parentInputParameter, String paramName,
+			ActionInputParameter childInputParameter, Suggest<?>[] possibleValues) throws IOException {
 		if (possibleValues.length > 0) {
 			if (childInputParameter.isArrayOrCollection()) {
 				// TODO multiple formatted callvalues
-				appendSelectMulti(paramName, possibleValues,
-						childInputParameter);
+				appendSelectMulti(paramName, possibleValues, childInputParameter);
 			} else {
-				appendSelectOne(paramName, possibleValues,
-						childInputParameter);
+				appendSelectOne(paramName, possibleValues, childInputParameter);
 			}
 		} else {
-			appendInput(paramName, childInputParameter,
-					childInputParameter.getValue(),
+			appendInput(paramName, childInputParameter, childInputParameter.getValue(),
 					parentInputParameter.isReadOnly(paramName));
 		}
 	}
-
 
 	private BeanInfo getBeanInfo(Class<?> beanType) {
 		try {
@@ -704,9 +680,8 @@ public class XhtmlWriter extends Writer {
 		}
 	}
 
-	private void appendInput(String requestParamName, ActionInputParameter actionInputParameter, Object value, boolean
-			readOnly) throws
-			IOException {
+	private void appendInput(String requestParamName, ActionInputParameter actionInputParameter, Object value,
+			boolean readOnly) throws IOException {
 		if (actionInputParameter.isRequestBody()) { // recurseBeanProperties does that
 			throw new IllegalArgumentException("cannot append input field for requestBody");
 		}
@@ -726,10 +701,8 @@ public class XhtmlWriter extends Writer {
 			}
 			writeLabelWithDoc(fieldLabel, requestParamName, documentationUrl);
 			if (actionInputParameter.hasInputConstraints()) {
-				for (Map.Entry<String, Object> inputConstraint : actionInputParameter.getInputConstraints()
-						.entrySet()) {
-					attrs.and(inputConstraint.getKey(), inputConstraint.getValue()
-							.toString());
+				for (Map.Entry<String, Object> inputConstraint : actionInputParameter.getInputConstraints().entrySet()) {
+					attrs.and(inputConstraint.getKey(), inputConstraint.getValue().toString());
 				}
 			}
 			input(requestParamName, htmlInputFieldType, attrs);
@@ -738,23 +711,19 @@ public class XhtmlWriter extends Writer {
 	}
 
 	private void writeLabelWithDoc(String label, String fieldName, String documentationUrl) throws IOException {
-		beginLabel(OptionalAttributes.attr("for", fieldName)
-				.and("class", controlLabelClass));
+		beginLabel(OptionalAttributes.attr("for", fieldName).and("class", controlLabelClass));
 		if (documentationUrl == null) {
 			write(label);
 		} else {
-			beginAnchor(XhtmlWriter.OptionalAttributes.attr("href", documentationUrl)
-					.and("title", documentationUrl));
+			beginAnchor(XhtmlWriter.OptionalAttributes.attr("href", documentationUrl).and("title", documentationUrl));
 			write(label);
 			endAnchor();
 		}
 		endLabel();
 	}
 
-
-	private void appendSelectOne(String requestParamName, Suggest<?>[] possibleValues, ActionInputParameter
-			actionInputParameter)
-			throws IOException {
+	private void appendSelectOne(String requestParamName, Suggest<?>[] possibleValues,
+			ActionInputParameter actionInputParameter) throws IOException {
 		beginDiv(OptionalAttributes.attr("class", formGroupClass));
 		Object callValue = actionInputParameter.getValue();
 		String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, callValue);
@@ -773,9 +742,8 @@ public class XhtmlWriter extends Writer {
 		endDiv();
 	}
 
-
-	private void appendSelectMulti(String requestParamName, Suggest<?>[] possibleValues, ActionInputParameter
-			actionInputParameter) throws IOException {
+	private void appendSelectMulti(String requestParamName, Suggest<?>[] possibleValues,
+			ActionInputParameter actionInputParameter) throws IOException {
 		beginDiv(OptionalAttributes.attr("class", formGroupClass));
 		Object[] actualValues = actionInputParameter.getValues();
 		final Object aCallValue;
@@ -787,8 +755,7 @@ public class XhtmlWriter extends Writer {
 		String documentationUrl = documentationProvider.getDocumentationUrl(actionInputParameter, aCallValue);
 		writeLabelWithDoc(requestParamName, requestParamName, documentationUrl);
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
-				OptionalAttributes.attr("multiple", "multiple")
-						.and("class", formControlClass));
+				OptionalAttributes.attr("multiple", "multiple").and("class", formControlClass));
 		for (Suggest<?> possibleValue : possibleValues) {
 			if (ObjectUtils.containsElement(actualValues, possibleValue.getValue())) {
 				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
@@ -832,8 +799,8 @@ public class XhtmlWriter extends Writer {
 		quote(name);
 		write(" id=");
 		quote(id);
-		//write(" size=");
-		//quote(Integer.toString(size));
+		// write(" size=");
+		// quote(Integer.toString(size));
 		writeAttributes(attrs);
 		endTag();
 	}

@@ -199,4 +199,6 @@ public interface ActionInputParameter {
 	 */
 	Map<String, Object> getInputConstraints();
 
+	String getName();
+
 }

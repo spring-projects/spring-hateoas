@@ -24,11 +24,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -84,6 +86,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	private final Map<String, ActionInputParameter> requestHeaders = new LinkedHashMap<String, ActionInputParameter>();
 
 	private ActionInputParameter requestBody;
+	private List<ActionInputParameter> bodyInputParameters;
+
 	private Cardinality cardinality = Cardinality.SINGLE;
 
 	/**
@@ -346,13 +350,20 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	@Override
 	public void accept(ActionInputParameterVisitor visitor) {
 		if (hasRequestBody()) {
-			recurseBeanCreationParams(getRequestBody().getParameterType(), getRequestBody(), getRequestBody().getValue(), "",
-					Collections.<String> emptySet(), visitor);
+			if (bodyInputParameters == null) {
+				bodyInputParameters = new ArrayList<ActionInputParameter>();
+				recurseBeanCreationParams(getRequestBody().getParameterType(), getRequestBody(), getRequestBody().getValue(),
+						"", Collections.<String> emptySet(), visitor, bodyInputParameters);
+			} else {
+				for (ActionInputParameter inputParameter : bodyInputParameters) {
+					visitor.visit(inputParameter);
+				}
+			}
 		} else {
 			Collection<String> paramNames = getRequestParamNames();
 			for (String paramName : paramNames) {
 				ActionInputParameter inputParameter = getActionInputParameter(paramName);
-				visitor.visit(inputParameter, "", paramName, inputParameter.getValueFormatted());
+				visitor.visit(inputParameter);
 			}
 		}
 
@@ -369,7 +380,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 */
 	static void recurseBeanCreationParams(final Class<?> beanType, final ActionInputParameter annotatedParameter,
 			final Object currentCallValue, final String parentParamName, final Set<String> knownFields,
-			final ActionInputParameterVisitor methodHandler) {
+			final ActionInputParameterVisitor methodHandler, List<ActionInputParameter> bodyInputParameters) {
 
 		// TODO collection, map and object node creation are only describable by an annotation, not via type reflection
 		if (ObjectNode.class.isAssignableFrom(beanType) || Map.class.isAssignableFrom(beanType)
@@ -405,7 +416,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 							MethodParameter methodParameter = new MethodParameter(constructor, paramIndex);
 
 							String fieldName = invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName,
-									paramName, parameterType, propertyValue, knownConstructorFields, methodHandler);
+									paramName, parameterType, propertyValue, knownConstructorFields, methodHandler, bodyInputParameters);
 
 							if (fieldName != null) {
 								knownConstructorFields.add(fieldName);
@@ -437,7 +448,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				MethodParameter methodParameter = new MethodParameter(propertyDescriptor.getWriteMethod(), 0);
 
 				invokeHandlerOrFollowRecurse(methodParameter, annotatedParameter, parentParamName, propertyName, propertyType,
-						propertyValue, knownConstructorFields, methodHandler);
+						propertyValue, knownConstructorFields, methodHandler, bodyInputParameters);
 
 			}
 		} catch (Exception e) {
@@ -447,20 +458,25 @@ public class SpringActionDescriptor implements ActionDescriptor {
 
 	private static String invokeHandlerOrFollowRecurse(MethodParameter methodParameter,
 			ActionInputParameter annotatedParameter, String parentParamName, String paramName, Class<?> parameterType,
-			Object propertyValue, Set<String> knownFields, ActionInputParameterVisitor handler) {
+			Object propertyValue, Set<String> knownFields, ActionInputParameterVisitor handler,
+			List<ActionInputParameter> bodyInputParameters) {
 		if (DataType.isSingleValueType(parameterType) || DataType.isArrayOrCollection(parameterType)
 				|| methodParameter.hasParameterAnnotation(Select.class)) {
 			/**
 			 * TODO This is a temporal patch, to be reviewed...
 			 */
 			if (annotatedParameter == null) {
-				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
-				return handler.visit(inputParameter, parentParamName, paramName, propertyValue);
+				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
+						parentParamName + paramName);
+				bodyInputParameters.add(inputParameter);
+				return handler.visit(inputParameter);
 			} else if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
-				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue);
+				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
+						parentParamName + paramName);
 				// TODO We need to find a better solution for this
 				inputParameter.possibleValues = ((SpringActionInputParameter) annotatedParameter).possibleValues;
-				return handler.visit(inputParameter, parentParamName, paramName, propertyValue);
+				bodyInputParameters.add(inputParameter);
+				return handler.visit(inputParameter);
 			}
 
 		} else {
@@ -470,8 +486,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			} else {
 				callValueBean = propertyValue;
 			}
-			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".", knownFields,
-					handler);
+			recurseBeanCreationParams(parameterType, annotatedParameter, callValueBean, paramName + ".", knownFields, handler,
+					bodyInputParameters);
 		}
 
 		return null;
