@@ -102,8 +102,8 @@ public interface ActionInputParameter {
 	boolean isReadOnly(String property);
 
 	/**
-	 * Determines if request body input parameter should be included. E.g. considering all of {@link Input#include}, {@link
-	 * Input#hidden} and {@link Input#readOnly}.
+	 * Determines if request body input parameter should be included. E.g. considering all of {@link Input#include},
+	 * {@link Input#hidden} and {@link Input#readOnly}.
 	 *
 	 * @param property name or property path
 	 * @return true if included
@@ -124,7 +124,14 @@ public interface ActionInputParameter {
 	 * @param actionDescriptor in case that access to the other parameters is necessary to determine the possible values.
 	 * @return possible values or empty array
 	 */
-	<T>Suggest<T>[] getPossibleValues(ActionDescriptor actionDescriptor);
+	<T> Suggest<T>[] getPossibleValues(ActionDescriptor actionDescriptor);
+
+	/**
+	 * Establish possible values for this parameter
+	 * 
+	 * @param possibleValues
+	 */
+	<T> void setPossibleValues(Suggest<T>[] possibleValues);
 
 	/**
 	 * Parameter is an array or collection, think {?val*} in uri template.
@@ -134,8 +141,8 @@ public interface ActionInputParameter {
 	boolean isArrayOrCollection();
 
 	/**
-	 * Is this action input parameter required, based on the presence of a default value,
-	 * the parameter annotations and the kind of input parameter.
+	 * Is this action input parameter required, based on the presence of a default value, the parameter annotations and
+	 * the kind of input parameter.
 	 *
 	 * @return true if required
 	 */
@@ -180,8 +187,8 @@ public interface ActionInputParameter {
 	/**
 	 * Gets input constraints.
 	 *
-	 * @return constraints where the key is one of {@link Input#MAX} etc. and the value is a string or number,
-	 * depending on the input constraint.
+	 * @return constraints where the key is one of {@link Input#MAX} etc. and the value is a string or number, depending
+	 *         on the input constraint.
 	 * @see Input#MAX
 	 * @see Input#MIN
 	 * @see Input#MAX_LENGTH
@@ -191,4 +198,5 @@ public interface ActionInputParameter {
 	 * @see Input#READONLY
 	 */
 	Map<String, Object> getInputConstraints();
+
 }

@@ -331,7 +331,8 @@ public class SpringActionInputParameter implements ActionInputParameter {
 
 	}
 
-	void setPossibleValues(Suggest[] possibleValues) {
+	@Override
+	public <T> void setPossibleValues(Suggest<T>[] possibleValues) {
 		resolver = new FixedPossibleValuesResolver(possibleValues);
 	}
 
