@@ -108,7 +108,8 @@ public class ActionDescriptorBuilder {
 			} else {
 				argument = null;
 			}
-			result.put(parameter.getParameterName(), new SpringActionInputParameter(parameter, argument));
+			result.put(parameter.getParameterName(),
+					new SpringActionInputParameter(parameter, argument, parameter.getParameterName()));
 		}
 
 		return result;
