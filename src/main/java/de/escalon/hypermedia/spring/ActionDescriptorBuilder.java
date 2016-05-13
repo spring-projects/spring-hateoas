@@ -2,7 +2,7 @@ package de.escalon.hypermedia.spring;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -145,7 +145,7 @@ public class ActionDescriptorBuilder {
 							result.put(inputParameter.getParameterName(), inputParameter);
 							return "";
 						}
-					}, Collections.<ActionInputParameter> emptyList());
+					}, new ArrayList<ActionInputParameter>());
 
 		}
 
