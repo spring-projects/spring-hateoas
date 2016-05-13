@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,7 +55,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -422,5 +425,20 @@ public class HalFormsMessageConverterTest {
 
 		LOG.debug(result.getResponse().getContentAsString());
 
+	}
+
+	@Test
+	public void testReadHalFormDocument() throws JsonParseException, JsonMappingException, IOException {
+
+		Order order = new Order();
+		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null, null)))
+				.withRel("order-items"));
+
+		Object entity = HalFormsUtils.toHalFormsDocument(order);
+		String json = objectMapper.valueToTree(entity).toString();
+
+		HalFormsDocument doc = objectMapper.readValue(json, HalFormsDocument.class);
+
+		assertThat(doc.getTemplates().size(), equalTo(1));
 	}
 }

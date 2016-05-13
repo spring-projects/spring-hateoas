@@ -8,27 +8,29 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.core.EmbeddedWrapper;
 import org.springframework.hateoas.core.EmbeddedWrappers;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
 @JsonPropertyOrder({ "embeddeds", "links", "templates" })
-class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
+public class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 
 	private final List<Template> templates = new ArrayList<Template>();
 
-	private final EmbeddedWrappers wrappers;
-	private final List<EmbeddedWrapper> embeddedWrappers;
+	private final EmbeddedWrappers wrappers = new EmbeddedWrappers(true);
+	private final List<EmbeddedWrapper> embeddedWrappers = new ArrayList<EmbeddedWrapper>();;
+
+	public HalFormsDocument() {}
 
 	public HalFormsDocument(Iterable<Link> links) {
-
-		wrappers = new EmbeddedWrappers(true);
-		embeddedWrappers = new ArrayList<EmbeddedWrapper>();
 
 		for (Link link : links) {
 			if (link instanceof Template) {
@@ -39,10 +41,19 @@ class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 		}
 	}
 
+	@JsonCreator
+	public HalFormsDocument(@JsonProperty("templates") List<Template> templates, @JsonProperty("links") List<Link> links,
+			@JsonProperty("embeddeds") List<EmbeddedWrapper> wrappers) {
+		this.templates.addAll(templates);
+		this.embeddedWrappers.addAll(wrappers);
+		add(links);
+	}
+
 	@Override
 	@JsonProperty("_templates")
 	@JsonInclude(Include.NON_EMPTY)
 	@JsonSerialize(using = Jackson2HalFormsModule.HalTemplateListSerializer.class)
+	@JsonDeserialize(using = Jackson2HalFormsModule.HalTemplateListDeserializer.class)
 	public List<Template> getTemplates() {
 		return templates;
 	}
@@ -50,6 +61,7 @@ class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 	@JsonProperty("_embedded")
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY,
 			using = Jackson2HalFormsModule.HalEmbeddedResourcesSerializer.class)
+	@JsonDeserialize(using = Jackson2HalModule.HalResourcesDeserializer.class)
 	public Collection<EmbeddedWrapper> getEmbeddeds() {
 		return embeddedWrappers;
 	}
@@ -57,6 +69,7 @@ class HalFormsDocument extends ResourceSupport implements TemplatesSupport {
 	@Override
 	@JsonProperty("_links")
 	@JsonSerialize(using = Jackson2HalFormsModule.HalFormsLinkLinkSerializer.class)
+	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
 	public List<Link> getLinks() {
 		return super.getLinks();
 	}

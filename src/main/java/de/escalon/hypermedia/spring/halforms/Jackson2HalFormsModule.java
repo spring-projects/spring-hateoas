@@ -26,9 +26,14 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -37,6 +42,7 @@ import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
@@ -47,7 +53,7 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-class Jackson2HalFormsModule extends SimpleModule {
+public class Jackson2HalFormsModule extends SimpleModule {
 
 	private static final long serialVersionUID = -4496351128468451196L;
 
@@ -242,6 +248,52 @@ class Jackson2HalFormsModule extends SimpleModule {
 		public String getTitle() {
 			return title;
 		}
+	}
+
+	public static class HalTemplateListDeserializer extends ContainerDeserializerBase<List<Template>> {
+
+		protected HalTemplateListDeserializer() {
+			super(List.class);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		@Override
+		public List<Template> deserialize(JsonParser jp, DeserializationContext ctxt)
+				throws IOException, JsonProcessingException {
+			List<Template> result = new ArrayList<Template>();
+
+			String key;
+			Template template;
+			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
+					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+				}
+
+				// save the relation in case the link does not contain it
+				key = jp.getText();
+
+				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
+					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
+						template = jp.readValueAs(Template.class);
+						result.add(new Template(template.getHref(), key));
+					}
+				} else {
+					template = jp.readValueAs(Template.class);
+					result.add(new Template("http://localhost", key));
+				}
+			}
+			return result;
+		}
+
 	}
 
 	public static class HalEmbeddedResourcesSerializer extends ContainerSerializer<Collection<?>>

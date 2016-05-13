@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(Include.NON_DEFAULT)
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
 @JsonIgnoreProperties({ "href", "rel" })
-class Template extends Link {
+public class Template extends Link {
 
 	private static final long serialVersionUID = 2593020248152501268L;
 

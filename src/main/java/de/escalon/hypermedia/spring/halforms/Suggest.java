@@ -15,10 +15,12 @@
  */
 package de.escalon.hypermedia.spring.halforms;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Define the "value" and "text" fields of an object included in a {@link Property} of a HAL-FORMS {@link Template}
- * 
  */
+@JsonDeserialize(using = SuggestDeserializer.class)
 interface Suggest {
 	String getValueField();
 
