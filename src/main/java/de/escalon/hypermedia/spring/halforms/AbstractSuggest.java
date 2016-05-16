@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties({ "type" })
-class AbstractSuggest implements Suggest {
+public class AbstractSuggest implements Suggest {
 
 	private final String textField;
 

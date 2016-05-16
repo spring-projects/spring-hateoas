@@ -288,7 +288,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 					}
 				} else {
 					template = jp.readValueAs(Template.class);
-					result.add(new Template("http://localhost", key));
+					result.add(template);
 				}
 			}
 			return result;

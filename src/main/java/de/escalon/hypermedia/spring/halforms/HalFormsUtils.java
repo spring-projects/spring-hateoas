@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
@@ -40,14 +39,17 @@ public class HalFormsUtils {
 				for (ActionDescriptor actionDescriptor : affordance.getActionDescriptors()) {
 
 					// TODO: revisar!
-					if ("application/prs.hal-forms+json".equals(actionDescriptor.getProduces())) {
+					// if ("application/prs.hal-forms+json".equals(actionDescriptor.getProduces())) {
+					if (actionDescriptor.getRequestParamNames() != null
+							&& actionDescriptor.getRequestParamNames().contains("rel")) {
 						processed.add(affordance);
 					} else {
-						Template template = new Template(link.getHref());
+						String key = actionDescriptor.getSemanticActionType();
+						Template template = new Template(link.getHref(), key != null ? key : "default");
 						template.setContentType(actionDescriptor.getConsumes());
 
 						// there is only one httpmethod??
-						template.setMethod(new RequestMethod[] { RequestMethod.valueOf(actionDescriptor.getHttpMethod()) });
+						template.setMethod(actionDescriptor.getHttpMethod());
 						actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
 						processed.add(template);
 					}

@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,7 +43,7 @@ public class Template extends Link {
 
 	private final List<Property> properties = new ArrayList<Property>();
 
-	private RequestMethod[] method;
+	private String method;
 
 	private String contentType;
 
@@ -60,7 +59,7 @@ public class Template extends Link {
 		super(href, key);
 	}
 
-	public void setMethod(RequestMethod[] method) {
+	public void setMethod(String method) {
 		this.method = method;
 	}
 
@@ -89,23 +88,9 @@ public class Template extends Link {
 		return properties;
 	}
 
-	@JsonIgnore
-	public RequestMethod[] getMethod() {
-		return method;
-	}
-
 	@JsonProperty("method")
-	public String getMethodStr() {
-		if (method == null) {
-			return null;
-		}
-
-		StringBuilder sb = new StringBuilder();
-		for (RequestMethod rm : method) {
-			sb.append(rm.toString()).append(',');
-		}
-		sb.setLength(sb.length() - 1);
-		return sb.toString();
+	public String getMethod() {
+		return method;
 	}
 
 	@JsonIgnore

@@ -440,5 +440,6 @@ public class HalFormsMessageConverterTest {
 		HalFormsDocument doc = objectMapper.readValue(json, HalFormsDocument.class);
 
 		assertThat(doc.getTemplates().size(), equalTo(1));
+		// ((SuggestProvider) doc.getTemplates().get(0).getProperties().get(3).getSuggest());
 	}
 }
