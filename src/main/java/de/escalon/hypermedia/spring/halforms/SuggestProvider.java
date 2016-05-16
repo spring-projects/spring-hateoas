@@ -48,6 +48,10 @@ public class SuggestProvider extends AbstractSuggest {
 		return embeddedRel;
 	}
 
+	public String getHref() {
+		return href;
+	}
+
 	public <T> List<T> getPossibleValues(ParameterizedTypeReference<T> parameterizedType) {
 		JavaType javaType = objectMapper.getTypeFactory().constructType(parameterizedType.getType());
 
