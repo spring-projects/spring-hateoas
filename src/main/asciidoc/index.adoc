@@ -180,7 +180,7 @@ Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
 assertThat(link.getHref(), is("/people/2")));
 ----
 
-`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposed it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
+`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
 
 1. The return type has to be capable of proxying as we need to expose the method invocation on it.
 2. The parameters handed into the methods are generally neglected, except the ones referred to through `@PathVariable` as they make up the URI.
