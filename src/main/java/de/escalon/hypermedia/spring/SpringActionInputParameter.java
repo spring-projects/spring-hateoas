@@ -152,6 +152,9 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(nested.getEnumConstants(), type));
 		} else if (select != null) {
 			resolver = new OptionsPossibleValuesResolver(select);
+
+			// FIXME: properties with possible Values are required by now. We need a "required" attribute in @Select
+			putInputConstraint(Input.REQUIRED, "", true);
 		}
 	}
 
