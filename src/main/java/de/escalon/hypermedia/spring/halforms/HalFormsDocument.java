@@ -9,6 +9,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.core.EmbeddedWrapper;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,15 +30,14 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 
 	public HalFormsDocument() {}
 
-	public HalFormsDocument(Iterable<Link> links) {
+	public HalFormsDocument(Iterable<Link> links, List<Template> templates) {
 
-		for (Link link : links) {
-			if (link instanceof Template) {
-				add((Template) link);
-			} else {
-				super.add(link);
-			}
+		super.add(links);
+
+		for (Template template : templates) {
+			add(template);
 		}
+
 	}
 
 	@Override
@@ -63,19 +63,6 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 	}
 
 	public void add(Template template) {
-		// TODO Create a getter in template to obtain Link instance.
-		String href = template.getHref();
-		String rel = template.getRel();
-
-		if (href != null) {
-			Link link = new Link(href, Template.DEFAULT_KEY.equals(rel) ? Link.REL_SELF : rel);
-
-			// FIXME: only support one rel with multiple templates
-			if (!alreadyExists(link)) {
-				add(link);
-			}
-		}
-
 		templates.add(template);
 
 		if (template.getProperties() == null) {
@@ -114,6 +101,21 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 			}
 		}
 		return false;
+	}
+
+	@JsonIgnore
+	public Template getTemplate() {
+		return getTemplate(Template.DEFAULT_KEY);
+	}
+
+	@JsonIgnore
+	public Template getTemplate(String key) {
+		for (Template template : templates) {
+			if (template.getKey().equals(key)) {
+				return template;
+			}
+		}
+		return null;
 	}
 
 }

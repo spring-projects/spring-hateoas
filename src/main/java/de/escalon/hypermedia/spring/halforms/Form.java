@@ -34,8 +34,8 @@ class Form extends Template {
 
 	public Form() {}
 
-	public Form(String href, String rel) {
-		super(href, rel);
+	public Form(String key) {
+		super(key);
 	}
 
 	public void setBody(Object body) {

@@ -18,10 +18,6 @@ package de.escalon.hypermedia.spring.halforms;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.Link;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,14 +30,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonInclude(Include.NON_DEFAULT)
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
-@JsonIgnoreProperties({ "href", "rel" })
-public class Template extends Link {
-
-	private static final long serialVersionUID = 2593020248152501268L;
+public class Template {
 
 	public static final String DEFAULT_KEY = "default";
 
 	private final List<Property> properties = new ArrayList<Property>();
+
+	private String key;
 
 	private String method;
 
@@ -49,14 +44,12 @@ public class Template extends Link {
 
 	private String title;
 
-	public Template() {}
-
-	public Template(String href) {
-		this(href, Template.DEFAULT_KEY);
+	public Template() {
+		this(Template.DEFAULT_KEY);
 	}
 
-	public Template(String href, String key) {
-		super(href, key);
+	public Template(String key) {
+		this.key = key != null ? key : Template.DEFAULT_KEY;
 	}
 
 	public void setMethod(String method) {
@@ -93,10 +86,8 @@ public class Template extends Link {
 		return method;
 	}
 
-	@JsonIgnore
-	@Override
-	public boolean isTemplated() {
-		return false;
+	public String getKey() {
+		return key;
 	}
 
 }

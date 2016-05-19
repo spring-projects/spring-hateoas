@@ -10,14 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.escalon.hypermedia.affordance.SuggestType;
 
-public class SuggestProvider extends AbstractSuggest {
+public class SuggestMapper extends AbstractSuggest {
 
 	private final ObjectMapper objectMapper;
 	private List<Object> values;
 	private String embeddedRel;
 	private String href;
 
-	public SuggestProvider(String textField, String valueField) {
+	public SuggestMapper(String textField, String valueField) {
 		super(textField, valueField);
 		this.objectMapper = new ObjectMapper();
 	}
@@ -52,6 +52,7 @@ public class SuggestProvider extends AbstractSuggest {
 		return href;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> List<T> getPossibleValues(ParameterizedTypeReference<T> parameterizedType) {
 		JavaType javaType = objectMapper.getTypeFactory().constructType(parameterizedType.getType());
 

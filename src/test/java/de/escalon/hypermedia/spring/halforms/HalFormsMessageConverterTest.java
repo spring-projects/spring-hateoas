@@ -1,10 +1,12 @@
 package de.escalon.hypermedia.spring.halforms;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static de.escalon.hypermedia.spring.AffordanceBuilder.linkTo;
 import static de.escalon.hypermedia.spring.AffordanceBuilder.methodOn;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
@@ -69,6 +72,7 @@ import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.Suggest;
 import de.escalon.hypermedia.affordance.SuggestImpl;
 import de.escalon.hypermedia.affordance.SuggestType;
+import de.escalon.hypermedia.spring.AffordanceBuilder;
 import de.escalon.hypermedia.spring.halforms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -264,6 +268,12 @@ public class HalFormsMessageConverterTest {
 			return null;
 		}
 
+		@RequestMapping(value = "/{orderNumber}/items", method = RequestMethod.GET, params = "rel",
+				consumes = MediaType.APPLICATION_JSON_VALUE)
+		public ResponseEntity<Void> addOrderItemsPrepareForm(@PathVariable int orderNumber, @RequestParam String rel) {
+			return null;
+		}
+
 		@RequestMapping(value = "/{orderNumber}/items", method = RequestMethod.POST,
 				consumes = MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<Void> addOrderItems(@PathVariable int orderNumber, @RequestBody OrderItem orderItem) {
@@ -336,9 +346,13 @@ public class HalFormsMessageConverterTest {
 	@Test
 	public void testTemplatesWithRequestBody() throws JsonProcessingException {
 
+		AffordanceBuilder builder = linkTo(
+				methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null, null)));
+		Link link = linkTo(methodOn(DummyOrderController.class).addOrderItemsPrepareForm(42, null)).and(builder)
+				.withSelfRel();
+
 		Order order = new Order();
-		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null, null)))
-				.withRel("order-items"));
+		order.add(link);
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
@@ -359,10 +373,9 @@ public class HalFormsMessageConverterTest {
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
 
-		assertThat(json, hasJsonPath("$._templates"));
-		assertThat(json, hasJsonPath("$._templates.default"));
-		assertThat(json, hasJsonPath("$._templates.default.method", equalTo("GET")));
-		assertThat(json, hasJsonPath("$._templates.default.properties", hasSize(1)));
+		assertThat(json, hasJsonPath("$._links['test:orders'].href", equalTo("http://localhost/orders{?attr}")));
+
+		assertThat(json, hasNoJsonPath("$._templates"));
 	}
 
 	@Test
@@ -380,7 +393,8 @@ public class HalFormsMessageConverterTest {
 		String json = objectMapper.valueToTree(entity).toString();
 
 		// If there are no @RequestParam AffordanceBuilder doesn't declare a UriTemplate variable
-		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filtered{?count,status}")));
+		assertThat(json,
+				hasJsonPath("$._links['test:orders'].href", equalTo("http://localhost/orders/filtered{?count,status}")));
 	}
 
 	@Test
@@ -397,7 +411,8 @@ public class HalFormsMessageConverterTest {
 		// al anotar el método del controller con @RequestParam mete una variable en la url pero no es correcta ya que
 		// Spring espera dos parámetros derivados de los fields de OrderFilter: status y count. Por lo tanto la UriTemplate
 		// correcta debería ser http://localhost/orders/filteredWithRP{?status, count}
-		assertThat(json, hasJsonPath("$._links.self.href", equalTo("http://localhost/orders/filteredWithRP{?filter}")));
+		assertThat(json,
+				hasJsonPath("$._links['test:orders'].href", equalTo("http://localhost/orders/filteredWithRP{?filter}")));
 
 	}
 
@@ -430,9 +445,13 @@ public class HalFormsMessageConverterTest {
 	@Test
 	public void testReadHalFormDocument() throws JsonParseException, JsonMappingException, IOException {
 
+		AffordanceBuilder builder = linkTo(
+				methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null, null)));
+		Link link = linkTo(methodOn(DummyOrderController.class).addOrderItemsPrepareForm(42, null)).and(builder)
+				.withSelfRel();
+
 		Order order = new Order();
-		order.add(linkTo(methodOn(DummyOrderController.class).addOrderItems(42, new OrderItem(42, null, null, null, null)))
-				.withRel("order-items"));
+		order.add(link);
 
 		Object entity = HalFormsUtils.toHalFormsDocument(order);
 		String json = objectMapper.valueToTree(entity).toString();
@@ -440,6 +459,7 @@ public class HalFormsMessageConverterTest {
 		HalFormsDocument doc = objectMapper.readValue(json, HalFormsDocument.class);
 
 		assertThat(doc.getTemplates().size(), equalTo(1));
+		assertThat(doc.getTemplate().getProperty("size").getSuggest(), notNullValue());
 		// ((SuggestProvider) doc.getTemplates().get(0).getProperties().get(3).getSuggest());
 	}
 }

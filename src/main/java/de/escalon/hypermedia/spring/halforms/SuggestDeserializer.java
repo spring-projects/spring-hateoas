@@ -22,11 +22,11 @@ public class SuggestDeserializer extends JsonDeserializer<Suggest> {
 		String valueField = null;
 		String embeddedRel = null;
 		String href = null;
+		List<Object> list = new ArrayList<Object>();
 		while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
 			if (JsonToken.START_ARRAY.equals(jp.getCurrentToken())) {
 				textField = "prompt";
 				valueField = "value";
-				List<Object> list = new ArrayList<Object>();
 				while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 					list.add(deser.deserialize(jp, ctxt));
 				}
@@ -47,7 +47,8 @@ public class SuggestDeserializer extends JsonDeserializer<Suggest> {
 			}
 		}
 
-		SuggestProvider suggest = new SuggestProvider(textField, valueField);
+		SuggestMapper suggest = new SuggestMapper(textField, valueField);
+		suggest.setValues(list);
 		suggest.setEmbeddedRel(embeddedRel);
 		suggest.setHref(href);
 

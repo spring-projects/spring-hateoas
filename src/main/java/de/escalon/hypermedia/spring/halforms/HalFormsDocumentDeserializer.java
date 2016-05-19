@@ -2,7 +2,6 @@ package de.escalon.hypermedia.spring.halforms;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,19 +51,17 @@ public class HalFormsDocumentDeserializer extends JsonDeserializer<HalFormsDocum
 			}
 		}
 
-		links.addAll(assignEmbeddeds(templates, embeddeds));
-
-		return new HalFormsDocument(links);
+		return new HalFormsDocument(links, assignEmbeddeds(templates, embeddeds));
 	}
 
-	private Collection<? extends Link> assignEmbeddeds(List<Template> templates, Map<String, List<Object>> embeddeds) {
+	private List<Template> assignEmbeddeds(List<Template> templates, Map<String, List<Object>> embeddeds) {
 		for (Template template : templates) {
 			for (Property property : template.getProperties()) {
 				if (property.getSuggest() == null) {
 					continue;
 				}
 
-				SuggestProvider suggest = (SuggestProvider) property.getSuggest();
+				SuggestMapper suggest = (SuggestMapper) property.getSuggest();
 				if (suggest.getType() == SuggestType.EXTERNAL) {
 					suggest.setValues(embeddeds.get(suggest.getEmbeddedRel()));
 				}
@@ -183,16 +180,16 @@ public class HalFormsDocumentDeserializer extends JsonDeserializer<HalFormsDocum
 			// TODO: curies es un array!
 
 			if ("curies".equals(relation)) {
-				link = jp.readValueAs(Curie.class);
+				link = jp.readValueAs(ExtendedLink.class);
 			} else {
-				link = jp.readValueAs(Link.class);
+				link = jp.readValueAs(ExtendedLink.class);
 			}
 			return link;
 		}
 
 	}
 
-	public static class Curie extends Link {
+	public static class ExtendedLink extends Link {
 		private String name;
 		private boolean templated;
 

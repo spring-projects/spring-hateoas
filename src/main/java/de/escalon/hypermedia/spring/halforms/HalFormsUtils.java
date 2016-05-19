@@ -24,41 +24,45 @@ public class HalFormsUtils {
 
 		if (object instanceof ResourceSupport) {
 			ResourceSupport rs = (ResourceSupport) object;
-			return new HalFormsDocument(getLinks(rs));
+			List<Template> templates = new ArrayList<Template>();
+			List<Link> links = new ArrayList<Link>();
+			process(rs, links, templates);
+			return new HalFormsDocument(links, templates);
 
 		} else { // bean
 			return object;
 		}
 	}
 
-	private static List<Link> getLinks(ResourceSupport resource) {
-		List<Link> processed = new ArrayList<Link>();
+	private static void process(ResourceSupport resource, List<Link> links, List<Template> templates) {
 		for (Link link : resource.getLinks()) {
 			if (link instanceof Affordance) {
 				Affordance affordance = (Affordance) link;
-				for (ActionDescriptor actionDescriptor : affordance.getActionDescriptors()) {
 
-					// TODO: revisar!
-					// if ("application/prs.hal-forms+json".equals(actionDescriptor.getProduces())) {
-					if (actionDescriptor.getRequestParamNames() != null
-							&& actionDescriptor.getRequestParamNames().contains("rel")) {
-						processed.add(affordance);
+				// TODO: revisar! el primer actionDescriptor corresponde al "self" por tanto no añade una template nunca!
+				for (int i = 0; i < affordance.getActionDescriptors().size(); i++) {
+					ActionDescriptor actionDescriptor = affordance.getActionDescriptors().get(i);
+					if (i == 0) {
+						links.add(affordance);
 					} else {
 						String key = actionDescriptor.getSemanticActionType();
-						Template template = new Template(link.getHref(), key != null ? key : "default");
-						template.setContentType(actionDescriptor.getConsumes());
+						if (actionDescriptor.hasRequestBody()) {
+							Template template = new Template(key);
+							template.setContentType(actionDescriptor.getConsumes());
 
-						// there is only one httpmethod??
-						template.setMethod(actionDescriptor.getHttpMethod());
-						actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
-						processed.add(template);
+							// there is only one httpmethod??
+							template.setMethod(actionDescriptor.getHttpMethod());
+							actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
+							templates.add(template);
+						} else {
+							links.add(link);
+						}
 					}
 				}
 			} else {
-				processed.add(link);
+				links.add(link);
 			}
 		}
-		return processed;
 	}
 
 	public static Property getProperty(ActionInputParameter actionInputParameter, ActionDescriptor actionDescriptor,

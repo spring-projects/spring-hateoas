@@ -99,10 +99,10 @@ public class Jackson2HalFormsModule extends SimpleModule {
 			Map<String, List<Object>> sortedTemplates = new LinkedHashMap<String, List<Object>>();
 
 			for (Template template : value) {
-				if (sortedTemplates.get(template.getRel()) == null) {
-					sortedTemplates.put(template.getRel(), new ArrayList<Object>());
+				if (sortedTemplates.get(template.getKey()) == null) {
+					sortedTemplates.put(template.getKey(), new ArrayList<Object>());
 				}
-				sortedTemplates.get(template.getRel()).add(toHalTemplate(template));
+				sortedTemplates.get(template.getKey()).add(toHalTemplate(template));
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
@@ -124,11 +124,11 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		 */
 		private HalTemplate toHalTemplate(Template template) {
 
-			String rel = template.getRel();
-			String title = getTitle(rel);
+			String key = template.getKey();
+			String title = getTitle(key);
 
 			if (title == null) {
-				title = getTitle(rel.contains(":") ? rel.substring(rel.indexOf(":") + 1) : rel);
+				title = getTitle(key.contains(":") ? key.substring(key.indexOf(":") + 1) : key);
 			}
 
 			return new HalTemplate(template, title);
@@ -240,7 +240,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		}
 
 		@JsonUnwrapped
-		public Link getTemplate() {
+		public Template getTemplate() {
 			return template;
 		}
 
@@ -284,14 +284,23 @@ public class Jackson2HalFormsModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						template = jp.readValueAs(Template.class);
-						result.add(new Template(template.getHref(), key));
+						result.add(copy(template, key));
 					}
 				} else {
 					template = jp.readValueAs(Template.class);
-					result.add(template);
+					result.add(copy(template, key));
 				}
 			}
 			return result;
+		}
+
+		private Template copy(Template template, String key) {
+			// Template must not be null or empty
+			Template copied = new Template(key);
+			copied.setContentType(template.getContentType());
+			copied.setMethod(template.getMethod());
+			copied.getProperties().addAll(template.getProperties());
+			return copied;
 		}
 
 	}
