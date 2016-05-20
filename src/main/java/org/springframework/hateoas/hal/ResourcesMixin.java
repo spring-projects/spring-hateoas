@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.XmlElement;
 
 import org.springframework.hateoas.Resources;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -32,8 +34,8 @@ public abstract class ResourcesMixin<T> extends Resources<T> {
 	@Override
 	@XmlElement(name = "embedded")
 	@JsonProperty("_embedded")
-	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY, using = Jackson2HalModule.HalResourcesSerializer.class)
+	@JsonInclude(Include.NON_EMPTY)
+	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
 	@JsonDeserialize(using = Jackson2HalModule.HalResourcesDeserializer.class)
 	public abstract Collection<T> getContent();
-
 }

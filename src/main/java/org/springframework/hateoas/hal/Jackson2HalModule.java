@@ -576,6 +576,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			// links is an object, so we parse till we find its end.
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+
 				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
 					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
 				}
@@ -651,6 +652,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			// links is an object, so we parse till we find its end.
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
+
 				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
 					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
 				}
@@ -658,7 +660,6 @@ public class Jackson2HalModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						object = deser.deserialize(jp, ctxt);
-						;
 						result.add(object);
 					}
 				} else {
