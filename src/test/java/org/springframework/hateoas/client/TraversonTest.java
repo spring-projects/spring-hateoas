@@ -35,6 +35,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
@@ -364,9 +365,9 @@ public class TraversonTest {
 		
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
-		Resource<?> itemResource = traverson.//
+		Resources itemResource = traverson.//
 				follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))).//
-				toObject(Resource.class);
+				toObject(Resources.class);
 
 		assertThat(itemResource.hasLink("self"), is(true));
 		assertThat(itemResource.getLink("self").expand().getHref(),

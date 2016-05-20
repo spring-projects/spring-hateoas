@@ -16,9 +16,13 @@
 package org.springframework.hateoas.hal;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.hateoas.EmbeddedResource;
 import org.springframework.hateoas.Resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,5 +39,9 @@ public abstract class ResourcesMixin<T> extends Resources<T> {
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY, using = Jackson2HalModule.HalResourcesSerializer.class)
 	@JsonDeserialize(using = Jackson2HalModule.HalResourcesDeserializer.class)
 	public abstract Collection<T> getContent();
+
+	@Override
+	@JsonIgnore
+	public abstract List<EmbeddedResource> getEmbeddedResources();
 
 }

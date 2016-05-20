@@ -26,12 +26,14 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
+import org.springframework.hateoas.EmbeddedResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
@@ -76,6 +78,10 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String LINK_TEMPLATE = "{\"_links\":{\"search\":{\"href\":\"/foo{?bar}\",\"templated\":true}}}";
 
 	static final String LINK_WITH_TITLE = "{\"_links\":{\"ns:foobar\":{\"href\":\"target\",\"title\":\"Foobar's title!\"}}}";
+
+	static final String RESOURCE_WITH_SINGLE_EMBEDDED_RESOURCE_REFERENCE = "{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"related\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}}}";
+	static final String RESOURCE_WITH_SINGLE_EMBEDDED_RESOURCE_COLLECTION_REFERENCE = "{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"relatedCollection\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
+	static final String RESOURCE_WITH_MULTIPLE_EMBEDDED_RESOURCES_REFERENCE = "{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}},\"_embedded\":{\"related\":{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},\"relatedCollection\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]}}";
 
 	@Before
 	public void setUpModule() {
@@ -378,6 +384,52 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	public void rendersTitleIfMessageSourceResolvesLocalKey() throws Exception {
 		verifyResolvedTitle("_links.foobar.title");
 	}
+
+	@Test
+	public void rendersResourceWithSingleEmbeddedResource() throws Exception {
+
+		Resource<SimplePojo> simplePojoResource = new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"));
+		simplePojoResource.add(new EmbeddedResource("related", new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"))));
+
+		assertThat(write(simplePojoResource), is(RESOURCE_WITH_SINGLE_EMBEDDED_RESOURCE_REFERENCE));
+	}
+
+	@Test
+	public void rendersResourceWithSingleEmbeddedResourceCollection() throws Exception {
+
+		Resource<SimplePojo> simplePojoResource = new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"));
+		simplePojoResource.add(new EmbeddedResource(
+				"relatedCollection",
+				Arrays.asList(
+						new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")),
+						new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"))
+				)
+		));
+
+		assertThat(write(simplePojoResource), is(RESOURCE_WITH_SINGLE_EMBEDDED_RESOURCE_COLLECTION_REFERENCE));
+	}
+
+	@Test
+	public void rendersResourceWithMultipleEmbeddedResources() throws Exception {
+
+		Resource<SimplePojo> simplePojoResource = new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"));
+		simplePojoResource.add(new EmbeddedResource("related", new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"))));
+		simplePojoResource.add(new EmbeddedResource(
+				"relatedCollection",
+				Arrays.asList(
+						new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost")),
+						new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"))
+				)
+		));
+
+		assertThat(write(simplePojoResource), is(RESOURCE_WITH_MULTIPLE_EMBEDDED_RESOURCES_REFERENCE));
+	}
+
+	@Ignore("The functionality not yet implemented")
+	@Test
+	public void deserializesSingleEmbeddedResource() throws Exception {
+	}
+
 
 	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {
 
