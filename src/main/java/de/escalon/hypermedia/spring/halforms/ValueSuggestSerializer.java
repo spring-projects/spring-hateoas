@@ -84,7 +84,6 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 				gen.writeStringField("href", (String) value.getValues().iterator().next());
 			}
 
-			// FIXME: debería delegar en el serializador por defecto??
 			if (value.getTextField() != null) {
 				gen.writeStringField("prompt-field", value.getTextField());
 			}

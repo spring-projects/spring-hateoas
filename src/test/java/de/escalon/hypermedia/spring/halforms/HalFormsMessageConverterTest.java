@@ -460,6 +460,21 @@ public class HalFormsMessageConverterTest {
 
 		assertThat(doc.getTemplates().size(), equalTo(1));
 		assertThat(doc.getTemplate().getProperty("size").getSuggest(), notNullValue());
-		// ((SuggestProvider) doc.getTemplates().get(0).getProperties().get(3).getSuggest());
+	}
+
+	@Test
+	public void testReadHalFormDocumentWithLinkArrays() throws JsonParseException, JsonMappingException, IOException {
+		Link link = linkTo(methodOn(DummyOrderController.class).addOrderItemsPrepareForm(42, null)).withRel("orders");
+		Link link2 = linkTo(methodOn(DummyOrderController.class).addOrderItemsPrepareForm(42, null)).withRel("orders");
+		Order order = new Order();
+		order.add(link, link2);
+
+		Object entity = HalFormsUtils.toHalFormsDocument(order);
+		String json = objectMapper.valueToTree(entity).toString();
+
+		HalFormsDocument doc = objectMapper.readValue(json, HalFormsDocument.class);
+		assertThat(doc.getLinks().size(), equalTo(3));
+		assertThat(doc.getLinks().get(0).getRel(), equalTo(doc.getLinks().get(1).getRel()));
+
 	}
 }

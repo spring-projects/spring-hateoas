@@ -45,8 +45,6 @@ public class HalFormsDocumentDeserializer extends JsonDeserializer<HalFormsDocum
 			} else if ("_links".equals(jp.getCurrentName())) {
 				links.addAll(linkDeser.deserialize(jp, ctxt));
 			} else if ("_templates".equals(jp.getCurrentName())) {
-
-				// FIXME: change SuggestDeserializer!
 				templates.addAll(templateDeser.deserialize(jp, ctxt));
 			}
 		}
@@ -177,8 +175,6 @@ public class HalFormsDocumentDeserializer extends JsonDeserializer<HalFormsDocum
 
 		private Link readValue(JsonParser jp, String relation) throws IOException {
 			Link link = null;
-			// TODO: curies es un array!
-
 			if ("curies".equals(relation)) {
 				link = jp.readValueAs(ExtendedLink.class);
 			} else {
@@ -190,6 +186,8 @@ public class HalFormsDocumentDeserializer extends JsonDeserializer<HalFormsDocum
 	}
 
 	public static class ExtendedLink extends Link {
+		private static final long serialVersionUID = -2697601490376254527L;
+
 		private String name;
 		private boolean templated;
 
