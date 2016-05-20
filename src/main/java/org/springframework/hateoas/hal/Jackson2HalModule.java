@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,9 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>>implements ContextualSerializer {
+	public static class HalLinkListSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
+
+		private static final long serialVersionUID = -1844788111509966406L;
 
 		private static final String RELATION_MESSAGE_TEMPLATE = "_links.%s.title";
 
@@ -129,7 +131,8 @@ public class Jackson2HalModule extends SimpleModule {
 		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
 				MessageSourceAccessor messageSource) {
 
-			super(List.class, false);
+			super(TypeFactory.defaultInstance().constructType(List.class));
+
 			this.property = property;
 			this.curieProvider = curieProvider;
 			this.mapper = mapper;
@@ -306,7 +309,10 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>>implements ContextualSerializer {
+	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>>
+			implements ContextualSerializer {
+
+		private static final long serialVersionUID = 8030706944344625390L;
 
 		private final BeanProperty property;
 		private final EmbeddedMapper embeddedMapper;
@@ -317,7 +323,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		public HalResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
 
-			super(Collection.class, false);
+			super(TypeFactory.defaultInstance().constructType(Collection.class));
 
 			this.property = property;
 			this.embeddedMapper = embeddedMapper;
@@ -392,6 +398,8 @@ public class Jackson2HalModule extends SimpleModule {
 	public static class OptionalListJackson2Serializer extends ContainerSerializer<Object>
 			implements ContextualSerializer {
 
+		private static final long serialVersionUID = 3700806118177419817L;
+
 		private final BeanProperty property;
 		private final Map<Class<?>, JsonSerializer<Object>> serializers;
 
@@ -406,7 +414,8 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		public OptionalListJackson2Serializer(BeanProperty property) {
 
-			super(List.class, false);
+			super(TypeFactory.defaultInstance().constructType(List.class));
+
 			this.property = property;
 			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
 		}
@@ -531,9 +540,8 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private static final long serialVersionUID = 6420432361123210955L;
 
-		@SuppressWarnings("deprecation")
 		public HalLinkListDeserializer() {
-			super(List.class);
+			super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
 		}
 
 		/*
@@ -598,15 +606,14 @@ public class Jackson2HalModule extends SimpleModule {
 		private JavaType contentType;
 
 		public HalResourcesDeserializer() {
-			this(List.class, null);
+			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class), null);
 		}
 
 		public HalResourcesDeserializer(JavaType vc) {
 			this(null, vc);
 		}
 
-		@SuppressWarnings("deprecation")
-		private HalResourcesDeserializer(Class<?> type, JavaType contentType) {
+		private HalResourcesDeserializer(JavaType type, JavaType contentType) {
 
 			super(type);
 			this.contentType = contentType;
@@ -755,6 +762,8 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @since 0.9
 	 */
 	public static class TrueOnlyBooleanSerializer extends NonTypedScalarSerializerBase<Boolean> {
+
+		private static final long serialVersionUID = 5817795880782727569L;
 
 		public TrueOnlyBooleanSerializer() {
 			super(Boolean.class);
