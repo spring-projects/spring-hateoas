@@ -190,7 +190,7 @@ assertThat(link.getHref(), is("/people/2")));
 
 So far we have created links by pointing to the web-framework implementations (i.e. Spring MVC controllers or JAX-RS resource classes) and inspected the mapping. In many cases these classes essentially read and write representations backed by a model class.
 
-The `EntityLinks` interfaces now exposes API to lookup `Link`s or `LinkBuilder`s based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
+The `EntityLinks` interfaces now exposes API to lookup ++Link++s or ++LinkBuilder++s based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
 
 ----
 EntityLinks links = …;
