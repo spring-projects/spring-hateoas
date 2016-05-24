@@ -596,4 +596,9 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		return ret;
 	}
 
+	@Override
+	public String toString() {
+		return "SpringActionDescriptor [httpMethod=" + httpMethod + ", actionName=" + actionName + "]";
+	}
+
 }
