@@ -39,7 +39,7 @@ public class HalFormsUtils {
 			if (link instanceof Affordance) {
 				Affordance affordance = (Affordance) link;
 
-				// TODO: revisar! el primer actionDescriptor corresponde al "self" por tanto no añade una template nunca!
+				// TODO: review! the first ActionDescriptor corresponds to the "self" link therefore does never add a template
 				for (int i = 0; i < affordance.getActionDescriptors().size(); i++) {
 					ActionDescriptor actionDescriptor = affordance.getActionDescriptors().get(i);
 					if (i == 0) {
@@ -89,7 +89,6 @@ public class HalFormsUtils {
 
 		String value = propertyValue != null ? propertyValue.toString() : null;
 
-		// FIXME: we need suggest type!
 		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter
 				.getPossibleValues(actionDescriptor);
 		ValueSuggest<?> suggest = null;

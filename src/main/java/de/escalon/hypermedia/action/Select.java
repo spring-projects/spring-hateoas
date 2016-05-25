@@ -32,7 +32,7 @@ public @interface Select {
 	 * possible values, since the default Options implementation is {@link StringOptions}
 	 *
 	 * @return arguments to the Options implementation. For the default {@link StringOptions}, an array of possible
-	 * values.
+	 *         values.
 	 */
 	String[] value() default {};
 
@@ -49,12 +49,20 @@ public @interface Select {
 	 * @return names of the arguments whose value should be passed to {@link Options#get}
 	 */
 	String[] args() default {};
-	
+
 	/**
-	 * Marks the type of select, in case of {@link SuggestType#EXTERNAL} the data may be outside the select, for example as a variable in HAL response
-	 * rather than in HAL-FORMS document
+	 * Marks the type of select, in case of {@link SuggestType#EXTERNAL} the data may be outside the select, for example
+	 * as a variable in HAL response rather than in HAL-FORMS document
+	 * 
 	 * @return
 	 */
 	SuggestType type() default SuggestType.INTERNAL;
-	
+
+	/**
+	 * Establish the property as required
+	 * 
+	 * @return
+	 */
+	boolean required() default false;
+
 }

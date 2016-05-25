@@ -141,7 +141,12 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		Class<?> parameterType = methodParameter.getNestedParameterType();
 		Class<?> nested;
 		Select select = methodParameter.getParameterAnnotation(Select.class);
-		SuggestType type = select != null ? select.type() : SuggestType.INTERNAL;
+		SuggestType type = SuggestType.INTERNAL;
+		if (select != null && select.required()) {
+			type = select.type();
+			putInputConstraint(Input.REQUIRED, "", true);
+		}
+
 		if (Enum[].class.isAssignableFrom(parameterType)) {
 			resolver = new FixedPossibleValuesResolver(
 					SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants(), type));
@@ -152,9 +157,6 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(nested.getEnumConstants(), type));
 		} else if (select != null) {
 			resolver = new OptionsPossibleValuesResolver(select);
-
-			// FIXME: properties with possible Values are required by now. We need a "required" attribute in @Select
-			putInputConstraint(Input.REQUIRED, "", true);
 		}
 	}
 
