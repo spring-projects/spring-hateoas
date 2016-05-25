@@ -46,13 +46,21 @@ public class HalFormsUtils {
 						links.add(affordance);
 					} else {
 						String key = actionDescriptor.getSemanticActionType();
-						if (actionDescriptor.hasRequestBody()) {
+						if (actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
 							Template template = new Template(key);
 							template.setContentType(actionDescriptor.getConsumes());
 
 							// there is only one httpmethod??
 							template.setMethod(actionDescriptor.getHttpMethod());
-							actionDescriptor.accept(new TemplateActionInputParameterVisitor(template, actionDescriptor));
+							TemplateActionInputParameterVisitor visitor = new TemplateActionInputParameterVisitor(template,
+									actionDescriptor);
+							if (actionDescriptor.hasRequestBody()) {
+								actionDescriptor.accept(visitor);
+							} else {
+								for (String param : actionDescriptor.getRequestParamNames()) {
+									visitor.visit(actionDescriptor.getActionInputParameter(param));
+								}
+							}
 							templates.add(template);
 						} else {
 							links.add(link);
@@ -63,6 +71,7 @@ public class HalFormsUtils {
 				links.add(link);
 			}
 		}
+
 	}
 
 	public static Property getProperty(ActionInputParameter actionInputParameter, ActionDescriptor actionDescriptor,
