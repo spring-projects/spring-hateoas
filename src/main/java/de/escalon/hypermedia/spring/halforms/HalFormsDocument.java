@@ -26,7 +26,8 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 	private final List<Template> templates = new ArrayList<Template>();
 
 	private final EmbeddedWrappers wrappers = new EmbeddedWrappers(true);
-	private final List<EmbeddedWrapper> embeddedWrappers = new ArrayList<EmbeddedWrapper>();;
+	private final List<EmbeddedWrapper> embeddedWrappers = new ArrayList<EmbeddedWrapper>();
+	List<Object> embedded = new ArrayList<Object>();
 
 	public HalFormsDocument() {}
 
@@ -74,10 +75,26 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 			if (suggest instanceof ValueSuggest<?>) {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
-				if (valueSuggest.getType().equals(ValueSuggestType.EMBEDDED)) {
-					embeddedWrappers.add(wrappers.wrap(valueSuggest.getValues()));
+				if (valueSuggest.getType() == ValueSuggestType.EMBEDDED) {
+					addIfNotDuplicated(valueSuggest.getValues());
 				}
 			}
+		}
+	}
+
+	private void addIfNotDuplicated(Iterable<?> values) {
+		/**
+		 * Remove embedded duplicates
+		 */
+		List<Object> temp = new ArrayList<Object>();
+		for (Object object : values) {
+			if (!embedded.contains(object)) {
+				temp.add(object);
+				embedded.add(object);
+			}
+		}
+		if (!temp.isEmpty()) {
+			embeddedWrappers.add(wrappers.wrap(temp));
 		}
 	}
 
