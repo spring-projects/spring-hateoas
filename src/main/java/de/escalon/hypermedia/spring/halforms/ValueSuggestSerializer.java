@@ -16,7 +16,6 @@
 package de.escalon.hypermedia.spring.halforms;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
 
 import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
@@ -49,15 +47,15 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 
 	private final ValueSuggestDirectSerializer directSerializer;
 
-	public ValueSuggestSerializer(EmbeddedMapper mapper, RelProvider relProvider,
-			ValueSuggestDirectSerializer directSerializer) {
+	public ValueSuggestSerializer(final EmbeddedMapper mapper, final RelProvider relProvider,
+			final ValueSuggestDirectSerializer directSerializer) {
 		this.relProvider = relProvider;
 		this.mapper = mapper;
 		this.directSerializer = directSerializer;
 	}
 
 	@Override
-	public void serialize(ValueSuggest<?> value, JsonGenerator gen, SerializerProvider provider)
+	public void serialize(final ValueSuggest<?> value, final JsonGenerator gen, final SerializerProvider provider)
 			throws IOException, JsonProcessingException {
 
 		Iterator<?> iterator = value.getValues().iterator();
@@ -67,7 +65,8 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 
 		if (value.getType() == ValueSuggestType.DIRECT) {
 			directSerializer.serialize(value, gen, provider);
-		} else {
+		}
+		else {
 			gen.writeStartObject();
 
 			Map<String, Object> curiedMap = mapper.map(value.getValues());
@@ -76,11 +75,13 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 				String embeddedRel;
 				if (!curiedMap.isEmpty()) {
 					embeddedRel = curiedMap.keySet().iterator().next();
-				} else {
+				}
+				else {
 					embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
 				}
 				gen.writeStringField("embedded", embeddedRel);
-			} else {
+			}
+			else {
 				gen.writeStringField("href", (String) value.getValues().iterator().next());
 			}
 
@@ -96,37 +97,30 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 	}
 
 	@Override
-	public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-			throws JsonMappingException {
+	public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property) throws JsonMappingException {
 
-		return new ValueSuggestSerializer(mapper, relProvider, new ValueSuggestDirectSerializer(property));
+		return new ValueSuggestSerializer(mapper, relProvider, new ValueSuggestDirectSerializer());
 	}
 
 	public static class ValueSuggestDirectSerializer extends ContainerSerializer<Object> implements ContextualSerializer {
 
 		private static final long serialVersionUID = 1L;
 
-		private final BeanProperty property;
-
-		private final Map<Class<?>, JsonSerializer<Object>> serializers;
-
 		private final TextValueSerializer textValueSerializer;
 
-		public ValueSuggestDirectSerializer() {
-			this(null);
-		}
+		private final EnumValueSerializer enumValueSerializer;
 
-		protected ValueSuggestDirectSerializer(BeanProperty property) {
+		protected ValueSuggestDirectSerializer() {
 
 			super(List.class, false);
-			this.property = property;
-			serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
 
 			textValueSerializer = new TextValueSerializer();
+
+			enumValueSerializer = new EnumValueSerializer();
 		}
 
 		@Override
-		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider)
+		public void serialize(final Object value, final JsonGenerator jgen, final SerializerProvider provider)
 				throws IOException, JsonGenerationException {
 			ValueSuggest<?> suggest = (ValueSuggest<?>) value;
 
@@ -135,14 +129,13 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 			if (!iterable.iterator().hasNext()) {
 				return;
 			}
-
 			jgen.writeStartArray();
 			serializeContents(suggest, jgen, provider);
 			jgen.writeEndArray();
 
 		}
 
-		private void serializeContents(ValueSuggest<?> suggest, JsonGenerator jgen, SerializerProvider provider)
+		private void serializeContents(final ValueSuggest<?> suggest, final JsonGenerator jgen, final SerializerProvider provider)
 				throws IOException, JsonGenerationException {
 
 			textValueSerializer.setTextField(suggest.getTextField());
@@ -151,34 +144,21 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 			for (Object elem : suggest.getValues()) {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
-				} else {
-					JsonSerializer<Object> serializer = getOrLookupSerializerFor(elem.getClass(), provider);
-					if (EnumSerializer.class.isAssignableFrom(serializer.getClass())) {
-						serializer.serialize(elem, jgen, provider);
-					} else {
+				}
+				else {
+					if (elem.getClass().isEnum()) {
+						enumValueSerializer.serialize(elem, jgen, provider);
+					}
+					else {
 						textValueSerializer.serialize(elem, jgen, provider);
 					}
 				}
 			}
 		}
 
-		private JsonSerializer<Object> getOrLookupSerializerFor(Class<?> type, SerializerProvider provider)
-				throws JsonMappingException {
-
-			JsonSerializer<Object> serializer = serializers.get(type);
-
-			if (serializer == null) {
-				serializer = provider.findValueSerializer(type, property);
-				serializers.put(type, serializer);
-			}
-
-			return serializer;
-		}
-
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-				throws JsonMappingException {
-			return new ValueSuggestDirectSerializer(property);
+		public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property) throws JsonMappingException {
+			return new ValueSuggestDirectSerializer();
 		}
 
 		@Override
@@ -192,17 +172,17 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 		}
 
 		@Override
-		public boolean hasSingleElement(Object value) {
+		public boolean hasSingleElement(final Object value) {
 			return false;
 		}
 
 		@Override
-		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+		protected ContainerSerializer<?> _withValueTypeSerializer(final TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	public static class TextValueSerializer extends JsonSerializer<Object> {
+	private static class TextValueSerializer extends JsonSerializer<Object> {
 
 		private static final String VALUE_FIELD_NAME = "value";
 
@@ -213,7 +193,7 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 		private String textField;
 
 		@Override
-		public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers)
+		public void serialize(final Object value, final JsonGenerator gen, final SerializerProvider serializers)
 				throws IOException, JsonProcessingException {
 
 			BeanWrapper beanWrapper = new BeanWrapperImpl(value);
@@ -228,12 +208,30 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 			gen.writeEndObject();
 		}
 
-		public void setValueField(String valueField) {
+		public void setValueField(final String valueField) {
 			this.valueField = valueField;
 		}
 
-		public void setTextField(String textField) {
+		public void setTextField(final String textField) {
 			this.textField = textField;
+		}
+
+	}
+
+	private static class EnumValueSerializer extends JsonSerializer<Object> {
+
+		private static final String VALUE_FIELD_NAME = "value";
+
+		private static final String PROMPT_FIELD_NAME = "prompt";
+
+		@Override
+		public void serialize(final Object value, final JsonGenerator gen, final SerializerProvider serializers)
+				throws IOException, JsonProcessingException {
+
+			gen.writeStartObject();
+			gen.writeObjectField(VALUE_FIELD_NAME, (value));
+			gen.writeObjectField(PROMPT_FIELD_NAME, ((Enum<?>) value).name());
+			gen.writeEndObject();
 		}
 
 	}
