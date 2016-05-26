@@ -93,7 +93,11 @@ public class HalFormsUtils {
 				.getPossibleValues(actionDescriptor);
 		ValueSuggest<?> suggest = null;
 		SuggestType suggestType = SuggestType.INTERNAL;
+		boolean multi = false;
 		if (possibleValues.length > 0) {
+			if (actionInputParameter.isArrayOrCollection()) {
+				multi = true;
+			}
 			String textField = null;
 			String valueField = null;
 			List<Object> values = new ArrayList<Object>();
@@ -107,7 +111,7 @@ public class HalFormsUtils {
 			suggest = new ValueSuggest<Object>(values, textField, valueField, valueSuggestType);
 		}
 
-		return new Property(name, readOnly, templated, value, null, regex, required, suggest);
+		return new Property(name, readOnly, templated, value, null, regex, required, multi, suggest);
 	}
 
 	static class TemplateActionInputParameterVisitor implements ActionInputParameterVisitor {

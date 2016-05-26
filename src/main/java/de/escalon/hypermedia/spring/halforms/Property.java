@@ -41,12 +41,14 @@ public class Property {
 
 	private boolean required;
 
+	private boolean multi;
+
 	private Suggest suggest;
 
 	public Property() {}
 
 	public Property(String name, Boolean readOnly, boolean templated, String value, String prompt, String regex,
-			boolean required, Suggest suggest) {
+			boolean required, boolean multi, Suggest suggest) {
 		this.name = name;
 		this.readOnly = readOnly;
 		this.templated = templated;
@@ -54,6 +56,7 @@ public class Property {
 		this.prompt = prompt;
 		this.regex = regex;
 		this.required = required;
+		this.multi = multi;
 		this.suggest = suggest;
 	}
 
@@ -87,5 +90,9 @@ public class Property {
 
 	public Suggest getSuggest() {
 		return suggest;
+	}
+
+	public boolean isMulti() {
+		return multi;
 	}
 }
