@@ -147,7 +147,9 @@ public class SpringActionInputParameter implements ActionInputParameter {
 			putInputConstraint(Input.REQUIRED, "", true);
 		}
 
-		if (Enum[].class.isAssignableFrom(parameterType)) {
+		if (select != null) {
+			resolver = new OptionsPossibleValuesResolver(select);
+		} else if (Enum[].class.isAssignableFrom(parameterType)) {
 			resolver = new FixedPossibleValuesResolver(
 					SimpleSuggest.wrap(parameterType.getComponentType().getEnumConstants(), type));
 		} else if (Enum.class.isAssignableFrom(parameterType)) {
@@ -155,8 +157,6 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		} else if (Collection.class.isAssignableFrom(parameterType)
 				&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1).getType())) {
 			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(nested.getEnumConstants(), type));
-		} else if (select != null) {
-			resolver = new OptionsPossibleValuesResolver(select);
 		}
 	}
 
@@ -547,6 +547,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		this.excluded = excluded;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
