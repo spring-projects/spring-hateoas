@@ -47,7 +47,8 @@ public class HalFormsUtils {
 					} else {
 						String key = actionDescriptor.getSemanticActionType();
 						if (actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
-							Template template = new Template(key);
+							Template template = templates.isEmpty() ? new Template()
+									: new Template(key != null ? key : actionDescriptor.getHttpMethod().toLowerCase());
 							template.setContentType(actionDescriptor.getConsumes());
 
 							// there is only one httpmethod??
@@ -62,8 +63,6 @@ public class HalFormsUtils {
 								}
 							}
 							templates.add(template);
-						} else {
-							links.add(link);
 						}
 					}
 				}
