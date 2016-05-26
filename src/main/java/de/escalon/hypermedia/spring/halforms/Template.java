@@ -18,6 +18,7 @@ package de.escalon.hypermedia.spring.halforms;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,13 +31,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonInclude(Include.NON_DEFAULT)
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
+@JsonIgnoreProperties({ "key" })
 public class Template {
 
 	public static final String DEFAULT_KEY = "default";
 
 	private final List<Property> properties = new ArrayList<Property>();
 
-	private String key;
+	private final String key;
 
 	private String method;
 
