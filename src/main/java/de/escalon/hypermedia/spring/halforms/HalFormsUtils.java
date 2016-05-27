@@ -13,7 +13,6 @@ import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
 import de.escalon.hypermedia.affordance.Affordance;
 import de.escalon.hypermedia.affordance.SuggestType;
-import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
 
 public class HalFormsUtils {
 
@@ -106,8 +105,7 @@ public class HalFormsUtils {
 				valueField = possibleValue.getValueField();
 				suggestType = possibleValue.getType();
 			}
-			ValueSuggestType valueSuggestType = ValueSuggestType.valueOf(suggestType);
-			suggest = new ValueSuggest<Object>(values, textField, valueField, valueSuggestType);
+			suggest = new ValueSuggest<Object>(values, textField, valueField, suggestType);
 		}
 
 		return new Property(name, readOnly, templated, value, null, regex, required, multi, suggest);

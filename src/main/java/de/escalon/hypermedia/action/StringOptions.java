@@ -13,14 +13,15 @@ package de.escalon.hypermedia.action;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.SimpleSuggest;
 import de.escalon.hypermedia.affordance.Suggest;
+import de.escalon.hypermedia.affordance.SuggestObjectWrapper;
 import de.escalon.hypermedia.affordance.SuggestType;
 
-public class StringOptions implements Options<String> {
+public class StringOptions implements Options<SuggestObjectWrapper> {
 
 	/**
 	 * Allows to specify possible values for an argument. This allows an {@link ActionDescriptor} to determine possible
-	 * values for an action argument.
-	 * The example below defines four possible values for the <code>mood</code> parameter.
+	 * values for an action argument. The example below defines four possible values for the <code>mood</code> parameter.
+	 * 
 	 * <pre>
 	 * &#0064;RequestMapping(value = "/customer", method = RequestMethod.GET, params = { "mood" })
 	 * public HttpEntity&lt;SamplePersonResourcegt; showPersonByMood(
@@ -31,7 +32,7 @@ public class StringOptions implements Options<String> {
 	 * </pre>
 	 */
 	@Override
-	public Suggest<String>[] get(SuggestType type, String[] value, Object... args) {
+	public Suggest<SuggestObjectWrapper>[] get(SuggestType type, String[] value, Object... args) {
 		return SimpleSuggest.wrap(value, type);
 	}
 }

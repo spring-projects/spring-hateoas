@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 
-import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
+import de.escalon.hypermedia.affordance.SuggestType;
 
 class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements ContextualSerializer {
 
@@ -63,25 +63,22 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 			return;
 		}
 
-		if (value.getType() == ValueSuggestType.DIRECT) {
+		if (value.getType() == SuggestType.INTERNAL) {
 			directSerializer.serialize(value, gen, provider);
-		}
-		else {
+		} else {
 			gen.writeStartObject();
 
 			Map<String, Object> curiedMap = mapper.map(value.getValues());
 
-			if (value.getType() == ValueSuggestType.EMBEDDED) {
+			if (value.getType() == SuggestType.EXTERNAL) {
 				String embeddedRel;
 				if (!curiedMap.isEmpty()) {
 					embeddedRel = curiedMap.keySet().iterator().next();
-				}
-				else {
+				} else {
 					embeddedRel = relProvider.getCollectionResourceRelFor(iterator.next().getClass());
 				}
 				gen.writeStringField("embedded", embeddedRel);
-			}
-			else {
+			} else {
 				gen.writeStringField("href", (String) value.getValues().iterator().next());
 			}
 
@@ -97,7 +94,8 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 	}
 
 	@Override
-	public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property) throws JsonMappingException {
+	public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property)
+			throws JsonMappingException {
 
 		return new ValueSuggestSerializer(mapper, relProvider, new ValueSuggestDirectSerializer());
 	}
@@ -135,8 +133,8 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 
 		}
 
-		private void serializeContents(final ValueSuggest<?> suggest, final JsonGenerator jgen, final SerializerProvider provider)
-				throws IOException, JsonGenerationException {
+		private void serializeContents(final ValueSuggest<?> suggest, final JsonGenerator jgen,
+				final SerializerProvider provider) throws IOException, JsonGenerationException {
 
 			textValueSerializer.setTextField(suggest.getTextField());
 			textValueSerializer.setValueField(suggest.getValueField());
@@ -144,12 +142,10 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 			for (Object elem : suggest.getValues()) {
 				if (elem == null) {
 					provider.defaultSerializeNull(jgen);
-				}
-				else {
+				} else {
 					if (elem.getClass().isEnum()) {
 						enumValueSerializer.serialize(elem, jgen, provider);
-					}
-					else {
+					} else {
 						textValueSerializer.serialize(elem, jgen, provider);
 					}
 				}
@@ -157,7 +153,8 @@ class ValueSuggestSerializer extends JsonSerializer<ValueSuggest<?>> implements 
 		}
 
 		@Override
-		public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<?> createContextual(final SerializerProvider prov, final BeanProperty property)
+				throws JsonMappingException {
 			return new ValueSuggestDirectSerializer();
 		}
 

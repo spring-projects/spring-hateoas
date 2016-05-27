@@ -34,19 +34,19 @@ class ValueSuggest<D> extends AbstractSuggest {
 
 	private final Iterable<D> values;
 
-	private final ValueSuggestType type;
+	private final SuggestType type;
 
 	public ValueSuggest(Iterable<D> values, String textFieldName, String valueFieldName) {
-		this(values, textFieldName, valueFieldName, ValueSuggestType.DIRECT);
+		this(values, textFieldName, valueFieldName, SuggestType.INTERNAL);
 	}
 
-	public ValueSuggest(Iterable<D> values, String textFieldName, String valueFieldName, ValueSuggestType type) {
+	public ValueSuggest(Iterable<D> values, String textFieldName, String valueFieldName, SuggestType type) {
 		super(textFieldName, valueFieldName);
 		this.values = values;
 		this.type = type;
 	}
 
-	public ValueSuggestType getType() {
+	public SuggestType getType() {
 		return type;
 	}
 
@@ -54,35 +54,4 @@ class ValueSuggest<D> extends AbstractSuggest {
 		return values;
 	}
 
-	/**
-	 * Types of {@link ValueSuggest}
-	 */
-	public static enum ValueSuggestType {
-		/**
-		 * Values are serialized as a list into the "suggest" property {"suggest":[{"text":"...","value":"..."},...]}
-		 */
-		DIRECT,
-
-		/**
-		 * Values are serialized into the _embedded attribute of a {@link Resource} and "suggest.embedded" property
-		 * references _embedded attribute {"suggest":{"embedded":"","text-field":"","value-field":""}}
-		 */
-		EMBEDDED,
-
-		/**
-		 * Values will be retrieved from a remove URL
-		 */
-		REMOTE;
-
-		public static ValueSuggestType valueOf(SuggestType type) {
-			switch (type) {
-				case INTERNAL:
-					return DIRECT;
-				case EXTERNAL:
-					return EMBEDDED;
-				default:
-					return REMOTE;
-			}
-		}
-	}
 }

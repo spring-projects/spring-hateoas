@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import de.escalon.hypermedia.spring.halforms.ValueSuggest.ValueSuggestType;
+import de.escalon.hypermedia.affordance.SuggestType;
 
 @JsonPropertyOrder({ "embeddeds", "links", "templates" })
 @JsonDeserialize(using = HalFormsDocumentDeserializer.class)
@@ -75,7 +75,7 @@ public class HalFormsDocument extends ResourceSupport implements TemplatesSuppor
 			if (suggest instanceof ValueSuggest<?>) {
 
 				ValueSuggest<?> valueSuggest = (ValueSuggest<?>) suggest;
-				if (valueSuggest.getType() == ValueSuggestType.EMBEDDED) {
+				if (valueSuggest.getType() == SuggestType.EXTERNAL) {
 					addIfNotDuplicated(valueSuggest.getValues());
 				}
 			}
