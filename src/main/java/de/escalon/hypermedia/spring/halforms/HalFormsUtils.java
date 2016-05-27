@@ -46,7 +46,7 @@ public class HalFormsUtils {
 						links.add(affordance);
 					} else {
 						String key = actionDescriptor.getSemanticActionType();
-						if (actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
+						if (true || actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
 							Template template = templates.isEmpty() ? new Template()
 									: new Template(key != null ? key : actionDescriptor.getHttpMethod().toLowerCase());
 							template.setContentType(actionDescriptor.getConsumes());
