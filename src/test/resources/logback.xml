@@ -9,7 +9,7 @@
 
 	<logger name="org.springframework.hateoas" level="error" />
 
-	<root level="error">
+	<root level="debug">
 		<appender-ref ref="console" />
 	</root>
 
