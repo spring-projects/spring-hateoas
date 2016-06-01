@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import de.escalon.hypermedia.action.Action;
-import de.escalon.hypermedia.action.DTORequestParam;
+import de.escalon.hypermedia.action.DTOParam;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
@@ -130,7 +130,7 @@ public class ActionDescriptorBuilder {
 		MethodParameters parameters = new MethodParameters(method);
 		final Map<String, ActionInputParameter> result = new HashMap<String, ActionInputParameter>();
 
-		for (MethodParameter parameter : parameters.getParametersWith(DTORequestParam.class)) {
+		for (MethodParameter parameter : parameters.getParametersWith(DTOParam.class)) {
 			final int parameterIndex = parameter.getParameterIndex();
 			final Object argument;
 			if (parameterIndex < arguments.length) {

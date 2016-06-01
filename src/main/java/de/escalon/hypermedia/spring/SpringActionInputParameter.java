@@ -158,6 +158,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 				&& Enum.class.isAssignableFrom(nested = TypeDescriptor.nested(methodParameter, 1).getType())) {
 			resolver = new FixedPossibleValuesResolver(SimpleSuggest.wrap(nested.getEnumConstants(), type));
 		}
+
 	}
 
 	public SpringActionInputParameter(MethodParameter methodParameter, Object value, String name) {
@@ -370,17 +371,15 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	 */
 	@Override
 	public boolean isRequired() {
-		boolean ret;
 		if (isRequestBody()) {
-			ret = requestBody.required();
+			return requestBody.required();
 		} else if (isRequestParam()) {
-			ret = !(isDefined(requestParam.defaultValue()) || !requestParam.required());
+			return !(isDefined(requestParam.defaultValue()) || !requestParam.required());
 		} else if (isRequestHeader()) {
-			ret = !(isDefined(requestHeader.defaultValue()) || !requestHeader.required());
+			return !(isDefined(requestHeader.defaultValue()) || !requestHeader.required());
 		} else {
-			ret = true;
+			return true;
 		}
-		return ret;
 	}
 
 	private boolean isDefined(String defaultValue) {
@@ -598,7 +597,6 @@ public class SpringActionInputParameter implements ActionInputParameter {
 
 		@Override
 		public Suggest[] getValues(Object[] args) {
-
 			return options.get(select.type(), select.value(), args);
 		}
 	}

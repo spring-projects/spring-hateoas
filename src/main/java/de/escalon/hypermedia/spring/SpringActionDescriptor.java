@@ -52,6 +52,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.escalon.hypermedia.PropertyUtils;
 import de.escalon.hypermedia.action.Action;
 import de.escalon.hypermedia.action.Cardinality;
+import de.escalon.hypermedia.action.DTOParam;
 import de.escalon.hypermedia.action.ResourceHandler;
 import de.escalon.hypermedia.action.Select;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
@@ -471,12 +472,29 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				bodyInputParameters.add(inputParameter);
 				return handler.visit(inputParameter);
 			} else if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
-				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
-						parentParamName + paramName);
-				// TODO We need to find a better solution for this
-				inputParameter.possibleValues = ((SpringActionInputParameter) annotatedParameter).possibleValues;
-				bodyInputParameters.add(inputParameter);
-				return handler.visit(inputParameter);
+				if (DataType.isArrayOrCollection(parameterType) && methodParameter.hasParameterAnnotation(DTOParam.class)) {
+					if (parameterType.isArray()) {
+						Object[] array = (Object[]) propertyValue;
+						for (int i = 0; i < array.length; i++) {
+							Object value = array[i];
+							recurseBeanCreationParams(array[i].getClass(), annotatedParameter, value,
+									parentParamName + paramName + "[" + i + "].", knownFields, handler, bodyInputParameters);
+						}
+					} else {
+						int i = 0;
+						for (Object value : (Collection) propertyValue) {
+							recurseBeanCreationParams(value.getClass(), annotatedParameter, value,
+									parentParamName + paramName + "[" + (i++) + "].", knownFields, handler, bodyInputParameters);
+						}
+					}
+				} else {
+					SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
+							parentParamName + paramName);
+					// TODO We need to find a better solution for this
+					inputParameter.possibleValues = ((SpringActionInputParameter) annotatedParameter).possibleValues;
+					bodyInputParameters.add(inputParameter);
+					return handler.visit(inputParameter);
+				}
 			}
 
 		} else {

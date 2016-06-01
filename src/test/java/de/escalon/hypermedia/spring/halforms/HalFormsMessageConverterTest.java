@@ -64,7 +64,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import de.escalon.hypermedia.action.DTORequestParam;
+import de.escalon.hypermedia.action.DTOParam;
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Options;
 import de.escalon.hypermedia.action.Select;
@@ -286,7 +286,7 @@ public class HalFormsMessageConverterTest {
 		}
 
 		@RequestMapping("/filtered")
-		public ResponseEntity<Resources<Order>> getOrdersFiltered(@DTORequestParam OrderFilter filter) {
+		public ResponseEntity<Resources<Order>> getOrdersFiltered(@DTOParam OrderFilter filter) {
 			return null;
 		}
 
