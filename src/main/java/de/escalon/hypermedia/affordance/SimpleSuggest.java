@@ -3,7 +3,11 @@ package de.escalon.hypermedia.affordance;
 public class SimpleSuggest<T> extends SuggestImpl<SuggestObjectWrapper> {
 
 	public SimpleSuggest(T origin, SuggestType type) {
-		super(new SuggestObjectWrapper(String.valueOf(origin), String.valueOf(origin)), type, "id", "text");
+		this(new SuggestObjectWrapper(String.valueOf(origin), String.valueOf(origin)), type);
+	}
+
+	public SimpleSuggest(SuggestObjectWrapper wrapper, SuggestType type) {
+		super(wrapper, type, "id", "text");
 	}
 
 	public SimpleSuggest(String text, String value, SuggestType type) {
