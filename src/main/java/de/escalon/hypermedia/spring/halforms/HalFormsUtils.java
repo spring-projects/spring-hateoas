@@ -16,7 +16,7 @@ import de.escalon.hypermedia.affordance.SuggestType;
 
 public class HalFormsUtils {
 
-	public static Object toHalFormsDocument(Object object) {
+	public static Object toHalFormsDocument(final Object object) {
 		if (object == null) {
 			return null;
 		}
@@ -28,12 +28,13 @@ public class HalFormsUtils {
 			process(rs, links, templates);
 			return new HalFormsDocument(links, templates);
 
-		} else { // bean
+		}
+		else { // bean
 			return object;
 		}
 	}
 
-	private static void process(ResourceSupport resource, List<Link> links, List<Template> templates) {
+	private static void process(final ResourceSupport resource, final List<Link> links, final List<Template> templates) {
 		for (Link link : resource.getLinks()) {
 			if (link instanceof Affordance) {
 				Affordance affordance = (Affordance) link;
@@ -43,7 +44,8 @@ public class HalFormsUtils {
 					ActionDescriptor actionDescriptor = affordance.getActionDescriptors().get(i);
 					if (i == 0) {
 						links.add(affordance);
-					} else {
+					}
+					else {
 						String key = actionDescriptor.getSemanticActionType();
 						if (true || actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
 							Template template = templates.isEmpty() ? new Template()
@@ -56,7 +58,8 @@ public class HalFormsUtils {
 									actionDescriptor);
 							if (actionDescriptor.hasRequestBody()) {
 								actionDescriptor.accept(visitor);
-							} else {
+							}
+							else {
 								for (String param : actionDescriptor.getRequestParamNames()) {
 									visitor.visit(actionDescriptor.getActionInputParameter(param));
 								}
@@ -65,30 +68,26 @@ public class HalFormsUtils {
 						}
 					}
 				}
-			} else {
+			}
+			else {
 				links.add(link);
 			}
 		}
 
 	}
 
-	public static Property getProperty(ActionInputParameter actionInputParameter, ActionDescriptor actionDescriptor,
-			Object propertyValue, String name) {
+	public static Property getProperty(final ActionInputParameter actionInputParameter, final ActionDescriptor actionDescriptor,
+			final Object propertyValue, final String name) {
 		Map<String, Object> inputConstraints = actionInputParameter.getInputConstraints();
 
 		// TODO: templated comes from an Input attribute?
 		boolean templated = false;
 		// FIXME: input.readOnly or input.editable?
-		boolean readOnly = inputConstraints.containsKey(Input.EDITABLE) ? !((Boolean) inputConstraints.get(Input.EDITABLE))
-				: true;
+		boolean readOnly = inputConstraints.containsKey(Input.EDITABLE) ? !((Boolean) inputConstraints.get(Input.EDITABLE)) : true;
 		String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
-		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
-				: false;
+		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED) : false;
 
-		String value = propertyValue != null ? propertyValue.toString() : null;
-
-		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter
-				.getPossibleValues(actionDescriptor);
+		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
 		ValueSuggest<?> suggest = null;
 		SuggestType suggestType = SuggestType.INTERNAL;
 		boolean multi = false;
@@ -108,24 +107,24 @@ public class HalFormsUtils {
 			suggest = new ValueSuggest<Object>(values, textField, valueField, suggestType);
 		}
 
-		return new Property(name, readOnly, templated, value, null, regex, required, multi, suggest);
+		return new Property(name, readOnly, templated, propertyValue, null, regex, required, multi, suggest);
 	}
 
 	static class TemplateActionInputParameterVisitor implements ActionInputParameterVisitor {
 
 		private final Template template;
+
 		private final ActionDescriptor actionDescriptor;
 
-		public TemplateActionInputParameterVisitor(Template template, ActionDescriptor actionDescriptor) {
+		public TemplateActionInputParameterVisitor(final Template template, final ActionDescriptor actionDescriptor) {
 			this.template = template;
 			this.actionDescriptor = actionDescriptor;
 		}
 
 		@Override
-		public String visit(ActionInputParameter inputParameter) {
+		public String visit(final ActionInputParameter inputParameter) {
 
-			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(),
-					inputParameter.getName());
+			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(), inputParameter.getName());
 
 			template.getProperties().add(property);
 
