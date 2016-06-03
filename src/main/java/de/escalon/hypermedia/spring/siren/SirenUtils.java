@@ -377,15 +377,17 @@ public class SirenUtils {
 			if (inputParameter.isArrayOrCollection()) {
 				type = "checkbox";
 				for (Suggest<?> possibleValue : possibleValues) {
-					boolean selected = ObjectUtils.containsElement(inputParameter.getValues(), possibleValue.getValue());
+					boolean selected = ObjectUtils.containsElement(inputParameter.getValues(), possibleValue.getUnwrappedValue());
 					// TODO have more useful value title
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.getText(), possibleValue.getValue(), selected));
+					sirenPossibleValues
+							.add(new SirenFieldValue(possibleValue.getText(), possibleValue.getUnwrappedValue(), selected));
 				}
 			} else {
 				type = "radio";
 				for (Suggest<?> possibleValue : possibleValues) {
-					boolean selected = possibleValue.getValue().equals(propertyValue);
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.getText(), possibleValue.getValue(), selected));
+					boolean selected = possibleValue.getUnwrappedValue().equals(propertyValue);
+					sirenPossibleValues
+							.add(new SirenFieldValue(possibleValue.getText(), possibleValue.getUnwrappedValue(), selected));
 				}
 			}
 			sirenField = new SirenField(paramName, type, sirenPossibleValues, null, null);

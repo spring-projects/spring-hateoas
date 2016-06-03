@@ -153,7 +153,7 @@ public class AffordanceBuilderTest {
 				.getPossibleValues(actionDescriptor);
 		EventStatusType[] types = new EventStatusType[values.length];
 		for (int i = 0; i < types.length; i++) {
-			types[i] = values[i].getValue();
+			types[i] = values[i].getUnwrappedValue();
 		}
 		Assert.assertThat(types, Matchers.arrayContainingInAnyOrder(EventStatusType.EVENT_CANCELLED,
 				EventStatusType.EVENT_POSTPONED, EventStatusType.EVENT_RESCHEDULED, EventStatusType.EVENT_SCHEDULED));

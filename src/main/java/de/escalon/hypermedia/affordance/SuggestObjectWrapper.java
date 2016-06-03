@@ -1,13 +1,15 @@
 package de.escalon.hypermedia.affordance;
 
-public class SuggestObjectWrapper {
+public class SuggestObjectWrapper<T> implements WrappedValue<T> {
 
 	private final String text;
 	private final String id;
+	private final T original;
 
-	public SuggestObjectWrapper(String text, String id) {
+	public SuggestObjectWrapper(String text, String id, T original) {
 		this.text = text;
 		this.id = id;
+		this.original = original;
 	}
 
 	public String getText() {
@@ -16,6 +18,11 @@ public class SuggestObjectWrapper {
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public T getValue() {
+		return original;
 	}
 
 	@Override

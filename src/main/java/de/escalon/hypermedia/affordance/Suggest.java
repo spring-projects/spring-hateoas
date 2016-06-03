@@ -22,16 +22,54 @@ public interface Suggest<T> {
 
 	Suggest<?>[] EMPTY = new Suggest[0];
 
+	/**
+	 * Value to show, it may be a wrapped value of the original object in which we have a valid textField and valueField
+	 * 
+	 * @return
+	 */
 	T getValue();
 
+	/**
+	 * Returns the original value, it may be equals to getValue() or not (i.e. Enums), in this case the real value is
+	 * returned
+	 * 
+	 * @return
+	 */
+	<U> U getUnwrappedValue();
+
+	/**
+	 * String representation of the valueField inside value object
+	 * 
+	 * @return
+	 */
 	String getValueAsString();
 
+	/**
+	 * Value field name
+	 * 
+	 * @return
+	 */
 	String getValueField();
 
+	/**
+	 * Text field name
+	 * 
+	 * @return
+	 */
 	String getTextField();
 
+	/**
+	 * String representation of the textField inside value object
+	 * 
+	 * @return
+	 */
 	String getText();
 
+	/**
+	 * Suggest type
+	 * 
+	 * @return
+	 */
 	SuggestType getType();
 
 }

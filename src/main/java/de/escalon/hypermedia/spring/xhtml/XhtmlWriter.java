@@ -730,7 +730,7 @@ public class XhtmlWriter extends Writer {
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
 				OptionalAttributes.attr("class", formControlClass));
 		for (Suggest<?> possibleValue : possibleValues) {
-			if (possibleValue.getValue().equals(callValue)) {
+			if (possibleValue.getUnwrappedValue().equals(callValue)) {
 				option(possibleValue.getText(), attr("selected", "selected").and("value", possibleValue.getValueAsString()));
 			} else {
 				option(possibleValue.getText(), attr("value", possibleValue.getValueAsString()));
@@ -756,7 +756,7 @@ public class XhtmlWriter extends Writer {
 		beginSelect(requestParamName, requestParamName, possibleValues.length,
 				OptionalAttributes.attr("multiple", "multiple").and("class", formControlClass));
 		for (Suggest<?> possibleValue : possibleValues) {
-			if (ObjectUtils.containsElement(actualValues, possibleValue.getValue())) {
+			if (ObjectUtils.containsElement(actualValues, possibleValue.getUnwrappedValue())) {
 				option(possibleValue.getText(), attr("selected", "selected").and("value", possibleValue.getValueAsString()));
 			} else {
 				option(possibleValue.getText(), attr("value", possibleValue.getValueAsString()));
