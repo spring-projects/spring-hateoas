@@ -87,7 +87,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	private final Map<String, ActionInputParameter> requestHeaders = new LinkedHashMap<String, ActionInputParameter>();
 
 	private ActionInputParameter requestBody;
-	private List<ActionInputParameter> bodyInputParameters;
+	private final Map<String, ActionInputParameter> bodyInputParameters = new LinkedHashMap<String, ActionInputParameter>();
 
 	private Cardinality cardinality = Cardinality.SINGLE;
 
@@ -224,6 +224,9 @@ public class SpringActionDescriptor implements ActionDescriptor {
 		if (ret == null) {
 			ret = pathVariables.get(name);
 		}
+		if (ret == null) {
+			ret = bodyInputParameters.get(name);
+		}
 		return ret;
 	}
 
@@ -284,6 +287,21 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	 */
 	public void setRequestBody(ActionInputParameter requestBody) {
 		this.requestBody = requestBody;
+		if (requestBody != null) {
+			List<ActionInputParameter> bodyInputParameters = new ArrayList<ActionInputParameter>();
+			recurseBeanCreationParams(getRequestBody().getParameterType(), getRequestBody(), getRequestBody().getValue(), "",
+					Collections.<String> emptySet(), new ActionInputParameterVisitor() {
+
+						@Override
+						public void visit(ActionInputParameter inputParameter) {
+							System.out.println(inputParameter.getName());
+
+						}
+					}, bodyInputParameters);
+			for (ActionInputParameter actionInputParameter : bodyInputParameters) {
+				this.bodyInputParameters.put(actionInputParameter.getName(), actionInputParameter);
+			}
+		}
 	}
 
 	/**
@@ -351,14 +369,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 	@Override
 	public void accept(ActionInputParameterVisitor visitor) {
 		if (hasRequestBody()) {
-			if (bodyInputParameters == null) {
-				bodyInputParameters = new ArrayList<ActionInputParameter>();
-				recurseBeanCreationParams(getRequestBody().getParameterType(), getRequestBody(), getRequestBody().getValue(),
-						"", Collections.<String> emptySet(), visitor, bodyInputParameters);
-			} else {
-				for (ActionInputParameter inputParameter : bodyInputParameters) {
-					visitor.visit(inputParameter);
-				}
+			for (ActionInputParameter inputParameter : bodyInputParameters.values()) {
+				visitor.visit(inputParameter);
 			}
 		} else {
 			Collection<String> paramNames = getRequestParamNames();
@@ -470,9 +482,11 @@ public class SpringActionDescriptor implements ActionDescriptor {
 				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
 						parentParamName + paramName);
 				bodyInputParameters.add(inputParameter);
-				return handler.visit(inputParameter);
+				handler.visit(inputParameter);
+				return inputParameter.getName();
 			} else if (annotatedParameter.isIncluded(paramName) && !knownFields.contains(parentParamName + paramName)) {
-				if (DataType.isArrayOrCollection(parameterType) && methodParameter.hasParameterAnnotation(DTOParam.class)) {
+				if (propertyValue != null && DataType.isArrayOrCollection(parameterType)
+						&& methodParameter.hasParameterAnnotation(DTOParam.class)) {
 					if (parameterType.isArray()) {
 						Object[] array = (Object[]) propertyValue;
 						for (int i = 0; i < array.length; i++) {
@@ -482,6 +496,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 						}
 					} else {
 						int i = 0;
+
 						for (Object value : (Collection) propertyValue) {
 							recurseBeanCreationParams(value.getClass(), annotatedParameter, value,
 									parentParamName + paramName + "[" + (i++) + "].", knownFields, handler, bodyInputParameters);
@@ -493,7 +508,8 @@ public class SpringActionDescriptor implements ActionDescriptor {
 					// TODO We need to find a better solution for this
 					inputParameter.possibleValues = ((SpringActionInputParameter) annotatedParameter).possibleValues;
 					bodyInputParameters.add(inputParameter);
-					return handler.visit(inputParameter);
+					handler.visit(inputParameter);
+					return inputParameter.getName();
 				}
 			}
 

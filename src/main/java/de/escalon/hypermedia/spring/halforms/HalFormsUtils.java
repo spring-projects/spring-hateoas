@@ -92,17 +92,7 @@ public class HalFormsUtils {
 
 		String value = null;
 		if (propertyValue != null) {
-			// if (propertyValue.getClass().getDeclaredFields().length == 1) {
 			value = propertyValue.toString();
-			// }
-			// else {
-			// try {
-			// value = new ObjectMapper().writeValueAsString(propertyValue);
-			// }
-			// catch (JsonProcessingException e) {
-			//
-			// }
-			// }
 		}
 
 		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
@@ -150,13 +140,11 @@ public class HalFormsUtils {
 		}
 
 		@Override
-		public String visit(final ActionInputParameter inputParameter) {
+		public void visit(final ActionInputParameter inputParameter) {
 
 			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(), inputParameter.getName());
 
 			template.getProperties().add(property);
-
-			return property.getName();
 		}
 
 	}
