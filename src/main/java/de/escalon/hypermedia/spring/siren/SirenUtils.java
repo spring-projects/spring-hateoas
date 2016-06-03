@@ -354,7 +354,7 @@ public class SirenUtils {
 		}
 
 		@Override
-		public String visit(ActionInputParameter inputParameter) {
+		public void visit(ActionInputParameter inputParameter) {
 			final Suggest<?>[] possibleValues = inputParameter.getPossibleValues(actionDescriptor);
 
 			// dot-separated property path as field name
@@ -362,7 +362,6 @@ public class SirenUtils {
 					possibleValues);
 
 			fields.add(sirenField);
-			return sirenField.getName();
 		}
 	}
 

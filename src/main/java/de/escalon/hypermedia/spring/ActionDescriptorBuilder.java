@@ -34,13 +34,6 @@ public class ActionDescriptorBuilder {
 			actionDescriptor.setSemanticActionType(actionAnnotation.value());
 		}
 
-		Map<String, ActionInputParameter> requestBodyMap = getActionInputParameters(RequestBody.class, invokedMethod,
-				arguments);
-		Assert.state(requestBodyMap.size() < 2, "found more than one request body on " + invokedMethod.getName());
-		for (ActionInputParameter value : requestBodyMap.values()) {
-			actionDescriptor.setRequestBody(value);
-		}
-
 		// the action descriptor needs to know the param type, value and name
 		Map<String, ActionInputParameter> requestParamMap = getRequestParams(invokedMethod, arguments);
 		for (Map.Entry<String, ActionInputParameter> entry : requestParamMap.entrySet()) {
@@ -79,6 +72,13 @@ public class ActionDescriptorBuilder {
 					values.put(key, actionInputParameter.getValueFormatted());
 				}
 			}
+		}
+
+		Map<String, ActionInputParameter> requestBodyMap = getActionInputParameters(RequestBody.class, invokedMethod,
+				arguments);
+		Assert.state(requestBodyMap.size() < 2, "found more than one request body on " + invokedMethod.getName());
+		for (ActionInputParameter value : requestBodyMap.values()) {
+			actionDescriptor.setRequestBody(value);
 		}
 
 		return actionDescriptor;
@@ -142,9 +142,8 @@ public class ActionDescriptorBuilder {
 					new ActionInputParameterVisitor() {
 
 						@Override
-						public String visit(ActionInputParameter inputParameter) {
+						public void visit(ActionInputParameter inputParameter) {
 							result.put(inputParameter.getParameterName(), inputParameter);
-							return "";
 						}
 					}, new ArrayList<ActionInputParameter>());
 
