@@ -7,6 +7,9 @@ import java.util.Map;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
@@ -87,11 +90,36 @@ public class HalFormsUtils {
 		String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
 		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED) : false;
 
+		String value = null;
+		if (propertyValue != null) {
+			// if (propertyValue.getClass().getDeclaredFields().length == 1) {
+			value = propertyValue.toString();
+			// }
+			// else {
+			// try {
+			// value = new ObjectMapper().writeValueAsString(propertyValue);
+			// }
+			// catch (JsonProcessingException e) {
+			//
+			// }
+			// }
+		}
+
 		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter.getPossibleValues(actionDescriptor);
 		ValueSuggest<?> suggest = null;
 		SuggestType suggestType = SuggestType.INTERNAL;
 		boolean multi = false;
 		if (possibleValues.length > 0) {
+
+			try {
+				if (propertyValue != null) {
+					value = new ObjectMapper().writeValueAsString(propertyValue);
+				}
+			}
+			catch (JsonProcessingException e) {
+
+			}
+
 			if (actionInputParameter.isArrayOrCollection()) {
 				multi = true;
 			}
@@ -107,7 +135,7 @@ public class HalFormsUtils {
 			suggest = new ValueSuggest<Object>(values, textField, valueField, suggestType);
 		}
 
-		return new Property(name, readOnly, templated, propertyValue, null, regex, required, multi, suggest);
+		return new Property(name, readOnly, templated, value, null, regex, required, multi, suggest);
 	}
 
 	static class TemplateActionInputParameterVisitor implements ActionInputParameterVisitor {

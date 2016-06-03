@@ -31,7 +31,7 @@ public class Property {
 
 	private Boolean readOnly;
 
-	private Object value;
+	private String value;
 
 	private String prompt;
 
@@ -48,7 +48,7 @@ public class Property {
 	public Property() {
 	}
 
-	public Property(final String name, final Boolean readOnly, final boolean templated, final Object value, final String prompt,
+	public Property(final String name, final Boolean readOnly, final boolean templated, final String value, final String prompt,
 			final String regex, final boolean required, final boolean multi, final Suggest suggest) {
 		this.name = name;
 		this.readOnly = readOnly;
