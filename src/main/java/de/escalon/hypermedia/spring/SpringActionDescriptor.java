@@ -293,10 +293,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 					Collections.<String> emptySet(), new ActionInputParameterVisitor() {
 
 						@Override
-						public void visit(ActionInputParameter inputParameter) {
-							System.out.println(inputParameter.getName());
-
-						}
+						public void visit(ActionInputParameter inputParameter) {}
 					}, bodyInputParameters);
 			for (ActionInputParameter actionInputParameter : bodyInputParameters) {
 				this.bodyInputParameters.put(actionInputParameter.getName(), actionInputParameter);
@@ -479,7 +476,7 @@ public class SpringActionDescriptor implements ActionDescriptor {
 			 * TODO This is a temporal patch, to be reviewed...
 			 */
 			if (annotatedParameter == null) {
-				SpringActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
+				ActionInputParameter inputParameter = new SpringActionInputParameter(methodParameter, propertyValue,
 						parentParamName + paramName);
 				bodyInputParameters.add(inputParameter);
 				handler.visit(inputParameter);

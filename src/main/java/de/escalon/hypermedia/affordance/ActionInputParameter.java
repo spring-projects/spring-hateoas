@@ -201,4 +201,6 @@ public interface ActionInputParameter {
 
 	String getName();
 
+	void setReadOnly(boolean readOnly);
+
 }

@@ -282,6 +282,11 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	}
 
 	@Override
+	public void setReadOnly(boolean readOnly) {
+		editable = !readOnly;
+	}
+
+	@Override
 	public boolean isIncluded(String property) {
 		return !hasExplicitOrImplicitPropertyIncludeValue() || containsPropertyIncludeValue(property);
 	}

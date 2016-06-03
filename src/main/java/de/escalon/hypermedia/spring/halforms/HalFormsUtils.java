@@ -54,13 +54,8 @@ public class HalFormsUtils {
 							template.setMethod(actionDescriptor.getHttpMethod());
 							TemplateActionInputParameterVisitor visitor = new TemplateActionInputParameterVisitor(template,
 									actionDescriptor);
-							if (actionDescriptor.hasRequestBody()) {
-								actionDescriptor.accept(visitor);
-							} else {
-								for (String param : actionDescriptor.getRequestParamNames()) {
-									visitor.visit(actionDescriptor.getActionInputParameter(param));
-								}
-							}
+							actionDescriptor.accept(visitor);
+
 							templates.add(template);
 						}
 					}
@@ -122,7 +117,8 @@ public class HalFormsUtils {
 
 		@Override
 		public void visit(ActionInputParameter inputParameter) {
-
+			System.out.println(
+					"input:" + inputParameter.hashCode() + " " + inputParameter.getName() + " " + inputParameter.isReadOnly(""));
 			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(),
 					inputParameter.getName());
 
