@@ -7,6 +7,9 @@ import java.util.Map;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
@@ -43,7 +46,8 @@ public class HalFormsUtils {
 					ActionDescriptor actionDescriptor = affordance.getActionDescriptors().get(i);
 					if (i == 0) {
 						links.add(affordance);
-					} else {
+					}
+					else {
 						String key = actionDescriptor.getSemanticActionType();
 						if (true || actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
 							Template template = templates.isEmpty() ? new Template()
@@ -54,13 +58,25 @@ public class HalFormsUtils {
 							template.setMethod(actionDescriptor.getHttpMethod());
 							TemplateActionInputParameterVisitor visitor = new TemplateActionInputParameterVisitor(template,
 									actionDescriptor);
+<<<<<<< HEAD
 							actionDescriptor.accept(visitor);
 
+=======
+							if (actionDescriptor.hasRequestBody()) {
+								actionDescriptor.accept(visitor);
+							}
+							else {
+								for (String param : actionDescriptor.getRequestParamNames()) {
+									visitor.visit(actionDescriptor.getActionInputParameter(param));
+								}
+							}
+>>>>>>> branch 'feature/affordances' of https://github.com/hdiv/spring-hateoas
 							templates.add(template);
 						}
 					}
 				}
-			} else {
+			}
+			else {
 				links.add(link);
 			}
 		}
@@ -80,12 +96,26 @@ public class HalFormsUtils {
 		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
 				: false;
 
+		String value = null;
+		if (propertyValue != null) {
+			value = propertyValue.toString();
+		}
+
 		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter
 				.getPossibleValues(actionDescriptor);
 		ValueSuggest<?> suggest = null;
 		SuggestType suggestType = SuggestType.INTERNAL;
 		boolean multi = false;
 		if (possibleValues.length > 0) {
+
+			try {
+				if (propertyValue != null) {
+					value = new ObjectMapper().writeValueAsString(propertyValue);
+				}
+			} catch (JsonProcessingException e) {
+
+			}
+
 			if (actionInputParameter.isArrayOrCollection()) {
 				multi = true;
 			}
@@ -101,7 +131,7 @@ public class HalFormsUtils {
 			suggest = new ValueSuggest<Object>(values, textField, valueField, suggestType);
 		}
 
-		return new Property(name, readOnly, templated, propertyValue, null, regex, required, multi, suggest);
+		return new Property(name, readOnly, templated, value, null, regex, required, multi, suggest);
 	}
 
 	static class TemplateActionInputParameterVisitor implements ActionInputParameterVisitor {
