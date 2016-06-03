@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
- * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link Template} may contain a
- * list of {@link Property}
+ * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link Template} may contain a list of
+ * {@link Property}
  * 
  * @see http://mamund.site44.com/misc/hal-forms/
  */
@@ -31,7 +31,7 @@ public class Property {
 
 	private Boolean readOnly;
 
-	private String value;
+	private Object value;
 
 	private String prompt;
 
@@ -45,10 +45,11 @@ public class Property {
 
 	private Suggest suggest;
 
-	public Property() {}
+	public Property() {
+	}
 
-	public Property(String name, Boolean readOnly, boolean templated, String value, String prompt, String regex,
-			boolean required, boolean multi, Suggest suggest) {
+	public Property(final String name, final Boolean readOnly, final boolean templated, final Object value, final String prompt,
+			final String regex, final boolean required, final boolean multi, final Suggest suggest) {
 		this.name = name;
 		this.readOnly = readOnly;
 		this.templated = templated;
@@ -68,7 +69,7 @@ public class Property {
 		return readOnly;
 	}
 
-	public String getValue() {
+	public Object getValue() {
 		return value;
 	}
 

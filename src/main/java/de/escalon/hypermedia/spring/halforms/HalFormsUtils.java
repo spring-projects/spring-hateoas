@@ -16,7 +16,7 @@ import de.escalon.hypermedia.affordance.SuggestType;
 
 public class HalFormsUtils {
 
-	public static Object toHalFormsDocument(Object object) {
+	public static Object toHalFormsDocument(final Object object) {
 		if (object == null) {
 			return null;
 		}
@@ -33,7 +33,7 @@ public class HalFormsUtils {
 		}
 	}
 
-	private static void process(ResourceSupport resource, List<Link> links, List<Template> templates) {
+	private static void process(final ResourceSupport resource, final List<Link> links, final List<Template> templates) {
 		for (Link link : resource.getLinks()) {
 			if (link instanceof Affordance) {
 				Affordance affordance = (Affordance) link;
@@ -72,8 +72,8 @@ public class HalFormsUtils {
 
 	}
 
-	public static Property getProperty(ActionInputParameter actionInputParameter, ActionDescriptor actionDescriptor,
-			Object propertyValue, String name) {
+	public static Property getProperty(final ActionInputParameter actionInputParameter,
+			final ActionDescriptor actionDescriptor, final Object propertyValue, final String name) {
 		Map<String, Object> inputConstraints = actionInputParameter.getInputConstraints();
 
 		// TODO: templated comes from an Input attribute?
@@ -84,8 +84,6 @@ public class HalFormsUtils {
 		String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
 		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
 				: false;
-
-		String value = propertyValue != null ? propertyValue.toString() : null;
 
 		final de.escalon.hypermedia.affordance.Suggest<Object>[] possibleValues = actionInputParameter
 				.getPossibleValues(actionDescriptor);
@@ -108,15 +106,16 @@ public class HalFormsUtils {
 			suggest = new ValueSuggest<Object>(values, textField, valueField, suggestType);
 		}
 
-		return new Property(name, readOnly, templated, value, null, regex, required, multi, suggest);
+		return new Property(name, readOnly, templated, propertyValue, null, regex, required, multi, suggest);
 	}
 
 	static class TemplateActionInputParameterVisitor implements ActionInputParameterVisitor {
 
 		private final Template template;
+
 		private final ActionDescriptor actionDescriptor;
 
-		public TemplateActionInputParameterVisitor(Template template, ActionDescriptor actionDescriptor) {
+		public TemplateActionInputParameterVisitor(final Template template, final ActionDescriptor actionDescriptor) {
 			this.template = template;
 			this.actionDescriptor = actionDescriptor;
 		}
