@@ -135,8 +135,6 @@ public class HalFormsUtils {
 
 		@Override
 		public void visit(ActionInputParameter inputParameter) {
-			System.out.println(
-					"input:" + inputParameter.hashCode() + " " + inputParameter.getName() + " " + inputParameter.isReadOnly(""));
 			Property property = getProperty(inputParameter, actionDescriptor, inputParameter.getValue(),
 					inputParameter.getName());
 
