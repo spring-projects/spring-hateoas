@@ -10,7 +10,6 @@ import org.springframework.hateoas.ResourceSupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
 import de.escalon.hypermedia.affordance.ActionInputParameterVisitor;
@@ -78,10 +77,10 @@ public class HalFormsUtils {
 		// TODO: templated comes from an Input attribute?
 		boolean templated = false;
 		// FIXME: input.readOnly or input.editable?
-		boolean readOnly = inputConstraints.containsKey(Input.EDITABLE) ? !((Boolean) inputConstraints.get(Input.EDITABLE))
+		boolean readOnly = inputConstraints.containsKey(ActionInputParameter.EDITABLE) ? !((Boolean) inputConstraints.get(ActionInputParameter.EDITABLE))
 				: true;
-		String regex = inputConstraints.containsKey(Input.PATTERN) ? (String) inputConstraints.get(Input.PATTERN) : null;
-		boolean required = inputConstraints.containsKey(Input.REQUIRED) ? (Boolean) inputConstraints.get(Input.REQUIRED)
+		String regex = inputConstraints.containsKey(ActionInputParameter.PATTERN) ? (String) inputConstraints.get(ActionInputParameter.PATTERN) : null;
+		boolean required = inputConstraints.containsKey(ActionInputParameter.REQUIRED) ? (Boolean) inputConstraints.get(ActionInputParameter.REQUIRED)
 				: false;
 
 		String value = null;

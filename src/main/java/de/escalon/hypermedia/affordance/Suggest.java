@@ -17,18 +17,21 @@ package de.escalon.hypermedia.affordance;
 
 /**
  * Define the "value" and "text" fields of an object
- * 
  */
 public interface Suggest<T> {
-	
-	Suggest<?> [] EMPTY = new Suggest[0];
-	
+
+	Suggest<?>[] EMPTY = new Suggest[0];
+
 	T getValue();
-	
+
+	String getValueAsString();
+
 	String getValueField();
 
 	String getTextField();
-	
+
+	String getText();
+
 	SuggestType getType();
-	
+
 }

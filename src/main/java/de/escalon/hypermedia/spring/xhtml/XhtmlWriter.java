@@ -29,7 +29,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.escalon.hypermedia.PropertyUtils;
-import de.escalon.hypermedia.action.Input;
 import de.escalon.hypermedia.action.Type;
 import de.escalon.hypermedia.affordance.ActionDescriptor;
 import de.escalon.hypermedia.affordance.ActionInputParameter;
@@ -50,7 +49,7 @@ public class XhtmlWriter extends Writer {
 
 	public static final String HTML_HEAD_START = "" + //
 	// "<?xml version='1.0' encoding='UTF-8' ?>" + // formatter
-	"<!DOCTYPE html>" + //
+			"<!DOCTYPE html>" + //
 			"<html xmlns='http://www.w3.org/1999/xhtml'>" + //
 			"  <head>" + //
 			"    <meta charset=\"utf-8\"/>" + //
@@ -697,7 +696,7 @@ public class XhtmlWriter extends Writer {
 			// TODO consider @Input-include/exclude/hidden here
 			OptionalAttributes attrs = OptionalAttributes.attr("value", val);
 			if (readOnly) {
-				attrs.and(Input.READONLY, Input.READONLY);
+				attrs.and(ActionInputParameter.READONLY, ActionInputParameter.READONLY);
 			}
 			writeLabelWithDoc(fieldLabel, requestParamName, documentationUrl);
 			if (actionInputParameter.hasInputConstraints()) {
@@ -732,9 +731,9 @@ public class XhtmlWriter extends Writer {
 				OptionalAttributes.attr("class", formControlClass));
 		for (Suggest<?> possibleValue : possibleValues) {
 			if (possibleValue.getValue().equals(callValue)) {
-				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
+				option(possibleValue.getText(), attr("selected", "selected").and("value", possibleValue.getValueAsString()));
 			} else {
-				option(possibleValue.getTextField(), attr("value", possibleValue.getValueField()));
+				option(possibleValue.getText(), attr("value", possibleValue.getValueAsString()));
 			}
 		}
 		endSelect();
@@ -758,9 +757,9 @@ public class XhtmlWriter extends Writer {
 				OptionalAttributes.attr("multiple", "multiple").and("class", formControlClass));
 		for (Suggest<?> possibleValue : possibleValues) {
 			if (ObjectUtils.containsElement(actualValues, possibleValue.getValue())) {
-				option(possibleValue.getTextField(), attr("selected", "selected").and("value", possibleValue.getValueField()));
+				option(possibleValue.getText(), attr("selected", "selected").and("value", possibleValue.getValueAsString()));
 			} else {
-				option(possibleValue.getTextField(), attr("value", possibleValue.getValueField()));
+				option(possibleValue.getText(), attr("value", possibleValue.getValueAsString()));
 			}
 		}
 		endForm();

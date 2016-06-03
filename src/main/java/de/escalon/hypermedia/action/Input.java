@@ -32,16 +32,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface Input {
 
-	String MIN = "min";
-	String MAX = "max";
-	String STEP = "step";
-	String MIN_LENGTH = "minLength";
-	String MAX_LENGTH = "maxLength";
-	String PATTERN = "pattern";
-	String READONLY = "readonly";
-	String EDITABLE = "editable";
-	String REQUIRED = "required";
-
 	/**
 	 * Input type, to set the input type, e.g. hidden, password. With the default type FROM_JAVA the type will be number
 	 * or text for scalar values (depending on the parameter type), and null for arrays, collections or beans.

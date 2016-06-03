@@ -1,8 +1,5 @@
 package de.escalon.hypermedia.spring.siren;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -382,27 +379,18 @@ public class SirenUtils {
 				for (Suggest<?> possibleValue : possibleValues) {
 					boolean selected = ObjectUtils.containsElement(inputParameter.getValues(), possibleValue.getValue());
 					// TODO have more useful value title
-					sirenPossibleValues
-							.add(new SirenFieldValue(possibleValue.getTextField(), possibleValue.getValue(), selected));
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.getText(), possibleValue.getValue(), selected));
 				}
 			} else {
 				type = "radio";
 				for (Suggest<?> possibleValue : possibleValues) {
 					boolean selected = possibleValue.getValue().equals(propertyValue);
-					sirenPossibleValues.add(new SirenFieldValue(possibleValue.toString(), possibleValue.getValue(), selected));
+					sirenPossibleValues.add(new SirenFieldValue(possibleValue.getText(), possibleValue.getValue(), selected));
 				}
 			}
 			sirenField = new SirenField(paramName, type, sirenPossibleValues, null, null);
 		}
 		return sirenField;
-	}
-
-	private BeanInfo getBeanInfo(Class<?> beanType) {
-		try {
-			return Introspector.getBeanInfo(beanType);
-		} catch (IntrospectionException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	private List<SirenLink> toSirenLinks(List<Link> links) {

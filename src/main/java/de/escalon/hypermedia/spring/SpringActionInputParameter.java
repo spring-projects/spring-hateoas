@@ -101,19 +101,19 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		// might be a nested property which is neither requestBody, requestParam nor pathVariable
 		Input inputAnnotation = methodParameter.getParameterAnnotation(Input.class);
 		if (inputAnnotation != null) {
-			putInputConstraint(Input.MIN, Integer.MIN_VALUE, inputAnnotation.min());
-			putInputConstraint(Input.MAX, Integer.MAX_VALUE, inputAnnotation.max());
-			putInputConstraint(Input.MIN_LENGTH, Integer.MIN_VALUE, inputAnnotation.minLength());
-			putInputConstraint(Input.MAX_LENGTH, Integer.MAX_VALUE, inputAnnotation.maxLength());
-			putInputConstraint(Input.STEP, 0, inputAnnotation.step());
-			putInputConstraint(Input.PATTERN, "", inputAnnotation.pattern());
+			putInputConstraint(ActionInputParameter.MIN, Integer.MIN_VALUE, inputAnnotation.min());
+			putInputConstraint(ActionInputParameter.MAX, Integer.MAX_VALUE, inputAnnotation.max());
+			putInputConstraint(ActionInputParameter.MIN_LENGTH, Integer.MIN_VALUE, inputAnnotation.minLength());
+			putInputConstraint(ActionInputParameter.MAX_LENGTH, Integer.MAX_VALUE, inputAnnotation.maxLength());
+			putInputConstraint(ActionInputParameter.STEP, 0, inputAnnotation.step());
+			putInputConstraint(ActionInputParameter.PATTERN, "", inputAnnotation.pattern());
 			setReadOnly(!inputAnnotation.editable());
 
 			/**
 			 * I think this is not correct, or at least makes XmlHtmlWriter to write readonly="[java.lang.String"
 			 */
 			// putInputConstraint(Input.READONLY, "", inputAnnotation.readOnly());
-			putInputConstraint(Input.REQUIRED, "", inputAnnotation.required());
+			putInputConstraint(ActionInputParameter.REQUIRED, "", inputAnnotation.required());
 
 			excluded = inputAnnotation.exclude();
 			readOnly = inputAnnotation.readOnly();
@@ -144,7 +144,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 		SuggestType type = SuggestType.INTERNAL;
 		if (select != null && select.required()) {
 			type = select.type();
-			putInputConstraint(Input.REQUIRED, "", true);
+			putInputConstraint(ActionInputParameter.REQUIRED, "", true);
 		}
 
 		if (select != null) {
@@ -284,7 +284,7 @@ public class SpringActionInputParameter implements ActionInputParameter {
 	@Override
 	public void setReadOnly(boolean readOnly) {
 		editable = !readOnly;
-		putInputConstraint(Input.EDITABLE, "", editable);
+		putInputConstraint(ActionInputParameter.EDITABLE, "", editable);
 	}
 
 	@Override

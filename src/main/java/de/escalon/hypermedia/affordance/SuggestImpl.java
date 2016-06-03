@@ -1,5 +1,6 @@
 package de.escalon.hypermedia.affordance;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class SuggestImpl<T> implements Suggest<T> {
@@ -34,7 +35,37 @@ public class SuggestImpl<T> implements Suggest<T> {
 	public String getTextField() {
 		return textField;
 	}
-	
+
+	@Override
+	public String getText() {
+		if (value != null) {
+			try {
+				return String.valueOf(getField(textField).get(value));
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Textfield could not be serialized", e);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getValueAsString() {
+		if (value != null) {
+			try {
+				return String.valueOf(getField(valueField).get(value));
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Textfield could not be serialized", e);
+			}
+		}
+		return null;
+	}
+
+	private Field getField(String name) throws NoSuchFieldException, SecurityException {
+		Field field = value.getClass().getDeclaredField(valueField);
+		field.setAccessible(true);
+		return field;
+	}
+
 	@Override
 	public SuggestType getType() {
 		return type;

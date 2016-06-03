@@ -12,6 +12,16 @@ import de.escalon.hypermedia.action.Type;
  */
 public interface ActionInputParameter {
 
+	String MIN = "min";
+	String MAX = "max";
+	String STEP = "step";
+	String MIN_LENGTH = "minLength";
+	String MAX_LENGTH = "maxLength";
+	String PATTERN = "pattern";
+	String READONLY = "readonly";
+	String EDITABLE = "editable";
+	String REQUIRED = "required";
+
 	/**
 	 * Raw field value, without conversion.
 	 *
@@ -187,15 +197,15 @@ public interface ActionInputParameter {
 	/**
 	 * Gets input constraints.
 	 *
-	 * @return constraints where the key is one of {@link Input#MAX} etc. and the value is a string or number, depending
+	 * @return constraints where the key is one of {@link ActionInputParameter#MAX} etc. and the value is a string or number, depending
 	 *         on the input constraint.
-	 * @see Input#MAX
-	 * @see Input#MIN
-	 * @see Input#MAX_LENGTH
-	 * @see Input#MIN_LENGTH
-	 * @see Input#STEP
-	 * @see Input#PATTERN
-	 * @see Input#READONLY
+	 * @see ActionInputParameter#MAX
+	 * @see ActionInputParameter#MIN
+	 * @see ActionInputParameter#MAX_LENGTH
+	 * @see ActionInputParameter#MIN_LENGTH
+	 * @see ActionInputParameter#STEP
+	 * @see ActionInputParameter#PATTERN
+	 * @see ActionInputParameter#READONLY
 	 */
 	Map<String, Object> getInputConstraints();
 
