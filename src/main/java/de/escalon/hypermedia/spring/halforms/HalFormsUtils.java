@@ -46,8 +46,7 @@ public class HalFormsUtils {
 					ActionDescriptor actionDescriptor = affordance.getActionDescriptors().get(i);
 					if (i == 0) {
 						links.add(affordance);
-					}
-					else {
+					} else {
 						String key = actionDescriptor.getSemanticActionType();
 						if (true || actionDescriptor.hasRequestBody() || !actionDescriptor.getRequestParamNames().isEmpty()) {
 							Template template = templates.isEmpty() ? new Template()
@@ -58,25 +57,14 @@ public class HalFormsUtils {
 							template.setMethod(actionDescriptor.getHttpMethod());
 							TemplateActionInputParameterVisitor visitor = new TemplateActionInputParameterVisitor(template,
 									actionDescriptor);
-<<<<<<< HEAD
+
 							actionDescriptor.accept(visitor);
 
-=======
-							if (actionDescriptor.hasRequestBody()) {
-								actionDescriptor.accept(visitor);
-							}
-							else {
-								for (String param : actionDescriptor.getRequestParamNames()) {
-									visitor.visit(actionDescriptor.getActionInputParameter(param));
-								}
-							}
->>>>>>> branch 'feature/affordances' of https://github.com/hdiv/spring-hateoas
 							templates.add(template);
 						}
 					}
 				}
-			}
-			else {
+			} else {
 				links.add(link);
 			}
 		}
