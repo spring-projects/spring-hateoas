@@ -123,6 +123,10 @@ public class Jackson2HalModule extends SimpleModule {
 		private final EmbeddedMapper mapper;
 		private final MessageSourceAccessor messageSource;
 
+    public HalLinkListSerializer() {
+      this(null, null, null);
+    }
+    
 		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper,
 				MessageSourceAccessor messageSource) {
 			this(null, curieProvider, mapper, messageSource);
@@ -268,19 +272,21 @@ public class Jackson2HalModule extends SimpleModule {
 			return null;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
 		 */
-		public boolean isEmpty(List<Link> value) {
+		@Override
+    public boolean isEmpty(List<Link> value) {
 			return isEmpty(null, value);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
-		public boolean isEmpty(SerializerProvider provider, List<Link> value) {
+		@Override
+    public boolean isEmpty(SerializerProvider provider, List<Link> value) {
 			return value.isEmpty();
 		}
 
@@ -369,11 +375,13 @@ public class Jackson2HalModule extends SimpleModule {
 			return null;
 		}
 
-		public boolean isEmpty(Collection<?> value) {
+		@Override
+    public boolean isEmpty(Collection<?> value) {
 			return isEmpty(null, value);
 		}
 
-		public boolean isEmpty(SerializerProvider provider, Collection<?> value) {
+		@Override
+    public boolean isEmpty(SerializerProvider provider, Collection<?> value) {
 			return value.isEmpty();
 		}
 
@@ -507,19 +515,21 @@ public class Jackson2HalModule extends SimpleModule {
 			return false;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#isEmpty(java.lang.Object)
 		 */
-		public boolean isEmpty(Object value) {
+		@Override
+    public boolean isEmpty(Object value) {
 			return isEmpty(null, value);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
-		public boolean isEmpty(SerializerProvider provider, Object value) {
+		@Override
+    public boolean isEmpty(SerializerProvider provider, Object value) {
 			return false;
 		}
 
@@ -604,7 +614,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private static final long serialVersionUID = 4755806754621032622L;
 
-		private JavaType contentType;
+		private final JavaType contentType;
 
 		public HalResourcesDeserializer() {
 			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class), null);
@@ -774,15 +784,17 @@ public class Jackson2HalModule extends SimpleModule {
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(java.lang.Object)
 		 */
-		public boolean isEmpty(Boolean value) {
+		@Override
+    public boolean isEmpty(Boolean value) {
 			return isEmpty(null, value);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
-		public boolean isEmpty(SerializerProvider provider, Boolean value) {
+		@Override
+    public boolean isEmpty(SerializerProvider provider, Boolean value) {
 			return value == null || Boolean.FALSE.equals(value);
 		}
 
@@ -825,9 +837,9 @@ public class Jackson2HalModule extends SimpleModule {
 	 */
 	private static class EmbeddedMapper {
 
-		private RelProvider relProvider;
-		private CurieProvider curieProvider;
-		private boolean preferCollectionRels;
+		private final RelProvider relProvider;
+		private final CurieProvider curieProvider;
+		private final boolean preferCollectionRels;
 
 		/**
 		 * Creates a new {@link EmbeddedMapper} for the given {@link RelProvider}, {@link CurieProvider} and flag whether to
