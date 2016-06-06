@@ -5,6 +5,7 @@ env:
   matrix:
     - PROFILE=non-existant
     - PROFILE=spring42
+    - PROFILE=spring43
     - PROFILE=spring42-next
 cache:
   directories:

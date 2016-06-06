@@ -59,12 +59,12 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.1.7.RELEASE</spring.version>
-		<logback.version>1.1.3</logback.version>
+		<logback.version>1.1.7</logback.version>
 		<jackson.version>2.5.5</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2</minidevjson.version>
-		<jsonpath.version>2.0.0</jsonpath.version>
-		<slf4j.version>1.7.12</slf4j.version>
+		<jsonpath.version>2.2.0</jsonpath.version>
+		<slf4j.version>1.7.21</slf4j.version>
 		<evo.version>1.2.1</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 		<source.level>1.6</source.level>
@@ -75,16 +75,30 @@
 		<profile>
 			<id>spring42</id>
 			<properties>
-				<spring.version>4.2.1.RELEASE</spring.version>
-				<jackson.version>2.6.1</jackson.version>
+				<spring.version>4.2.6.RELEASE</spring.version>
+				<jackson.version>2.6.5</jackson.version>
 			</properties>
 		</profile>
 
 		<profile>
-			<id>spring42-next</id>
+			<id>spring43</id>
 			<properties>
-				<spring.version>4.2.2.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.6.1</jackson.version>
+				<spring.version>4.3.0.RC1</spring.version>
+				<jackson.version>2.7.4</jackson.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-milestone</id>
+					<url>http://repo.spring.io/libs-milestone</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>spring43-next</id>
+			<properties>
+				<spring.version>4.3.0.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.7.4</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
