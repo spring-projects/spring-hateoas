@@ -1,6 +1,31 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.20.0.RELEASE (2016-06-06)
+----------------------------------------------
+- #458 - Release 0.20.
+- #457 - Move to Lombok's non-experimental Builder in ALPS types.
+- #455 - Assert compatibility with Jackson 2.7.
+- #449 - Add IDE formatter presets.
+- #440 - Given link header is not RFC5988 compliant.
+- #432 - Add code of conduct.
+- #423 - Make sure URL parts are joined correctly.
+- #422, #398 Remove unnecessary URI conversion.
+- #421 - DefaultCurieProvider should dynamically prepend application base URI.
+- #398 - ControllerLinkBuilder does not handle special query parameter characters correctly.
+- #397 - Fixed typos.
+- #390 - Rename missing Tests to Test for Maven support.
+- #388 - Rename ForwardedHeaderUnitTests to test to be picked up by Maven.
+- #383 - Reintroduce general compatibility with Jackson 2.4.
+- #382 - Fixed Traverson double encoding issue.
+- #381 - Upgrade Spring 4.2 build profile to Spring 4.2.1.RELEASE.
+- #380 - Make sure all integration tests run in Maven build.
+- #372 - Added support for Map parameters to LinkBuilderFactory.linkTo(…).
+- #362 - Add ResourceProcessor support magic from Spring Data REST.
+- #337 - Traverson's double encodes URIs.
+- #269 - linkTo(methodOn(…)) sometimes misses slashes.
+- #186 - Allow multiple mappings on type and method level.
+
 Changes in version 0.19.0.RELEASE (2015-09-01)
 ----------------------------------------------
 - #379 - Release 0.19.0.
