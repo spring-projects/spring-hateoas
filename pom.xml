@@ -13,7 +13,7 @@
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2015</inceptionYear>
+	<inceptionYear>2012-2016</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
@@ -471,7 +471,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.16.4</version>
+			<version>1.16.8</version>
 			<scope>provided</scope>
 		</dependency>
 
