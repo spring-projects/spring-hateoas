@@ -29,6 +29,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -60,6 +61,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
@@ -107,9 +109,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			if (JSONPATH_PRESENT) {
 
 				AbstractBeanDefinition linkDiscovererBeanDefinition = getLinkDiscovererBeanDefinition(type);
-				registerBeanDefinition(
-						new BeanDefinitionHolder(linkDiscovererBeanDefinition, BeanDefinitionReaderUtils.generateBeanName(
-								linkDiscovererBeanDefinition, registry)), registry);
+				registerBeanDefinition(new BeanDefinitionHolder(linkDiscovererBeanDefinition,
+						BeanDefinitionReaderUtils.generateBeanName(linkDiscovererBeanDefinition, registry)), registry);
 			}
 		}
 
@@ -224,7 +225,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	 */
 	static class Jackson2ModuleRegisteringBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
-		private BeanFactory beanFactory;
+		private AutowireCapableBeanFactory beanFactory;
 
 		/* 
 		 * (non-Javadoc)
@@ -232,7 +233,11 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		 */
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = beanFactory;
+
+			Assert.isInstanceOf(AutowireCapableBeanFactory.class, beanFactory,
+					"BeanFactory must be an AutowireCapableBeanFactory!");
+
+			this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 		}
 
 		/* 
@@ -251,8 +256,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			if (bean instanceof AnnotationMethodHandlerAdapter) {
 
 				AnnotationMethodHandlerAdapter adapter = (AnnotationMethodHandlerAdapter) bean;
-				List<HttpMessageConverter<?>> augmentedConverters = potentiallyRegisterModule(Arrays.asList(adapter
-						.getMessageConverters()));
+				List<HttpMessageConverter<?>> augmentedConverters = potentiallyRegisterModule(
+						Arrays.asList(adapter.getMessageConverters()));
 				adapter
 						.setMessageConverters(augmentedConverters.toArray(new HttpMessageConverter<?>[augmentedConverters.size()]));
 			}
@@ -294,8 +299,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 					MessageSourceAccessor.class);
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
-			halObjectMapper.setHandlerInstantiator(
-					new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider, linkRelationMessageSource));
+			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider,
+					linkRelationMessageSource, beanFactory));
 
 			MappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 					ResourceSupport.class);

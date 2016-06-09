@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
@@ -121,22 +122,21 @@ public class Jackson2HalModule extends SimpleModule {
 		private final BeanProperty property;
 		private final CurieProvider curieProvider;
 		private final EmbeddedMapper mapper;
-		private final MessageSourceAccessor messageSource;
+		private final MessageSourceAccessor accessor;
 
-		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageSourceAccessor messageSource) {
-			this(null, curieProvider, mapper, messageSource);
+		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper, MessageSourceAccessor accessor) {
+			this(null, curieProvider, mapper, accessor);
 		}
 
 		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageSourceAccessor messageSource) {
+				MessageSourceAccessor accessor) {
 
 			super(TypeFactory.defaultInstance().constructType(List.class));
 
 			this.property = property;
 			this.curieProvider = curieProvider;
 			this.mapper = mapper;
-			this.messageSource = messageSource;
+			this.accessor = accessor;
 		}
 
 		/*
@@ -204,7 +204,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		/**
-		 * Wraps the given link into a HAL specifc extension.
+		 * Wraps the given link into a HAL specific extension.
 		 * 
 		 * @param link must not be {@literal null}.
 		 * @return
@@ -233,8 +233,7 @@ public class Jackson2HalModule extends SimpleModule {
 			Assert.hasText(localRel, "Local relation must not be null or empty!");
 
 			try {
-				return messageSource == null ? null
-						: messageSource.getMessage(String.format(RELATION_MESSAGE_TEMPLATE, localRel));
+				return accessor == null ? null : accessor.getMessage(String.format(RELATION_MESSAGE_TEMPLATE, localRel));
 			} catch (NoSuchMessageException o_O) {
 				return null;
 			}
@@ -247,7 +246,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinkListSerializer(property, curieProvider, mapper, messageSource);
+			return new HalLinkListSerializer(property, curieProvider, mapper, accessor);
 		}
 
 		/*
@@ -681,30 +680,73 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 	}
 
+	/**
+	 * HandlerInstantiator to create HAL-specific serializers, deserializers etc.
+	 *
+	 * @author Oliver Gierke
+	 */
 	public static class HalHandlerInstantiator extends HandlerInstantiator {
 
-		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
+		private final Map<Class<?>, Object> serializers = new HashMap<Class<?>, Object>();
+		private final AutowireCapableBeanFactory delegate;
 
-		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor messageSource) {
-			this(resolver, curieProvider, messageSource, true);
+		/**
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
+		 * {@link MessageSourceAccessor} and {@link AutowireCapableBeanFactory}. Registers a prepared
+		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation using the given
+		 * {@link AutowireCapableBeanFactory} if provided, or simple default constructor instantiation if not.
+		 * 
+		 * @param provider must not be {@literal null}.
+		 * @param curieProvider can be {@literal null}.
+		 * @param accessor can be {@literal null}.
+		 * @param beanFactory can be {@literal null}
+		 */
+		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
+				AutowireCapableBeanFactory beanFactory) {
+			this(provider, curieProvider, accessor, true, beanFactory);
 		}
 
-		public HalHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections) {
-
-			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
-
-			Assert.notNull(resolver, "RelProvider must not be null!");
-			this.instanceMap.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
-			this.instanceMap.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, messageSource));
+		/**
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
+		 * {@link MessageSourceAccessor}. Registers a prepared {@link HalResourcesSerializer} and
+		 * {@link HalLinkListSerializer} falling back to instantiation expecting a default constructor.
+		 * 
+		 * @param provider must not be {@literal null}.
+		 * @param curieProvider can be {@literal null}.
+		 * @param messageSourceAccessor can be {@literal null}.
+		 */
+		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
+				MessageSourceAccessor messageSourceAccessor) {
+			this(provider, curieProvider, messageSourceAccessor, true);
 		}
 
-		private Object findInstance(Class<?> type) {
+		/**
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
+		 * {@link MessageSourceAccessor} and whether to enforce embedded collections. Registers a prepared
+		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation expecting a
+		 * default constructor.
+		 * 
+		 * @param provider must not be {@literal null}.
+		 * @param curieProvider can be {@literal null}
+		 * @param accessor can be {@literal null}.
+		 * @param enforceEmbeddedCollections
+		 */
+		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
+				boolean enforceEmbeddedCollections) {
+			this(provider, curieProvider, accessor, enforceEmbeddedCollections, null);
+		}
 
-			Object result = instanceMap.get(type);
-			return result != null ? result : BeanUtils.instantiateClass(type);
+		private HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
+				boolean enforceEmbeddedCollections, AutowireCapableBeanFactory delegate) {
+
+			Assert.notNull(provider, "RelProvider must not be null!");
+
+			EmbeddedMapper mapper = new EmbeddedMapper(provider, curieProvider, enforceEmbeddedCollections);
+
+			this.delegate = delegate;
+
+			this.serializers.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
+			this.serializers.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider, mapper, accessor));
 		}
 
 		/*
@@ -753,6 +795,13 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
 			return (TypeIdResolver) findInstance(resolverClass);
+		}
+
+		private Object findInstance(Class<?> type) {
+
+			Object result = serializers.get(type);
+
+			return result != null ? result : delegate != null ? delegate.createBean(type) : BeanUtils.instantiateClass(type);
 		}
 	}
 

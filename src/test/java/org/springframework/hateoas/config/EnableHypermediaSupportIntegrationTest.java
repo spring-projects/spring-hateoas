@@ -97,7 +97,7 @@ public class EnableHypermediaSupportIntegrationTest {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
 
 		Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
-		postProcessor.setBeanFactory(context);
+		postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
 
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
@@ -112,8 +112,8 @@ public class EnableHypermediaSupportIntegrationTest {
 				found = true;
 
 				AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
-				List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils.getField(
-						processor, "messageConverters");
+				List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils
+						.getField(processor, "messageConverters");
 
 				assertThat(converters.get(0), is(instanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class)));
 				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
