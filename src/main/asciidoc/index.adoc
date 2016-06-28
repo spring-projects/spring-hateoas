@@ -378,7 +378,7 @@ There are more options to customize template parameters at each level.
 
 [source,java,indent=0]
 ----
-include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-with-param]
+include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
 ----
 
 The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI Template variables.
@@ -387,7 +387,7 @@ NOTE: `.withParameter()` returns a new Hop object that is chainable. You can str
 
 [source,java,indent=0]
 ----
-include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTests.java[tag=hop-put]
+include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
 ----
 
 It's also possible to load an entire `Map` of parameters via `.withParameters(Map)`.
@@ -428,4 +428,3 @@ Link link = discoverer.findLinkWithRel("foo", content);
 assertThat(link.getRel(), is("foo"));
 assertThat(link.getHref(), is("/foo/bar"));
 ----
-
