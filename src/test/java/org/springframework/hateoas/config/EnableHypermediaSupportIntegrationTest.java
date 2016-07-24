@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +49,6 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
@@ -62,7 +60,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  */
-@SuppressWarnings("deprecation")
 @RunWith(MockitoJUnitRunner.class)
 public class EnableHypermediaSupportIntegrationTest {
 
@@ -152,13 +149,13 @@ public class EnableHypermediaSupportIntegrationTest {
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
 
 		Map<String, EntityLinks> discoverers = context.getBeansOfType(EntityLinks.class);
-		assertThat(discoverers.values(), Matchers.<EntityLinks> hasItem(instanceOf(DelegatingEntityLinks.class)));
+		assertThat(discoverers.values(), Matchers.<EntityLinks>hasItem(instanceOf(DelegatingEntityLinks.class)));
 	}
 
 	private static void assertRelProvidersSetUp(ApplicationContext context) {
 
 		Map<String, RelProvider> discoverers = context.getBeansOfType(RelProvider.class);
-		assertThat(discoverers.values(), Matchers.<RelProvider> hasItem(instanceOf(DelegatingRelProvider.class)));
+		assertThat(discoverers.values(), Matchers.<RelProvider>hasItem(instanceOf(DelegatingRelProvider.class)));
 	}
 
 	@SuppressWarnings({ "unchecked" })
@@ -171,11 +168,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(rmha.getMessageConverters(),
-				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
-
-		AnnotationMethodHandlerAdapter amha = context.getBean(AnnotationMethodHandlerAdapter.class);
-		assertThat(Arrays.asList(amha.getMessageConverters()),
-				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
+				Matchers.<HttpMessageConverter<?>>hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
 	}
 
 	/**
@@ -212,13 +205,6 @@ public class EnableHypermediaSupportIntegrationTest {
 		public RequestMappingHandlerAdapter rmh() {
 			RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 			numberOfMessageConverters = adapter.getMessageConverters().size();
-			return adapter;
-		}
-
-		@Bean
-		public AnnotationMethodHandlerAdapter amha() {
-			AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
-			numberOfMessageConvertersLegacy = adapter.getMessageConverters().length;
 			return adapter;
 		}
 

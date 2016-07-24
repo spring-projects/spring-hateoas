@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,6 @@ import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -77,7 +76,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  */
-@SuppressWarnings("deprecation")
 class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
@@ -253,13 +251,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				adapter.setMessageConverters(potentiallyRegisterModule(adapter.getMessageConverters()));
 			}
 
-			if (bean instanceof AnnotationMethodHandlerAdapter) {
+			if (bean instanceof RequestMappingHandlerAdapter) {
 
-				AnnotationMethodHandlerAdapter adapter = (AnnotationMethodHandlerAdapter) bean;
-				List<HttpMessageConverter<?>> augmentedConverters = potentiallyRegisterModule(
-						Arrays.asList(adapter.getMessageConverters()));
-				adapter
-						.setMessageConverters(augmentedConverters.toArray(new HttpMessageConverter<?>[augmentedConverters.size()]));
+				RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
+				adapter.setMessageConverters(potentiallyRegisterModule(adapter.getMessageConverters()));
 			}
 
 			if (bean instanceof RestTemplate) {

@@ -75,7 +75,7 @@
 		<profile>
 			<id>spring42</id>
 			<properties>
-				<spring.version>4.2.6.RELEASE</spring.version>
+				<spring.version>4.2.7.RELEASE</spring.version>
 				<jackson.version>2.6.5</jackson.version>
 			</properties>
 		</profile>
@@ -83,21 +83,29 @@
 		<profile>
 			<id>spring43</id>
 			<properties>
-				<spring.version>4.3.0.RC1</spring.version>
+				<spring.version>4.3.1.RELEASE</spring.version>
 				<jackson.version>2.7.4</jackson.version>
 			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-milestone</id>
-					<url>http://repo.spring.io/libs-milestone</url>
-				</repository>
-			</repositories>
 		</profile>
 
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.0.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.2.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.7.4</jackson.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<url>http://repo.spring.io/libs-snapshot</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>spring5-next</id>
+			<properties>
+				<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
 				<jackson.version>2.7.4</jackson.version>
 			</properties>
 			<repositories>
