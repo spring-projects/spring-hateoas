@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.21.0.RELEASE (2016-07-17)
+----------------------------------------------
+- #472 - Release 0.21.
+- #469 - Remove use of AnnotationMethodHandlerAdapter for Spring 5 compatibility.
+- #464 - Documentation for Traverson broken.
+- #460 - HalHandlerInstantiator should use a BeanFactory just like SpringHandlerInstantiator.
+
 Changes in version 0.20.0.RELEASE (2016-06-06)
 ----------------------------------------------
 - #458 - Release 0.20.

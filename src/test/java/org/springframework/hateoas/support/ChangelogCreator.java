@@ -30,7 +30,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 20;
+	private static final int MILESTONE_ID = 21;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) throws Exception {
