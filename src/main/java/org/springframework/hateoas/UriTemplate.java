@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,12 +38,13 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Custom URI template to support qualified URI template variables.
  * 
  * @author Oliver Gierke
+ * @author JamesE Richardson
  * @see http://tools.ietf.org/html/rfc6570
  * @since 0.9
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
-	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,]+)\\}");
+	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
 
 	private final TemplateVariables variables;
@@ -68,7 +71,14 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			String[] names = matcher.group(2).split(",");
 
 			for (String name : names) {
-				TemplateVariable variable = new TemplateVariable(name, type);
+				
+				TemplateVariable variable;
+
+				if (name.endsWith(VariableType.COMPOSITE_PARAM.toString())) {
+					variable = new TemplateVariable(name.substring(0, name.length() - 1), VariableType.COMPOSITE_PARAM);
+				} else {
+					variable = new TemplateVariable(name, type);
+				}
 
 				if (!variable.isRequired() && start < baseUriEndIndex) {
 					baseUriEndIndex = start;
@@ -276,6 +286,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		switch (variable.getType()) {
+			case COMPOSITE_PARAM:
+				appendComposite(builder, variable.getName(), value);
+				break;
 			case REQUEST_PARAM:
 			case REQUEST_PARAM_CONTINUED:
 				builder.queryParam(variable.getName(), value);
@@ -287,6 +300,29 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			case FRAGMENT:
 				builder.fragment(value.toString());
 				break;
+		}
+	}
+
+	/**
+	 * Expand what could be a single value, a {@link List}, or a {@link Map}.
+	 *
+	 * @param builder
+	 * @param name
+	 * @param value
+	 * @see https://tools.ietf.org/html/rfc6570#section-2.4.2
+	 */
+	private static void appendComposite(UriComponentsBuilder builder, String name, Object value) {
+
+		if (value instanceof Iterable) {
+			for (Object valuePart : (Iterable<?>) value) {
+				builder.queryParam(name, valuePart);
+			}
+		} else if (value instanceof Map) {
+			for (Entry<String, Object> queryParam : (Set<Entry<String, Object>>) ((Map) value).entrySet()) {
+				builder.queryParam(queryParam.getKey(), queryParam.getValue());
+			}
+		} else {
+			builder.queryParam(name, value);
 		}
 	}
 }

@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * A single template variable.
  * 
  * @author Oliver Gierke
+ * @author JamesE Richardson
  */
 @Value
 @EqualsAndHashCode
@@ -150,14 +151,15 @@ public final class TemplateVariable implements Serializable {
 		REQUEST_PARAM("?", true), //
 		REQUEST_PARAM_CONTINUED("&", true), //
 		SEGMENT("/", true), //
-		FRAGMENT("#", true);
+		FRAGMENT("#", true), //
+		COMPOSITE_PARAM("*", true);
 
 		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 
 		private final String key;
 		private final boolean optional;
 
-		private VariableType(String key, boolean optional) {
+		VariableType(String key, boolean optional) {
 
 			this.key = key;
 			this.optional = optional;
