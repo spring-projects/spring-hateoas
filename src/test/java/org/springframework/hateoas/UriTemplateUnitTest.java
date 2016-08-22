@@ -261,6 +261,66 @@ public class UriTemplateUnitTest {
 		assertThat(template.toString(), is("/{?q}"));
 	}
 
+	/**
+	 * @see #483
+	 */
+	@Test
+	public void compositveValuesAreRecognisedAsVariableType() {
+		UriTemplate template = new UriTemplate("/foo{&bar,foobar*}");
+
+		assertVariables(template,
+				new TemplateVariable("bar", VariableType.REQUEST_PARAM_CONTINUED),
+				new TemplateVariable("foobar", VariableType.COMPOSITE_PARAM));
+	}
+
+	/**
+	 * @see #483
+	 */
+	@Test
+	public void expandsCompositeValueAsAssociativeArray() {
+		UriTemplate template = new UriTemplate("/foo{&bar,foobar*}");
+
+		String expandedTemplate = template.expand(new HashMap<String, Object>(){{
+			put("bar", "barExpanded");
+			put("foobar", new HashMap<String, String>(){{
+				put("city", "Clarksville");
+				put("state", "TN");
+			}});
+		}}).toString();
+
+		assertThat(expandedTemplate, is("/foo?bar=barExpanded&city=Clarksville&state=TN"));
+	}
+
+	/**
+	 * @see #483
+	 */
+	@Test
+	public void expandsCompositeValueAsList() {
+		UriTemplate template = new UriTemplate("/foo{&bar,foobar*}");
+
+		String expandedTemplate = template.expand(new HashMap<String, Object>(){{
+			put("bar", "barExpanded");
+			put("foobar", Arrays.asList("foo1", "foo2"));
+		}}).toString();
+
+		assertThat(expandedTemplate, is("/foo?bar=barExpanded&foobar=foo1&foobar=foo2"));
+	}
+
+	/**
+	 * @see #483
+	 */
+	@Test
+	public void handlesCompositeValueAsSingleValue() {
+		UriTemplate template = new UriTemplate("/foo{&bar,foobar*}");
+
+		String expandedTemplate = template.expand(new HashMap<String, Object>(){{
+			put("bar", "barExpanded");
+			put("foobar", "singleValue");
+		}}).toString();
+
+		assertThat(expandedTemplate, is("/foo?bar=barExpanded&foobar=singleValue"));
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}

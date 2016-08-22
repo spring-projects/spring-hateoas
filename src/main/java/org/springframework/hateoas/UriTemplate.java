@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +41,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
-	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,]+)\\}");
+	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
 
 	private final TemplateVariables variables;;
@@ -67,7 +68,14 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			String[] names = matcher.group(2).split(",");
 
 			for (String name : names) {
-				TemplateVariable variable = new TemplateVariable(name, type);
+				boolean isCompositeValue = name.endsWith("*");
+				TemplateVariable variable;
+
+				if (isCompositeValue) {
+					variable = new TemplateVariable(name.substring(0, name.length() - 1), VariableType.COMPOSITE_PARAM);
+				} else {
+					variable = new TemplateVariable(name, type);
+				}
 
 				if (!variable.isRequired() && start < baseUriEndIndex) {
 					baseUriEndIndex = start;
@@ -286,6 +294,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		switch (variable.getType()) {
+			case COMPOSITE_PARAM:
+				appendComposite(builder, variable.getName(), value);
+				break;
 			case REQUEST_PARAM:
 			case REQUEST_PARAM_CONTINUED:
 				builder.queryParam(variable.getName(), value);
@@ -297,6 +308,21 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			case FRAGMENT:
 				builder.fragment(value.toString());
 				break;
+		}
+	}
+
+	private static void appendComposite(UriComponentsBuilder builder, String name, Object value) {
+		if (value instanceof Iterable) {
+			for (Object valuePart : (Iterable) value) {
+				builder.queryParam(name, valuePart);
+			}
+		} else if (value instanceof Map) {
+			Set<Map.Entry> valueEntries = ((Map) value).entrySet();
+			for (Map.Entry queryParam : valueEntries) {
+				builder.queryParam(queryParam.getKey().toString(), queryParam.getValue());
+			}
+		} else {
+			builder.queryParam(name, value);
 		}
 	}
 }

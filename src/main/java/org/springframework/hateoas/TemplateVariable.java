@@ -23,6 +23,8 @@ import lombok.Value;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -150,7 +152,8 @@ public final class TemplateVariable implements Serializable {
 		REQUEST_PARAM("?", true), //
 		REQUEST_PARAM_CONTINUED("&", true), //
 		SEGMENT("/", true), //
-		FRAGMENT("#", true);
+		FRAGMENT("#", true),
+		COMPOSITE_PARAM("*", true);
 
 		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 
