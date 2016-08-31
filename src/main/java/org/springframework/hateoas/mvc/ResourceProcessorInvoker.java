@@ -367,9 +367,9 @@ public class ResourceProcessorInvoker {
 
 			ResolvableType superType = null;
 
-			for (Class<?> resourcesType : Arrays.<Class<?>> asList(resources.getClass(), Resources.class)) {
+			for (Class<?> resourcesType : Arrays.<Class<?>>asList(resources.getClass(), Resources.class)) {
 
-				superType = ResolvableType.forClass(resourcesType, getRawType(target));
+				superType = getSuperType(target, resourcesType);
 
 				if (superType != null) {
 					break;
@@ -390,6 +390,34 @@ public class ResourceProcessorInvoker {
 			}
 
 			return false;
+		}
+
+		/**
+		 * Returns the {@link ResolvableType} for the given raw super class.
+		 * 
+		 * @param source must not be {@literal null}.
+		 * @param superType must not be {@literal null}.
+		 * @return
+		 */
+		private static ResolvableType getSuperType(ResolvableType source, Class<?> superType) {
+
+			if (source.getRawClass().equals(superType)) {
+				return source;
+			}
+
+			ResolvableType candidate = source.getSuperType();
+
+			if (superType.isAssignableFrom(candidate.getRawClass())) {
+				return candidate;
+			}
+
+			for (ResolvableType interfaces : source.getInterfaces()) {
+				if (superType.isAssignableFrom(interfaces.getRawClass())) {
+					return interfaces;
+				}
+			}
+
+			return ResolvableType.forClass(superType);
 		}
 	}
 
