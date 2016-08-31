@@ -58,9 +58,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.1.7.RELEASE</spring.version>
+		<spring.version>4.3.3.BUILD-SNAPSHOT</spring.version>
 		<logback.version>1.1.7</logback.version>
-		<jackson.version>2.5.5</jackson.version>
+		<jackson.version>2.7.4</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
@@ -73,26 +73,9 @@
 	<profiles>
 
 		<profile>
-			<id>spring42</id>
-			<properties>
-				<spring.version>4.2.7.RELEASE</spring.version>
-				<jackson.version>2.6.5</jackson.version>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>spring43</id>
-			<properties>
-				<spring.version>4.3.1.RELEASE</spring.version>
-				<jackson.version>2.7.4</jackson.version>
-			</properties>
-		</profile>
-
-		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.2.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.7.4</jackson.version>
+				<spring.version>4.3.3.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -103,10 +86,22 @@
 		</profile>
 
 		<profile>
+			<id>spring5</id>
+			<properties>
+				<spring.version>5.0.0.M1</spring.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-milestone</id>
+					<url>http://repo.spring.io/libs-milestone</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
 			<id>spring5-next</id>
 			<properties>
 				<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.7.4</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -677,8 +672,8 @@
 
 	<repositories>
 		<repository>
-			<id>spring-libs-release</id>
-			<url>http://repo.spring.io/libs-release</url>
+			<id>spring-libs-snapshot</id>
+			<url>http://repo.spring.io/libs-snapshot</url>
 		</repository>
 	</repositories>
 
