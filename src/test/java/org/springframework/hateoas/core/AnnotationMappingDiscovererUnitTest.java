@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * 
  * @author Oliver Gierke
  * @author Kevin Conaway
+ * @author Mark Paluch
  */
 public class AnnotationMappingDiscovererUnitTest {
 
@@ -142,7 +144,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	@RequestMapping("/type")
 	interface MyController {
 
-		@RequestMapping("/method")
+		@GetMapping("/method")
 		void method();
 
 		@RequestMapping
