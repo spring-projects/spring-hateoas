@@ -66,7 +66,7 @@ public class JacksonSerializationTest {
 								).build(), //
 						descriptor().id("resultType").type(Type.SEMANTIC).//
 								doc(doc().value("results format").build()).//
-								ext(ext().href("http://alps.io/ext/range").value("summary,detail").build()//
+								ext(ext().id("#ext-range").href("http://alps.io/ext/range").value("summary,detail").build()//
 								).build())//
 				).build();
 

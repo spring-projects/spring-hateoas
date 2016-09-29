@@ -24,6 +24,7 @@
     },
     "type" : "SEMANTIC",
     "ext" : {
+      "id" : "#ext-range",
       "href" : "http://alps.io/ext/range",
       "value" : "summary,detail"
     }
