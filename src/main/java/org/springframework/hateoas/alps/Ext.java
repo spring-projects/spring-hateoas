@@ -29,6 +29,7 @@ import lombok.Value;
 @Builder
 public class Ext {
 
+	private final String id;
 	private final String href;
 	private final String value;
 }
