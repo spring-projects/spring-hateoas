@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,5 +172,23 @@ public class LinkUnitTest {
 
 		Link link = new Link("/customer/{customerId}/programs", "programs");
 		assertThat(link.getHref(), is("/customer/{customerId}/programs"));
+	}
+
+	/**
+	 * @see #504
+	 */
+	@Test
+	public void parsesLinkRelationWithDotAndMinus() {
+		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").getRel(), is("rel-with-minus-and-."));
+	}
+
+	/**
+	 * @see #504
+	 */
+	@Test
+	public void parsesUriLinkRelations() {
+
+		assertThat(Link.valueOf("<http://localhost>; rel=\"http://acme.com/rels/foo-bar\"").getRel(),
+				is("http://acme.com/rels/foo-bar"));
 	}
 }
