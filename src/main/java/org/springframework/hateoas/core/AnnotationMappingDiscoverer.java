@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation;
+import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
 import java.lang.annotation.Annotation;

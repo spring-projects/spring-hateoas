@@ -141,11 +141,24 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method), is("/type/method"));
 	}
 
+	/**
+	 * @see #471
+	 */
+	@Test
+	public void discoversMethodLevelMappingUsingComposedAnnotation() throws Exception {
+
+		Method method = MyController.class.getMethod("methodWithComposedAnnotation");
+		assertThat(discoverer.getMapping(method), is("/type/otherMethod"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
-		@GetMapping("/method")
+		@RequestMapping("/method")
 		void method();
+
+		@GetMapping("/otherMethod")
+		void methodWithComposedAnnotation();
 
 		@RequestMapping
 		void noMethodMapping();
