@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 package org.springframework.hateoas.mvc;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -27,6 +29,8 @@ import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriTemplate;
 
@@ -36,6 +40,9 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Gierke
  */
 class AnnotatedParametersParameterAccessor {
+
+	private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<Method, MethodParameters>(
+			16, ReferenceType.WEAK);
 
 	private final AnnotationAttribute attribute;
 
@@ -47,6 +54,7 @@ class AnnotatedParametersParameterAccessor {
 	public AnnotatedParametersParameterAccessor(AnnotationAttribute attribute) {
 
 		Assert.notNull(attribute);
+
 		this.attribute = attribute;
 	}
 
@@ -60,7 +68,7 @@ class AnnotatedParametersParameterAccessor {
 
 		Assert.notNull(invocation, "MethodInvocation must not be null!");
 
-		MethodParameters parameters = new MethodParameters(invocation.getMethod());
+		MethodParameters parameters = getOrCreateMethodParametersFor(invocation.getMethod());
 		Object[] arguments = invocation.getArguments();
 		List<BoundMethodParameter> result = new ArrayList<BoundMethodParameter>();
 
@@ -89,15 +97,35 @@ class AnnotatedParametersParameterAccessor {
 
 		if (value == null) {
 
-			Object indexOrName = StringUtils.hasText(parameter.getParameterName()) ? parameter.getParameterName() : parameter
-					.getParameterIndex();
+			Object indexOrName = StringUtils.hasText(parameter.getParameterName()) ? parameter.getParameterName()
+					: parameter.getParameterIndex();
 
-			throw new IllegalArgumentException(String.format(
-					"Required controller parameter %s of method %s found but null value given!", indexOrName,
-					parameter.getMethod()));
+			throw new IllegalArgumentException(
+					String.format("Required controller parameter %s of method %s found but null value given!", indexOrName,
+							parameter.getMethod()));
 		}
 
 		return value;
+	}
+
+	/**
+	 * Returns the {@link MethodParameters} for the given {@link Method}.
+	 * 
+	 * @param method
+	 * @return
+	 */
+	private static MethodParameters getOrCreateMethodParametersFor(Method method) {
+
+		MethodParameters methodParameters = METHOD_PARAMETERS_CACHE.get(method);
+
+		if (methodParameters != null) {
+			return methodParameters;
+		}
+
+		methodParameters = new MethodParameters(method);
+		METHOD_PARAMETERS_CACHE.put(method, methodParameters);
+
+		return methodParameters;
 	}
 
 	/**
