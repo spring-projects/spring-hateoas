@@ -161,7 +161,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		request.addHeader("X-Forwarded-Host", "somethingDifferent");
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
+		assertThat(link.getHref(), startsWith("http://somethingDifferent/"));
 	}
 
 	/**
@@ -198,7 +198,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		request.addHeader("X-Forwarded-Ssl", "on");
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("https://somethingDifferent"));
+		assertThat(link.getHref(), startsWith("https://somethingDifferent/"));
 	}
 
 	/**
@@ -260,7 +260,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(components.getQuery(), is("foo=bar"));
 	}
 
-	/**
+    @Test
+    public void usesForwardedHostWithoutDefaultPortFromHeader() {
+
+        request.addHeader("X-Forwarded-Host", "somethingDifferent:80");
+
+        Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+        assertThat(link.getHref(), startsWith("http://somethingDifferent/"));
+    }
+
+
+    /**
 	 * @see #90
 	 */
 	@Test
@@ -269,7 +279,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://foobar:8088"));
+		assertThat(link.getHref(), startsWith("http://foobar:8088/"));
 	}
 
 	/**
@@ -281,7 +291,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://barfoo:8888"));
+		assertThat(link.getHref(), startsWith("http://barfoo:8888/"));
 	}
 
 	/**

@@ -275,7 +275,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		}
 
 		String host = forwarded.getHost();
-		host = hasText(host) ? host : request.getHeader("X-Forwarded-Host");
 
 		if (!hasText(host)) {
 			return builder;
