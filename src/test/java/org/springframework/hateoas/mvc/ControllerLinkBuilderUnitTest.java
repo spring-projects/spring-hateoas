@@ -52,6 +52,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oemer Yildiz
  * @author Greg Turnquist
  * @author Kevin Conaway
+ * @author Oliver Trosien
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -537,11 +538,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 */
 	@Test
 	public void supportsTwoProxiesAddingXForwardedPort() {
+
 		request.addHeader("X-Forwarded-Port", "1443,8443");
 		request.addHeader("X-Forwarded-Host", "proxy1,proxy2");
 
-		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://proxy1:1443"));
+		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), startsWith("http://proxy1:1443"));
 	}
 
 	/**
@@ -549,11 +550,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 */
 	@Test
 	public void resolvesAmbiguousXForwardedHeaders() {
+
 		request.addHeader("X-Forwarded-Proto", "http");
 		request.addHeader("X-Forwarded-Ssl", "on");
 
-		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://"));
+		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), startsWith("http://"));
 	}
 
 	private static UriComponents toComponents(Link link) {

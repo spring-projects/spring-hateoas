@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.mvc;
 
+import static org.springframework.util.StringUtils.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
-
-import static org.springframework.util.StringUtils.hasText;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -255,14 +255,14 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with
-	 * scheme tweaked in case the request contains an {@code X-Forwarded-Ssl} header, which is not (yet)
-	 * supported by the underlying {@link UriComponentsBuilder}.
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
+	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
+	 * {@link UriComponentsBuilder}.
 	 * 
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
-		
+
 		HttpServletRequest request = getCurrentRequest();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request));
 
