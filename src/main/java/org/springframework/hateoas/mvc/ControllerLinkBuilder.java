@@ -256,7 +256,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with
-	 * scheme tweaked in case the request contains an {@code X-Forwarded-Ssl} header, which is not yet
+	 * scheme tweaked in case the request contains an {@code X-Forwarded-Ssl} header, which is not (yet)
 	 * supported by the underlying {@link UriComponentsBuilder}.
 	 * 
 	 * @return
@@ -264,10 +264,16 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	static UriComponentsBuilder getBuilder() {
 		
 		HttpServletRequest request = getCurrentRequest();
-		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
-
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request));
-		if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+
+		// special case handling for X-Forwarded-Ssl:
+		// apply it, but only if X-Forwarded-Proto is unset.
+
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
+		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
+
+		if (!hasText(proto) && hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
 			builder.scheme("https");
 		}
 
