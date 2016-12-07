@@ -56,7 +56,8 @@ import org.springframework.web.util.UriTemplate;
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
-	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final CachingAnnotationMappingDiscoverer DISCOVERER = new CachingAnnotationMappingDiscoverer(
+			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
@@ -318,6 +319,27 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
 		return servletRequest;
+	}
+
+	@RequiredArgsConstructor
+	private static class CachingAnnotationMappingDiscoverer implements MappingDiscoverer {
+
+		private final @Delegate AnnotationMappingDiscoverer delegate;
+		private final Map<String, UriTemplate> templates = new ConcurrentReferenceHashMap<String, UriTemplate>();
+
+		public UriTemplate getMappingAsUriTemplate(Class<?> type, Method method) {
+
+			String mapping = delegate.getMapping(type, method);
+
+			UriTemplate template = templates.get(mapping);
+
+			if (template == null) {
+				template = new UriTemplate(mapping);
+				templates.put(mapping, template);
+			}
+
+			return template;
+		}
 	}
 
 	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
