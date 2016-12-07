@@ -75,6 +75,8 @@
 		<evo.version>1.2.1</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 		<source.level>1.6</source.level>
+		<jacoco-maven-plugin>0.7.4.201502262128</jacoco-maven-plugin>
+		<sonar-maven-plugin>2.6</sonar-maven-plugin>
 	</properties>
 
 	<profiles>
@@ -668,6 +670,19 @@
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 					</links>
 				</configuration>
+			</plugin>
+
+			<!-- Sonar-related plugins -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco-maven-plugin}</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>${sonar-maven-plugin}</version>
 			</plugin>
 
 		</plugins>
