@@ -58,7 +58,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.3.BUILD-SNAPSHOT</spring.version>
+		<spring.version>4.3.4.RELEASE</spring.version>
 		<logback.version>1.1.7</logback.version>
 		<jackson.version>2.7.4</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
