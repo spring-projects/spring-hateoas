@@ -267,10 +267,14 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
 		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
 		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+		// not sure why Google has to do things differently :(
+		String appengineHttps = request.getHeader("X-AppEngine-Https");
 
 		if (hasText(proto)) {
 			builder.scheme(proto);
 		} else if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+			builder.scheme("https");
+		} else if (hasText(appengineHttps) && appengineHttps.equalsIgnoreCase("on")) {
 			builder.scheme("https");
 		}
 
