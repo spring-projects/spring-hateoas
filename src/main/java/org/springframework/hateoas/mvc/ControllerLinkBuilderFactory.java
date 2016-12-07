@@ -121,12 +121,21 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, method, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Object)
 	 */
 	@Override
 	public ControllerLinkBuilder linkTo(Object invocationValue) {
+		return linkTo(ControllerLinkBuilder.getBuilder(), invocationValue);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(UriComponentsBuilder builder, java.lang.Object)
+	 */
+	@Override
+	public ControllerLinkBuilder linkTo(UriComponentsBuilder builder, Object invocationValue) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
@@ -136,7 +145,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		Method method = invocation.getMethod();
 
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
-		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
+		builder.path(mapping);
 
 		UriTemplate template = new UriTemplate(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();

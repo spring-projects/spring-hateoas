@@ -193,6 +193,18 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
+	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
+	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 *
+	 * @param builder
+	 * @param invocationValue
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(UriComponentsBuilder builder, Object invocationValue) {
+		return FACTORY.linkTo(builder, invocationValue);
+	}
+
+	/**
 	 * Wrapper for {@link DummyInvocationUtils#methodOn(Class, Object...)} to be available in case you work with static
 	 * imports of {@link ControllerLinkBuilder}.
 	 * 
@@ -260,8 +272,13 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
-
-		HttpServletRequest request = getCurrentRequest();
+		HttpServletRequest request;
+		try {
+			request = getCurrentRequest();
+		} catch (IllegalStateException e){
+			// not in the context of a Http Request, so return blank UriComponentsBuilder...
+			return UriComponentsBuilder.fromPath("");
+		}
 		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
 		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
