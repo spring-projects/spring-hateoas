@@ -30,6 +30,8 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.util.MultiValueMap;
@@ -283,29 +285,42 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	/**
-	 * @see #122
+	 * @see #122, #169
 	 */
 	@Test
-	public void doesNotAppendParameterForNullRequestParameters() {
+	public void appendsOptionalParameterVariableForUnsetParameter() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalNextPage(null)).withSelfRel();
-		assertThat(link.getHref(), endsWith("/foo"));
+
+		assertThat(link.getVariables(), contains(new TemplateVariable("offset", VariableType.REQUEST_PARAM)));
+		assertThat(link.expand().getHref(), endsWith("/foo"));
 	}
 
 	/**
-	 * @see #122
+	 * @see #122, #169
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsMissingPathVariable() {
-		linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null));
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null))//
+				.withSelfRel();
+
+		exception.expect(IllegalArgumentException.class);
+
+		link.expand();
 	}
 
 	/**
-	 * @see #122
+	 * @see #122, #169
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsMissingRequiredRequestParam() {
-		linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null));
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
+
+		assertThat(link.getVariableNames(), contains("id"));
+
+		link.expand();
 	}
 
 	/**
@@ -473,8 +488,52 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/something/foo?id=Spring%23%0A"));
 	}
 
+	/**
+	 * @see #169
+	 */
+	@Test
+	public void createsPartiallyExpandedLink() {
+
+		Link link = linkTo(methodOn(PersonsAddressesController.class, "some id").getAddressesForCountry(null))
+				.withSelfRel();
+
+		assertThat(link.isTemplated(), is(true));
+		assertThat(link.getHref(), containsString("some%20id"));
+	}
+
+	/**
+	 * @see #169
+	 */
+	@Test
+	public void addsRequestParameterVariablesForMissingRequiredParameter() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, null)).withSelfRel();
+
+		assertThat(link.getVariableNames(), contains("limit"));
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage("limit");
+
+		link.expand();
+	}
+
+	/**
+	 * @see #169
+	 */
+	@Test
+	public void addsOptionalRequestParameterTemplateForMissingValue() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
+
+		assertThat(link.getVariables(), contains(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED)));
+
+		UriComponents components = toComponents(link);
+
+		assertThat(components.getQueryParams().get("query"), is(nullValue()));
+	}
+
 	private static UriComponents toComponents(Link link) {
-		return UriComponentsBuilder.fromUriString(link.getHref()).build();
+		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
 
 	static class Person implements Identifiable<Long> {
@@ -529,7 +588,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		}
 
 		@RequestMapping(value = "/{id}/foo")
-		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam Integer offset,
+		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam(required = false) Integer offset,
 				@RequestParam Integer limit) {
 			return null;
 		}

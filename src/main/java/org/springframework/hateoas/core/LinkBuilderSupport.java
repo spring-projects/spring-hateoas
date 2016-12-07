@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
+import static org.springframework.hateoas.core.EncodingUtils.*;
 import static org.springframework.web.util.UriComponentsBuilder.*;
 
 import java.net.URI;
@@ -85,18 +86,22 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return getThis();
 		}
 
+		return slash(UriComponentsBuilder.fromUriString(path).build(), false);
+	}
+
+	protected T slash(UriComponents components, boolean encoded) {
+
 		String uriString = uriComponents.toUriString();
 		UriComponentsBuilder builder = uriString.isEmpty() ? fromUri(uriComponents.toUri()) : fromUriString(uriString);
 
-		UriComponents components = UriComponentsBuilder.fromUriString(path).build();
-
 		for (String pathSegment : components.getPathSegments()) {
-			builder.pathSegment(pathSegment);
+			builder.pathSegment(encoded ? pathSegment : encodePath(pathSegment));
 		}
 
 		String fragment = components.getFragment();
+
 		if (StringUtils.hasText(fragment)) {
-			builder.fragment(fragment);
+			builder.fragment(encoded ? fragment : encodeFragment(fragment));
 		}
 
 		return createNewInstance(builder.query(components.getQuery()));
@@ -120,7 +125,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#toUri()
 	 */
 	public URI toUri() {
-		return uriComponents.encode().toUri();
+		return uriComponents.encode().toUri().normalize();
 	}
 
 	/*
@@ -128,7 +133,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
 	 */
 	public Link withRel(String rel) {
-		return new Link(this.toString(), rel);
+		return new Link(toString(), rel);
 	}
 
 	/*
@@ -145,7 +150,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 */
 	@Override
 	public String toString() {
-		return toUri().normalize().toASCIIString();
+		return uriComponents.toUriString();
 	}
 
 	/**
