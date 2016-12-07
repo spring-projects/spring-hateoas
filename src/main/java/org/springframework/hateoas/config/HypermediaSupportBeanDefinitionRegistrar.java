@@ -17,7 +17,6 @@ package org.springframework.hateoas.config;
 
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
-import static org.springframework.hateoas.MediaTypes.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -297,9 +296,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider,
 					linkRelationMessageSource, beanFactory));
 
+			HateoasConfigurer hateoasConfigurer = HateoasConfigurerResolver.resolveHateoasConfigurer(beanFactory);
 			MappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 					ResourceSupport.class);
-			halConverter.setSupportedMediaTypes(Arrays.asList(HAL_JSON));
+			halConverter.setSupportedMediaTypes(hateoasConfigurer.getSupportedMediaTypes());
 			halConverter.setObjectMapper(halObjectMapper);
 
 			List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>(converters.size());
