@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.util.StringUtils.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
@@ -32,6 +30,7 @@ import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -260,49 +259,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
-
-		HttpServletRequest request = getCurrentRequest();
-		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
-
-		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
-		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
-		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
-
-		if (hasText(proto)) {
-			builder.scheme(proto);
-		} else if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
-			builder.scheme("https");
-		}
-
-		String host = forwarded.getHost();
-		host = hasText(host) ? host : request.getHeader("X-Forwarded-Host");
-
-		if (!hasText(host)) {
-			return builder;
-		}
-
-		String[] hosts = commaDelimitedListToStringArray(host);
-		String hostToUse = hosts[0];
-
-		if (hostToUse.contains(":")) {
-
-			String[] hostAndPort = split(hostToUse, ":");
-
-			builder.host(hostAndPort[0]);
-			builder.port(Integer.parseInt(hostAndPort[1]));
-
-		} else {
-			builder.host(hostToUse);
-			builder.port(-1); // reset port if it was forwarded from default port
-		}
-
-		String port = request.getHeader("X-Forwarded-Port");
-
-		if (hasText(port)) {
-			builder.port(Integer.parseInt(port));
-		}
-
-		return builder;
+		return UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(getCurrentRequest()));
 	}
 
 	/**
