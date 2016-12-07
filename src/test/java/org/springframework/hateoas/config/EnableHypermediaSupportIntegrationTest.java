@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ import org.springframework.hateoas.core.DelegatingEntityLinks;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -134,6 +136,21 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	/**
+	 * @see #263
+	 */
+	@Test
+	public void registerCustomMediaType() {
+
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(CustomMediaTypeConfig.class);
+		RestTemplate template = context.getBean(RestTemplate.class);
+
+		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(),
+				hasItem(CustomMediaTypeConfig.CUSTOM_TYPE));
+		context.close();
+	}
+
+	/**
 	 * @see #341
 	 */
 	@Test
@@ -216,6 +233,26 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	@Configuration
 	static class ExtendedHalConfig extends HalConfig {
+
+	}
+
+	@Configuration
+	static class CustomMediaTypeConfig extends HalConfig {
+
+		public static final MediaType CUSTOM_TYPE = MediaType.parseMediaType("application/vnd.vendor.resource+json");
+
+		@Bean
+		public HateoasConfigurer hateoasConfigurer()
+		{
+			return new HateoasConfigurer() {
+
+				@Override
+				public List<MediaType> getSupportedMediaTypes() {
+					return Arrays.asList(CUSTOM_TYPE);
+				}
+
+			};
+		}
 
 	}
 
