@@ -18,6 +18,8 @@ package org.springframework.hateoas.mvc;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
+import static org.springframework.util.StringUtils.hasText;
+
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Map;
@@ -51,6 +53,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Greg Turnquist
  * @author Kevin Conaway
  * @author Andrew Naydyonock
+ * @author Oliver Trosien
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -252,14 +255,23 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
-	 * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
-	 * {@code X-Forwarded-Ssl} header
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with tweaked
+	 * scheme tweaked in case the request contains an {@code X-Forwarded-Ssl} header, which is not yet
+	 * supported by the underlying {@link UriComponentsBuilder}.
 	 * 
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
-		return UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(getCurrentRequest()));
+		
+		HttpServletRequest request = getCurrentRequest();
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request));
+		if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+			builder.scheme("https");
+		}
+
+		return builder;
 	}
 
 	/**
