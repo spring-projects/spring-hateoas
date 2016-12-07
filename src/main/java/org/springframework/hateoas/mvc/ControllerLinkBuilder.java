@@ -255,7 +255,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with tweaked
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with
 	 * scheme tweaked in case the request contains an {@code X-Forwarded-Ssl} header, which is not yet
 	 * supported by the underlying {@link UriComponentsBuilder}.
 	 * 
