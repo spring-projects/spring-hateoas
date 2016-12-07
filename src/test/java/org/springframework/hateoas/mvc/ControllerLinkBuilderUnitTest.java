@@ -532,6 +532,30 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(components.getQueryParams().get("query"), is(nullValue()));
 	}
 
+	/**
+	 * @see #509
+	 */
+	@Test
+	public void supportsTwoProxiesAddingXForwardedPort() {
+		request.addHeader("X-Forwarded-Port", "1443,8443");
+		request.addHeader("X-Forwarded-Host", "proxy1,proxy2");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://proxy1:1443"));
+	}
+
+	/**
+	 * @see #509
+	 */
+	@Test
+	public void resolvesAmbiguousXForwardedHeaders() {
+		request.addHeader("X-Forwarded-Proto", "http");
+		request.addHeader("X-Forwarded-Ssl", "on");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
