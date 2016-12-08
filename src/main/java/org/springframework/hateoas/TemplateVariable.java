@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -29,13 +32,15 @@ import org.springframework.util.StringUtils;
  * 
  * @author Oliver Gierke
  */
+@Value
+@EqualsAndHashCode
 public final class TemplateVariable implements Serializable {
 
 	private static final long serialVersionUID = -2731446749851863774L;
 
-	private final String name;
-	private final TemplateVariable.VariableType type;
-	private final String description;
+	String name;
+	TemplateVariable.VariableType type;
+	String description;
 
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name and type.
@@ -63,33 +68,6 @@ public final class TemplateVariable implements Serializable {
 		this.name = name;
 		this.type = type;
 		this.description = description;
-	}
-
-	/**
-	 * Returns the name of the variable.
-	 * 
-	 * @return
-	 */
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * Returns the type of the variable.
-	 * 
-	 * @return the type
-	 */
-	public VariableType getType() {
-		return type;
-	}
-
-	/**
-	 * Returns the description of the variable.
-	 * 
-	 * @return
-	 */
-	public String getDescription() {
-		return description;
 	}
 
 	/**
@@ -142,7 +120,7 @@ public final class TemplateVariable implements Serializable {
 	}
 
 	/**
-	 * Returns whether the variable is a fragement one.
+	 * Returns whether the variable is a fragment one.
 	 * 
 	 * @return
 	 */
@@ -161,46 +139,12 @@ public final class TemplateVariable implements Serializable {
 		return StringUtils.hasText(description) ? String.format("%s - %s", base, description) : base;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-
-		if (obj == this) {
-			return true;
-		}
-
-		if (!(obj instanceof TemplateVariable)) {
-			return false;
-		}
-
-		TemplateVariable that = (TemplateVariable) obj;
-		return this.name.equals(that.name) && this.type.equals(that.type);
-	}
-
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-
-		int result = 17;
-
-		result += this.name.hashCode();
-		result += this.type.hashCode();
-
-		return result;
-	}
-
 	/**
 	 * An enumeration for all supported variable types.
 	 * 
 	 * @author Oliver Gierke
 	 */
-	public static enum VariableType {
+	public enum VariableType {
 
 		PATH_VARIABLE("", false), //
 		REQUEST_PARAM("?", true), //
@@ -208,12 +152,13 @@ public final class TemplateVariable implements Serializable {
 		SEGMENT("/", true), //
 		FRAGMENT("#", true);
 
-		private static final List<VariableType> combinableTypes = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
+		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 
 		private final String key;
 		private final boolean optional;
 
 		private VariableType(String key, boolean optional) {
+
 			this.key = key;
 			this.optional = optional;
 		}
@@ -228,7 +173,7 @@ public final class TemplateVariable implements Serializable {
 		}
 
 		public boolean canBeCombinedWith(VariableType type) {
-			return this.equals(type) || combinableTypes.contains(this) && combinableTypes.contains(type);
+			return this.equals(type) || COMBINABLE_TYPES.contains(this) && COMBINABLE_TYPES.contains(type);
 		}
 
 		/**

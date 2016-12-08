@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas.core;
 
+import lombok.NonNull;
+import lombok.Value;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -79,7 +82,7 @@ public class DummyInvocationUtils {
 		 * @param targetType must not be {@literal null}.
 		 * @param parameters must not be {@literal null}.
 		 */
-		public InvocationRecordingMethodInterceptor(Class<?> targetType, Object... parameters) {
+		InvocationRecordingMethodInterceptor(Class<?> targetType, Object... parameters) {
 
 			Assert.notNull(targetType, "Target type must not be null!");
 			Assert.notNull(parameters, "Parameters must not be null!");
@@ -222,50 +225,11 @@ public class DummyInvocationUtils {
 		return result;
 	}
 
+	@Value
 	static class SimpleMethodInvocation implements MethodInvocation {
 
-		private final Class<?> targetType;
-		private final Method method;
-		private final Object[] arguments;
-
-		/**
-		 * Creates a new {@link SimpleMethodInvocation} for the given {@link Method} and arguments.
-		 * 
-		 * @param method
-		 * @param arguments
-		 */
-		private SimpleMethodInvocation(Class<?> targetType, Method method, Object[] arguments) {
-
-			this.targetType = targetType;
-			this.arguments = arguments;
-			this.method = method;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation#getTargetType()
-		 */
-		@Override
-		public Class<?> getTargetType() {
-			return targetType;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation#getArguments()
-		 */
-		@Override
-		public Object[] getArguments() {
-			return arguments;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation#getMethod()
-		 */
-		@Override
-		public Method getMethod() {
-			return method;
-		}
+		@NonNull Class<?> targetType;
+		@NonNull Method method;
+		@NonNull Object[] arguments;
 	}
 }

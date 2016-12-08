@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
+import lombok.EqualsAndHashCode;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,9 +35,10 @@ import org.springframework.util.Assert;
  * 
  * @author Oliver Gierke
  */
+@EqualsAndHashCode
 public final class TemplateVariables implements Iterable<TemplateVariable>, Serializable {
 
-	public static TemplateVariables NONE = new TemplateVariables();
+	public static final TemplateVariables NONE = new TemplateVariables();
 	private static final long serialVersionUID = -7736592281223783079L;
 
 	private final List<TemplateVariable> variables;
@@ -171,34 +174,5 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		}
 
 		return builder.append("}").toString();
-	}
-
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof TemplateVariables)) {
-			return false;
-		}
-
-		TemplateVariables that = (TemplateVariables) obj;
-
-		return this.variables.equals(that.variables);
-	}
-
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return this.variables.hashCode();
 	}
 }

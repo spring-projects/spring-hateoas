@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +28,7 @@ import java.util.HashSet;
  * @see http://www.iana.org/assignments/link-relations/link-relations.xhtml
  * @author Oliver Gierke
  */
+@UtilityClass
 public class IanaRels {
 
 	private static final Collection<String> RELS;
@@ -36,13 +39,13 @@ public class IanaRels {
 
 		rels.addAll(Arrays.asList("about", "alternate", "appendix", "archives", "author", "bookmark", "canonical",
 				"chapter", "collection", "contents", "copyright", "create-form", "current", "describedby", "describes",
-				"disclosure", "duplicate", "edit", "edit-form", "edit-media", "enclosure", "first", "glossary", "help",
-				"hosts", "hub", "icon", "index", "item", "last", "latest-version", "license", "lrdd", "memento", "monitor",
-				"monitor-group", "next", "next-archive", "nofollow", "noreferrer", "original", "payment",
-				"predecessor-version", "prefetch", "prev", "preview", "previous", "prev-archive", "privacy-policy", "profile",
-				"related", "replies", "search", "section", "self", "service", "start", "stylesheet", "subsection",
-				"successor-version", "tag", "terms-of-service", "timegate", "timemap", "type", "up", "version-history", "via",
-				"working-copy", "working-copy-of"));
+				"disclosure", "duplicate", "edit", "edit-form", "edit-media", "enclosure", "first", "glossary", "help", "hosts",
+				"hub", "icon", "index", "item", "last", "latest-version", "license", "lrdd", "memento", "monitor",
+				"monitor-group", "next", "next-archive", "nofollow", "noreferrer", "original", "payment", "predecessor-version",
+				"prefetch", "prev", "preview", "previous", "prev-archive", "privacy-policy", "profile", "related", "replies",
+				"search", "section", "self", "service", "start", "stylesheet", "subsection", "successor-version", "tag",
+				"terms-of-service", "timegate", "timemap", "type", "up", "version-history", "via", "working-copy",
+				"working-copy-of"));
 
 		RELS = Collections.unmodifiableCollection(rels);
 	}
