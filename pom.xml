@@ -60,6 +60,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.3.4.RELEASE</spring.version>
 		<logback.version>1.1.7</logback.version>
+		<jacoco>0.7.7.201606060606</jacoco>
+		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson.version>2.8.5</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
@@ -137,6 +139,34 @@
 				</plugins>
 			</build>
 
+		</profile>
+
+		<profile>
+
+			<!-- Profile for SonarQube -->
+
+			<id>sonarqube</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco}</version>
+						<configuration>
+							<destFile>${jacoco.destfile}</destFile>
+						</configuration>
+						<executions>
+							<execution>
+								<id>jacoco-initialize</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 
 		<profile>
