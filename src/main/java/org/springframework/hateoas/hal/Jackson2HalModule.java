@@ -85,7 +85,6 @@ public class Jackson2HalModule extends SimpleModule {
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-        setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
 	}
 
 	/**
