@@ -322,11 +322,11 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 				return value;
 			}
 
-			if (annotation.required()) {
-				return annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? SKIP_VALUE : null;
+			if (!annotation.required()) {
+				return SKIP_VALUE;
 			}
 
-			return value == null ? SKIP_VALUE : value;
+			return annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? SKIP_VALUE : null;
 		}
 	}
 }
