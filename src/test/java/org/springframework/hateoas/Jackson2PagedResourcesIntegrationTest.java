@@ -48,7 +48,7 @@ public class Jackson2PagedResourcesIntegrationTest {
 	static {
 
 		try {
-			SPRING_4_2_WRITE_METHOD = MappingJackson2HttpMessageConverter.class.getMethod("write", Object.class, Type.class,
+			SPRING_4_2_WRITE_METHOD = MappingJackson2HttpMessageConverter.class.getMethod("writeInternal", Object.class, Type.class,
 					MediaType.class, HttpOutputMessage.class);
 		} catch (Exception e) {}
 	}

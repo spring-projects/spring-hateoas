@@ -121,7 +121,6 @@ public class DefaultCurieProvider implements CurieProvider {
 
 	private Link buildCurie(String name, String title, UriTemplate uriTemplate) {
 		Assert.hasText(name, "curie prefix must not be null or empty");
-		Assert.hasText(title, "curie title must not be null or empty");
 		Assert.isTrue(uriTemplate.getVariableNames().size() == 1,
 				String.format("Expected a single template variable in the UriTemplate %s!", uriTemplate.toString()));
 
