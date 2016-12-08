@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package org.springframework.hateoas.support;
 
-import java.util.Iterator;
-
 import net.minidev.json.JSONArray;
+
+import java.util.Iterator;
 
 import org.springframework.web.client.RestTemplate;
 
@@ -30,7 +30,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 17;
+	private static final int MILESTONE_ID = 20;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) throws Exception {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ package org.springframework.hateoas.mvc;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 
 /**
  * Unit tests for {@link TypeConstrainedMappingJackson2HttpMessageConverter}.
@@ -40,30 +40,41 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	}
 
 	/**
-	 * @see #219
+	 * @see #219, #360
 	 */
 	@Test
 	public void canReadTypeIfAssignableToConfiguredType() {
 
-		HttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				ResourceSupport.class);
 
-		assertThat(converter.canRead(Object.class, MediaType.APPLICATION_JSON), is(false));
-		assertThat(converter.canRead(ResourceSupport.class, MediaType.APPLICATION_JSON), is(true));
-		assertThat(converter.canRead(Resource.class, MediaType.APPLICATION_JSON), is(true));
+		assertCanRead(converter, Object.class, false);
+		assertCanRead(converter, ResourceSupport.class, true);
+		assertCanRead(converter, Resource.class, true);
 	}
 
 	/**
-	 * @see #219
+	 * @see #219, #360
 	 */
 	@Test
 	public void canWriteTypeIfAssignableToConfiguredType() {
 
-		HttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				ResourceSupport.class);
 
-		assertThat(converter.canWrite(Object.class, MediaType.APPLICATION_JSON), is(false));
-		assertThat(converter.canWrite(ResourceSupport.class, MediaType.APPLICATION_JSON), is(true));
-		assertThat(converter.canWrite(Resource.class, MediaType.APPLICATION_JSON), is(true));
+		assertCanWrite(converter, Object.class, false);
+		assertCanWrite(converter, ResourceSupport.class, true);
+		assertCanWrite(converter, Resource.class, true);
+	}
+
+	private static void assertCanRead(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
+
+		assertThat(converter.canRead(type, APPLICATION_JSON), is(expected));
+		assertThat(converter.canRead(type, type, APPLICATION_JSON), is(expected));
+	}
+
+	private static void assertCanWrite(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
+
+		assertThat(converter.canWrite(type, APPLICATION_JSON), is(expected));
 	}
 }

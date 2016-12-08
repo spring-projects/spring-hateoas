@@ -54,6 +54,7 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAda
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -132,6 +133,19 @@ public class EnableHypermediaSupportIntegrationTest {
 		RestTemplate template = context.getBean(RestTemplate.class);
 
 		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		context.close();
+	}
+
+	/**
+	 * @see #341
+	 */
+	@Test
+	public void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+
+		assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES), is(false));
 		context.close();
 	}
 

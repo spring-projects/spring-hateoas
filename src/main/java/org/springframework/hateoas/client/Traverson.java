@@ -58,6 +58,8 @@ import com.jayway.jsonpath.JsonPath;
  * @see https://github.com/basti1302/traverson
  * @author Oliver Gierke
  * @author Dietrich Schulten
+ * @author Greg Turnquist
+ * @author Tom Bunting
  * @since 0.11
  */
 public class Traverson {
@@ -184,8 +186,8 @@ public class Traverson {
 	 */
 	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
 
-		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS : new LinkDiscoverers(
-				OrderAwarePluginRegistry.create(discoverer));
+		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS
+				: new LinkDiscoverers(OrderAwarePluginRegistry.create(discoverer));
 
 		return this;
 	}
@@ -199,6 +201,16 @@ public class Traverson {
 	 */
 	public TraversalBuilder follow(String... rels) {
 		return new TraversalBuilder().follow(rels);
+	}
+
+	/**
+	 * Sets up a {@link TraversalBuilder} for a single rel with customized details.
+	 *
+	 * @param hop must not be {@literal null}
+	 * @return
+	 */
+	public TraversalBuilder follow(Hop hop) {
+		return new TraversalBuilder().follow(hop);
 	}
 
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
@@ -220,7 +232,7 @@ public class Traverson {
 	 */
 	public class TraversalBuilder {
 
-		private List<String> rels = new ArrayList<String>();
+		private List<Hop> rels = new ArrayList<Hop>();
 		private Map<String, Object> templateParameters = new HashMap<String, Object>();
 		private HttpHeaders headers = new HttpHeaders();
 
@@ -233,11 +245,30 @@ public class Traverson {
 		 * @param rels must not be {@literal null}.
 		 * @return
 		 */
-		private TraversalBuilder follow(String... rels) {
+		public TraversalBuilder follow(String... rels) {
 
 			Assert.notNull(rels, "Rels must not be null!");
 
-			this.rels.addAll(Arrays.asList(rels));
+			for (String rel : rels) {
+				this.rels.add(Hop.rel(rel));
+			}
+			return this;
+		}
+
+		/**
+		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
+		 * line.
+		 *
+		 * @param hop must not be {@literal null}.
+		 * @return
+		 * @see Hop#rel(String)
+		 */
+		public TraversalBuilder follow(Hop hop) {
+
+			Assert.notNull(hop, "Hop must not be null!");
+
+			this.rels.add(hop);
+
 			return this;
 		}
 
@@ -275,7 +306,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -288,7 +319,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
 		}
 
 		/**
@@ -302,7 +333,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), String.class)
+			String forObject = operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), String.class)
 					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
@@ -316,7 +347,7 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToFinalUrl(true), GET, prepareRequest(headers), type);
+			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type);
 		}
 
 		/**
@@ -344,39 +375,53 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(traverseToFinalUrl(expandFinalUrl), rels.get(rels.size() - 1));
+			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().toString() : traverseToFinalUrl(),
+					rels.get(rels.size() - 1).getRel());
 		}
 
-		private String traverseToFinalUrl(boolean expandFinalUrl) {
+		private String traverseToFinalUrl() {
 
 			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			UriTemplate uriTemplate = new UriTemplate(uri);
-			return expandFinalUrl ? uriTemplate.expand(templateParameters).toString() : uriTemplate.toString();
+			return new UriTemplate(uri).toString();
 		}
 
-		private String getAndFindLinkWithRel(String uri, Iterator<String> rels) {
+		private URI traverseToExpandedFinalUrl() {
+
+			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
+			return new UriTemplate(uri).expand(templateParameters);
+		}
+
+		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
 
 			if (!rels.hasNext()) {
 				return uri;
 			}
 
 			HttpEntity<?> request = prepareRequest(headers);
-			UriTemplate uriTemplate = new UriTemplate(uri);
+			UriTemplate template = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = operations.exchange(uriTemplate.expand(templateParameters), GET, request,
-					String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 
-			Rel rel = Rels.getRelFor(rels.next(), discoverers);
+			Hop thisHop = rels.next();
+
+			Rel rel = Rels.getRelFor(thisHop.getRel(), discoverers);
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
-				throw new IllegalStateException(String.format("Expected to find link with rel '%s' in response %s!", rel,
-						responseBody));
+				throw new IllegalStateException(
+						String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody));
 			}
 
-			return getAndFindLinkWithRel(link.getHref(), rels);
+			/**
+			 * Don't expand if the parameters are empty
+			 */
+			if (!thisHop.hasParameters()) {
+				return getAndFindLinkWithRel(link.getHref(), rels);
+			} else {
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels);
+			}
 		}
 	}
 }

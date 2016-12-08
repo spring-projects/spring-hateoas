@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas;
+package org.springframework.hateoas.client;
 
-import org.springframework.http.MediaType;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * Constants for well-known hypermedia types.
- * 
- * @author Oliver Gierke
- * @author Przemek Nowak
- */
-public class MediaTypes {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class Item {
 
-	/**
-	 * A String equivalent of {@link MediaTypes#HAL_JSON}.
-	 */
-	public static final String HAL_JSON_VALUE = "application/hal+json";
+	String image;
+	String description;
 
-	/**
-	 * Public constant media type for {@code application/hal+json}.
-	 */
-	public static final MediaType HAL_JSON = MediaType.valueOf(HAL_JSON_VALUE);
+	Item(@JsonProperty("image") String image, @JsonProperty("description") String description) {
+		this.image = image;
+		this.description = description;
+	}
 }

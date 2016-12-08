@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,9 +45,13 @@ import static org.springframework.util.StringUtils.split;
  * 
  * @author Oliver Gierke
  * @author Kamill Sokol
+ * @author Greg Turnquist
+ * @author Kevin Conaway
+ * @author Andrew Naydyonock
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
+	private static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 
@@ -57,6 +62,15 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	ControllerLinkBuilder(UriComponentsBuilder builder) {
 		super(builder);
+	}
+
+	/**
+	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponents}.
+	 *
+	 * @param uriComponents must not be {@literal null}.
+	 */
+	ControllerLinkBuilder(UriComponents uriComponents) {
+		super(uriComponents);
 	}
 
 	/**
@@ -80,15 +94,37 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
 
-		Assert.notNull(controller);
+		Assert.notNull(controller, "Controller must not be null!");
+		Assert.notNull(parameters, "Parameters must not be null!");
 
-		ControllerLinkBuilder builder = new ControllerLinkBuilder(getBuilder());
 		String mapping = DISCOVERER.getMapping(controller);
 
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
 		UriComponents expandedComponents = uriComponents.expand(parameters);
 
-		return builder.slash(expandedComponents);
+		return new ControllerLinkBuilder(getBuilder()).slash(expandedComponents);
+	}
+
+	/**
+	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
+	 * Parameter map is used to fill up potentially available path variables in the class scope request mapping.
+	 *
+	 * @param controller the class to discover the annotation on, must not be {@literal null}.
+	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
+	 *          {@literal null}.
+	 * @return
+	 */
+	public static ControllerLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
+
+		Assert.notNull(controller, "Controller must not be null!");
+		Assert.notNull(parameters, "Parameters must not be null!");
+
+		String mapping = DISCOVERER.getMapping(controller);
+
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
+		UriComponents expandedComponents = uriComponents.expand(parameters);
+
+		return new ControllerLinkBuilder(getBuilder()).slash(expandedComponents);
 	}
 
 	/*
@@ -117,10 +153,10 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 * 
 	 * <pre>
-	 * @RequestMapping("/customers")
+	 * &#64;RequestMapping("/customers")
 	 * class CustomerController {
 	 * 
-	 *   @RequestMapping("/{id}/addresses")
+	 *   &#64;RequestMapping("/{id}/addresses")
 	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
 	 * }
 	 * 
@@ -243,7 +279,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	private static HttpServletRequest getCurrentRequest() {
 
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
+		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
 		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.StringUtils;
 
@@ -29,6 +31,8 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  */
 public class Links implements Iterable<Link> {
+
+	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>;rel=\"[^\"]*\")");
 
 	static final Links NO_LINKS = new Links(Collections.<Link> emptyList());
 
@@ -109,12 +113,12 @@ public class Links implements Iterable<Link> {
 			return NO_LINKS;
 		}
 
-		String[] elements = source.split(",");
-		List<Link> links = new ArrayList<Link>(elements.length);
+		Matcher matcher = LINK_HEADER_PATTERN.matcher(source);
+		List<Link> links = new ArrayList<Link>();
 
-		for (String element : elements) {
+		while (matcher.find()) {
 
-			Link link = Link.valueOf(element);
+			Link link = Link.valueOf(matcher.group());
 
 			if (link != null) {
 				links.add(link);
@@ -122,6 +126,7 @@ public class Links implements Iterable<Link> {
 		}
 
 		return new Links(links);
+
 	}
 
 	/**

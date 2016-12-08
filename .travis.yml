@@ -4,8 +4,8 @@ jdk:
 env:
   matrix:
     - PROFILE=non-existant
-    - PROFILE=spring41
-    - PROFILE=spring41-next
+    - PROFILE=spring42
+    - PROFILE=spring43
     - PROFILE=spring42-next
 cache:
   directories:

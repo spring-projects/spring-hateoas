@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Unit tests for {@link AnnotationMappingDiscoverer}.
  * 
  * @author Oliver Gierke
+ * @author Kevin Conaway
  */
 public class AnnotationMappingDiscovererUnitTest {
 
@@ -97,6 +98,47 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(ChildWithTypeMapping.class, method), is("/child/parent"));
 	}
 
+	/**
+	 * @see #269
+	 */
+	@Test
+	public void handlesSlashes() throws Exception {
+
+		Method method = ControllerWithoutSlashes.class.getMethod("noslash");
+		assertThat(discoverer.getMapping(method), is("slashes/noslash"));
+
+		method = ControllerWithoutSlashes.class.getMethod("withslash");
+		assertThat(discoverer.getMapping(method), is("slashes/withslash"));
+
+		method = ControllerWithTrailingSlashes.class.getMethod("noslash");
+		assertThat(discoverer.getMapping(method), is("trailing/noslash"));
+
+		method = ControllerWithTrailingSlashes.class.getMethod("withslash");
+		assertThat(discoverer.getMapping(method), is("trailing/withslash"));
+	}
+
+	/**
+	 * @see #269
+	 */
+	@Test
+	public void removesMultipleSlashes() throws Exception {
+
+		Method method = ControllerWithMultipleSlashes.class.getMethod("withslash");
+
+		assertThat(discoverer.getMapping(method), is("trailing/withslash"));
+	}
+
+	/**
+	 * @see #186
+	 */
+	@Test
+	public void usesFirstMappingInCaseMultipleOnesAreDefined() throws Exception {
+
+		Method method = MultipleMappingsController.class.getMethod("method");
+
+		assertThat(discoverer.getMapping(method), is("/type/method"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -139,4 +181,38 @@ public class AnnotationMappingDiscovererUnitTest {
 
 	@RequestMapping("/child")
 	interface ChildWithTypeMapping extends ParentWithMethod {}
+
+	@RequestMapping("slashes")
+	interface ControllerWithoutSlashes {
+
+		@RequestMapping("noslash")
+		void noslash();
+
+		@RequestMapping("/withslash")
+		void withslash();
+	}
+
+	@RequestMapping("trailing/")
+	interface ControllerWithTrailingSlashes {
+
+		@RequestMapping("noslash")
+		void noslash();
+
+		@RequestMapping("/withslash")
+		void withslash();
+	}
+
+	@RequestMapping("trailing///")
+	interface ControllerWithMultipleSlashes {
+
+		@RequestMapping("////withslash")
+		void withslash();
+	}
+
+	@RequestMapping({ "/type", "/typeAlias" })
+	interface MultipleMappingsController {
+
+		@RequestMapping({ "/method", "/methodAlias" })
+		void method();
+	}
 }

@@ -8,9 +8,9 @@ Import-Template:
  javax.servlet.*;version="[2.5,4.0)";resolution:=optional,
  javax.ws.rs.*;version="${jaxrs.version:[=.=.=,+1.0.0)}";resolution:=optional,
  javax.xml.bind.*;version="0",
+ lombok.*;version="0";resolution:=optional,
  net.minidev.json.*;version="${minidevjson.version:[=.=.=,+1.0.0)}";resolution:=optional,
  org.aopalliance.*;version="[1.0.0,2.0.0)";resolution:=optional,
  org.atteo.evo.inflector.*;version="${evo.version:[=.=.=,+1.0.0)}";resolution:=optional,
- org.objenesis.*;version="${objenesis.version:[=.=.=,+1.0.0)}",
  org.springframework.plugin.*;version="[0.8.0,2.0.0)";resolution:=optional,
  org.springframework.*;version="${spring.version:[=.=.=,+1.1.0)}";resolution:=optional

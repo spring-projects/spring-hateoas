@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
@@ -51,6 +52,7 @@ import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
@@ -60,6 +62,7 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAda
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -80,6 +83,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
 	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
 	private static final String HAL_OBJECT_MAPPER_BEAN_NAME = "_halObjectMapper";
+	private static final String MESSAGE_SOURCE_BEAN_NAME = "linkRelationMessageSource";
 
 	private static final boolean JACKSON2_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
 			null);
@@ -117,6 +121,9 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				BeanDefinitionBuilder halQueryMapperBuilder = rootBeanDefinition(ObjectMapper.class);
 				registerSourcedBeanDefinition(halQueryMapperBuilder, metadata, registry, HAL_OBJECT_MAPPER_BEAN_NAME);
+
+				BeanDefinitionBuilder customizerBeanDefinition = rootBeanDefinition(DefaultObjectMapperCustomizer.class);
+				registerSourcedBeanDefinition(customizerBeanDefinition, metadata, registry);
 
 				BeanDefinitionBuilder builder = rootBeanDefinition(Jackson2ModuleRegisteringBeanPostProcessor.class);
 				registerSourcedBeanDefinition(builder, metadata, registry);
@@ -287,9 +294,12 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
             halObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             halObjectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+			MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
+					MessageSourceAccessor.class);
 
 			halObjectMapper.registerModule(new Jackson2HalModule());
-			halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider));
+			halObjectMapper.setHandlerInstantiator(
+					new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider, linkRelationMessageSource));
 
 			MappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 					ResourceSupport.class);
@@ -309,6 +319,41 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			} catch (NoSuchBeanDefinitionException e) {
 				return null;
 			}
+		}
+	}
+
+	/**
+	 * {@link BeanPostProcessor} to disable the default HAL {@link ObjectMapper} to fail on unknown properties. Needed as
+	 * the methods to do that on {@link Jackson2ObjectMapperFactoryBean} were introduced in Spring 4.1 only.
+	 *
+	 * @author Oliver Gierke
+	 */
+	private static class DefaultObjectMapperCustomizer implements BeanPostProcessor {
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization(java.lang.Object, java.lang.String)
+		 */
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+
+			if (!HAL_OBJECT_MAPPER_BEAN_NAME.equals(beanName)) {
+				return bean;
+			}
+
+			ObjectMapper mapper = (ObjectMapper) bean;
+			mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+			return mapper;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
+		 */
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			return bean;
 		}
 	}
 }
