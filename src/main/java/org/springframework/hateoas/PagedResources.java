@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 @XmlRootElement(name = "pagedEntities")
 public class PagedResources<T> extends Resources<T> {
-	
+	public static final Link CURIE_REQUIRED_LINK = new Link("will_not_render", "will_not_render");
 	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
 
 	private PageMetadata metadata;

@@ -66,7 +66,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.1.9.RELEASE</spring.version>
 		<logback.version>1.1.7</logback.version>
-		<jackson.version>2.5.5</jackson.version>
+		<jackson.version>2.4.6</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>

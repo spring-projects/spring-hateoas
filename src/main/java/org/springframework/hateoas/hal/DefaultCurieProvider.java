@@ -115,7 +115,7 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public String getNamespacedRelFor(String rel) {
 
-		boolean prefixingNeeded = !IanaRels.isIanaRel(rel) && !rel.contains(":");
+		boolean prefixingNeeded = defaultCurie != null && !IanaRels.isIanaRel(rel) && !rel.contains(":");
 		return prefixingNeeded ? String.format("%s:%s", defaultCurie.getName(), rel) : rel;
 	}
 
