@@ -229,11 +229,18 @@ public class Jackson2HalModule extends SimpleModule {
             if (title == null) {
                 title = getTitle(rel.contains(":") ? rel.substring(rel.indexOf(":") + 1) : rel);
             }
+
+            if(title == null){
+                title = link.getTitle();
+            }
+
             Link.Builder linkBuilder = new Link.Builder()
-                    .name(link.getName())
-                    .href(link.getHref())
                     .rel(link.getRel())
-                    .title(title);
+                    .href(link.getHref())
+                    .name(link.getName())
+                    .title(title)
+                    .profile(link.getProfile());
+
             if (link.getPreferCollections()) {
                 linkBuilder.preferCollections();
             }
