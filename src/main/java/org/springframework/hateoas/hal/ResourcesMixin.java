@@ -28,7 +28,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@JsonPropertyOrder({ "content", "links" })
+
+/**
+ * Default json order was inversed. According to business needs we required _links to be first.
+ * Please see <a href="https://wiki.inbcu.com/display/NEWSCONTAPI/Spring+HATEOAS">wiki</a> 
+ * for more information.
+ */
+@JsonPropertyOrder({ "links", "content" })
 public abstract class ResourcesMixin<T> extends Resources<T> {
 
 	@Override

@@ -140,6 +140,11 @@ public class Jackson2HalModule extends SimpleModule {
         /*
          * (non-Javadoc)
          * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+         * 
+         * This method was modified to be compatible with jackson 2.4.6 API. Version 2.4.6 is required to be 
+         * compatible with jackson version in CW API. Curies generation logic was modified.
+         * Please see <a href="https://wiki.inbcu.com/display/NEWSCONTAPI/Spring+HATEOAS">wiki</a> 
+         * for more information.
          */
         @Override
         public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
@@ -151,9 +156,20 @@ public class Jackson2HalModule extends SimpleModule {
 
             boolean prefixingRequired = curieProvider != null;
             boolean curiedLinkPresent = false;
-
+            boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
+            
+//            Was disabled because 2.4.6 don't support jgen.getCurrentValue().
+//            Object currentValue = jgen.getCurrentValue();
+//
+//            if (currentValue instanceof Resources) {
+//                if (mapper.hasCuriedEmbed((Resources<?>) currentValue)) {
+//                    curiedLinkPresent = true;
+//                }
+//            }
+//            
             for (Link link : value) {
 
+                // CURIE_REQUIRED_LINK link is used to trigger curies on paginated resources. We don't serialize it.
                 if (link.equals(PagedResources.CURIE_REQUIRED_LINK)) {
                     curiedLinkPresent = true;
                     continue;
@@ -171,13 +187,12 @@ public class Jackson2HalModule extends SimpleModule {
                 }
 
                 links.add(link);
-                //sortedLinks.get(rel).add(getHalLink(link));
                 Link halLink = getHalLink(link);
                 sortedLinks.get(rel).add(halLink);
 
             }
 
-            if (prefixingRequired && curiedLinkPresent) {
+            if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
                 sortedLinks.put("curies", new ArrayList<Object>(curieProvider.getCurieInformation(new Links(links))));
             }
@@ -348,6 +363,7 @@ public class Jackson2HalModule extends SimpleModule {
 
         public HalResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
 
+            // Was rewritten to be compatible with  2.4.6 jackson.
             //super(TypeFactory.defaultInstance().constructType(Collection.class));
             super(Collection.class, false);
 
