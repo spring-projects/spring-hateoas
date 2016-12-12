@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ public class LinksUnitTest {
 
 	static final String FIRST = "</something>;rel=\"foo\"";
 	static final String SECOND = "</somethingElse>;rel=\"bar\"";
+	static final String WITH_COMMA = "<http://localhost:8080/test?page=0&filter=foo,bar>;rel=\"foo\"";
 
 	static final String LINKS = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIRST, SECOND));
 
@@ -59,5 +60,21 @@ public class LinksUnitTest {
 	@Test
 	public void getSingleLinkByRel() {
 		assertThat(reference.getLink("bar"), is(new Link("/somethingElse", "bar")));
+	}
+
+	/**
+	 * @see #440
+	 */
+	@Test
+	public void parsesLinkWithComma() {
+
+		Link withComma = new Link("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
+
+		assertThat(Links.valueOf(WITH_COMMA).getLink("foo"), is(withComma));
+
+		Links twoWithCommaInFirst = Links.valueOf(WITH_COMMA.concat(",").concat(SECOND));
+
+		assertThat(twoWithCommaInFirst.getLink("foo"), is(withComma));
+		assertThat(twoWithCommaInFirst.getLink("bar"), is(new Link("/somethingElse", "bar")));
 	}
 }

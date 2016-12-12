@@ -1,0 +1,27 @@
+{
+  "_links" : {
+    "self" : {
+      "href" : "%s/springagram/items{?projection}",
+      "templated" : true
+    }
+  },
+  "_embedded" : {
+    "items" : [ {
+      "description" : "cat",
+      "_links" : {
+        "self" : {
+          "href" : "%s/springagram/items/1{?projection}",
+          "templated" : true
+        }
+      }
+    }, {
+      "description" : "caterpillar",
+      "_links" : {
+        "self" : {
+          "href" : "%s/springagram/items/2{?projection}",
+          "templated" : true
+        }
+      }
+    } ]
+  }
+}

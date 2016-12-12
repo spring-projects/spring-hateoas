@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 
@@ -28,6 +29,8 @@ import org.springframework.util.Assert;
  * @author Oliver Gierke
  */
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
+
+	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("\\/{2,}");
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
@@ -67,11 +70,6 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		String[] mapping = getMappingFrom(findAnnotation(type, annotationType));
 
-		if (mapping.length > 1) {
-			throw new IllegalStateException(String.format("Multiple class level mappings defined on class %s!",
-					type.getName()));
-		}
-
 		return mapping.length == 0 ? null : mapping[0];
 	}
 
@@ -97,19 +95,13 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		Assert.notNull(method, "Method must not be null!");
 
 		String[] mapping = getMappingFrom(findAnnotation(method, annotationType));
-
-		if (mapping.length > 1) {
-			throw new IllegalStateException(String.format("Multiple method level mappings defined on method %s!",
-					method.toString()));
-		}
-
 		String typeMapping = getMapping(type);
 
 		if (mapping == null || mapping.length == 0) {
 			return typeMapping;
 		}
 
-		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : typeMapping + mapping[0];
+		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : join(typeMapping, mapping[0]);
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {
@@ -126,5 +118,16 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		throw new IllegalStateException(String.format(
 				"Unsupported type for the mapping attribute! Support String and String[] but got %s!", value.getClass()));
+	}
+
+	/**
+	 * Joins the given mappings making sure exactly one slash.
+	 * 
+	 * @param typeMapping must not be {@literal null} or empty.
+	 * @param mapping must not be {@literal null} or empty.
+	 * @return
+	 */
+	private static String join(String typeMapping, String mapping) {
+		return MULTIPLE_SLASHES.matcher(typeMapping.concat("/").concat(mapping)).replaceAll("/");
 	}
 }

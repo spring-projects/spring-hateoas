@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mvc;
 
+import java.lang.reflect.Type;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
@@ -24,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Extension of {@link MappingJackson2HttpMessageConverter} to constrain the ability to read and write HTTP message
  * based on the target type. Useful in case the {@link ObjectMapper} about to be configured has customizations that
- * sholny be applied to object trees of a certain base type.
+ * shall only be applied to object trees of a certain base type.
  * 
  * @author Oliver Gierke
  */
@@ -50,6 +52,16 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return type.isAssignableFrom(clazz) && super.canRead(clazz, mediaType);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.http.converter.json.MappingJackson2HttpMessageConverter#canRead(java.lang.reflect.Type, java.lang.Class, org.springframework.http.MediaType)
+	 */
+	@Override
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		return this.type.isAssignableFrom(getJavaType(type, contextClass).getRawClass())
+				&& super.canRead(type, contextClass, mediaType);
 	}
 
 	/* 

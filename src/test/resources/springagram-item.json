@@ -1,0 +1,10 @@
+{
+  "image" : "%s/springagram/file/cat",
+  "description" : "cat",
+  "_links" : {
+    "self" : {
+      "href" : "%s/springagram/items/1{?projection}",
+      "templated" : true
+    }
+  }
+}

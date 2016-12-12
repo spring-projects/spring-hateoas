@@ -20,13 +20,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.objenesis.ObjenesisStd;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -149,7 +149,8 @@ public class DummyInvocationUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor, ClassLoader classLoader) {
+	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
+			ClassLoader classLoader) {
 
 		if (type.isInterface()) {
 

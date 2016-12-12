@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * 
  * @author Oliver Gierke
  */
-public class JacksonSerializationTests {
+public class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
@@ -87,7 +87,7 @@ public class JacksonSerializationTests {
 				builder.append(scanner.nextLine());
 
 				if (scanner.hasNextLine()) {
-					builder.append("\n");
+					builder.append(System.getProperty("line.separator"));
 				}
 			}
 

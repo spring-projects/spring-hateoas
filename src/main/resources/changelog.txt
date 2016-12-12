@@ -1,6 +1,60 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.20.0.RELEASE (2016-06-06)
+----------------------------------------------
+- #458 - Release 0.20.
+- #457 - Move to Lombok's non-experimental Builder in ALPS types.
+- #455 - Assert compatibility with Jackson 2.7.
+- #449 - Add IDE formatter presets.
+- #440 - Given link header is not RFC5988 compliant.
+- #432 - Add code of conduct.
+- #423 - Make sure URL parts are joined correctly.
+- #422, #398 Remove unnecessary URI conversion.
+- #421 - DefaultCurieProvider should dynamically prepend application base URI.
+- #398 - ControllerLinkBuilder does not handle special query parameter characters correctly.
+- #397 - Fixed typos.
+- #390 - Rename missing Tests to Test for Maven support.
+- #388 - Rename ForwardedHeaderUnitTests to test to be picked up by Maven.
+- #383 - Reintroduce general compatibility with Jackson 2.4.
+- #382 - Fixed Traverson double encoding issue.
+- #381 - Upgrade Spring 4.2 build profile to Spring 4.2.1.RELEASE.
+- #380 - Make sure all integration tests run in Maven build.
+- #372 - Added support for Map parameters to LinkBuilderFactory.linkTo(…).
+- #362 - Add ResourceProcessor support magic from Spring Data REST.
+- #337 - Traverson's double encodes URIs.
+- #269 - linkTo(methodOn(…)) sometimes misses slashes.
+- #186 - Allow multiple mappings on type and method level.
+
+Changes in version 0.19.0.RELEASE (2015-09-01)
+----------------------------------------------
+- #379 - Release 0.19.0.
+- #378 - Add title attributes for HAL links derived from resource bundle.
+- #376 - Compile against latest JAX-RS API.
+- #375 - TrueOnlyBooleanSerializer.isEmpty(…) not honored on Jackson 2.6.
+- #363 - Support for multiple Curie namespaces in the same application.
+- #320 - Improve curie rendering in case no namespaced links are present.
+
+Changes in version 0.18.0.RELEASE (2015-08-04)
+----------------------------------------------
+- #369 - Traverson's getAndFindLinkWithRel(…) needs to expand given URI defensively.
+- #368 - Assert Jackson 2.6 compatibility.
+- #364 - Added missing parentheses in reference documentation.
+- #360 - TypeConstrainedMappingJackson2HttpMessageConverter needs to override canRead(Type, Class<?>, MediaType).
+- #356 - #355 - Clean up Traverson section and explain Resources vs. Resource.
+- #355 - Traverson docs need more cleanup.
+- #353 - Release 0.18.0.
+- #347 - Augment .gitignore to contain exclusions for Intellij.
+- #342 - Augment error message when building links outside of an MVC request.
+- #341 - ObjectMapper used for default HAL converter should not fail on unknown properties.
+- #332 - Inconsistent behavior when using linkTo(methodOn()) on handler methods.
+- #331 - Inconsistent behavior when using linkTo(methodOn()) on handler methods with defaultValue attribute set on @RequestParam.
+- #329 - #247 - Added HAL_JSON_VALUE in MediaTypes class.
+- #322 - Upgrade to Spring Plugin 1.2.0.
+- #321 - Remove dependency to Objenesis.
+- #314 - JSON-Path in HalLinkDiscoverer doesn't work for URI rels.
+- #247 - Add HAL_JSON_VALUE in MediaTypes class.
+
 Changes in version 0.17.0.RELEASE (2015-03-05)
 ----------------------------------------------
 - #313 - Assert compatibility with both JSONPath 0.9 and 1.2.

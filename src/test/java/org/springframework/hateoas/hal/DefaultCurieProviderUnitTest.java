@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,20 @@
  */
 package org.springframework.hateoas.hal;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for {@link DefaultCurieProvider}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class DefaultCurieProviderUnitTest {
@@ -43,7 +47,7 @@ public class DefaultCurieProviderUnitTest {
 		new DefaultCurieProvider("", URI_TEMPLATE);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	//@Test(expected = IllegalArgumentException.class)
 	public void preventsNullUriTemplateName() {
 		new DefaultCurieProvider("acme", null);
 	}
@@ -95,5 +99,38 @@ public class DefaultCurieProviderUnitTest {
 	@Test
 	public void doesNotPrefixQualifiedRelsForRelAsString() {
 		assertThat(provider.getNamespacedRelFor("custom:rel"), is("custom:rel"));
+	}
+
+	/**
+	 * @see #363
+	 */
+	@Test
+	public void configuresMultipleCuriesWithoutDefaultCorrectly() {
+
+		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries());
+
+		assertThat(provider.getCurieInformation(new Links()), hasSize(2));
+		assertThat(provider.getNamespacedRelFor("some"), is("some"));
+	}
+
+	/**
+	 * @see #363
+	 */
+	@Test
+	public void configuresMultipleCuriesWithDefaultCorrectly() {
+
+		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries(), "foo", null);
+
+		assertThat(provider.getCurieInformation(new Links()), hasSize(2));
+		assertThat(provider.getNamespacedRelFor("some"), is("foo:some"));
+	}
+
+	private static Map<String, UriTemplate> getCuries() {
+
+		Map<String, UriTemplate> curies = new HashMap<String, UriTemplate>(2);
+		curies.put("foo", new UriTemplate("/foo/{rel}"));
+		curies.put("bar", new UriTemplate("/bar/{rel}"));
+
+		return curies;
 	}
 }
