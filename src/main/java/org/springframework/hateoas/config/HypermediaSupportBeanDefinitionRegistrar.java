@@ -291,6 +291,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			CurieProvider curieProvider = getCurieProvider(beanFactory);
 			RelProvider relProvider = beanFactory.getBean(DELEGATING_REL_PROVIDER_BEAN_NAME, RelProvider.class);
 			ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
+			halObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 			MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
 					MessageSourceAccessor.class);
 

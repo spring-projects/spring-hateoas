@@ -85,20 +85,19 @@ public class Jackson2HalModule extends SimpleModule {
     private static final long serialVersionUID = 7806951456457932384L;
 
     /**
-     * TODO: This constant was commented, because 
+     * TODO: This constant was commented, because
      * 1) it's usage in code were connected with with jackson 2.5.6 api
      * 2) jsonOrder in {@link ResourcesMixin} which was override.
      */
 //    private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = new Link("__rel__", "¯\\_(ツ)_/¯");
-
     public Jackson2HalModule() {
 
         super("json-hal-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
-		setMixInAnnotation(Link.class, LinkMixin.class);
-		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-	}
+        setMixInAnnotation(Link.class, LinkMixin.class);
+        setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
+        setMixInAnnotation(Resources.class, ResourcesMixin.class);
+    }
 
     /**
      * Returns whether the module was already registered in the given {@link ObjectMapper}.
@@ -163,8 +162,8 @@ public class Jackson2HalModule extends SimpleModule {
 
             boolean prefixingRequired = curieProvider != null;
             boolean curiedLinkPresent = false;
-            boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
-            
+            //boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
+
 //            TODO: Was disabled because 2.4.6 don't support jgen.getCurrentValue().
 //            Object currentValue = jgen.getCurrentValue();
 //
@@ -175,7 +174,7 @@ public class Jackson2HalModule extends SimpleModule {
 //            }
 //            
             for (Link link : value) {
-                
+
 //                if (link.equals(CURIES_REQUIRED_DUE_TO_EMBEDS)) {
 //                    continue;
 //                }
@@ -203,7 +202,8 @@ public class Jackson2HalModule extends SimpleModule {
 
             }
 
-            if (!skipCuries && prefixingRequired && curiedLinkPresent) {
+            //if (!skipCuries && prefixingRequired && curiedLinkPresent) {
+            if (prefixingRequired && curiedLinkPresent) {
 
                 sortedLinks.put("curies", new ArrayList<Object>(curieProvider.getCurieInformation(new Links(links))));
             }
@@ -255,7 +255,7 @@ public class Jackson2HalModule extends SimpleModule {
                 title = getTitle(rel.contains(":") ? rel.substring(rel.indexOf(":") + 1) : rel);
             }
 
-            if(title == null){
+            if (title == null) {
                 title = link.getTitle();
             }
 
