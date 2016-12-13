@@ -214,6 +214,11 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
+	 *  We did this due to business requirements from Seattle :
+	 •	They wanted to pass in a header which we would use to override the domain & port of the links we generate.
+	 •	There were also peculiarities with the order in which headers got to our application
+	 *  due to the environment we’re in: Amazon ELB, Mashery, etc.
+	 *
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
 	 * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
 	 * {@code X-Forwarded-Ssl} header
