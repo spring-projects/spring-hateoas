@@ -84,6 +84,13 @@ public class Jackson2HalModule extends SimpleModule {
 
     private static final long serialVersionUID = 7806951456457932384L;
 
+    /**
+     * TODO: This constant was commented, because 
+     * 1) it's usage in code were connected with with jackson 2.5.6 api
+     * 2) jsonOrder in {@link ResourcesMixin} which was override.
+     */
+//    private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = new Link("__rel__", "¯\\_(ツ)_/¯");
+
     public Jackson2HalModule() {
 
         super("json-hal-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
@@ -141,7 +148,7 @@ public class Jackson2HalModule extends SimpleModule {
          * (non-Javadoc)
          * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
          * 
-         * This method was modified to be compatible with jackson 2.4.6 API. Version 2.4.6 is required to be 
+         * TODO: This method was modified to be compatible with jackson 2.4.6 API. Version 2.4.6 is required to be 
          * compatible with jackson version in CW API. Curies generation logic was modified.
          * Please see <a href="https://wiki.inbcu.com/display/NEWSCONTAPI/Spring+HATEOAS">wiki</a> 
          * for more information.
@@ -158,7 +165,7 @@ public class Jackson2HalModule extends SimpleModule {
             boolean curiedLinkPresent = false;
             boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
             
-//            Was disabled because 2.4.6 don't support jgen.getCurrentValue().
+//            TODO: Was disabled because 2.4.6 don't support jgen.getCurrentValue().
 //            Object currentValue = jgen.getCurrentValue();
 //
 //            if (currentValue instanceof Resources) {
@@ -168,6 +175,10 @@ public class Jackson2HalModule extends SimpleModule {
 //            }
 //            
             for (Link link : value) {
+                
+//                if (link.equals(CURIES_REQUIRED_DUE_TO_EMBEDS)) {
+//                    continue;
+//                }
 
                 // CURIE_REQUIRED_LINK link is used to trigger curies on paginated resources. We don't serialize it.
                 if (link.equals(PagedResources.CURIE_REQUIRED_LINK)) {
@@ -363,7 +374,7 @@ public class Jackson2HalModule extends SimpleModule {
 
         public HalResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
 
-            // Was rewritten to be compatible with  2.4.6 jackson.
+            //TODO: Was rewritten to be compatible with  2.4.6 jackson.
             //super(TypeFactory.defaultInstance().constructType(Collection.class));
             super(Collection.class, false);
 
@@ -382,6 +393,15 @@ public class Jackson2HalModule extends SimpleModule {
                 throws IOException, JsonGenerationException {
 
             Map<String, Object> embeddeds = embeddedMapper.map(value);
+            //TODO: Was disabled because 2.4.6 don't support jgen.getCurrentValue().
+//            Object currentValue = jgen.getCurrentValue();
+//
+//            if (currentValue instanceof ResourceSupport) {
+//
+//                if (embeddedMapper.hasCuriedEmbed(value)) {
+//                    ((ResourceSupport) currentValue).add(CURIES_REQUIRED_DUE_TO_EMBEDS);
+//                }
+//            }
 
             provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
         }

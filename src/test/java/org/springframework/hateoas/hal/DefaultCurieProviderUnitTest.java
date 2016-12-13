@@ -47,11 +47,6 @@ public class DefaultCurieProviderUnitTest {
 		new DefaultCurieProvider("", URI_TEMPLATE);
 	}
 
-	//@Test(expected = IllegalArgumentException.class)
-	public void preventsNullUriTemplateName() {
-		new DefaultCurieProvider("acme", null);
-	}
-
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsUriTemplateWithoutVariable() {
 		new DefaultCurieProvider("acme", new UriTemplate("http://localhost:8080/rels"));
