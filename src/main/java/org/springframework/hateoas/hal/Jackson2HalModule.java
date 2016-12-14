@@ -162,6 +162,9 @@ public class Jackson2HalModule extends SimpleModule {
 
             boolean prefixingRequired = curieProvider != null;
             boolean curiedLinkPresent = false;
+            //TODO : Was reverted to previous version.
+            // Please see <a href="https://wiki.inbcu.com/display/NEWSCONTAPI/Spring+HATEOAS">wiki</a>for more information.
+
             //boolean skipCuries = !jgen.getOutputContext().getParent().inRoot();
 
 //            TODO: Was disabled because 2.4.6 don't support jgen.getCurrentValue().
@@ -201,6 +204,9 @@ public class Jackson2HalModule extends SimpleModule {
                 sortedLinks.get(rel).add(halLink);
 
             }
+
+            //TODO : Was reverted to previous version.
+            // Please see <a href="https://wiki.inbcu.com/display/NEWSCONTAPI/Spring+HATEOAS">wiki</a>for more information.
 
             //if (!skipCuries && prefixingRequired && curiedLinkPresent) {
             if (prefixingRequired && curiedLinkPresent) {
