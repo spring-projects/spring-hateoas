@@ -59,14 +59,14 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.3.4.RELEASE</spring.version>
-		<logback.version>1.1.7</logback.version>
-		<jacoco>0.7.7.201606060606</jacoco>
+		<logback.version>1.1.8</logback.version>
+		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson.version>2.8.5</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
-		<slf4j.version>1.7.21</slf4j.version>
+		<slf4j.version>1.7.22</slf4j.version>
 		<evo.version>1.2.1</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 		<source.level>1.6</source.level>
@@ -77,7 +77,7 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.3.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.5.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -90,7 +90,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.0.M2</spring.version>
+				<spring.version>5.0.0.M3</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -125,7 +125,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.3</version>
+						<version>2.10.4</version>
 						<executions>
 							<execution>
 								<goals>
@@ -190,7 +190,7 @@
 				<dependency>
 					<groupId>org.springframework.data.build</groupId>
 					<artifactId>spring-data-build-resources</artifactId>
-					<version>1.6.2.RELEASE</version>
+					<version>1.8.5.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
 				</dependency>
@@ -246,17 +246,17 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.2.1</version>
+						<version>1.5.3</version>
 						<dependencies>
 							<dependency>
 								<groupId>org.asciidoctor</groupId>
 								<artifactId>asciidoctorj-pdf</artifactId>
-								<version>1.5.0-alpha.8</version>
+								<version>1.5.0-alpha.11</version>
 							</dependency>
 							<dependency>
 								<groupId>org.asciidoctor</groupId>
 								<artifactId>asciidoctorj-epub3</artifactId>
-								<version>1.5.0-alpha.4</version>
+								<version>1.5.0-alpha.6</version>
 							</dependency>
 						</dependencies>
 						<executions>
@@ -378,7 +378,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>2.5.5</version>
+						<version>3.0.0</version>
 						<executions>
 							<execution>
 								<id>static</id>
@@ -518,7 +518,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.16.8</version>
+			<version>1.16.12</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -573,7 +573,7 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-			<version>2.8.1</version>
+			<version>2.9.7</version>
 			<scope>test</scope>
 		</dependency>
 
