@@ -557,6 +557,19 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), startsWith("http://"));
 	}
 
+	/**
+	 * @see #527
+	 */
+	@Test
+	public void createsLinkRelativeToContextRoot() {
+
+		request.setContextPath("/ctx");
+		request.setServletPath("/foo");
+		request.setRequestURI("/ctx/foo");
+
+		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), endsWith("/ctx/people"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}

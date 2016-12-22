@@ -32,7 +32,6 @@ import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -264,7 +263,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	static UriComponentsBuilder getBuilder() {
 
 		HttpServletRequest request = getCurrentRequest();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpRequest(new ServletServerHttpRequest(request));
+		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
 		// special case handling for X-Forwarded-Ssl:
 		// apply it, but only if X-Forwarded-Proto is unset.
