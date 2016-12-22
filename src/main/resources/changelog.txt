@@ -1,6 +1,11 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.23.0.RELEASE (2016-12-22)
+----------------------------------------------
+- #529 - Release 0.23.
+- #527 - Link creation via ControllerLinkBuilder broken.
+
 Changes in version 0.22.0.RELEASE (2016-12-21)
 ----------------------------------------------
 - #473 - Release 0.22.
