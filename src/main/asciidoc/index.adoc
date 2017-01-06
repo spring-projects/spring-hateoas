@@ -398,7 +398,7 @@ NOTE: `follow()` is chainable, meaning you can string together multiple hops as 
 
 The examples shown so far demonstrate how to side step Java's type erasure and convert a single JSON-formatted resource into a `Resource<Item>` object. But what if you get a collection like an *_embedded* HAL collection?
 
-One slight twak and you're set.
+One slight tweak and you're set.
 
 [source,java]
 ----
