@@ -415,8 +415,8 @@
 									<fromDir>${project.build.directory}/static-resources</fromDir>
 									<includes>**</includes>
 									<serverId>static-dot-s2</serverId>
-									<url>scp://static.springsource.org</url>
-									<toDir>/var/www/domains/springsource.org/www/htdocs/autorepo/docs/${project.artifactId}/${project.version}</toDir>
+									<url>scp://docs.af.pivotal.io</url>
+									<toDir>/var/www/domains/spring.io/www/htdocs/autorepo/docs/${project.artifactId}/${project.version}</toDir>
 									<optimize>true</optimize>
 								</configuration>
 							</execution>
