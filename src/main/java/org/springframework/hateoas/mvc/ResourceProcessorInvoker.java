@@ -199,7 +199,7 @@ public class ResourceProcessorInvoker {
 		 */
 		public DefaultProcessorWrapper(ResourceProcessor<?> processor) {
 
-			Assert.notNull(processor);
+			Assert.notNull(processor, "Processor must not be null!");
 
 			this.processor = processor;
 			this.targetType = ResolvableType.forClass(ResourceProcessor.class, processor.getClass()).getGeneric(0);

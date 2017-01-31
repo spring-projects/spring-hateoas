@@ -55,7 +55,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 */
 	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation, String mappingAttributeName) {
 
-		Assert.notNull(annotation);
+		Assert.notNull(annotation, "Annotation must not be null!");
 
 		this.annotationType = annotation;
 		this.mappingAttributeName = mappingAttributeName;

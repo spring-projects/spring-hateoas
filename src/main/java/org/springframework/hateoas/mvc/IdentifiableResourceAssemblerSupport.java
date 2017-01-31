@@ -66,8 +66,8 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 	@Override
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
-		Assert.notNull(entity);
-		Assert.notNull(id);
+		Assert.notNull(entity, "Entity must not be null!");
+		Assert.notNull(id, "Id must not be null!");
 
 		D instance = instantiateResource(entity);
 		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());

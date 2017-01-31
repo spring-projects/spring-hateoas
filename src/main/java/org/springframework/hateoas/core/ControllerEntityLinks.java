@@ -65,8 +65,8 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 	public ControllerEntityLinks(Iterable<? extends Class<?>> controllerTypes,
 			LinkBuilderFactory<? extends LinkBuilder> linkBuilderFactory) {
 
-		Assert.notNull(controllerTypes);
-		Assert.notNull(linkBuilderFactory);
+		Assert.notNull(controllerTypes, "ControllerTypes must not be null!");
+		Assert.notNull(linkBuilderFactory, "LinkBuilderFactory must not be null!");
 
 		this.linkBuilderFactory = linkBuilderFactory;
 		this.entityToController = new HashMap<Class<?>, Class<?>>();
@@ -105,7 +105,7 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 	@Override
 	public LinkBuilder linkFor(Class<?> entity, Object... parameters) {
 
-		Assert.notNull(entity);
+		Assert.notNull(entity, "Entity must not be null!");
 
 		Class<?> controllerType = entityToController.get(entity);
 

@@ -64,7 +64,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 */
 	public Resources(Iterable<T> content, Iterable<Link> links) {
 
-		Assert.notNull(content);
+		Assert.notNull(content, "Content must not be null!");
 
 		this.content = new ArrayList<T>();
 
@@ -83,7 +83,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	@SuppressWarnings("unchecked")
 	public static <T extends Resource<S>, S> Resources<T> wrap(Iterable<S> content) {
 
-		Assert.notNull(content);
+		Assert.notNull(content, "Content must not be null!");
 		ArrayList<T> resources = new ArrayList<T>();
 
 		for (S element : content) {

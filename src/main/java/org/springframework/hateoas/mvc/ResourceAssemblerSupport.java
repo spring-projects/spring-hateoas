@@ -44,8 +44,8 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 */
 	public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
 
-		Assert.notNull(controllerClass);
-		Assert.notNull(resourceType);
+		Assert.notNull(controllerClass, "ControllerClass must not be null!");
+		Assert.notNull(resourceType, "ResourceType must not be null!");
 
 		this.controllerClass = controllerClass;
 		this.resourceType = resourceType;
@@ -60,7 +60,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 */
 	public List<D> toResources(Iterable<? extends T> entities) {
 
-		Assert.notNull(entities);
+		Assert.notNull(entities, "Entities must not be null!");
 		List<D> result = new ArrayList<D>();
 
 		for (T entity : entities) {
@@ -83,8 +83,8 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
-		Assert.notNull(entity);
-		Assert.notNull(id);
+		Assert.notNull(entity, "Entity must not be null!");
+		Assert.notNull(id, "Id must not be null!");
 
 		D instance = instantiateResource(entity);
 		instance.add(linkTo(controllerClass, parameters).slash(id).withSelfRel());
