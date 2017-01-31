@@ -89,7 +89,7 @@ public class PagedResources<T> extends Resources<T> {
 	@SuppressWarnings("unchecked")
 	public static <T extends Resource<S>, S> PagedResources<T> wrap(Iterable<S> content, PageMetadata metadata) {
 
-		Assert.notNull(content);
+		Assert.notNull(content, "Content must not be null!");
 		ArrayList<T> resources = new ArrayList<T>();
 
 		for (S element : content) {

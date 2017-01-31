@@ -57,7 +57,7 @@ public class MethodParameters {
 	 */
 	public MethodParameters(Method method, AnnotationAttribute namingAnnotation) {
 
-		Assert.notNull(method);
+		Assert.notNull(method, "Method must not be null!");
 		this.parameters = new ArrayList<MethodParameter>();
 
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
@@ -131,7 +131,7 @@ public class MethodParameters {
 			return cached;
 		}
 
-		Assert.notNull(annotation);
+		Assert.notNull(annotation, "Annotation must not be null!");
 		List<MethodParameter> result = new ArrayList<MethodParameter>();
 
 		for (MethodParameter parameter : getParameters()) {

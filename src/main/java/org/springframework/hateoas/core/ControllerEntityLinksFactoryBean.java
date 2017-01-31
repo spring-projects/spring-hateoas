@@ -49,7 +49,7 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 	 * @param annotation must not be {@literal null}.
 	 */
 	public void setAnnotation(Class<? extends Annotation> annotation) {
-		Assert.notNull(annotation);
+		Assert.notNull(annotation, "Annotation must not be null!");
 		this.annotation = annotation;
 	}
 

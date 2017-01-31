@@ -49,7 +49,7 @@ public class AnnotationAttribute {
 	 */
 	public AnnotationAttribute(Class<? extends Annotation> annotationType, String attributeName) {
 
-		Assert.notNull(annotationType);
+		Assert.notNull(annotationType, "AnnotationType must not be null!");
 
 		this.annotationType = annotationType;
 		this.attributeName = attributeName;
