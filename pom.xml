@@ -90,7 +90,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.0.M3</spring.version>
+				<spring.version>5.0.0.M5</spring.version>
 			</properties>
 			<repositories>
 				<repository>
