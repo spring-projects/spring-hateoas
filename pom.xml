@@ -77,7 +77,7 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.5.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.8.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
