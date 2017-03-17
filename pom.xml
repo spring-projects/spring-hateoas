@@ -218,7 +218,7 @@
 						</executions>
 						<configuration>
 							<includeGroupIds>org.springframework.data</includeGroupIds>
-							<includeArtifacIds>spring-data-build-resources</includeArtifacIds>
+							<includeArtifactIds>spring-data-build-resources</includeArtifactIds>
 							<includeTypes>zip</includeTypes>
 							<excludeTransitive>true</excludeTransitive>
 							<outputDirectory>${shared.resources}</outputDirectory>
