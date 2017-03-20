@@ -62,11 +62,18 @@ resource.add(new Link("http://myhost/people"));
 
 This would render as follows in JSON:
 
-[source, xml]
+[source, json]
 ----
-{ firstname : "Dave",
-  lastname : "Matthews",
-  links : [ { rel : "self", href : "http://myhost/people" } ] }
+{
+    "firstname" : "Dave",
+    "lastname" : "Matthews",
+    _"links" : [
+        {
+            "rel" : "self",
+            "href" : "http://myhost/people"
+        }
+    ]
+}
 ----
 
 … or slightly more verbose in XML …
@@ -192,6 +199,7 @@ So far we have created links by pointing to the web-framework implementations (i
 
 The `EntityLinks` interface now exposes an API to lookup a `Link` or `LinkBuilder` based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
 
+[source, java]
 ----
 EntityLinks links = …;
 LinkBuilder builder = links.linkFor(CustomerResource.class);
@@ -330,20 +338,20 @@ public class Config {
 
 Note that now the prefix `ex:` automatically appears before all rels which are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form:
 
-[source, java]
+[source, json]
 ----
 {
-  _links : {
-    self: { href: "http://myhost/person/1" },
-  curies: {
-         name: "ex",
-         href: "http://example.com/rels/{rel}",
-         templated: true
+  _"links" : {
+    "self" : { href: "http://myhost/person/1" },
+    "curies" : {
+         "name" : "ex",
+         "href" : "http://example.com/rels/{rel}",
+         "templated" : true
     },
-    "ex:orders" : { href: "http://myhost/person/1/orders" }
+    "ex:orders" : { href : "http://myhost/person/1/orders" }
   },
-  firstname : "Dave",
-  lastname : "Matthews"
+  "firstname" : "Dave",
+  "lastname" : "Matthews"
 }
 ----
 
