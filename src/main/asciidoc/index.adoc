@@ -18,9 +18,9 @@ toc::[]
 == Fundmentals
 
 [[fundamentals.jaxb-json]]
-=== JAXB / JSON integration
+=== Jackson / JAXB integration
 
-As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either JAXB, JSON or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
+As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either Jackson, JAXB, or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
 
 [[fundamentals.links]]
 === Links
