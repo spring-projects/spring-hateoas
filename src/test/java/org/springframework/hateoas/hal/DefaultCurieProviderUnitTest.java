@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * Unit tests for {@link DefaultCurieProvider}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class DefaultCurieProviderUnitTest {
 
@@ -80,6 +81,19 @@ public class DefaultCurieProviderUnitTest {
 	@Test
 	public void doesNotPrefixQualifiedRels() {
 		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")), is("custom:rel"));
+	}
+
+	/**
+	 * @see #100
+	 */
+	@Test
+	public void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
+		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")
+			.withHreflang("en")
+			.withTitle("the title")
+			.withMedia("the media")
+			.withType("the type")
+			.withDeprecation("http://example.com/custom/deprecated")), is("custom:rel"));
 	}
 
 	/**

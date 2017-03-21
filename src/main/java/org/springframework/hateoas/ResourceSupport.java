@@ -151,7 +151,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		return relatedLinks;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
