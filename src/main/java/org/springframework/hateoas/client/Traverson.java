@@ -82,7 +82,7 @@ public class Traverson {
 	 * interact with the service.
 	 * 
 	 * @param baseUri must not be {@literal null}.
-	 * @param mediaType must not be {@literal null} or empty.
+	 * @param mediaTypes must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, MediaType... mediaTypes) {
 		this(baseUri, Arrays.asList(mediaTypes));
@@ -93,7 +93,7 @@ public class Traverson {
 	 * interact with the service.
 	 * 
 	 * @param baseUri must not be {@literal null}.
-	 * @param mediaType must not be {@literal null} or empty.
+	 * @param mediaTypes must not be {@literal null} or empty.
 	 */
 	public Traverson(URI baseUri, List<MediaType> mediaTypes) {
 
