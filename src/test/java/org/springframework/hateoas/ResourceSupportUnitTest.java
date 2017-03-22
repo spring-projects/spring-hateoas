@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 /**
@@ -36,6 +37,7 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLinks(), is(false));
 		assertThat(support.hasLink(Link.REL_SELF), is(false));
 		assertThat(support.getLinks().isEmpty(), is(true));
+		assertThat(support.getLinks(Link.REL_SELF).isEmpty(), is(true));
 	}
 
 	@Test
@@ -49,6 +51,21 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLinks(), is(true));
 		assertThat(support.hasLink(link.getRel()), is(true));
 		assertThat(support.getLink(link.getRel()), is(link));
+		assertThat(support.getLinks(Link.REL_NEXT), contains(link));
+	}
+
+	@Test
+	public void addsMultipleLinkRelationsCorrectly() {
+
+		Link link = new Link("/customers/1", "customers");
+		Link link2 = new Link("/orders/1/customer", "customers");
+		ResourceSupport support = new ResourceSupport();
+		support.add(link, link2);
+
+		assertThat(support.getLinks("customers").size(), is(2));
+		assertThat(support.getLinks("customers"), contains(link, link2));
+		assertThat(support.getLinks("non-existent").size(), is(0));
+		assertThat(support.getLinks("non-existent"), is(Matchers.<Link>empty()));
 	}
 
 	@Test
@@ -64,6 +81,8 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLinks(), is(true));
 		assertThat(support.getLinks(), hasItems(first, second));
 		assertThat(support.getLinks().size(), is(2));
+		assertThat(support.getLinks(Link.REL_PREVIOUS), contains(first));
+		assertThat(support.getLinks(Link.REL_NEXT), contains(second));
 	}
 
 	@Test

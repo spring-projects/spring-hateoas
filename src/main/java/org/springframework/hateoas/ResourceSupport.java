@@ -133,6 +133,24 @@ public class ResourceSupport implements Identifiable<Link> {
 		return null;
 	}
 
+	/**
+	 * Returns all {@link Link}s with the given relation type.
+	 *
+	 * @return the links in a {@link List}
+	 */
+	public List<Link> getLinks(String rel) {
+
+		List<Link> relatedLinks = new ArrayList<Link>();
+		
+		for (Link link : links) {
+			if (link.getRel().equals(rel)) {
+				relatedLinks.add(link);
+			}
+		}
+		
+		return relatedLinks;
+	}
+
 	/* 
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
