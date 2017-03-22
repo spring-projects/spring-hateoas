@@ -102,7 +102,6 @@ public class PagedResources<T> extends Resources<T> {
 	/**
 	 * Returns the Link pointing to the next page (if set).
 	 * 
-	 * @see #addPaginationLinks(Link)
 	 * @return
 	 */
 	@JsonIgnore
@@ -113,7 +112,6 @@ public class PagedResources<T> extends Resources<T> {
 	/**
 	 * Returns the Link pointing to the previous page (if set).
 	 * 
-	 * @see #addPaginationLinks(Link)
 	 * @return
 	 */
 	@JsonIgnore
