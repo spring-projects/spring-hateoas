@@ -20,6 +20,10 @@ import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.hateoas.client.Hop.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -35,8 +39,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
+import org.springframework.hateoas.mvc.TypeReferences;
+import org.springframework.hateoas.mvc.TypeReferences.ResourceType;
+import org.springframework.hateoas.mvc.TypeReferences.ResourcesType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
@@ -371,9 +379,9 @@ public class TraversonTest {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
-		Resource<?> itemResource = traverson.//
+		Resources<?> itemResource = traverson.//
 				follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))).//
-				toObject(Resource.class);
+				toObject(Resources.class);
 
 		assertThat(itemResource.hasLink("self")).isTrue();
 		assertThat(itemResource.getRequiredLink("self").expand().getHref())

@@ -16,6 +16,7 @@
 package org.springframework.hateoas.hal;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 
@@ -37,4 +38,10 @@ abstract class ResourceSupportMixin extends ResourceSupport {
 	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)
 	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
 	public abstract List<Link> getLinks();
+
+	@Override
+	@XmlElement(name = "embedded")
+	@JsonProperty("_embedded")
+	@JsonInclude(Include.NON_EMPTY)
+	public abstract Map<String, ResourceSupport> getEmbeddedResources();
 }

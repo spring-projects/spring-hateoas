@@ -2,7 +2,12 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
+
+import org.springframework.hateoas.support.Author;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 

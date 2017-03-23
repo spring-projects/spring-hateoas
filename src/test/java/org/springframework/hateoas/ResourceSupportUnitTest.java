@@ -17,9 +17,16 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
+
+import org.springframework.hateoas.support.Author;
 
 /**
  * Unit tests for {@link ResourceSupport}.
@@ -172,5 +179,30 @@ public class ResourceSupportUnitTest {
 
 		assertThat(support.hasLink("self")).isTrue();
 		assertThat(support.hasLink("another")).isTrue();
+	}
+
+	@Test
+	public void addEmbeddedResource() {
+
+		// given
+		ResourceSupport support = new ResourceSupport();
+
+		Author author = new Author("Alan Watts", "January 6, 1915", "November 16, 1973");
+		author.add(new Link("/people/alan-watts").withSelfRel());
+
+		// when
+		support.addEmbeddedResource("author", author);
+		support.add(new Link("/blog-post").withSelfRel(), new Link("/people/alan-watts").withRel("author"));
+
+		// then
+		assertThat(support.hasLink("self")).isTrue();
+		assertThat(support.hasLink("author")).isTrue();
+
+		assertThat(support.hasEmbeddedResources()).isTrue();
+		assertThat(support.getEmbeddedResource("author").hasLink("self")).isTrue();
+		assertThat(support.getEmbeddedResource("author").getLinks()).contains(new Link("/people/alan-watts", "self"));
+		assertThat(((Author) support.getEmbeddedResource("author")).getName()).isEqualTo("Alan Watts");
+		assertThat(((Author) support.getEmbeddedResource("author")).getBorn()).isEqualTo("January 6, 1915");
+		assertThat(((Author) support.getEmbeddedResource("author")).getDied()).isEqualTo("November 16, 1973");
 	}
 }
