@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -64,6 +65,20 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLinks(), is(true));
 		assertThat(support.getLinks(), hasItems(first, second));
 		assertThat(support.getLinks().size(), is(2));
+	}
+
+	@Test
+	public void getsMultipleLinksThatShareSameRelCorrectly() {
+		Link linkOne = new Link("linkOne", "my-rel");
+		Link linkTwo = new Link("linkTwo", "my-rel");
+		Link linkThree = new Link("linkThree", "my-rel");
+
+		ResourceSupport support = new ResourceSupport();
+		support.add(Arrays.asList(linkOne, linkTwo, linkThree));
+
+		assertThat(support.getLinks("my-rel").size(), is(3));
+		assertThat(support.getLinks("my-rel"), hasItems(linkOne, linkTwo, linkThree));
+		assertThat(support.getLinks("nonexistent-rel").size(), is(0));
 	}
 
 	@Test

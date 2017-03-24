@@ -110,6 +110,23 @@ public class ResourceSupport implements Identifiable<Link> {
 	}
 
 	/**
+	 * Returns all {@link Link}s contained in this resource with the given rel.
+	 * @param rel
+	 * @return a list of links with the given rel or an empty list if none are found
+	 */
+	public List<Link> getLinks(String rel) {
+		List<Link> linksWithGivenRel = new ArrayList<Link>();
+
+		for (Link link : links) {
+			if (link.getRel().equals(rel)) {
+				linksWithGivenRel.add(link);
+			}
+		}
+
+		return linksWithGivenRel;
+	}
+
+	/**
 	 * Removes all {@link Link}s added to the resource so far.
 	 */
 	public void removeLinks() {
