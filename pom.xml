@@ -25,11 +25,21 @@
 			<id>ogierke</id>
 			<name>Oliver Gierke</name>
 			<email>ogierke(at)pivotal.io</email>
-			<organization>Pivotal, Inc.</organization>
+			<organization>Pivotal Software, Inc.</organization>
 			<roles>
 				<role>Project lead</role>
 			</roles>
 			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>gturnquist</id>
+			<name>Greg Turnquist</name>
+			<email>gturnquist(at)pivotal.io</email>
+			<organization>Pivotal Software, Inc.</organization>
+			<roles>
+				<role>Contributor</role>
+			</roles>
+			<timezone>-6</timezone>
 		</developer>
 	</developers>
 
