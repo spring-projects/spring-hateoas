@@ -251,12 +251,6 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				adapter.setMessageConverters(potentiallyRegisterModule(adapter.getMessageConverters()));
 			}
 
-			if (bean instanceof RequestMappingHandlerAdapter) {
-
-				RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
-				adapter.setMessageConverters(potentiallyRegisterModule(adapter.getMessageConverters()));
-			}
-
 			if (bean instanceof RestTemplate) {
 
 				RestTemplate template = (RestTemplate) bean;
