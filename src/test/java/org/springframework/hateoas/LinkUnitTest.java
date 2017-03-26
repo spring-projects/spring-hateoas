@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.Test;
  * Unit tests for {@link Link}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class LinkUnitTest {
 
@@ -103,21 +104,46 @@ public class LinkUnitTest {
 		assertThat(Link.valueOf(""), is(nullValue()));
 	}
 
+	/**
+	 * @see #54
+	 * @see #100
+	 */
 	@Test
 	public void parsesRFC5988HeaderIntoLink() {
 
 		assertThat(Link.valueOf("</something>;rel=\"foo\""), is(new Link("/something", "foo")));
 		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo")));
+		assertThat(Link.valueOf("</customer/1>;rel=\"self\";hreflang=\"en\";media=\"pdf\";title=\"pdf customer copy\";type=\"portable document\";deprecation=\"http://example.com/customers/deprecated\""),
+			is(new Link("/customer/1")
+				.withHreflang("en")
+				.withMedia("pdf")
+				.withTitle("pdf customer copy")
+				.withType("portable document")
+				.withDeprecation("http://example.com/customers/deprecated")));
+	}
+
+	/**
+	 * @see #100
+	 */
+	@Test
+	public void ignoresUnrecognizedAttributes() {
+		Link link = Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
+
+		assertThat(link.getHref(), is("/something"));
+		assertThat(link.getRel(), is("foo"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsMissingRelAttribute() {
-		Link.valueOf("</something>);title=\"title\"");
+		Link.valueOf("</something>;title=\"title\"");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsLinkWithoutAttributesAtAll() {
-		Link.valueOf("</something>);title=\"title\"");
+
+		Link link = Link.valueOf("</something>");
+
+		System.out.println(link);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

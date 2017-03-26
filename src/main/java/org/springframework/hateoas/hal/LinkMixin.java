@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,46 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * 
  * @author Alexander Baetz
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
-@JsonIgnoreProperties(value = "rel")
+@JsonIgnoreProperties({"rel", "media"})
 abstract class LinkMixin extends Link {
 
 	private static final long serialVersionUID = 4720588561299667409L;
 
-	/* 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Link#getHreflang()
+	 */
+	@Override
+	@JsonInclude(Include.NON_NULL)
+	public abstract String getHreflang();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Link#getTitle()
+	 */
+	@Override
+	@JsonInclude(Include.NON_NULL)
+	public abstract String getTitle();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Link#getType()
+	 */
+	@Override
+	@JsonInclude(Include.NON_NULL)
+	public abstract String getType();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Link#getDeprecation()
+	 */
+	@Override
+	@JsonInclude(Include.NON_NULL)
+	public abstract String getDeprecation();
+	
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.Link#isTemplate()
 	 */

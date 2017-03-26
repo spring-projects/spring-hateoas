@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
  * Unit test for {@link Links}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class LinksUnitTest {
 
@@ -36,18 +37,27 @@ public class LinksUnitTest {
 
 	static final String LINKS = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIRST, SECOND));
 
-	static final Links reference = new Links(new Link("/something", "foo"), new Link("/somethingElse", "bar"));
+	static final String THIRD = "</something>;rel=\"foo\";hreflang=\"en\"";
+	static final String FOURTH = "</somethingElse>;rel=\"bar\";hreflang=\"de\"";
 
+	static final String LINKS2 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(THIRD, FOURTH));
+
+	static final Links reference = new Links(new Link("/something", "foo"), new Link("/somethingElse", "bar"));
+	static final Links reference2 = new Links(new Link("/something", "foo").withHreflang("en"), new Link("/somethingElse", "bar").withHreflang("de"));
+	
 	@Test
 	public void parsesLinkHeaderLinks() {
 
 		assertThat(Links.valueOf(LINKS), is(reference));
+		assertThat(Links.valueOf(LINKS2), is(reference2));
 		assertThat(reference.toString(), is(LINKS));
+		assertThat(reference2.toString(), is(LINKS2));
 	}
 
 	@Test
 	public void skipsEmptyLinkElements() {
 		assertThat(Links.valueOf(LINKS + ",,,"), is(reference));
+		assertThat(Links.valueOf(LINKS2 + ",,,"), is(reference2));
 	}
 
 	@Test
@@ -57,9 +67,14 @@ public class LinksUnitTest {
 		assertThat(Links.valueOf(""), is(Links.NO_LINKS));
 	}
 
+	/**
+	 * @see #54
+	 * @see #100
+	 */
 	@Test
 	public void getSingleLinkByRel() {
 		assertThat(reference.getLink("bar"), is(new Link("/somethingElse", "bar")));
+		assertThat(reference2.getLink("bar"), is(new Link("/somethingElse", "bar").withHreflang("de")));
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 package org.springframework.hateoas;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Wither;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -37,9 +44,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * Value object for links.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonIgnoreProperties("templated")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Getter
+@EqualsAndHashCode(of = {"rel", "href", "hreflang", "media", "title", "deprecation"})
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -53,8 +65,13 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
-	@XmlAttribute private String rel;
-	@XmlAttribute private String href;
+	@XmlAttribute @Wither private String rel;
+	@XmlAttribute @Wither private String href;
+	@XmlAttribute @Wither private String hreflang;
+	@XmlAttribute @Wither private String media;
+	@XmlAttribute @Wither private String title;
+	@XmlAttribute @Wither private String type;
+	@XmlAttribute @Wither private String deprecation;
 	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
@@ -91,41 +108,6 @@ public class Link implements Serializable {
 		this.template = template;
 		this.href = template.toString();
 		this.rel = rel;
-	}
-
-	/**
-	 * Empty constructor required by the marshalling framework.
-	 */
-	protected Link() {
-
-	}
-
-	/**
-	 * Returns the actual URI the link is pointing to.
-	 * 
-	 * @return
-	 */
-	public String getHref() {
-		return href;
-	}
-
-	/**
-	 * Returns the rel of the link.
-	 * 
-	 * @return
-	 */
-	public String getRel() {
-		return rel;
-	}
-
-	/**
-	 * Returns a {@link Link} pointing to the same URI but with the given relation.
-	 * 
-	 * @param rel must not be {@literal null} or empty.
-	 * @return
-	 */
-	public Link withRel(String rel) {
-		return new Link(href, rel);
 	}
 
 	/**
@@ -195,46 +177,35 @@ public class Link implements Serializable {
 		return template;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof Link)) {
-			return false;
-		}
-
-		Link that = (Link) obj;
-
-		return this.href.equals(that.href) && this.rel.equals(that.rel);
-	}
-
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-
-		int result = 17;
-		result += 31 * href.hashCode();
-		result += 31 * rel.hashCode();
-		return result;
-	}
-
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("<%s>;rel=\"%s\"", href, rel);
+		String linkString = String.format("<%s>;rel=\"%s\"", href, rel);
+
+		if (hreflang != null) {
+			linkString += ";hreflang=\"" + hreflang + "\"";
+		}
+
+		if (media != null) {
+			linkString += ";media=\"" + media + "\"";
+		}
+
+		if (title != null) {
+			linkString += ";title=\"" + title + "\"";
+		}
+
+		if (type != null) {
+			linkString += ";type=\"" + type + "\"";
+		}
+
+		if (deprecation != null) {
+			linkString += ";deprecation=\"" + deprecation + "\"";
+		}
+		
+		return linkString;
 	}
 
 	/**
@@ -263,7 +234,29 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			return new Link(matcher.group(1), attributes.get("rel"));
+			Link link = new Link(matcher.group(1), attributes.get("rel"));
+
+			if (attributes.containsKey("hreflang")) {
+				link = link.withHreflang(attributes.get("hreflang"));
+			}
+
+			if (attributes.containsKey("media")) {
+				link = link.withMedia(attributes.get("media"));
+			}
+
+			if (attributes.containsKey("title")) {
+				link = link.withTitle(attributes.get("title"));
+			}
+
+			if (attributes.containsKey("type")) {
+				link = link.withType(attributes.get("type"));
+			}
+
+			if (attributes.containsKey("deprecation")) {
+				link = link.withDeprecation(attributes.get("deprecation"));
+			}
+
+			return link;
 
 		} else {
 			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
@@ -283,7 +276,7 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-]*|" + URI_PATTERN + ")\"");
+		Pattern keyAndValue = Pattern.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
 		Matcher matcher = keyAndValue.matcher(source);
 
 		while (matcher.find()) {
