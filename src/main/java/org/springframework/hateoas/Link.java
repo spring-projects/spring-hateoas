@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 package org.springframework.hateoas;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +40,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * Value object for links.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonIgnoreProperties("templated")
@@ -55,6 +59,11 @@ public class Link implements Serializable {
 
 	@XmlAttribute private String rel;
 	@XmlAttribute private String href;
+	@XmlAttribute private String hreflang;
+	@XmlAttribute private String media;
+	@XmlAttribute private String title;
+	@XmlAttribute private String type;
+	@XmlAttribute private String deprecation;
 	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
@@ -85,12 +94,33 @@ public class Link implements Serializable {
 	 */
 	public Link(UriTemplate template, String rel) {
 
-		Assert.notNull(template, "UriTempalte must not be null!");
+		Assert.notNull(template, "UriTemplate must not be null!");
 		Assert.hasText(rel, "Rel must not be null or empty!");
 
 		this.template = template;
 		this.href = template.toString();
 		this.rel = rel;
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given URI with the given rel, hreflang, media, title, and type.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param rel must not be {@literal null} or empty.
+	 * @param hreflang
+	 * @param media
+	 * @param title
+	 * @param type
+	 * @param deprecation
+	 */
+	public Link(String href, String rel, String hreflang, String media, String title, String type, String deprecation) {
+
+		this(href, rel);
+		this.hreflang = hreflang;
+		this.media = media;
+		this.title = title;
+		this.type = type;
+		this.deprecation = deprecation;
 	}
 
 	/**
@@ -119,6 +149,51 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Returns the hreflang of the link.
+	 *
+	 * @return
+	 */
+	public String getHreflang() {
+		return hreflang;
+	}
+
+	/**
+	 * Returns the media of the link.
+	 *
+	 * @return
+	 */
+	public String getMedia() {
+		return media;
+	}
+
+	/**
+	 * Returns the title of the link.
+	 *
+	 * @return
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * Returns the type of the link
+	 * 
+	 * @return
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * Returns link about deprecation of this link.
+	 * 
+	 * @return
+	 */
+	public String getDeprecation() {
+		return deprecation;
+	}
+
+	/**
 	 * Returns a {@link Link} pointing to the same URI but with the given relation.
 	 * 
 	 * @param rel must not be {@literal null} or empty.
@@ -135,6 +210,61 @@ public class Link implements Serializable {
 	 */
 	public Link withSelfRel() {
 		return withRel(Link.REL_SELF);
+	}
+
+	/**
+	 * Returns a {@link Link} with the {@code hreflang} attribute filled out.
+	 *
+	 * @param hreflang
+	 * @return
+	 */
+	public Link withHreflang(String hreflang) {
+		Assert.hasText(hreflang, "hreflang must not be null or empty!");
+		return new Link(this.href, this.rel, hreflang, this.media, this.title, this.type, this.deprecation);
+	}
+
+	/**
+	 * Returns a {@link Link} with the {@code media} attribute filled out.
+	 *
+	 * @param media
+	 * @return
+	 */
+	public Link withMedia(String media) {
+		Assert.hasText(media, "media must not be null or empty!");
+		return new Link(this.href, this.rel, this.hreflang, media, this.title, this.type, this.deprecation);
+	}
+
+	/**
+	 * Returns a {@link Link} with the {@code title} attribute filled out.
+	 *
+	 * @param title
+	 * @return
+	 */
+	public Link withTitle(String title) {
+		Assert.hasText(title, "title must not be null or empty!");
+		return new Link(this.href, this.rel, this.hreflang, this.media, title, this.type, this.deprecation);
+	}
+
+	/**
+	 * Returns a {@link Link} with the {@code type} attribute filled out.
+	 *
+	 * @param type
+	 * @return
+	 */
+	public Link withType(String type) {
+		Assert.hasText(type, "type must not be null or empty!");
+		return new Link(this.href, this.rel, this.hreflang, this.media, this.title, type, this.deprecation);
+	}
+
+	/**
+	 * Returns a {@link Link} with the {@code deprecation} attribute filled out.
+	 * 
+	 * @param deprecation
+	 * @return
+	 */
+	public Link withDeprecation(String deprecation) {
+		Assert.hasText(deprecation, "deprecation must not be null or empty!");
+		return new Link(this.href, this.rel, this.hreflang, this.media, this.title, this.type, deprecation);
 	}
 
 	/**
@@ -212,7 +342,21 @@ public class Link implements Serializable {
 
 		Link that = (Link) obj;
 
-		return this.href.equals(that.href) && this.rel.equals(that.rel);
+		return
+			this.href.equals(that.href)
+			&&
+			this.rel.equals(that.rel)
+			&&
+			(this.hreflang != null ? this.hreflang.equals(that.hreflang) : this.hreflang == that.hreflang)
+			&&
+			(this.media != null ? this.media.equals(that.media) : this.media == that.media)
+			&&
+			(this.title != null ? this.title.equals(that.title) : this.title == that.title)
+			&&
+			(this.type != null ? this.type.equals(that.type) : this.type == that.type)
+			&&
+			(this.deprecation != null ? this.deprecation.equals(that.deprecation) : this.deprecation == that.deprecation);
+
 	}
 
 	/* 
@@ -225,6 +369,21 @@ public class Link implements Serializable {
 		int result = 17;
 		result += 31 * href.hashCode();
 		result += 31 * rel.hashCode();
+		if (hreflang != null) {
+			result += 31 * hreflang.hashCode();
+		}
+		if (media != null) {
+			result += 31 * media.hashCode();
+		}
+		if (title != null) {
+			result += 31 * title.hashCode();
+		}
+		if (type != null) {
+			result += 31 * type.hashCode();
+		}
+		if (deprecation != null) {
+			result += 31 * deprecation.hashCode();
+		}
 		return result;
 	}
 
@@ -234,7 +393,30 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return String.format("<%s>;rel=\"%s\"", href, rel);
+		String linkString = String.format("<%s>;rel=\"%s\"", href, rel);
+
+		if (hreflang != null) {
+			linkString += ";hreflang=\"" + hreflang + "\"";
+		}
+
+		if (media != null) {
+			linkString += ";media=\"" + media + "\"";
+		}
+
+		if (title != null) {
+			linkString += ";title=\"" + title + "\"";
+		}
+
+		if (type != null) {
+			linkString += ";type=\"" + type + "\"";
+		}
+
+		if (deprecation != null) {
+			linkString += ";deprecation=\"" + deprecation + "\"";
+		}
+
+
+		return linkString;
 	}
 
 	/**
@@ -263,7 +445,34 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			return new Link(matcher.group(1), attributes.get("rel"));
+			Set<String> unrecognizedHeaders = unrecognizedHeaders(attributes);
+			if (!unrecognizedHeaders.isEmpty()) {
+				throw new IllegalArgumentException("Link contains invalid RFC5988 headers! => " + unrecognizedHeaders);
+			}
+
+			Link link = new Link(matcher.group(1), attributes.get("rel"));
+
+			if (attributes.containsKey("hreflang")) {
+				link = link.withHreflang(attributes.get("hreflang"));
+			}
+
+			if (attributes.containsKey("media")) {
+				link = link.withMedia(attributes.get("media"));
+			}
+
+			if (attributes.containsKey("title")) {
+				link = link.withTitle(attributes.get("title"));
+			}
+
+			if (attributes.containsKey("type")) {
+				link = link.withType(attributes.get("type"));
+			}
+
+			if (attributes.containsKey("deprecation")) {
+				link = link.withDeprecation(attributes.get("deprecation"));
+			}
+
+			return link;
 
 		} else {
 			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
@@ -283,7 +492,7 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-]*|" + URI_PATTERN + ")\"");
+		Pattern keyAndValue = Pattern.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
 		Matcher matcher = keyAndValue.matcher(source);
 
 		while (matcher.find()) {
@@ -291,5 +500,24 @@ public class Link implements Serializable {
 		}
 
 		return attributes;
+	}
+
+	/**
+	 * Scan for any headers not recognized.
+	 *
+	 * @param attributes
+	 * @return
+	 */
+	private static Set<String> unrecognizedHeaders(final Map<String, String> attributes) {
+
+		// Copy the existing keys to avoid damaging the original.
+		Set<String> unrecognizedHeaders = new HashSet<String>() {{
+			addAll(attributes.keySet());
+		}};
+
+		// Remove all recognized headers
+		unrecognizedHeaders.removeAll(Arrays.asList("href", "rel", "hreflang", "media", "title", "type", "deprecation"));
+
+		return unrecognizedHeaders;
 	}
 }

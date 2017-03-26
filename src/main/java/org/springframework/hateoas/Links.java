@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ import org.springframework.util.StringUtils;
  * Value object to represent a list of {@link Link}s.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class Links implements Iterable<Link> {
 
-	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>;rel=\"[^\"]*\")");
+	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\w+=\"[^\"]*\")+)");
 
 	static final Links NO_LINKS = new Links(Collections.<Link> emptyList());
 
