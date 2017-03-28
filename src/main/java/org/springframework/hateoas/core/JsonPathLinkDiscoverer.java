@@ -67,23 +67,22 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	}
 
 	private final String pathTemplate;
-	private final MediaType mediaType;
+	private final List<MediaType> mediaTypes;
 
 	/**
 	 * Creates a new {@link JsonPathLinkDiscoverer} using the given path template supporting the given {@link MediaType}.
 	 * The template has to contain a single {@code %s} placeholder which will be replaced by the relation type.
 	 * 
 	 * @param pathTemplate must not be {@literal null} or empty and contain a single placeholder.
-	 * @param mediaType the {@link MediaType} to support.
+	 * @param mediaTypes the {@link MediaType}s to support.
 	 */
-	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType) {
-
+	public JsonPathLinkDiscoverer(String pathTemplate, MediaType... mediaTypes) {
 		Assert.hasText(pathTemplate, "Path template must not be null!");
 		Assert.isTrue(StringUtils.countOccurrencesOf(pathTemplate, "%s") == 1,
 				"Path template must contain a single placeholder!");
 
 		this.pathTemplate = pathTemplate;
-		this.mediaType = mediaType;
+		this.mediaTypes = Arrays.asList(mediaTypes);
 	}
 
 	/* 
@@ -178,6 +177,16 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 */
 	@Override
 	public boolean supports(MediaType delimiter) {
-		return this.mediaType == null ? true : this.mediaType.isCompatibleWith(delimiter);
+		boolean supports = false;
+		if (this.mediaTypes == null) {
+			return true;
+		} else {
+			for (MediaType mediaType : this.mediaTypes) {
+				if (mediaType.isCompatibleWith(delimiter)) {
+					supports = true;
+				}
+			}
+		}
+		return supports;
 	}
 }

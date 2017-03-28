@@ -249,6 +249,12 @@ public class TraversonTest {
 		assertThat(converters, hasSize(2));
 		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
 		assertThat(converters.get(1), is(instanceOf(MappingJackson2HttpMessageConverter.class)));
+
+		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON_UTF8);
+
+		assertThat(converters, hasSize(2));
+		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
+		assertThat(converters.get(1), is(instanceOf(MappingJackson2HttpMessageConverter.class)));
 	}
 
 	/**

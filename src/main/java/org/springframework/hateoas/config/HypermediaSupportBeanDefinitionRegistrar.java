@@ -299,7 +299,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 			MappingJackson2HttpMessageConverter halConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 					ResourceSupport.class);
-			halConverter.setSupportedMediaTypes(Arrays.asList(HAL_JSON));
+			halConverter.setSupportedMediaTypes(Arrays.asList(HAL_JSON, HAL_JSON_UTF8));
 			halConverter.setObjectMapper(halObjectMapper);
 
 			List<HttpMessageConverter<?>> result = new ArrayList<HttpMessageConverter<?>>(converters.size());
