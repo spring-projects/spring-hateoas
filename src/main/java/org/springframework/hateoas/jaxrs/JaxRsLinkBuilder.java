@@ -25,6 +25,7 @@ import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -38,6 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(Path.class);
+	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
 	/**
 	 * Creates a new {@link JaxRsLinkBuilder} from the given {@link UriComponentsBuilder}.
@@ -72,10 +74,11 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 		Assert.notNull(resourceType, "Controller type must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(resourceType)).build();
-		UriComponents expandedComponents = uriComponents.expand(parameters);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(resourceType));
+		UriComponents expandedComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expandedComponents);
+		return new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping())//
+				.slash(expandedComponents, true);
 	}
 
 	/**
@@ -92,10 +95,11 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 		Assert.notNull(resourceType, "Controller type must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(resourceType)).build();
-		UriComponents expandedComponents = uriComponents.expand(parameters);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DISCOVERER.getMapping(resourceType));
+		UriComponents expandedComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping()).slash(expandedComponents);
+		return new JaxRsLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping())//
+				.slash(expandedComponents, true);
 	}
 
 	/* 
@@ -114,5 +118,30 @@ public class JaxRsLinkBuilder extends LinkBuilderSupport<JaxRsLinkBuilder> {
 	@Override
 	protected JaxRsLinkBuilder createNewInstance(UriComponentsBuilder builder) {
 		return new JaxRsLinkBuilder(builder);
+	}
+
+	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
+
+		public CustomUriTemplateHandler() {
+			setStrictEncoding(true);
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.util.Map)
+		 */
+		@Override
+		public UriComponents expandAndEncode(UriComponentsBuilder builder, Map<String, ?> uriVariables) {
+			return super.expandAndEncode(builder, uriVariables);
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.lang.Object[])
+		 */
+		@Override
+		public UriComponents expandAndEncode(UriComponentsBuilder builder, Object[] uriVariables) {
+			return super.expandAndEncode(builder, uriVariables);
+		}
 	}
 }

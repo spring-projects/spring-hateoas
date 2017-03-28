@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * 
  * @author Oliver Gierke
  * @author Kevin Conaway
+ * @author Mark Paluch
  */
 public class AnnotationMappingDiscovererUnitTest {
 
@@ -139,11 +141,24 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method), is("/type/method"));
 	}
 
+	/**
+	 * @see #471
+	 */
+	@Test
+	public void discoversMethodLevelMappingUsingComposedAnnotation() throws Exception {
+
+		Method method = MyController.class.getMethod("methodWithComposedAnnotation");
+		assertThat(discoverer.getMapping(method), is("/type/otherMethod"));
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
 		@RequestMapping("/method")
 		void method();
+
+		@GetMapping("/otherMethod")
+		void methodWithComposedAnnotation();
 
 		@RequestMapping
 		void noMethodMapping();

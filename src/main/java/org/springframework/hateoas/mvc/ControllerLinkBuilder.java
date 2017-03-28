@@ -17,6 +17,9 @@ package org.springframework.hateoas.mvc;
 
 import static org.springframework.util.StringUtils.*;
 
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
+
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Map;
@@ -24,16 +27,19 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -46,12 +52,17 @@ import org.springframework.web.util.UriTemplate;
  * @author Greg Turnquist
  * @author Kevin Conaway
  * @author Andrew Naydyonock
+ * @author Oliver Trosien
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
-	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final CachingAnnotationMappingDiscoverer DISCOVERER = new CachingAnnotationMappingDiscoverer(
+			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
+	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
+
+	private final TemplateVariables variables;
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -59,7 +70,10 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @param builder must not be {@literal null}.
 	 */
 	ControllerLinkBuilder(UriComponentsBuilder builder) {
+
 		super(builder);
+
+		this.variables = TemplateVariables.NONE;
 	}
 
 	/**
@@ -68,7 +82,14 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @param uriComponents must not be {@literal null}.
 	 */
 	ControllerLinkBuilder(UriComponents uriComponents) {
+		this(uriComponents, TemplateVariables.NONE);
+	}
+
+	ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables) {
+
 		super(uriComponents);
+
+		this.variables = variables;
 	}
 
 	/**
@@ -97,10 +118,10 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		String mapping = DISCOVERER.getMapping(controller);
 
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
-		UriComponents expandedComponents = uriComponents.expand(parameters);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
+		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(expandedComponents);
+		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
 	}
 
 	/**
@@ -119,10 +140,10 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		String mapping = DISCOVERER.getMapping(controller);
 
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping).build();
-		UriComponents expandedComponents = uriComponents.expand(parameters);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
+		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(expandedComponents);
+		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
 	}
 
 	/*
@@ -140,7 +161,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		UriTemplate template = new UriTemplate(DISCOVERER.getMapping(controller, method));
+		UriTemplate template = DISCOVERER.getMappingAsUriTemplate(controller, method);
 		URI uri = template.expand(parameters);
 
 		return new ControllerLinkBuilder(getBuilder()).slash(uri);
@@ -211,54 +232,48 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return UriComponentsBuilder.fromUri(toUri());
 	}
 
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.LinkBuilderSupport#toString()
+	 */
+	@Override
+	public String toString() {
+
+		String result = super.toString();
+
+		if (variables == TemplateVariables.NONE) {
+			return result;
+		}
+
+		if (!result.contains("#")) {
+			return result.concat(variables.toString());
+		}
+
+		String[] parts = result.split("#");
+		return parts[0].concat(variables.toString()).concat("#").concat(parts[0]);
+	}
+
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with the host tweaked in case the
-	 * request contains an {@code X-Forwarded-Host} header and the scheme tweaked in case the request contains an
-	 * {@code X-Forwarded-Ssl} header
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
+	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
+	 * {@link UriComponentsBuilder}.
 	 * 
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
 
 		HttpServletRequest request = getCurrentRequest();
-		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
+		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
+		// special case handling for X-Forwarded-Ssl:
+		// apply it, but only if X-Forwarded-Proto is unset.
+
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
 		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
 		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
-		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
 
-		if (hasText(proto)) {
-			builder.scheme(proto);
-		} else if (hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+		if (!hasText(proto) && hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
 			builder.scheme("https");
-		}
-
-		String host = forwarded.getHost();
-		host = hasText(host) ? host : request.getHeader("X-Forwarded-Host");
-
-		if (!hasText(host)) {
-			return builder;
-		}
-
-		String[] hosts = commaDelimitedListToStringArray(host);
-		String hostToUse = hosts[0];
-
-		if (hostToUse.contains(":")) {
-
-			String[] hostAndPort = split(hostToUse, ":");
-
-			builder.host(hostAndPort[0]);
-			builder.port(Integer.parseInt(hostAndPort[1]));
-
-		} else {
-			builder.host(hostToUse);
-			builder.port(-1); // reset port if it was forwarded from default port
-		}
-
-		String port = request.getHeader("X-Forwarded-Port");
-
-		if (hasText(port)) {
-			builder.port(Integer.parseInt(port));
 		}
 
 		return builder;
@@ -278,5 +293,51 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
 		return servletRequest;
+	}
+
+	@RequiredArgsConstructor
+	private static class CachingAnnotationMappingDiscoverer implements MappingDiscoverer {
+
+		private final @Delegate AnnotationMappingDiscoverer delegate;
+		private final Map<String, UriTemplate> templates = new ConcurrentReferenceHashMap<String, UriTemplate>();
+
+		public UriTemplate getMappingAsUriTemplate(Class<?> type, Method method) {
+
+			String mapping = delegate.getMapping(type, method);
+
+			UriTemplate template = templates.get(mapping);
+
+			if (template == null) {
+				template = new UriTemplate(mapping);
+				templates.put(mapping, template);
+			}
+
+			return template;
+		}
+	}
+
+	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
+
+		public CustomUriTemplateHandler() {
+			setStrictEncoding(true);
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.util.Map)
+		 */
+		@Override
+		public UriComponents expandAndEncode(UriComponentsBuilder builder, Map<String, ?> uriVariables) {
+			return super.expandAndEncode(builder, uriVariables);
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.lang.Object[])
+		 */
+		@Override
+		public UriComponents expandAndEncode(UriComponentsBuilder builder, Object[] uriVariables) {
+			return super.expandAndEncode(builder, uriVariables);
+		}
 	}
 }

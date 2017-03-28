@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
+	private static final String URI_PATTERN = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
@@ -282,7 +283,7 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\\\"(\\p{Alnum}*)\"");
+		Pattern keyAndValue = Pattern.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-]*|" + URI_PATTERN + ")\"");
 		Matcher matcher = keyAndValue.matcher(source);
 
 		while (matcher.find()) {

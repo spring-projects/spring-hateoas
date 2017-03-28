@@ -18,9 +18,9 @@ toc::[]
 == Fundmentals
 
 [[fundamentals.jaxb-json]]
-=== JAXB / JSON integration
+=== Jackson / JAXB integration
 
-As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either JAXB, JSON or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
+As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either Jackson, JAXB, or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
 
 [[fundamentals.links]]
 === Links
@@ -30,7 +30,7 @@ The `Link` value object follows the Atom link definition and consists of a `rel`
 ----
 Link link = new Link("http://localhost:8080/something");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
-assertThat(link.getRel(), is(Link.SELF));
+assertThat(link.getRel(), is(Link.REL_SELF));
 
 Link link = new Link("http://localhost:8080/something", "my-rel");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
@@ -62,11 +62,18 @@ resource.add(new Link("http://myhost/people"));
 
 This would render as follows in JSON:
 
-[source, xml]
+[source, json]
 ----
-{ firstname : "Dave",
-  lastname : "Matthews",
-  links : [ { rel : "self", href : "http://myhost/people" } ] }
+{
+    "firstname" : "Dave",
+    "lastname" : "Matthews",
+    _"links" : [
+        {
+            "rel" : "self",
+            "href" : "http://myhost/people"
+        }
+    ]
+}
 ----
 
 … or slightly more verbose in XML …
@@ -88,7 +95,7 @@ You can also easily access links contained in that resource:
 ----
 Link selfLink = new Link("http://myhost/people");
 assertThat(resource.getId(), is(selfLink));
-assertThat(resource.getLink(Link.SELF), is(selfLink));
+assertThat(resource.getLink(Link.REL_SELF), is(selfLink));
 ----
 [[fundamentals.obtaining-links]]
 === Obtaining links
@@ -136,7 +143,7 @@ The `ControllerLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under th
 Person person = new Person(1L, "Dave", "Matthews");
 //                 /person                 /     1
 Link link = linkTo(PersonController.class).slash(person.getId()).withSelfRel();
-assertThat(link.getRel(), is(Link.SELF));
+assertThat(link.getRel(), is(Link.REL_SELF));
 assertThat(link.getHref(), endsWith("/people/1"));
 ----
 
@@ -169,7 +176,7 @@ As of version 0.4 you can even easily build links pointing to methods or creatin
 Method method = PersonController.class.getMethod("show", Long.class);
 Link link = linkTo(method, 2L).withSelfRel();
 
-assertThat(link.getHref(), is("/people/2")));
+assertThat(link.getHref(), endsWith("/people/2")));
 ----
 
 This is still a bit dissatisfying as we have to get a `Method` instance first, which throws an exception and is generally quite cumbersome. At least we don't repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy we can create easily using the `methodOn(…)` helper.
@@ -177,10 +184,10 @@ This is still a bit dissatisfying as we have to get a `Method` instance first, w
 [source, java]
 ----
 Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
-assertThat(link.getHref(), is("/people/2")));
+assertThat(link.getHref(), endsWith("/people/2")));
 ----
 
-`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposed it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
+`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
 
 1. The return type has to be capable of proxying as we need to expose the method invocation on it.
 2. The parameters handed into the methods are generally neglected, except the ones referred to through `@PathVariable` as they make up the URI.
@@ -192,6 +199,7 @@ So far we have created links by pointing to the web-framework implementations (i
 
 The `EntityLinks` interface now exposes an API to lookup a `Link` or `LinkBuilder` based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
 
+[source, java]
 ----
 EntityLinks links = …;
 LinkBuilder builder = links.linkFor(CustomerResource.class);
@@ -330,20 +338,20 @@ public class Config {
 
 Note that now the prefix `ex:` automatically appears before all rels which are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form:
 
-[source, java]
+[source, json]
 ----
 {
-  _links : {
-    self: { href: "http://myhost/person/1" },
-  curies: {
-         name: "ex",
-         href: "http://example.com/rels/{rel}",
-         templated: true
+  _"links" : {
+    "self" : { href: "http://myhost/person/1" },
+    "curies" : {
+         "name" : "ex",
+         "href" : "http://example.com/rels/{rel}",
+         "templated" : true
     },
-    "ex:orders" : { href: "http://myhost/person/1/orders" }
+    "ex:orders" : { href : "http://myhost/person/1/orders" }
   },
-  firstname : "Dave",
-  lastname : "Matthews"
+  "firstname" : "Dave",
+  "lastname" : "Matthews"
 }
 ----
 
@@ -398,7 +406,7 @@ NOTE: `follow()` is chainable, meaning you can string together multiple hops as 
 
 The examples shown so far demonstrate how to side step Java's type erasure and convert a single JSON-formatted resource into a `Resource<Item>` object. But what if you get a collection like an *_embedded* HAL collection?
 
-One slight twak and you're set.
+One slight tweak and you're set.
 
 [source,java]
 ----

@@ -44,9 +44,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 public class ResourceProcessorHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	static final ResolvableType RESOURCE_TYPE = ResolvableType.forClass(Resource.class);
-	static final ResolvableType RESOURCES_TYPE = ResolvableType.forClass(Resources.class);
-	private static final ResolvableType HTTP_ENTITY_TYPE = ResolvableType.forClass(HttpEntity.class);
+	static final ResolvableType RESOURCE_TYPE = ResolvableType.forRawClass(Resource.class);
+	static final ResolvableType RESOURCES_TYPE = ResolvableType.forRawClass(Resources.class);
+	private static final ResolvableType HTTP_ENTITY_TYPE = ResolvableType.forRawClass(HttpEntity.class);
 
 	static final Field CONTENT_FIELD = ReflectionUtils.findField(Resources.class, "content");
 

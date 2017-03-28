@@ -1,6 +1,35 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.23.0.RELEASE (2016-12-22)
+----------------------------------------------
+- #529 - Release 0.23.
+- #527 - Link creation via ControllerLinkBuilder broken.
+
+Changes in version 0.22.0.RELEASE (2016-12-21)
+----------------------------------------------
+- #473 - Release 0.22.
+- #526 - Upgrade to Spring 4.3.5.
+- #521 - Setup code coverage for SonarQube build.
+- #520 - Polish most critical SonarQube warnings.
+- #517 - Upgrade to Spring 4.3.4.
+- #511 - Sub-optimal performance of ControllerLinkBuilder.linkTo(…).
+- #509 - ControllerLinkBuilder does not handle multiple X-Forwarded-* headers values.
+- #507 - Upgrade Spring 5 build profile to point to M2.
+- #504 - Link.valueOf does not accept relations with dot or minus.
+- #499 - Alps.Ext lacks required attribute id.
+- #486 - Assignment checks for ResolvableType in ResourceProcessorInvoker don't work.
+- #485 - Upgrade to Spring 4.3.
+- #471 - Add support for @GetMapping, @PostMapping etc. introduced in Spring 4.3 in ControllerLinkBuilder.
+- #169 - Allow creation of UriTemplates when pointing to controller methods.
+
+Changes in version 0.21.0.RELEASE (2016-07-17)
+----------------------------------------------
+- #472 - Release 0.21.
+- #469 - Remove use of AnnotationMethodHandlerAdapter for Spring 5 compatibility.
+- #464 - Documentation for Traverson broken.
+- #460 - HalHandlerInstantiator should use a BeanFactory just like SpringHandlerInstantiator.
+
 Changes in version 0.20.0.RELEASE (2016-06-06)
 ----------------------------------------------
 - #458 - Release 0.20.

@@ -35,7 +35,7 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 */
 	@Override
 	public Link linkToSingleResource(Identifiable<?> entity) {
-		Assert.notNull(entity);
+		Assert.notNull(entity, "Entity must not be null!");
 		return linkToSingleResource(entity.getClass(), entity.getId());
 	}
 
@@ -54,7 +54,7 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 */
 	@Override
 	public LinkBuilder linkForSingleResource(Identifiable<?> entity) {
-		Assert.notNull(entity);
+		Assert.notNull(entity, "Entity must not be null!");
 		return linkForSingleResource(entity.getClass(), entity.getId());
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,13 @@
  */
 package org.springframework.hateoas.core;
 
+import lombok.NonNull;
+import lombok.Value;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
@@ -28,6 +32,8 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -37,7 +43,9 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DummyInvocationUtils {
 
-	private static ObjenesisStd OBJENESIS = new ObjenesisStd();
+	private static final ObjenesisStd OBJENESIS = new ObjenesisStd();
+	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<Class<?>, Class<?>>(16,
+			ReferenceType.WEAK);
 
 	public interface LastInvocationAware {
 
@@ -52,8 +60,8 @@ public class DummyInvocationUtils {
 	 * 
 	 * @author Oliver Gierke
 	 */
-	private static class InvocationRecordingMethodInterceptor implements MethodInterceptor, LastInvocationAware,
-			org.springframework.cglib.proxy.MethodInterceptor {
+	private static class InvocationRecordingMethodInterceptor
+			implements MethodInterceptor, LastInvocationAware, org.springframework.cglib.proxy.MethodInterceptor {
 
 		private static final Method GET_INVOCATIONS;
 		private static final Method GET_OBJECT_PARAMETERS;
@@ -71,9 +79,13 @@ public class DummyInvocationUtils {
 		 * Creates a new {@link InvocationRecordingMethodInterceptor} carrying the given parameters forward that might be
 		 * needed to populate the class level mapping.
 		 * 
-		 * @param parameters
+		 * @param targetType must not be {@literal null}.
+		 * @param parameters must not be {@literal null}.
 		 */
-		public InvocationRecordingMethodInterceptor(Class<?> targetType, Object... parameters) {
+		InvocationRecordingMethodInterceptor(Class<?> targetType, Object... parameters) {
+
+			Assert.notNull(targetType, "Target type must not be null!");
+			Assert.notNull(parameters, "Parameters must not be null!");
 
 			this.targetType = targetType;
 			this.objectParameters = parameters.clone();
@@ -168,7 +180,7 @@ public class DummyInvocationUtils {
 		enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
 		enhancer.setClassLoader(classLoader);
 
-		Factory factory = (Factory) OBJENESIS.newInstance(enhancer.createClass());
+		Factory factory = (Factory) OBJENESIS.newInstance(getOrCreateEnhancedClass(type, classLoader));
 		factory.setCallbacks(new Callback[] { interceptor });
 		return (T) factory;
 	}
@@ -182,50 +194,42 @@ public class DummyInvocationUtils {
 		Class<?> getTargetType();
 	}
 
+	/**
+	 * Returns the already created proxy class for the given source type or creates a new one.
+	 * 
+	 * @param type must not be {@literal null}.
+	 * @param classLoader must not be {@literal null}.
+	 * @return
+	 */
+	private static Class<?> getOrCreateEnhancedClass(Class<?> type, ClassLoader classLoader) {
+
+		Assert.notNull(type, "Source type must not be null!");
+		Assert.notNull(classLoader, "ClassLoader must not be null!");
+
+		Class<?> result = CLASS_CACHE.get(type);
+
+		if (result != null) {
+			return result;
+		}
+
+		Enhancer enhancer = new Enhancer();
+		enhancer.setSuperclass(type);
+		enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
+		enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
+		enhancer.setClassLoader(classLoader);
+
+		result = enhancer.createClass();
+
+		CLASS_CACHE.put(type, result);
+
+		return result;
+	}
+
+	@Value
 	static class SimpleMethodInvocation implements MethodInvocation {
 
-		private final Class<?> targetType;
-		private final Method method;
-		private final Object[] arguments;
-
-		/**
-		 * Creates a new {@link SimpleMethodInvocation} for the given {@link Method} and arguments.
-		 * 
-		 * @param method
-		 * @param arguments
-		 */
-		private SimpleMethodInvocation(Class<?> targetType, Method method, Object[] arguments) {
-
-			this.targetType = targetType;
-			this.arguments = arguments;
-			this.method = method;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation#getTargetType()
-		 */
-		@Override
-		public Class<?> getTargetType() {
-			return targetType;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation#getArguments()
-		 */
-		@Override
-		public Object[] getArguments() {
-			return arguments;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation#getMethod()
-		 */
-		@Override
-		public Method getMethod() {
-			return method;
-		}
+		@NonNull Class<?> targetType;
+		@NonNull Method method;
+		@NonNull Object[] arguments;
 	}
 }

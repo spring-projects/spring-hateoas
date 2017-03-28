@@ -32,10 +32,10 @@ public class ControllerRelProvider implements RelProvider {
 
 	public ControllerRelProvider(Class<?> controller, PluginRegistry<RelProvider, Class<?>> providers) {
 
-		Assert.notNull(controller);
+		Assert.notNull(controller, "Controller must not be null!");
 
 		ExposesResourceFor annotation = AnnotationUtils.findAnnotation(controller, ExposesResourceFor.class);
-		Assert.notNull(annotation);
+		Assert.notNull(annotation, "Controller must be annotated with ExposesResourceFor!");
 
 		this.controllerType = controller;
 		this.entityType = annotation.value();

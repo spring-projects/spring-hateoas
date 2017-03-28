@@ -84,7 +84,7 @@ public class TypeReferences {
 			Type type = parameterizedTypeReferenceSubclass.getGenericSuperclass();
 			Assert.isInstanceOf(ParameterizedType.class, type);
 			ParameterizedType parameterizedType = (ParameterizedType) type;
-			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1);
+			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, String.format("Type must have exactly one gerneric type argument but has %s.", parameterizedType.getActualTypeArguments().length));
 
 			Class<?> resourceType = GenericTypeResolver.resolveType(parameterizedType.getActualTypeArguments()[0],
 					new HashMap<TypeVariable, Type>());

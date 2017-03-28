@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
+import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
 import java.lang.annotation.Annotation;
@@ -27,6 +28,7 @@ import org.springframework.util.Assert;
  * {@link MappingDiscoverer} implementation that inspects mappings from a particular annotation.
  * 
  * @author Oliver Gierke
+ * @author Mark Paluch
  */
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
@@ -53,7 +55,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 */
 	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation, String mappingAttributeName) {
 
-		Assert.notNull(annotation);
+		Assert.notNull(annotation, "Annotation must not be null!");
 
 		this.annotationType = annotation;
 		this.mappingAttributeName = mappingAttributeName;
@@ -68,7 +70,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		Assert.notNull(type, "Type must not be null!");
 
-		String[] mapping = getMappingFrom(findAnnotation(type, annotationType));
+		String[] mapping = getMappingFrom(findMergedAnnotation(type, annotationType));
 
 		return mapping.length == 0 ? null : mapping[0];
 	}
@@ -94,7 +96,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		Assert.notNull(type, "Type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		String[] mapping = getMappingFrom(findAnnotation(method, annotationType));
+		String[] mapping = getMappingFrom(findMergedAnnotation(method, annotationType));
 		String typeMapping = getMapping(type);
 
 		if (mapping == null || mapping.length == 0) {

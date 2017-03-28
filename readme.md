@@ -1,3 +1,6 @@
+[![Spring Hateoas](https://spring.io/badges/spring-hateoas/ga.svg)](http://projects.spring.io/spring-hateoas/#quick-start)
+[![Spring Hateoas](https://spring.io/badges/spring-hateoas/snapshot.svg)](http://projects.spring.io/spring-hateoas/#quick-start)
+
 # Spring Hateoas
 This project provides some APIs to ease creating REST representations that follow the [HATEOAS](http://en.wikipedia.org/wiki/HATEOAS) principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 

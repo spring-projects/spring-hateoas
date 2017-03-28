@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class JacksonSerializationTest {
 								).build(), //
 						descriptor().id("resultType").type(Type.SEMANTIC).//
 								doc(doc().value("results format").build()).//
-								ext(ext().href("http://alps.io/ext/range").value("summary,detail").build()//
+								ext(ext().id("#ext-range").href("http://alps.io/ext/range").value("summary,detail").build()//
 								).build())//
 				).build();
 
