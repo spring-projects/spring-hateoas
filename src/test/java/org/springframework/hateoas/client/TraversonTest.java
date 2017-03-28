@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class TraversonTest {
 
 		this.server = new Server();
 		this.baseUri = URI.create(server.rootResource());
-		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
 
 		setUpActors();
 	}
@@ -102,9 +102,10 @@ public class TraversonTest {
 
 		traverson.follow().toObject(String.class);
 
-		verifyThatRequest(). //
-				havingPathEqualTo("/"). //
-				havingHeader("Accept", hasItem("application/hal+json"));
+		verifyThatRequest() //
+				.havingPathEqualTo("/") //
+				.havingHeader("Accept", contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.receivedOnce();
 	}
 
 	/**
@@ -249,6 +250,12 @@ public class TraversonTest {
 		assertThat(converters, hasSize(2));
 		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
 		assertThat(converters.get(1), is(instanceOf(MappingJackson2HttpMessageConverter.class)));
+
+		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON_UTF8);
+
+		assertThat(converters, hasSize(2));
+		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
+		assertThat(converters.get(1), is(instanceOf(MappingJackson2HttpMessageConverter.class)));
 	}
 
 	/**
@@ -355,13 +362,13 @@ public class TraversonTest {
 		assertThat(item.image, equalTo(server.rootResource() + "/springagram/file/cat"));
 		assertThat(item.description, equalTo("cat"));
 	}
-	
+
 	/**
 	 * @see #337
 	 */
 	@Test
 	public void doesNotDoubleEncodeURI() {
-		
+
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		Resource<?> itemResource = traverson.//
@@ -369,8 +376,7 @@ public class TraversonTest {
 				toObject(Resource.class);
 
 		assertThat(itemResource.hasLink("self"), is(true));
-		assertThat(itemResource.getLink("self").expand().getHref(),
-				equalTo(server.rootResource() + "/springagram/items"));
+		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items"));
 	}
 
 	private void setUpActors() {

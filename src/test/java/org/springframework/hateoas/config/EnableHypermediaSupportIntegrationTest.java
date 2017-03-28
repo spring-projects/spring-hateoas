@@ -76,6 +76,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		assertThat(discoverers, is(notNullValue()));
 		assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON), is(instanceOf(HalLinkDiscoverer.class)));
+		assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8), is(instanceOf(HalLinkDiscoverer.class)));
 		assertRelProvidersSetUp(context);
 	}
 
@@ -98,7 +99,8 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
-		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(),
+				hasItems(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
 
 		boolean found = false;
 
@@ -113,7 +115,7 @@ public class EnableHypermediaSupportIntegrationTest {
 						.getField(processor, "messageConverters");
 
 				assertThat(converters.get(0), is(instanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class)));
-				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+				assertThat(converters.get(0).getSupportedMediaTypes(), hasItems(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
 			}
 		}
 
@@ -129,7 +131,8 @@ public class EnableHypermediaSupportIntegrationTest {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
 		RestTemplate template = context.getBean(RestTemplate.class);
 
-		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(),
+				hasItems(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
 		context.close();
 	}
 
@@ -149,13 +152,13 @@ public class EnableHypermediaSupportIntegrationTest {
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
 
 		Map<String, EntityLinks> discoverers = context.getBeansOfType(EntityLinks.class);
-		assertThat(discoverers.values(), Matchers.<EntityLinks>hasItem(instanceOf(DelegatingEntityLinks.class)));
+		assertThat(discoverers.values(), Matchers.<EntityLinks> hasItem(instanceOf(DelegatingEntityLinks.class)));
 	}
 
 	private static void assertRelProvidersSetUp(ApplicationContext context) {
 
 		Map<String, RelProvider> discoverers = context.getBeansOfType(RelProvider.class);
-		assertThat(discoverers.values(), Matchers.<RelProvider>hasItem(instanceOf(DelegatingRelProvider.class)));
+		assertThat(discoverers.values(), Matchers.<RelProvider> hasItem(instanceOf(DelegatingRelProvider.class)));
 	}
 
 	@SuppressWarnings({ "unchecked" })
@@ -168,7 +171,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(rmha.getMessageConverters(),
-				Matchers.<HttpMessageConverter<?>>hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
+				Matchers.<HttpMessageConverter<?>> hasItems(instanceOf(MappingJackson2HttpMessageConverter.class)));
 	}
 
 	/**

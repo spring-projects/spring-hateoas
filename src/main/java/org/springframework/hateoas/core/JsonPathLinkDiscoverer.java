@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.core;
 
+import net.minidev.json.JSONArray;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -24,10 +26,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import net.minidev.json.JSONArray;
-
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -67,23 +68,31 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	}
 
 	private final String pathTemplate;
-	private final MediaType mediaType;
+	private final List<MediaType> mediaTypes;
 
 	/**
 	 * Creates a new {@link JsonPathLinkDiscoverer} using the given path template supporting the given {@link MediaType}.
 	 * The template has to contain a single {@code %s} placeholder which will be replaced by the relation type.
 	 * 
 	 * @param pathTemplate must not be {@literal null} or empty and contain a single placeholder.
-	 * @param mediaType the {@link MediaType} to support.
+	 * @param mediaType the primary {@link MediaType}s to support.
+	 * @param additional {@link MediaTypes} to support.
 	 */
-	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType) {
+	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType, MediaType... others) {
 
 		Assert.hasText(pathTemplate, "Path template must not be null!");
 		Assert.isTrue(StringUtils.countOccurrencesOf(pathTemplate, "%s") == 1,
 				"Path template must contain a single placeholder!");
+		Assert.notNull(mediaType, "Primary MediaType must not be null!");
+		Assert.notNull(others, "Other MediaTypes must not be null!");
 
 		this.pathTemplate = pathTemplate;
-		this.mediaType = mediaType;
+
+		List<MediaType> mediaTypes = new ArrayList<MediaType>(others.length + 1);
+		mediaTypes.add(mediaType);
+		mediaTypes.addAll(Arrays.asList(others));
+
+		this.mediaTypes = mediaTypes;
 	}
 
 	/* 
@@ -178,6 +187,13 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 */
 	@Override
 	public boolean supports(MediaType delimiter) {
-		return this.mediaType == null ? true : this.mediaType.isCompatibleWith(delimiter);
+
+		for (MediaType mediaType : this.mediaTypes) {
+			if (mediaType.isCompatibleWith(delimiter)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

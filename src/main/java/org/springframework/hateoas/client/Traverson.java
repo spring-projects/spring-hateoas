@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -130,11 +131,32 @@ public class Traverson {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 
-		if (mediaTypes.contains(MediaTypes.HAL_JSON)) {
-			converters.add(getHalConverter());
+		List<MediaType> halFlavors = getHalJsonFlavors(mediaTypes);
+
+		if (!halFlavors.isEmpty()) {
+			converters.add(getHalConverter(halFlavors));
 		}
 
 		return converters;
+	}
+
+	/**
+	 * Returns all HAL JSON compatible media types from the given list.
+	 * 
+	 * @param mediaTypes must not be {@literal null}.
+	 * @return
+	 */
+	private static List<MediaType> getHalJsonFlavors(Collection<MediaType> mediaTypes) {
+
+		List<MediaType> result = new ArrayList<MediaType>();
+
+		for (MediaType mediaType : mediaTypes) {
+			if (MediaTypes.HAL_JSON.isCompatibleWith(mediaType)) {
+				result.add(mediaType);
+			}
+		}
+
+		return result;
 	}
 
 	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
@@ -150,7 +172,7 @@ public class Traverson {
 	 * 
 	 * @return
 	 */
-	private static final HttpMessageConverter<?> getHalConverter() {
+	private static final HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
@@ -159,7 +181,7 @@ public class Traverson {
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
 		converter.setObjectMapper(mapper);
-		converter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON));
+		converter.setSupportedMediaTypes(halFlavours);
 
 		return converter;
 	}
