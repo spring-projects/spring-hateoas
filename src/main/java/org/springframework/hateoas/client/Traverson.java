@@ -130,7 +130,7 @@ public class Traverson {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 
-		if (mediaTypes.contains(MediaTypes.HAL_JSON)) {
+		if (mediaTypes.contains(MediaTypes.HAL_JSON) || mediaTypes.contains(MediaTypes.HAL_JSON_UTF8)) {
 			converters.add(getHalConverter());
 		}
 

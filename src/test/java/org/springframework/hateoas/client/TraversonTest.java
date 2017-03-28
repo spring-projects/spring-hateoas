@@ -66,7 +66,7 @@ public class TraversonTest {
 
 		this.server = new Server();
 		this.baseUri = URI.create(server.rootResource());
-		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
 
 		setUpActors();
 	}
@@ -245,6 +245,12 @@ public class TraversonTest {
 	public void returnsDefaultMessageConvertersForHal() {
 
 		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON);
+
+		assertThat(converters, hasSize(2));
+		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
+		assertThat(converters.get(1), is(instanceOf(MappingJackson2HttpMessageConverter.class)));
+
+		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON_UTF8);
 
 		assertThat(converters, hasSize(2));
 		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
