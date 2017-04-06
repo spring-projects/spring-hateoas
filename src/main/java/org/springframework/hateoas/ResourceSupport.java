@@ -69,6 +69,16 @@ public class ResourceSupport implements Identifiable<Link> {
 		}
 	}
 
+    /**
+     * Adds all given {@link Link}s to the resource.
+     *
+     * @param links
+     */
+    public void add(Link... links) {
+        Assert.notNull(links, "Given links must not be null!");
+        add(Arrays.asList(links));
+    }
+
 	/**
 	 * Adds all given {@link Link}s to the resource.
 	 *
