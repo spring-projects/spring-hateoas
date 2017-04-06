@@ -352,6 +352,17 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), startsWith("http://foobarhost/"));
 	}
 
+	@Test
+	public void usesForwardedHostAndPathFromHeaderAndPortFromAnotherHeader() {
+
+		request.addHeader("X-Forwarded-Host", "foobarhost");
+		request.addHeader("X-Forwarded-Path", "/foo");
+		request.addHeader("X-Forwarded-Port", "1234");
+
+		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
+		assertThat(link.getHref(), startsWith("http://foobarhost:1234/foo"));
+	}
+
 	/**
 	 * @see #114
 	 */

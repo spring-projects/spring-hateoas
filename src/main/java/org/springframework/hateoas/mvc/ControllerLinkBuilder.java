@@ -276,6 +276,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			builder.scheme("https");
 		}
 
+		String path = request.getHeader("X-Forwarded-Path");
+
+		if (hasText(path)) {
+			builder.path(path);
+		}
+
 		return builder;
 	}
 
