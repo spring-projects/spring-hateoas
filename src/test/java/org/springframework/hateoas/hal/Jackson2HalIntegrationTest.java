@@ -55,6 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
+	static final String SINGLE_LINK_REFERENCE_AS_MULTIPLE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
 
 	static final String SIMPLE_EMBEDDED_RESOURCE_REFERENCE = "{\"_embedded\":{\"content\":[\"first\",\"second\"]},\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
@@ -94,6 +95,15 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost"));
 
 		assertThat(write(resourceSupport), is(SINGLE_LINK_REFERENCE));
+	}
+
+	@Test
+	public void rendersSingleLinkAsArrayWhenMultiple() throws Exception {
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost").asMultiple());
+
+
 	}
 
 	@Test

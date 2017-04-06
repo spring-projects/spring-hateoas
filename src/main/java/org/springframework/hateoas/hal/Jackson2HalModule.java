@@ -443,8 +443,11 @@ public class Jackson2HalModule extends SimpleModule {
 			}
 
 			if (list.size() == 1) {
-				serializeContents(list.iterator(), jgen, provider);
-				return;
+				if(!(list.get(0) instanceof Link) ||
+						!((Link) list.get(0)).isMultiple()) {
+                    serializeContents(list.iterator(), jgen, provider);
+                    return;
+				}
 			}
 
 			jgen.writeStartArray();
