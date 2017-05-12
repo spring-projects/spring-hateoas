@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.mvc;
 
+import java.lang.reflect.Field;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.lang.reflect.Field;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;

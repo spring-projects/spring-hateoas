@@ -18,6 +18,7 @@ package org.springframework.hateoas.hal;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,6 +32,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
@@ -43,6 +45,7 @@ import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.support.MappingUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,6 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Alexander Baetz
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
@@ -326,6 +330,21 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		support.add(new Link("/foo{?bar}", "search"));
 
 		assertThat(write(support), is(LINK_TEMPLATE));
+	}
+
+	/**
+	 * @see Affordances API addition
+	 * @throws IOException
+	 */
+	@Test
+	public void parsesTemplatedLinks() throws IOException {
+
+		String json = MappingUtils.read(new ClassPathResource("templated-link.json", getClass()));
+		ResourceSupport resource = mapper.readValue(json, ResourceSupport.class);
+
+		assertThat(resource.getLinks().size(), is(2));
+		assertThat(resource.getLink("search").isTemplated(), is(true));
+		assertThat(resource.getLink("self").isTemplated(), is(false));
 	}
 
 	/**

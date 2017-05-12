@@ -26,7 +26,7 @@ import lombok.Value;
  * @see http://alps.io/spec/#prop-ext
  */
 @Value
-@Builder
+@Builder(builderMethodName = "ext")
 public class Ext {
 
 	private final String id;

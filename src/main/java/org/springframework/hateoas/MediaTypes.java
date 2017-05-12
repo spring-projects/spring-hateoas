@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.springframework.http.MediaType;
  * 
  * @author Oliver Gierke
  * @author Przemek Nowak
+ * @author Dietrich Schulten
+ * @author Greg Turnquist
  */
 public class MediaTypes {
 
@@ -34,4 +36,12 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/hal+json}.
 	 */
 	public static final MediaType HAL_JSON = MediaType.valueOf(HAL_JSON_VALUE);
+
+	/**
+	 * Public constant media type for {@code application/prs.hal-forms+json}.
+	 */
+	public static final String HAL_FORMS_JSON_VALUE = "application/prs.hal-forms+json";
+
+	public static final MediaType HAL_FORMS_JSON = MediaType.parseMediaType(HAL_FORMS_JSON_VALUE);
+
 }

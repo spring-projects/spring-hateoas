@@ -17,8 +17,6 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
-import lombok.EqualsAndHashCode;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import lombok.EqualsAndHashCode;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
@@ -48,7 +48,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	 * 
 	 * @param variables must not be {@literal null}.
 	 */
-	public TemplateVariables(TemplateVariable... variables) {
+	private TemplateVariables(TemplateVariable... variables) {
 		this(Arrays.asList(variables));
 	}
 
@@ -57,10 +57,28 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	 * 
 	 * @param variables must not be {@literal null}.
 	 */
-	public TemplateVariables(List<TemplateVariable> variables) {
+	private TemplateVariables(List<TemplateVariable> variables) {
 
 		Assert.notNull(variables, "Template variables must not be null!");
 		this.variables = Collections.unmodifiableList(variables);
+	}
+
+	/**
+	 * Creates a new {@link TemplateVariables} for the given {@link TemplateVariable}s.
+	 * 
+	 * @param variables must not be {@literal null}.
+	 */
+	public static TemplateVariables of(TemplateVariable... variables) {
+		return new TemplateVariables(variables);
+	}
+
+	/**
+	 * Creates a new {@link TemplateVariables} for the given {@link TemplateVariable}s.
+	 * 
+	 * @param variables must not be {@literal null}.
+	 */
+	public static TemplateVariables of(List<TemplateVariable> variables) {
+		return new TemplateVariables(variables);
 	}
 
 	/**
@@ -90,7 +108,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 			}
 		}
 
-		return new TemplateVariables(result);
+		return TemplateVariables.of(result);
 	}
 
 	/**
@@ -110,6 +128,49 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	 */
 	public List<TemplateVariable> asList() {
 		return this.variables;
+	}
+
+	public TemplateVariables getRequiredVariables() {
+
+		if (isEmpty()) {
+			return this;
+		}
+
+		List<TemplateVariable> result = new ArrayList<TemplateVariable>();
+
+		for (TemplateVariable variable : this.variables) {
+			if (variable.isRequired()) {
+				result.add(variable);
+			}
+		}
+
+		return TemplateVariables.of(result);
+	}
+
+	public List<String> getNames() {
+
+		List<String> names = new ArrayList<String>(variables.size());
+
+		for (TemplateVariable variable : variables) {
+			names.add(variable.getName());
+		}
+
+		return Collections.unmodifiableList(names);
+	}
+
+	public boolean isEmpty() {
+		return variables.isEmpty();
+	}
+
+	public boolean hasVariable(String name) {
+
+		for (TemplateVariable variable : variables) {
+			if (variable.hasName(name)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean containsEquivalentFor(TemplateVariable candidate) {

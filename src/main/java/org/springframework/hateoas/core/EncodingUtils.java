@@ -15,9 +15,9 @@
  */
 package org.springframework.hateoas.core;
 
-import lombok.experimental.UtilityClass;
-
 import java.io.UnsupportedEncodingException;
+
+import lombok.experimental.UtilityClass;
 
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriUtils;

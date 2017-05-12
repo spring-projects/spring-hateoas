@@ -45,7 +45,7 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void rendersSingleVariableCorrectly() {
 
-		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
+		TemplateVariables variables = TemplateVariables.of(TemplateVariable.of("foo", SEGMENT));
 		assertThat(variables.toString(), is("{/foo}"));
 	}
 
@@ -55,10 +55,10 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesMultipleVariablesOfTheSameType() {
 
-		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM);
-		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
+		TemplateVariable first = TemplateVariable.of("foo", REQUEST_PARAM);
+		TemplateVariable second = TemplateVariable.of("bar", REQUEST_PARAM);
 
-		TemplateVariables variables = new TemplateVariables(first, second);
+		TemplateVariables variables = TemplateVariables.of(first, second);
 
 		assertThat(variables.toString(), is("{?foo,bar}"));
 	}
@@ -69,10 +69,10 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesMultipleVariablesOfTheDifferentType() {
 
-		TemplateVariable first = new TemplateVariable("foo", SEGMENT);
-		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
+		TemplateVariable first = TemplateVariable.of("foo", SEGMENT);
+		TemplateVariable second = TemplateVariable.of("bar", REQUEST_PARAM);
 
-		TemplateVariables variables = new TemplateVariables(first, second);
+		TemplateVariables variables = TemplateVariables.of(first, second);
 
 		assertThat(variables.toString(), is("{/foo}{?bar}"));
 	}
@@ -83,8 +83,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void concatsVariables() {
 
-		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
-		variables = variables.concat(new TemplateVariable("bar", REQUEST_PARAM));
+		TemplateVariables variables = TemplateVariables.of(TemplateVariable.of("foo", SEGMENT));
+		variables = variables.concat(TemplateVariable.of("bar", REQUEST_PARAM));
 
 		assertThat(variables.toString(), is("{/foo}{?bar}"));
 	}
@@ -95,10 +95,10 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesContinuedParamWithParam() {
 
-		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM);
-		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM_CONTINUED);
+		TemplateVariable first = TemplateVariable.of("foo", REQUEST_PARAM);
+		TemplateVariable second = TemplateVariable.of("bar", REQUEST_PARAM_CONTINUED);
 
-		TemplateVariables variables = new TemplateVariables(first, second);
+		TemplateVariables variables = TemplateVariables.of(first, second);
 
 		assertThat(variables.toString(), is("{?foo,bar}"));
 	}
@@ -109,10 +109,10 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void combinesContinuedParameterWithParameter() {
 
-		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM_CONTINUED);
-		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
+		TemplateVariable first = TemplateVariable.of("foo", REQUEST_PARAM_CONTINUED);
+		TemplateVariable second = TemplateVariable.of("bar", REQUEST_PARAM);
 
-		TemplateVariables variables = new TemplateVariables(first, second);
+		TemplateVariables variables = TemplateVariables.of(first, second);
 
 		assertThat(variables.toString(), is("{&foo,bar}"));
 	}
@@ -123,8 +123,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void dropsDuplicateTemplateVariable() {
 
-		TemplateVariable variable = new TemplateVariable("foo", REQUEST_PARAM);
-		TemplateVariables variables = new TemplateVariables(variable);
+		TemplateVariable variable = TemplateVariable.of("foo", REQUEST_PARAM);
+		TemplateVariables variables = TemplateVariables.of(variable);
 
 		List<TemplateVariable> result = variables.concat(variable).asList();
 
@@ -138,9 +138,9 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void considersRequestParameterVariablesEquivalent() {
 
-		TemplateVariable parameter = new TemplateVariable("foo", REQUEST_PARAM);
-		TemplateVariable continued = new TemplateVariable("foo", REQUEST_PARAM_CONTINUED);
-		TemplateVariable fragment = new TemplateVariable("foo", FRAGMENT);
+		TemplateVariable parameter = TemplateVariable.of("foo", REQUEST_PARAM);
+		TemplateVariable continued = TemplateVariable.of("foo", REQUEST_PARAM_CONTINUED);
+		TemplateVariable fragment = TemplateVariable.of("foo", FRAGMENT);
 
 		assertThat(parameter.isEquivalent(continued), is(true));
 		assertThat(continued.isEquivalent(parameter), is(true));
@@ -153,8 +153,8 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void considersFragementVariable() {
 
-		assertThat(new TemplateVariable("foo", VariableType.FRAGMENT).isFragment(), is(true));
-		assertThat(new TemplateVariable("foo", VariableType.REQUEST_PARAM).isFragment(), is(false));
+		assertThat(TemplateVariable.of("foo", VariableType.FRAGMENT).isFragment(), is(true));
+		assertThat(TemplateVariable.of("foo", VariableType.REQUEST_PARAM).isFragment(), is(false));
 	}
 
 	/**
@@ -163,10 +163,10 @@ public class TemplateVariablesUnitTest {
 	@Test
 	public void doesNotAddEquivalentVariable() {
 
-		TemplateVariable parameter = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
-		TemplateVariable parameterContinued = new TemplateVariable("foo", VariableType.REQUEST_PARAM_CONTINUED);
+		TemplateVariable parameter = TemplateVariable.of("foo", VariableType.REQUEST_PARAM);
+		TemplateVariable parameterContinued = TemplateVariable.of("foo", VariableType.REQUEST_PARAM_CONTINUED);
 
-		List<TemplateVariable> result = new TemplateVariables(parameter).concat(parameterContinued).asList();
+		List<TemplateVariable> result = TemplateVariables.of(parameter).concat(parameterContinued).asList();
 
 		assertThat(result, hasSize(1));
 		assertThat(result, hasItem(parameter));
@@ -177,7 +177,7 @@ public class TemplateVariablesUnitTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void variableRejectsEmptyName() {
-		new TemplateVariable("", PATH_VARIABLE);
+		TemplateVariable.of("", PATH_VARIABLE);
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class TemplateVariablesUnitTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void variableRejectsNullName() {
-		new TemplateVariable(null, PATH_VARIABLE);
+		TemplateVariable.of(null, PATH_VARIABLE);
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class TemplateVariablesUnitTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void variableRejectsNullType() {
-		new TemplateVariable("foo", null);
+		TemplateVariable.of("foo", null);
 	}
 
 	/**
@@ -201,6 +201,6 @@ public class TemplateVariablesUnitTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void variableRejectsNullDescription() {
-		new TemplateVariable("foo", PATH_VARIABLE, null);
+		TemplateVariable.of("foo", PATH_VARIABLE, null);
 	}
 }

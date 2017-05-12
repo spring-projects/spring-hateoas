@@ -15,16 +15,12 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.util.StringUtils.*;
-
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
@@ -35,10 +31,6 @@ import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -56,7 +48,6 @@ import org.springframework.web.util.UriTemplate;
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
-	private static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
 	private static final CachingAnnotationMappingDiscoverer DISCOVERER = new CachingAnnotationMappingDiscoverer(
 			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
@@ -121,7 +112,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new ControllerLinkBuilder(UriComponentsSupport.getBuilder()).slash(uriComponents, true);
 	}
 
 	/**
@@ -143,7 +134,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new ControllerLinkBuilder(UriComponentsSupport.getBuilder()).slash(uriComponents, true);
 	}
 
 	/*
@@ -164,7 +155,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriTemplate template = DISCOVERER.getMappingAsUriTemplate(controller, method);
 		URI uri = template.expand(parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uri);
+		return new ControllerLinkBuilder(UriComponentsSupport.getBuilder()).slash(uri);
 	}
 
 	/**
@@ -251,48 +242,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		String[] parts = result.split("#");
 		return parts[0].concat(variables.toString()).concat("#").concat(parts[0]);
-	}
-
-	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
-	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
-	 * {@link UriComponentsBuilder}.
-	 * 
-	 * @return
-	 */
-	static UriComponentsBuilder getBuilder() {
-
-		HttpServletRequest request = getCurrentRequest();
-		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
-
-		// special case handling for X-Forwarded-Ssl:
-		// apply it, but only if X-Forwarded-Proto is unset.
-
-		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
-		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
-		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
-
-		if (!hasText(proto) && hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
-			builder.scheme("https");
-		}
-
-		return builder;
-	}
-
-	/**
-	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("null")
-	private static HttpServletRequest getCurrentRequest() {
-
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
-		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
-		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
-		return servletRequest;
 	}
 
 	@RequiredArgsConstructor

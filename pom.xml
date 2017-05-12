@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>0.24.0.BUILD-SNAPSHOT</version>
+	<version>0.24.0.AFFORDANCES-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
 	<url>http://github.com/SpringSource/spring-hateoas</url>
@@ -69,6 +70,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>4.3.5.RELEASE</spring.version>
+		<spring-restdocs.version>1.2.0.RELEASE</spring-restdocs.version>
 		<logback.version>1.1.8</logback.version>
 		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
@@ -87,7 +89,7 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.8.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.9.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -100,7 +102,8 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.0.M5</spring.version>
+				<spring.version>5.0.0.RC1</spring.version>
+				<jackson.version>2.9.0.pr3</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -193,7 +196,6 @@
 			<properties>
 				<shared.resources>${project.build.directory}/shared-resources</shared.resources>
 				<maven.install.skip>true</maven.install.skip>
-				<skipTests>true</skipTests>
 				<project.root>${basedir}</project.root>
 			</properties>
 
@@ -211,9 +213,8 @@
 
 				<plugins>
 
-					<!--
-						Unpacks the content of spring-data-build-resources into the shared resources folder.
-					-->
+					<!-- Unpacks the content of spring-data-build-resources into the shared
+						resources folder. -->
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -236,9 +237,7 @@
 						</configuration>
 					</plugin>
 
-					<!--
-						Configures JavaDoc generation.
-					-->
+					<!-- Configures JavaDoc generation. -->
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -252,6 +251,18 @@
 								<phase>package</phase>
 							</execution>
 						</executions>
+					</plugin>
+
+					<!-- ONLY run the **DocumentationTest test cases for Spring RestDocs -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.20</version>
+						<configuration>
+							<includes>
+								<include>**/*DocumentationTest</include>
+							</includes>
+						</configuration>
 					</plugin>
 
 					<plugin>
@@ -269,12 +280,17 @@
 								<artifactId>asciidoctorj-epub3</artifactId>
 								<version>1.5.0-alpha.6</version>
 							</dependency>
+							<dependency>
+								<groupId>org.springframework.restdocs</groupId>
+								<artifactId>spring-restdocs-asciidoctor</artifactId>
+								<version>${spring-restdocs.version}</version>
+							</dependency>
 						</dependencies>
 						<executions>
 
 							<execution>
 								<id>html</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>process-asciidoc</goal>
 								</goals>
@@ -292,23 +308,13 @@
 								</configuration>
 							</execution>
 
-							<!--
-							<execution>
-								<id>epub</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>epub3</backend>
-									<sourceHighlighter>coderay</sourceHighlighter>
-								</configuration>
-							</execution>
-							-->
+							<!-- <execution> <id>epub</id> <phase>generate-resources</phase> <goals>
+								<goal>process-asciidoc</goal> </goals> <configuration> <backend>epub3</backend>
+								<sourceHighlighter>coderay</sourceHighlighter> </configuration> </execution> -->
 
 							<execution>
 								<id>pdf</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>process-asciidoc</goal>
 								</goals>
@@ -348,13 +354,15 @@
 								<configuration>
 									<target>
 										<copy todir="${project.root}/target/site/reference/html">
-											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
+											<fileset dir="${shared.resources}/asciidoc"
+												erroronmissingdir="false">
 												<include name="**/*.css" />
 											</fileset>
 											<flattenmapper />
 										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
-											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
+											<fileset dir="${basedir}/src/main/asciidoc"
+												erroronmissingdir="false">
 												<include name="**/*.png" />
 												<include name="**/*.gif" />
 												<include name="**/*.jpg" />
@@ -373,8 +381,12 @@
 								<phase>process-resources</phase>
 								<configuration>
 									<target>
-										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
-										<copy file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${project.artifactId}-reference.epub" failonerror="false" />
+										<copy file="${project.build.directory}/generated-docs/index.pdf"
+											tofile="${project.root}/target/site/reference/pdf/${project.artifactId}-reference.pdf"
+											failonerror="false" />
+										<copy file="${project.build.directory}/generated-docs/index.epub"
+											tofile="${project.root}/target/site/reference/epub/${project.artifactId}-reference.epub"
+											failonerror="false" />
 									</target>
 								</configuration>
 								<goals>
@@ -575,6 +587,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<version>${spring-restdocs.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<version>1.10.19</version>
@@ -602,7 +621,15 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--  Needs to be after Jadler to make sure it sees the Servlet 3.0 dependency pulled in for testing -->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path-assert</artifactId>
+			<version>2.2.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Needs to be after Jadler to make sure it sees the Servlet 3.0 dependency
+			pulled in for testing -->
 
 		<dependency>
 			<groupId>javax.servlet</groupId>

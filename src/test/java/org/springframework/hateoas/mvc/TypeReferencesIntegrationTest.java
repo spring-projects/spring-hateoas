@@ -47,17 +47,18 @@ import org.springframework.web.client.RestTemplate;
  * Integration tests for {@link TypeReferences}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class TypeReferencesIntegrationTest {
 
 	private static final String USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
-	private static final String RESOURCE = String.format("{ \"_links\" : { \"self\" : \"/resource\" }, %s }", USER);
+	private static final String RESOURCE = String.format("{ \"_links\" : { \"self\" : { \"href\" : \"/resource\" } }, %s }", USER);
 	private static final String RESOURCES_OF_USER = String.format(
-			"{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ { %s } ] }}", USER);
+			"{ \"_links\" : { \"self\" : { \"href\" : \"/resources\" } }, \"_embedded\" : { \"users\" : [ { %s } ] }}", USER);
 	private static final String RESOURCES_OF_RESOURCE = String.format(
-			"{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE);
+			"{ \"_links\" : { \"self\" : { \"href\" :  \"/resources\" } }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE);
 
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.HAL)

@@ -57,7 +57,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{?bar}");
 
-		assertVariables(template, new TemplateVariable("bar", VariableType.REQUEST_PARAM));
+		assertVariables(template, TemplateVariable.of("bar", VariableType.REQUEST_PARAM));
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo?bar{&foobar}");
 
-		assertVariables(template, new TemplateVariable("foobar", VariableType.REQUEST_PARAM_CONTINUED));
+		assertVariables(template, TemplateVariable.of("foobar", VariableType.REQUEST_PARAM_CONTINUED));
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{/bar}");
 
-		assertVariables(template, new TemplateVariable("bar", VariableType.SEGMENT));
+		assertVariables(template, TemplateVariable.of("bar", VariableType.SEGMENT));
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo/{bar}");
 
-		assertVariables(template, new TemplateVariable("bar", VariableType.PATH_VARIABLE));
+		assertVariables(template, TemplateVariable.of("bar", VariableType.PATH_VARIABLE));
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{#bar}");
 
-		assertVariables(template, new TemplateVariable("bar", VariableType.FRAGMENT));
+		assertVariables(template, TemplateVariable.of("bar", VariableType.FRAGMENT));
 	}
 
 	/**
@@ -112,8 +112,8 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{?bar,foobar}");
 
-		assertVariables(template, new TemplateVariable("bar", VariableType.REQUEST_PARAM), new TemplateVariable("foobar",
-				VariableType.REQUEST_PARAM));
+		assertVariables(template, TemplateVariable.of("bar", VariableType.REQUEST_PARAM),
+				TemplateVariable.of("foobar", VariableType.REQUEST_PARAM));
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{?bar}");
 
-		URI uri = template.expand(Collections.singletonMap("bar", "myBar"));
+		URI uri = template.expand(Collections.singletonMap("bar", "myBar")).toUri();
 		assertThat(uri.toString(), is("/foo?bar=myBar"));
 	}
 
@@ -140,18 +140,18 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{?bar,fooBar}");
 
-		URI uri = template.expand(parameters);
+		URI uri = template.expand(parameters).toUri();
 		assertThat(uri.toString(), is("/foo?bar=myBar&fooBar=myFooBar"));
 	}
 
 	/**
 	 * @see #137
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void rejectsMissingRequiredPathVariable() {
 
 		UriTemplate template = new UriTemplate("/foo/{bar}");
-		template.expand(Collections.<String, Object> emptyMap());
+		template.toUri();
 	}
 
 	/**
@@ -161,8 +161,9 @@ public class UriTemplateUnitTest {
 	public void expandsMultipleVariablesViaArray() {
 
 		UriTemplate template = new UriTemplate("/foo{/bar}{?firstname,lastname}{#anchor}");
-		URI uri = template.expand("path", "Dave", "Matthews", "discography");
-		assertThat(uri.toString(), is("/foo/path?firstname=Dave&lastname=Matthews#discography"));
+		UriTemplate expanded = template.expand("path", "Dave", "Matthews", "discography");
+
+		assertThat(expanded.toString(), is("/foo/path?firstname=Dave&lastname=Matthews#discography"));
 	}
 
 	/**
@@ -178,7 +179,8 @@ public class UriTemplateUnitTest {
 	 */
 	@Test
 	public void correctlyExpandsFullUri() {
-		assertThat(new UriTemplate("http://localhost:8080/foo{?bar}").expand().toString(), is("http://localhost:8080/foo"));
+		assertThat(new UriTemplate("http://localhost:8080/foo{?bar}").toUri().toString(),
+				is("http://localhost:8080/foo"));
 	}
 
 	/**
@@ -198,13 +200,13 @@ public class UriTemplateUnitTest {
 	public void addsTemplateVariables() {
 
 		UriTemplate source = new UriTemplate("/{foo}/bar{?page}");
-		List<TemplateVariable> toAdd = Arrays.asList(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
+		List<TemplateVariable> toAdd = Arrays.asList(TemplateVariable.of("bar", VariableType.REQUEST_PARAM));
 
 		List<TemplateVariable> expected = new ArrayList<TemplateVariable>();
 		expected.addAll(source.getVariables());
 		expected.addAll(toAdd);
 
-		assertVariables(source.with(new TemplateVariables(toAdd)), expected);
+		assertVariables(source.with(TemplateVariables.of(toAdd)), expected);
 	}
 
 	/**
@@ -214,10 +216,11 @@ public class UriTemplateUnitTest {
 	public void doesNotAddVariablesForAlreadyExistingRequestParameters() {
 
 		UriTemplate template = new UriTemplate("/?page=2");
-		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("page", VariableType.REQUEST_PARAM)));
+		UriTemplate result = template
+				.with(TemplateVariables.of(TemplateVariable.of("page", VariableType.REQUEST_PARAM)));
 		assertThat(result.getVariableNames(), is(empty()));
 
-		result = template.with(new TemplateVariables(new TemplateVariable("page", VariableType.REQUEST_PARAM_CONTINUED)));
+		result = template.with(TemplateVariables.of(TemplateVariable.of("page", VariableType.REQUEST_PARAM_CONTINUED)));
 		assertThat(result.getVariableNames(), is(empty()));
 	}
 
@@ -228,7 +231,8 @@ public class UriTemplateUnitTest {
 	public void doesNotAddVariablesForAlreadyExistingFragment() {
 
 		UriTemplate template = new UriTemplate("/#fragment");
-		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("fragment", VariableType.FRAGMENT)));
+		UriTemplate result = template
+				.with(TemplateVariables.of(TemplateVariable.of("fragment", VariableType.FRAGMENT)));
 		assertThat(result.getVariableNames(), is(empty()));
 	}
 
@@ -259,6 +263,252 @@ public class UriTemplateUnitTest {
 		UriTemplate template = new UriTemplate("/").with("q", VariableType.REQUEST_PARAM);
 
 		assertThat(template.toString(), is("/{?q}"));
+	}
+
+	@Test
+	public void testToStringWithQueryVariablesContainingDot() throws Exception {
+
+		UriTemplate partialUriTemplateComponents = new UriTemplate(
+				"http://localhost/events/query{?foo1,foo2,bar.baz,bars.empty,offset,size,strings.empty}");
+
+		assertThat(partialUriTemplateComponents.getVariableNames(),
+				contains("foo1", "foo2", "bar.baz", "bars.empty", "offset", "size", "strings.empty"));
+	}
+
+	@Test
+	public void testExpandAllComponents() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}{?eventName,location}{#section}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof#description"));
+	}
+
+	@Test
+	public void testExpandQueryWithTwoVariables() throws Exception {
+
+		UriTemplate template = new UriTemplate("http://example.com/events/Wiesbaden{?eventName,location}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof"));
+	}
+
+	@Test
+	public void testExpandQueryWithOneVariable() throws Exception {
+
+		UriTemplate template = new UriTemplate("http://example.com/events/Wiesbaden{?eventName}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(), is("http://example.com/events/Wiesbaden?eventName=Revo+Tour"));
+	}
+
+	@Test
+	public void testExpandLevelOnePathSegment() throws Exception {
+
+		UriTemplate template = new UriTemplate("http://example.com/events/{city}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+
+		assertThat(template.expand(val).toString(), is("http://example.com/events/Wiesbaden"));
+	}
+
+	@Test
+	public void testExpandLevelOnePathSegmentWithRegex() throws Exception {
+
+		UriTemplate template = new UriTemplate("http://example.com/events/{city:+}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+
+		assertThat(template.expand(val).toString(), is("http://example.com/events/Wiesbaden"));
+	}
+
+	@Test
+	public void testExpandLevelOnePathSegmentWithPrefix() throws Exception {
+
+		UriTemplate template = new UriTemplate("http://example.com/events/v{version}/Wiesbaden");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("version", "1.2.0");
+
+		assertThat(template.expand(val).toString(), is("http://example.com/events/v1.2.0/Wiesbaden"));
+	}
+
+	@Test
+	public void testExpandLevelOneQueryWithOneVariable() throws Exception {
+
+		UriTemplate template = new UriTemplate("http://example.com/events/Wiesbaden?eventName={eventName}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(), is("http://example.com/events/Wiesbaden?eventName=Revo+Tour"));
+	}
+
+	@Test
+	public void testExpandLevelOneQueryWithTwoVariables() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events/Wiesbaden?eventName={eventName}&location={location}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof"));
+	}
+
+	@Test
+	public void testExpandDoesNotChangeUrlWithoutVariables() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof#description");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof#description"));
+	}
+
+	@Test
+	public void testExpandWithFixedQuery() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}?eventName=Revo+Tour&location=Schlachthof{#section}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof#description"));
+	}
+
+	@Test
+	public void testExpandWithFixedFragmentIdentifier() throws Exception {
+		final UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}{?eventName," + "location}#price");
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+		val.put("section", "description");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof#price"));
+	}
+
+	@Test
+	public void testExpandAllComponentsButFragmentIdentifier() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}{?eventName,location}{#section}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("eventName", "Revo Tour");
+		val.put("location", "Schlachthof");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden?eventName=Revo+Tour&location=Schlachthof{#section}"));
+	}
+
+	@Test
+	public void testExpandOneOfTwoQueryVariables() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}/concerts{?eventName,location}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("location", "Schlachthof");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events{/city}/concerts?location=Schlachthof{&eventName}"));
+	}
+
+	@Test
+	public void testExpandSegmentVariable() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example" + ".com/events/{city}/concerts{?eventName,location}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("city", "Wiesbaden");
+		val.put("location", "Schlachthof");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events/Wiesbaden/concerts?location=Schlachthof{&eventName}"));
+	}
+
+	@Test
+	public void testExpandQueryContinuationTemplate() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example" + ".com/events{/city}/concerts?eventName=Revo+Tour{&location}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("location", "Schlachthof");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events{/city}/concerts?eventName=Revo+Tour&location=Schlachthof"));
+	}
+
+	@Test
+	public void testExpandQueryContinuationTemplateAfterFixedQueryContinuation() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}/concerts?eventName=Revo+Tour&foo=bar{&location}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("location", "Schlachthof");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events{/city}/concerts?eventName=Revo+Tour&foo=bar&location=Schlachthof"));
+	}
+
+	@Test
+	public void testExpandQueryContinuationTemplatesAfterFixedQueryContinuation() throws Exception {
+
+		UriTemplate template = new UriTemplate(
+				"http://example.com/events{/city}/concerts?eventName=Revo+Tour&foo=bar{&location,baz}");
+
+		Map<String, Object> val = new HashMap<String, Object>();
+		val.put("baz", "Gnarf");
+		val.put("location", "Schlachthof");
+
+		assertThat(template.expand(val).toString(),
+				is("http://example.com/events{/city}/concerts?eventName=Revo+Tour&foo=bar&location=Schlachthof&baz=Gnarf"));
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {

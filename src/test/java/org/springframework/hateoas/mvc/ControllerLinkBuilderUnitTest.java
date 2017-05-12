@@ -293,8 +293,10 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalNextPage(null)).withSelfRel();
 
-		assertThat(link.getVariables(), contains(new TemplateVariable("offset", VariableType.REQUEST_PARAM)));
-		assertThat(link.expand().getHref(), endsWith("/foo"));
+		assertThat(link.getVariables(), contains(TemplateVariable.of("offset", VariableType.REQUEST_PARAM)));
+		Link expandedLink = link.expand();
+		String href = expandedLink.getHref();
+		assertThat(href, endsWith("/foo"));
 	}
 
 	/**
@@ -306,7 +308,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null))//
 				.withSelfRel();
 
-		exception.expect(IllegalArgumentException.class);
+		exception.expect(IllegalStateException.class);
 
 		link.expand();
 	}
@@ -314,7 +316,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	/**
 	 * @see #122, #169
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = IllegalStateException.class)
 	public void rejectsMissingRequiredRequestParam() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
@@ -512,7 +514,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		assertThat(link.getVariableNames(), contains("limit"));
 
-		exception.expect(IllegalArgumentException.class);
+		exception.expect(IllegalStateException.class);
 		exception.expectMessage("limit");
 
 		link.expand();
@@ -526,7 +528,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
 
-		assertThat(link.getVariables(), contains(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED)));
+		assertThat(link.getVariables(), contains(TemplateVariable.of("offset", VariableType.REQUEST_PARAM_CONTINUED)));
 
 		UriComponents components = toComponents(link);
 
@@ -627,7 +629,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam(required = false) Integer offset,
-				@RequestParam Integer limit) {
+				@RequestParam(required = true) Integer limit) {
 			return null;
 		}
 

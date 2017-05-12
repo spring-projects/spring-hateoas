@@ -20,11 +20,22 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportSelector;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaConfigurationImportSelector;
+import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans available for
@@ -43,7 +54,8 @@ import org.springframework.hateoas.LinkDiscoverer;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class })
+@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class,
+		HypermediaConfigurationImportSelector.class })
 public @interface EnableHypermediaSupport {
 
 	/**
@@ -51,14 +63,14 @@ public @interface EnableHypermediaSupport {
 	 * 
 	 * @return
 	 */
-	HypermediaType[] type();
+	HypermediaType[] type() default {};
 
 	/**
 	 * Hypermedia representation types supported.
 	 * 
 	 * @author Oliver Gierke
 	 */
-	static enum HypermediaType {
+	enum HypermediaType {
 
 		/**
 		 * HAL - Hypermedia Application Language.
@@ -66,6 +78,42 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL;
+		HAL,
+
+		HAL_FORMS(HalFormsConfiguration.class.getName());
+
+		private List<String> configurations;
+
+		HypermediaType(String... configurations) {
+			this.configurations = Arrays.asList(configurations);
+		}
+	}
+
+	@Slf4j
+	class HypermediaConfigurationImportSelector implements ImportSelector {
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.context.annotation.ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)
+		 */
+		@Override
+		public String[] selectImports(AnnotationMetadata metadata) {
+
+			Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
+
+			Collection<HypermediaType> types = Arrays.asList((HypermediaType[]) attributes.get("type"));
+			types = types.isEmpty() ? Arrays.asList(HypermediaType.values()) : types;
+
+			log.debug("Registering support for hypermedia types {} according configuration on {}.", types,
+					metadata.getClassName());
+
+			List<String> configurations = new ArrayList<String>();
+
+			for (HypermediaType type : types) {
+				configurations.addAll(type.configurations);
+			}
+
+			return configurations.toArray(new String[configurations.size()]);
+		}
 	}
 }

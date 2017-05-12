@@ -155,7 +155,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @param rel the relation type that was parsed for.
 	 * @return
 	 */
-	private List<Link> createLinksFrom(Object parseResult, String rel) {
+	protected List<Link> createLinksFrom(Object parseResult, String rel) {
 
 		if (parseResult instanceof JSONArray) {
 
