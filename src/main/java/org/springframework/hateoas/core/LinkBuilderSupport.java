@@ -86,6 +86,8 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return getThis();
 		}
 
+		path = path.startsWith("/") ? path : "/".concat(path);
+
 		return slash(UriComponentsBuilder.fromUriString(path).build(), false);
 	}
 

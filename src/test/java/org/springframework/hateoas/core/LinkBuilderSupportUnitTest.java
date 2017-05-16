@@ -53,6 +53,19 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 		assertThat(builder.toString(), endsWith("foo%20bar#foo"));
 	}
 
+	/**
+	 * @see #582
+	 */
+	@Test
+	public void appendsPathContainingColonsCorrectly() {
+
+		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
+
+		builder = builder.slash("47:11");
+
+		assertThat(builder.toString(), endsWith("47:11"));
+	}
+
 	static class SampleLinkBuilder extends LinkBuilderSupport<SampleLinkBuilder> {
 
 		public SampleLinkBuilder(UriComponentsBuilder builder) {

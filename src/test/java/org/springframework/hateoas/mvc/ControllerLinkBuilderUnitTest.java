@@ -397,7 +397,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #192
 	 */
 	@Test
-	public void usesRootMappingOfTargetClassForMethodsOfParen() throws Exception {
+	public void usesRootMappingOfTargetClassForMethodsOfParent() throws Exception {
 
 		Method method = ParentControllerWithoutRootMapping.class.getMethod("someEmptyMappedMethod");
 
