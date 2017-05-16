@@ -114,6 +114,7 @@
 			<id>spring5-next</id>
 			<properties>
 				<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.9.0.pr3</jackson.version>
 			</properties>
 			<repositories>
 				<repository>

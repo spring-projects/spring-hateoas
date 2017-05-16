@@ -610,7 +610,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		public HalResourcesDeserializer(JavaType vc) {
-			this(null, vc);
+			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, vc), vc);
 		}
 
 		private HalResourcesDeserializer(JavaType type, JavaType contentType) {
