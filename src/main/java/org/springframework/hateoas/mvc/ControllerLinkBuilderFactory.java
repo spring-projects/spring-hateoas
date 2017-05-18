@@ -44,6 +44,7 @@ import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,6 +72,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
+	private static final Map<String, UriTemplate> TEMPLATES = new ConcurrentReferenceHashMap<String, UriTemplate>();
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
 
@@ -138,7 +140,12 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
 		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
 
-		UriTemplate template = new UriTemplate(mapping);
+		UriTemplate template = TEMPLATES.get(mapping);
+		if (template == null) {
+			template = new UriTemplate(mapping);
+			TEMPLATES.put(mapping, template);
+		}
+
 		Map<String, Object> values = new HashMap<String, Object>();
 		Iterator<String> names = template.getVariableNames().iterator();
 
