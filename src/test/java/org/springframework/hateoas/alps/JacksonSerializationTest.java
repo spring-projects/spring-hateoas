@@ -87,7 +87,7 @@ public class JacksonSerializationTest {
 				builder.append(scanner.nextLine());
 
 				if (scanner.hasNextLine()) {
-					builder.append("\n");
+					builder.append("\r\n");
 				}
 			}
 
