@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>0.24.0.BUILD-SNAPSHOT</version>
+	<version>0.24.0.ISSUE-536-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
 	<url>http://github.com/SpringSource/spring-hateoas</url>
@@ -68,7 +68,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.5.RELEASE</spring.version>
+		<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
 		<logback.version>1.1.8</logback.version>
 		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
@@ -487,7 +487,7 @@
 		<dependency>
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
-			<version>1.2.0.RELEASE</version>
+			<version>1.3.0.ISSUE-33-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 
