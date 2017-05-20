@@ -15,15 +15,15 @@
  */
 package org.springframework.hateoas.client;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.Wither;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.util.Assert;
 

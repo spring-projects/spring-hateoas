@@ -17,12 +17,13 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.Value;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -38,17 +39,30 @@ public final class TemplateVariable implements Serializable {
 
 	private static final long serialVersionUID = -2731446749851863774L;
 
-	String name;
-	TemplateVariable.VariableType type;
-	String description;
+	/**
+	 * The name of the variable.
+	 */
+	@NonNull String name;
+
+	/**
+	 * The type of the variable.
+	 */
+	@NonNull TemplateVariable.VariableType type;
+
+	/**
+	 * The description of the variable
+	 */
+	@NonNull String description;
 
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name and type.
 	 * 
 	 * @param name must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
+	 * @deprecated use {@link #of(String, VariableType)} instead.
 	 */
-	public TemplateVariable(String name, TemplateVariable.VariableType type) {
+	@Deprecated
+	public TemplateVariable(String name, VariableType type) {
 		this(name, type, "");
 	}
 
@@ -57,17 +71,53 @@ public final class TemplateVariable implements Serializable {
 	 * 
 	 * @param name must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
-	 * @param description must not be {@literal null}.
+	 * @param description can be {@literal null}.
+	 * @deprecated use {@link #of(String, VariableType, String)} instead
 	 */
-	public TemplateVariable(String name, TemplateVariable.VariableType type, String description) {
+	@Deprecated
+	public TemplateVariable(String name, VariableType type, String description) {
 
-		Assert.hasText(name, "Variable name must not be null or empty!");
-		Assert.notNull(type, "Variable type must not be null!");
+		Assert.hasText(name, "Name must not be null or empty!");
+		Assert.notNull(type, "Type must not be null!");
 		Assert.notNull(description, "Description must not be null!");
 
 		this.name = name;
 		this.type = type;
 		this.description = description;
+	}
+
+	/**
+	 * Creates a new {@link TemplateVariable} with the given name and type.
+	 * 
+	 * @param name must not be {@literal null} or empty.
+	 * @param type must not be {@literal null}.
+	 */
+	public static TemplateVariable of(String name, VariableType type) {
+		return of(name, type, "");
+	}
+
+	/**
+	 * Creates a new {@link TemplateVariable} with the given name, type and description.
+	 * 
+	 * @param name must not be {@literal null} or empty.
+	 * @param type must not be {@literal null}.
+	 * @param description can be {@literal null}.
+	 */
+	public static TemplateVariable of(String name, VariableType type, String description) {
+		return new TemplateVariable(name, type, description);
+	}
+
+	/**
+	 * Returns whether the {@link TemplateVariable} has the given name.
+	 * 
+	 * @param name must not be {@literal null}.
+	 * @return
+	 */
+	public boolean hasName(String name) {
+
+		Assert.notNull(name, "Name must not be null!");
+
+		return this.name.equals(name);
 	}
 
 	/**

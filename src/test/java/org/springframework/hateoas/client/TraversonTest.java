@@ -112,7 +112,7 @@ public class TraversonTest {
 	 */
 	@Test
 	public void readsTraversalIntoJsonPathExpression() {
-		assertThat(traverson.follow("movies", "movie", "actor").<String> toObject("$.name"), is("Keanu Reaves"));
+		assertThat(traverson.follow("movies", "movie", "actor").<String>toObject("$.name"), is("Keanu Reaves"));
 	}
 
 	/**
@@ -123,7 +123,7 @@ public class TraversonTest {
 		assertThat(traverson.follow(//
 				"$._links.movies.href", //
 				"$._links.movie.href", //
-				"$._links.actor.href").<String> toObject("$.name"), is("Keanu Reaves"));
+				"$._links.actor.href").<String>toObject("$.name"), is("Keanu Reaves"));
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class TraversonTest {
 		headers.add("Link", expectedHeader);
 
 		assertThat(traverson.follow("movies", "movie", "actor").//
-				withHeaders(headers).<String> toObject("$.name"), is("Keanu Reaves"));
+				withHeaders(headers).<String>toObject("$.name"), is("Keanu Reaves"));
 
 		verifyThatRequest(). //
 				havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4"). //
@@ -185,12 +185,12 @@ public class TraversonTest {
 		CountingInterceptor interceptor = new CountingInterceptor();
 
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList(interceptor));
+		restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor>asList(interceptor));
 
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
 		this.traverson.setRestOperations(restTemplate);
 
-		traverson.follow("movies", "movie", "actor").<String> toObject("$.name");
+		traverson.follow("movies", "movie", "actor").<String>toObject("$.name");
 		assertThat(interceptor.intercepted, is(4));
 	}
 
@@ -258,7 +258,7 @@ public class TraversonTest {
 	public void returnsDefaultMessageConverters() {
 
 		List<HttpMessageConverter<?>> converters = Traverson
-				.getDefaultMessageConverters(Collections.<MediaType> emptyList());
+				.getDefaultMessageConverters(Collections.<MediaType>emptyList());
 
 		assertThat(converters, hasSize(1));
 		assertThat(converters.get(0), is(instanceOf(StringHttpMessageConverter.class)));
@@ -355,13 +355,13 @@ public class TraversonTest {
 		assertThat(item.image, equalTo(server.rootResource() + "/springagram/file/cat"));
 		assertThat(item.description, equalTo("cat"));
 	}
-	
+
 	/**
 	 * @see #337
 	 */
 	@Test
 	public void doesNotDoubleEncodeURI() {
-		
+
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		Resource<?> itemResource = traverson.//
@@ -369,8 +369,7 @@ public class TraversonTest {
 				toObject(Resource.class);
 
 		assertThat(itemResource.hasLink("self"), is(true));
-		assertThat(itemResource.getLink("self").expand().getHref(),
-				equalTo(server.rootResource() + "/springagram/items"));
+		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items"));
 	}
 
 	private void setUpActors() {

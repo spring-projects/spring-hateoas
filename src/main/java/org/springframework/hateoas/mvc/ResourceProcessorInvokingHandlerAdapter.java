@@ -15,12 +15,12 @@
  */
 package org.springframework.hateoas.mvc;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.hateoas.ResourceProcessor;
 import org.springframework.util.ReflectionUtils;

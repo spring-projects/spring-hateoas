@@ -136,7 +136,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		Method method = invocation.getMethod();
 
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
-		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
+		UriComponentsBuilder builder = UriComponentsSupport.getBuilder().path(mapping);
 
 		UriTemplate template = new UriTemplate(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();
@@ -178,7 +178,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		for (String parameter : optionalEmptyParameters) {
 
 			boolean previousRequestParameter = components.getQueryParams().isEmpty() && variables.equals(NONE);
-			TemplateVariable variable = new TemplateVariable(parameter,
+			TemplateVariable variable = TemplateVariable.of(parameter,
 					previousRequestParameter ? REQUEST_PARAM : REQUEST_PARAM_CONTINUED);
 			variables = variables.concat(variable);
 		}

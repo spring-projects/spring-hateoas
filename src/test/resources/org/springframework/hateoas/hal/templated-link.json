@@ -1,0 +1,11 @@
+{
+  "_links" : {
+    "search" : {
+      "href" : "/employees/{?name}",
+      "templated": true
+    },
+    "self" : {
+      "href" : "/employees/1"
+    }
+  }
+}

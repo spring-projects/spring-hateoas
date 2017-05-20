@@ -388,7 +388,7 @@ public class Traverson {
 		private URI traverseToExpandedFinalUrl() {
 
 			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).expand(templateParameters);
+			return new UriTemplate(uri).expand(templateParameters).toUri();
 		}
 
 		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
@@ -400,7 +400,8 @@ public class Traverson {
 			HttpEntity<?> request = prepareRequest(headers);
 			UriTemplate template = new UriTemplate(uri);
 
-			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(template.expand().toUri(), GET, request,
+					String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
 			String responseBody = responseEntity.getBody();
 

@@ -97,10 +97,14 @@ public class Server implements Closeable {
 				withContentType(MediaTypes.HAL_JSON.toString());
 
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
-		org.springframework.core.io.Resource springagramRoot = resourceLoader.getResource("classpath:springagram-root.json");
-		org.springframework.core.io.Resource springagramItems = resourceLoader.getResource("classpath:springagram-items.json");
-		org.springframework.core.io.Resource springagramItem = resourceLoader.getResource("classpath:springagram-item.json");
-		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader.getResource("classpath:springagram-item-without-image.json");
+		org.springframework.core.io.Resource springagramRoot = resourceLoader
+				.getResource("classpath:springagram-root.json");
+		org.springframework.core.io.Resource springagramItems = resourceLoader
+				.getResource("classpath:springagram-items.json");
+		org.springframework.core.io.Resource springagramItem = resourceLoader
+				.getResource("classpath:springagram-item.json");
+		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader
+				.getResource("classpath:springagram-item-without-image.json");
 
 		String springagramRootTemplate;
 		String springagramItemsTemplate;
@@ -118,7 +122,8 @@ public class Server implements Closeable {
 		}
 
 		String springagramRootHalDocument = String.format(springagramRootTemplate, rootResource(), rootResource());
-		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(), rootResource());
+		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(),
+				rootResource());
 		String springagramItemHalDocument = String.format(springagramItemTemplate, rootResource(), rootResource());
 		String springagramItemWithoutImageHalDocument = String.format(springagramItemWithoutImageTemplate, rootResource());
 
@@ -152,7 +157,7 @@ public class Server implements Closeable {
 
 		onRequest(). //
 				havingPathEqualTo("/springagram/items"). //
-				havingQueryString(equalTo("projection=no%20images")). //
+				havingQueryString(equalTo("projection=no+images")). //
 				respond(). //
 				withBody(springagramItemsHalDocument). //
 				withContentType(MediaTypes.HAL_JSON.toString());
@@ -183,13 +188,13 @@ public class Server implements Closeable {
 
 	public void finishMocking() {
 
-		Resources<String> resources = new Resources<String>(Collections.<String> emptyList());
+		Resources<String> resources = new Resources<String>(Collections.<String>emptyList());
 
 		for (Link link : baseResources.keySet()) {
 
 			resources.add(link);
 
-			Resources<String> nested = new Resources<String>(Collections.<String> emptyList());
+			Resources<String> nested = new Resources<String>(Collections.<String>emptyList());
 			nested.add(baseResources.get(link));
 
 			register(link.getHref(), nested);

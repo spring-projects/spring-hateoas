@@ -15,15 +15,17 @@
  */
 package org.springframework.hateoas.core;
 
-import lombok.NonNull;
-import lombok.Value;
-
+import java.beans.Introspector;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
+import lombok.NonNull;
+import lombok.Value;
 import org.aopalliance.intercept.MethodInterceptor;
+
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.cglib.proxy.Callback;
@@ -60,7 +62,7 @@ public class DummyInvocationUtils {
 	 * 
 	 * @author Oliver Gierke
 	 */
-	private static class InvocationRecordingMethodInterceptor
+	public static class InvocationRecordingMethodInterceptor
 			implements MethodInterceptor, LastInvocationAware, org.springframework.cglib.proxy.MethodInterceptor {
 
 		private static final Method GET_INVOCATIONS;
@@ -82,7 +84,7 @@ public class DummyInvocationUtils {
 		 * @param targetType must not be {@literal null}.
 		 * @param parameters must not be {@literal null}.
 		 */
-		InvocationRecordingMethodInterceptor(Class<?> targetType, Object... parameters) {
+		public InvocationRecordingMethodInterceptor(Class<?> targetType, Object... parameters) {
 
 			Assert.notNull(targetType, "Target type must not be null!");
 			Assert.notNull(parameters, "Parameters must not be null!");
@@ -98,6 +100,10 @@ public class DummyInvocationUtils {
 		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) {
 
+//			if (method.getName().equals("toString")) {
+//				return "Debugging?";
+//			}
+
 			if (GET_INVOCATIONS.equals(method)) {
 				return getLastInvocation();
 			} else if (GET_OBJECT_PARAMETERS.equals(method)) {
@@ -106,10 +112,14 @@ public class DummyInvocationUtils {
 				return ReflectionUtils.invokeMethod(method, obj, args);
 			}
 
-			this.invocation = new SimpleMethodInvocation(targetType, method, args);
+			this.invocation = new SimpleMethodInvocation(targetType, method, args, getLastInvocation());
 
 			Class<?> returnType = method.getReturnType();
-			return returnType.cast(getProxyWithInterceptor(returnType, this, obj.getClass().getClassLoader()));
+			if (Modifier.isFinal(returnType.getModifiers())) {
+				return null;
+			} else {
+				return returnType.cast(getProxyWithInterceptor(returnType, this, obj.getClass().getClassLoader()));
+			}
 		}
 
 		/* 
@@ -161,7 +171,7 @@ public class DummyInvocationUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
+	public static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
 			ClassLoader classLoader) {
 
 		if (type.isInterface()) {
@@ -173,12 +183,6 @@ public class DummyInvocationUtils {
 
 			return (T) factory.getProxy();
 		}
-
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(type);
-		enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
-		enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-		enhancer.setClassLoader(classLoader);
 
 		Factory factory = (Factory) OBJENESIS.newInstance(getOrCreateEnhancedClass(type, classLoader));
 		factory.setCallbacks(new Callback[] { interceptor });
@@ -231,5 +235,15 @@ public class DummyInvocationUtils {
 		@NonNull Class<?> targetType;
 		@NonNull Method method;
 		@NonNull Object[] arguments;
+		MethodInvocation invocation;
+
+		@Override
+		public String toString() {
+			return (invocation != null ? invocation.toString() + "." : "") + getPropertyFromMethod(method);
+		}
+
+		private String getPropertyFromMethod(Method method) {
+			return Introspector.decapitalize(method.getName().substring(method.getName().startsWith("is") ? 2 : 3));
+		}
 	}
 }

@@ -16,6 +16,7 @@
 package org.springframework.hateoas.core;
 
 import org.atteo.evo.inflector.English;
+
 import org.springframework.hateoas.RelProvider;
 
 /**

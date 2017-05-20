@@ -18,15 +18,17 @@ package org.springframework.hateoas.alps;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.hateoas.alps.Alps.*;
+import static org.springframework.hateoas.alps.Descriptor.*;
+import static org.springframework.hateoas.alps.Doc.*;
+import static org.springframework.hateoas.alps.Ext.*;
+import static org.springframework.hateoas.support.MappingUtils.*;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Scanner;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +36,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Unit tests for serialization of ALPS documents.
- * 
+ *
  * @author Oliver Gierke
  */
 public class JacksonSerializationTest {
@@ -73,30 +75,4 @@ public class JacksonSerializationTest {
 		assertThat(mapper.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
 	}
 
-	private static String read(Resource resource) throws IOException {
-
-		Scanner scanner = null;
-
-		try {
-
-			scanner = new Scanner(resource.getInputStream());
-			StringBuilder builder = new StringBuilder();
-
-			while (scanner.hasNextLine()) {
-
-				builder.append(scanner.nextLine());
-
-				if (scanner.hasNextLine()) {
-					builder.append("\n");
-				}
-			}
-
-			return builder.toString();
-
-		} finally {
-			if (scanner != null) {
-				scanner.close();
-			}
-		}
-	}
 }

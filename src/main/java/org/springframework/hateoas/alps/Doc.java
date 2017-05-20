@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * @see http://alps.io/spec/#prop-doc
  */
 @Value
-@Builder
+@Builder(builderMethodName = "doc")
 @AllArgsConstructor
 public class Doc {
 

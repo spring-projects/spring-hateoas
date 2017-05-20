@@ -15,12 +15,12 @@
  */
 package org.springframework.hateoas;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+
+import lombok.experimental.UtilityClass;
 
 /**
  * Static class to find out whether a relation type is defined by the IANA.
