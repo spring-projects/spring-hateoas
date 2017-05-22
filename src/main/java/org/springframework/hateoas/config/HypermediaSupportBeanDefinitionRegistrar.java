@@ -46,6 +46,7 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.RenderSingleLinks;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.AnnotationRelProvider;
@@ -53,6 +54,7 @@ import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
+import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
@@ -76,7 +78,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  */
-class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
+class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
 
 	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
 	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
@@ -89,8 +91,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final boolean EVO_PRESENT = ClassUtils.isPresent("org.atteo.evo.inflector.English", null);
 
 	private final ImportBeanDefinitionRegistrar linkBuilderBeanDefinitionRegistrar = new LinkBuilderBeanDefinitionRegistrar();
+	
+	private BeanFactory beanFactory;
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.context.annotation.ImportBeanDefinitionRegistrar#registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata, org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 */
@@ -125,6 +129,16 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				BeanDefinitionBuilder builder = rootBeanDefinition(Jackson2ModuleRegisteringBeanPostProcessor.class);
 				registerSourcedBeanDefinition(builder, metadata, registry);
 			}
+
+			try {
+				this.beanFactory.getBean(HalConfiguration.class);
+			} catch (BeansException e) {
+
+				// If no HalConfiguration bean, create a default one.
+				BeanDefinitionBuilder defaultHalConfiguration = rootBeanDefinition(HalConfiguration.class);
+				defaultHalConfiguration.addPropertyValue("renderSingleLinks", RenderSingleLinks.AS_SINGLE);
+				registerSourcedBeanDefinition(defaultHalConfiguration, metadata, registry);
+			}
 		}
 
 		if (!types.isEmpty()) {
@@ -141,6 +155,11 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		}
 
 		registerRelProviderPluginRegistryAndDelegate(registry);
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
 	}
 
 	/**

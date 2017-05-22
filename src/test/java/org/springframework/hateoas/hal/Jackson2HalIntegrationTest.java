@@ -37,6 +37,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.PagedResources.PageMetadata;
+import org.springframework.hateoas.RenderSingleLinks;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
@@ -86,7 +87,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_SINGLE)));
 	}
 
 	/**
@@ -409,6 +410,17 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void rendersTitleIfMessageSourceResolvesLocalKey() throws Exception {
 		verifyResolvedTitle("_links.foobar.title");
+	}
+
+	@Test
+	public void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
+
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost").withSelfRel());
+
+		assertThat(write(resourceSupport), is("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"));
 	}
 
 	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {

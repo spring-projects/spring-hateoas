@@ -32,14 +32,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.EntityLinks;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.RenderSingleLinks;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
 import org.springframework.hateoas.core.DelegatingRelProvider;
+import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -52,6 +56,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -94,7 +99,8 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
 
-		Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+		Jackson2ModuleRegisteringBeanPostProcessor postProcessor =
+			new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
 		postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
 
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
@@ -146,6 +152,39 @@ public class EnableHypermediaSupportIntegrationTest {
 		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
 
 		assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES), is(false));
+		context.close();
+	}
+
+	@Test
+	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+
+		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost").withSelfRel());
+
+		assertThat(mapper.writeValueAsString(resourceSupport),
+			is("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}"));
+
+		context.close();
+	}
+
+
+	@Test
+	public void verifyRenderSingleLinkAsArrayViaOverridingBean() throws JsonProcessingException {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(RenderLinkAsSingleLinksConfig.class);
+
+		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost").withSelfRel());
+
+		assertThat(mapper.writeValueAsString(resourceSupport),
+			is("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"));
+
 		context.close();
 	}
 
@@ -225,6 +264,22 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.HAL)
 	static class DelegateConfig {
+
+	}
+
+	@Configuration
+	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	static class RenderLinkAsSingleLinksConfig {
+
+		@Bean
+		HalConfiguration halConfiguration() {
+			return new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY);
+		}
+
+		@Bean
+		public RequestMappingHandlerAdapter rmh() {
+			return new RequestMappingHandlerAdapter();
+		}
 
 	}
 }
