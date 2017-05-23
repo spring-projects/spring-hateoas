@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.util.Assert;
  * sure a self-link is always added.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> implements ResourceAssembler<T, D> {
 
@@ -58,7 +60,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 * @param entities must not be {@literal null}.
 	 * @return
 	 */
-	public List<D> toResources(Iterable<? extends T> entities) {
+	public Resources<D> toResources(Iterable<? extends T> entities) {
 
 		Assert.notNull(entities, "Entities must not be null!");
 		List<D> result = new ArrayList<D>();
@@ -67,7 +69,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 			result.add(toResource(entity));
 		}
 
-		return result;
+		return new Resources<D>(result);
 	}
 
 	/**
@@ -87,7 +89,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 		Assert.notNull(id, "Id must not be null!");
 
 		D instance = instantiateResource(entity);
-		instance.add(linkTo(controllerClass, parameters).slash(id).withSelfRel());
+		instance.add(linkTo(this.controllerClass, parameters).slash(id).withSelfRel());
 		return instance;
 	}
 
@@ -101,5 +103,13 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 */
 	protected D instantiateResource(T entity) {
 		return BeanUtils.instantiateClass(resourceType);
+	}
+
+	public Class<?> getControllerClass() {
+		return this.controllerClass;
+	}
+
+	public Class<D> getResourceType() {
+		return this.resourceType;
 	}
 }

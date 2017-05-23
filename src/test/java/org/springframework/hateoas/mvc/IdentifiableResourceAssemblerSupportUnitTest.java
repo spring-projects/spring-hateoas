@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Unit tests for {@link IdentifiableResourceAssemblerSupport}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
@@ -89,7 +91,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Person second = new Person();
 		second.id = 2L;
 
-		List<PersonResource> result = assembler.toResources(Arrays.asList(first, second));
+		Resources<PersonResource> result = assembler.toResources(Arrays.asList(first, second));
 
 		LinkBuilder builder = linkTo(PersonController.class);
 
