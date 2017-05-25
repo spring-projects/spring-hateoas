@@ -28,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
@@ -39,7 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -53,6 +53,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Greg Turnquist
  * @author Kevin Conaway
  * @author Oliver Trosien
+ * @author Greg Turnquist
  */
 public class ControllerLinkBuilderUnitTest extends TestUtils {
 
@@ -459,22 +460,6 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
 
 		assertThat(link.getHref(), endsWith("/bar"));
-	}
-
-	/**
-	 * @see #342
-	 */
-	@Test
-	public void mentionsRequiredUsageWithinWebRequestInException() {
-
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("request");
-		exception.expectMessage("Spring MVC");
-
-		RequestContextHolder.setRequestAttributes(null);
-
-		linkTo(methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
-				.withSelfRel();
 	}
 
 	/**

@@ -17,14 +17,14 @@ package org.springframework.hateoas.mvc;
 
 import static org.springframework.util.StringUtils.*;
 
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
@@ -53,6 +53,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Kevin Conaway
  * @author Andrew Naydyonock
  * @author Oliver Trosien
+ * @author Greg Turnquist
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
@@ -257,11 +258,17 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
 	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
 	 * {@link UriComponentsBuilder}.
+	 *
+	 * If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall back to relative URIs.
 	 * 
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
 
+		if (RequestContextHolder.getRequestAttributes() == null) {
+			return UriComponentsBuilder.fromPath("/");
+		}
+		
 		HttpServletRequest request = getCurrentRequest();
 		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 

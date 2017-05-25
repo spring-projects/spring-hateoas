@@ -6,6 +6,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.hateoas.Link;
 import org.springframework.web.context.request.RequestContextHolder;
 
 /**
@@ -24,18 +26,15 @@ public class ControllerLinkBuilderOutsideSpringMvcUnitTest {
 	}
 
 	/**
-	 * @see #342
+	 * @see #408
 	 */
-	@Test(expected = IllegalStateException.class)
-	public void createsLinkToMethodOnParameterizedControllerRoot() {
+	@Test
+	public void requestingLinkOutsideWebRequest() {
 
-		try {
-			linkTo(methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15)
-					.getAddressesForCountry("DE")).withSelfRel();
-		} catch (IllegalStateException e) {
-			assertThat(e.getMessage(), equalTo("Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?"));
-			throw e;
-		}
+		Link link = linkTo(methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15)
+			.getAddressesForCountry("DE")).withSelfRel();
+
+		assertThat(link, is(new Link("/people/15/addresses/DE").withSelfRel()));
 	}
 
 }
