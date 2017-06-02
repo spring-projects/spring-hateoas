@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * Value object for links.
@@ -105,6 +106,7 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
+	@JsonView(ResourcesLinksVisible.class)
 	public String getHref() {
 		return href;
 	}
@@ -114,6 +116,7 @@ public class Link implements Serializable {
 	 * 
 	 * @return
 	 */
+	@JsonView(ResourcesLinksVisible.class)
 	public String getRel() {
 		return rel;
 	}
