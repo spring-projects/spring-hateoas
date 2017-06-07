@@ -108,7 +108,11 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private String[] getMappingFrom(Annotation annotation) {
 
-		Object value = mappingAttributeName == null ? getValue(annotation) : getValue(annotation, mappingAttributeName);
+		Object value = null;
+
+		if (annotation != null) {
+			value = mappingAttributeName == null ? getValue(annotation) : getValue(annotation, mappingAttributeName);
+		}
 
 		if (value instanceof String) {
 			return new String[] { (String) value };
