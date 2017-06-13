@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,49 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal;
+package org.springframework.hateoas.alps;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.junit.Test;
 
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
+import org.springframework.util.StreamUtils;
 
 /**
- * Unit tests for {@link HalLinkDiscoverer}.
- * 
- * @author Oliver Gierke
+ * @author Greg Turnquist
  */
-public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
+public class AlpsLinkDiscoverUnitTest extends AbstractLinkDiscovererUnitTest {
 
-	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
-	static final String SAMPLE = "{ _links : { self : { href : 'selfHref' }, " + //
-			"relation : [ { href : 'firstHref' }, { href : 'secondHref' }], " + //
-			"'http://foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
+	LinkDiscoverer discoverer = new AlpsLinkDiscoverer();
 
-	/**
-	 * @see #314
-	 */
+	ResourceLoader loader = new DefaultResourceLoader();
+
 	@Test
 	public void discoversFullyQualifiedRel() {
 
-		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", SAMPLE);
+		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString());
 
 		assertThat(link, is(notNullValue()));
 		assertThat(link.getHref(), is("fullRelHref"));
 	}
 
+	/**
+	 * Return the {@link LinkDiscoverer} to be tested.
+	 *
+	 * @return
+	 */
 	@Override
 	protected LinkDiscoverer getDiscoverer() {
 		return discoverer;
 	}
 
+	/**
+	 * Return the JSON structure we expect to find the links in.
+	 *
+	 * @return
+	 */
 	@Override
 	protected String getInputString() {
-		return SAMPLE;
+		try {
+			return StreamUtils.copyToString(
+				loader.getResource("classpath:org/springframework/hateoas/alps/link-discoverer.json").getInputStream(),
+				Charset.defaultCharset());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
