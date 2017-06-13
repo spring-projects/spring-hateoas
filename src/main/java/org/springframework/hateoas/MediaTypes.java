@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
  * @author Oliver Gierke
  * @author Przemek Nowak
  * @author Drummond Dawson
+ * @author Greg Turnquist
  */
 public class MediaTypes {
 
@@ -45,4 +46,14 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/hal+json;charset=UTF-8}.
 	 */
 	public static final MediaType HAL_JSON_UTF8 = MediaType.valueOf(HAL_JSON_UTF8_VALUE);
+
+	/**
+	 * A string equivalient of {@link MediaTypes#ALPS_JSON}.
+	 */
+	public static final String ALPS_JSON_VALUE = "application/alps+json";
+
+	/**
+	 * Public constant media type for {@code application/alps+json}.
+	 */
+	public static final MediaType ALPS_JSON = MediaType.parseMediaType(ALPS_JSON_VALUE);
 }
