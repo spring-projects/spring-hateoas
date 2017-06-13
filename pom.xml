@@ -67,7 +67,7 @@
 		<spring.version>4.1.9.RELEASE</spring.version>
 		<logback.version>1.1.7</logback.version>
 		<!--TODO: The version of jackson was downgraded from 2.5.6 to 2.4.6 to be compatible with jackson version in CW API-->
-		<jackson.version>2.4.6</jackson.version>
+		<jackson.version>2.8.7</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
