@@ -28,6 +28,7 @@ import net.minidev.json.JSONArray;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -119,7 +120,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 			Object parseResult = getExpression(rel).read(representation);
 			return createLinksFrom(parseResult, rel);
 		} catch (InvalidPathException e) {
-			return Collections.emptyList();
+			throw new LinkNotFoundException(rel, representation);
 		}
 	}
 
@@ -134,7 +135,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 			Object parseResult = getExpression(rel).read(representation);
 			return createLinksFrom(parseResult, rel);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new LinkNotFoundException(rel, "<<in a stream>>");
 		}
 	}
 

@@ -33,7 +33,7 @@ public interface LinkDiscoverer extends Plugin<MediaType> {
 	 * 
 	 * @param rel must not be {@literal null} or empty.
 	 * @param representation must not be {@literal null} or empty.
-	 * @return the first link with the given relation type found, or {@literal null} if none was found.
+	 * @return the first link with the given relation type found, or {@link LinkNotFoundException} if none was found.
 	 */
 	Link findLinkWithRel(String rel, String representation);
 
@@ -42,7 +42,7 @@ public interface LinkDiscoverer extends Plugin<MediaType> {
 	 * 
 	 * @param rel must not be {@literal null} or empty.
 	 * @param representation must not be {@literal null} or empty.
-	 * @return the first link with the given relation type found, or {@literal null} if none was found.
+	 * @return the first link with the given relation type found, or {@link LinkNotFoundException} if none was found.
 	 */
 	Link findLinkWithRel(String rel, InputStream representation);
 

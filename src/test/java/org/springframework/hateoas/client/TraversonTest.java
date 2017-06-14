@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkNotFoundException;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
@@ -371,6 +372,19 @@ public class TraversonTest {
 		assertThat(itemResource.hasLink("self"), is(true));
 		assertThat(itemResource.getLink("self").expand().getHref(),
 				equalTo(server.rootResource() + "/springagram/items"));
+	}
+
+	@Test(expected = LinkNotFoundException.class)
+	public void noop() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		try {
+			traverson.follow("foo").asLink();
+		} catch (LinkNotFoundException e) {
+			assertThat(e.getRel(), is("foo"));
+			throw e;
+		}
 	}
 
 	private void setUpActors() {

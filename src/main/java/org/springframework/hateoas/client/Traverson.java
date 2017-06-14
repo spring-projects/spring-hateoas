@@ -30,6 +30,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
+import org.springframework.hateoas.LinkNotFoundException;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.client.Rels.Rel;
@@ -410,8 +411,7 @@ public class Traverson {
 			Link link = rel.findInResponse(responseBody, contentType);
 
 			if (link == null) {
-				throw new IllegalStateException(
-						String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody));
+				throw new LinkNotFoundException(rel.toString(), responseBody);
 			}
 
 			/**

@@ -22,10 +22,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
+
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkNotFoundException;
 
 /**
  * Base class for unit tests for {@link LinkDiscoverer} implementations.
@@ -70,12 +71,28 @@ public abstract class AbstractLinkDiscovererUnitTest {
 		assertThat(getDiscoverer().findLinkWithRel("something", inputStream), is(nullValue()));
 	}
 
-	@Test
+	@Test(expected = LinkNotFoundException.class)
 	public void returnsNullForNonExistingLinkContainer() {
 
-		assertThat(getDiscoverer().findLinksWithRel("something", getInputStringWithoutLinkContainer()),
-				is(Matchers.<Link> empty()));
-		assertThat(getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer()), is(nullValue()));
+		try {
+			getDiscoverer().findLinksWithRel("something", getInputStringWithoutLinkContainer());
+		} catch (LinkNotFoundException e) {
+			assertThat(e.getRel(), is("something"));
+			assertThat(e.getResponseBody(), is("{}"));
+			throw e;
+		}
+	}
+
+	@Test(expected = LinkNotFoundException.class)
+	public void returnsNullForNonExistingLinkContainer2() {
+
+		try {
+			getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer());
+		} catch (LinkNotFoundException e) {
+			assertThat(e.getRel(), is("something"));
+			assertThat(e.getResponseBody(), is("{}"));
+			throw e;
+		}
 	}
 
 	/**
