@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,12 @@ package org.springframework.hateoas.core;
 import static org.assertj.core.api.Assertions.*;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -29,10 +33,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Oliver Gierke
  * @author Kevin Conaway
  * @author Mark Paluch
+ * @author Josh Ghiloni
+ * @author Greg Turnquist
  */
 public class AnnotationMappingDiscovererUnitTest {
 
-	MappingDiscoverer discoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
+	AnnotationMappingDiscoverer discoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullAnnotation() {
@@ -150,6 +156,35 @@ public class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/otherMethod");
 	}
 
+	/**
+	 * @see #361
+	 */
+	@Test
+	public void resolvesVariablesInMappings() throws NoSuchMethodException {
+
+		Method method = DynamicEndpointControllerWithMethod.class.getMethod("method");
+
+		// Test regression first
+		assertThat(discoverer.getMapping(DynamicEndpointController.class)).isEqualTo("/${test.variable}");
+		assertThat(discoverer.getMapping(DynamicEndpointControllerWithMethod.class, method))
+			.isEqualTo("/${test.variable}/${test.child}");
+
+		// Test property substitution
+		Map<String, Object> source = new HashMap<>();
+		source.put("test.variable", "dynamicparent");
+		source.put("test.child", "dynamicchild");
+
+		StandardEnvironment env = new StandardEnvironment();
+		env.getPropertySources().addLast(new MapPropertySource("mapping-env", source));
+		
+		PropertyResolvingDiscoverer propertyResolvingDiscoverer = new PropertyResolvingDiscoverer(discoverer, env);
+
+		assertThat(propertyResolvingDiscoverer.getMapping(DynamicEndpointController.class)).isEqualTo("/dynamicparent");
+		assertThat(propertyResolvingDiscoverer.getMapping(method)).isEqualTo("/dynamicparent/dynamicchild");
+		assertThat(propertyResolvingDiscoverer.getMapping(DynamicEndpointControllerWithMethod.class, method))
+			.isEqualTo("/dynamicparent/dynamicchild");
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -227,6 +262,16 @@ public class AnnotationMappingDiscovererUnitTest {
 	interface MultipleMappingsController {
 
 		@RequestMapping({ "/method", "/methodAlias" })
+		void method();
+	}
+
+	@RequestMapping("/${test.variable}")
+	interface DynamicEndpointController {}
+
+	@RequestMapping("/${test.variable}")
+	interface DynamicEndpointControllerWithMethod {
+
+		@RequestMapping("/${test.child}")
 		void method();
 	}
 }

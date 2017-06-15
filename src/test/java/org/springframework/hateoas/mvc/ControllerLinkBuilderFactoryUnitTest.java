@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.hateoas.mvc;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,11 +29,15 @@ import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.PropertyResolvingDiscoverer;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.ControllerWithMethods;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonsAddressesController;
@@ -50,6 +56,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Ross Turner
+ * @author Josh Ghiloni
+ * @author Greg Turnquist
  */
 public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
@@ -174,6 +182,46 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/people/17/addresses");
 	}
 
+	/**
+	 * @see #361
+	 */
+	@Test
+	public void createsLinkToControllerMethodWithDynamicMapping() throws NoSuchMethodException {
+
+		Map<String, Object> source = new HashMap<>();
+		source.put("test.variable", "dynamicparent");
+		source.put("test.child", "dynamicchild");
+		source.put("dynamicendpoint", "foo");
+
+		StandardEnvironment env = new StandardEnvironment();
+		env.getPropertySources().addLast(new MapPropertySource("mapping-env", source));
+
+		PropertyResolvingDiscoverer discoverer = new PropertyResolvingDiscoverer(
+			new AnnotationMappingDiscoverer(RequestMapping.class), env);
+		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory(discoverer);
+
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithDynamicEndpoint()).withSelfRel();
+		
+		assertPointsToMockServer(link);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
+		assertThat(link.getHref()).endsWith("/sample/foo");
+
+		Method method = DynamicEndpointControllerWithMethod.class.getMethod("method");
+
+		link = factory.linkTo(DynamicEndpointControllerWithMethod.class).withSelfRel();
+		assertThat(link.getHref()).endsWith("/dynamicparent");
+
+		// explicitly add new Object[0] here to avoid conflict with (env, Object invocationValue)
+		link = factory.linkTo(method, new Object[0]).withSelfRel();
+		assertThat(link.getHref()).endsWith("/dynamicparent/dynamicchild");
+
+		link = factory.linkTo(DynamicEndpointControllerWithMethod.class, method).withSelfRel();
+		assertThat(link.getHref()).endsWith("/dynamicparent/dynamicchild");
+
+		// Clean out so other unit tests are not affected
+		ControllerLinkBuilder.clearDelegateDiscoverer();
+	}
+
 	interface SampleController {
 
 		@RequestMapping("/sample/{id}")
@@ -187,6 +235,16 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		@RequestMapping("/sample/multivaluemapsupport")
 		HttpEntity<?> sampleMethodWithMap(@RequestParam MultiValueMap<String, String> queryParams);
+
+		@RequestMapping("/sample/${dynamicendpoint}")
+		HttpEntity<?> sampleMethodWithDynamicEndpoint();
+	}
+
+	@RequestMapping("/${test.variable}")
+	interface DynamicEndpointControllerWithMethod {
+
+		@RequestMapping("/${test.child}")
+		void method();
 	}
 
 	static class SampleUriComponentsContributor implements UriComponentsContributor {

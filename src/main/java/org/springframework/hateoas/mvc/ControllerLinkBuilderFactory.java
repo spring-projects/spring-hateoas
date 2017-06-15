@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,16 +65,25 @@ import org.springframework.web.util.UriTemplate;
  * @author Oemer Yildiz
  * @author Kevin Conaway
  * @author Andrew Naydyonock
+ * @author Josh Ghiloni
  * @author Greg Turnquist
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
-	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
 
+	private MappingDiscoverer discoverer;
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<>();
+
+	public ControllerLinkBuilderFactory() {
+		this.discoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
+	}
+
+	public ControllerLinkBuilderFactory(MappingDiscoverer discoverer) {
+		this.discoverer = discoverer;
+	}
 
 	/**
 	 * Configures the {@link UriComponentsContributor} to be used when building {@link Link} instances from method
@@ -137,8 +146,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 		Method method = invocation.getMethod();
 
-		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
-
+		String mapping = this.discoverer.getMapping(invocation.getTargetType(), method);
 		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
 
 		UriTemplate template = new UriTemplate(mapping);
@@ -186,7 +194,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			variables = variables.concat(variable);
 		}
 
-		return new ControllerLinkBuilder(components, variables, invocation);
+		return new ControllerLinkBuilder(components, variables, invocation, discoverer);
 	}
 
 	/*
