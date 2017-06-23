@@ -50,7 +50,7 @@ public interface CurieProvider {
 	String getNamespacedRelFor(String rel);
 
 	/**
-	 * Returns an object to render as the base curie information. Implementations have to make sure, the retunred
+	 * Returns an object to render as the base curie information. Implementations have to make sure, the returned
 	 * instances renders as defined in the spec.
 	 * 
 	 * @param links the {@link Links} that have been added to the response so far.

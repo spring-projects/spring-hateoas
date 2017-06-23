@@ -85,7 +85,7 @@ public class Link implements Serializable {
 	 */
 	public Link(UriTemplate template, String rel) {
 
-		Assert.notNull(template, "UriTempalte must not be null!");
+		Assert.notNull(template, "UriTemplate must not be null!");
 		Assert.hasText(rel, "Rel must not be null or empty!");
 
 		this.template = template;

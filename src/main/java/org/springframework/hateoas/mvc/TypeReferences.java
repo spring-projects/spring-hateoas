@@ -62,7 +62,7 @@ public class TypeReferences {
 			SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedResources<T>> {}
 
 	/**
-	 * Special {@link ParameterizedTypeReference} to customize the generic type detection and eventually return a sythetic
+	 * Special {@link ParameterizedTypeReference} to customize the generic type detection and eventually return a synthetic
 	 * {@link ParameterizedType} to represent the resource type along side its generic parameter.
 	 *
 	 * @author Oliver Gierke
@@ -84,7 +84,7 @@ public class TypeReferences {
 			Type type = parameterizedTypeReferenceSubclass.getGenericSuperclass();
 			Assert.isInstanceOf(ParameterizedType.class, type);
 			ParameterizedType parameterizedType = (ParameterizedType) type;
-			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, String.format("Type must have exactly one gerneric type argument but has %s.", parameterizedType.getActualTypeArguments().length));
+			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, String.format("Type must have exactly one generic type argument but has %s.", parameterizedType.getActualTypeArguments().length));
 
 			Class<?> resourceType = GenericTypeResolver.resolveType(parameterizedType.getActualTypeArguments()[0],
 					new HashMap<TypeVariable, Type>());
