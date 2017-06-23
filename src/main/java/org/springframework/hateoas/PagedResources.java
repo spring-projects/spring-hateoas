@@ -199,7 +199,7 @@ public class PagedResources<T> extends Resources<T> {
 		}
 
 		/**
-		 * Creates a new {@link PageMetadata} from the given size, numer and total elements.
+		 * Creates a new {@link PageMetadata} from the given size, number and total elements.
 		 * 
 		 * @param size the size of the page
 		 * @param number the number of the page

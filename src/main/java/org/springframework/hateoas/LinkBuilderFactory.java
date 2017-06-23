@@ -27,7 +27,7 @@ import java.util.Map;
 public interface LinkBuilderFactory<T extends LinkBuilder> {
 
 	/**
-	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target clas (controller,
+	 * Creates a new {@link LinkBuilder} with a base of the mapping annotated to the given target class (controller,
 	 * service, etc.).
 	 * 
 	 * @param target must not be {@literal null}.

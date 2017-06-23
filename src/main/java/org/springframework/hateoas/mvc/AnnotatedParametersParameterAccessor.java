@@ -136,7 +136,7 @@ class AnnotatedParametersParameterAccessor {
 		private final MethodParameter parameter;
 		private final Object value;
 		private final AnnotationAttribute attribute;
-		private final TypeDescriptor parameterTypeDecsriptor;
+		private final TypeDescriptor parameterTypeDescriptor;
 
 		/**
 		 * Creates a new {@link BoundMethodParameter}
@@ -152,7 +152,7 @@ class AnnotatedParametersParameterAccessor {
 			this.parameter = parameter;
 			this.value = value;
 			this.attribute = attribute;
-			this.parameterTypeDecsriptor = TypeDescriptor.nested(parameter, 0);
+			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, 0);
 		}
 
 		/**
@@ -189,7 +189,7 @@ class AnnotatedParametersParameterAccessor {
 		 */
 		public String asString() {
 			return value == null ? null
-					: (String) CONVERSION_SERVICE.convert(value, parameterTypeDecsriptor, STRING_DESCRIPTOR);
+					: (String) CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
 		}
 
 		/**

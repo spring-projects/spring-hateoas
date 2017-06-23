@@ -126,11 +126,10 @@ public class Links implements Iterable<Link> {
 		}
 
 		return new Links(links);
-
 	}
 
 	/**
-	 * Returns whether the {@link Links} containter is empty.
+	 * Returns whether the {@link Links} container is empty.
 	 * 
 	 * @return
 	 */
