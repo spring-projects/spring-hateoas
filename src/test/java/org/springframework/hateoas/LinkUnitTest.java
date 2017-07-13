@@ -23,6 +23,9 @@ import java.io.ObjectOutputStream;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
+import org.springframework.hateoas.mvc.SpringMvcAffordance;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 /**
  * Unit tests for {@link Link}.
  * 
@@ -225,6 +228,27 @@ public class LinkUnitTest {
 	}
 
 	/**
+	 * @see #340
+	 */
+	@Test
+	public void linkWithAffordancesShouldWorkProperly() {
+
+		Link originalLink = new Link("/foo");
+		Link linkWithAffordance = originalLink.withAffordance(new TestSpringMvcAffordance());
+		Link linkWithTwoAffordances = linkWithAffordance.withAffordance(new TestSpringMvcAffordance());
+
+		assertThat(originalLink.getAffordances()).hasSize(0);
+		assertThat(linkWithAffordance.getAffordances()).hasSize(1);
+		assertThat(linkWithTwoAffordances.getAffordances()).hasSize(2);
+
+		assertThat(originalLink.hashCode()).isNotEqualTo(linkWithAffordance.hashCode());
+		assertThat(originalLink).isNotEqualTo(linkWithAffordance);
+
+		assertThat(linkWithAffordance.hashCode()).isNotEqualTo(linkWithTwoAffordances.hashCode());
+		assertThat(linkWithAffordance).isNotEqualTo(linkWithTwoAffordances);
+	}
+
+	/**
 	 * @see #671
 	 */
 	@Test
@@ -246,5 +270,12 @@ public class LinkUnitTest {
 
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(null));
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(""));
+	}
+
+	static class TestSpringMvcAffordance extends SpringMvcAffordance {
+
+		TestSpringMvcAffordance() {
+			super(RequestMethod.PATCH, null);
+		}
 	}
 }

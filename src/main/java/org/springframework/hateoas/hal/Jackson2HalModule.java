@@ -144,6 +144,13 @@ public class Jackson2HalModule extends SimpleModule {
 			this.halConfiguration = halConfiguration;
 		}
 
+		/**
+		 * Needed to support Jackson
+		 */
+		HalLinkListSerializer() {
+			this(null, null, null, null, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_SINGLE));
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
@@ -679,27 +686,6 @@ public class Jackson2HalModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 		private final AutowireCapableBeanFactory delegate;
 
-		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
-		 * {@link MessageSourceAccessor} and {@link AutowireCapableBeanFactory}. Registers a prepared
-		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation using the given
-		 * {@link AutowireCapableBeanFactory} if provided, or simple default constructor instantiation if not.
-		 * 
-		 * @param provider must not be {@literal null}.
-		 * @param curieProvider can be {@literal null}.
-		 * @param accessor can be {@literal null}.
-		 * @param beanFactory can be {@literal null}
-		 */
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
-				AutowireCapableBeanFactory beanFactory, HalConfiguration halConfiguration) {
-			this(provider, curieProvider, accessor, true, beanFactory, halConfiguration);
-		}
-
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
-				MessageSourceAccessor messageSourceAccessor, AutowireCapableBeanFactory beanFactory) {
-			this(provider, curieProvider, messageSourceAccessor, beanFactory, beanFactory.getBean(HalConfiguration.class));
-		}
-
 		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
 				MessageSourceAccessor messageSourceAccessor) {
 			this(provider, curieProvider, messageSourceAccessor, new HalConfiguration());
@@ -864,7 +850,7 @@ public class Jackson2HalModule extends SimpleModule {
 	 *
 	 * @author Oliver Gierke
 	 */
-	private static class EmbeddedMapper {
+	public static class EmbeddedMapper {
 
 		private RelProvider relProvider;
 		private CurieProvider curieProvider;

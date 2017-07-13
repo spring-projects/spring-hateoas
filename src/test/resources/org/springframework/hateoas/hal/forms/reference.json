@@ -1,0 +1,25 @@
+{
+  "_links" : {
+    "collection" : {
+      "href" : "/employees"
+    },
+    "self" : {
+      "href" : "/employees/1"
+    }
+  },
+  "_templates" : {
+    "default" : {
+      "title" : "HAL-FORMS unit test",
+      "method" : "get",
+      "contentType" : "application/hal+json",
+      "properties" : [ {
+        "name" : "my-name",
+        "readOnly" : true,
+        "value" : "my-value",
+        "prompt" : "my-prompt",
+        "regex" : "my-regex",
+        "required" : true
+      } ]
+    }
+  }
+}

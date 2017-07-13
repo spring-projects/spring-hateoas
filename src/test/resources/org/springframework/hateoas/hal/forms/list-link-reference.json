@@ -1,0 +1,9 @@
+{
+  "_links" : {
+    "self" : [ {
+      "href" : "localhost"
+    }, {
+      "href" : "localhost2"
+    } ]
+  }
+}

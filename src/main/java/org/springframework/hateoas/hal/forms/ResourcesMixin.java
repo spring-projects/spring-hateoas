@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal;
+package org.springframework.hateoas.hal.forms;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
+import org.springframework.hateoas.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -29,19 +30,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * Custom mixin to render {@link Link}s in HAL.
- *
- * @author Alexander Baetz
- * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public abstract class ResourceSupportMixin extends ResourceSupport {
+@JsonSerialize(using = HalFormsResourcesSerializer.class)
+abstract class ResourcesMixin<T> extends Resources<T> {
 
 	@Override
-	@XmlElement(name = "link")
-	@JsonProperty("_links")
+	@XmlElement(name = "embedded")
+	@JsonProperty("_embedded")
 	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)
-	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
-	public abstract List<Link> getLinks();
+	@JsonDeserialize(using = HalFormsResourcesDeserializer.class)
+	public abstract Collection<T> getContent();
+
 }

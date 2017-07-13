@@ -1,0 +1,8 @@
+{
+  "_links" : {
+    "ns:foobar" : {
+      "href" : "target",
+      "title" : "Foobar's title!"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "_links" : {
+    "search" : {
+      "href" : "/foo{?bar}",
+      "templated" : true
+    }
+  }
+}

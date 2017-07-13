@@ -28,6 +28,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+/**
+ * Custom mixin to to render collection content as {@literal _embedded}.
+ *
+ * @author Alexander Baetz
+ * @author Oliver Gierke
+ * @author Greg Turnquist
+ */
 @JsonPropertyOrder({ "content", "links" })
 public abstract class ResourcesMixin<T> extends Resources<T> {
 

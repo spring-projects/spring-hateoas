@@ -1,0 +1,15 @@
+{
+  "_embedded" : { },
+  "_links" : {
+    "default:myrel" : {
+      "href" : "foo"
+    },
+    "curies" : [ {
+      "href" : "bar",
+      "name" : "foo"
+    }, {
+      "href" : "foo",
+      "name" : "bar"
+    } ]
+  }
+}

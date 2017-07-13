@@ -45,5 +45,6 @@ public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		Link result = read(REFERENCE, Link.class);
 		assertThat(result.getHref()).isEqualTo("location");
 		assertThat(result.getRel()).isEqualTo("something");
+		assertThat(result.getAffordances()).hasSize(0);
 	}
 }

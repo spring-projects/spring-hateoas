@@ -1,0 +1,35 @@
+{
+  "_embedded" : {
+    "pojos" : [ {
+      "text" : "test1",
+      "number" : 1,
+      "_links" : {
+        "self" : {
+          "href" : "localhost"
+        }
+      }
+    }, {
+      "text" : "test2",
+      "number" : 2,
+      "_links" : {
+        "self" : {
+          "href" : "localhost"
+        }
+      }
+    } ]
+  },
+  "_links" : {
+    "next" : {
+      "href" : "foo"
+    },
+    "prev" : {
+      "href" : "bar"
+    }
+  },
+  "page" : {
+    "size" : 2,
+    "totalElements" : 4,
+    "totalPages" : 2,
+    "number" : 0
+  }
+}

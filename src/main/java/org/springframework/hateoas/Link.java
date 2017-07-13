@@ -19,10 +19,10 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Wither;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +34,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -48,10 +49,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonIgnoreProperties("templated")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
-@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "deprecation" })
+@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "deprecation", "affordances" })
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -73,6 +73,7 @@ public class Link implements Serializable {
 	private @XmlAttribute @Wither String type;
 	private @XmlAttribute @Wither String deprecation;
 	private @XmlTransient @JsonIgnore UriTemplate template;
+	private @XmlTransient @JsonIgnore List<Affordance> affordances;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -108,6 +109,32 @@ public class Link implements Serializable {
 		this.template = template;
 		this.href = template.toString();
 		this.rel = rel;
+		this.affordances = new ArrayList<Affordance>();
+	}
+
+	public Link(String href, String rel, List<Affordance> affordances) {
+		
+		this(href, rel);
+
+		Assert.notNull(affordances, "affordances must not be null!");
+		
+		this.affordances = affordances;
+	}
+
+	/**
+	 * Empty constructor required by the marshalling framework.
+	 */
+	protected Link() {
+		this.affordances = new ArrayList<Affordance>();
+	}
+
+	/**
+	 * Returns safe copy of {@link Affordance}s.
+	 * 
+	 * @return
+	 */
+	public List<Affordance> getAffordances() {
+		return new ArrayList<Affordance>(Collections.unmodifiableCollection(this.affordances));
 	}
 
 	/**
@@ -118,6 +145,39 @@ public class Link implements Serializable {
 	public Link withSelfRel() {
 		return withRel(Link.REL_SELF);
 	}
+
+	/**
+	 * Create new {@link Link} with an additional {@link Affordance}.
+	 *
+	 * @param affordance
+	 * @return
+	 */
+	public Link withAffordance(Affordance affordance) {
+
+		List<Affordance> newAffordances = new ArrayList<Affordance>();
+		newAffordances.addAll(this.affordances);
+		newAffordances.add(affordance);
+
+		return new Link(this.rel, this.href, this.hreflang ,this.media, this.title, this.type,
+			this.deprecation, this.template, newAffordances);
+	}
+
+	/**
+	 * Create new {@link Link} with additional {@link Affordance}s.
+	 * 
+	 * @param affordances
+	 * @return
+	 */
+	public Link addAffordances(List<Affordance> affordances) {
+
+		List<Affordance> newAffordances = new ArrayList<Affordance>();
+		newAffordances.addAll(this.affordances);
+		newAffordances.addAll(affordances);
+
+		return new Link(this.rel, this.href, this.hreflang ,this.media, this.title, this.type,
+			this.deprecation, this.template, newAffordances);
+	}
+
 
 	/**
 	 * Returns the variable names contained in the template.
