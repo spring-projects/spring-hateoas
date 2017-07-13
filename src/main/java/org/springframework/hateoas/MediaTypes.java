@@ -22,7 +22,10 @@ import org.springframework.http.MediaType;
  * 
  * @author Oliver Gierke
  * @author Przemek Nowak
+<<<<<<< HEAD
  * @author Drummond Dawson
+=======
+>>>>>>> f5bf966... #340 - Add new Affordances API + HAL-FORMS mediatype.
  * @author Greg Turnquist
  */
 public class MediaTypes {
@@ -56,4 +59,15 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/alps+json}.
 	 */
 	public static final MediaType ALPS_JSON = MediaType.parseMediaType(ALPS_JSON_VALUE);
+
+	/**
+	 * Public constant media type for {@code application/prs.hal-forms+json}.
+	 */
+	public static final String HAL_FORMS_JSON_VALUE = "application/prs.hal-forms+json";
+
+	/**
+	 * Public constant media type for {@code applicatino/prs.hal-forms+json}.
+	 */
+	public static final MediaType HAL_FORMS_JSON = MediaType.parseMediaType(HAL_FORMS_JSON_VALUE);
+
 }

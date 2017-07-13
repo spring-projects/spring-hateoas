@@ -672,6 +672,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 
+		@RequestMapping
 		HttpEntity<Void> methodWithJdk8Optional(@RequestParam Optional<Integer> value) {
 			return null;
 		}

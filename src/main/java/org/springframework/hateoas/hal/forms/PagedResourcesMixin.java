@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal;
+package org.springframework.hateoas.hal.forms;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.PagedResources;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * Custom mixin to render {@link Link}s in HAL.
+ * Custom mixin to render {@link org.springframework.hateoas.PagedResources.PageMetadata} in HAL.
  *
- * @author Alexander Baetz
- * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public abstract class ResourceSupportMixin extends ResourceSupport {
+abstract class PagedResourcesMixin<T> extends PagedResources<T> {
 
 	@Override
-	@XmlElement(name = "link")
-	@JsonProperty("_links")
+	@JsonProperty("page")
 	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)
-	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
-	public abstract List<Link> getLinks();
+	public PageMetadata getMetadata() {
+		return super.getMetadata();
+	}
 }

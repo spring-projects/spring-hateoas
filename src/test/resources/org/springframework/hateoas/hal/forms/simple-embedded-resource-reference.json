@@ -1,0 +1,10 @@
+{
+  "_embedded" : {
+    "content" : [ "first", "second" ]
+  },
+  "_links" : {
+    "self" : {
+      "href" : "localhost"
+    }
+  }
+}

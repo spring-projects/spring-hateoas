@@ -1,0 +1,9 @@
+{
+  "text" : "test1",
+  "number" : 1,
+  "_links" : {
+    "self" : {
+      "href" : "localhost"
+    }
+  }
+}

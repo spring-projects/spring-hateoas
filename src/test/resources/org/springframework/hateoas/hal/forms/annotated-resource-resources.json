@@ -1,0 +1,18 @@
+{
+  "_embedded" : {
+    "pojos" : [ {
+      "text" : "test1",
+      "number" : 1,
+      "_links" : {
+        "self" : {
+          "href" : "localhost"
+        }
+      }
+    } ]
+  },
+  "_links" : {
+    "self" : {
+      "href" : "localhost"
+    }
+  }
+}

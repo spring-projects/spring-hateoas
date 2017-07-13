@@ -1,0 +1,26 @@
+{
+  "_embedded" : {
+    "content" : [ {
+      "text" : "test1",
+      "number" : 1,
+      "_links" : {
+        "self" : {
+          "href" : "localhost"
+        }
+      }
+    }, {
+      "text" : "test2",
+      "number" : 2,
+      "_links" : {
+        "self" : {
+          "href" : "localhost"
+        }
+      }
+    } ]
+  },
+  "_links" : {
+    "self" : {
+      "href" : "localhost"
+    }
+  }
+}

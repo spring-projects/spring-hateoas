@@ -1,0 +1,8 @@
+{
+  "_embedded" : { },
+  "_links" : {
+    "self" : {
+      "href" : "foo"
+    }
+  }
+}

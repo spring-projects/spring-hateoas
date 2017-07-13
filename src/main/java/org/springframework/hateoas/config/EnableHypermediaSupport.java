@@ -20,11 +20,20 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportSelector;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.hal.forms.HalFormsWebMvcConfigurer;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans available for
@@ -39,11 +48,13 @@ import org.springframework.hateoas.LinkDiscoverer;
  * @see LinkDiscoverer
  * @see EntityLinks
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class })
+@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class,
+	EnableHypermediaSupport.HypermediaConfigurationImportSelector.class})
 public @interface EnableHypermediaSupport {
 
 	/**
@@ -66,6 +77,50 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL;
+		HAL,
+
+		/**
+		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
+		 * @see https://rwcbook.github.io/hal-forms/
+		 */
+		HAL_FORMS(HalFormsWebMvcConfigurer.class);
+
+		private final List<Class<?>> configurations;
+
+		HypermediaType(Class<?>... configurations) {
+			this.configurations = Arrays.asList(configurations);
+		}
+	}
+
+	@Slf4j
+	class HypermediaConfigurationImportSelector implements ImportSelector {
+
+		@Override
+		public String[] selectImports(AnnotationMetadata metadata) {
+
+			Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
+
+			HypermediaType[] types = (HypermediaType[]) attributes.get("type");
+
+			/**
+			 * If no types are defined inside the annotation, add them all.
+			 */
+			if (types.length == 0) {
+				types = HypermediaType.values();
+			}
+
+			log.debug("Registering support for hypermedia types {} according to configuration on {}",
+				types, metadata.getClassName());
+
+			List<String> configurationNames = new ArrayList<String>();
+
+			for (HypermediaType type : types) {
+				for (Class<?> configuration : type.configurations) {
+					configurationNames.add(configuration.getName());
+				}
+			}
+
+			return configurationNames.toArray(new String[0]);
+		}
 	}
 }

@@ -1,0 +1,16 @@
+{
+  "_embedded" : { },
+  "_links" : {
+    "self" : {
+      "href" : "foo"
+    },
+    "foo:myrel" : {
+      "href" : "bar"
+    },
+    "curies" : [ {
+      "href" : "http://localhost:8080/rels/{rel}",
+      "name" : "foo",
+      "templated" : true
+    } ]
+  }
+}
