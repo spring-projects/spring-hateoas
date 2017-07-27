@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,11 +108,11 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private String[] getMappingFrom(Annotation annotation) {
 
-		Object value = null;
-
-		if (annotation != null) {
-			value = mappingAttributeName == null ? getValue(annotation) : getValue(annotation, mappingAttributeName);
+		if (annotation == null) {
+			return new String[0];
 		}
+
+		Object value = mappingAttributeName == null ? getValue(annotation) : getValue(annotation, mappingAttributeName);
 
 		if (value instanceof String) {
 			return new String[] { (String) value };
