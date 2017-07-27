@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
 /**
  * DTO to implement binding response representations of pageable collections.
@@ -75,6 +76,7 @@ public class PagedResources<T> extends Resources<T> {
 	 * @return the metadata
 	 */
 	@JsonProperty("page")
+	@JsonView(ResourcesLinksVisible.class)
 	public PageMetadata getMetadata() {
 		return metadata;
 	}
