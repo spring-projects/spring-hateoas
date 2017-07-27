@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-abstract class ResourceSupportMixin extends ResourceSupport {
+public abstract class ResourceSupportMixin extends ResourceSupport {
 
 	@Override
 	@XmlElement(name = "link")
