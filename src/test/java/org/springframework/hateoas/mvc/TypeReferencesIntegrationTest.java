@@ -81,17 +81,12 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourceTypeReference() {
+	public void usesResourceTypeReferenceForHal() {
 
 		server.expect(times(1), requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON));
-		server.expect(times(1), requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON_UTF8));
 
 		ResponseEntity<Resource<User>> response = template.exchange("/resource", HttpMethod.GET, null,
 				new ResourceType<User>() {});
-
-		assertExpectedUserResource(response.getBody());
-
-		response = template.exchange("/resource", HttpMethod.GET, null, new ResourceType<User>() {});
 
 		assertExpectedUserResource(response.getBody());
 	}
@@ -100,10 +95,9 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesTypeReference() {
+	public void usesResourcesTypeReferenceForHal() {
 
 		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON));
-		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON_UTF8));
 
 		ResponseEntity<Resources<User>> response = template.exchange("/resources", HttpMethod.GET, null,
 				new ResourcesType<User>() {});
@@ -115,26 +109,15 @@ public class TypeReferencesIntegrationTest {
 
 		assertThat(nested, hasSize(1));
 		assertExpectedUser(nested.iterator().next());
-
-		response = template.exchange("/resources", HttpMethod.GET, null, new ResourcesType<User>() {});
-		body = response.getBody();
-
-		assertThat(body.hasLink("self"), is(true));
-
-		nested = body.getContent();
-
-		assertThat(nested, hasSize(1));
-		assertExpectedUser(nested.iterator().next());
 	}
 
 	/**
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesOfResourceTypeReference() {
+	public void usesResourcesOfResourceTypeReferenceForHal() {
 
 		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON));
-		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON_UTF8));
 
 		ResponseEntity<Resources<Resource<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
 				new ResourcesType<Resource<User>>() {});
@@ -146,13 +129,48 @@ public class TypeReferencesIntegrationTest {
 
 		assertThat(nested, hasSize(1));
 		assertExpectedUserResource(nested.iterator().next());
+	}
 
-		response = template.exchange("/resources", HttpMethod.GET, null, new ResourcesType<Resource<User>>() {});
-		body = response.getBody();
+	@Test
+	public void usesResourceTypeReferenceForHalUtf8() {
+
+		server.expect(times(1), requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON_UTF8));
+
+		ResponseEntity<Resource<User>> response = template.exchange("/resource", HttpMethod.GET, null,
+			new ResourceType<User>() {});
+
+		assertExpectedUserResource(response.getBody());
+	}
+
+	@Test
+	public void usesResourcesTypeReferenceForHalUtf8() {
+
+		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON_UTF8));
+
+		ResponseEntity<Resources<User>> response = template.exchange("/resources", HttpMethod.GET, null,
+			new ResourcesType<User>() {});
+		Resources<User> body = response.getBody();
 
 		assertThat(body.hasLink("self"), is(true));
 
-		nested = body.getContent();
+		Collection<User> nested = body.getContent();
+
+		assertThat(nested, hasSize(1));
+		assertExpectedUser(nested.iterator().next());
+	}
+
+	@Test
+	public void usesResourcesOfResourceTypeReferenceForHalUtf8() {
+
+		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON_UTF8));
+
+		ResponseEntity<Resources<Resource<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
+			new ResourcesType<Resource<User>>() {});
+		Resources<Resource<User>> body = response.getBody();
+
+		assertThat(body.hasLink("self"), is(true));
+
+		Collection<Resource<User>> nested = body.getContent();
 
 		assertThat(nested, hasSize(1));
 		assertExpectedUserResource(nested.iterator().next());

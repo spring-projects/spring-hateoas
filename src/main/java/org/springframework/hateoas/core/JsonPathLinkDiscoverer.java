@@ -179,7 +179,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	@Override
 	public boolean supports(MediaType delimiter) {
 
-		if (this.mediaTypes == null) {
+		if (this.mediaTypes.isEmpty()) {
 			return true;
 		} else {
 			for (MediaType mediaType : this.mediaTypes) {
