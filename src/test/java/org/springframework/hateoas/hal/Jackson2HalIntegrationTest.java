@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -51,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Alexander Baetz
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
@@ -77,6 +79,9 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final String LINK_WITH_TITLE = "{\"_links\":{\"ns:foobar\":{\"href\":\"target\",\"title\":\"Foobar's title!\"}}}";
 
+	static final String SINGLE_WITH_ONE_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"title\":\"the title\"}}}";
+	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
+	
 	@Before
 	public void setUpModule() {
 
@@ -94,6 +99,33 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost"));
 
 		assertThat(write(resourceSupport), is(SINGLE_LINK_REFERENCE));
+	}
+
+	/**
+	 * @see #100
+	 */
+	@Test
+	public void rendersAllExtraRFC5988Attributes() throws Exception {
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost", "self")
+			.withHreflang("en")
+			.withTitle("the title")
+			.withType("the type")
+			.withMedia("the media")
+			.withDeprecation("/customers/deprecated"));
+
+		assertThat(write(resourceSupport), is(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES));
+	}
+
+	@Test
+	public void rendersWithOneExtraRFC5988Attribute() throws Exception {
+
+		ResourceSupport resourceSupport = new ResourceSupport();
+		resourceSupport.add(new Link("localhost", "self")
+			.withTitle("the title"));
+
+		assertThat(write(resourceSupport), is(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES));
 	}
 
 	@Test
