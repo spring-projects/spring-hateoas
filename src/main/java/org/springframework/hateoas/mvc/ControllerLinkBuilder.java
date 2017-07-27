@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ package org.springframework.hateoas.mvc;
 
 import static org.springframework.util.StringUtils.*;
 
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
+
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
@@ -257,9 +257,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	/**
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
 	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
-	 * {@link UriComponentsBuilder}.
-	 *
-	 * If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall back to relative URIs.
+	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
+	 * back to relative URIs.
 	 * 
 	 * @return
 	 */
@@ -268,7 +267,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		if (RequestContextHolder.getRequestAttributes() == null) {
 			return UriComponentsBuilder.fromPath("/");
 		}
-		
+
 		HttpServletRequest request = getCurrentRequest();
 		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
