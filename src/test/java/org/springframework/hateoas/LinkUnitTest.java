@@ -125,24 +125,25 @@ public class LinkUnitTest {
 	/**
 	 * @see #100
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsUnrecognizedAttributes() {
-		try {
-			Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
-		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage(), is("Link contains invalid RFC5988 headers! => [unknown]"));
-			throw e;
-		}
+	@Test
+	public void ignoresUnrecognizedAttributes() {
+		Link link = Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
+
+		assertThat(link.getHref(), is("/something"));
+		assertThat(link.getRel(), is("foo"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsMissingRelAttribute() {
-		Link.valueOf("</something>);title=\"title\"");
+		Link.valueOf("</something>;title=\"title\"");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsLinkWithoutAttributesAtAll() {
-		Link.valueOf("</something>);title=\"title\"");
+
+		Link link = Link.valueOf("</something>");
+
+		System.out.println(link);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

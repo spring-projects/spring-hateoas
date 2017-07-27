@@ -15,14 +15,18 @@
  */
 package org.springframework.hateoas;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Wither;
+
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +48,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonIgnoreProperties("templated")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Getter
+@EqualsAndHashCode(of = {"rel", "href", "hreflang", "media", "title", "deprecation"})
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -57,13 +65,13 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
-	@XmlAttribute private String rel;
-	@XmlAttribute private String href;
-	@XmlAttribute private String hreflang;
-	@XmlAttribute private String media;
-	@XmlAttribute private String title;
-	@XmlAttribute private String type;
-	@XmlAttribute private String deprecation;
+	@XmlAttribute @Wither private String rel;
+	@XmlAttribute @Wither private String href;
+	@XmlAttribute @Wither private String hreflang;
+	@XmlAttribute @Wither private String media;
+	@XmlAttribute @Wither private String title;
+	@XmlAttribute @Wither private String type;
+	@XmlAttribute @Wither private String deprecation;
 	@XmlTransient @JsonIgnore private UriTemplate template;
 
 	/**
@@ -103,107 +111,6 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Creates a new {@link Link} to the given URI with the given rel, hreflang, media, title, and type.
-	 *
-	 * @param href must not be {@literal null} or empty.
-	 * @param rel must not be {@literal null} or empty.
-	 * @param hreflang
-	 * @param media
-	 * @param title
-	 * @param type
-	 * @param deprecation
-	 */
-	public Link(String href, String rel, String hreflang, String media, String title, String type, String deprecation) {
-
-		this(href, rel);
-		this.hreflang = hreflang;
-		this.media = media;
-		this.title = title;
-		this.type = type;
-		this.deprecation = deprecation;
-	}
-
-	/**
-	 * Empty constructor required by the marshalling framework.
-	 */
-	protected Link() {
-
-	}
-
-	/**
-	 * Returns the actual URI the link is pointing to.
-	 * 
-	 * @return
-	 */
-	public String getHref() {
-		return href;
-	}
-
-	/**
-	 * Returns the rel of the link.
-	 * 
-	 * @return
-	 */
-	public String getRel() {
-		return rel;
-	}
-
-	/**
-	 * Returns the hreflang of the link.
-	 *
-	 * @return
-	 */
-	public String getHreflang() {
-		return hreflang;
-	}
-
-	/**
-	 * Returns the media of the link.
-	 *
-	 * @return
-	 */
-	public String getMedia() {
-		return media;
-	}
-
-	/**
-	 * Returns the title of the link.
-	 *
-	 * @return
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * Returns the type of the link
-	 *
-	 * @return
-	 */
-	public String getType() {
-		return type;
-	}
-
-	/**
-	 * Returns link about deprecation of this link.
-	 *
-	 * @return
-	 */
-	public String getDeprecation() {
-		return deprecation;
-	}
-	
-	/**
-	 * Returns a {@link Link} pointing to the same URI but with the given relation.
-	 * 
-	 * @param rel must not be {@literal null} or empty.
-	 * @return
-	 */
-	public Link withRel(String rel) {
-		return new Link(href, rel);
-	}
-
-	/**
 	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
 	 * 
 	 * @return
@@ -212,66 +119,6 @@ public class Link implements Serializable {
 		return withRel(Link.REL_SELF);
 	}
 
-	/**
-	 * Returns a {@link Link} with the {@code hreflang} attribute filled out.
-	 *
-	 * @param hreflang
-	 * @return
-	 */
-	public Link withHreflang(String hreflang) {
-
-		Assert.hasText(hreflang, "hreflang must not be null or empty!");
-		return new Link(this.href, this.rel, hreflang, this.media, this.title, this.type, this.deprecation);
-	}
-
-	/**
-	 * Returns a {@link Link} with the {@code media} attribute filled out.
-	 *
-	 * @param media
-	 * @return
-	 */
-	public Link withMedia(String media) {
-
-		Assert.hasText(media, "media must not be null or empty!");
-		return new Link(this.href, this.rel, this.hreflang, media, this.title, this.type, this.deprecation);
-	}
-
-	/**
-	 * Returns a {@link Link} with the {@code title} attribute filled out.
-	 *
-	 * @param title
-	 * @return
-	 */
-	public Link withTitle(String title) {
-
-		Assert.hasText(title, "title must not be null or empty!");
-		return new Link(this.href, this.rel, this.hreflang, this.media, title, this.type, this.deprecation);
-	}
-
-	/**
-	 * Returns a {@link Link} with the {@code type} attribute filled out.
-	 *
-	 * @param type
-	 * @return
-	 */
-	public Link withType(String type) {
-
-		Assert.hasText(type, "type must not be null or empty!");
-		return new Link(this.href, this.rel, this.hreflang, this.media, this.title, type, this.deprecation);
-	}
-
-	/**
-	 * Returns a {@link Link} with the {@code deprecation} attribute filled out.
-	 *
-	 * @param deprecation
-	 * @return
-	 */
-	public Link withDeprecation(String deprecation) {
-		
-		Assert.hasText(deprecation, "deprecation must not be null or empty!");
-		return new Link(this.href, this.rel, this.hreflang, this.media, this.title, this.type, deprecation);
-	}
-	
 	/**
 	 * Returns the variable names contained in the template.
 	 * 
@@ -330,68 +177,7 @@ public class Link implements Serializable {
 		return template;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof Link)) {
-			return false;
-		}
-
-		Link that = (Link) obj;
-
-		return
-			this.href.equals(that.href)
-				&&
-				this.rel.equals(that.rel)
-				&&
-				(this.hreflang != null ? this.hreflang.equals(that.hreflang) : this.hreflang == that.hreflang)
-				&&
-				(this.media != null ? this.media.equals(that.media) : this.media == that.media)
-				&&
-				(this.title != null ? this.title.equals(that.title) : this.title == that.title)
-				&&
-				(this.type != null ? this.type.equals(that.type) : this.type == that.type)
-				&&
-				(this.deprecation != null ? this.deprecation.equals(that.deprecation) : this.deprecation == that.deprecation);
-	}
-
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-
-		int result = 17;
-		result += 31 * href.hashCode();
-		result += 31 * rel.hashCode();
-		if (hreflang != null) {
-			result += 31 * hreflang.hashCode();
-		}
-		if (media != null) {
-			result += 31 * media.hashCode();
-		}
-		if (title != null) {
-			result += 31 * title.hashCode();
-		}
-		if (type != null) {
-			result += 31 * type.hashCode();
-		}
-		if (deprecation != null) {
-			result += 31 * deprecation.hashCode();
-		}
-		return result;
-	}
-
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -448,11 +234,6 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			Set<String> unrecognizedHeaders = unrecognizedHeaders(attributes);
-			if (!unrecognizedHeaders.isEmpty()) {
-				throw new IllegalArgumentException("Link contains invalid RFC5988 headers! => " + unrecognizedHeaders);
-			}
-
 			Link link = new Link(matcher.group(1), attributes.get("rel"));
 
 			if (attributes.containsKey("hreflang")) {
@@ -503,23 +284,5 @@ public class Link implements Serializable {
 		}
 
 		return attributes;
-	}
-
-	/**
-	 * Scan for any headers not recognized.
-	 *
-	 * @param attributes
-	 * @return
-	 */
-	private static Set<String> unrecognizedHeaders(final Map<String, String> attributes) {
-
-		// Copy the existing keys to avoid damaging the original.
-		Set<String> unrecognizedHeaders = new HashSet<String>();
-		unrecognizedHeaders.addAll(attributes.keySet());
-
-		// Remove all recognized headers
-		unrecognizedHeaders.removeAll(Arrays.asList("href", "rel", "hreflang", "media", "title", "type", "deprecation"));
-
-		return unrecognizedHeaders;
 	}
 }
