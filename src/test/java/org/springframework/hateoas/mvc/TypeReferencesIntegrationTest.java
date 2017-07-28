@@ -17,6 +17,7 @@ package org.springframework.hateoas.mvc;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.web.client.ExpectedCount.times;
 import static org.springframework.test.web.client.MockRestServiceServer.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -82,10 +83,15 @@ public class TypeReferencesIntegrationTest {
 	@Test
 	public void usesResourceTypeReference() {
 
-		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON));
+		server.expect(times(1), requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON));
+		server.expect(times(1), requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON_UTF8));
 
 		ResponseEntity<Resource<User>> response = template.exchange("/resource", HttpMethod.GET, null,
 				new ResourceType<User>() {});
+
+		assertExpectedUserResource(response.getBody());
+
+		response = template.exchange("/resource", HttpMethod.GET, null, new ResourceType<User>() {});
 
 		assertExpectedUserResource(response.getBody());
 	}
@@ -96,7 +102,8 @@ public class TypeReferencesIntegrationTest {
 	@Test
 	public void usesResourcesTypeReference() {
 
-		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON));
+		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON));
+		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON_UTF8));
 
 		ResponseEntity<Resources<User>> response = template.exchange("/resources", HttpMethod.GET, null,
 				new ResourcesType<User>() {});
@@ -108,6 +115,16 @@ public class TypeReferencesIntegrationTest {
 
 		assertThat(nested, hasSize(1));
 		assertExpectedUser(nested.iterator().next());
+
+		response = template.exchange("/resources", HttpMethod.GET, null, new ResourcesType<User>() {});
+		body = response.getBody();
+
+		assertThat(body.hasLink("self"), is(true));
+
+		nested = body.getContent();
+
+		assertThat(nested, hasSize(1));
+		assertExpectedUser(nested.iterator().next());
 	}
 
 	/**
@@ -116,7 +133,8 @@ public class TypeReferencesIntegrationTest {
 	@Test
 	public void usesResourcesOfResourceTypeReference() {
 
-		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON));
+		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON));
+		server.expect(times(1), requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON_UTF8));
 
 		ResponseEntity<Resources<Resource<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
 				new ResourcesType<Resource<User>>() {});
@@ -125,6 +143,16 @@ public class TypeReferencesIntegrationTest {
 		assertThat(body.hasLink("self"), is(true));
 
 		Collection<Resource<User>> nested = body.getContent();
+
+		assertThat(nested, hasSize(1));
+		assertExpectedUserResource(nested.iterator().next());
+
+		response = template.exchange("/resources", HttpMethod.GET, null, new ResourcesType<Resource<User>>() {});
+		body = response.getBody();
+
+		assertThat(body.hasLink("self"), is(true));
+
+		nested = body.getContent();
 
 		assertThat(nested, hasSize(1));
 		assertExpectedUserResource(nested.iterator().next());

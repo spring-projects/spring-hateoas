@@ -76,6 +76,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		assertThat(discoverers, is(notNullValue()));
 		assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON), is(instanceOf(HalLinkDiscoverer.class)));
+		assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8), is(instanceOf(HalLinkDiscoverer.class)));
 		assertRelProvidersSetUp(context);
 	}
 
@@ -99,6 +100,7 @@ public class EnableHypermediaSupportIntegrationTest {
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
 		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON_UTF8));
 
 		boolean found = false;
 
@@ -114,6 +116,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 				assertThat(converters.get(0), is(instanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class)));
 				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+				assertThat(converters.get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON_UTF8));
 			}
 		}
 
@@ -130,6 +133,7 @@ public class EnableHypermediaSupportIntegrationTest {
 		RestTemplate template = context.getBean(RestTemplate.class);
 
 		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON));
+		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(), hasItem(MediaTypes.HAL_JSON_UTF8));
 		context.close();
 	}
 
