@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.LinkBuilderFactory;
@@ -129,11 +130,38 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 
 	/* 
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.EntityLinks#getLinkToSingleResource(java.lang.Class, java.lang.Object)
+	 * @see org.springframework.hateoas.EntityLinks#linkToCollectionResource(java.lang.Class, java.lang.Object...)
+	 */
+	@Override
+	public Link linkToCollectionResource(Class<?> type, Object... parameters) {
+		return linkFor(type, parameters).withSelfRel();
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.EntityLinks#linkToSingleResource(java.lang.Class, java.lang.Object)
 	 */
 	@Override
 	public Link linkToSingleResource(Class<?> entity, Object id) {
 		return linkFor(entity).slash(id).withSelfRel();
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.EntityLinks#linkToSingleResource(java.lang.Class, java.lang.Object, java.lang.Object...)
+	 */
+	@Override
+	public Link linkToSingleResource(Class<?> type, Object id, Object... parameters) {
+		return linkFor(type, parameters).slash(id).withSelfRel();
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.EntityLinks#linkToSingleResource(org.springframework.hateoas.Identifiable, java.lang.Object...)
+	 */
+	@Override
+	public Link linkToSingleResource(Identifiable<?> entity, Object... parameters) {
+		return linkFor(entity.getClass(), parameters).slash(entity.getId()).withSelfRel();
 	}
 
 	/* 

@@ -15,14 +15,6 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-
-import java.util.Arrays;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,11 +25,21 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.LinkBuilderFactory;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 /**
  * Unit tests for {@link ControllerEntityLinks}.
@@ -63,6 +65,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullControllerList() {
+
 		new ControllerEntityLinks(null, linkBuilderFactory);
 	}
 
@@ -107,7 +110,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	public void rejectsUnmanagedEntity() {
 
 		EntityLinks links = new ControllerEntityLinks(
-				Arrays.asList(SampleController.class, ControllerWithParameters.class), linkBuilderFactory);
+																		Arrays.asList(SampleController.class, ControllerWithParameters.class), linkBuilderFactory);
 
 		assertThat(links.supports(Person.class), is(true));
 		assertThat(links.supports(Order.class), is(true));
@@ -117,6 +120,48 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 		thrown.expectMessage(SampleController.class.getName());
 		thrown.expectMessage(ExposesResourceFor.class.getName());
 		links.linkFor(SampleController.class);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void verifyThatLinkForSingleResourceOnOrdersControllersProperlyPutsInControllerParameters() {
+
+		when(linkBuilderFactory.linkTo(eq(OrdersController.class), Mockito.any(Object[].class))).thenReturn(linkTo(OrdersController.class,
+																																									101));
+
+		ControllerEntityLinks links = new ControllerEntityLinks(Arrays.asList(OrdersController.class),
+																				  linkBuilderFactory);
+
+		LinkBuilder builder = links.linkForSingleResource(Order.class, 508, 101);
+		assertThat(builder.withSelfRel().getHref(), CoreMatchers.endsWith("/person/101/orders/508"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void verifyThatLinkToSingleResourceOnOrdersControllersProperlyPutsInControllerParameters() {
+
+		when(linkBuilderFactory.linkTo(eq(OrdersController.class), Mockito.any(Object[].class))).thenReturn(linkTo(OrdersController.class,
+																																									101));
+
+		ControllerEntityLinks links = new ControllerEntityLinks(Arrays.asList(OrdersController.class),
+																				  linkBuilderFactory);
+
+		Link link = links.linkToSingleResource(Order.class, 508, 101);
+		assertThat(link.getHref(), CoreMatchers.endsWith("/person/101/orders/508"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void verifyThatLinkToCollectionResourceOnOrdersControllersProperlyPutsInControllerParameters() {
+
+		when(linkBuilderFactory.linkTo(eq(OrdersController.class), Mockito.any(Object[].class))).thenReturn(linkTo(OrdersController.class,
+																																									101));
+
+		ControllerEntityLinks links = new ControllerEntityLinks(Arrays.asList(OrdersController.class),
+																				  linkBuilderFactory);
+
+		Link link = links.linkToCollectionResource(Order.class, 101);
+		assertThat(link.getHref(), CoreMatchers.endsWith("/person/101/orders"));
 	}
 
 	@Controller
@@ -131,6 +176,24 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	@RequestMapping("/person/{id}")
 	static class ControllerWithParameters {
 
+	}
+
+	@Controller
+	@ExposesResourceFor(Order.class)
+	@RequestMapping("/person/{personId}/orders")
+	static class OrdersController {
+
+		@RequestMapping
+		public Collection<Order> orders() {
+
+			return Arrays.asList(new Order(), new Order());
+		}
+
+		@RequestMapping("{id}")
+		public Order order() {
+
+			return new Order();
+		}
 	}
 
 	static class InvalidController {
