@@ -51,7 +51,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
-@EqualsAndHashCode(of = {"rel", "href", "hreflang", "media", "title", "deprecation"})
+@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "deprecation" })
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -65,14 +65,14 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
-	@XmlAttribute @Wither private String rel;
-	@XmlAttribute @Wither private String href;
-	@XmlAttribute @Wither private String hreflang;
-	@XmlAttribute @Wither private String media;
-	@XmlAttribute @Wither private String title;
-	@XmlAttribute @Wither private String type;
-	@XmlAttribute @Wither private String deprecation;
-	@XmlTransient @JsonIgnore private UriTemplate template;
+	private @XmlAttribute @Wither String rel;
+	private @XmlAttribute @Wither String href;
+	private @XmlAttribute @Wither String hreflang;
+	private @XmlAttribute @Wither String media;
+	private @XmlAttribute @Wither String title;
+	private @XmlAttribute @Wither String type;
+	private @XmlAttribute @Wither String deprecation;
+	private @XmlTransient @JsonIgnore UriTemplate template;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
@@ -183,6 +183,7 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
+
 		String linkString = String.format("<%s>;rel=\"%s\"", href, rel);
 
 		if (hreflang != null) {
@@ -204,7 +205,7 @@ public class Link implements Serializable {
 		if (deprecation != null) {
 			linkString += ";deprecation=\"" + deprecation + "\"";
 		}
-		
+
 		return linkString;
 	}
 
@@ -276,7 +277,8 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
+		Pattern keyAndValue = Pattern
+				.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
 		Matcher matcher = keyAndValue.matcher(source);
 
 		while (matcher.find()) {
