@@ -86,7 +86,6 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 	private static final String DELEGATING_REL_PROVIDER_BEAN_NAME = "_relProvider";
 	private static final String LINK_DISCOVERER_REGISTRY_BEAN_NAME = "_linkDiscovererRegistry";
-	private static final String AFFORDANCE_MODEL_FACTORY_REGISTRY_BEAN_NAME = "_affordanceModelFactoryRegistry";
 	private static final String HAL_OBJECT_MAPPER_BEAN_NAME = "_halObjectMapper";
 	private static final String HAL_FORMS_OBJECT_MAPPER_BEAN_NAME = "_halFormsObjectMapper";
 	private static final String MESSAGE_SOURCE_BEAN_NAME = "linkRelationMessageSource";
@@ -146,7 +145,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		registerRelProviderPluginRegistryAndDelegate(registry);
 	}
 
-	private static void registerHypermediaComponents(AnnotationMetadata metadata, BeanDefinitionRegistry registry, String objectMapperBeanName) {
+	private static void registerHypermediaComponents(AnnotationMetadata metadata, BeanDefinitionRegistry registry,
+			String objectMapperBeanName) {
 
 		if (JACKSON2_PRESENT) {
 
@@ -316,7 +316,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				ObjectMapper halObjectMapper = beanFactory.getBean(HAL_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 				MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
-					MessageSourceAccessor.class);
+						MessageSourceAccessor.class);
 
 				halObjectMapper.registerModule(new Jackson2HalModule());
 
@@ -340,7 +340,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				ObjectMapper halFormsObjectMapper = beanFactory.getBean(HAL_FORMS_OBJECT_MAPPER_BEAN_NAME, ObjectMapper.class);
 				MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
-					MessageSourceAccessor.class);
+						MessageSourceAccessor.class);
 
 				halFormsObjectMapper.registerModule(new Jackson2HalFormsModule());
 
@@ -354,7 +354,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				}
 
 				MappingJackson2HttpMessageConverter halFormsConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-					ResourceSupport.class);
+						ResourceSupport.class);
 				halFormsConverter.setSupportedMediaTypes(Arrays.asList(HAL_FORMS_JSON));
 				halFormsConverter.setObjectMapper(halFormsObjectMapper);
 				result.add(halFormsConverter);

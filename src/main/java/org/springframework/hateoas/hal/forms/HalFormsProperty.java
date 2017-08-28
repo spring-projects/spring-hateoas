@@ -15,32 +15,33 @@
  */
 package org.springframework.hateoas.hal.forms;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Value;
+import lombok.experimental.Wither;
 
-import org.springframework.hateoas.AffordanceModel;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
- * Describe a parameter for the associated state transition in a HAL-FORMS document.
- * A {@link HalFormsTemplate} may contain a list of {@link HalFormsProperty}s
+ * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link HalFormsTemplate} may
+ * contain a list of {@link HalFormsProperty}s
  * 
  * @see http://mamund.site44.com/misc/hal-forms/
  */
 @JsonInclude(Include.NON_DEFAULT)
 @Value
-@AllArgsConstructor
+@Wither
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 public class HalFormsProperty {
 
-	private String name;
-
-	/**
-	 * readOnly uses {@link Boolean} not {@literal boolean}, because if {@literal null}, the element won't be rendered
-	 */
+	private @Wither(AccessLevel.PRIVATE) @NonNull String name;
 	private Boolean readOnly;
-
 	private String value;
 	private String prompt;
 	private String regex;
@@ -49,9 +50,15 @@ public class HalFormsProperty {
 	private boolean multi;
 
 	/**
-	 * Default constructor to support Jackson.
+	 * Creates a new {@link HalFormsProperty} with the given name.
+	 * 
+	 * @param name must not be {@literal null} or empty.
+	 * @return
 	 */
-	HalFormsProperty() {
-		this(null, null, null, null, null, false, false, false);
+	public static HalFormsProperty named(String name) {
+
+		Assert.hasText(name, "Property name must not be null or empty!");
+
+		return new HalFormsProperty().withName(name);
 	}
 }

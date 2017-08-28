@@ -21,9 +21,11 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -111,15 +113,15 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	}
 
 	/**
-	 * Extract {@link org.springframework.web.bind.annotation.RequestMapping}'s list of {@link RequestMethod}s
-	 * into an array of {@link String}s.
+	 * Extract {@link org.springframework.web.bind.annotation.RequestMapping}'s list of {@link RequestMethod}s into an
+	 * array of {@link String}s.
 	 * 
 	 * @param type
 	 * @param method
 	 * @return
 	 */
 	@Override
-	public String[] getRequestType(Class<?> type, Method method) {
+	public Collection<HttpMethod> getRequestMethod(Class<?> type, Method method) {
 
 		Assert.notNull(type, "Type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
@@ -129,13 +131,13 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		RequestMethod[] requestMethods = (RequestMethod[]) value;
 
-		List<String> requestMethodNames = new ArrayList<String>();
+		List<HttpMethod> requestMethodNames = new ArrayList<HttpMethod>();
 
 		for (RequestMethod requestMethod : requestMethods) {
-			requestMethodNames.add(requestMethod.toString());
+			requestMethodNames.add(HttpMethod.valueOf(requestMethod.toString()));
 		}
 
-		return requestMethodNames.toArray(new String[]{});
+		return requestMethodNames;
 	}
 
 	private String[] getMappingFrom(Annotation annotation) {

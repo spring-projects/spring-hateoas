@@ -34,12 +34,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Value object for links.
@@ -48,6 +48,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Greg Turnquist
  */
 @XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties("templated")
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
@@ -113,11 +114,11 @@ public class Link implements Serializable {
 	}
 
 	public Link(String href, String rel, List<Affordance> affordances) {
-		
+
 		this(href, rel);
 
 		Assert.notNull(affordances, "affordances must not be null!");
-		
+
 		this.affordances = affordances;
 	}
 
@@ -134,7 +135,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public List<Affordance> getAffordances() {
-		return new ArrayList<Affordance>(Collections.unmodifiableCollection(this.affordances));
+		return Collections.unmodifiableList(this.affordances);
 	}
 
 	/**
@@ -149,35 +150,46 @@ public class Link implements Serializable {
 	/**
 	 * Create new {@link Link} with an additional {@link Affordance}.
 	 *
-	 * @param affordance
+	 * @param affordance must not be {@literal null}.
 	 * @return
 	 */
-	public Link withAffordance(Affordance affordance) {
+	public Link andAffordance(Affordance affordance) {
+
+		Assert.notNull(affordance, "Affordance must not be null!");
 
 		List<Affordance> newAffordances = new ArrayList<Affordance>();
 		newAffordances.addAll(this.affordances);
 		newAffordances.add(affordance);
 
-		return new Link(this.rel, this.href, this.hreflang ,this.media, this.title, this.type,
-			this.deprecation, this.template, newAffordances);
+		return withAffordances(newAffordances);
 	}
 
 	/**
 	 * Create new {@link Link} with additional {@link Affordance}s.
 	 * 
-	 * @param affordances
+	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
-	public Link addAffordances(List<Affordance> affordances) {
+	public Link andAffordances(List<Affordance> affordances) {
 
 		List<Affordance> newAffordances = new ArrayList<Affordance>();
 		newAffordances.addAll(this.affordances);
 		newAffordances.addAll(affordances);
 
-		return new Link(this.rel, this.href, this.hreflang ,this.media, this.title, this.type,
-			this.deprecation, this.template, newAffordances);
+		return withAffordances(newAffordances);
 	}
 
+	/**
+	 * Creats a new {@link Link} with the given {@link Affordance}s.
+	 * 
+	 * @param affordances must not be {@literal null}.
+	 * @return
+	 */
+	public Link withAffordances(List<Affordance> affordances) {
+
+		return new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
+				this.template, affordances);
+	}
 
 	/**
 	 * Returns the variable names contained in the template.

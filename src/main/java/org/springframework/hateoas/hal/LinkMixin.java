@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@JsonIgnoreProperties({"rel", "media"})
+@JsonIgnoreProperties({ "rel", "media", "affordances", "template" })
 public abstract class LinkMixin extends Link {
 
 	private static final long serialVersionUID = 4720588561299667409L;
@@ -66,7 +66,7 @@ public abstract class LinkMixin extends Link {
 	@Override
 	@JsonInclude(Include.NON_NULL)
 	public abstract String getDeprecation();
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.Link#isTemplate()

@@ -15,18 +15,21 @@
  */
 package org.springframework.hateoas.mvc;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModelFactory;
+import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponents;
 
 /**
@@ -34,41 +37,35 @@ import org.springframework.web.util.UriComponents;
  * 
  * @author Greg Turnquist
  */
-public class SpringMvcAffordanceBuilder {
+@RequiredArgsConstructor
+class SpringMvcAffordanceBuilder {
 
-	private final PluginRegistry<? extends AffordanceModelFactory, MediaType> factories;
-
-	public SpringMvcAffordanceBuilder(PluginRegistry<? extends AffordanceModelFactory, MediaType> factories) {
-
-		Assert.notNull(factories, "Registry of LinkDiscoverer must not be null!");
-		this.factories = factories;
-	}
+	private final @NonNull PluginRegistry<? extends AffordanceModelFactory, MediaType> factories;
 
 	/**
-	 * Use the attributes of the current method call along with a collection of {@link AffordanceModelFactory}'s to
-	 * create a set of {@link Affordance}s.
+	 * Use the attributes of the current method call along with a collection of {@link AffordanceModelFactory}'s to create
+	 * a set of {@link Affordance}s.
 	 * 
 	 * @param invocation
 	 * @param discoverer
 	 * @param components
 	 * @return
 	 */
-	public List<Affordance> create(MethodInvocation invocation, MappingDiscoverer discoverer, UriComponents components) {
+	public Collection<Affordance> create(MethodInvocation invocation, MappingDiscoverer discoverer,
+			UriComponents components) {
 
 		Method method = invocation.getMethod();
-		String[] httpMethods = discoverer.getRequestType(invocation.getTargetType(), method);
-
 		List<Affordance> affordances = new ArrayList<Affordance>();
 
-		for (String requestMethod : httpMethods) {
+		for (HttpMethod requestMethod : discoverer.getRequestMethod(invocation.getTargetType(), method)) {
 
-			SpringMvcAffordance springMvcAffordance = new SpringMvcAffordance(RequestMethod.valueOf(requestMethod), invocation.getMethod());
+			SpringMvcAffordance affordance = new SpringMvcAffordance(requestMethod, invocation.getMethod());
 
 			for (AffordanceModelFactory factory : factories) {
-				springMvcAffordance.addAffordanceModel(factory.getMediaType(), factory.getAffordanceModel(springMvcAffordance, invocation, components));
+				affordance.addAffordanceModel(factory.getAffordanceModel(affordance, invocation, components));
 			}
 
-			affordances.add(springMvcAffordance);
+			affordances.add(affordance);
 		}
 
 		return affordances;

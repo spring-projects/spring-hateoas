@@ -16,10 +16,13 @@
 package org.springframework.hateoas.core;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+
+import org.springframework.http.HttpMethod;
 
 /**
- * Strategy interface to discover a URI mapping and related {@link org.springframework.hateoas.Affordance}s
- * for either a given type or method.
+ * Strategy interface to discover a URI mapping and related {@link org.springframework.hateoas.Affordance}s for either a
+ * given type or method.
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
@@ -53,12 +56,12 @@ public interface MappingDiscoverer {
 	String getMapping(Class<?> type, Method method);
 
 	/**
-	 * Returns the HTTP verbs for the given {@link Method} invoked on the given type. This can be used to build
-	 * hypermedia templates.
+	 * Returns the HTTP verbs for the given {@link Method} invoked on the given type. This can be used to build hypermedia
+	 * templates.
 	 * 
 	 * @param type
 	 * @param method
 	 * @return
 	 */
-	String[] getRequestType(Class<?> type, Method method);
+	Collection<HttpMethod> getRequestMethod(Class<?> type, Method method);
 }

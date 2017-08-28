@@ -28,7 +28,6 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -51,6 +50,7 @@ import org.springframework.hateoas.hal.SimplePojo;
 import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import org.springframework.hateoas.support.MappingUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -60,13 +60,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
-	
+
 	@Before
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2HalFormsModule());
-		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(
-			new AnnotationRelProvider(), null, null, true, new HalFormsConfiguration()));
+		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationRelProvider(), null, null, true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -77,7 +76,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resourceSupport.add(new Link("localhost"));
 
 		assertThat(write(resourceSupport),
-			is(MappingUtils.read(new ClassPathResource("single-link-reference.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("single-link-reference.json", getClass()))));
 	}
 
 	@Test
@@ -86,8 +85,9 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost"));
 
-		assertThat(read(MappingUtils.read(new ClassPathResource("single-link-reference.json", getClass())),
-			ResourceSupport.class), is(expected));
+		assertThat(
+				read(MappingUtils.read(new ClassPathResource("single-link-reference.json", getClass())), ResourceSupport.class),
+				is(expected));
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resourceSupport.add(new Link("localhost2"));
 
 		assertThat(write(resourceSupport),
-			is(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass()))));
 	}
 
 	@Test
@@ -108,8 +108,9 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		expected.add(new Link("localhost"));
 		expected.add(new Link("localhost2"));
 
-		assertThat(read(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass())),
-			ResourceSupport.class), is(expected));
+		assertThat(
+				read(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass())), ResourceSupport.class),
+				is(expected));
 	}
 
 	@Test
@@ -118,7 +119,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		Resource<SimplePojo> resource = new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"));
 
 		assertThat(write(resource),
-			is(MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass()))));
 	}
 
 	@Test
@@ -127,8 +128,8 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		Resource<SimplePojo> expected = new Resource<SimplePojo>(new SimplePojo("test1", 1), new Link("localhost"));
 
 		Resource<SimplePojo> result = mapper.readValue(
-			MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass())),
-			mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class));
+				MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass())),
+				mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class));
 
 		assertThat(result, is(expected));
 	}
@@ -144,7 +145,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources),
-			is(MappingUtils.read(new ClassPathResource("simple-embedded-resource-reference.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("simple-embedded-resource-reference.json", getClass()))));
 	}
 
 	@Test
@@ -158,8 +159,8 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		expected.add(new Link("localhost"));
 
 		Resources<String> result = mapper.readValue(
-			MappingUtils.read(new ClassPathResource("simple-embedded-resource-reference.json", getClass())),
-			mapper.getTypeFactory().constructParametricType(Resources.class, String.class));
+				MappingUtils.read(new ClassPathResource("simple-embedded-resource-reference.json", getClass())),
+				mapper.getTypeFactory().constructParametricType(Resources.class, String.class));
 
 		assertThat(result, is(expected));
 
@@ -175,7 +176,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources),
-			is(MappingUtils.read(new ClassPathResource("single-embedded-resource-reference.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("single-embedded-resource-reference.json", getClass()))));
 	}
 
 	@Test
@@ -188,9 +189,9 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		expected.add(new Link("localhost"));
 
 		Resources<Resource<SimplePojo>> result = mapper.readValue(
-			MappingUtils.read(new ClassPathResource("single-embedded-resource-reference.json", getClass())),
-			mapper.getTypeFactory().constructParametricType(Resources.class,
-				mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+				MappingUtils.read(new ClassPathResource("single-embedded-resource-reference.json", getClass())),
+				mapper.getTypeFactory().constructParametricType(Resources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
 
 		assertThat(result, is(expected));
 	}
@@ -202,7 +203,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources),
-			is(MappingUtils.read(new ClassPathResource("multiple-resource-resources.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("multiple-resource-resources.json", getClass()))));
 	}
 
 	@Test
@@ -211,10 +212,10 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		Resources<Resource<SimplePojo>> expected = setupResources();
 		expected.add(new Link("localhost"));
 
-		Resources<Resource<SimplePojo>> result =
-			mapper.readValue(MappingUtils.read(new ClassPathResource("multiple-resource-resources.json", getClass())),
+		Resources<Resource<SimplePojo>> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("multiple-resource-resources.json", getClass())),
 				mapper.getTypeFactory().constructParametricType(Resources.class,
-					mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
 
 		assertThat(result, is(expected));
 	}
@@ -229,7 +230,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources),
-			is(MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass()))));
 	}
 
 	@Test
@@ -241,10 +242,10 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		Resources<Resource<SimpleAnnotatedPojo>> expected = new Resources<Resource<SimpleAnnotatedPojo>>(content);
 		expected.add(new Link("localhost"));
 
-		Resources<Resource<SimpleAnnotatedPojo>> result =
-			mapper.readValue(MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass())),
+		Resources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass())),
 				mapper.getTypeFactory().constructParametricType(Resources.class,
-					mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(expected));
 	}
@@ -252,16 +253,16 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	public void serializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
 		assertThat(write(setupAnnotatedResources()),
-			is(MappingUtils.read(new ClassPathResource("annotated-embedded-resources-reference.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("annotated-embedded-resources-reference.json", getClass()))));
 	}
 
 	@Test
 	public void deserializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
-		Resources<Resource<SimpleAnnotatedPojo>> result =
-			mapper.readValue(MappingUtils.read(new ClassPathResource("annotated-embedded-resources-reference.json", getClass())),
+		Resources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("annotated-embedded-resources-reference.json", getClass())),
 				mapper.getTypeFactory().constructParametricType(Resources.class,
-					mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(setupAnnotatedResources()));
 	}
@@ -269,15 +270,15 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	public void serializesPagedResource() throws Exception {
 		assertThat(write(setupAnnotatedPagedResources()),
-			is(MappingUtils.read(new ClassPathResource("annotated-paged-resources.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("annotated-paged-resources.json", getClass()))));
 	}
 
 	@Test
 	public void deserializesPagedResource() throws Exception {
-		PagedResources<Resource<SimpleAnnotatedPojo>> result =
-			mapper.readValue(MappingUtils.read(new ClassPathResource("annotated-paged-resources.json", getClass())),
+		PagedResources<Resource<SimpleAnnotatedPojo>> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("annotated-paged-resources.json", getClass())),
 				mapper.getTypeFactory().constructParametricType(PagedResources.class,
-					mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
+						mapper.getTypeFactory().constructParametricType(Resource.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result, is(setupAnnotatedPagedResources()));
 	}
@@ -286,10 +287,10 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	public void rendersCuriesCorrectly() throws Exception {
 
 		Resources<Object> resources = new Resources<Object>(Collections.emptySet(), new Link("foo"),
-			new Link("bar", "myrel"));
+				new Link("bar", "myrel"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources),
-			is(MappingUtils.read(new ClassPathResource("curied-document.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("curied-document.json", getClass()))));
 	}
 
 	@Test
@@ -297,7 +298,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 		Resources<Object> resources = new Resources<Object>(Collections.emptySet());
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources),
-			is(MappingUtils.read(new ClassPathResource("empty-document.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("empty-document.json", getClass()))));
 	}
 
 	@Test
@@ -307,7 +308,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resources.add(new Link("foo"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources),
-			is(MappingUtils.read(new ClassPathResource("single-non-curie-document.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("single-non-curie-document.json", getClass()))));
 	}
 
 	@Test
@@ -316,8 +317,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		ResourceSupport support = new ResourceSupport();
 		support.add(new Link("/foo{?bar}", "search"));
 
-		assertThat(write(support),
-			is(MappingUtils.read(new ClassPathResource("link-template.json", getClass()))));
+		assertThat(write(support), is(MappingUtils.read(new ClassPathResource("link-template.json", getClass()))));
 	}
 
 	@Test
@@ -334,7 +334,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		};
 
 		assertThat(getCuriedObjectMapper(provider, null).writeValueAsString(resources),
-			is(MappingUtils.read(new ClassPathResource("multiple-curies-document.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("multiple-curies-document.json", getClass()))));
 	}
 
 	@Test
@@ -347,8 +347,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 		Resources<Object> resources = new Resources<Object>(values);
 
-		assertThat(write(resources),
-			is(MappingUtils.read(new ClassPathResource("empty-embedded-pojos.json", getClass()))));
+		assertThat(write(resources), is(MappingUtils.read(new ClassPathResource("empty-embedded-pojos.json", getClass()))));
 	}
 
 	@Test
@@ -374,7 +373,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		resource.add(new Link("target", "ns:foobar"));
 
 		assertThat(objectMapper.writeValueAsString(resource),
-			is(MappingUtils.read(new ClassPathResource("link-with-title.json", getClass()))));
+				is(MappingUtils.read(new ClassPathResource("link-with-title.json", getClass()))));
 	}
 
 	private static Resources<Resource<SimplePojo>> setupResources() {
@@ -401,13 +400,14 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
 		content.add(new Resource<SimpleAnnotatedPojo>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
 
-		return new PagedResources<Resource<SimpleAnnotatedPojo>>(content, new PagedResources.PageMetadata(2, 0, 4), PAGINATION_LINKS);
+		return new PagedResources<Resource<SimpleAnnotatedPojo>>(content, new PagedResources.PageMetadata(2, 0, 4),
+				PAGINATION_LINKS);
 	}
 
 	private static ObjectMapper getCuriedObjectMapper() {
 
 		return getCuriedObjectMapper(new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}")),
-			null);
+				null);
 	}
 
 	private static ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
@@ -415,11 +415,10 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationRelProvider(), provider,
-			messageSource == null ? null : new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
+				messageSource == null ? null : new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		mapper.setSerializationInclusion(Include.NON_NULL);
 
 		return mapper;
 	}
-
-
 }

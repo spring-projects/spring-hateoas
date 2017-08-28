@@ -19,17 +19,14 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.*;
-import static org.springframework.hateoas.hal.forms.HalFormsDocument.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -44,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * @author Greg Turnquist
  */
-public class HalFormsMessageConverterTest {
+public class HalFormsMessageConverterUnitTest {
 
 	ObjectMapper mapper;
 	HttpMessageConverter<Object> messageConverter;
@@ -92,28 +89,30 @@ public class HalFormsMessageConverterTest {
 		assertThat(halFormsDocument.getTemplates().size(), is(1));
 		assertThat(halFormsDocument.getTemplates().keySet(), hasItems("default"));
 		assertThat(halFormsDocument.getTemplates().get("default").getContentType(), is("application/hal+json"));
-		assertThat(halFormsDocument.getTemplates().get("default").getKey(), is(HalFormsTemplate.DEFAULT_KEY));
 		assertThat(halFormsDocument.getTemplates().get("default").getHttpMethod(), is(HttpMethod.GET));
 		assertThat(halFormsDocument.getTemplates().get("default").getMethod(), is(HttpMethod.GET.toString().toLowerCase()));
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void canWriteAHalFormsDocumentMessage() throws IOException {
 
-		HalFormsProperty property = new HalFormsProperty("my-name", true, "my-value", "my-prompt",
-			"my-regex", false, true, false);
-		HalFormsTemplate template = new HalFormsTemplate();
-		template.setHttpMethod(HttpMethod.GET);
-		template.setContentType(Collections.singletonList(MediaTypes.HAL_JSON));
-		template.setTitle("HAL-FORMS unit test");
-		template.getProperties().add(property);
+		HalFormsProperty property = HalFormsProperty.named("my-name")//
+				.withReadOnly(true) //
+				.withValue("my-value") //
+				.withPrompt("my-prompt") //
+				.withRegex("my-regex") //
+				.withRequired(true);
 
-		HalFormsDocument expected = halFormsDocument()
-			.link(new Link("/employees").withRel("collection"))
-			.link(new Link("/employees/1").withSelfRel())
-			.template("foo", template)
-			.build();
+		HalFormsTemplate template = HalFormsTemplate.forMethod(HttpMethod.GET) //
+				.withTitle("HAL-FORMS unit test") //
+				.andContentType(MediaTypes.HAL_JSON) //
+				.andProperty(property); //
 
+		HalFormsDocument expected = HalFormsDocument.empty() //
+				.andLink(new Link("/employees").withRel("collection")) //
+				.andLink(new Link("/employees/1").withSelfRel())//
+				.andTemplate("foo", template);
 
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -131,13 +130,6 @@ public class HalFormsMessageConverterTest {
 
 		this.messageConverter.write(expected, MediaTypes.HAL_FORMS_JSON, convertedMessage);
 
-		String json = stream.toString();
-
-		System.out.println(json);
-		
-		HalFormsDocument actual = this.mapper.readValue(json, HalFormsDocument.class);
-
-		assertThat(actual, is(expected));
+		assertThat(this.mapper.readValue(stream.toString(), HalFormsDocument.class), is(expected));
 	}
-
 }

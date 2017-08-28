@@ -15,16 +15,19 @@
  */
 package org.springframework.hateoas.mvc;
 
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -32,50 +35,58 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 
  * @author Greg Turnquist
  */
-@Data
-public class SpringMvcAffordance implements Affordance {
-
-	private static final Logger log = LoggerFactory.getLogger(SpringMvcAffordance.class);
-
-	private final HashMap<MediaType, AffordanceModel> affordanceModels;
+@Value
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+class SpringMvcAffordance implements Affordance {
 
 	/**
 	 * Request method verb associated with the Spring MVC controller method.
 	 */
-	private final RequestMethod requestMethod;
+	private final HttpMethod httpMethod;
 
 	/**
 	 * Handle on the Spring MVC controller {@link Method}.
 	 */
 	private final Method method;
+	private final Map<MediaType, AffordanceModel> affordanceModels;
 
 	/**
 	 * Construct a Spring MVC-based {@link Affordance} based on Spring MVC controller method and {@link RequestMethod}.
 	 */
-	public SpringMvcAffordance(RequestMethod requestMethod, Method method) {
-
-		this.requestMethod = requestMethod;
-		this.method = method;
-		this.affordanceModels = new HashMap<MediaType, AffordanceModel>();
+	public SpringMvcAffordance(HttpMethod httpMethod, Method method) {
+		this(httpMethod, method, new HashMap<MediaType, AffordanceModel>());
 	}
 
-	@Override
-	public String getHttpMethod() {
-		return this.requestMethod.toString();
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Affordance#getName()
+	 */
 	@Override
 	public String getName() {
 		return this.method.getName();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Affordance#getAffordanceModel(org.springframework.http.MediaType)
+	 */
 	@Override
-	public AffordanceModel getAffordanceModel(MediaType mediaType) {
-		return this.affordanceModels.get(mediaType);
+	@SuppressWarnings("unchecked")
+	public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
+		return (T) this.affordanceModels.get(mediaType);
 	}
 
-	@Override
-	public void addAffordanceModel(MediaType mediaType, AffordanceModel affordanceModel) {
-		this.affordanceModels.put(mediaType, affordanceModel);
+	/**
+	 * Adds the given {@link AffordanceModel} to the {@link Affordance}.
+	 * 
+	 * @param affordanceModel must not be {@literal null}.
+	 */
+	public void addAffordanceModel(AffordanceModel affordanceModel) {
+
+		Assert.notNull(affordanceModel, "Affordance model must not be null!");
+
+		for (MediaType mediaType : affordanceModel.getMediaTypes()) {
+			this.affordanceModels.put(mediaType, affordanceModel);
+		}
 	}
 }

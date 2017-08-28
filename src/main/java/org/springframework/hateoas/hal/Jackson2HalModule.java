@@ -207,9 +207,8 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
-			MapSerializer serializer = MapSerializer.construct(Collections.emptySet(), mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration),
-					null);
+			MapSerializer serializer = MapSerializer.construct(Collections.<String> emptySet(), mapType, true, null,
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration), null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -402,14 +401,6 @@ public class Jackson2HalModule extends SimpleModule {
 		private final Map<Class<?>, JsonSerializer<Object>> serializers;
 		private final HalConfiguration halConfiguration;
 
-		public OptionalListJackson2Serializer() {
-			this(null, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_SINGLE));
-		}
-
-		public OptionalListJackson2Serializer(BeanProperty property) {
-			this(property, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_SINGLE));
-		}
-
 		/**
 		 * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty}.
 		 * 
@@ -527,7 +518,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new OptionalListJackson2Serializer(property);
+			return new OptionalListJackson2Serializer(property, halConfiguration);
 		}
 	}
 
@@ -573,7 +564,7 @@ public class Jackson2HalModule extends SimpleModule {
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
 
 				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-					throw new JsonParseException(jp, "Expected relation name", jp.getCurrentLocation());
+					throw new JsonParseException(jp, "Expected relation name");
 				}
 
 				// save the relation in case the link does not contain it
@@ -649,7 +640,7 @@ public class Jackson2HalModule extends SimpleModule {
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
 
 				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-					throw new JsonParseException(jp, "Expected relation name", jp.getCurrentLocation());
+					throw new JsonParseException(jp, "Expected relation name");
 				}
 
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
