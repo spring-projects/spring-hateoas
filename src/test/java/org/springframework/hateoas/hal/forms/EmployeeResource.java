@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal.forms;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import org.springframework.hateoas.ResourceSupport;
 
@@ -24,6 +25,7 @@ import org.springframework.hateoas.ResourceSupport;
  * @author Greg Turnquist
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 class EmployeeResource extends ResourceSupport {
 

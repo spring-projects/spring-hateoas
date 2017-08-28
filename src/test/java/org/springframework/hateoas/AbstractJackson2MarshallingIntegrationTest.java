@@ -20,7 +20,6 @@ import java.io.Writer;
 
 import org.junit.Before;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -37,7 +36,6 @@ public abstract class AbstractJackson2MarshallingIntegrationTest {
 	@Before
 	public void setUp() {
 		mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
 	protected String write(Object object) throws Exception {

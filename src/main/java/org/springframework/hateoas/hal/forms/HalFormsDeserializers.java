@@ -38,9 +38,12 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * 
  * @author Greg Turnquist
  */
-public class HalFormsDeserializers {
+class HalFormsDeserializers {
 
-	static class HalFormsResourcesDeserializer extends ContainerDeserializerBase<List<Object>> implements ContextualDeserializer {
+	static class HalFormsResourcesDeserializer extends ContainerDeserializerBase<List<Object>>
+			implements ContextualDeserializer {
+
+		private static final long serialVersionUID = -7325599536381465624L;
 
 		private JavaType contentType;
 
@@ -65,7 +68,7 @@ public class HalFormsDeserializers {
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
 
 				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-					throw new JsonParseException("Expected relation name", jp.getCurrentLocation());
+					throw new JsonParseException(jp, "Expected relation name");
 				}
 
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
@@ -93,7 +96,8 @@ public class HalFormsDeserializers {
 		}
 
 		@Override
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
+		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
+				throws JsonMappingException {
 
 			if (property != null) {
 				JavaType vc = property.getType().getContentType();

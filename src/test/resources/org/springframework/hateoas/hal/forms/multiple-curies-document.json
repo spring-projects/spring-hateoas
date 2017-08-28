@@ -1,5 +1,4 @@
 {
-  "_embedded" : { },
   "_links" : {
     "default:myrel" : {
       "href" : "foo"

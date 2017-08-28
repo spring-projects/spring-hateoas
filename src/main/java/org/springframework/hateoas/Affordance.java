@@ -15,12 +15,14 @@
  */
 package org.springframework.hateoas;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
 /**
  * Abstract representation of an action a link is able to take. Web frameworks must provide concrete implementation.
  *
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
 public interface Affordance {
 
@@ -29,7 +31,7 @@ public interface Affordance {
 	 *
 	 * @return
 	 */
-	String getHttpMethod();
+	HttpMethod getHttpMethod();
 
 	/**
 	 * Name for the REST action this {@link Affordance} can take.
@@ -44,14 +46,5 @@ public interface Affordance {
 	 * @param mediaType
 	 * @return
 	 */
-	AffordanceModel getAffordanceModel(MediaType mediaType);
-
-	/**
-	 * Add a new {@link AffordanceModel} for a given {@link MediaType}.
-	 *
-	 * @param mediaType
-	 * @param affordanceModel
-	 */
-	void addAffordanceModel(MediaType mediaType, AffordanceModel affordanceModel);
-
+	<T extends AffordanceModel> T getAffordanceModel(MediaType mediaType);
 }

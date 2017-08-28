@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
@@ -54,7 +54,7 @@ import org.springframework.hateoas.hal.forms.HalFormsWebMvcConfigurer;
 @Target(ElementType.TYPE)
 @Documented
 @Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class,
-	EnableHypermediaSupport.HypermediaConfigurationImportSelector.class})
+		EnableHypermediaSupport.HypermediaConfigurationImportSelector.class })
 public @interface EnableHypermediaSupport {
 
 	/**
@@ -68,6 +68,7 @@ public @interface EnableHypermediaSupport {
 	 * Hypermedia representation types supported.
 	 * 
 	 * @author Oliver Gierke
+	 * @author Greg Turnquist
 	 */
 	enum HypermediaType {
 
@@ -81,6 +82,7 @@ public @interface EnableHypermediaSupport {
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
+		 * 
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
 		HAL_FORMS(HalFormsWebMvcConfigurer.class);
@@ -109,8 +111,8 @@ public @interface EnableHypermediaSupport {
 				types = HypermediaType.values();
 			}
 
-			log.debug("Registering support for hypermedia types {} according to configuration on {}",
-				types, metadata.getClassName());
+			LOG.debug("Registering support for hypermedia types {} according to configuration on {}", types,
+					metadata.getClassName());
 
 			List<String> configurationNames = new ArrayList<String>();
 

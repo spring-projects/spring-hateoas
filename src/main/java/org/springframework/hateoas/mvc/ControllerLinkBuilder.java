@@ -22,24 +22,25 @@ import lombok.experimental.Delegate;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
+import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.hateoas.hal.forms.HalFormsAffordanceModelFactory;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
+import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,6 +71,17 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
+	private static final SpringMvcAffordanceBuilder AFFORDANCE_BUILDER;
+
+	static {
+
+		List<AffordanceModelFactory> factories = SpringFactoriesLoader.loadFactories(AffordanceModelFactory.class,
+				ControllerLinkBuilder.class.getClassLoader());
+
+		PluginRegistry<? extends AffordanceModelFactory, MediaType> MODEL_FACTORIES = OrderAwarePluginRegistry
+				.create(factories);
+		AFFORDANCE_BUILDER = new SpringMvcAffordanceBuilder(MODEL_FACTORIES);
+	}
 
 	private final TemplateVariables variables;
 
@@ -100,24 +112,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		this.variables = variables;
 		this.addAffordances(findAffordances(invocation, uriComponents));
-	}
-
-	/**
-	 * Look up {@link Affordance}s and {@link org.springframework.hateoas.AffordanceModel}s based on the
-	 * {@link MethodInvocation} and {@link UriComponents}.
-	 *
-	 * @param invocation
-	 * @param components
-	 * @return
-	 */
-	private List<Affordance> findAffordances(MethodInvocation invocation, UriComponents components) {
-
-		OrderAwarePluginRegistry<? extends AffordanceModelFactory, MediaType> modelFactories =
-			OrderAwarePluginRegistry.create(Arrays.asList(new HalFormsAffordanceModelFactory()));
-
-		SpringMvcAffordanceBuilder springMvcAffordanceBuilder = new SpringMvcAffordanceBuilder(modelFactories);
-
-		return springMvcAffordanceBuilder.create(invocation, DISCOVERER, components);
 	}
 
 	/**
@@ -222,12 +216,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Extract a {@link Link} from the {@link ControllerLinkBuilder} and look up the related {@link Affordance}.
-	 * Should only be one.
+	 * Extract a {@link Link} from the {@link ControllerLinkBuilder} and look up the related {@link Affordance}. Should
+	 * only be one.
 	 *
 	 * <pre>
-	 * Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
-	 * findOneLink.withAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id)))
+	 * Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel()
+	 * 		.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id)));
 	 * </pre>
 	 *
 	 * This takes a link and adds an {@link Affordance} based on another Spring MVC handler method.
@@ -349,6 +343,18 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
 		return servletRequest;
+	}
+
+	/**
+	 * Look up {@link Affordance}s and {@link org.springframework.hateoas.AffordanceModel}s based on the
+	 * {@link MethodInvocation} and {@link UriComponents}.
+	 *
+	 * @param invocation
+	 * @param components
+	 * @return
+	 */
+	private static Collection<Affordance> findAffordances(MethodInvocation invocation, UriComponents components) {
+		return AFFORDANCE_BUILDER.create(invocation, DISCOVERER, components);
 	}
 
 	@RequiredArgsConstructor

@@ -18,19 +18,25 @@ package org.springframework.hateoas.hal.forms;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.Wither;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.hal.forms.HalFormsDeserializers.MediaTypesDeserializer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -43,50 +49,79 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @see https://rwcbook.github.io/hal-forms/#_the_code__templates_code_element
  */
 @Data
+@Setter(AccessLevel.NONE)
+@Wither
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@EqualsAndHashCode
+@ToString
+@JsonAutoDetect(getterVisibility = Visibility.NON_PRIVATE)
+@JsonIgnoreProperties({ "httpMethod", "contentTypes" })
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
-@JsonIgnoreProperties({ "key" })
 public class HalFormsTemplate {
 
 	public static final String DEFAULT_KEY = "default";
 
-	private @JsonIgnore String key;
-	private List<HalFormsProperty> properties = new ArrayList<HalFormsProperty>();
-
 	private String title;
-	private @JsonIgnore HttpMethod httpMethod;
-	private List<MediaType> contentType;
+	private @Wither(AccessLevel.PRIVATE) HttpMethod httpMethod;
+	private List<HalFormsProperty> properties;
+	private List<MediaType> contentTypes;
 
-	/**
-	 * Configure a HAL-FORMS template with a key value.
-	 * @param key
-	 */
-	public HalFormsTemplate(String key) {
-		this.key = key;
+	private HalFormsTemplate() {
+		this(null, null, Collections.<HalFormsProperty> emptyList(), Collections.<MediaType> emptyList());
+	}
+
+	public static HalFormsTemplate forMethod(HttpMethod httpMethod) {
+		return new HalFormsTemplate().withHttpMethod(httpMethod);
 	}
 
 	/**
-	 * A HAL-FORMS template with no name is dubbed the <a href="https://rwcbook.github.io/hal-forms/#_the_code__templates_code_element">"default" template</a>.
+	 * Returns a new {@link HalFormsTemplate} with the given {@link HalFormsProperty} added.
+	 * 
+	 * @param property must not be {@literal null}.
+	 * @return
 	 */
-	public HalFormsTemplate() {
-		this(HalFormsTemplate.DEFAULT_KEY);
+	public HalFormsTemplate andProperty(HalFormsProperty property) {
+
+		Assert.notNull(property, "Property must not be null!");
+
+		ArrayList<HalFormsProperty> properties = new ArrayList<HalFormsProperty>(this.properties);
+		properties.add(property);
+
+		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
 	}
 
-	public String getContentType() {
-		return StringUtils.collectionToCommaDelimitedString(contentType);
+	/**
+	 * Returns a new {@link HalFormsTemplate} with the given {@link MediaType} added as content type.
+	 * 
+	 * @param mediaType must not be {@literal null}.
+	 * @return
+	 */
+	public HalFormsTemplate andContentType(MediaType mediaType) {
+
+		Assert.notNull(mediaType, "Media type must not be null!");
+
+		ArrayList<MediaType> contentTypes = new ArrayList<MediaType>(this.contentTypes);
+		contentTypes.add(mediaType);
+
+		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
+	}
+
+	// Jackson helper methods to create the right representation format
+
+	String getContentType() {
+		return StringUtils.collectionToDelimitedString(contentTypes, ", ");
 	}
 
 	@JsonDeserialize(using = MediaTypesDeserializer.class)
-	public void setContentType(List<MediaType> contentType) {
-		this.contentType = contentType;
+	void setContentType(List<MediaType> mediaTypes) {
+		this.contentTypes = mediaTypes;
 	}
 
-	public String getMethod() {
+	String getMethod() {
 		return this.httpMethod == null ? null : this.httpMethod.toString().toLowerCase();
 	}
 
-	public void setMethod(String method) {
+	void setMethod(String method) {
 		this.httpMethod = HttpMethod.valueOf(method.toUpperCase());
 	}
 }

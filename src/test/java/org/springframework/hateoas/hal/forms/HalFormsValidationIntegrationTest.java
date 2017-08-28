@@ -16,10 +16,9 @@
 package org.springframework.hateoas.hal.forms;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -60,80 +59,55 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
+ * Test that when an {@link org.springframework.hateoas.Affordance} is included that does NOT match the self link, an
+ * exception is thrown.
+ * 
  * @author Greg Turnquist
  */
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HalFormsWebMvcTest {
+public class HalFormsValidationIntegrationTest {
 
-	@Autowired
-	WebApplicationContext context;
+	@Autowired WebApplicationContext context;
 
-	@Autowired
-	ObjectMapper mapper;
+	@Autowired ObjectMapper mapper;
 
 	MockMvc mockMvc;
 
 	@Before
 	public void setUp() {
-		this.mockMvc = webAppContextSetup(this.context)
-			.build();
+		this.mockMvc = webAppContextSetup(this.context).build();
 	}
 
 	@Test
 	public void singleEmployee() throws Exception {
 
-		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name", is("Frodo Baggins")))
-			.andExpect(jsonPath("$.role", is("ring bearer")))
+		Exception exception = this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON))
+				.andExpect(status().is5xxServerError()) //
+				.andReturn() //
+				.getResolvedException();
 
-			.andExpect(jsonPath("$._links.*", hasSize(2)))
-			.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
-			.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
-
-			.andExpect(jsonPath("$._templates.*", hasSize(2)))
-			.andExpect(jsonPath("$._templates['default'].method", is("put")))
-			.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-			.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-			.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-			.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
-
-			.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
-			.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-			.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-			.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-			.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
+		assertThat(exception.getMessage(), containsString("Affordance's URI /employees"));
+		assertThat(exception.getMessage(), containsString("doesn't match self link /employees/0"));
 	}
 
 	@Test
 	public void collectionOfEmployees() throws Exception {
 
-		this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$._embedded.employees[0].name", is("Frodo Baggins")))
-			.andExpect(jsonPath("$._embedded.employees[0].role", is("ring bearer")))
-			.andExpect(jsonPath("$._embedded.employees[0]._links['self'].href", is("http://localhost/employees/0")))
-			.andExpect(jsonPath("$._embedded.employees[1].name", is("Bilbo Baggins")))
-			.andExpect(jsonPath("$._embedded.employees[1].role", is("burglar")))
-			.andExpect(jsonPath("$._embedded.employees[1]._links['self'].href", is("http://localhost/employees/1")))
+		Exception exception = this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
+				.andExpect(status().is5xxServerError()) //
+				.andReturn().getResolvedException();
 
-			.andExpect(jsonPath("$._links.*", hasSize(1)))
-			.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
-
-			.andExpect(jsonPath("$._templates.*", hasSize(1)))
-			.andExpect(jsonPath("$._templates['default'].method", is("post")))
-			.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-			.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-			.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-			.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)));
+		assertThat(exception.getMessage(), containsString("Affordance's URI /employees/0"));
+		assertThat(exception.getMessage(), containsString("doesn't match self link /employees"));
 	}
 
+	/**
+	 * This controller violates HAL-FORMS spec requirements. We use it to verify the serializers can catch it.
+	 */
 	@RestController
-	static class EmployeeController {
+	static class BadController {
 
 		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<Integer, Employee>();
 
@@ -149,35 +123,31 @@ public class HalFormsWebMvcTest {
 			List<Resource<Employee>> employees = new ArrayList<Resource<Employee>>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
-			for (int i=0; i < EMPLOYEES.size(); i++) {
-				employees.add(findOne(String.valueOf(i)));
+			for (int i = 0; i < EMPLOYEES.size(); i++) {
+				employees.add(findOne(i));
 			}
 
 			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
-				.withAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)));
+			Link selfLink = linkTo(methodOn(BadController.class).all()).withSelfRel()
+					.andAffordance(afford(methodOn(BadController.class).updateEmployee(null, 0)));
 
 			// Return the collection of employee resources along with the composite affordance
 			return new Resources<Resource<Employee>>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
-		public Resource<Employee> findOne(@PathVariable String id) {
+		public Resource<Employee> findOne(@PathVariable Integer id) {
 
 			// Start the affordance with the "self" link, i.e. this method.
-			Link findOneLink =
-				linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
+			Link findOneLink = linkTo(methodOn(BadController.class).findOne(id)).withSelfRel();
 
 			// Define final link as means to find entire collection.
-			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
+			Link employeesLink = linkTo(methodOn(BadController.class).all()).withRel("employees")
+					.andAffordance(afford(methodOn(BadController.class).newEmployee(null)));
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<Employee>(
-				EMPLOYEES.get(Integer.parseInt(id)),
-				findOneLink
-					.withAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id)))
-					.withAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
-				employeesLink);
+			return new Resource<Employee>(EMPLOYEES.get(id), findOneLink.andAffordances(employeesLink.getAffordances()),
+					employeesLink);
 		}
 
 		@PostMapping("/employees")
@@ -188,9 +158,7 @@ public class HalFormsWebMvcTest {
 			EMPLOYEES.put(newEmployeeId, employee);
 
 			try {
-				return ResponseEntity
-					.noContent()
-					.location(new URI(findOne(String.valueOf(newEmployeeId)).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.noContent().location(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
@@ -198,13 +166,12 @@ public class HalFormsWebMvcTest {
 		}
 
 		@PutMapping("/employees/{id}")
-		public ResponseEntity<?> updateEmployee(@RequestBody Employee employee, @PathVariable String id) {
+		public ResponseEntity<?> updateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
 
-			EMPLOYEES.put(Integer.parseInt(id), employee);
+			EMPLOYEES.put(id, employee);
+
 			try {
-				return ResponseEntity
-					.noContent()
-					.location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
@@ -212,7 +179,7 @@ public class HalFormsWebMvcTest {
 		}
 
 		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Employee employee, @PathVariable String id) {
+		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
 
 			Employee oldEmployee = EMPLOYEES.get(id);
 
@@ -226,11 +193,10 @@ public class HalFormsWebMvcTest {
 				newEmployee = newEmployee.withRole(employee.getRole());
 			}
 
-			EMPLOYEES.put(Integer.parseInt(id), newEmployee);
+			EMPLOYEES.put(id, newEmployee);
+
 			try {
-				return ResponseEntity
-					.noContent()
-					.location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
@@ -240,14 +206,12 @@ public class HalFormsWebMvcTest {
 
 	@Configuration
 	@EnableWebMvc
-	@EnableHypermediaSupport(type = {HypermediaType.HAL_FORMS})
+	@EnableHypermediaSupport(type = { HypermediaType.HAL_FORMS })
 	static class TestConfig {
 
 		@Bean
-		EmployeeController employeeController() {
-			return new EmployeeController();
+		BadController employeeController() {
+			return new BadController();
 		}
 	}
-
-
 }

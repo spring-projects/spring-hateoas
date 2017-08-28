@@ -23,16 +23,18 @@ import org.junit.Test;
 import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModelFactory;
+import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
+import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.web.util.UriComponents;
 
 /**
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
-public class SpringMvcAffordanceBuilderUnitTests {
+public class SpringMvcAffordanceBuilderUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullPluginRegistry() {
@@ -45,22 +47,18 @@ public class SpringMvcAffordanceBuilderUnitTests {
 		AffordanceModelFactory low = new LowPriorityModelFactory();
 		AffordanceModelFactory high = new HighPriorityModelFactory();
 
-		OrderAwarePluginRegistry<AffordanceModelFactory, MediaType> registry =
-			OrderAwarePluginRegistry.create(Arrays.asList(low, high));
-		
+		PluginRegistry<AffordanceModelFactory, MediaType> registry = OrderAwarePluginRegistry
+				.create(Arrays.asList(low, high));
+
 		assertThat(registry.getPluginFor(MediaType.APPLICATION_JSON).get()).isEqualTo(high);
 	}
 
 	@Order(20)
-	static class LowPriorityModelFactory extends AffordanceModelFactory {
+	static class LowPriorityModelFactory implements AffordanceModelFactory {
 
 		@Override
-		public MediaType getMediaType() {
-			return MediaType.APPLICATION_JSON;
-		}
-
-		@Override
-		public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components) {
+		public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue,
+				UriComponents components) {
 			return null;
 		}
 
@@ -71,15 +69,11 @@ public class SpringMvcAffordanceBuilderUnitTests {
 	}
 
 	@Order(10)
-	static class HighPriorityModelFactory extends AffordanceModelFactory {
+	static class HighPriorityModelFactory implements AffordanceModelFactory {
 
 		@Override
-		public MediaType getMediaType() {
-			return MediaType.APPLICATION_JSON;
-		}
-
-		@Override
-		public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components) {
+		public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue,
+				UriComponents components) {
 			return null;
 		}
 

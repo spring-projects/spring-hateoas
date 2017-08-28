@@ -15,24 +15,28 @@
  */
 package org.springframework.hateoas.hal.forms;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.*;
-import static org.springframework.hateoas.hal.Jackson2HalModule.*;
-
-import lombok.Builder;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.Singular;
+import lombok.Value;
+import lombok.experimental.Wither;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListDeserializer;
+import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListSerializer;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -44,69 +48,154 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * 
  * @author Dietrich Schulten
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
-@Data
-@Builder(builderMethodName = "halFormsDocument")
+@Value
+@Wither
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @JsonPropertyOrder({ "resource", "resources", "embedded", "links", "templates", "metadata" })
 public class HalFormsDocument<T> {
 
-	@JsonUnwrapped
-	@JsonInclude(Include.NON_NULL)
+	@JsonUnwrapped //
+	@JsonInclude(Include.NON_NULL) //
+	@Wither(AccessLevel.PRIVATE) //
 	private T resource;
 
-	@JsonIgnore
 	@JsonInclude(Include.NON_EMPTY)
+	@JsonIgnore //
+	@Wither(AccessLevel.PRIVATE) //
 	private Collection<T> resources;
 
-	@JsonProperty("_embedded")
-	@JsonInclude(Include.NON_NULL)
+	@JsonProperty("_embedded") //
+	@JsonInclude(Include.NON_EMPTY) //
 	private Map<String, Object> embedded;
 
-	@JsonProperty("page")
-	@JsonInclude(Include.NON_NULL)
+	@JsonProperty("page") //
+	@JsonInclude(Include.NON_NULL) //
 	private PagedResources.PageMetadata pageMetadata;
 
-	@Singular private List<Link> links;
+	@Singular //
+	@JsonProperty("_links") //
+	@JsonInclude(Include.NON_EMPTY) //
+	@JsonSerialize(using = HalLinkListSerializer.class) //
+	@JsonDeserialize(using = HalLinkListDeserializer.class) //
+	private List<Link> links;
 
-	@Singular private Map<String, HalFormsTemplate> templates;
+	@Singular //
+	@JsonProperty("_templates") //
+	@JsonInclude(Include.NON_EMPTY) //
+	private Map<String, HalFormsTemplate> templates;
 
-	HalFormsDocument(T resource, Collection<T> resources, Map<String, Object> embedded,
-					 PagedResources.PageMetadata pageMetadata, List<Link> links, Map<String, HalFormsTemplate> templates) {
-
-		this.resource = resource;
-		this.resources = resources;
-		this.embedded = embedded;
-		this.pageMetadata = pageMetadata;
-		this.links = links;
-		this.templates = templates;
+	private HalFormsDocument() {
+		this(null, null, Collections.<String, Object> emptyMap(), null, Collections.<Link> emptyList(),
+				Collections.<String, HalFormsTemplate> emptyMap());
 	}
 
-	HalFormsDocument() {
-		this(null, null, null, null, new ArrayList<Link>(), new HashMap<String, HalFormsTemplate>());
+	/**
+	 * Creates a new {@link HalFormsDocument} for the given resource.
+	 * 
+	 * @param resource can be {@literal null}.
+	 * @return
+	 */
+	public static <T> HalFormsDocument<T> forResource(T resource) {
+		return new HalFormsDocument<T>().withResource(resource);
 	}
 
-	@JsonProperty("_links")
-	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = HalLinkListSerializer.class)
-	@JsonDeserialize(using = HalLinkListDeserializer.class)
-	public List<Link> getLinks() {
-		return this.links;
+	/**
+	 * returns a new {@link HalFormsDocument} for the given resources.
+	 * 
+	 * @param resources must not be {@literal null}.
+	 * @return
+	 */
+	public static <T> HalFormsDocument<T> forResources(Collection<T> resources) {
+
+		Assert.notNull(resources, "Resources must not be null!");
+
+		return new HalFormsDocument<T>().withResources(resources);
 	}
 
-	@JsonProperty("_templates")
-	@JsonInclude(Include.NON_EMPTY)
-	public Map<String, HalFormsTemplate> getTemplates() {
-		return this.templates;
+	/**
+	 * Creates a new empty {@link HalFormsDocument}.
+	 * 
+	 * @return
+	 */
+	public static HalFormsDocument<?> empty() {
+		return new HalFormsDocument<Object>();
 	}
 
+	/**
+	 * Returns the default template of the document.
+	 * 
+	 * @return
+	 */
 	@JsonIgnore
-	public HalFormsTemplate getTemplate() {
+	public HalFormsTemplate getDefaultTemplate() {
 		return getTemplate(HalFormsTemplate.DEFAULT_KEY);
 	}
 
+	/**
+	 * Returns the template with the given name.
+	 * 
+	 * @param key must not be {@literal null}.
+	 * @return
+	 */
 	@JsonIgnore
 	public HalFormsTemplate getTemplate(String key) {
+
+		Assert.notNull(key, "Template key must not be null!");
+
 		return this.templates.get(key);
 	}
 
+	/**
+	 * Adds the given {@link Link} to the current document.
+	 * 
+	 * @param link must not be {@literal null}.
+	 * @return
+	 */
+	public HalFormsDocument<T> andLink(Link link) {
+
+		Assert.notNull(link, "Link must not be null!");
+
+		List<Link> links = new ArrayList<Link>(this.links);
+		links.add(link);
+
+		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
+	}
+
+	/**
+	 * Adds the given {@link HalFormsTemplate} to the current document.
+	 * 
+	 * @param name must not be {@literal null} or empty.
+	 * @param template must not be {@literal null}.
+	 * @return
+	 */
+	public HalFormsDocument<T> andTemplate(String name, HalFormsTemplate template) {
+
+		Assert.hasText(name, "Template name must not be null or empty!");
+		Assert.notNull(template, "Template must not be null!");
+
+		Map<String, HalFormsTemplate> templates = new HashMap<String, HalFormsTemplate>(this.templates);
+		templates.put(name, template);
+
+		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
+	}
+
+	/**
+	 * Adds the given value as embedded one.
+	 * 
+	 * @param key must not be {@literal null} or empty.
+	 * @param value must not be {@literal null}.
+	 * @return
+	 */
+	public HalFormsDocument<T> andEmbedded(String key, Object value) {
+
+		Assert.notNull(key, "Embedded key must not be null!");
+		Assert.notNull(value, "Embedded value must not be null!");
+
+		Map<String, Object> embedded = new HashMap<String, Object>(this.embedded);
+		embedded.put(key, value);
+
+		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
+	}
 }

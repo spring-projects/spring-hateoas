@@ -15,11 +15,23 @@
  */
 package org.springframework.hateoas;
 
+import java.util.Collection;
+
+import org.springframework.http.MediaType;
+
 /**
- * Marker interface for mediatypes to build up type-specific details for an {@link Affordance}
+ * An affordance model is a media type specific description of an affordance.
  * 
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
 public interface AffordanceModel {
 
+	/**
+	 * The media types this is a model for. Can be multiple ones as often media types come in different flavors like an
+	 * XML and JSON one and in simple cases a single model might serve them all.
+	 * 
+	 * @return will never be {@literal null}.
+	 */
+	Collection<MediaType> getMediaTypes();
 }

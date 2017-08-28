@@ -22,9 +22,8 @@ import java.io.ObjectOutputStream;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
-
-import org.springframework.hateoas.mvc.SpringMvcAffordance;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 
 /**
  * Unit tests for {@link Link}.
@@ -148,10 +147,7 @@ public class LinkUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsLinkWithoutAttributesAtAll() {
-
-		Link link = Link.valueOf("</something>");
-
-		System.out.println(link);
+		Link.valueOf("</something>");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -231,8 +227,8 @@ public class LinkUnitTest {
 	public void linkWithAffordancesShouldWorkProperly() {
 
 		Link originalLink = new Link("/foo");
-		Link linkWithAffordance = originalLink.withAffordance(new TestSpringMvcAffordance());
-		Link linkWithTwoAffordances = linkWithAffordance.withAffordance(new TestSpringMvcAffordance());
+		Link linkWithAffordance = originalLink.andAffordance(new TestAffordance());
+		Link linkWithTwoAffordances = linkWithAffordance.andAffordance(new TestAffordance());
 
 		assertThat(originalLink.getAffordances()).hasSize(0);
 		assertThat(linkWithAffordance.getAffordances()).hasSize(1);
@@ -245,10 +241,33 @@ public class LinkUnitTest {
 		assertThat(linkWithAffordance).isNotEqualTo(linkWithTwoAffordances);
 	}
 
-	static class TestSpringMvcAffordance extends SpringMvcAffordance {
+	static class TestAffordance implements Affordance {
 
-		TestSpringMvcAffordance() {
-			super(RequestMethod.PATCH, null);
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.Affordance#getAffordanceModel(org.springframework.http.MediaType)
+		 */
+		@Override
+		public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
+			return null;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.Affordance#getHttpMethod()
+		 */
+		@Override
+		public HttpMethod getHttpMethod() {
+			return HttpMethod.PATCH;
+		}
+
+		/* 
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.Affordance#getName()
+		 */
+		@Override
+		public String getName() {
+			return null;
 		}
 	}
 }

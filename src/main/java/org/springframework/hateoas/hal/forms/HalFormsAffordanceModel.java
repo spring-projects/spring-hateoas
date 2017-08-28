@@ -15,20 +15,29 @@
  */
 package org.springframework.hateoas.hal.forms;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.beans.PropertyDescriptor;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.hateoas.core.MethodParameters;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriComponents;
 
@@ -37,42 +46,28 @@ import org.springframework.web.util.UriComponents;
  * 
  * @author Greg Turnquist
  */
-public class HalFormsAffordanceModel implements AffordanceModel {
+@Slf4j
+class HalFormsAffordanceModel implements AffordanceModel {
 
-	private static final Logger log = LoggerFactory.getLogger(HalFormsAffordanceModel.class);
+	private static final List<HttpMethod> METHODS_FOR_INPUT_DETECTTION = Arrays.asList(HttpMethod.POST, HttpMethod.PUT,
+			HttpMethod.PATCH);
 
-	/**
-	 * Details about the affordance's 
-	 */
 	private final UriComponents components;
-
-	/**
-	 * Is this required/not required?
-	 */
 	private final boolean required;
-
-	/**
-	 * {@link Map} of property names and their types associated with the incoming request body.
-	 */
 	private final Map<String, Class<?>> properties;
 
 	public HalFormsAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components) {
 
 		this.components = components;
 		this.required = determineRequired(affordance.getHttpMethod());
-
-		this.properties = new TreeMap<String, Class<?>>();
-
-		if (affordance.getHttpMethod().equalsIgnoreCase("POST") ||
-			affordance.getHttpMethod().equalsIgnoreCase("PUT") ||
-			affordance.getHttpMethod().equalsIgnoreCase("PATCH")) {
-			
-			determineAffordanceInputs(invocationValue.getMethod());
-		}
+		this.properties = METHODS_FOR_INPUT_DETECTTION.contains(affordance.getHttpMethod()) //
+				? determineAffordanceInputs(invocationValue.getMethod()) //
+				: Collections.<String, Class<?>> emptyMap();
 	}
 
 	/**
-	 * Transform the details of the Spring MVC method's {@link RequestBody} into a collection of {@link HalFormsProperty}s.
+	 * Transform the details of the Spring MVC method's {@link RequestBody} into a collection of
+	 * {@link HalFormsProperty}s.
 	 * 
 	 * @return
 	 */
@@ -80,20 +75,42 @@ public class HalFormsAffordanceModel implements AffordanceModel {
 
 		List<HalFormsProperty> halFormsProperties = new ArrayList<HalFormsProperty>();
 
-		for (Map.Entry<String, Class<?>> entry : this.properties.entrySet()) {
-			halFormsProperties.add(new HalFormsProperty(entry.getKey(), null, null, null, null, false, this.required, false));
+		for (Entry<String, Class<?>> entry : this.properties.entrySet()) {
+
+			HalFormsProperty property = HalFormsProperty//
+					.named(entry.getKey())//
+					.withRequired(required);
+
+			halFormsProperties.add(property);
 		}
 
 		return halFormsProperties;
 	}
 
+	public String getPath() {
+		return components.getPath();
+	}
+
 	/**
-	 * Look up the path of the {@link UriComponents}.
+	 * Returns whether the affordance is pointing to the same path as the given one.
 	 * 
+	 * @param path must not be {@literal null}.
 	 * @return
 	 */
-	public String getPath() {
-		return this.components.getPath();
+	public boolean hasPath(String path) {
+
+		Assert.notNull(path, "Path must not be null!");
+
+		return getPath().equals(path);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel#getMediaType()
+	 */
+	@Override
+	public Collection<MediaType> getMediaTypes() {
+		return Collections.singleton(MediaTypes.HAL_FORMS_JSON);
 	}
 
 	/**
@@ -102,48 +119,45 @@ public class HalFormsAffordanceModel implements AffordanceModel {
 	 * @param httpMethod - string representation of an HTTP method, e.g. GET, POST, etc.
 	 * @return
 	 */
-	private boolean determineRequired(String httpMethod) {
-
-		if (httpMethod.equalsIgnoreCase("POST") || httpMethod.equalsIgnoreCase("PUT")) {
-			return true;
-		} else {
-			return false;
-		}
+	private boolean determineRequired(HttpMethod httpMethod) {
+		return Arrays.asList(HttpMethod.POST, HttpMethod.PUT).contains(httpMethod);
 	}
-	
+
 	/**
 	 * Look at the inputs for a Spring MVC controller method to decide the {@link Affordance}'s properties.
 	 *
 	 * @param method - {@link Method} of the Spring MVC controller tied to this affordance
 	 */
-	private void determineAffordanceInputs(Method method) {
+	private Map<String, Class<?>> determineAffordanceInputs(Method method) {
 
 		if (method == null) {
-			return;
+			return Collections.emptyMap();
 		}
 
-		log.debug("Gathering details about " + method.getDeclaringClass().getCanonicalName() + "." + method.getName());
+		LOG.debug("Gathering details about " + method.getDeclaringClass().getCanonicalName() + "." + method.getName());
 
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
+		Map<String, Class<?>> properties = new TreeMap<String, Class<?>>();
+		MethodParameters parameters = new MethodParameters(method);
 
-			for (Annotation annotation : method.getParameterAnnotations()[i]) {
+		for (MethodParameter parameter : parameters.getParametersWith(RequestBody.class)) {
 
-				if (annotation.annotationType().equals(RequestBody.class)) {
+			Class<?> parameterType = parameter.getParameterType();
 
-					log.debug("\tRequest body: " + method.getParameterTypes()[i].getCanonicalName() + "(");
+			LOG.debug("\tRequest body: " + parameterType.getCanonicalName() + "(");
 
-					for (PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(method.getParameterTypes()[i])) {
+			for (PropertyDescriptor descriptor : BeanUtils.getPropertyDescriptors(parameterType)) {
 
-						if (!descriptor.getName().equals("class")) {
-							log.debug("\t\t" + descriptor.getPropertyType().getCanonicalName() + " " + descriptor.getName());
-							this.properties.put(descriptor.getName(), descriptor.getPropertyType());
-						}
-					}
-					log.debug(")");
+				if (!descriptor.getName().equals("class")) {
+
+					LOG.debug("\t\t" + descriptor.getPropertyType().getCanonicalName() + " " + descriptor.getName());
+					properties.put(descriptor.getName(), descriptor.getPropertyType());
 				}
 			}
+
+			LOG.debug(")");
 		}
 
-		log.debug("Assembled " + this.toString());
+		LOG.debug("Assembled " + this.toString());
+		return properties;
 	}
 }

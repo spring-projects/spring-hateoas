@@ -48,12 +48,14 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
  *
  * @author Greg Turnquist
  */
-public class HalFormsSerializers {
+class HalFormsSerializers {
 
 	/**
 	 * Serializer for {@link Resources}.
 	 */
 	static class HalFormsResourceSerializer extends ContainerSerializer<Resource<?>> implements ContextualSerializer {
+
+		private static final long serialVersionUID = -7912243216469101379L;
 
 		private final BeanProperty property;
 
@@ -70,15 +72,11 @@ public class HalFormsSerializers {
 		@Override
 		public void serialize(Resource<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
-			HalFormsDocument<?> doc = HalFormsDocument.<Object> halFormsDocument()
-				.resource(value.getContent())
-				.links(value.getLinks())
-				.templates(findTemplates(value))
-				.build();
+			HalFormsDocument<?> doc = HalFormsDocument.forResource(value.getContent()) //
+					.withLinks(value.getLinks()) //
+					.withTemplates(findTemplates(value));
 
-			provider
-				.findValueSerializer(HalFormsDocument.class, property)
-				.serialize(doc, gen, provider);
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
 
 		@Override
@@ -102,7 +100,8 @@ public class HalFormsSerializers {
 		}
 
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
 			return new HalFormsResourceSerializer(property);
 		}
 	}
@@ -112,12 +111,15 @@ public class HalFormsSerializers {
 	 */
 	static class HalFormsResourcesSerializer extends ContainerSerializer<Resources<?>> implements ContextualSerializer {
 
+		private static final long serialVersionUID = -3601146866067500734L;
+
 		private final BeanProperty property;
 		private final Jackson2HalModule.EmbeddedMapper embeddedMapper;
 
 		HalFormsResourcesSerializer(BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 
 			super(Resources.class, false);
+
 			this.property = property;
 			this.embeddedMapper = embeddedMapper;
 		}
@@ -135,25 +137,21 @@ public class HalFormsSerializers {
 
 			if (value instanceof PagedResources) {
 
-				doc = HalFormsDocument.<Object> halFormsDocument()
-					.embedded(embeddeds)
-					.pageMetadata(((PagedResources) value).getMetadata())
-					.links(value.getLinks())
-					.templates(findTemplates(value))
-					.build();
+				doc = HalFormsDocument.empty() //
+						.withEmbedded(embeddeds) //
+						.withPageMetadata(((PagedResources<?>) value).getMetadata()) //
+						.withLinks(value.getLinks()) //
+						.withTemplates(findTemplates(value));
+
 			} else {
 
-				doc = HalFormsDocument.<Object> halFormsDocument()
-					.embedded(embeddeds)
-					.pageMetadata(null)
-					.links(value.getLinks())
-					.templates(findTemplates(value))
-					.build();
+				doc = HalFormsDocument.empty() //
+						.withEmbedded(embeddeds) //
+						.withLinks(value.getLinks()) //
+						.withTemplates(findTemplates(value));
 			}
 
-			provider
-				.findValueSerializer(HalFormsDocument.class, property)
-				.serialize(doc, gen, provider);
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
 
 		@Override
@@ -177,7 +175,8 @@ public class HalFormsSerializers {
 		}
 
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
 			return new HalFormsResourcesSerializer(property, embeddedMapper);
 		}
 	}
@@ -195,25 +194,19 @@ public class HalFormsSerializers {
 		if (resource.hasLink(Link.REL_SELF)) {
 			for (Affordance affordance : resource.getLink(Link.REL_SELF).map(Link::getAffordances).orElse(Collections.emptyList())) {
 
-				HalFormsAffordanceModel model =
-					(HalFormsAffordanceModel) affordance.getAffordanceModel(MediaTypes.HAL_FORMS_JSON);
+				HalFormsAffordanceModel model = affordance.getAffordanceModel(MediaTypes.HAL_FORMS_JSON);
 
-				if (!affordance.getHttpMethod().equals(HttpMethod.GET.toString())) {
+				if (!affordance.getHttpMethod().equals(HttpMethod.GET)) {
 
 					validate(resource, affordance, model);
 
-					HalFormsTemplate template = new HalFormsTemplate();
-					template.setHttpMethod(HttpMethod.valueOf(affordance.getHttpMethod()));
-					template.setProperties(model.getProperties());
+					HalFormsTemplate template = HalFormsTemplate.forMethod(affordance.getHttpMethod()) //
+							.withProperties(model.getProperties());
 
 					/**
 					 * First template in HAL-FORMS is "default".
 					 */
-					if (templates.isEmpty()) {
-						templates.put("default", template);
-					} else {
-						templates.put(affordance.getName(), template);
-					}
+					templates.put(templates.isEmpty() ? "default" : affordance.getName(), template);
 				}
 			}
 		}
@@ -223,7 +216,8 @@ public class HalFormsSerializers {
 
 	/**
 	 * Verify that the resource's self link and the affordance's URI have the same relative path.
-	 *  @param resource
+	 * 
+	 * @param resource
 	 * @param affordance
 	 * @param model
 	 */
@@ -231,15 +225,15 @@ public class HalFormsSerializers {
 
 		try {
 			Optional<Link> selfLink = resource.getLink(Link.REL_SELF);
-
 			URI selfLinkUri = new URI(selfLink.map(link -> link.expand().getHref()).orElse(""));
 
-			if (!selfLinkUri.getPath().equals(model.getPath())) {
-				throw new IllegalStateException("Affordance's URI " + model.getPath() + " doesn't match self link " + selfLinkUri.getPath() + " as expected in HAL-FORMS");
+			if (!model.hasPath(selfLinkUri.getPath())) {
+				throw new IllegalStateException("Affordance's URI " + model.getPath() + " doesn't match self link "
+						+ selfLinkUri.getPath() + " as expected in HAL-FORMS");
 			}
+
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
-
 }

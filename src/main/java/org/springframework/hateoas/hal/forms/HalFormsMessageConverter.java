@@ -32,14 +32,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
- * A message converter that converts any object into a HAL-FORMS document before bundling up
- * as an {@link HttpOutputMessage}, or that converts any incoming {@link HttpInputMessage} into
- * an object.
+ * A message converter that converts any object into a HAL-FORMS document before bundling up as an
+ * {@link HttpOutputMessage}, or that converts any incoming {@link HttpInputMessage} into an object.
  *
  * @author Dietrich Schulten
  * @author Greg Turnquist
  */
-public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Object> {
+class HalFormsMessageConverter extends AbstractHttpMessageConverter<Object> {
 
 	private final ObjectMapper objectMapper;
 
@@ -47,6 +46,7 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 
 		this.objectMapper = objectMapper;
 		this.objectMapper.registerModule(new Jackson2HalFormsModule());
+
 		setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_FORMS_JSON));
 	}
 
@@ -55,7 +55,7 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 	 * @see org.springframework.http.converter.AbstractHttpMessageConverter#supports(java.lang.Class)
 	 */
 	@Override
-	protected boolean supports(final Class<?> clazz) {
+	protected boolean supports(Class<?> clazz) {
 		return true;
 	}
 
@@ -64,14 +64,14 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 	 * @see org.springframework.http.converter.AbstractHttpMessageConverter#readInternal(java.lang.Class, org.springframework.http.HttpInputMessage)
 	 */
 	@Override
-	protected Object readInternal(final Class<? extends Object> clazz, final HttpInputMessage inputMessage)
+	protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		return this.objectMapper.readValue(inputMessage.getBody(), clazz);
 	}
 
 	@Override
-	protected void writeInternal(final Object t, final HttpOutputMessage outputMessage)
+	protected void writeInternal(Object t, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(outputMessage.getBody(), JsonEncoding.UTF8);
@@ -88,5 +88,4 @@ public class HalFormsMessageConverter extends AbstractHttpMessageConverter<Objec
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}
-
 }

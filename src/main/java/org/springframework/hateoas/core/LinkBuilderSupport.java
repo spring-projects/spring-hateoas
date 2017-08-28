@@ -23,6 +23,7 @@ import lombok.Getter;
 import java.net.URI;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.hateoas.Affordance;
@@ -143,10 +144,10 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 		return uriComponents.encode().toUri().normalize();
 	}
 
-	public LinkBuilderSupport addAffordances(List<Affordance> affordances) {
+	public T addAffordances(Collection<Affordance> affordances) {
 
 		this.affordances.addAll(affordances);
-		return this;
+		return getThis();
 	}
 
 	/*
@@ -154,14 +155,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
 	 */
 	public Link withRel(String rel) {
-		
-		Link link = new Link(toString(), rel);
-
-		for (Affordance affordance : this.affordances) {
-			link = link.withAffordance(affordance);
-		}
-
-		return link;
+		return new Link(toString(), rel).withAffordances(affordances);
 	}
 
 	/*

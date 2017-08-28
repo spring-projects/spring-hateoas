@@ -15,12 +15,10 @@
  */
 package org.springframework.hateoas.hal.forms;
 
-import lombok.Getter;
-
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.http.MediaType;
 import org.springframework.web.util.UriComponents;
@@ -29,14 +27,26 @@ import org.springframework.web.util.UriComponents;
  * Factory for creating {@link HalFormsAffordanceModel}s.
  *
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
-@Getter
-public class HalFormsAffordanceModelFactory extends AffordanceModelFactory {
+class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
-	
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(org.springframework.hateoas.Affordance, org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation, org.springframework.web.util.UriComponents)
+	 */
 	@Override
-	public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components) {
+	public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue,
+			UriComponents components) {
 		return new HalFormsAffordanceModel(affordance, invocationValue, components);
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
+	 */
+	@Override
+	public boolean supports(MediaType mediaType) {
+		return MediaTypes.HAL_FORMS_JSON.equals(mediaType);
 	}
 }

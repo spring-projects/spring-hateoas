@@ -15,8 +15,11 @@
  */
 package org.springframework.hateoas.hal.forms;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.bind.annotation.XmlElement;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -32,25 +35,36 @@ import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.hal.LinkMixin;
 import org.springframework.hateoas.hal.ResourceSupportMixin;
+import org.springframework.hateoas.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
+import org.springframework.hateoas.hal.forms.HalFormsSerializers.HalFormsResourceSerializer;
 import org.springframework.hateoas.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
+import org.springframework.hateoas.mvc.JacksonSerializers.MediaTypeDeserializer;
+import org.springframework.http.MediaType;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
- * Serialize/Deserialize all the parts of HAL-FORMS documents using Jackson.
+ * Serialize / deserialize all the parts of HAL-FORMS documents using Jackson.
  *
  * @author Dietrich Schulten
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
 public class Jackson2HalFormsModule extends SimpleModule {
 
@@ -65,7 +79,36 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		setMixInAnnotation(Resource.class, ResourceMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
 		setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
+		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
 	}
+
+	@JsonSerialize(using = HalFormsResourceSerializer.class)
+	static interface ResourceMixin {}
+
+	@JsonSerialize(using = HalFormsResourcesSerializer.class)
+	abstract class ResourcesMixin<T> extends Resources<T> {
+
+		@Override
+		@XmlElement(name = "embedded")
+		@JsonProperty("_embedded")
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonDeserialize(using = HalFormsResourcesDeserializer.class)
+		public abstract Collection<T> getContent();
+	}
+
+	abstract class PagedResourcesMixin<T> extends PagedResources<T> {
+
+		@Override
+		@JsonProperty("page")
+		@JsonInclude(Include.NON_EMPTY)
+		public PageMetadata getMetadata() {
+			return super.getMetadata();
+		}
+	}
+
+	@JsonSerialize(using = ToStringSerializer.class)
+	@JsonDeserialize(using = MediaTypeDeserializer.class)
+	static interface MediaTypeMixin {}
 
 	/**
 	 * Create new HAL-FORMS serializers based on the context.
@@ -99,41 +142,33 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 *
-		 * @see
-		 * com.fasterxml.jackson.databind.cfg.HandlerInstantiator#deserializerInstance(com.fasterxml.jackson.databind.
-		 * DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 * @see org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator#deserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 		 */
 		@Override
 		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
-														Class<?> deserClass) {
+				Class<?> deserClass) {
 
 			Object jsonDeser = findInstance(deserClass);
 			return jsonDeser != null ? (JsonDeserializer<?>) jsonDeser
-				: super.deserializerInstance(config, annotated, deserClass);
+					: super.deserializerInstance(config, annotated, deserClass);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 *
-		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#keyDeserializerInstance(com.fasterxml.jackson.
-		 * databind. DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 * @see org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator#keyDeserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 		 */
 		@Override
 		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
-													   Class<?> keyDeserClass) {
+				Class<?> keyDeserClass) {
 
 			Object keyDeser = findInstance(keyDeserClass);
 			return keyDeser != null ? (KeyDeserializer) keyDeser
-				: super.keyDeserializerInstance(config, annotated, keyDeserClass);
+					: super.keyDeserializerInstance(config, annotated, keyDeserClass);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 *
-		 * @see
-		 * com.fasterxml.jackson.databind.cfg.HandlerInstantiator#serializerInstance(com.fasterxml.jackson.databind.
-		 * SerializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 * @see org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator#serializerInstance(com.fasterxml.jackson.databind.SerializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 		 */
 		@Override
 		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
@@ -144,33 +179,27 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 *
-		 * @see
-		 * com.fasterxml.jackson.databind.cfg.HandlerInstantiator#typeResolverBuilderInstance(com.fasterxml.jackson.
-		 * databind .cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 * @see org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator#typeResolverBuilderInstance(com.fasterxml.jackson.databind.cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 		 */
 		@Override
 		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
-																  Class<?> builderClass) {
+				Class<?> builderClass) {
 
 			Object builder = findInstance(builderClass);
 			return builder != null ? (TypeResolverBuilder<?>) builder
-				: super.typeResolverBuilderInstance(config, annotated, builderClass);
+					: super.typeResolverBuilderInstance(config, annotated, builderClass);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 *
-		 * @see
-		 * com.fasterxml.jackson.databind.cfg.HandlerInstantiator#typeIdResolverInstance(com.fasterxml.jackson.databind.
-		 * cfg. MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
+		 * @see org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator#typeIdResolverInstance(com.fasterxml.jackson.databind.cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 		 */
 		@Override
 		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
 
 			Object resolver = findInstance(resolverClass);
 			return resolver != null ? (TypeIdResolver) resolver
-				: super.typeIdResolverInstance(config, annotated, resolverClass);
+					: super.typeIdResolverInstance(config, annotated, resolverClass);
 		}
 	}
 }

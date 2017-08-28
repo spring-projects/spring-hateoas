@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas;
+package org.springframework.hateoas.core;
 
+import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.Plugin;
@@ -24,15 +26,9 @@ import org.springframework.web.util.UriComponents;
  * TODO: Replace this with an interface and a default implementation of {@link #supports(MediaType)} in Java 8.
  * 
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
-public abstract class AffordanceModelFactory implements Plugin<MediaType> {
-
-	/**
-	 * Look up the {@link MediaType} of this factory.
-	 *
-	 * @return
-	 */
-	abstract public MediaType getMediaType();
+public interface AffordanceModelFactory extends Plugin<MediaType> {
 
 	/**
 	 * Look up the {@link AffordanceModel} for this factory.
@@ -42,16 +38,5 @@ public abstract class AffordanceModelFactory implements Plugin<MediaType> {
 	 * @param components
 	 * @return
 	 */
-	abstract public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components);
-
-	/**
-	 * Find factories based on {@link MediaType}.
-	 * 
-	 * @param delimiter
-	 * @return
-	 */
-	@Override
-	public boolean supports(MediaType delimiter) {
-		return delimiter != null && delimiter.equals(this.getMediaType());
-	}
+	AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components);
 }
