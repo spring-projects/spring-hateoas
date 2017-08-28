@@ -56,7 +56,7 @@ class AnnotatedParametersParameterAccessor {
 	 * @param invocation must not be {@literal null}.
 	 * @return
 	 */
-	public List<BoundMethodParameter> getBoundParameters(MethodInvocation invocation) {
+	public List<BoundMethodParameter> getBoundParameters(MethodInvocation invocation, ConversionService conversionService) {
 
 		Assert.notNull(invocation, "MethodInvocation must not be null!");
 
@@ -70,7 +70,7 @@ class AnnotatedParametersParameterAccessor {
 			Object verifiedValue = verifyParameterValue(parameter, value);
 
 			if (verifiedValue != null) {
-				result.add(createParameter(parameter, verifiedValue, attribute));
+				result.add(createParameter(parameter, verifiedValue, attribute, conversionService));
 			}
 		}
 
@@ -87,8 +87,8 @@ class AnnotatedParametersParameterAccessor {
 	 * @return
 	 */
 	protected BoundMethodParameter createParameter(MethodParameter parameter, Object value,
-			AnnotationAttribute attribute) {
-		return new BoundMethodParameter(parameter, value, attribute);
+			AnnotationAttribute attribute, ConversionService conversionService) {
+		return new BoundMethodParameter(parameter, value, attribute, conversionService);
 	}
 
 	/**
@@ -138,6 +138,8 @@ class AnnotatedParametersParameterAccessor {
 		private final AnnotationAttribute attribute;
 		private final TypeDescriptor parameterTypeDescriptor;
 
+		private ConversionService overrideConversionService = null;
+
 		/**
 		 * Creates a new {@link BoundMethodParameter}
 		 * 
@@ -145,7 +147,8 @@ class AnnotatedParametersParameterAccessor {
 		 * @param value
 		 * @param attribute
 		 */
-		public BoundMethodParameter(MethodParameter parameter, Object value, AnnotationAttribute attribute) {
+		public BoundMethodParameter(MethodParameter parameter, Object value, AnnotationAttribute attribute,
+									ConversionService overrideConversionService) {
 
 			Assert.notNull(parameter, "MethodParameter must not be null!");
 
@@ -153,6 +156,7 @@ class AnnotatedParametersParameterAccessor {
 			this.value = value;
 			this.attribute = attribute;
 			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, 0);
+			this.overrideConversionService = overrideConversionService;
 		}
 
 		/**
@@ -189,7 +193,7 @@ class AnnotatedParametersParameterAccessor {
 		 */
 		public String asString() {
 			return value == null ? null
-					: (String) CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
+					: (String) getConversionService().convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
 		}
 
 		/**
@@ -199,6 +203,10 @@ class AnnotatedParametersParameterAccessor {
 		 */
 		public boolean isRequired() {
 			return true;
+		}
+
+		private ConversionService getConversionService() {
+			return (this.overrideConversionService != null) ? this.overrideConversionService : CONVERSION_SERVICE;
 		}
 	}
 }

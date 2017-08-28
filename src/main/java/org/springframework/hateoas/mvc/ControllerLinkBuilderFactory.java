@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
 import org.springframework.hateoas.TemplateVariable;
@@ -72,8 +73,10 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
 
-	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
+	private static ConversionService overrideDefaultConversionService = null;
 
+	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
+	
 	/**
 	 * Configures the {@link UriComponentsContributor} to be used when building {@link Link} instances from method
 	 * invocations.
@@ -146,13 +149,13 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			values.put(names.next(), encodePath(classMappingParameters.next()));
 		}
 
-		for (BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation)) {
+		for (BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation, overrideDefaultConversionService)) {
 			values.put(parameter.getVariableName(), encodePath(parameter.asString()));
 		}
 
 		List<String> optionalEmptyParameters = new ArrayList<String>();
 
-		for (BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation)) {
+		for (BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation, overrideDefaultConversionService)) {
 
 			bindRequestParameters(builder, parameter);
 
@@ -268,6 +271,14 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		}
 	}
 
+	public static void setConversionService(ConversionService conversionService) {
+		overrideDefaultConversionService = conversionService;
+	}
+
+	public static void clearConversionService() {
+		overrideDefaultConversionService = null;
+	}
+
 	/**
 	 * Custom extension of {@link AnnotatedParametersParameterAccessor} for {@link RequestParam} to allow {@literal null}
 	 * values handed in for optional request parameters.
@@ -286,9 +297,9 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		 */
 		@Override
 		protected BoundMethodParameter createParameter(final MethodParameter parameter, Object value,
-				AnnotationAttribute attribute) {
+				AnnotationAttribute attribute, ConversionService conversionService) {
 
-			return new BoundMethodParameter(parameter, value, attribute) {
+			return new BoundMethodParameter(parameter, value, attribute, conversionService) {
 
 				/* 
 				 * (non-Javadoc)

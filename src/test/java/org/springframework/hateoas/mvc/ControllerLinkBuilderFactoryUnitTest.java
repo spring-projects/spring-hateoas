@@ -24,10 +24,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.Link;
@@ -100,6 +103,48 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
 		assertThat(link.getHref(), endsWith("/sample/" + ISODateTimeFormat.date().print(now)));
+	}
+
+	@Test
+	public void pluginCustomConversionService() {
+
+		DateTime now = DateTime.now();
+
+		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+
+		final TypeDescriptor[] actualSourceType = {null};
+		final TypeDescriptor[] actualTargetType = {null};
+
+		factory.setConversionService(new ConversionService() {
+			@Override
+			public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
+				return true;
+			}
+
+			@Override
+			public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+				return true;
+			}
+
+			@Override
+			public <T> T convert(Object source, Class<T> targetType) {
+				return (T) "converted";
+			}
+
+			@Override
+			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+				actualSourceType[0] = sourceType;
+				actualTargetType[0] = targetType;
+				return "converted";
+			}
+		});
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
+		assertThat(actualSourceType[0].getType(), CoreMatchers.<Class<?>>equalTo(DateTime.class));
+		assertThat(actualTargetType[0].getType(), CoreMatchers.<Class<?>>equalTo(String.class));
+		assertThat(link.getHref(), endsWith("/sample/converted"));
+
+		// Clear things out to avoid breaking other test cases.
+		factory.clearConversionService();
 	}
 
 	/**
