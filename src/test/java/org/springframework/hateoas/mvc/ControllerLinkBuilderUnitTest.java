@@ -580,6 +580,16 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("?value=1"));
 	}
 
+	/**
+	 * @see #617
+	 */
+	@Test
+	public void alternativePathVariableParameter() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithAlternatePathVariable("bar")).withSelfRel();
+		assertThat(link.getHref(), is("http://localhost/something/bar/foo"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -644,6 +654,11 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
 				@RequestParam Integer limit) {
+			return null;
+		}
+
+		@RequestMapping(value = "/{id}/foo")
+		HttpEntity<Void> methodWithAlternatePathVariable(@PathVariable(name = "id") String otherId) {
 			return null;
 		}
 
