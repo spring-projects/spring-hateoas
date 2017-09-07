@@ -16,28 +16,27 @@
 package org.springframework.hateoas.alps;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.junit.Test;
-
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 import org.springframework.util.StreamUtils;
 
 /**
+ * Unit tests for {@link AlpsLinkDiscoverer}.
+ * 
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
 public class AlpsLinkDiscoverUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new AlpsLinkDiscoverer();
-
-	ResourceLoader loader = new DefaultResourceLoader();
 
 	@Test
 	public void discoversFullyQualifiedRel() {
@@ -65,10 +64,10 @@ public class AlpsLinkDiscoverUnitTest extends AbstractLinkDiscovererUnitTest {
 	 */
 	@Override
 	protected String getInputString() {
+
 		try {
-			return StreamUtils.copyToString(
-				loader.getResource("classpath:org/springframework/hateoas/alps/link-discoverer.json").getInputStream(),
-				Charset.defaultCharset());
+			return StreamUtils.copyToString(new ClassPathResource("link-discoverer.json", getClass()).getInputStream(),
+					Charset.defaultCharset());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

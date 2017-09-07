@@ -29,5 +29,4 @@ public class AlpsLinkDiscoverer extends JsonPathLinkDiscoverer {
 	public AlpsLinkDiscoverer() {
 		super("$.descriptors[?(@.name == '%s')].href", MediaTypes.ALPS_JSON);
 	}
-
 }
