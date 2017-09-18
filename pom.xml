@@ -68,7 +68,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.5.RELEASE</spring.version>
+		<spring.version>4.3.11.RELEASE</spring.version>
 		<logback.version>1.1.8</logback.version>
 		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
@@ -87,7 +87,7 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.8.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.12.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -100,7 +100,8 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.0.M5</spring.version>
+				<spring.version>5.0.0.RC4</spring.version>
+				<jackson.version>2.9.1</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
