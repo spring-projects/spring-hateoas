@@ -31,6 +31,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.ControllerWithMethods;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.PersonControllerImpl;
@@ -174,19 +175,19 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref(), endsWith("/people/17/addresses"));
 	}
 
-	static interface SampleController {
+	interface SampleController {
 
 		@RequestMapping("/sample/{id}")
-		HttpEntity<?> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);
+		Resource<HttpEntity<?>> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);
 
 		@RequestMapping("/sample/{time}")
-		HttpEntity<?> sampleMethod(@PathVariable("time") @DateTimeFormat(iso = ISO.DATE) DateTime time);
+		Resource<HttpEntity<?>> sampleMethod(@PathVariable("time") @DateTimeFormat(iso = ISO.DATE) DateTime time);
 
 		@RequestMapping("/sample/mapsupport")
-		HttpEntity<?> sampleMethodWithMap(@RequestParam Map<String, String> queryParams);
+		Resource<HttpEntity<?>> sampleMethodWithMap(@RequestParam Map<String, String> queryParams);
 
 		@RequestMapping("/sample/multivaluemapsupport")
-		HttpEntity<?> sampleMethodWithMap(@RequestParam MultiValueMap<String, String> queryParams);
+		Resource<HttpEntity<?>> sampleMethodWithMap(@RequestParam MultiValueMap<String, String> queryParams);
 	}
 
 	static class SampleUriComponentsContributor implements UriComponentsContributor {

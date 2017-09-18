@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mvc;
 
 import org.junit.Test;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.http.HttpEntity;
@@ -40,8 +41,8 @@ public class DummyInvocationUtilsUnitTest extends TestUtils {
 	static class SampleController {
 
 		@RequestMapping("/{id}/foo")
-		HttpEntity<Void> someMethod(@PathVariable("id") Long id) {
-			return new ResponseEntity<Void>(HttpStatus.OK);
+		Resource<HttpEntity<Void>> someMethod(@PathVariable("id") Long id) {
+			return new Resource(new ResponseEntity<Void>(HttpStatus.OK));
 		}
 	}
 }

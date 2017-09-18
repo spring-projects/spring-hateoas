@@ -30,6 +30,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
@@ -577,7 +578,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	static class PersonsAddressesController {
 
 		@RequestMapping("/{country}")
-		public HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
+		public Resource<HttpEntity<Void>> getAddressesForCountry(@PathVariable String country) {
 			return null;
 		}
 	}
@@ -595,39 +596,39 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	static class ControllerWithMethods {
 
 		@RequestMapping("/else")
-		HttpEntity<Void> myMethod(@RequestBody Object payload) {
+		Resource<HttpEntity<Void>> myMethod(@RequestBody Object payload) {
 			return null;
 		}
 
 		@RequestMapping("/{id}/foo")
-		HttpEntity<Void> methodWithPathVariable(@PathVariable String id) {
+		Resource<HttpEntity<Void>> methodWithPathVariable(@PathVariable String id) {
 			return null;
 		}
 
 		@RequestMapping("/foo")
-		HttpEntity<Void> methodWithRequestParam(@RequestParam String id) {
+		Resource<HttpEntity<Void>> methodWithRequestParam(@RequestParam String id) {
 			return null;
 		}
 
 		@RequestMapping(value = "/{id}/foo")
-		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam(required = false) Integer offset,
+		Resource<HttpEntity<Void>> methodForNextPage(@PathVariable String id, @RequestParam(required = false) Integer offset,
 				@RequestParam Integer limit) {
 			return null;
 		}
 
 		@RequestMapping(value = "/{id}/foo")
-		HttpEntity<Void> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
+		Resource<HttpEntity<Void>> methodWithMultiValueRequestParams(@PathVariable String id, @RequestParam List<Integer> items,
 				@RequestParam Integer limit) {
 			return null;
 		}
 
 		@RequestMapping(value = "/foo")
-		HttpEntity<Void> methodForOptionalNextPage(@RequestParam(required = false) Integer offset) {
+		Resource<HttpEntity<Void>> methodForOptionalNextPage(@RequestParam(required = false) Integer offset) {
 			return null;
 		}
 
 		@RequestMapping(value = "/bar")
-		HttpEntity<Void> methodForOptionalSizeWithDefaultValue(@RequestParam(defaultValue = "10") Integer size) {
+		Resource<HttpEntity<Void>> methodForOptionalSizeWithDefaultValue(@RequestParam(defaultValue = "10") Integer size) {
 			return null;
 		}
 	}
@@ -638,13 +639,13 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	interface ChildController extends ParentController {
 
 		@RequestMapping("/child")
-		Object myMethod();
+		Resource<Object> myMethod();
 	}
 
 	interface ParentWithMethod {
 
 		@RequestMapping("/parent")
-		Object myMethod();
+		Resource<Object> myMethod();
 	}
 
 	@RequestMapping("/child")
@@ -653,7 +654,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	interface ParentControllerWithoutRootMapping {
 
 		@RequestMapping
-		Object someEmptyMappedMethod();
+		Resource<Object> someEmptyMappedMethod();
 	}
 
 	@RequestMapping("/root")

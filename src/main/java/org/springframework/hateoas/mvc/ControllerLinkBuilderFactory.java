@@ -30,9 +30,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationAttribute;
@@ -44,6 +47,7 @@ import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,6 +70,8 @@ import org.springframework.web.util.UriTemplate;
  * @author Andrew Naydyonock
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
+
+	private static final Logger log = LoggerFactory.getLogger(ControllerLinkBuilderFactory.class);
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
@@ -134,6 +140,20 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		MethodInvocation invocation = invocations.getLastInvocation();
 		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 		Method method = invocation.getMethod();
+
+		if (!ClassUtils.isAssignable(ResourceSupport.class, method.getReturnType())) {
+			log.warn("");
+			log.warn(method.getDeclaringClass().getSimpleName() + "." + method.getName() + "()'s return type is " + method.getReturnType().toString() + ", which doesn't implement ResourceSupport, Resource, or Resources.");
+			log.warn("Return that from a controller and it probably won't serialize correctly.");
+			log.warn("");
+
+			System.out.println("");
+			System.out.println(method.getDeclaringClass().getSimpleName() + "." + method.getName() + "()'s return type is " + method.getReturnType().toString() + ", which doesn't implement ResourceSupport, Resource, or Resources.");
+			System.out.println("Return that from a controller and it probably won't serialize correctly.");
+			System.out.println("");
+
+			throw new RuntimeException(method.getReturnType().toString() + " does NOT implement ResourceSupport");
+		}
 
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
 		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
