@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 
 /**
@@ -30,6 +31,7 @@ import org.springframework.util.Assert;
  * sure a self-link is always added.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> implements ResourceAssembler<T, D> {
 
@@ -52,22 +54,36 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	}
 
 	/**
-	 * Converts all given entities into resources.
+	 * Transform a list of {@code T}s into a list of {@link ResourceSupport}s.
+	 *
+	 * @see {@link #toResources(Iterable)} if you need this transformed list rendered as hypermedia
 	 * 
-	 * @see #toResource(Object)
-	 * @param entities must not be {@literal null}.
+	 * @param entities
 	 * @return
 	 */
-	public List<D> toResources(Iterable<? extends T> entities) {
+	public List<D> toList(Iterable<? extends T> entities) {
 
 		Assert.notNull(entities, "Entities must not be null!");
-		List<D> result = new ArrayList<D>();
+		List<D> result = new ArrayList<>();
 
 		for (T entity : entities) {
 			result.add(toResource(entity));
 		}
 
 		return result;
+	}
+
+	/**
+	 * Converts all given entities into resources.
+	 *
+	 * @see #toResource(Object)
+	 * @param entities must not be {@literal null}.
+	 * @return
+	 */
+	public Resources<D> toResources(Iterable<? extends T> entities) {
+
+		Assert.notNull(entities, "Entities must not be null!");
+		return new Resources<D>(toList(entities));
 	}
 
 	/**
