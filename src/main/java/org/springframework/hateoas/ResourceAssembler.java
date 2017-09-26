@@ -15,10 +15,14 @@
  */
 package org.springframework.hateoas;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Interface for components that convert a domain type into an {@link ResourceSupport}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public interface ResourceAssembler<T, D extends ResourceSupport> {
 
@@ -29,4 +33,20 @@ public interface ResourceAssembler<T, D extends ResourceSupport> {
 	 * @return
 	 */
 	D toResource(T entity);
+
+	/**
+	 * Converts an {@link Iterable} or {@code T}s into an {@link Iterable} of {@link ResourceSupport} and wraps
+	 * them in a {@link Resources} instance.
+	 * 
+	 * @param entities
+	 * @return
+	 */
+	default Resources<D> toResources(List<T> entities) {
+		
+		List<D> resources = new ArrayList<>();
+		for (T entity : entities) {
+			resources.add(toResource(entity));
+		}
+		return new Resources<>(resources);
+	}
 }

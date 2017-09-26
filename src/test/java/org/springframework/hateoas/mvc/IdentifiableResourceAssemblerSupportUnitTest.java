@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Unit tests for {@link IdentifiableResourceAssemblerSupport}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
@@ -81,6 +83,34 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
 	}
 
+	/**
+	 * @see #416
+	 */
+	@Test
+	public void convertsEntitiesToListOfResources() {
+
+		Person first = new Person();
+		first.id = 1L;
+		Person second = new Person();
+		second.id = 2L;
+
+		List<PersonResource> result = assembler.map(Arrays.asList(first, second)).toListOfResources();
+
+		LinkBuilder builder = linkTo(PersonController.class);
+
+		PersonResource firstResource = new PersonResource();
+		firstResource.add(builder.slash(1L).withSelfRel());
+
+		PersonResource secondResource = new PersonResource();
+		secondResource.add(builder.slash(1L).withSelfRel());
+
+		assertThat(result).hasSize(2);
+		assertThat(result).contains(firstResource, secondResource);
+	}
+
+	/**
+	 * @see #416
+	 */
 	@Test
 	public void convertsEntitiesToResources() {
 
@@ -89,7 +119,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Person second = new Person();
 		second.id = 2L;
 
-		List<PersonResource> result = assembler.toResources(Arrays.asList(first, second));
+		Resources<PersonResource> result = assembler.map(Arrays.asList(first, second)).toResources();
 
 		LinkBuilder builder = linkTo(PersonController.class);
 
@@ -130,11 +160,11 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 	class PersonResourceAssembler extends IdentifiableResourceAssemblerSupport<Person, PersonResource> {
 
-		public PersonResourceAssembler() {
+		PersonResourceAssembler() {
 			this(PersonController.class);
 		}
 
-		public PersonResourceAssembler(Class<?> controllerType) {
+		PersonResourceAssembler(Class<?> controllerType) {
 			super(controllerType, PersonResource.class);
 		}
 
