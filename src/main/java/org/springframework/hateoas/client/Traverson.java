@@ -17,21 +17,26 @@ package org.springframework.hateoas.client;
 
 import static org.springframework.http.HttpMethod.*;
 
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.client.Rels.Rel;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
@@ -247,6 +252,18 @@ public class Traverson {
 		return new HttpEntity<Void>(toSend);
 	}
 
+	private <T> HttpEntity<T> prepareRequest(HttpHeaders headers, T body) {
+
+		HttpHeaders toSend = new HttpHeaders();
+		toSend.putAll(headers);
+
+		if (headers.getAccept().isEmpty()) {
+			toSend.setAccept(mediaTypes);
+		}
+
+		return new HttpEntity<T>(body, headers);
+	}
+
 	/**
 	 * Builder API to customize traversals.
 	 * 
@@ -370,6 +387,34 @@ public class Traverson {
 
 			Assert.notNull(type, "Target type must not be null!");
 			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type);
+		}
+
+		public <T> Resource<T> post(T object, Class<T> clazz) {
+
+			Assert.notNull(object, "Object must not be null!");
+			URI uri = traverseToExpandedFinalUrl();
+			ResponseEntity<T> response = operations.exchange(uri, POST, prepareRequest(headers, object), clazz);
+
+			if (response.getHeaders().containsKey(HttpHeaders.LOCATION)) {
+				return new Resource<T>(response.getBody(),
+					new Link(response.getHeaders().getLocation().toString()).withRel("location"));
+			} else {
+				return new Resource<T>(response.getBody());
+			}
+		}
+
+		public <T> Resource<T> put(T object, Class<T> clazz) {
+
+			Assert.notNull(object, "Object must not be null!");
+			URI uri = traverseToExpandedFinalUrl();
+			ResponseEntity<T> response = operations.exchange(uri, PUT, prepareRequest(headers, object), clazz);
+
+			if (response.getHeaders().containsKey(HttpHeaders.LOCATION)) {
+				return new Resource<T>(response.getBody(),
+					new Link(response.getHeaders().getLocation().toString()).withRel("location"));
+			} else {
+				return new Resource<T>(response.getBody());
+			}
 		}
 
 		/**

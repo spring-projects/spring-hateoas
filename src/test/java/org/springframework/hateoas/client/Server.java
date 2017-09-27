@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.UUID;
 
+import net.jadler.stubbing.ResponseStubbing;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
@@ -33,6 +34,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -181,6 +184,13 @@ public class Server implements Closeable {
 		return resourceUri;
 	}
 
+	public String mockResourceFor(HttpMethod method, String resourceUri, Object content) {
+
+		register(method, resourceUri, content);
+
+		return resourceUri;
+	}
+
 	public void finishMocking() {
 
 		Resources<String> resources = new Resources<String>(Collections.<String> emptyList());
@@ -199,15 +209,23 @@ public class Server implements Closeable {
 	}
 
 	private void register(String path, Object response) {
+		register(HttpMethod.GET, path, response);
+	}
+
+	private void register(HttpMethod method, String path, Object response) {
 
 		path = path.startsWith(rootResource()) ? path.substring(rootResource().length()) : path;
 
 		try {
-			onRequest(). //
-					havingMethodEqualTo("GET"). //
-					havingPathEqualTo(path). //
-					respond().//
-					withBody(mapper.writeValueAsString(response));
+			ResponseStubbing stub = onRequest(). //
+				havingMethodEqualTo(method.toString()). //
+				havingPathEqualTo(path). //
+				respond().//
+				withBody(mapper.writeValueAsString(response));
+
+			if (method == HttpMethod.POST) {
+				stub.withHeader(HttpHeaders.LOCATION, this.rootResource() + path);
+			}
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}

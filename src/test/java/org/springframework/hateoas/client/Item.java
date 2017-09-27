@@ -15,10 +15,13 @@
  */
 package org.springframework.hateoas.client;
 
+import lombok.Data;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@Data
 public class Item {
 
 	String image;

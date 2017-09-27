@@ -38,6 +38,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -379,6 +380,32 @@ public class TraversonTest {
 		assertThat(itemResource.getLink("self").expand().getHref(), equalTo(server.rootResource() + "/springagram/items"));
 	}
 
+	@Test
+	public void postingFromTraversonWorks() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		Resource<Item> newItem = traverson
+			.follow("items")
+			.post(new Item("image", "description"), Item.class);
+
+		assertThat(newItem.getContent(), is(new Item("image", "description")));
+		assertThat(newItem.getLink("location").getHref(), endsWith("/springagram/items"));
+	}
+
+	@Test
+	public void puttingFromTraversonWorks() {
+
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+
+		Resource<Item> newItem = traverson
+			.follow("items")
+			.put(new Item("image", "description"), Item.class);
+
+		assertThat(newItem.getContent(), is(new Item("image", "description")));
+		assertThat(newItem.getLinks().size(), is(0));
+	}
+
 	private void setUpActors() {
 
 		Resource<Actor> actor = new Resource<Actor>(new Actor("Keanu Reaves"));
@@ -389,6 +416,9 @@ public class TraversonTest {
 		resource.add(new Link(actorUri, "actor"));
 
 		server.mockResourceFor(resource);
+		server.mockResourceFor(HttpMethod.POST, "/springagram/items", new Item("image", "description"));
+		server.mockResourceFor(HttpMethod.PUT, "/springagram/items", new Item("image", "description"));
+
 		server.finishMocking();
 	}
 
