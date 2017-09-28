@@ -100,7 +100,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.0.RC4</spring.version>
+				<spring.version>5.0.0.RELEASE</spring.version>
 				<jackson.version>2.9.1</jackson.version>
 			</properties>
 			<repositories>
@@ -114,7 +114,7 @@
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.0.1.BUILD-SNAPSHOT</spring.version>
 				<jackson.version>2.9.1</jackson.version>
 			</properties>
 			<repositories>
