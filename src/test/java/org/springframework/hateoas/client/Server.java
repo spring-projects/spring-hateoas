@@ -46,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Haroun Pacquee
  */
 public class Server implements Closeable {
 
@@ -95,6 +96,34 @@ public class Server implements Closeable {
 				respond(). //
 				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
 				withContentType(MediaTypes.HAL_JSON.toString());
+
+		//For POST HttpMethod
+
+		onRequest(). //
+				havingPathEqualTo("/225"). //
+				havingMethodEqualTo("POST"). //
+				respond(). //
+				withStatus(201). //
+				withHeader("location", "1");
+
+
+		//For PUT HttpMethod
+
+		onRequest(). //
+				havingPathEqualTo("/225"). //
+				havingMethodEqualTo("PUT"). //
+				respond(). //
+				withStatus(204). //
+				withHeader("location", "1");
+
+		//For DELETE HttpMethod
+
+		onRequest(). //
+				havingPathEqualTo("/225"). //
+				havingMethodEqualTo("DELETE"). //
+				respond(). //
+				withStatus(202);
+
 
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
 		org.springframework.core.io.Resource springagramRoot = resourceLoader.getResource("classpath:springagram-root.json");
