@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -47,6 +49,7 @@ class AnnotatedParametersParameterAccessor {
 
 	private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<Method, MethodParameters>(
 			16, ReferenceType.WEAK);
+	private static final DefaultParameterNameDiscoverer DISCOVERER = new DefaultParameterNameDiscoverer();
 
 	private final @NonNull AnnotationAttribute attribute;
 
@@ -70,7 +73,9 @@ class AnnotatedParametersParameterAccessor {
 			Object verifiedValue = verifyParameterValue(parameter, value);
 
 			if (verifiedValue != null) {
-				result.add(createParameter(parameter, verifiedValue, attribute));
+				SynthesizingMethodParameter synthesizingMethodParameter = new SynthesizingMethodParameter(invocation.getMethod(), parameter.getParameterIndex());
+				synthesizingMethodParameter.initParameterNameDiscovery(DISCOVERER);
+				result.add(createParameter(synthesizingMethodParameter, verifiedValue, attribute));
 			}
 		}
 
