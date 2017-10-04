@@ -92,7 +92,7 @@ class AnnotatedParametersParameterAccessor {
 	}
 
 	/**
-	 * Callback to verifiy the parameter values given for a dummy invocation. Default implementation rejects
+	 * Callback to verify the parameter values given for a dummy invocation. Default implementation rejects
 	 * {@literal null} values as they indicate an invalid dummy call.
 	 * 
 	 * @param parameter will never be {@literal null}.
