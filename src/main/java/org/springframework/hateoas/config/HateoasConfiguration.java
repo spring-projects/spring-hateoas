@@ -22,7 +22,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 /**
- * Common HATOEAS specific configuration.
+ * Common HATEOAS specific configuration.
  *
  * @author Oliver Gierke
  * @soundtrack Elephants Crossing - Wait (Live at Stadtfest Dresden)

@@ -59,7 +59,7 @@ public class Alps {
 	}
 
 	/**
-	 * Retruns a new {@link ExtBuilder}.
+	 * Returns a new {@link ExtBuilder}.
 	 * 
 	 * @return
 	 */
