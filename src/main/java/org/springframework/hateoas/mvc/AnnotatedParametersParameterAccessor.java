@@ -141,9 +141,9 @@ class AnnotatedParametersParameterAccessor {
 		/**
 		 * Creates a new {@link BoundMethodParameter}
 		 * 
-		 * @param parameter
-		 * @param value
-		 * @param attribute
+		 * @param parameter must not be {@literal null}.
+		 * @param value can be {@literal null}.
+		 * @param attribute can be {@literal null}.
 		 */
 		public BoundMethodParameter(MethodParameter parameter, Object value, AnnotationAttribute attribute) {
 
@@ -190,7 +190,9 @@ class AnnotatedParametersParameterAccessor {
 		 * @return
 		 */
 		public String asString() {
-			return value == null ? null
+
+			return value == null //
+					? null //
 					: (String) CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
 		}
 
