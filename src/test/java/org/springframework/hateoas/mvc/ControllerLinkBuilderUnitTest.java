@@ -22,6 +22,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.hamcrest.Matchers;
 import org.junit.Rule;
@@ -554,6 +555,31 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), endsWith("/ctx/people"));
 	}
 
+	/**
+	 * @see #639
+	 */
+	@Test
+	public void considersEmptyOptionalMethodParameterOptional() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithJdk8Optional(Optional.<Integer> empty()))
+				.withSelfRel();
+
+		assertThat(link.isTemplated(), is(true));
+		assertThat(link.getVariableNames(), contains("value"));
+	}
+
+	/**
+	 * @see #639
+	 */
+	@Test
+	public void considersOptionalWithValueMethodParameterOptional() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithJdk8Optional(Optional.of(1))).withSelfRel();
+
+		assertThat(link.isTemplated(), is(false));
+		assertThat(link.getHref(), endsWith("?value=1"));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -628,6 +654,10 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(value = "/bar")
 		HttpEntity<Void> methodForOptionalSizeWithDefaultValue(@RequestParam(defaultValue = "10") Integer size) {
+			return null;
+		}
+
+		HttpEntity<Void> methodWithJdk8Optional(@RequestParam Optional<Integer> value) {
 			return null;
 		}
 	}

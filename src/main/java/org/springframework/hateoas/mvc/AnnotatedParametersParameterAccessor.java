@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,10 +149,12 @@ class AnnotatedParametersParameterAccessor {
 
 			Assert.notNull(parameter, "MethodParameter must not be null!");
 
+			boolean isOptional = Java8Utils.isJava8Optional(parameter.getParameterType());
+
 			this.parameter = parameter;
 			this.value = value;
 			this.attribute = attribute;
-			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, 0);
+			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, isOptional ? 1 : 0);
 		}
 
 		/**
