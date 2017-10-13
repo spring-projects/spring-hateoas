@@ -1,5 +1,4 @@
 {
-  "version" : "1.0",
   "doc" : {
     "href" : "http://example.org/samples/full/doc.html"
   },
@@ -28,5 +27,6 @@
       "href" : "http://alps.io/ext/range",
       "value" : "summary,detail"
     }
-  } ]
+  } ],
+  "version" : "1.0"
 }
