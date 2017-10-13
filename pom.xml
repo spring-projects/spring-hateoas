@@ -78,7 +78,6 @@
 		<jsonpath.version>2.2.0</jsonpath.version>
 		<slf4j.version>1.7.22</slf4j.version>
 		<evo.version>1.2.1</evo.version>
-		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 		<source.level>1.6</source.level>
 	</properties>
 
@@ -633,23 +632,6 @@
 					<source>${source.level}</source>
 					<target>${source.level}</target>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>com.springsource.bundlor</groupId>
-				<artifactId>com.springsource.bundlor.maven</artifactId>
-				<version>1.0.0.RELEASE</version>
-				<configuration>
-					<failOnWarnings>${bundlor.failOnWarnings}</failOnWarnings>
-				</configuration>
-				<executions>
-					<execution>
-						<id>bundlor</id>
-						<goals>
-							<goal>bundlor</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
