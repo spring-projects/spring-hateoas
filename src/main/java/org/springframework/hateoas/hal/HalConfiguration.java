@@ -15,21 +15,34 @@
  */
 package org.springframework.hateoas.hal;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Wither;
 
-import org.springframework.hateoas.HypermediaConfiguration;
-import org.springframework.hateoas.RenderSingleLinks;
+import org.springframework.hateoas.Link;
 
 /**
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
-@AllArgsConstructor
 @NoArgsConstructor
-public class HalConfiguration implements HypermediaConfiguration {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class HalConfiguration {
 
-	private @Wither @Getter @Setter RenderSingleLinks renderSingleLinks;
+	private @Wither @Getter RenderSingleLinks renderSingleLinks = RenderSingleLinks.AS_SINGLE;
+
+	public enum RenderSingleLinks {
+
+		/**
+		 * A single {@link Link} is rendered as a JSON object.
+		 */
+		AS_SINGLE,
+
+		/**
+		 * A single {@link Link} is rendered as a JSON Array.
+		 */
+		AS_ARRAY
+	}
 }

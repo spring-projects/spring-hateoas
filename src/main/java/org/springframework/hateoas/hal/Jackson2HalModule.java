@@ -32,10 +32,10 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.RenderSingleLinks;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -126,7 +126,8 @@ public class Jackson2HalModule extends SimpleModule {
 		private final MessageSourceAccessor accessor;
 		private final HalConfiguration halConfiguration;
 
-		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper, MessageSourceAccessor accessor, HalConfiguration halConfiguration) {
+		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper, MessageSourceAccessor accessor,
+				HalConfiguration halConfiguration) {
 			this(null, curieProvider, mapper, accessor, halConfiguration);
 		}
 
@@ -201,7 +202,8 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
 			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration), null);
+					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration),
+					null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
@@ -430,8 +432,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			List<?> list = (List<?>) value;
 
@@ -695,12 +696,14 @@ public class Jackson2HalModule extends SimpleModule {
 			this(provider, curieProvider, accessor, true, beanFactory, halConfiguration);
 		}
 
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor messageSourceAccessor, AutowireCapableBeanFactory beanFactory) {
+		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
+				MessageSourceAccessor messageSourceAccessor, AutowireCapableBeanFactory beanFactory) {
 			this(provider, curieProvider, messageSourceAccessor, beanFactory, beanFactory.getBean(HalConfiguration.class));
 		}
 
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor messageSourceAccessor) {
-			this(provider, curieProvider, messageSourceAccessor, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_SINGLE));
+		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
+				MessageSourceAccessor messageSourceAccessor) {
+			this(provider, curieProvider, messageSourceAccessor, new HalConfiguration());
 		}
 
 		/**
@@ -743,7 +746,8 @@ public class Jackson2HalModule extends SimpleModule {
 			this.delegate = delegate;
 
 			this.serializers.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
-			this.serializers.put(HalLinkListSerializer.class, new HalLinkListSerializer(curieProvider, mapper, accessor, halConfiguration));
+			this.serializers.put(HalLinkListSerializer.class,
+					new HalLinkListSerializer(curieProvider, mapper, accessor, halConfiguration));
 		}
 
 		/*

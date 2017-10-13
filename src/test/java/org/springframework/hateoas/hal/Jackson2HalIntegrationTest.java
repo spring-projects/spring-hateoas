@@ -27,7 +27,6 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -37,13 +36,13 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.PagedResources.PageMetadata;
-import org.springframework.hateoas.RenderSingleLinks;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.EmbeddedWrappers;
+import org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,12 +81,13 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final String SINGLE_WITH_ONE_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"title\":\"the title\"}}}";
 	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
-	
+
 	@Before
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_SINGLE)));
+		mapper.setHandlerInstantiator(
+				new HalHandlerInstantiator(new AnnotationRelProvider(), null, null, new HalConfiguration()));
 	}
 
 	/**
@@ -109,12 +109,12 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	public void rendersAllExtraRFC5988Attributes() throws Exception {
 
 		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link("localhost", "self")
-			.withHreflang("en")
-			.withTitle("the title")
-			.withType("the type")
-			.withMedia("the media")
-			.withDeprecation("/customers/deprecated"));
+		resourceSupport.add(new Link("localhost", "self") //
+				.withHreflang("en") //
+				.withTitle("the title") //
+				.withType("the type") //
+				.withMedia("the media") //
+				.withDeprecation("/customers/deprecated"));
 
 		assertThat(write(resourceSupport), is(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES));
 	}
@@ -123,8 +123,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	public void rendersWithOneExtraRFC5988Attribute() throws Exception {
 
 		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link("localhost", "self")
-			.withTitle("the title"));
+		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
 
 		assertThat(write(resourceSupport), is(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES));
 	}
@@ -415,7 +414,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null,
+				new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
 
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost").withSelfRel());

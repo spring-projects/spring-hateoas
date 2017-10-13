@@ -28,6 +28,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -46,7 +47,6 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.RenderSingleLinks;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.AnnotationRelProvider;
@@ -91,8 +91,8 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 	private static final boolean EVO_PRESENT = ClassUtils.isPresent("org.atteo.evo.inflector.English", null);
 
 	private final ImportBeanDefinitionRegistrar linkBuilderBeanDefinitionRegistrar = new LinkBuilderBeanDefinitionRegistrar();
-	
-	private BeanFactory beanFactory;
+
+	private ListableBeanFactory beanFactory;
 
 	/*
 	 * (non-Javadoc)
@@ -130,14 +130,9 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				registerSourcedBeanDefinition(builder, metadata, registry);
 			}
 
-			try {
-				this.beanFactory.getBean(HalConfiguration.class);
-			} catch (BeansException e) {
-
-				// If no HalConfiguration bean, create a default one.
-				BeanDefinitionBuilder defaultHalConfiguration = rootBeanDefinition(HalConfiguration.class);
-				defaultHalConfiguration.addPropertyValue("renderSingleLinks", RenderSingleLinks.AS_SINGLE);
-				registerSourcedBeanDefinition(defaultHalConfiguration, metadata, registry);
+			// If no HalConfiguration bean, create a default one.
+			if (this.beanFactory.getBeanNamesForType(HalConfiguration.class).length == 0) {
+				registerSourcedBeanDefinition(rootBeanDefinition(HalConfiguration.class), metadata, registry);
 			}
 		}
 
@@ -159,7 +154,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
+		this.beanFactory = (ListableBeanFactory) beanFactory;
 	}
 
 	/**
