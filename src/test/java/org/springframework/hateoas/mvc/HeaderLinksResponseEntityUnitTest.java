@@ -15,12 +15,10 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -47,14 +45,14 @@ public class HeaderLinksResponseEntityUnitTest {
 		HttpEntity<Resource<Object>> wrapper = HeaderLinksResponseEntity.wrap(entity);
 
 		// No links in resource anymore
-		assertThat(wrapper.getBody().getLinks(), is(Matchers.<Link> empty()));
+		assertThat(wrapper.getBody().getLinks()).isEmpty();
 
 		// Link found in header
 		List<String> linkHeader = wrapper.getHeaders().get("Link");
-		assertThat(linkHeader, hasSize(1));
+		assertThat(linkHeader).hasSize(1);
 
 		Link link = Link.valueOf(linkHeader.get(0));
-		assertThat(link, is(LINK));
+		assertThat(link).isEqualTo(LINK);
 	}
 
 	@Test
@@ -63,6 +61,6 @@ public class HeaderLinksResponseEntityUnitTest {
 		HttpEntity<Resource<Object>> entity = new HttpEntity<Resource<Object>>(resource);
 		ResponseEntity<Resource<Object>> wrappedEntity = HeaderLinksResponseEntity.wrap(entity);
 
-		assertThat(wrappedEntity.getStatusCode(), is(HttpStatus.OK));
+		assertThat(wrappedEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 }

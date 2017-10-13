@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -38,9 +37,9 @@ public class MethodParametersUnitTest {
 		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
 		MethodParameters parameters = new MethodParameters(method, new AnnotationAttribute(Qualifier.class));
 
-		assertThat(parameters.getParameter("param"), is(notNullValue()));
-		assertThat(parameters.getParameter("foo"), is(notNullValue()));
-		assertThat(parameters.getParameter("another"), is(nullValue()));
+		assertThat(parameters.getParameter("param")).isNotNull();
+		assertThat(parameters.getParameter("foo")).isNotNull();
+		assertThat(parameters.getParameter("another")).isNull();
 	}
 
 	/**
@@ -53,8 +52,8 @@ public class MethodParametersUnitTest {
 		MethodParameters methodParameters = new MethodParameters(method);
 
 		List<MethodParameter> objectParameters = methodParameters.getParametersOfType(Object.class);
-		assertThat(objectParameters, hasSize(1));
-		assertThat(objectParameters.get(0).getParameterIndex(), is(2));
+		assertThat(objectParameters).hasSize(1);
+		assertThat(objectParameters.get(0).getParameterIndex()).isEqualTo(2);
 	}
 
 	static class Sample {

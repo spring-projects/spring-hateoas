@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 
 import org.junit.Test;
@@ -69,12 +68,12 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 
 	private static void assertCanRead(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
 
-		assertThat(converter.canRead(type, APPLICATION_JSON), is(expected));
-		assertThat(converter.canRead(type, type, APPLICATION_JSON), is(expected));
+		assertThat(converter.canRead(type, APPLICATION_JSON)).isEqualTo(expected);
+		assertThat(converter.canRead(type, type, APPLICATION_JSON)).isEqualTo(expected);
 	}
 
 	private static void assertCanWrite(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
 
-		assertThat(converter.canWrite(type, APPLICATION_JSON), is(expected));
+		assertThat(converter.canWrite(type, APPLICATION_JSON)).isEqualTo(expected);
 	}
 }

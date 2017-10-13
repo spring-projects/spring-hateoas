@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 
@@ -32,7 +31,7 @@ public class ForwardedHeaderUnitTest {
 	 */
 	@Test
 	public void detectsProtoValue() {
-		assertThat(ForwardedHeader.of("for=192.0.2.60;proto=http").getProto(), is("http"));
+		assertThat(ForwardedHeader.of("for=192.0.2.60;proto=http").getProto()).isEqualTo("http");
 	}
 
 	/**
@@ -40,7 +39,7 @@ public class ForwardedHeaderUnitTest {
 	 */
 	@Test
 	public void detectsHostValue() {
-		assertThat(ForwardedHeader.of("host=localhost;proto=http").getHost(), is("localhost"));
+		assertThat(ForwardedHeader.of("host=localhost;proto=http").getHost()).isEqualTo("localhost");
 	}
 
 	/**
@@ -51,8 +50,8 @@ public class ForwardedHeaderUnitTest {
 
 		ForwardedHeader header = ForwardedHeader.of(null);
 
-		assertThat(header, is(notNullValue()));
-		assertThat(header.getHost(), is(nullValue()));
-		assertThat(header.getProto(), is(nullValue()));
+		assertThat(header).isNotNull();
+		assertThat(header.getHost()).isNull();
+		assertThat(header.getProto()).isNull();
 	}
 }

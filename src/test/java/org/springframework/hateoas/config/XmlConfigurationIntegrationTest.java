@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -40,7 +39,7 @@ public class XmlConfigurationIntegrationTest {
 
 		ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("application-context.xml", getClass());
 
-		assertThat(context.getBean(RelProvider.class), is(notNullValue()));
+		assertThat(context.getBean(RelProvider.class)).isNotNull();
 
 		context.close();
 	}

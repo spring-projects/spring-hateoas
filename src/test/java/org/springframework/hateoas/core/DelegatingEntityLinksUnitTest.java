@@ -15,23 +15,19 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.SimplePluginRegistry;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -43,11 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RunWith(MockitoJUnitRunner.class)
 public class DelegatingEntityLinksUnitTest extends TestUtils {
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
-	@Mock
-	EntityLinks target;
+	@Mock EntityLinks target;
 
 	@Before
 	@Override
@@ -63,11 +55,11 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	@Test
 	public void throwsExceptionForUnsupportedClass() {
 
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(String.class.getName());
-
 		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.<Class<?>, EntityLinks> create());
-		links.linkFor(String.class);
+
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> links.linkFor(String.class)) //
+				.withMessageContaining(String.class.getName());
 	}
 
 	@Test
@@ -75,27 +67,22 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 
 		EntityLinks links = createDelegatingEntityLinks();
 
-		assertThat(links.supports(String.class), is(true));
+		assertThat(links.supports(String.class)).isTrue();
 	}
 
 	@Test
 	public void delegatesLinkForCall() {
 
-		EntityLinks links = createDelegatingEntityLinks();
+		createDelegatingEntityLinks().linkFor(String.class);
 
-		links.linkFor(String.class);
 		verify(target, times(1)).linkFor(String.class);
 	}
 
 	private EntityLinks createDelegatingEntityLinks() {
-
-		PluginRegistry<EntityLinks, Class<?>> registry = SimplePluginRegistry.create(Arrays.asList(target));
-		return new DelegatingEntityLinks(registry);
+		return new DelegatingEntityLinks(SimplePluginRegistry.create(Arrays.asList(target)));
 	}
 
 	@ExposesResourceFor(String.class)
 	@RequestMapping("/string")
-	static class Controller {
-
-	}
+	static class Controller {}
 }

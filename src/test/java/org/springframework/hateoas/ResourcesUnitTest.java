@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.Set;
@@ -37,7 +36,7 @@ public class ResourcesUnitTest {
 	public void equalsForSelfReference() {
 
 		Resources<Resource<String>> resource = new Resources<Resource<String>>(foo);
-		assertThat(resource, is(resource));
+		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
@@ -46,8 +45,8 @@ public class ResourcesUnitTest {
 		Resources<Resource<String>> left = new Resources<Resource<String>>(foo);
 		Resources<Resource<String>> right = new Resources<Resource<String>>(foo);
 
-		assertThat(left, is(right));
-		assertThat(right, is(left));
+		assertThat(left).isEqualTo(right);
+		assertThat(right).isEqualTo(left);
 	}
 
 	@Test
@@ -56,8 +55,8 @@ public class ResourcesUnitTest {
 		Resources<Resource<String>> left = new Resources<Resource<String>>(foo);
 		Resources<Resource<String>> right = new Resources<Resource<String>>(bar);
 
-		assertThat(left, is(not(right)));
-		assertThat(right, is(not(left)));
+		assertThat(left).isNotEqualTo(right);
+		assertThat(right).isNotEqualTo(left);
 	}
 
 	@Test
@@ -67,7 +66,7 @@ public class ResourcesUnitTest {
 		Resources<Resource<String>> right = new Resources<Resource<String>>(bar);
 		right.add(new Link("localhost"));
 
-		assertThat(left, is(not(right)));
-		assertThat(right, is(not(left)));
+		assertThat(left).isNotEqualTo(right);
+		assertThat(right).isNotEqualTo(left);
 	}
 }

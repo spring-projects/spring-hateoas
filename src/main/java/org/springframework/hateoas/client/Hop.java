@@ -47,7 +47,7 @@ public class Hop {
 	/**
 	 * Collection of URI Template parameters.
 	 */
-	private final @Wither Map<String, ? extends Object> parameters;
+	private final @Wither Map<String, Object> parameters;
 
 	/**
 	 * Creates a new {@link Hop} for the given relation name.

@@ -15,14 +15,12 @@
  */
 package org.springframework.hateoas.hal;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.RelProvider;
@@ -53,8 +51,8 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(null, "foo", 1L);
 
-		assertThat(map.get("string"), is((Object) "foo"));
-		assertThat(map.get("long"), is((Object) 1L));
+		assertThat(map.get("string")).isEqualTo((Object) "foo");
+		assertThat(map.get("long")).isEqualTo((Object) 1L);
 	}
 
 	@Test
@@ -62,8 +60,8 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(null, "foo", "bar", 1L);
 
-		assertThat(map.containsKey("string"), is(false));
-		assertThat(map.get("long"), is((Object) 1L));
+		assertThat(map.containsKey("string")).isFalse();
+		assertThat(map.get("long")).isEqualTo(1L);
 		assertHasValues(map, "strings", "foo", "bar");
 	}
 
@@ -75,9 +73,9 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(null, "foo", "bar", "foobar", 1L);
 
-		assertThat(map.containsKey("string"), is(false));
+		assertThat(map.containsKey("string")).isFalse();
 		assertHasValues(map, "strings", "foo", "bar", "foobar");
-		assertThat(map.get("long"), is((Object) 1L));
+		assertThat(map.get("long")).isEqualTo(1L);
 	}
 
 	/**
@@ -89,7 +87,7 @@ public class HalEmbeddedBuilderUnitTest {
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, null, true);
 		builder.add("Sample");
 
-		assertThat(builder.asMap().get("string"), is(nullValue()));
+		assertThat(builder.asMap().get("string")).isNull();
 		assertHasValues(builder.asMap(), "strings", "Sample");
 	}
 
@@ -104,7 +102,7 @@ public class HalEmbeddedBuilderUnitTest {
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, null, true);
 		builder.add(wrappers.wrap("MyValue", "foo"));
 
-		assertThat(builder.asMap().get("foo"), is(instanceOf(String.class)));
+		assertThat(builder.asMap().get("foo")).isInstanceOf(String.class);
 	}
 
 	/**
@@ -123,8 +121,8 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(curieProvider, "foo", 1L);
 
-		assertThat(map.get("curie:string"), is((Object) "foo"));
-		assertThat(map.get("curie:long"), is((Object) 1L));
+		assertThat(map.get("curie:string")).isEqualTo((Object) "foo");
+		assertThat(map.get("curie:long")).isEqualTo((Object) 1L);
 	}
 
 	/**
@@ -135,8 +133,8 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(curieProvider, "foo", "bar", 1L);
 
-		assertThat(map.containsKey("curie:string"), is(false));
-		assertThat(map.get("curie:long"), is((Object) 1L));
+		assertThat(map.containsKey("curie:string")).isFalse();
+		assertThat(map.get("curie:long")).isEqualTo((Object) 1L);
 		assertHasValues(map, "curie:strings", "foo", "bar");
 	}
 
@@ -148,9 +146,9 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(curieProvider, "foo", "bar", "foobar", 1L);
 
-		assertThat(map.containsKey("curie:string"), is(false));
+		assertThat(map.containsKey("curie:string")).isFalse();
 		assertHasValues(map, "curie:strings", "foo", "bar", "foobar");
-		assertThat(map.get("curie:long"), is((Object) 1L));
+		assertThat(map.get("curie:long")).isEqualTo((Object) 1L);
 	}
 
 	/**
@@ -162,7 +160,7 @@ public class HalEmbeddedBuilderUnitTest {
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, true);
 		builder.add("Sample");
 
-		assertThat(builder.asMap().get("curie:string"), is(nullValue()));
+		assertThat(builder.asMap().get("curie:string")).isNull();
 		assertHasValues(builder.asMap(), "curie:strings", "Sample");
 	}
 
@@ -179,8 +177,10 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Object value = source.get(rel);
 
-		assertThat(value, is(instanceOf(List.class)));
-		assertThat((List<Object>) value, Matchers.<List<Object>> allOf(hasSize(values.length), hasItems(values)));
+		assertThat(value).isInstanceOfSatisfying(List.class, it -> {
+			assertThat(it).hasSize(values.length);
+			assertThat(it).contains(values);
+		});
 	}
 
 	private Map<String, Object> setUpBuilder(CurieProvider curieProvider, Object... values) {

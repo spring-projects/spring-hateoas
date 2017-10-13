@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.MockRestServiceServer.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
@@ -54,10 +53,10 @@ public class TypeReferencesIntegrationTest {
 
 	private static final String USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
 	private static final String RESOURCE = String.format("{ \"_links\" : { \"self\" : \"/resource\" }, %s }", USER);
-	private static final String RESOURCES_OF_USER = String.format(
-			"{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ { %s } ] }}", USER);
-	private static final String RESOURCES_OF_RESOURCE = String.format(
-			"{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE);
+	private static final String RESOURCES_OF_USER = String
+			.format("{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ { %s } ] }}", USER);
+	private static final String RESOURCES_OF_RESOURCE = String
+			.format("{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE);
 
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.HAL)
@@ -102,11 +101,11 @@ public class TypeReferencesIntegrationTest {
 				new ResourcesType<User>() {});
 		Resources<User> body = response.getBody();
 
-		assertThat(body.hasLink("self"), is(true));
+		assertThat(body.hasLink("self")).isTrue();
 
 		Collection<User> nested = body.getContent();
 
-		assertThat(nested, hasSize(1));
+		assertThat(nested).hasSize(1);
 		assertExpectedUser(nested.iterator().next());
 	}
 
@@ -122,24 +121,24 @@ public class TypeReferencesIntegrationTest {
 				new ResourcesType<Resource<User>>() {});
 		Resources<Resource<User>> body = response.getBody();
 
-		assertThat(body.hasLink("self"), is(true));
+		assertThat(body.hasLink("self")).isTrue();
 
 		Collection<Resource<User>> nested = body.getContent();
 
-		assertThat(nested, hasSize(1));
+		assertThat(nested).hasSize(1);
 		assertExpectedUserResource(nested.iterator().next());
 	}
 
 	private static void assertExpectedUserResource(Resource<User> user) {
 
-		assertThat(user.hasLink("self"), is(true));
+		assertThat(user.hasLink("self")).isTrue();
 		assertExpectedUser(user.getContent());
 	}
 
 	private static void assertExpectedUser(User user) {
 
-		assertThat(user.firstname, is("Dave"));
-		assertThat(user.lastname, is("Matthews"));
+		assertThat(user.firstname).isEqualTo("Dave");
+		assertThat(user.lastname).isEqualTo("Matthews");
 	}
 
 	static class User {

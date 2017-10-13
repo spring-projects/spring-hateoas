@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.TestUtils;
@@ -34,7 +33,7 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 	public void callingSlashWithEmptyStringIsNoOp() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
-		assertThat(builder.slash(""), is(builder));
+		assertThat(builder.slash("")).isEqualTo(builder);
 	}
 
 	@Test
@@ -42,15 +41,15 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
 		builder = builder.slash("foo#bar");
-		assertThat(builder.toString(), endsWith("foo#bar"));
+		assertThat(builder.toString()).endsWith("foo#bar");
 		builder = builder.slash("bar");
-		assertThat(builder.toString(), endsWith("foo/bar#bar"));
+		assertThat(builder.toString()).endsWith("foo/bar#bar");
 		builder = builder.slash("#foo");
-		assertThat(builder.toString(), endsWith("foo/bar#foo"));
+		assertThat(builder.toString()).endsWith("foo/bar#foo");
 		builder = builder.slash("#");
-		assertThat(builder.toString(), endsWith("foo/bar#foo"));
+		assertThat(builder.toString()).endsWith("foo/bar#foo");
 		builder = builder.slash("foo bar");
-		assertThat(builder.toString(), endsWith("foo%20bar#foo"));
+		assertThat(builder.toString()).endsWith("foo%20bar#foo");
 	}
 
 	/**
@@ -63,7 +62,7 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 
 		builder = builder.slash("47:11");
 
-		assertThat(builder.toString(), endsWith("47:11"));
+		assertThat(builder.toString()).endsWith("47:11");
 	}
 
 	static class SampleLinkBuilder extends LinkBuilderSupport<SampleLinkBuilder> {

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 
@@ -46,7 +45,7 @@ public class LinkDiscoverersUnitTest {
 		LinkDiscoverer high = new HighPriorityLinkDiscoverer();
 
 		PluginRegistry<LinkDiscoverer, MediaType> registry = OrderAwarePluginRegistry.create(Arrays.asList(low, high));
-		assertThat(registry.getRequiredPluginFor(MediaType.APPLICATION_JSON), is(high));
+		assertThat(registry.getRequiredPluginFor(MediaType.APPLICATION_JSON)).isEqualTo(high);
 	}
 
 	@Order(20)

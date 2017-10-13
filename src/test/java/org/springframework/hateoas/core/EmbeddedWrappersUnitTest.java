@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,8 +41,8 @@ public class EmbeddedWrappersUnitTest {
 		EmbeddedWrapper wrapper = wrappers.emptyCollectionOf(String.class);
 
 		assertEmptyCollectionValue(wrapper);
-		assertThat(wrapper.getRel(), is(nullValue()));
-		assertThat(wrapper.getRelTargetType(), is(equalTo((Class) String.class)));
+		assertThat(wrapper.getRel()).isNull();
+		assertThat(wrapper.getRelTargetType()).isEqualTo((Class) String.class);
 	}
 
 	/**
@@ -55,8 +54,8 @@ public class EmbeddedWrappersUnitTest {
 		EmbeddedWrapper wrapper = wrappers.wrap(Collections.emptySet(), "rel");
 
 		assertEmptyCollectionValue(wrapper);
-		assertThat(wrapper.getRel(), is("rel"));
-		assertThat(wrapper.getRelTargetType(), is(nullValue()));
+		assertThat(wrapper.getRel()).isEqualTo("rel");
+		assertThat(wrapper.getRelTargetType()).isNull();
 	}
 
 	/**
@@ -67,9 +66,8 @@ public class EmbeddedWrappersUnitTest {
 		wrappers.wrap(Collections.emptySet());
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void assertEmptyCollectionValue(EmbeddedWrapper wrapper) {
-
-		assertThat(wrapper.getValue(), is(instanceOf(Collection.class)));
-		assertThat((Collection<?>) wrapper.getValue(), is(empty()));
+		assertThat(wrapper.getValue()).isInstanceOfSatisfying(Collection.class, it -> assertThat(it).isEmpty());
 	}
 }

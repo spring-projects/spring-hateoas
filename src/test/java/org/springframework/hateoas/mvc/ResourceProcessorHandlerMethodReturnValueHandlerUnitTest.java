@@ -15,9 +15,8 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.util.ReflectionUtils.*;
 
@@ -27,13 +26,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -49,9 +49,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ReflectionUtils.MethodCallback;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Unit tests for {@link org.springframework.data.rest.webmvc.ResourceProcessorHandlerMethodReturnValueHandler}.
@@ -60,7 +58,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Jon Brisbin
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTests {
+public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	static final Resource<String> FOO = new Resource<String>("foo");
 	static final Resources<Resource<String>> FOOS = new Resources<Resource<String>>(Collections.singletonList(FOO));
@@ -245,7 +243,19 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTests {
 	 * @see #362
 	 */
 	@Test
+	public void usesHeaderLinksResponseEntityForResourceIfConfigured() throws Exception {
+		usesHeaderLinksResponseEntityIfConfigured(Function.identity());
+	}
+
+	/**
+	 * @see #362
+	 */
+	@Test
 	public void usesHeaderLinksResponseEntityIfConfigured() throws Exception {
+		usesHeaderLinksResponseEntityIfConfigured(it -> ResponseEntity.ok(it));
+	}
+
+	private void usesHeaderLinksResponseEntityIfConfigured(Function<Object, Object> mapper) throws Exception {
 
 		Resource<String> resource = new Resource<String>("foo", new Link("href", "rel"));
 		MethodParameter parameter = METHOD_PARAMS.get("resource");
@@ -253,10 +263,10 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTests {
 		ResourceProcessorHandlerMethodReturnValueHandler handler = new ResourceProcessorHandlerMethodReturnValueHandler(
 				delegate, new ResourceProcessorInvoker(resourceProcessors));
 		handler.setRootLinksAsHeaders(true);
-		handler.handleReturnValue(resource, parameter, null, null);
+		handler.handleReturnValue(mapper.apply(resource), parameter, null, null);
 
-		verify(delegate, times(1)).handleReturnValue(Mockito.any(HeaderLinksResponseEntity.class), eq(parameter),
-				Mockito.any(ModelAndViewContainer.class), Mockito.any(NativeWebRequest.class));
+		verify(delegate, times(1)).handleReturnValue(any(HeaderLinksResponseEntity.class), eq(parameter), isNull(),
+				isNull());
 	}
 
 	/**
@@ -267,7 +277,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTests {
 
 		ResolvableType type = ResolvableType.forClass(PagedStringResources.class);
 
-		assertThat(ResourcesProcessorWrapper.isValueTypeMatch(FOO_PAGE, type), is(true));
+		assertThat(ResourcesProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
 	}
 
 	/**
@@ -278,12 +288,12 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTests {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 		Resources<Object> value = new Resources<Object>(
-				Collections.<Object>singleton(wrappers.emptyCollectionOf(Object.class)));
+				Collections.<Object> singleton(wrappers.emptyCollectionOf(Object.class)));
 		ResourcesProcessorWrapper wrapper = new ResourcesProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));
 
-		assertThat(wrapper.supports(type, value), is(false));
+		assertThat(wrapper.supports(type, value)).isFalse();
 	}
 
 	/**
@@ -334,7 +344,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTests {
 		HandlerMethodReturnValueHandler handler = new ResourceProcessorHandlerMethodReturnValueHandler(delegate,
 				new ResourceProcessorInvoker(resourceProcessors));
 
-		assertThat(handler.supportsReturnType(parameter), is(value));
+		assertThat(handler.supportsReturnType(parameter)).isEqualTo(value);
 	}
 
 	enum StringResourceProcessor implements ResourceProcessor<Resource<String>> {

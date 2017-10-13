@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -43,10 +42,10 @@ public class UriTemplateUnitTest {
 	@Test
 	public void discoversTemplate() {
 
-		assertThat(UriTemplate.isTemplate("/foo{?bar}"), is(true));
-		assertThat(UriTemplate.isTemplate("/foo"), is(false));
-		assertThat(UriTemplate.isTemplate(null), is(false));
-		assertThat(UriTemplate.isTemplate(""), is(false));
+		assertThat(UriTemplate.isTemplate("/foo{?bar}")).isTrue();
+		assertThat(UriTemplate.isTemplate("/foo")).isFalse();
+		assertThat(UriTemplate.isTemplate(null)).isFalse();
+		assertThat(UriTemplate.isTemplate("")).isFalse();
 	}
 
 	/**
@@ -112,8 +111,8 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{?bar,foobar}");
 
-		assertVariables(template, new TemplateVariable("bar", VariableType.REQUEST_PARAM), new TemplateVariable("foobar",
-				VariableType.REQUEST_PARAM));
+		assertVariables(template, new TemplateVariable("bar", VariableType.REQUEST_PARAM),
+				new TemplateVariable("foobar", VariableType.REQUEST_PARAM));
 	}
 
 	/**
@@ -125,7 +124,7 @@ public class UriTemplateUnitTest {
 		UriTemplate template = new UriTemplate("/foo{?bar}");
 
 		URI uri = template.expand(Collections.singletonMap("bar", "myBar"));
-		assertThat(uri.toString(), is("/foo?bar=myBar"));
+		assertThat(uri.toString()).isEqualTo("/foo?bar=myBar");
 	}
 
 	/**
@@ -141,7 +140,7 @@ public class UriTemplateUnitTest {
 		UriTemplate template = new UriTemplate("/foo{?bar,fooBar}");
 
 		URI uri = template.expand(parameters);
-		assertThat(uri.toString(), is("/foo?bar=myBar&fooBar=myFooBar"));
+		assertThat(uri.toString()).isEqualTo("/foo?bar=myBar&fooBar=myFooBar");
 	}
 
 	/**
@@ -162,7 +161,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/foo{/bar}{?firstname,lastname}{#anchor}");
 		URI uri = template.expand("path", "Dave", "Matthews", "discography");
-		assertThat(uri.toString(), is("/foo/path?firstname=Dave&lastname=Matthews#discography"));
+		assertThat(uri.toString()).isEqualTo("/foo/path?firstname=Dave&lastname=Matthews#discography");
 	}
 
 	/**
@@ -170,7 +169,7 @@ public class UriTemplateUnitTest {
 	 */
 	@Test
 	public void expandsTemplateWithoutVariablesCorrectly() {
-		assertThat(new UriTemplate("/foo").expand().toString(), is("/foo"));
+		assertThat(new UriTemplate("/foo").expand().toString()).isEqualTo("/foo");
 	}
 
 	/**
@@ -178,7 +177,8 @@ public class UriTemplateUnitTest {
 	 */
 	@Test
 	public void correctlyExpandsFullUri() {
-		assertThat(new UriTemplate("http://localhost:8080/foo{?bar}").expand().toString(), is("http://localhost:8080/foo"));
+		assertThat(new UriTemplate("http://localhost:8080/foo{?bar}").expand().toString())
+				.isEqualTo("http://localhost:8080/foo");
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class UriTemplateUnitTest {
 	public void rendersUriTempalteWithPathVariable() {
 
 		UriTemplate template = new UriTemplate("/{foo}/bar{?page}");
-		assertThat(template.toString(), is("/{foo}/bar{?page}"));
+		assertThat(template.toString()).isEqualTo("/{foo}/bar{?page}");
 	}
 
 	/**
@@ -215,10 +215,10 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/?page=2");
 		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("page", VariableType.REQUEST_PARAM)));
-		assertThat(result.getVariableNames(), is(empty()));
+		assertThat(result.getVariableNames()).isEmpty();
 
 		result = template.with(new TemplateVariables(new TemplateVariable("page", VariableType.REQUEST_PARAM_CONTINUED)));
-		assertThat(result.getVariableNames(), is(empty()));
+		assertThat(result.getVariableNames()).isEmpty();
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/#fragment");
 		UriTemplate result = template.with(new TemplateVariables(new TemplateVariable("fragment", VariableType.FRAGMENT)));
-		assertThat(result.getVariableNames(), is(empty()));
+		assertThat(result.getVariableNames()).isEmpty();
 	}
 
 	/**
@@ -239,7 +239,7 @@ public class UriTemplateUnitTest {
 	public void expandASimplePathVariable() {
 
 		UriTemplate template = new UriTemplate("/foo/{id}");
-		assertThat(template.expand(2).toString(), is("/foo/2"));
+		assertThat(template.expand(2).toString()).isEqualTo("/foo/2");
 	}
 
 	/**
@@ -258,7 +258,7 @@ public class UriTemplateUnitTest {
 
 		UriTemplate template = new UriTemplate("/").with("q", VariableType.REQUEST_PARAM);
 
-		assertThat(template.toString(), is("/{?q}"));
+		assertThat(template.toString()).isEqualTo("/{?q}");
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
@@ -267,13 +267,13 @@ public class UriTemplateUnitTest {
 
 	private static void assertVariables(UriTemplate template, Collection<TemplateVariable> variables) {
 
-		assertThat(template.getVariableNames(), hasSize(variables.size()));
-		assertThat(template.getVariables(), hasSize(variables.size()));
+		assertThat(template.getVariableNames()).hasSize(variables.size());
+		assertThat(template.getVariables()).hasSize(variables.size());
 
 		for (TemplateVariable variable : variables) {
 
-			assertThat(template, hasItem(variable));
-			assertThat(template.getVariableNames(), hasItems(variable.getName()));
+			assertThat(template).contains(variable);
+			assertThat(template.getVariableNames()).contains(variable.getName());
 		}
 	}
 }

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 
@@ -43,28 +42,29 @@ public class LinksUnitTest {
 	static final String LINKS2 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(THIRD, FOURTH));
 
 	static final Links reference = new Links(new Link("/something", "foo"), new Link("/somethingElse", "bar"));
-	static final Links reference2 = new Links(new Link("/something", "foo").withHreflang("en"), new Link("/somethingElse", "bar").withHreflang("de"));
-	
+	static final Links reference2 = new Links(new Link("/something", "foo").withHreflang("en"),
+			new Link("/somethingElse", "bar").withHreflang("de"));
+
 	@Test
 	public void parsesLinkHeaderLinks() {
 
-		assertThat(Links.valueOf(LINKS), is(reference));
-		assertThat(Links.valueOf(LINKS2), is(reference2));
-		assertThat(reference.toString(), is(LINKS));
-		assertThat(reference2.toString(), is(LINKS2));
+		assertThat(Links.valueOf(LINKS)).isEqualTo(reference);
+		assertThat(Links.valueOf(LINKS2)).isEqualTo(reference2);
+		assertThat(reference.toString()).isEqualTo(LINKS);
+		assertThat(reference2.toString()).isEqualTo(LINKS2);
 	}
 
 	@Test
 	public void skipsEmptyLinkElements() {
-		assertThat(Links.valueOf(LINKS + ",,,"), is(reference));
-		assertThat(Links.valueOf(LINKS2 + ",,,"), is(reference2));
+		assertThat(Links.valueOf(LINKS + ",,,")).isEqualTo(reference);
+		assertThat(Links.valueOf(LINKS2 + ",,,")).isEqualTo(reference2);
 	}
 
 	@Test
 	public void returnsNullForNullOrEmptySource() {
 
-		assertThat(Links.valueOf(null), is(Links.NO_LINKS));
-		assertThat(Links.valueOf(""), is(Links.NO_LINKS));
+		assertThat(Links.valueOf(null)).isEqualTo(Links.NO_LINKS);
+		assertThat(Links.valueOf("")).isEqualTo(Links.NO_LINKS);
 	}
 
 	/**
@@ -73,8 +73,8 @@ public class LinksUnitTest {
 	 */
 	@Test
 	public void getSingleLinkByRel() {
-		assertThat(reference.getLink("bar"), is(new Link("/somethingElse", "bar")));
-		assertThat(reference2.getLink("bar"), is(new Link("/somethingElse", "bar").withHreflang("de")));
+		assertThat(reference.getLink("bar")).isEqualTo(new Link("/somethingElse", "bar"));
+		assertThat(reference2.getLink("bar")).isEqualTo(new Link("/somethingElse", "bar").withHreflang("de"));
 	}
 
 	/**
@@ -85,11 +85,11 @@ public class LinksUnitTest {
 
 		Link withComma = new Link("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
 
-		assertThat(Links.valueOf(WITH_COMMA).getLink("foo"), is(withComma));
+		assertThat(Links.valueOf(WITH_COMMA).getLink("foo")).isEqualTo(withComma);
 
 		Links twoWithCommaInFirst = Links.valueOf(WITH_COMMA.concat(",").concat(SECOND));
 
-		assertThat(twoWithCommaInFirst.getLink("foo"), is(withComma));
-		assertThat(twoWithCommaInFirst.getLink("bar"), is(new Link("/somethingElse", "bar")));
+		assertThat(twoWithCommaInFirst.getLink("foo")).isEqualTo(withComma);
+		assertThat(twoWithCommaInFirst.getLink("bar")).isEqualTo(new Link("/somethingElse", "bar"));
 	}
 }

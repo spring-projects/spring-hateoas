@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.alps;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -43,8 +42,8 @@ public class AlpsLinkDiscoverUnitTest extends AbstractLinkDiscovererUnitTest {
 
 		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString());
 
-		assertThat(link, is(notNullValue()));
-		assertThat(link.getHref(), is("fullRelHref"));
+		assertThat(link).isNotNull();
+		assertThat(link.getHref()).isEqualTo("fullRelHref");
 	}
 
 	/**

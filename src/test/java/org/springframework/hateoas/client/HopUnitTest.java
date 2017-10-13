@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.client;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -52,7 +51,7 @@ public class HopUnitTest {
 	 */
 	@Test
 	public void hasNoParametersByDefault() {
-		assertThat(Hop.rel("rel").getParameters().entrySet(), is(empty()));
+		assertThat(Hop.rel("rel").getParameters()).isEmpty();
 	}
 
 	/**
@@ -63,8 +62,8 @@ public class HopUnitTest {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 
-		assertThat(hop.getParameters(), hasEntry("key", (Object) "value"));
-		assertThat(hop.getParameters().entrySet(), hasSize(1));
+		assertThat(hop.getParameters()).hasSize(1) //
+				.containsEntry("key", "value");
 	}
 
 	/**
@@ -73,11 +72,10 @@ public class HopUnitTest {
 	@Test
 	public void replacesParametersForWither() {
 
-		Hop hop = Hop.rel("rel").withParameter("key", "value")
-				.withParameters(Collections.<String, Object> singletonMap("foo", "bar"));
+		Hop hop = Hop.rel("rel").withParameter("key", "value").withParameters(Collections.singletonMap("foo", "bar"));
 
-		assertThat(hop.getParameters().entrySet(), hasSize(1));
-		assertThat(hop.getParameters(), hasEntry("foo", (Object) "bar"));
+		assertThat(hop.getParameters()).hasSize(1) //
+				.containsEntry("foo", (Object) "bar");
 	}
 
 	/**
@@ -88,10 +86,9 @@ public class HopUnitTest {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 
-		Map<String, Object> result = hop.getMergedParameters(Collections.<String, Object> singletonMap("foo", "bar"));
-
-		assertThat(result.entrySet(), hasSize(2));
-		assertThat(result, allOf(hasEntry("key", (Object) "value"), hasEntry("foo", (Object) "bar")));
+		assertThat(hop.getMergedParameters(Collections.singletonMap("foo", "bar"))).hasSize(2)//
+				.containsEntry("key", "value")//
+				.containsEntry("foo", "bar");
 	}
 
 	/**
@@ -104,7 +101,7 @@ public class HopUnitTest {
 
 		Map<String, Object> result = hop.getMergedParameters(Collections.singletonMap("key", (Object) "global"));
 
-		assertThat(result.entrySet(), hasSize(1));
-		assertThat(result, hasEntry("key", (Object) "value"));
+		assertThat(result).hasSize(1) //
+				.containsEntry("key", "value");
 	}
 }

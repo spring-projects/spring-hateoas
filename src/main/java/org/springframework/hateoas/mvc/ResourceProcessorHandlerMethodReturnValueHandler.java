@@ -126,7 +126,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 	Object rewrapResult(ResourceSupport newBody, Object originalValue) {
 
 		if (!(originalValue instanceof HttpEntity)) {
-			return newBody;
+			return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(newBody) : newBody;
 		}
 
 		HttpEntity<ResourceSupport> entity = null;
@@ -139,10 +139,6 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 			entity = new HttpEntity<ResourceSupport>(newBody, source.getHeaders());
 		}
 
-		return addLinksToHeaderWrapper(entity);
-	}
-
-	private HttpEntity<?> addLinksToHeaderWrapper(HttpEntity<ResourceSupport> entity) {
 		return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(entity) : entity;
 	}
 

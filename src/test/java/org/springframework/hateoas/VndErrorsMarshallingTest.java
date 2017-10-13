@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -89,7 +88,7 @@ public class VndErrorsMarshallingTest {
 	 */
 	@Test
 	public void jackson2Marshalling() throws Exception {
-		assertThat(jackson2Mapper.writeValueAsString(errors), equalToIgnoringWhiteSpace(json2Reference));
+		assertThat(jackson2Mapper.writeValueAsString(errors)).isEqualToIgnoringWhitespace(json2Reference);
 	}
 
 	/**
@@ -101,7 +100,7 @@ public class VndErrorsMarshallingTest {
 		Writer writer = new StringWriter();
 		marshaller.marshal(errors, writer);
 
-		assertThat(new Diff(xmlReference, writer.toString()).similar(), is(true));
+		assertThat(new Diff(xmlReference, writer.toString()).similar()).isTrue();
 	}
 
 	/**
@@ -109,7 +108,7 @@ public class VndErrorsMarshallingTest {
 	 */
 	@Test
 	public void jackson2UnMarshalling() throws Exception {
-		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class), is(errors));
+		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class)).isEqualTo(errors);
 	}
 
 	/**
@@ -118,7 +117,7 @@ public class VndErrorsMarshallingTest {
 	@Test
 	public void jaxbUnMarshalling() throws Exception {
 		VndErrors actual = (VndErrors) unmarshaller.unmarshal(new StringReader(xmlReference));
-		assertThat(actual, is(errors));
+		assertThat(actual).isEqualTo(errors);
 	}
 
 	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {

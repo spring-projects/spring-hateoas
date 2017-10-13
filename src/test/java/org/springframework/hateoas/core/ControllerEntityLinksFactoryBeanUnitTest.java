@@ -15,12 +15,9 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -37,16 +34,14 @@ import org.springframework.stereotype.Controller;
  */
 public class ControllerEntityLinksFactoryBeanUnitTest {
 
-	@Rule public ExpectedException exception = ExpectedException.none();
-
 	@Test
 	public void rejectsFactoryBeanIfAnnotationNotSet() throws Exception {
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage("Annotation");
-
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
-		builder.afterPropertiesSet();
+
+		assertThatExceptionOfType(IllegalStateException.class) //
+				.isThrownBy(() -> builder.afterPropertiesSet()) //
+				.withMessageContaining("Annotation");
 	}
 
 	@Test
@@ -65,6 +60,6 @@ public class ControllerEntityLinksFactoryBeanUnitTest {
 		builder.afterPropertiesSet();
 
 		ControllerEntityLinks entityLinks = builder.getObject();
-		assertThat(entityLinks.supports(Person.class), is(true));
+		assertThat(entityLinks.supports(Person.class)).isTrue();
 	}
 }

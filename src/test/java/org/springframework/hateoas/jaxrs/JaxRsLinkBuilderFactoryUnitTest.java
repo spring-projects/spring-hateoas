@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.jaxrs;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
@@ -43,8 +42,8 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(PersonServiceImpl.class).withSelfRel();
 
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people");
 	}
 
 	@Test
@@ -52,8 +51,8 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(PersonsAddressesService.class, 15).withSelfRel();
 
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/15/addresses"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people/15/addresses");
 	}
 
 	/**
@@ -64,8 +63,8 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(PersonsAddressesService.class, "with blank").withSelfRel();
 
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people/with%20blank/addresses");
 	}
 
 	/**
@@ -76,8 +75,8 @@ public class JaxRsLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(PersonsAddressesService.class, Collections.singletonMap("id", "17")).withSelfRel();
 
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/17/addresses"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people/17/addresses");
 	}
 
 	@Path("/people")

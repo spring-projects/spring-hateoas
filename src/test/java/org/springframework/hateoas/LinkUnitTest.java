@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -35,14 +34,14 @@ public class LinkUnitTest {
 	@Test
 	public void linkWithHrefOnlyBecomesSelfLink() {
 		Link link = new Link("foo");
-		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 	}
 
 	@Test
 	public void createsLinkFromRelAndHref() {
 		Link link = new Link("foo", Link.REL_SELF);
-		assertThat(link.getHref(), is("foo"));
-		assertThat(link.getRel(), is(Link.REL_SELF));
+		assertThat(link.getHref()).isEqualTo("foo");
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -94,14 +93,14 @@ public class LinkUnitTest {
 
 	@Test
 	public void differentTypeDoesNotEqual() {
-		assertThat(new Link("foo"), is(not((Object) new ResourceSupport())));
+		assertThat(new Link("foo")).isNotEqualTo((Object) new ResourceSupport());
 	}
 
 	@Test
 	public void returnsNullForNullOrEmptyLink() {
 
-		assertThat(Link.valueOf(null), is(nullValue()));
-		assertThat(Link.valueOf(""), is(nullValue()));
+		assertThat(Link.valueOf(null)).isNull();
+		assertThat(Link.valueOf("")).isNull();
 	}
 
 	/**
@@ -111,15 +110,21 @@ public class LinkUnitTest {
 	@Test
 	public void parsesRFC5988HeaderIntoLink() {
 
-		assertThat(Link.valueOf("</something>;rel=\"foo\""), is(new Link("/something", "foo")));
-		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo")));
-		assertThat(Link.valueOf("</customer/1>;rel=\"self\";hreflang=\"en\";media=\"pdf\";title=\"pdf customer copy\";type=\"portable document\";deprecation=\"http://example.com/customers/deprecated\""),
-			is(new Link("/customer/1")
-				.withHreflang("en")
-				.withMedia("pdf")
-				.withTitle("pdf customer copy")
-				.withType("portable document")
-				.withDeprecation("http://example.com/customers/deprecated")));
+		assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(new Link("/something", "foo"));
+		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\"")).isEqualTo(new Link("/something", "foo"));
+		assertThat(Link.valueOf("</customer/1>;" //
+				+ "rel=\"self\";" //
+				+ "hreflang=\"en\";" //
+				+ "media=\"pdf\";" //
+				+ "title=\"pdf customer copy\";" //
+				+ "type=\"portable document\";" //
+				+ "deprecation=\"http://example.com/customers/deprecated\"")) //
+						.isEqualTo(new Link("/customer/1") //
+								.withHreflang("en") //
+								.withMedia("pdf") //
+								.withTitle("pdf customer copy") //
+								.withType("portable document") //
+								.withDeprecation("http://example.com/customers/deprecated"));
 	}
 
 	/**
@@ -129,8 +134,8 @@ public class LinkUnitTest {
 	public void ignoresUnrecognizedAttributes() {
 		Link link = Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
 
-		assertThat(link.getHref(), is("/something"));
-		assertThat(link.getRel(), is("foo"));
+		assertThat(link.getHref()).isEqualTo("/something");
+		assertThat(link.getRel()).isEqualTo("foo");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -159,10 +164,10 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo{?page}");
 
-		assertThat(link.isTemplated(), is(true));
-		assertThat(link.getVariableNames(), hasSize(1));
-		assertThat(link.getVariableNames(), hasItem("page"));
-		assertThat(link.expand("2"), is(new Link("/foo?page=2")));
+		assertThat(link.isTemplated()).isTrue();
+		assertThat(link.getVariableNames()).hasSize(1);
+		assertThat(link.getVariableNames()).contains("page");
+		assertThat(link.expand("2")).isEqualTo(new Link("/foo?page=2"));
 	}
 
 	/**
@@ -173,8 +178,8 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo");
 
-		assertThat(link.isTemplated(), is(false));
-		assertThat(link.getVariableNames(), hasSize(0));
+		assertThat(link.isTemplated()).isFalse();
+		assertThat(link.getVariableNames()).hasSize(0);
 	}
 
 	/**
@@ -197,7 +202,7 @@ public class LinkUnitTest {
 	public void keepsCompleteBaseUri() {
 
 		Link link = new Link("/customer/{customerId}/programs", "programs");
-		assertThat(link.getHref(), is("/customer/{customerId}/programs"));
+		assertThat(link.getHref()).isEqualTo("/customer/{customerId}/programs");
 	}
 
 	/**
@@ -205,7 +210,8 @@ public class LinkUnitTest {
 	 */
 	@Test
 	public void parsesLinkRelationWithDotAndMinus() {
-		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").getRel(), is("rel-with-minus-and-."));
+		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").getRel())
+				.isEqualTo("rel-with-minus-and-.");
 	}
 
 	/**
@@ -214,7 +220,7 @@ public class LinkUnitTest {
 	@Test
 	public void parsesUriLinkRelations() {
 
-		assertThat(Link.valueOf("<http://localhost>; rel=\"http://acme.com/rels/foo-bar\"").getRel(),
-				is("http://acme.com/rels/foo-bar"));
+		assertThat(Link.valueOf("<http://localhost>; rel=\"http://acme.com/rels/foo-bar\"").getRel()) //
+				.isEqualTo("http://acme.com/rels/foo-bar");
 	}
 }

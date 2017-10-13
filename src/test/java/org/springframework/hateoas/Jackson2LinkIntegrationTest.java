@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 
@@ -35,7 +34,7 @@ public class Jackson2LinkIntegrationTest extends AbstractJackson2MarshallingInte
 	 */
 	@Test
 	public void writesLinkCorrectly() throws Exception {
-		assertThat(write(new Link("location", "something")), is(REFERENCE));
+		assertThat(write(new Link("location", "something"))).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -44,7 +43,7 @@ public class Jackson2LinkIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void readsLinkCorrectly() throws Exception {
 		Link result = read(REFERENCE, Link.class);
-		assertThat(result.getHref(), is("location"));
-		assertThat(result.getRel(), is("something"));
+		assertThat(result.getHref()).isEqualTo("location");
+		assertThat(result.getRel()).isEqualTo("something");
 	}
 }

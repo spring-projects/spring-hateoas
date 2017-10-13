@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Before;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -24,7 +23,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Utility class to ease tesing.
+ * Utility class to ease testing.
  * 
  * @author Oliver Gierke
  */
@@ -41,23 +40,23 @@ public class TestUtils {
 	}
 
 	protected void assertPointsToMockServer(Link link) {
-		assertThat(link.getHref(), startsWith("http://localhost"));
+		assertThat(link.getHref()).startsWith("http://localhost");
 	}
 
 	public static void assertEqualAndSameHashCode(Object left, Object right) {
 
-		assertThat(left, is(right));
-		assertThat(right, is(left));
-		assertThat(left, is(left));
-		assertThat(left.hashCode(), is(right.hashCode()));
-		assertThat(left.toString(), is(right.toString()));
+		assertThat(left).isEqualTo(right);
+		assertThat(right).isEqualTo(left);
+		assertThat(left).isEqualTo(left);
+		assertThat(left.hashCode()).isEqualTo(right.hashCode());
+		assertThat(left.toString()).isEqualTo(right.toString());
 	}
 
 	public static void assertNotEqualAndDifferentHashCode(Object left, Object right) {
 
-		assertThat(left, is(not(right)));
-		assertThat(right, is(not(left)));
-		assertThat(left.hashCode(), is(not(right.hashCode())));
-		assertThat(left.toString(), is(not(right.toString())));
+		assertThat(left).isNotEqualTo(right);
+		assertThat(right).isNotEqualTo(left);
+		assertThat(left.hashCode()).isNotEqualTo(right.hashCode());
+		assertThat(left.toString()).isNotEqualTo(right.toString());
 	}
 }

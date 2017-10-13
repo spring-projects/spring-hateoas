@@ -1,7 +1,6 @@
 package org.springframework.hateoas;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 		Resource<Person> resource = new Resource<Person>(person);
 		resource.add(new Link("localhost"));
 
-		assertThat(write(resource), is(REFERENCE));
+		assertThat(write(resource)).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -42,10 +41,10 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 
 		PersonResource result = read(REFERENCE, PersonResource.class);
 
-		assertThat(result.getLinks(), hasSize(1));
-		assertThat(result.getLinks(), hasItem(new Link("localhost")));
-		assertThat(result.getContent().firstname, is("Dave"));
-		assertThat(result.getContent().lastname, is("Matthews"));
+		assertThat(result.getLinks()).hasSize(1);
+		assertThat(result.getLinks()).contains(new Link("localhost"));
+		assertThat(result.getContent().firstname).isEqualTo("Dave");
+		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}
 
 	static class PersonResource extends Resource<Person> {

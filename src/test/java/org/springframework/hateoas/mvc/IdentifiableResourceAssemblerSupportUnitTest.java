@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
@@ -56,8 +55,8 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		PersonResource resource = assembler.createResource(person);
 		Link link = resource.getLink(Link.REL_SELF);
 
-		assertThat(link, is(notNullValue()));
-		assertThat(resource.getLinks().size(), is(1));
+		assertThat(link).isNotNull();
+		assertThat(resource.getLinks()).hasSize(1);
 	}
 
 	@Test
@@ -65,7 +64,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 		PersonResource resource = assembler.createResourceWithId(person.alternateId, person);
 		Link selfLink = resource.getId();
-		assertThat(selfLink.getHref(), endsWith("/people/id"));
+		assertThat(selfLink.getHref()).endsWith("/people/id");
 	}
 
 	@Test
@@ -74,7 +73,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		PersonResource resource = new PersonResourceAssembler(ParameterizedController.class).createResource(person, person,
 				"bar");
 		Link selfLink = resource.getId();
-		assertThat(selfLink.getHref(), endsWith("/people/10/bar/addresses/10"));
+		assertThat(selfLink.getHref()).endsWith("/people/10/bar/addresses/10");
 	}
 
 	@Test
@@ -95,8 +94,8 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		PersonResource secondResource = new PersonResource();
 		secondResource.add(builder.slash(1L).withSelfRel());
 
-		assertThat(result.size(), is(2));
-		assertThat(result, hasItems(firstResource, secondResource));
+		assertThat(result).hasSize(2);
+		assertThat(result).contains(firstResource, secondResource);
 	}
 
 	@RequestMapping("/people")

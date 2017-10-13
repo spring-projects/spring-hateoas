@@ -56,7 +56,7 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	 * @param entity must not be {@literal null}.
 	 */
 	private HeaderLinksResponseEntity(HttpEntity<T> entity) {
-		this(new ResponseEntity<T>(entity.getBody(), entity.getHeaders(), HttpStatus.OK));
+		this(ResponseEntity.ok().headers(entity.getHeaders()).body(entity.getBody()));
 	}
 
 	/**
@@ -75,6 +75,20 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 		} else {
 			return new HeaderLinksResponseEntity<S>(entity);
 		}
+	}
+
+	/**
+	 * Wraps the given {@link ResourceSupport} into a {@link HeaderLinksResponseEntity}. Will default the status code to
+	 * {@link HttpStatus#OK}.
+	 * 
+	 * @param entity must not be {@literal null}.
+	 * @return
+	 */
+	public static <S extends ResourceSupport> HeaderLinksResponseEntity<S> wrap(S entity) {
+
+		Assert.notNull(entity, "ResourceSupport must not be null!");
+
+		return new HeaderLinksResponseEntity<>(ResponseEntity.ok(entity));
 	}
 
 	/**

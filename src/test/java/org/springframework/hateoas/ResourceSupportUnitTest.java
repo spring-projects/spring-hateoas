@@ -15,12 +15,10 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 /**
@@ -34,10 +32,10 @@ public class ResourceSupportUnitTest {
 	public void setsUpWithEmptyLinkList() {
 
 		ResourceSupport support = new ResourceSupport();
-		assertThat(support.hasLinks(), is(false));
-		assertThat(support.hasLink(Link.REL_SELF), is(false));
-		assertThat(support.getLinks().isEmpty(), is(true));
-		assertThat(support.getLinks(Link.REL_SELF).isEmpty(), is(true));
+		assertThat(support.hasLinks()).isFalse();
+		assertThat(support.hasLink(Link.REL_SELF)).isFalse();
+		assertThat(support.getLinks().isEmpty()).isTrue();
+		assertThat(support.getLinks(Link.REL_SELF).isEmpty()).isTrue();
 	}
 
 	@Test
@@ -47,11 +45,11 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(link);
 
-		assertThat(support.getId(), is(nullValue()));
-		assertThat(support.hasLinks(), is(true));
-		assertThat(support.hasLink(link.getRel()), is(true));
-		assertThat(support.getLink(link.getRel()), is(link));
-		assertThat(support.getLinks(Link.REL_NEXT), contains(link));
+		assertThat(support.getId()).isNull();
+		assertThat(support.hasLinks()).isTrue();
+		assertThat(support.hasLink(link.getRel())).isTrue();
+		assertThat(support.getLink(link.getRel())).isEqualTo(link);
+		assertThat(support.getLinks(Link.REL_NEXT)).contains(link);
 	}
 
 	@Test
@@ -62,10 +60,10 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(link, link2);
 
-		assertThat(support.getLinks("customers").size(), is(2));
-		assertThat(support.getLinks("customers"), contains(link, link2));
-		assertThat(support.getLinks("non-existent").size(), is(0));
-		assertThat(support.getLinks("non-existent"), is(Matchers.<Link>empty()));
+		assertThat(support.getLinks("customers")).hasSize(2);
+		assertThat(support.getLinks("customers")).contains(link, link2);
+		assertThat(support.getLinks("non-existent")).hasSize(0);
+		assertThat(support.getLinks("non-existent")).isEmpty();
 	}
 
 	@Test
@@ -77,12 +75,12 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(Arrays.asList(first, second));
 
-		assertThat(support.getId(), is(nullValue()));
-		assertThat(support.hasLinks(), is(true));
-		assertThat(support.getLinks(), hasItems(first, second));
-		assertThat(support.getLinks().size(), is(2));
-		assertThat(support.getLinks(Link.REL_PREVIOUS), contains(first));
-		assertThat(support.getLinks(Link.REL_NEXT), contains(second));
+		assertThat(support.getId()).isNull();
+		assertThat(support.hasLinks()).isTrue();
+		assertThat(support.getLinks()).contains(first, second);
+		assertThat(support.getLinks()).hasSize(2);
+		assertThat(support.getLinks(Link.REL_PREVIOUS)).contains(first);
+		assertThat(support.getLinks(Link.REL_NEXT)).contains(second);
 	}
 
 	@Test
@@ -92,7 +90,7 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(link);
 
-		assertThat(support.getId(), is(link));
+		assertThat(support.getId()).isEqualTo(link);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -160,7 +158,7 @@ public class ResourceSupportUnitTest {
 	public void doesNotEqualNull() {
 
 		ResourceSupport support = new ResourceSupport();
-		assertThat(support.equals(null), is(false));
+		assertThat(support.equals(null)).isFalse();
 	}
 
 	/**
@@ -172,7 +170,7 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(new Link("/self", "self"), new Link("/another", "another"));
 
-		assertThat(support.hasLink("self"), is(true));
-		assertThat(support.hasLink("another"), is(true));
+		assertThat(support.hasLink("self")).isTrue();
+		assertThat(support.hasLink("another")).isTrue();
 	}
 }

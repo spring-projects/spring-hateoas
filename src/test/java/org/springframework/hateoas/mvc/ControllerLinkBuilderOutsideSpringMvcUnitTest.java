@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import org.junit.Before;
@@ -49,6 +48,6 @@ public class ControllerLinkBuilderOutsideSpringMvcUnitTest {
 				methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
 						.withSelfRel();
 
-		assertThat(link, is(new Link("/people/15/addresses/DE").withSelfRel()));
+		assertThat(link).isEqualTo(new Link("/people/15/addresses/DE").withSelfRel());
 	}
 }

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.Link;
@@ -36,15 +35,17 @@ public class DummyInvocationUtilsUnitTest extends TestUtils {
 	@Test
 	public void pathVariableWithDefaultParameter() {
 
-		Link link = ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someMethod(1L)).withSelfRel();
-		assertThat(link.getHref(), is("http://localhost/sample/1/foo"));
+		Link link = ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someMethod(1L))
+				.withSelfRel();
+		assertThat(link.getHref()).isEqualTo("http://localhost/sample/1/foo");
 	}
 
 	@Test
 	public void pathVariableWithNameParameter() {
 
-		Link link = ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someOtherMethod(2L)).withSelfRel();
-		assertThat(link.getHref(), is("http://localhost/sample/2/bar"));
+		Link link = ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someOtherMethod(2L))
+				.withSelfRel();
+		assertThat(link.getHref()).isEqualTo("http://localhost/sample/2/bar");
 	}
 
 	@RequestMapping("/sample")

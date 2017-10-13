@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Mars
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost"));
 
-		assertThat(write(resourceSupport), is(REFERENCE));
+		assertThat(write(resourceSupport)).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -49,7 +48,7 @@ public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Mars
 
 		ResourceSupport result = read(REFERENCE, ResourceSupport.class);
 
-		assertThat(result.getLinks(), hasSize(1));
-		assertThat(result.getLinks(), hasItem(new Link("localhost")));
+		assertThat(result.getLinks()).hasSize(1);
+		assertThat(result.getLinks()).contains(new Link("localhost"));
 	}
 }

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
@@ -33,7 +32,7 @@ public class ResourceUnitTest {
 	public void equalsForSelfReference() {
 
 		Resource<String> resource = new Resource<String>("foo");
-		assertThat(resource, is(resource));
+		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
@@ -42,8 +41,8 @@ public class ResourceUnitTest {
 		Resource<String> left = new Resource<String>("foo");
 		Resource<String> right = new Resource<String>("foo");
 
-		assertThat(left, is(right));
-		assertThat(right, is(left));
+		assertThat(left).isEqualTo(right);
+		assertThat(right).isEqualTo(left);
 	}
 
 	@Test
@@ -52,8 +51,8 @@ public class ResourceUnitTest {
 		Resource<String> left = new Resource<String>("foo");
 		Resource<String> right = new Resource<String>("bar");
 
-		assertThat(left, is(not(right)));
-		assertThat(right, is(not(left)));
+		assertThat(left).isNotEqualTo(right);
+		assertThat(right).isNotEqualTo(left);
 	}
 
 	@Test
@@ -63,8 +62,8 @@ public class ResourceUnitTest {
 		Resource<String> right = new Resource<String>("foo");
 		right.add(new Link("localhost"));
 
-		assertThat(left, is(not(right)));
-		assertThat(right, is(not(left)));
+		assertThat(left).isNotEqualTo(right);
+		assertThat(right).isNotEqualTo(left);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

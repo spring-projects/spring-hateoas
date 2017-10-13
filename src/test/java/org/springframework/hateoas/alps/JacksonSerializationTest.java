@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.alps;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.alps.Alps.*;
 
 import java.io.IOException;
@@ -70,7 +69,7 @@ public class JacksonSerializationTest {
 								).build())//
 				).build();
 
-		assertThat(mapper.writeValueAsString(alps), is(read(new ClassPathResource("reference.json", getClass()))));
+		assertThat(mapper.writeValueAsString(alps)).isEqualTo(read(new ClassPathResource("reference.json", getClass())));
 	}
 
 	private static String read(Resource resource) throws IOException {

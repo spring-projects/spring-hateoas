@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,13 +40,13 @@ public class DelegatingRelProviderUnitTest {
 
 		RelProvider delegatingProvider = new DelegatingRelProvider(registry);
 
-		assertThat(delegatingProvider.supports(Sample.class), is(true));
-		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class), is("foo"));
-		assertThat(delegatingProvider.getCollectionResourceRelFor(Sample.class), is("bar"));
+		assertThat(delegatingProvider.supports(Sample.class)).isTrue();
+		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class)).isEqualTo("foo");
+		assertThat(delegatingProvider.getCollectionResourceRelFor(Sample.class)).isEqualTo("bar");
 
-		assertThat(delegatingProvider.supports(String.class), is(true));
-		assertThat(delegatingProvider.getItemResourceRelFor(String.class), is("string"));
-		assertThat(delegatingProvider.getCollectionResourceRelFor(String.class), is("stringList"));
+		assertThat(delegatingProvider.supports(String.class)).isTrue();
+		assertThat(delegatingProvider.getItemResourceRelFor(String.class)).isEqualTo("string");
+		assertThat(delegatingProvider.getCollectionResourceRelFor(String.class)).isEqualTo("stringList");
 	}
 
 	@Relation(value = "foo", collectionRelation = "bar")

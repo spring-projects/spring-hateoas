@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.StringWriter;
@@ -80,7 +80,7 @@ public class Jackson2PagedResourcesIntegrationTest {
 		ReflectionUtils.invokeMethod(SPRING_4_2_WRITE_METHOD, converter, resources, method.getGenericReturnType(),
 				MediaType.APPLICATION_JSON, outputMessage);
 
-		assertThat(writer.toString(), is(REFERENCE));
+		assertThat(writer.toString()).isEqualTo(REFERENCE);
 	}
 
 	interface Sample {

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.VndErrors.VndError;
@@ -32,10 +31,10 @@ public class VndErrorsUnitTest {
 	public void rendersToStringCorrectly() {
 
 		VndError error = new VndErrors.VndError("logref", "message", new Link("foo", "bar"));
-		assertThat(error.toString(), is("VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]"));
+		assertThat(error.toString()).isEqualTo("VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]");
 
 		VndErrors errors = new VndErrors(error);
-		assertThat(errors.toString(),
-				is("VndErrors[VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]]"));
+		assertThat(errors.toString()) //
+				.isEqualTo("VndErrors[VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]]");
 	}
 }

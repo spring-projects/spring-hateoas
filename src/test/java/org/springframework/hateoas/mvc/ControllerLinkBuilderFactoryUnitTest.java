@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
@@ -61,8 +60,8 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonControllerImpl.class).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people");
 	}
 
 	@Test
@@ -71,8 +70,8 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonsAddressesController.class, 15).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/15/addresses"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people/15/addresses");
 	}
 
 	@Test
@@ -86,7 +85,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(1L, specialType)).withSelfRel();
 		assertPointsToMockServer(link);
-		assertThat(link.getHref(), endsWith("/sample/1?foo=value"));
+		assertThat(link.getHref()).endsWith("/sample/1?foo=value");
 	}
 
 	/**
@@ -99,7 +98,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
-		assertThat(link.getHref(), endsWith("/sample/" + ISODateTimeFormat.date().print(now)));
+		assertThat(link.getHref()).endsWith("/sample/" + ISODateTimeFormat.date().print(now));
 	}
 
 	/**
@@ -109,8 +108,8 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	public void linksToMethodWithPathVariableContainingBlank() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/something/with%20blank/foo"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/something/with%20blank/foo");
 	}
 
 	/**
@@ -122,8 +121,8 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonsAddressesController.class, "with blank").withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/with%20blank/addresses"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people/with%20blank/addresses");
 	}
 
 	/**
@@ -139,8 +138,8 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithMap(queryParams)).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/sample/mapsupport?firstKey=firstValue&secondKey=secondValue"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/sample/mapsupport?firstKey=firstValue&secondKey=secondValue");
 	}
 
 	/**
@@ -156,9 +155,9 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithMap(queryParams)).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(),
-				endsWith("/sample/multivaluemapsupport?key1=value1a&key1=value1b&key2=value2a&key2=value2b"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()) //
+				.endsWith("/sample/multivaluemapsupport?key1=value1a&key1=value1b&key2=value2a&key2=value2b");
 	}
 
 	/**
@@ -170,8 +169,8 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonsAddressesController.class, Collections.singletonMap("id", "17")).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel(), is(Link.REL_SELF));
-		assertThat(link.getHref(), endsWith("/people/17/addresses"));
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/people/17/addresses");
 	}
 
 	static interface SampleController {

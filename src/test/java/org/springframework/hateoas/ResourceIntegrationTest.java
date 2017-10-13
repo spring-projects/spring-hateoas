@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.StringWriter;
 
@@ -51,7 +50,7 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		Resource<Person> resource = new Resource<Person>(person);
 		resource.add(new Link("localhost"));
 
-		assertThat(write(resource), is(REFERENCE));
+		assertThat(write(resource)).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.marshal(resource, writer);
 
-		assertThat(new Diff(XML_REFERENCE, writer.toString()).similar(), is(true));
+		assertThat(new Diff(XML_REFERENCE, writer.toString()).similar()).isTrue();
 	}
 
 	/**
@@ -85,10 +84,10 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 
 		PersonResource result = read(REFERENCE, PersonResource.class);
 
-		assertThat(result.getLinks(), hasSize(1));
-		assertThat(result.getLinks(), hasItem(new Link("localhost")));
-		assertThat(result.getContent().firstname, is("Dave"));
-		assertThat(result.getContent().lastname, is("Matthews"));
+		assertThat(result.getLinks()).hasSize(1);
+		assertThat(result.getLinks()).contains(new Link("localhost"));
+		assertThat(result.getContent().firstname).isEqualTo("Dave");
+		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}
 
 	@XmlRootElement

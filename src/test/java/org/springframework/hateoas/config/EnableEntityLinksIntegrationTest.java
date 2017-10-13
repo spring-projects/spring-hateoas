@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import javax.ws.rs.Path;
 
@@ -56,16 +55,15 @@ public class EnableEntityLinksIntegrationTest {
 		}
 	}
 
-	@Autowired
-	DelegatingEntityLinks builder;
+	@Autowired DelegatingEntityLinks builder;
 
 	@Test
 	public void initializesDelegatingEntityLinks() {
 
-		assertThat(builder, is(notNullValue()));
-		assertThat(builder.supports(Person.class), is(true));
-		assertThat(builder.supports(Address.class), is(true));
-		assertThat(builder.supports(Object.class), is(false));
+		assertThat(builder).isNotNull();
+		assertThat(builder.supports(Person.class)).isTrue();
+		assertThat(builder.supports(Address.class)).isTrue();
+		assertThat(builder.supports(Object.class)).isFalse();
 	}
 
 	@Controller

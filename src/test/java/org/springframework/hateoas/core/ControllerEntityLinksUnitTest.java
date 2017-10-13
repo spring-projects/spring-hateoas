@@ -15,22 +15,17 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.LinkBuilder;
@@ -47,101 +42,84 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RunWith(MockitoJUnitRunner.class)
 public class ControllerEntityLinksUnitTest extends TestUtils {
 
-	@Mock
-	LinkBuilderFactory<LinkBuilder> linkBuilderFactory;
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+	@Mock LinkBuilderFactory<LinkBuilder> linkBuilderFactory;
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void rejectsUnannotatedController() {
 
-		thrown.expectMessage(InvalidController.class.getName());
-		new ControllerEntityLinks(Arrays.asList(InvalidController.class), linkBuilderFactory);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullControllerList() {
-		new ControllerEntityLinks(null, linkBuilderFactory);
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> new ControllerEntityLinks(Arrays.asList(InvalidController.class), linkBuilderFactory)) //
+				.withMessageContaining(InvalidController.class.getName());
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	public void rejectsNullControllerList() {
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> new ControllerEntityLinks(null, linkBuilderFactory));
+	}
+
+	@Test
 	public void rejectsNullLinkBuilderFactory() {
 
-		thrown.expectMessage(InvalidController.class.getName());
-		new ControllerEntityLinks(Arrays.asList(InvalidController.class), linkBuilderFactory);
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> new ControllerEntityLinks(Arrays.asList(SampleController.class), null));
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void registersControllerForEntity() {
 
 		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
 		EntityLinks links = new ControllerEntityLinks(Arrays.asList(SampleController.class), linkBuilderFactory);
 
-		assertThat(links.supports(Person.class), is(true));
-		assertThat(links.linkFor(Person.class), is(notNullValue()));
+		assertThat(links.supports(Person.class)).isTrue();
+		assertThat(links.linkFor(Person.class)).isNotNull();
 	}
 
 	/**
 	 * @see #43
 	 */
 	@Test
-	@SuppressWarnings("unchecked")
 	public void returnsLinkBuilderForParameterizedController() {
 
-		when(linkBuilderFactory.linkTo(eq(ControllerWithParameters.class), Mockito.any(Object[].class))).thenReturn(
-				linkTo(ControllerWithParameters.class, "1"));
+		when(linkBuilderFactory.linkTo(eq(ControllerWithParameters.class), (Object[]) any())) //
+				.thenReturn(linkTo(ControllerWithParameters.class, "1"));
 
 		ControllerEntityLinks links = new ControllerEntityLinks(Arrays.asList(ControllerWithParameters.class),
 				linkBuilderFactory);
 		LinkBuilder builder = links.linkFor(Order.class, "1");
 
-		assertThat(builder.withSelfRel().getHref(), CoreMatchers.endsWith("/person/1"));
+		assertThat(builder.withSelfRel().getHref()).endsWith("/person/1");
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void rejectsUnmanagedEntity() {
 
-		EntityLinks links = new ControllerEntityLinks(
-				Arrays.asList(SampleController.class, ControllerWithParameters.class), linkBuilderFactory);
+		EntityLinks links = new ControllerEntityLinks(Arrays.asList(SampleController.class, ControllerWithParameters.class),
+				linkBuilderFactory);
 
-		assertThat(links.supports(Person.class), is(true));
-		assertThat(links.supports(Order.class), is(true));
-		assertThat(links.supports(SampleController.class), is(false));
+		assertThat(links.supports(Person.class)).isTrue();
+		assertThat(links.supports(Order.class)).isTrue();
+		assertThat(links.supports(SampleController.class)).isFalse();
 
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage(SampleController.class.getName());
-		thrown.expectMessage(ExposesResourceFor.class.getName());
-		links.linkFor(SampleController.class);
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> links.linkFor(SampleController.class)) //
+				.withMessageContaining(SampleController.class.getName()) //
+				.withMessageContaining(ExposesResourceFor.class.getName());
 	}
 
 	@Controller
 	@ExposesResourceFor(Person.class)
 	@RequestMapping("/person")
-	static class SampleController {
-
-	}
+	static class SampleController {}
 
 	@Controller
 	@ExposesResourceFor(Order.class)
 	@RequestMapping("/person/{id}")
-	static class ControllerWithParameters {
+	static class ControllerWithParameters {}
 
-	}
+	static class InvalidController {}
 
-	static class InvalidController {
+	static class Person {}
 
-	}
-
-	static class Person {
-
-	}
-
-	static class Order {
-
-	}
+	static class Order {}
 }

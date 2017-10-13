@@ -63,11 +63,10 @@ public class Server implements Closeable {
 		this.mapper.registerModule(new Jackson2HalModule());
 		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
 
-		initJadler(). //
-				that().//
-				respondsWithDefaultContentType(MediaTypes.HAL_JSON.toString()). //
-				respondsWithDefaultStatus(200).//
-				respondsWithDefaultEncoding(Charset.forName("UTF-8"));
+		initJadler() //
+				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //
+				.withDefaultResponseEncoding(Charset.forName("UTF-8")) //
+				.withDefaultResponseStatus(200);
 
 		onRequest(). //
 				havingPathEqualTo("/"). //
@@ -97,10 +96,14 @@ public class Server implements Closeable {
 				withContentType(MediaTypes.HAL_JSON.toString());
 
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
-		org.springframework.core.io.Resource springagramRoot = resourceLoader.getResource("classpath:springagram-root.json");
-		org.springframework.core.io.Resource springagramItems = resourceLoader.getResource("classpath:springagram-items.json");
-		org.springframework.core.io.Resource springagramItem = resourceLoader.getResource("classpath:springagram-item.json");
-		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader.getResource("classpath:springagram-item-without-image.json");
+		org.springframework.core.io.Resource springagramRoot = resourceLoader
+				.getResource("classpath:springagram-root.json");
+		org.springframework.core.io.Resource springagramItems = resourceLoader
+				.getResource("classpath:springagram-items.json");
+		org.springframework.core.io.Resource springagramItem = resourceLoader
+				.getResource("classpath:springagram-item.json");
+		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader
+				.getResource("classpath:springagram-item-without-image.json");
 
 		String springagramRootTemplate;
 		String springagramItemsTemplate;
@@ -118,7 +121,8 @@ public class Server implements Closeable {
 		}
 
 		String springagramRootHalDocument = String.format(springagramRootTemplate, rootResource(), rootResource());
-		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(), rootResource());
+		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(),
+				rootResource());
 		String springagramItemHalDocument = String.format(springagramItemTemplate, rootResource(), rootResource());
 		String springagramItemWithoutImageHalDocument = String.format(springagramItemWithoutImageTemplate, rootResource());
 

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
@@ -45,7 +44,7 @@ public class PagedResourcesUnitTest {
 
 		resources.add(new Link("foo", Link.REL_NEXT));
 
-		assertThat(resources.getNextLink(), is(notNullValue()));
+		assertThat(resources.getNextLink()).isNotNull();
 	}
 
 	@Test
@@ -53,7 +52,7 @@ public class PagedResourcesUnitTest {
 
 		resources.add(new Link("custom", Link.REL_PREVIOUS));
 
-		assertThat(resources.getPreviousLink(), is(notNullValue()));
+		assertThat(resources.getPreviousLink()).isNotNull();
 	}
 
 	/**
@@ -101,6 +100,6 @@ public class PagedResourcesUnitTest {
 	 */
 	@Test
 	public void calculatesTotalPagesCorrectly() {
-		assertThat(new PageMetadata(5, 0, 16).getTotalPages(), is(4L));
+		assertThat(new PageMetadata(5, 0, 16).getTotalPages()).isEqualTo(4L);
 	}
 }

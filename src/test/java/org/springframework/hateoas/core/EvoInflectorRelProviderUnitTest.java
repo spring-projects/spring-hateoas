@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.RelProvider;
@@ -37,8 +36,8 @@ public class EvoInflectorRelProviderUnitTest {
 	}
 
 	private void assertRels(Class<?> type, String singleRel, String collectionRel) {
-		assertThat(provider.getItemResourceRelFor(type), is(singleRel));
-		assertThat(provider.getCollectionResourceRelFor(type), is(collectionRel));
+		assertThat(provider.getItemResourceRelFor(type)).isEqualTo(singleRel);
+		assertThat(provider.getCollectionResourceRelFor(type)).isEqualTo(collectionRel);
 	}
 
 	static class Person {
