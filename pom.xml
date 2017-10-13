@@ -73,6 +73,7 @@
 		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson.version>2.9.1</jackson.version>
+		<java-module-name>spring.hateoas</java-module-name>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
@@ -520,7 +521,7 @@
 			<version>2.10.0</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
@@ -588,6 +589,15 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.0.2</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Version>${project.version}</Implementation-Version>
+							<Automatic-Module-Name>${java-module-name}</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
 			</plugin>
 
 			<plugin>
