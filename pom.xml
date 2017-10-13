@@ -68,11 +68,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.11.RELEASE</spring.version>
+		<spring.version>5.0.0.RELEASE</spring.version>
 		<logback.version>1.1.8</logback.version>
 		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.8.5</jackson.version>
+		<jackson.version>2.9.1</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
@@ -84,37 +84,9 @@
 	<profiles>
 
 		<profile>
-			<id>spring43-next</id>
-			<properties>
-				<spring.version>4.3.12.BUILD-SNAPSHOT</spring.version>
-			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>spring5</id>
-			<properties>
-				<spring.version>5.0.0.RELEASE</spring.version>
-				<jackson.version>2.9.1</jackson.version>
-			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-milestone</id>
-					<url>http://repo.spring.io/libs-milestone</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
 			<id>spring5-next</id>
 			<properties>
 				<spring.version>5.0.1.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.1</jackson.version>
 			</properties>
 			<repositories>
 				<repository>

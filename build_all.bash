@@ -5,6 +5,4 @@
 #
 
 mvn clean package &&
-mvn clean package -Pspring43-next &&
-mvn clean package -Pspring5 &&
 mvn clean package -Pspring5-next
