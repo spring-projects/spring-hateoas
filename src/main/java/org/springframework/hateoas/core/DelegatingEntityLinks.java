@@ -96,13 +96,9 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 	 */
 	private EntityLinks getPluginFor(Class<?> type) {
 
-		EntityLinks plugin = delegates.getPluginFor(type);
-
-		if (plugin == null) {
-			throw new IllegalArgumentException(String.format(
-					"Cannot determine link for %s! No EntityLinks instance found supporting the domain type!", type.getName()));
-		}
-
-		return plugin;
+		return delegates.getPluginFor(type) //
+				.orElseThrow(() -> new IllegalArgumentException(
+						String.format("Cannot determine link for %s! No EntityLinks instance found supporting the domain type!",
+								type.getName())));
 	}
 }

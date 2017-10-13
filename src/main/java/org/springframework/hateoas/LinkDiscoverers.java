@@ -47,7 +47,7 @@ public class LinkDiscoverers {
 	 * @return
 	 */
 	public LinkDiscoverer getLinkDiscovererFor(MediaType mediaType) {
-		return discoverers.getPluginFor(mediaType);
+		return discoverers.getRequiredPluginFor(mediaType);
 	}
 
 	/**

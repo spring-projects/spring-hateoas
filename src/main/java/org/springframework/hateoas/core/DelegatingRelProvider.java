@@ -38,7 +38,7 @@ public class DelegatingRelProvider implements RelProvider {
 	 */
 	@Override
 	public String getItemResourceRelFor(Class<?> type) {
-		return providers.getPluginFor(type).getItemResourceRelFor(type);
+		return providers.getRequiredPluginFor(type).getItemResourceRelFor(type);
 	}
 
 	/*
@@ -47,7 +47,7 @@ public class DelegatingRelProvider implements RelProvider {
 	 */
 	@Override
 	public String getCollectionResourceRelFor(java.lang.Class<?> type) {
-		return providers.getPluginFor(type).getCollectionResourceRelFor(type);
+		return providers.getRequiredPluginFor(type).getCollectionResourceRelFor(type);
 	}
 
 	/*

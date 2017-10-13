@@ -46,7 +46,7 @@ public class LinkDiscoverersUnitTest {
 		LinkDiscoverer high = new HighPriorityLinkDiscoverer();
 
 		PluginRegistry<LinkDiscoverer, MediaType> registry = OrderAwarePluginRegistry.create(Arrays.asList(low, high));
-		assertThat(registry.getPluginFor(MediaType.APPLICATION_JSON), is(high));
+		assertThat(registry.getRequiredPluginFor(MediaType.APPLICATION_JSON), is(high));
 	}
 
 	@Order(20)
