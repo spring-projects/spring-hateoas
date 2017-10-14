@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.hateoas.IanaRels;
 import org.springframework.hateoas.Link;
@@ -78,16 +77,13 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		Assert.notNull(curies, "Curies must not be null!");
 
-		for (Entry<String, UriTemplate> entry : curies.entrySet()) {
-
-			String name = entry.getKey();
-			UriTemplate template = entry.getValue();
+		curies.forEach((name, template) -> {
 
 			Assert.hasText(name, "Curie name must not be null or empty!");
 			Assert.notNull(template, "UriTemplate must not be null!");
 			Assert.isTrue(template.getVariableNames().size() == 1,
 					String.format("Expected a single template variable in the UriTemplate %s!", template.toString()));
-		}
+		});
 
 		this.defaultCurie = StringUtils.hasText(defaultCurieName) ? defaultCurieName
 				: curies.size() == 1 ? curies.keySet().iterator().next() : null;
@@ -101,15 +97,9 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public Collection<? extends Object> getCurieInformation(Links links) {
 
-		List<Curie> result = new ArrayList<Curie>(curies.size());
+		List<Curie> result = new ArrayList<>(curies.size());
 
-		for (Entry<String, UriTemplate> source : curies.entrySet()) {
-
-			String name = source.getKey();
-			UriTemplate template = source.getValue();
-
-			result.add(new Curie(name, getCurieHref(name, template)));
-		}
+		curies.forEach((name, template) -> result.add(new Curie(name, getCurieHref(name, template))));
 
 		return Collections.unmodifiableCollection(result);
 	}
