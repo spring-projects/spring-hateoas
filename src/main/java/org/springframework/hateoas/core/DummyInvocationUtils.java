@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
 public class DummyInvocationUtils {
 
 	private static final ObjenesisStd OBJENESIS = new ObjenesisStd();
-	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<Class<?>, Class<?>>(16,
+	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<>(16,
 			ReferenceType.WEAK);
 
 	public interface LastInvocationAware {
@@ -206,23 +206,16 @@ public class DummyInvocationUtils {
 		Assert.notNull(type, "Source type must not be null!");
 		Assert.notNull(classLoader, "ClassLoader must not be null!");
 
-		Class<?> result = CLASS_CACHE.get(type);
+		return CLASS_CACHE.computeIfAbsent(type, key -> {
 
-		if (result != null) {
-			return result;
-		}
+			Enhancer enhancer = new Enhancer();
+			enhancer.setSuperclass(key);
+			enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
+			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
+			enhancer.setClassLoader(classLoader);
 
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(type);
-		enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
-		enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-		enhancer.setClassLoader(classLoader);
-
-		result = enhancer.createClass();
-
-		CLASS_CACHE.put(type, result);
-
-		return result;
+			return enhancer.createClass();
+		});
 	}
 
 	@Value

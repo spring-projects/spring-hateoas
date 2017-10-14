@@ -45,7 +45,7 @@ import org.springframework.web.util.UriTemplate;
 @RequiredArgsConstructor
 class AnnotatedParametersParameterAccessor {
 
-	private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<Method, MethodParameters>(
+	private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<>(
 			16, ReferenceType.WEAK);
 
 	private final @NonNull AnnotationAttribute attribute;
@@ -62,7 +62,7 @@ class AnnotatedParametersParameterAccessor {
 
 		MethodParameters parameters = getOrCreateMethodParametersFor(invocation.getMethod());
 		Object[] arguments = invocation.getArguments();
-		List<BoundMethodParameter> result = new ArrayList<BoundMethodParameter>();
+		List<BoundMethodParameter> result = new ArrayList<>();
 
 		for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
 
@@ -110,17 +110,7 @@ class AnnotatedParametersParameterAccessor {
 	 * @return
 	 */
 	private static MethodParameters getOrCreateMethodParametersFor(Method method) {
-
-		MethodParameters methodParameters = METHOD_PARAMETERS_CACHE.get(method);
-
-		if (methodParameters != null) {
-			return methodParameters;
-		}
-
-		methodParameters = new MethodParameters(method);
-		METHOD_PARAMETERS_CACHE.put(method, methodParameters);
-
-		return methodParameters;
+		return METHOD_PARAMETERS_CACHE.computeIfAbsent(method, MethodParameters::new);
 	}
 
 	/**
