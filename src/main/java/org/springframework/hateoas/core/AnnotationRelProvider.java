@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.hateoas.RelProvider;
 @Order(100)
 public class AnnotationRelProvider implements RelProvider {
 
-	private final Map<Class<?>, Relation> annotationCache = new HashMap<Class<?>, Relation>();
+	private final Map<Class<?>, Relation> annotationCache = new HashMap<>();
 
 	/*
 	 * (non-Javadoc)
@@ -73,19 +73,6 @@ public class AnnotationRelProvider implements RelProvider {
 	}
 
 	private Relation lookupAnnotation(Class<?> type) {
-
-		Relation relation = annotationCache.get(type);
-
-		if (relation != null) {
-			return relation;
-		}
-
-		relation = AnnotationUtils.getAnnotation(type, Relation.class);
-
-		if (relation != null) {
-			annotationCache.put(type, relation);
-		}
-
-		return relation;
+		return annotationCache.computeIfAbsent(type, key -> AnnotationUtils.getAnnotation(key, Relation.class));
 	}
 }

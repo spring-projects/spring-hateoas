@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class MethodParameters {
 	private static ParameterNameDiscoverer DISCOVERER = new DefaultParameterNameDiscoverer();
 
 	private final List<MethodParameter> parameters;
-	private final Map<Class<?>, List<MethodParameter>> parametersWithAnnotationCache = new ConcurrentReferenceHashMap<Class<?>, List<MethodParameter>>();
+	private final Map<Class<?>, List<MethodParameter>> parametersWithAnnotationCache = new ConcurrentReferenceHashMap<>();
 
 	/**
 	 * Creates a new {@link MethodParameters} from the given {@link Method}.
@@ -59,7 +59,7 @@ public class MethodParameters {
 	public MethodParameters(Method method, AnnotationAttribute namingAnnotation) {
 
 		Assert.notNull(method, "Method must not be null!");
-		this.parameters = new ArrayList<MethodParameter>();
+		this.parameters = new ArrayList<>();
 
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
 
@@ -107,7 +107,7 @@ public class MethodParameters {
 	public List<MethodParameter> getParametersOfType(Class<?> type) {
 
 		Assert.notNull(type, "Type must not be null!");
-		List<MethodParameter> result = new ArrayList<MethodParameter>();
+		List<MethodParameter> result = new ArrayList<>();
 
 		for (MethodParameter parameter : getParameters()) {
 			if (parameter.getParameterType().equals(type)) {
@@ -126,24 +126,19 @@ public class MethodParameters {
 	 */
 	public List<MethodParameter> getParametersWith(Class<? extends Annotation> annotation) {
 
-		List<MethodParameter> cached = parametersWithAnnotationCache.get(annotation);
+		return parametersWithAnnotationCache.computeIfAbsent(annotation, key -> {
 
-		if (cached != null) {
-			return cached;
-		}
+			Assert.notNull(annotation, "Annotation must not be null!");
+			List<MethodParameter> result = new ArrayList<>();
 
-		Assert.notNull(annotation, "Annotation must not be null!");
-		List<MethodParameter> result = new ArrayList<MethodParameter>();
-
-		for (MethodParameter parameter : getParameters()) {
-			if (parameter.hasParameterAnnotation(annotation)) {
-				result.add(parameter);
+			for (MethodParameter parameter : getParameters()) {
+				if (parameter.hasParameterAnnotation(annotation)) {
+					result.add(parameter);
+				}
 			}
-		}
 
-		parametersWithAnnotationCache.put(annotation, result);
-
-		return result;
+			return result;
+		});
 	}
 
 	/**

@@ -305,20 +305,13 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	private static class CachingAnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		private final @Delegate AnnotationMappingDiscoverer delegate;
-		private final Map<String, UriTemplate> templates = new ConcurrentReferenceHashMap<String, UriTemplate>();
+		private final Map<String, UriTemplate> templates = new ConcurrentReferenceHashMap<>();
 
 		public UriTemplate getMappingAsUriTemplate(Class<?> type, Method method) {
 
 			String mapping = delegate.getMapping(type, method);
-
-			UriTemplate template = templates.get(mapping);
-
-			if (template == null) {
-				template = new UriTemplate(mapping);
-				templates.put(mapping, template);
-			}
-
-			return template;
+			
+			return templates.computeIfAbsent(mapping, UriTemplate::new);
 		}
 	}
 

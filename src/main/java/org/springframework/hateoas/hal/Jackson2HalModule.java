@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,8 +152,8 @@ public class Jackson2HalModule extends SimpleModule {
 				throws IOException, JsonGenerationException {
 
 			// sort links according to their relation
-			Map<String, List<Object>> sortedLinks = new LinkedHashMap<String, List<Object>>();
-			List<Link> links = new ArrayList<Link>();
+			Map<String, List<Object>> sortedLinks = new LinkedHashMap<>();
+			List<Link> links = new ArrayList<>();
 
 			boolean prefixingRequired = curieProvider != null;
 			boolean curiedLinkPresent = false;
@@ -179,18 +179,14 @@ public class Jackson2HalModule extends SimpleModule {
 					curiedLinkPresent = true;
 				}
 
-				if (sortedLinks.get(rel) == null) {
-					sortedLinks.put(rel, new ArrayList<Object>());
-				}
+				sortedLinks.computeIfAbsent(rel, key -> new ArrayList<>()).add(toHalLink(link));
 
 				links.add(link);
-
-				sortedLinks.get(rel).add(toHalLink(link));
 			}
 
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
-				ArrayList<Object> curies = new ArrayList<Object>();
+				ArrayList<Object> curies = new ArrayList<>();
 				curies.add(curieProvider.getCurieInformation(new Links(links)));
 
 				sortedLinks.put("curies", curies);
@@ -414,7 +410,7 @@ public class Jackson2HalModule extends SimpleModule {
 			super(TypeFactory.defaultInstance().constructType(List.class));
 
 			this.property = property;
-			this.serializers = new HashMap<Class<?>, JsonSerializer<Object>>();
+			this.serializers = new HashMap<>();
 			this.halConfiguration = halConfiguration;
 		}
 
@@ -559,7 +555,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt)
 				throws IOException, JsonProcessingException {
 
-			List<Link> result = new ArrayList<Link>();
+			List<Link> result = new ArrayList<>();
 			String relation;
 			Link link;
 
@@ -635,7 +631,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt)
 				throws IOException, JsonProcessingException {
 
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
 			Object object;
 
@@ -677,7 +673,7 @@ public class Jackson2HalModule extends SimpleModule {
 	 */
 	public static class HalHandlerInstantiator extends HandlerInstantiator {
 
-		private final Map<Class<?>, Object> serializers = new HashMap<Class<?>, Object>();
+		private final Map<Class<?>, Object> serializers = new HashMap<>();
 		private final AutowireCapableBeanFactory delegate;
 
 		/**
