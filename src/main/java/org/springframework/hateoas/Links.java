@@ -20,8 +20,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.util.StringUtils;
 
@@ -35,7 +37,7 @@ public class Links implements Iterable<Link> {
 
 	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\w+=\"[^\"]*\")+)");
 
-	static final Links NO_LINKS = new Links(Collections.<Link> emptyList());
+	static final Links NO_LINKS = new Links(Collections.emptyList());
 
 	private final List<Link> links;
 
@@ -45,7 +47,7 @@ public class Links implements Iterable<Link> {
 	 * @param links
 	 */
 	public Links(List<Link> links) {
-		this.links = links == null ? Collections.<Link> emptyList() : Collections.unmodifiableList(links);
+		this.links = links == null ? Collections.emptyList() : Collections.unmodifiableList(links);
 	}
 
 	/**
@@ -61,17 +63,13 @@ public class Links implements Iterable<Link> {
 	 * Returns the {@link Link} with the given rel.
 	 * 
 	 * @param rel the relation type to lookup a link for.
-	 * @return the {@link Link} with the given rel or {@literal null} if none found.
+	 * @return the link with the given rel or {@literal Optional#empty()} if none found.
 	 */
-	public Link getLink(String rel) {
+	public Optional<Link> getLink(String rel) {
 
-		for (Link link : links) {
-			if (link.getRel().equals(rel)) {
-				return link;
-			}
-		}
-
-		return null;
+		return links.stream()
+				.filter(link -> link.getRel().equals(rel))
+				.findFirst();
 	}
 
 	/**
@@ -81,15 +79,9 @@ public class Links implements Iterable<Link> {
 	 */
 	public List<Link> getLinks(String rel) {
 
-		List<Link> result = new ArrayList<Link>();
-
-		for (Link link : links) {
-			if (link.getRel().endsWith(rel)) {
-				result.add(link);
-			}
-		}
-
-		return result;
+		return links.stream()
+				.filter(link -> link.getRel().endsWith(rel))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -99,7 +91,7 @@ public class Links implements Iterable<Link> {
 	 * @return
 	 */
 	public boolean hasLink(String rel) {
-		return getLink(rel) != null;
+		return getLink(rel).isPresent();
 	}
 
 	/**
@@ -115,7 +107,7 @@ public class Links implements Iterable<Link> {
 		}
 
 		Matcher matcher = LINK_HEADER_PATTERN.matcher(source);
-		List<Link> links = new ArrayList<Link>();
+		List<Link> links = new ArrayList<>();
 
 		while (matcher.find()) {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,13 +184,10 @@ public final class TemplateVariable implements Serializable {
 		 */
 		public static TemplateVariable.VariableType from(String key) {
 
-			for (TemplateVariable.VariableType type : values()) {
-				if (type.key.equals(key)) {
-					return type;
-				}
-			}
-
-			throw new IllegalArgumentException("Unsupported variable type " + key + "!");
+			return Arrays.stream(values())
+					.filter(type -> type.key.equals(key))
+					.findFirst()
+					.orElseThrow(() -> new IllegalArgumentException("Unsupported variable type " + key + "!"));
 		}
 
 		/* 

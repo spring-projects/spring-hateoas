@@ -19,7 +19,6 @@ import lombok.Getter;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -99,11 +98,9 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public Collection<? extends Object> getCurieInformation(Links links) {
 
-		List<Curie> result = curies.entrySet().stream() //
+		return curies.entrySet().stream() //
 				.map(it -> new Curie(it.getKey(), getCurieHref(it.getKey(), it.getValue()))) //
-				.collect(Collectors.toList());
-
-		return Collections.unmodifiableCollection(result);
+				.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableCollection));
 	}
 
 	/* 

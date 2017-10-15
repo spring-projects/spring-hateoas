@@ -18,6 +18,7 @@ package org.springframework.hateoas;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.util.StringUtils;
@@ -73,8 +74,8 @@ public class LinksUnitTest {
 	 */
 	@Test
 	public void getSingleLinkByRel() {
-		assertThat(reference.getLink("bar")).isEqualTo(new Link("/somethingElse", "bar"));
-		assertThat(reference2.getLink("bar")).isEqualTo(new Link("/somethingElse", "bar").withHreflang("de"));
+		assertThat(reference.getLink("bar")).isEqualTo(Optional.of(new Link("/somethingElse", "bar")));
+		assertThat(reference2.getLink("bar")).isEqualTo(Optional.of(new Link("/somethingElse", "bar").withHreflang("de")));
 	}
 
 	/**
@@ -85,11 +86,11 @@ public class LinksUnitTest {
 
 		Link withComma = new Link("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
 
-		assertThat(Links.valueOf(WITH_COMMA).getLink("foo")).isEqualTo(withComma);
+		assertThat(Links.valueOf(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
 
 		Links twoWithCommaInFirst = Links.valueOf(WITH_COMMA.concat(",").concat(SECOND));
 
-		assertThat(twoWithCommaInFirst.getLink("foo")).isEqualTo(withComma);
-		assertThat(twoWithCommaInFirst.getLink("bar")).isEqualTo(new Link("/somethingElse", "bar"));
+		assertThat(twoWithCommaInFirst.getLink("foo")).isEqualTo(Optional.of(withComma));
+		assertThat(twoWithCommaInFirst.getLink("bar")).isEqualTo(Optional.of(new Link("/somethingElse", "bar")));
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.hateoas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlElement;
 
@@ -36,7 +37,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	private final List<Link> links;
 
 	public ResourceSupport() {
-		this.links = new ArrayList<Link>();
+		this.links = new ArrayList<>();
 	}
 
 	/**
@@ -64,9 +65,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	public void add(Iterable<Link> links) {
 		Assert.notNull(links, "Given links must not be null!");
-		for (Link candidate : links) {
-			add(candidate);
-		}
+		links.forEach(this::add);
 	}
 
 	/**
@@ -124,13 +123,9 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	public Link getLink(String rel) {
 
-		for (Link link : links) {
-			if (link.getRel().equals(rel)) {
-				return link;
-			}
-		}
-
-		return null;
+		return getLinks(rel).stream()
+				.findFirst()
+				.orElse(null);
 	}
 
 	/**
@@ -140,15 +135,9 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	public List<Link> getLinks(String rel) {
 
-		List<Link> relatedLinks = new ArrayList<Link>();
-
-		for (Link link : links) {
-			if (link.getRel().equals(rel)) {
-				relatedLinks.add(link);
-			}
-		}
-
-		return relatedLinks;
+		return links.stream()
+				.filter(link -> link.getRel().equals(rel))
+				.collect(Collectors.toList());
 	}
 
 	/* 
