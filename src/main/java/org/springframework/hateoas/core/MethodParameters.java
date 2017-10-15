@@ -17,9 +17,11 @@ package org.springframework.hateoas.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -59,14 +61,11 @@ public class MethodParameters {
 	public MethodParameters(Method method, AnnotationAttribute namingAnnotation) {
 
 		Assert.notNull(method, "Method must not be null!");
-		this.parameters = new ArrayList<>();
 
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
-
-			MethodParameter parameter = new AnnotationNamingMethodParameter(method, i, namingAnnotation);
-			parameter.initParameterNameDiscovery(DISCOVERER);
-			parameters.add(parameter);
-		}
+		this.parameters = IntStream.range(0, method.getParameterTypes().length) //
+				.mapToObj(it -> new AnnotationNamingMethodParameter(method, it, namingAnnotation)) //
+				.peek(it -> it.initParameterNameDiscovery(DISCOVERER)) //
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -84,17 +83,13 @@ public class MethodParameters {
 	 * @param name must not be {@literal null} or empty.
 	 * @return
 	 */
-	public MethodParameter getParameter(String name) {
+	public Optional<MethodParameter> getParameter(String name) {
 
 		Assert.hasText(name, "Parameter name must not be null!");
 
-		for (MethodParameter parameter : parameters) {
-			if (name.equals(parameter.getParameterName())) {
-				return parameter;
-			}
-		}
-
-		return null;
+		return getParameters().stream() //
+				.filter(it -> name.equals(it.getParameterName())) //
+				.findFirst();
 	}
 
 	/**
@@ -107,15 +102,10 @@ public class MethodParameters {
 	public List<MethodParameter> getParametersOfType(Class<?> type) {
 
 		Assert.notNull(type, "Type must not be null!");
-		List<MethodParameter> result = new ArrayList<>();
 
-		for (MethodParameter parameter : getParameters()) {
-			if (parameter.getParameterType().equals(type)) {
-				result.add(parameter);
-			}
-		}
-
-		return result;
+		return getParameters().stream() //
+				.filter(it -> it.getParameterType().equals(type)) //
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -129,15 +119,10 @@ public class MethodParameters {
 		return parametersWithAnnotationCache.computeIfAbsent(annotation, key -> {
 
 			Assert.notNull(annotation, "Annotation must not be null!");
-			List<MethodParameter> result = new ArrayList<>();
 
-			for (MethodParameter parameter : getParameters()) {
-				if (parameter.hasParameterAnnotation(annotation)) {
-					result.add(parameter);
-				}
-			}
-
-			return result;
+			return getParameters().stream()//
+					.filter(it -> it.hasParameterAnnotation(annotation))//
+					.collect(Collectors.toList());
 		});
 	}
 

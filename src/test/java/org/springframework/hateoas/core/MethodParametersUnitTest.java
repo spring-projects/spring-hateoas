@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ public class MethodParametersUnitTest {
 		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
 		MethodParameters parameters = new MethodParameters(method, new AnnotationAttribute(Qualifier.class));
 
-		assertThat(parameters.getParameter("param")).isNotNull();
-		assertThat(parameters.getParameter("foo")).isNotNull();
-		assertThat(parameters.getParameter("another")).isNull();
+		assertThat(parameters.getParameter("param")).isPresent();
+		assertThat(parameters.getParameter("foo")).isPresent();
+		assertThat(parameters.getParameter("another")).isNotPresent();
 	}
 
 	/**

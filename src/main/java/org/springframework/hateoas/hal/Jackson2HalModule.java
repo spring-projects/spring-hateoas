@@ -179,7 +179,9 @@ public class Jackson2HalModule extends SimpleModule {
 					curiedLinkPresent = true;
 				}
 
-				sortedLinks.computeIfAbsent(rel, key -> new ArrayList<>()).add(toHalLink(link));
+				sortedLinks //
+						.computeIfAbsent(rel, key -> new ArrayList<>())//
+						.add(toHalLink(link));
 
 				links.add(link);
 			}

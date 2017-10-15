@@ -15,11 +15,13 @@
  */
 package org.springframework.hateoas.hal;
 
-import java.util.ArrayList;
+import lombok.Getter;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.hateoas.IanaRels;
 import org.springframework.hateoas.Link;
@@ -97,9 +99,9 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public Collection<? extends Object> getCurieInformation(Links links) {
 
-		List<Curie> result = new ArrayList<>(curies.size());
-
-		curies.forEach((name, template) -> result.add(new Curie(name, getCurieHref(name, template))));
+		List<Curie> result = curies.entrySet().stream() //
+				.map(it -> new Curie(it.getKey(), getCurieHref(it.getKey(), it.getValue()))) //
+				.collect(Collectors.toList());
 
 		return Collections.unmodifiableCollection(result);
 	}
@@ -151,16 +153,12 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		private static final long serialVersionUID = 1L;
 
-		private final String name;
+		private final @Getter String name;
 
 		public Curie(String name, String href) {
 
 			super(href, "curies");
 			this.name = name;
-		}
-
-		public String getName() {
-			return name;
 		}
 	}
 }
