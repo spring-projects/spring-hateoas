@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.springframework.hateoas.mvc;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,7 @@ import org.springframework.util.StringUtils;
 class ForwardedHeader {
 
 	public static String NAME = "Forwarded";
-	private static final ForwardedHeader NO_HEADER = new ForwardedHeader(Collections.<String, String> emptyMap());
+	private static final ForwardedHeader NO_HEADER = new ForwardedHeader(Collections.emptyMap());
 
 	private final Map<String, String> elements;
 
@@ -51,20 +52,11 @@ class ForwardedHeader {
 			return NO_HEADER;
 		}
 
-		Map<String, String> elements = new HashMap<String, String>();
+		Map<String, String> elements = Arrays.stream(source.split(";"))
+				.map(part -> part.split("="))
+				.filter(keyValue -> keyValue.length == 2)
+				.collect(Collectors.toMap((it) -> it[0].trim(), (it) -> it[1].trim()));
 
-		for (String part : source.split(";")) {
-
-			String[] keyValue = part.split("=");
-
-			if (keyValue.length != 2) {
-				continue;
-			}
-
-			elements.put(keyValue[0].trim(), keyValue[1].trim());
-		}
-
-		Assert.notNull(elements, "Forwarded elements must not be null!");
 		Assert.isTrue(!elements.isEmpty(), "At least one forwarded element needs to be present!");
 
 		return new ForwardedHeader(elements);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
@@ -88,7 +89,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 		this.pathTemplate = pathTemplate;
 
-		List<MediaType> mediaTypes = new ArrayList<MediaType>(others.length + 1);
+		List<MediaType> mediaTypes = new ArrayList<>(others.length + 1);
 		mediaTypes.add(mediaType);
 		mediaTypes.addAll(Arrays.asList(others));
 
@@ -168,17 +169,14 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 		if (parseResult instanceof JSONArray) {
 
-			List<Link> links = new ArrayList<Link>();
 			JSONArray array = (JSONArray) parseResult;
 
-			for (Object element : array) {
-				links.add(new Link(element.toString(), rel));
-			}
-
-			return Collections.unmodifiableList(links);
+			return array.stream()
+					.map(element -> new Link(element.toString(), rel))
+					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 		}
 
-		return Collections.unmodifiableList(Arrays.asList(new Link(parseResult.toString(), rel)));
+		return Collections.unmodifiableList(Collections.singletonList(new Link(parseResult.toString(), rel)));
 	}
 
 	/* 
@@ -188,12 +186,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	@Override
 	public boolean supports(MediaType delimiter) {
 
-		for (MediaType mediaType : this.mediaTypes) {
-			if (mediaType.isCompatibleWith(delimiter)) {
-				return true;
-			}
-		}
-
-		return false;
+		return this.mediaTypes.stream()
+				.anyMatch(mediaType -> mediaType.isCompatibleWith(delimiter));
 	}
 }
