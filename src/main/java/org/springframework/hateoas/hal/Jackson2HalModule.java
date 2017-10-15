@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -73,7 +74,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
-import com.fasterxml.jackson.databind.ser.std.NonTypedScalarSerializerBase;
+import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
@@ -195,11 +196,11 @@ public class Jackson2HalModule extends SimpleModule {
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-			JavaType keyType = typeFactory.uncheckedSimpleType(String.class);
+			JavaType keyType = typeFactory.constructType(String.class);
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
-			MapSerializer serializer = MapSerializer.construct(new String[] {}, mapType, true, null,
+			MapSerializer serializer = MapSerializer.construct(Collections.emptySet(), mapType, true, null,
 					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration),
 					null);
 
@@ -810,7 +811,7 @@ public class Jackson2HalModule extends SimpleModule {
 	 * @author Oliver Gierke
 	 * @since 0.9
 	 */
-	public static class TrueOnlyBooleanSerializer extends NonTypedScalarSerializerBase<Boolean> {
+	public static class TrueOnlyBooleanSerializer extends StdScalarSerializer<Boolean> {
 
 		private static final long serialVersionUID = 5817795880782727569L;
 
