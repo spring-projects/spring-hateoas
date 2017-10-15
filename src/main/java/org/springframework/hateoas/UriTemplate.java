@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 the original author or authors.
+ * Copyright 2014-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
@@ -57,7 +58,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		Matcher matcher = VARIABLE_REGEX.matcher(template);
 		int baseUriEndIndex = template.length();
-		List<TemplateVariable> variables = new ArrayList<TemplateVariable>();
+		List<TemplateVariable> variables = new ArrayList<>();
 
 		while (matcher.find()) {
 
@@ -108,7 +109,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
-		List<TemplateVariable> result = new ArrayList<TemplateVariable>();
+		List<TemplateVariable> result = new ArrayList<>();
 
 		for (TemplateVariable variable : variables) {
 
@@ -171,13 +172,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public List<String> getVariableNames() {
 
-		List<String> names = new ArrayList<String>();
-
-		for (TemplateVariable variable : variables) {
-			names.add(variable.getName());
-		}
-
-		return names;
+		return variables.asList().stream()
+				.map(TemplateVariable::getName)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -255,15 +252,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	private TemplateVariables getOptionalVariables() {
 
-		List<TemplateVariable> result = new ArrayList<TemplateVariable>();
-
-		for (TemplateVariable variable : this) {
-			if (!variable.isRequired()) {
-				result.add(variable);
-			}
-		}
-
-		return new TemplateVariables(result);
+		return variables.asList().stream()
+				.filter(variable -> !variable.isRequired())
+				.collect(Collectors.collectingAndThen(Collectors.toList(), TemplateVariables::new));
 	}
 
 	/**

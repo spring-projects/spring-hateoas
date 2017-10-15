@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
@@ -81,14 +82,14 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	 */
 	public TemplateVariables concat(Collection<TemplateVariable> variables) {
 
-		List<TemplateVariable> result = new ArrayList<TemplateVariable>(this.variables.size() + variables.size());
+		List<TemplateVariable> result = new ArrayList<>(this.variables.size() + variables.size());
 		result.addAll(this.variables);
 
-		for (TemplateVariable variable : variables) {
-			if (!containsEquivalentFor(variable)) {
-				result.add(variable);
-			}
-		}
+		List<TemplateVariable> filtered = variables.stream()
+				.filter(variable -> !containsEquivalentFor(variable))
+				.collect(Collectors.toList());
+
+		result.addAll(filtered);
 
 		return new TemplateVariables(result);
 	}
@@ -114,13 +115,8 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	private boolean containsEquivalentFor(TemplateVariable candidate) {
 
-		for (TemplateVariable variable : this.variables) {
-			if (variable.isEquivalent(candidate)) {
-				return true;
-			}
-		}
-
-		return false;
+		return this.variables.stream()
+				.anyMatch(variable -> variable.isEquivalent(candidate));
 	}
 
 	/* 

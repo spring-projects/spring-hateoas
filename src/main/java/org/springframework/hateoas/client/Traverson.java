@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
@@ -128,7 +129,7 @@ public class Traverson {
 
 		Assert.notNull(mediaTypes, "Media types must not be null!");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
 
 		List<MediaType> halFlavors = getHalJsonFlavors(mediaTypes);
@@ -148,15 +149,9 @@ public class Traverson {
 	 */
 	private static List<MediaType> getHalJsonFlavors(Collection<MediaType> mediaTypes) {
 
-		List<MediaType> result = new ArrayList<MediaType>();
-
-		for (MediaType mediaType : mediaTypes) {
-			if (MediaTypes.HAL_JSON.isCompatibleWith(mediaType)) {
-				result.add(mediaType);
-			}
-		}
-
-		return result;
+		return mediaTypes.stream()
+				.filter(MediaTypes.HAL_JSON::isCompatibleWith)
+				.collect(Collectors.toList());
 	}
 
 	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
@@ -254,8 +249,8 @@ public class Traverson {
 	 */
 	public class TraversalBuilder {
 
-		private List<Hop> rels = new ArrayList<Hop>();
-		private Map<String, Object> templateParameters = new HashMap<String, Object>();
+		private List<Hop> rels = new ArrayList<>();
+		private Map<String, Object> templateParameters = new HashMap<>();
 		private HttpHeaders headers = new HttpHeaders();
 
 		private TraversalBuilder() {}
