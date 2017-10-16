@@ -20,6 +20,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	public void createsInstanceWithSelfLinkToController() {
 
 		PersonResource resource = assembler.createResource(person);
-		Link link = resource.getLink(Link.REL_SELF);
+		Link link = resource.getRequiredLink(Link.REL_SELF);
 
 		assertThat(link).isNotNull();
 		assertThat(resource.getLinks()).hasSize(1);
@@ -63,8 +64,10 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	public void usesAlternateIdIfGivenExplicitly() {
 
 		PersonResource resource = assembler.createResourceWithId(person.alternateId, person);
-		Link selfLink = resource.getId();
-		assertThat(selfLink.getHref()).endsWith("/people/id");
+		Optional<Link> selfLink = resource.getId();
+
+		assertThat(selfLink.map(Link::getHref)) //
+				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
 	}
 
 	@Test
@@ -72,8 +75,10 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 
 		PersonResource resource = new PersonResourceAssembler(ParameterizedController.class).createResource(person, person,
 				"bar");
-		Link selfLink = resource.getId();
-		assertThat(selfLink.getHref()).endsWith("/people/10/bar/addresses/10");
+		Optional<Link> selfLink = resource.getId();
+
+		assertThat(selfLink.map(Link::getHref)) //
+				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
 	}
 
 	@Test
@@ -114,8 +119,8 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		String alternateId;
 
 		@Override
-		public Long getId() {
-			return id;
+		public Optional<Long> getId() {
+			return Optional.ofNullable(id);
 		}
 	}
 

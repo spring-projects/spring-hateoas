@@ -45,10 +45,10 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(link);
 
-		assertThat(support.getId()).isNull();
+		assertThat(support.getId()).isEmpty();
 		assertThat(support.hasLinks()).isTrue();
 		assertThat(support.hasLink(link.getRel())).isTrue();
-		assertThat(support.getLink(link.getRel())).isEqualTo(link);
+		assertThat(support.getLink(link.getRel())).hasValue(link);
 		assertThat(support.getLinks(Link.REL_NEXT)).contains(link);
 	}
 
@@ -75,7 +75,7 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(Arrays.asList(first, second));
 
-		assertThat(support.getId()).isNull();
+		assertThat(support.getId()).isEmpty();
 		assertThat(support.hasLinks()).isTrue();
 		assertThat(support.getLinks()).contains(first, second);
 		assertThat(support.getLinks()).hasSize(2);
@@ -90,7 +90,7 @@ public class ResourceSupportUnitTest {
 		ResourceSupport support = new ResourceSupport();
 		support.add(link);
 
-		assertThat(support.getId()).isEqualTo(link);
+		assertThat(support.getId()).hasValue(link);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

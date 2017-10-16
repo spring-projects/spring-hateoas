@@ -302,7 +302,7 @@ public class TraversonTest {
 		// end::hop-with-param[]
 
 		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getLink("self").expand().getHref())
+		assertThat(itemResource.getRequiredLink("self").expand().getHref())
 				.isEqualTo(server.rootResource() + "/springagram/items/1");
 
 		final Item item = itemResource.getContent();
@@ -330,7 +330,7 @@ public class TraversonTest {
 		// end::hop-put[]
 
 		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getLink("self").expand().getHref())
+		assertThat(itemResource.getRequiredLink("self").expand().getHref())
 				.isEqualTo(server.rootResource() + "/springagram/items/1");
 
 		final Item item = itemResource.getContent();
@@ -355,7 +355,7 @@ public class TraversonTest {
 				.withTemplateParameters(params).toObject(resourceParameterizedTypeReference);
 
 		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getLink("self").expand().getHref())
+		assertThat(itemResource.getRequiredLink("self").expand().getHref())
 				.isEqualTo(server.rootResource() + "/springagram/items/1");
 
 		final Item item = itemResource.getContent();
@@ -376,7 +376,8 @@ public class TraversonTest {
 				toObject(Resource.class);
 
 		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getLink("self").expand().getHref()).isEqualTo(server.rootResource() + "/springagram/items");
+		assertThat(itemResource.getRequiredLink("self").expand().getHref())
+				.isEqualTo(server.rootResource() + "/springagram/items");
 	}
 
 	private void setUpActors() {

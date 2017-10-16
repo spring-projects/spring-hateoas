@@ -18,6 +18,7 @@ package org.springframework.hateoas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -44,7 +45,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * Returns the {@link Link} with a rel of {@link Link#REL_SELF}.
 	 */
 	@JsonIgnore
-	public Link getId() {
+	public Optional<Link> getId() {
 		return getLink(Link.REL_SELF);
 	}
 
@@ -94,7 +95,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @return
 	 */
 	public boolean hasLink(String rel) {
-		return getLink(rel) != null;
+		return getLink(rel).isPresent();
 	}
 
 	/**
@@ -119,13 +120,23 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * Returns the link with the given rel.
 	 * 
 	 * @param rel
-	 * @return the link with the given rel or {@literal null} if none found.
+	 * @return the link with the given rel or {@link Optional#empty()} if none found.
 	 */
-	public Link getLink(String rel) {
+	public Optional<Link> getLink(String rel) {
+		return getLinks(rel).stream().findFirst();
+	}
 
-		return getLinks(rel).stream()
-				.findFirst()
-				.orElse(null);
+	/**
+	 * Returns the link with the given rel.
+	 * 
+	 * @param rel
+	 * @return the link with the given rel.
+	 * @throws IllegalArgumentException in case no link with the given rel can be found.
+	 */
+	public Link getRequiredLink(String rel) {
+
+		return getLink(rel) //
+				.orElseThrow(() -> new IllegalArgumentException(String.format("No link with rel %s found!", rel)));
 	}
 
 	/**
@@ -135,9 +146,8 @@ public class ResourceSupport implements Identifiable<Link> {
 	 */
 	public List<Link> getLinks(String rel) {
 
-		return links.stream()
-				.filter(link -> link.getRel().equals(rel))
-				.collect(Collectors.toList());
+		return links.stream() //
+				.filter(link -> link.getRel().equals(rel)).collect(Collectors.toList());
 	}
 
 	/* 

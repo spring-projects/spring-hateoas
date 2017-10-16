@@ -74,8 +74,8 @@ public class LinksUnitTest {
 	 */
 	@Test
 	public void getSingleLinkByRel() {
-		assertThat(reference.getLink("bar")).isEqualTo(Optional.of(new Link("/somethingElse", "bar")));
-		assertThat(reference2.getLink("bar")).isEqualTo(Optional.of(new Link("/somethingElse", "bar").withHreflang("de")));
+		assertThat(reference.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
+		assertThat(reference2.getLink("bar")).hasValue(new Link("/somethingElse", "bar").withHreflang("de"));
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class LinksUnitTest {
 
 		Links twoWithCommaInFirst = Links.valueOf(WITH_COMMA.concat(",").concat(SECOND));
 
-		assertThat(twoWithCommaInFirst.getLink("foo")).isEqualTo(Optional.of(withComma));
-		assertThat(twoWithCommaInFirst.getLink("bar")).isEqualTo(Optional.of(new Link("/somethingElse", "bar")));
+		assertThat(twoWithCommaInFirst.getLink("foo")).hasValue(withComma);
+		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
 	}
 }

@@ -122,7 +122,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void usesIdOfIdentifyableForPathSegment() {
 
 		Identifiable<Long> identifyable = Mockito.mock(Identifiable.class);
-		Mockito.when(identifyable.getId()).thenReturn(10L);
+		Mockito.when(identifyable.getId()).thenReturn(Optional.of(10L));
 
 		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
 		assertThat(link.getHref()).endsWith("/people/10");
@@ -599,8 +599,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		Long id;
 
 		@Override
-		public Long getId() {
-			return id;
+		public Optional<Long> getId() {
+			return Optional.ofNullable(id);
 		}
 	}
 

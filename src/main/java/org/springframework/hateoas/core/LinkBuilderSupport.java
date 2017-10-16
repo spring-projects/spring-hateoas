@@ -19,6 +19,7 @@ import static org.springframework.hateoas.core.EncodingUtils.*;
 import static org.springframework.web.util.UriComponentsBuilder.*;
 
 import java.net.URI;
+import java.util.Optional;
 
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
@@ -67,6 +68,8 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
 	 */
 	public T slash(Object object) {
+
+		object = Optional.class.isInstance(object) ? ((Optional<?>) object).orElse(null) : object;
 
 		if (object == null) {
 			return getThis();
