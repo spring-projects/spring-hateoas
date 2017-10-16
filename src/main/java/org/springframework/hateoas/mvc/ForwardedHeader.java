@@ -52,10 +52,10 @@ class ForwardedHeader {
 			return NO_HEADER;
 		}
 
-		Map<String, String> elements = Arrays.stream(source.split(";"))
-				.map(part -> part.split("="))
-				.filter(keyValue -> keyValue.length == 2)
-				.collect(Collectors.toMap((it) -> it[0].trim(), (it) -> it[1].trim()));
+		Map<String, String> elements = Arrays.stream(source.split(";")) //
+				.map(part -> part.split("=")) //
+				.filter(keyValue -> keyValue.length == 2) //
+				.collect(Collectors.toMap(it -> it[0].trim(), it -> it[1].trim()));
 
 		Assert.isTrue(!elements.isEmpty(), "At least one forwarded element needs to be present!");
 

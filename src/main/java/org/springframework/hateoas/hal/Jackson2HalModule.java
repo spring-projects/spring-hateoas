@@ -914,7 +914,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		public boolean hasCuriedEmbed(Iterable<?> source) {
 
-			return map(source).keySet().stream()
+			return map(source).keySet().stream() //
 					.anyMatch(rel -> rel.contains(":"));
 		}
 	}

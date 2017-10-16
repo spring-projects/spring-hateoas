@@ -171,8 +171,8 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 			JSONArray array = (JSONArray) parseResult;
 
-			return array.stream()
-					.map(element -> new Link(element.toString(), rel))
+			return array.stream() //
+					.map(element -> new Link(element.toString(), rel)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 		}
 
@@ -186,7 +186,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	@Override
 	public boolean supports(MediaType delimiter) {
 
-		return this.mediaTypes.stream()
+		return this.mediaTypes.stream() //
 				.anyMatch(mediaType -> mediaType.isCompatibleWith(delimiter));
 	}
 }

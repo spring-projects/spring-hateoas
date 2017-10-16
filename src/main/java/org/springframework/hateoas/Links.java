@@ -67,9 +67,8 @@ public class Links implements Iterable<Link> {
 	 */
 	public Optional<Link> getLink(String rel) {
 
-		return links.stream()
-				.filter(link -> link.getRel().equals(rel))
-				.findFirst();
+		return links.stream() //
+				.filter(link -> link.getRel().equals(rel)).findFirst();
 	}
 
 	/**
@@ -79,9 +78,8 @@ public class Links implements Iterable<Link> {
 	 */
 	public List<Link> getLinks(String rel) {
 
-		return links.stream()
-				.filter(link -> link.getRel().endsWith(rel))
-				.collect(Collectors.toList());
+		return links.stream() //
+				.filter(link -> link.getRel().endsWith(rel)).collect(Collectors.toList());
 	}
 
 	/**

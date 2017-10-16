@@ -85,7 +85,7 @@ public class ResourceProcessorInvokingHandlerAdapter extends RequestMappingHandl
 			return (HandlerMethodReturnValueHandlerComposite) handlers;
 		}
 
-		return new HandlerMethodReturnValueHandlerComposite()
+		return new HandlerMethodReturnValueHandlerComposite() //
 				.addHandlers((List<? extends HandlerMethodReturnValueHandler>) handlers);
 	}
 }

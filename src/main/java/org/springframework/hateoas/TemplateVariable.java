@@ -184,9 +184,9 @@ public final class TemplateVariable implements Serializable {
 		 */
 		public static TemplateVariable.VariableType from(String key) {
 
-			return Arrays.stream(values())
-					.filter(type -> type.key.equals(key))
-					.findFirst()
+			return Arrays.stream(values()) //
+					.filter(type -> type.key.equals(key)) //
+					.findFirst() //
 					.orElseThrow(() -> new IllegalArgumentException("Unsupported variable type " + key + "!"));
 		}
 

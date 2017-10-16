@@ -85,9 +85,8 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		List<TemplateVariable> result = new ArrayList<>(this.variables.size() + variables.size());
 		result.addAll(this.variables);
 
-		List<TemplateVariable> filtered = variables.stream()
-				.filter(variable -> !containsEquivalentFor(variable))
-				.collect(Collectors.toList());
+		List<TemplateVariable> filtered = variables.stream() //
+				.filter(variable -> !containsEquivalentFor(variable)).collect(Collectors.toList());
 
 		result.addAll(filtered);
 
@@ -115,7 +114,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	private boolean containsEquivalentFor(TemplateVariable candidate) {
 
-		return this.variables.stream()
+		return this.variables.stream() //
 				.anyMatch(variable -> variable.isEquivalent(candidate));
 	}
 

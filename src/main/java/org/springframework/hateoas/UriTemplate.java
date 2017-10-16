@@ -172,9 +172,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public List<String> getVariableNames() {
 
-		return variables.asList().stream()
-				.map(TemplateVariable::getName)
-				.collect(Collectors.toList());
+		return variables.asList().stream() //
+				.map(TemplateVariable::getName).collect(Collectors.toList());
 	}
 
 	/**
@@ -252,8 +251,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	private TemplateVariables getOptionalVariables() {
 
-		return variables.asList().stream()
-				.filter(variable -> !variable.isRequired())
+		return variables.asList().stream() //
+				.filter(variable -> !variable.isRequired()) //
 				.collect(Collectors.collectingAndThen(Collectors.toList(), TemplateVariables::new));
 	}
 
@@ -269,8 +268,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		if (value == null) {
 
 			if (variable.isRequired()) {
-				throw new IllegalArgumentException(String.format("Template variable %s is required but no value was given!",
-						variable.getName()));
+				throw new IllegalArgumentException(
+						String.format("Template variable %s is required but no value was given!", variable.getName()));
 			}
 
 			return;

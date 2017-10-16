@@ -149,8 +149,8 @@ public class Traverson {
 	 */
 	private static List<MediaType> getHalJsonFlavors(Collection<MediaType> mediaTypes) {
 
-		return mediaTypes.stream()
-				.filter(MediaTypes.HAL_JSON::isCompatibleWith)
+		return mediaTypes.stream() //
+				.filter(MediaTypes.HAL_JSON::isCompatibleWith) //
 				.collect(Collectors.toList());
 	}
 
@@ -249,7 +249,7 @@ public class Traverson {
 	 */
 	public class TraversalBuilder {
 
-		private List<Hop> rels = new ArrayList<>();
+		private final List<Hop> rels = new ArrayList<>();
 		private Map<String, Object> templateParameters = new HashMap<>();
 		private HttpHeaders headers = new HttpHeaders();
 
@@ -269,6 +269,7 @@ public class Traverson {
 			for (String rel : rels) {
 				this.rels.add(Hop.rel(rel));
 			}
+
 			return this;
 		}
 
