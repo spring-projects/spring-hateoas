@@ -45,6 +45,7 @@ import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -299,12 +300,12 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 					RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
-					if (Java8Utils.isJava8Optional(parameter.getParameterType())) {
+					if (parameter.isOptional()) {
 						return false;
 					}
 
 					return annotation.required() //
-							&& annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
+					       && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
 				}
 			};
 		}
@@ -318,13 +319,13 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
-			value = Java8Utils.unwrapJava8Optional(value);
+			value = ObjectUtils.unwrapOptional(value);
 
 			if (value != null) {
 				return value;
 			}
 
-			if (!annotation.required() || Java8Utils.isJava8Optional(parameter.getParameterType())) {
+			if (!annotation.required() || parameter.isOptional()) {
 				return SKIP_VALUE;
 			}
 

@@ -139,12 +139,10 @@ class AnnotatedParametersParameterAccessor {
 
 			Assert.notNull(parameter, "MethodParameter must not be null!");
 
-			boolean isOptional = Java8Utils.isJava8Optional(parameter.getParameterType());
-
 			this.parameter = parameter;
 			this.value = value;
 			this.attribute = attribute;
-			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, isOptional ? 1 : 0);
+			this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, parameter.isOptional() ? 1 : 0);
 		}
 
 		/**
