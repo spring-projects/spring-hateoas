@@ -174,12 +174,6 @@ public class DummyInvocationUtils {
 			return (T) factory.getProxy();
 		}
 
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(type);
-		enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
-		enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-		enhancer.setClassLoader(classLoader);
-
 		Factory factory = (Factory) OBJENESIS.newInstance(getOrCreateEnhancedClass(type, classLoader));
 		factory.setCallbacks(new Callback[] { interceptor });
 		return (T) factory;
