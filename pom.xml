@@ -68,16 +68,16 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.11.RELEASE</spring.version>
-		<logback.version>1.1.8</logback.version>
+		<spring.version>4.3.12.RELEASE</spring.version>
+		<logback.version>1.1.11</logback.version>
 		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.8.5</jackson.version>
+		<jackson.version>2.8.10</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
-		<slf4j.version>1.7.22</slf4j.version>
-		<evo.version>1.2.1</evo.version>
+		<slf4j.version>1.7.25</slf4j.version>
+		<evo.version>1.2.2</evo.version>
 		<bundlor.failOnWarnings>true</bundlor.failOnWarnings>
 		<source.level>1.6</source.level>
 	</properties>
@@ -87,7 +87,7 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.12.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.13.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -100,7 +100,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.0.RELEASE</spring.version>
+				<spring.version>5.0.1.RELEASE</spring.version>
 				<jackson.version>2.9.1</jackson.version>
 			</properties>
 			<repositories>
@@ -114,7 +114,7 @@
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.1.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.0.2.BUILD-SNAPSHOT</spring.version>
 				<jackson.version>2.9.1</jackson.version>
 			</properties>
 			<repositories>
@@ -202,7 +202,7 @@
 				<dependency>
 					<groupId>org.springframework.data.build</groupId>
 					<artifactId>spring-data-build-resources</artifactId>
-					<version>1.8.5.RELEASE</version>
+					<version>1.9.8.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
 				</dependency>
@@ -258,17 +258,12 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.3</version>
+						<version>1.5.6</version>
 						<dependencies>
 							<dependency>
 								<groupId>org.asciidoctor</groupId>
 								<artifactId>asciidoctorj-pdf</artifactId>
-								<version>1.5.0-alpha.11</version>
-							</dependency>
-							<dependency>
-								<groupId>org.asciidoctor</groupId>
-								<artifactId>asciidoctorj-epub3</artifactId>
-								<version>1.5.0-alpha.6</version>
+								<version>1.5.0-alpha.16</version>
 							</dependency>
 						</dependencies>
 						<executions>
@@ -292,20 +287,6 @@
 									</attributes>
 								</configuration>
 							</execution>
-
-							<!--
-							<execution>
-								<id>epub</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>epub3</backend>
-									<sourceHighlighter>coderay</sourceHighlighter>
-								</configuration>
-							</execution>
-							-->
 
 							<execution>
 								<id>pdf</id>
@@ -390,7 +371,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.0.0</version>
+						<version>3.1.0</version>
 						<executions>
 							<execution>
 								<id>static</id>
@@ -585,7 +566,7 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-			<version>2.9.7</version>
+			<version>2.9.9</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -599,7 +580,7 @@
 		<dependency>
 			<groupId>net.jadler</groupId>
 			<artifactId>jadler-all</artifactId>
-			<version>1.1.1</version>
+			<version>1.3.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -620,7 +601,7 @@
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>2.5</version>
+				<version>2.12</version>
 			</extension>
 		</extensions>
 
@@ -628,7 +609,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
+				<version>3.7.0</version>
 				<configuration>
 					<source>${source.level}</source>
 					<target>${source.level}</target>
@@ -655,16 +636,18 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.2</version>
 				<configuration>
-					<useDefaultManifestFile>true</useDefaultManifestFile>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
 				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -678,7 +661,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
+				<version>2.10.4</version>
 				<configuration>
 					<breakiterator>true</breakiterator>
 					<header>${project.name}</header>
