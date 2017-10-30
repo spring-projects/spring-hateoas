@@ -305,7 +305,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 					}
 
 					return annotation.required() //
-							&& annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
+					       && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
 				}
 			};
 		}
