@@ -133,7 +133,7 @@ public class UriTemplateUnitTest {
 	@Test
 	public void expandsMultipleRequestParameters() {
 
-		Map<String, Object> parameters = new HashMap<String, Object>();
+		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("bar", "myBar");
 		parameters.put("fooBar", "myFooBar");
 
@@ -150,7 +150,7 @@ public class UriTemplateUnitTest {
 	public void rejectsMissingRequiredPathVariable() {
 
 		UriTemplate template = new UriTemplate("/foo/{bar}");
-		template.expand(Collections.<String, Object> emptyMap());
+		template.expand(Collections.emptyMap());
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class UriTemplateUnitTest {
 		UriTemplate source = new UriTemplate("/{foo}/bar{?page}");
 		List<TemplateVariable> toAdd = Arrays.asList(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
 
-		List<TemplateVariable> expected = new ArrayList<TemplateVariable>();
+		List<TemplateVariable> expected = new ArrayList<>();
 		expected.addAll(source.getVariables());
 		expected.addAll(toAdd);
 

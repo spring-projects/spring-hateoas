@@ -91,7 +91,7 @@ public class TraversonTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsEmptyMediaTypes() {
-		new Traverson(baseUri, new MediaType[0]);
+		new Traverson(baseUri);
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class TraversonTest {
 		CountingInterceptor interceptor = new CountingInterceptor();
 
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList(interceptor));
+		restTemplate.setInterceptors(Arrays.asList(interceptor));
 
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
 		this.traverson.setRestOperations(restTemplate);
@@ -266,7 +266,7 @@ public class TraversonTest {
 	public void returnsDefaultMessageConverters() {
 
 		List<HttpMessageConverter<?>> converters = Traverson
-				.getDefaultMessageConverters(Collections.<MediaType> emptyList());
+				.getDefaultMessageConverters(Collections.emptyList());
 
 		assertThat(converters).hasSize(1);
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
@@ -346,7 +346,7 @@ public class TraversonTest {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("projection", "thisShouldGetOverwrittenByLocalHop");
 
 		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
@@ -382,11 +382,11 @@ public class TraversonTest {
 
 	private void setUpActors() {
 
-		Resource<Actor> actor = new Resource<Actor>(new Actor("Keanu Reaves"));
+		Resource<Actor> actor = new Resource<>(new Actor("Keanu Reaves"));
 		String actorUri = server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		Resource<Movie> resource = new Resource<Movie>(movie);
+		Resource<Movie> resource = new Resource<>(movie);
 		resource.add(new Link(actorUri, "actor"));
 
 		server.mockResourceFor(resource);
@@ -403,7 +403,7 @@ public class TraversonTest {
 			this.intercepted++;
 			return execution.execute(request, body);
 		}
-	};
+	}
 
 	static class GitHubLinkDiscoverer extends JsonPathLinkDiscoverer {
 

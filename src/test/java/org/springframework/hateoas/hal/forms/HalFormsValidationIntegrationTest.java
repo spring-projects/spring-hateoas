@@ -109,7 +109,7 @@ public class HalFormsValidationIntegrationTest {
 	@RestController
 	static class BadController {
 
-		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<Integer, Employee>();
+		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<>();
 
 		static {
 			EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
@@ -120,7 +120,7 @@ public class HalFormsValidationIntegrationTest {
 		public Resources<Resource<Employee>> all() {
 
 			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<Resource<Employee>>();
+			List<Resource<Employee>> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
@@ -132,7 +132,7 @@ public class HalFormsValidationIntegrationTest {
 					.andAffordance(afford(methodOn(BadController.class).updateEmployee(null, 0)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new Resources<Resource<Employee>>(employees, selfLink);
+			return new Resources<>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -146,8 +146,8 @@ public class HalFormsValidationIntegrationTest {
 					.andAffordance(afford(methodOn(BadController.class).newEmployee(null)));
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<Employee>(EMPLOYEES.get(id), findOneLink.andAffordances(employeesLink.getAffordances()),
-					employeesLink);
+			return new Resource<>(EMPLOYEES.get(id), findOneLink.andAffordances(employeesLink.getAffordances()),
+				employeesLink);
 		}
 
 		@PostMapping("/employees")

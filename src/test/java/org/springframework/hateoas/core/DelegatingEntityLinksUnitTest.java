@@ -55,7 +55,7 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	@Test
 	public void throwsExceptionForUnsupportedClass() {
 
-		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.<Class<?>, EntityLinks> create());
+		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.create());
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 				.isThrownBy(() -> links.linkFor(String.class)) //

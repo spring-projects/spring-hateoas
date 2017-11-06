@@ -52,7 +52,7 @@ public class Server implements Closeable {
 	private final ObjectMapper mapper;
 	private final RelProvider relProvider;
 
-	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<Link, Link>();
+	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<>();
 	private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public Server() {
@@ -187,13 +187,13 @@ public class Server implements Closeable {
 
 	public void finishMocking() {
 
-		Resources<String> resources = new Resources<String>(Collections.<String> emptyList());
+		Resources<String> resources = new Resources<>(Collections.emptyList());
 
 		for (Link link : baseResources.keySet()) {
 
 			resources.add(link);
 
-			Resources<String> nested = new Resources<String>(Collections.<String> emptyList());
+			Resources<String> nested = new Resources<>(Collections.emptyList());
 			nested.add(baseResources.get(link));
 
 			register(link.getHref(), nested);

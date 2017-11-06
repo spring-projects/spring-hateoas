@@ -60,39 +60,34 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
-	static final Resource<String> FOO = new Resource<String>("foo");
-	static final Resources<Resource<String>> FOOS = new Resources<Resource<String>>(Collections.singletonList(FOO));
-	static final PagedResources<Resource<String>> FOO_PAGE = new PagedResources<Resource<String>>(
-			Collections.singleton(FOO), new PageMetadata(1, 0, 10));
+	static final Resource<String> FOO = new Resource<>("foo");
+	static final Resources<Resource<String>> FOOS = new Resources<>(Collections.singletonList(FOO));
+	static final PagedResources<Resource<String>> FOO_PAGE = new PagedResources<>(
+		Collections.singleton(FOO), new PageMetadata(1, 0, 10));
 	static final StringResource FOO_RES = new StringResource("foo");
-	static final HttpEntity<Resource<String>> FOO_ENTITY = new HttpEntity<Resource<String>>(FOO);
-	static final ResponseEntity<Resource<String>> FOO_RESP_ENTITY = new ResponseEntity<Resource<String>>(FOO,
-			HttpStatus.OK);
-	static final HttpEntity<StringResource> FOO_RES_ENTITY = new HttpEntity<StringResource>(FOO_RES);
-	static final Resource<String> BAR = new Resource<String>("bar");
-	static final Resources<Resource<String>> BARS = new Resources<Resource<String>>(Collections.singletonList(BAR));
+	static final HttpEntity<Resource<String>> FOO_ENTITY = new HttpEntity<>(FOO);
+	static final ResponseEntity<Resource<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO,
+		HttpStatus.OK);
+	static final HttpEntity<StringResource> FOO_RES_ENTITY = new HttpEntity<>(FOO_RES);
+	static final Resource<String> BAR = new Resource<>("bar");
+	static final Resources<Resource<String>> BARS = new Resources<>(Collections.singletonList(BAR));
 	static final StringResource BAR_RES = new StringResource("bar");
-	static final HttpEntity<Resource<String>> BAR_ENTITY = new HttpEntity<Resource<String>>(BAR);
-	static final ResponseEntity<Resource<String>> BAR_RESP_ENTITY = new ResponseEntity<Resource<String>>(BAR,
-			HttpStatus.OK);
-	static final HttpEntity<StringResource> BAR_RES_ENTITY = new HttpEntity<StringResource>(BAR_RES);
-	static final Resource<Long> LONG_10 = new Resource<Long>(10L);
-	static final Resource<Long> LONG_20 = new Resource<Long>(20L);
+	static final HttpEntity<Resource<String>> BAR_ENTITY = new HttpEntity<>(BAR);
+	static final ResponseEntity<Resource<String>> BAR_RESP_ENTITY = new ResponseEntity<>(BAR,
+		HttpStatus.OK);
+	static final HttpEntity<StringResource> BAR_RES_ENTITY = new HttpEntity<>(BAR_RES);
+	static final Resource<Long> LONG_10 = new Resource<>(10L);
+	static final Resource<Long> LONG_20 = new Resource<>(20L);
 	static final LongResource LONG_10_RES = new LongResource(10L);
 	static final LongResource LONG_20_RES = new LongResource(20L);
-	static final HttpEntity<Resource<Long>> LONG_10_ENTITY = new HttpEntity<Resource<Long>>(LONG_10);
-	static final HttpEntity<LongResource> LONG_10_RES_ENTITY = new HttpEntity<LongResource>(LONG_10_RES);
-	static final HttpEntity<Resource<Long>> LONG_20_ENTITY = new HttpEntity<Resource<Long>>(LONG_20);
-	static final HttpEntity<LongResource> LONG_20_RES_ENTITY = new HttpEntity<LongResource>(LONG_20_RES);
-	static final Map<String, MethodParameter> METHOD_PARAMS = new HashMap<String, MethodParameter>();
+	static final HttpEntity<Resource<Long>> LONG_10_ENTITY = new HttpEntity<>(LONG_10);
+	static final HttpEntity<LongResource> LONG_10_RES_ENTITY = new HttpEntity<>(LONG_10_RES);
+	static final HttpEntity<Resource<Long>> LONG_20_ENTITY = new HttpEntity<>(LONG_20);
+	static final HttpEntity<LongResource> LONG_20_RES_ENTITY = new HttpEntity<>(LONG_20_RES);
+	static final Map<String, MethodParameter> METHOD_PARAMS = new HashMap<>();
 
 	static {
-		doWithMethods(Controller.class, new MethodCallback() {
-			@Override
-			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-				METHOD_PARAMS.put(method.getName(), new MethodParameter(method, -1));
-			}
-		});
+		doWithMethods(Controller.class, method -> METHOD_PARAMS.put(method.getName(), new MethodParameter(method, -1)));
 	}
 
 	@Mock HandlerMethodReturnValueHandler delegate;
@@ -100,7 +95,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	@Before
 	public void setUp() {
-		resourceProcessors = new ArrayList<ResourceProcessor<?>>();
+		resourceProcessors = new ArrayList<>();
 	}
 
 	/**
@@ -252,12 +247,12 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 */
 	@Test
 	public void usesHeaderLinksResponseEntityIfConfigured() throws Exception {
-		usesHeaderLinksResponseEntityIfConfigured(it -> ResponseEntity.ok(it));
+		usesHeaderLinksResponseEntityIfConfigured(ResponseEntity::ok);
 	}
 
 	private void usesHeaderLinksResponseEntityIfConfigured(Function<Object, Object> mapper) throws Exception {
 
-		Resource<String> resource = new Resource<String>("foo", new Link("href", "rel"));
+		Resource<String> resource = new Resource<>("foo", new Link("href", "rel"));
 		MethodParameter parameter = METHOD_PARAMS.get("resource");
 
 		ResourceProcessorHandlerMethodReturnValueHandler handler = new ResourceProcessorHandlerMethodReturnValueHandler(
@@ -287,8 +282,8 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	public void doesNotInvokeAProcessorForASpecializedType() throws Exception {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
-		Resources<Object> value = new Resources<Object>(
-				Collections.<Object> singleton(wrappers.emptyCollectionOf(Object.class)));
+		Resources<Object> value = new Resources<>(
+			Collections.singleton(wrappers.emptyCollectionOf(Object.class)));
 		ResourcesProcessorWrapper wrapper = new ResourcesProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));
@@ -392,7 +387,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		}
 	}
 
-	static interface Controller {
+	interface Controller {
 
 		Resources<Resource<String>> resources();
 
@@ -439,13 +434,13 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		}
 	}
 
-	static class PagedStringResources extends PagedResources<Resource<String>> {};
+	static class PagedStringResources extends PagedResources<Resource<String>> {}
 
 	static class Sample {
 
 	}
 
-	static interface SampleProjection {
+	interface SampleProjection {
 
 	}
 

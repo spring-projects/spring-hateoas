@@ -40,7 +40,7 @@ public class ControllerEntityLinksFactoryBeanUnitTest {
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
 
 		assertThatExceptionOfType(IllegalStateException.class) //
-				.isThrownBy(() -> builder.afterPropertiesSet()) //
+				.isThrownBy(builder::afterPropertiesSet) //
 				.withMessageContaining("Annotation");
 	}
 

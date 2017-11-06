@@ -144,9 +144,7 @@ public class EnableHypermediaSupportIntegrationTest {
 							.getField(processor, "messageConverters");
 
 					assertThat(converters.get(0)).isInstanceOfSatisfying(TypeConstrainedMappingJackson2HttpMessageConverter.class,
-							it -> {
-								assertThat(it.getSupportedMediaTypes()).contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-							});
+							it -> assertThat(it.getSupportedMediaTypes()).contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
 				}
 			}
 

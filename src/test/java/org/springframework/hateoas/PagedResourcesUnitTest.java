@@ -36,7 +36,7 @@ public class PagedResourcesUnitTest {
 
 	@Before
 	public void setUp() {
-		resources = new PagedResources<Object>(Collections.emptyList(), metadata);
+		resources = new PagedResources<>(Collections.emptyList(), metadata);
 	}
 
 	@Test
