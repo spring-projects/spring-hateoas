@@ -36,8 +36,8 @@ public class HeaderLinksResponseEntityUnitTest {
 	static final Object CONTENT = new Object();
 	static final Link LINK = new Link("href", "rel");
 
-	Resource<Object> resource = new Resource<Object>(CONTENT, LINK);
-	ResponseEntity<Resource<Object>> entity = new ResponseEntity<Resource<Object>>(resource, HttpStatus.OK);
+	Resource<Object> resource = new Resource<>(CONTENT, LINK);
+	ResponseEntity<Resource<Object>> entity = new ResponseEntity<>(resource, HttpStatus.OK);
 
 	@Test
 	public void movesRootResourceLinksToHeader() {
@@ -58,7 +58,7 @@ public class HeaderLinksResponseEntityUnitTest {
 	@Test
 	public void defaultStatusCodeToOkForHttpEntities() {
 
-		HttpEntity<Resource<Object>> entity = new HttpEntity<Resource<Object>>(resource);
+		HttpEntity<Resource<Object>> entity = new HttpEntity<>(resource);
 		ResponseEntity<Resource<Object>> wrappedEntity = HeaderLinksResponseEntity.wrap(entity);
 
 		assertThat(wrappedEntity.getStatusCode()).isEqualTo(HttpStatus.OK);

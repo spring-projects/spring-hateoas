@@ -127,7 +127,7 @@ public class HalFormsWebMvcIntegrationTest {
 	@RestController
 	static class EmployeeController {
 
-		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<Integer, Employee>();
+		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<>();
 
 		static {
 			EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
@@ -138,7 +138,7 @@ public class HalFormsWebMvcIntegrationTest {
 		public Resources<Resource<Employee>> all() {
 
 			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<Resource<Employee>>();
+			List<Resource<Employee>> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
@@ -150,7 +150,7 @@ public class HalFormsWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new Resources<Resource<Employee>>(employees, selfLink);
+			return new Resources<>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -163,10 +163,10 @@ public class HalFormsWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<Employee>(EMPLOYEES.get(id),
-					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
-							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
-					employeesLink);
+			return new Resource<>(EMPLOYEES.get(id),
+				findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
+					.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
+				employeesLink);
 		}
 
 		@PostMapping("/employees")

@@ -47,7 +47,7 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		Resource<Person> resource = new Resource<Person>(person);
+		Resource<Person> resource = new Resource<>(person);
 		resource.add(new Link("localhost"));
 
 		assertThat(write(resource)).isEqualTo(REFERENCE);

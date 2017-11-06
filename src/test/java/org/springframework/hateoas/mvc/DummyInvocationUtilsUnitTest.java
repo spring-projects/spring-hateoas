@@ -53,12 +53,12 @@ public class DummyInvocationUtilsUnitTest extends TestUtils {
 
 		@RequestMapping("/{id}/foo")
 		HttpEntity<Void> someMethod(@PathVariable("id") Long id) {
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
 
 		@RequestMapping("/{otherName}/bar")
 		HttpEntity<Void> someOtherMethod(@PathVariable(name = "otherName") Long id) {
-			return new ResponseEntity<Void>(HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
 	}
 }

@@ -31,15 +31,15 @@ public class ResourceUnitTest {
 	@Test
 	public void equalsForSelfReference() {
 
-		Resource<String> resource = new Resource<String>("foo");
+		Resource<String> resource = new Resource<>("foo");
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
 	public void equalsWithEqualContent() {
 
-		Resource<String> left = new Resource<String>("foo");
-		Resource<String> right = new Resource<String>("foo");
+		Resource<String> left = new Resource<>("foo");
+		Resource<String> right = new Resource<>("foo");
 
 		assertThat(left).isEqualTo(right);
 		assertThat(right).isEqualTo(left);
@@ -48,8 +48,8 @@ public class ResourceUnitTest {
 	@Test
 	public void notEqualForDifferentContent() {
 
-		Resource<String> left = new Resource<String>("foo");
-		Resource<String> right = new Resource<String>("bar");
+		Resource<String> left = new Resource<>("foo");
+		Resource<String> right = new Resource<>("bar");
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -58,8 +58,8 @@ public class ResourceUnitTest {
 	@Test
 	public void notEqualForDifferentLinks() {
 
-		Resource<String> left = new Resource<String>("foo");
-		Resource<String> right = new Resource<String>("foo");
+		Resource<String> left = new Resource<>("foo");
+		Resource<String> right = new Resource<>("foo");
 		right.add(new Link("localhost"));
 
 		assertThat(left).isNotEqualTo(right);

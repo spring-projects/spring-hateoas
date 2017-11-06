@@ -131,7 +131,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	@Test
 	public void createsLinkToControllerMethodWithMapRequestParam() {
 
-		Map<String, String> queryParams = new LinkedHashMap<String, String>();
+		Map<String, String> queryParams = new LinkedHashMap<>();
 		queryParams.put("firstKey", "firstValue");
 		queryParams.put("secondKey", "secondValue");
 
@@ -148,7 +148,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	@Test
 	public void createsLinkToControllerMethodWithMultiValueMapRequestParam() {
 
-		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 		queryParams.put("key1", Arrays.asList("value1a", "value1b"));
 		queryParams.put("key2", Arrays.asList("value2a", "value2b"));
 
@@ -173,7 +173,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/people/17/addresses");
 	}
 
-	static interface SampleController {
+	interface SampleController {
 
 		@RequestMapping("/sample/{id}")
 		HttpEntity<?> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);

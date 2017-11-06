@@ -170,7 +170,7 @@ public class DefaultCurieProviderUnitTest {
 
 	private static Map<String, UriTemplate> getCuries() {
 
-		Map<String, UriTemplate> curies = new HashMap<String, UriTemplate>(2);
+		Map<String, UriTemplate> curies = new HashMap<>(2);
 		curies.put("foo", new UriTemplate("/foo/{rel}"));
 		curies.put("bar", new UriTemplate("/bar/{rel}"));
 
