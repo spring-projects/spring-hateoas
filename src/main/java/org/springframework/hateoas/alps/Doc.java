@@ -21,16 +21,20 @@ import lombok.Value;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 /**
  * A value object for an ALPS doc element.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.15
  * @see http://alps.io/spec/#prop-doc
  */
 @Value
 @Builder
 @AllArgsConstructor
+@JsonPropertyOrder({"format", "href", "value"})
 public class Doc {
 
 	private final String href, value;

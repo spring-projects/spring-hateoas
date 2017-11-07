@@ -30,18 +30,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * An ALPS document.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.15
  * @see http://alps.io
  * @see http://alps.io/spec/#prop-alps
  */
 @Value
 @Builder(builderMethodName = "alps")
-@JsonPropertyOrder({"version", "doc", "descriptors"})
+@JsonPropertyOrder({"version", "doc", "descriptor"})
 public class Alps {
 
 	private final String version = "1.0";
 	private final Doc doc;
-	private final List<Descriptor> descriptors;
+	private final List<Descriptor> descriptor;
 
 	/**
 	 * Returns a new {@link DescriptorBuilder}.

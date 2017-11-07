@@ -3,14 +3,14 @@
   "doc" : {
     "href" : "http://example.org/samples/full/doc.html"
   },
-  "descriptors" : [ {
+  "descriptor" : [ {
     "id" : "search",
-    "doc" : {
-      "value" : "A search form with two inputs.",
-      "format" : "TEXT"
-    },
     "type" : "SAFE",
-    "descriptors" : [ {
+    "doc" : {
+      "format" : "TEXT",
+      "value" : "A search form with two inputs."
+    },
+    "descriptor" : [ {
       "href" : "#resultType"
     }, {
       "id" : "value",
@@ -19,10 +19,10 @@
     } ]
   }, {
     "id" : "resultType",
+    "type" : "SEMANTIC",
     "doc" : {
       "value" : "results format"
     },
-    "type" : "SEMANTIC",
     "ext" : {
       "id" : "#ext-range",
       "href" : "http://alps.io/ext/range",

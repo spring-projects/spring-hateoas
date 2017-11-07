@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * Unit tests for serialization of ALPS documents.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class JacksonSerializationTest {
 
@@ -56,10 +57,10 @@ public class JacksonSerializationTest {
 
 		Alps alps = alps().//
 				doc(doc().href("http://example.org/samples/full/doc.html").build()). //
-				descriptors(Arrays.asList(//
+				descriptor(Arrays.asList(//
 						descriptor().id("search").type(Type.SAFE).//
 								doc(new Doc("A search form with two inputs.", Format.TEXT)).//
-								descriptors(Arrays.asList( //
+								descriptor(Arrays.asList( //
 										descriptor().href("#resultType").build(), //
 										descriptor().id("value").name("search").type(Type.SEMANTIC).build())//
 								).build(), //
