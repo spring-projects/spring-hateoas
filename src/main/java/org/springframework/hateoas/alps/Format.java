@@ -21,6 +21,7 @@ import java.util.Locale;
  * Enum for all ALPS doc formats.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.15
  * @see http://alps.io/spec/#prop-format
  */
