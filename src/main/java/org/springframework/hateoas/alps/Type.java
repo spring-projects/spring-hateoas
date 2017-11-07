@@ -21,6 +21,7 @@ import java.util.Locale;
  * An enum for ALPS descriptor types
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.15
  * @see http://alps.io/spec/#prop-type
  */
