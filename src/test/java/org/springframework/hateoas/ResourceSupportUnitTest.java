@@ -199,8 +199,8 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLink("author")).isTrue();
 
 		assertThat(support.hasEmbeddedResources()).isTrue();
-		assertThat(support.getEmbeddedResource("author").hasLink("self")).isTrue();
-		assertThat(support.getEmbeddedResource("author").getLinks()).contains(new Link("/people/alan-watts", "self"));
+		assertThat(((ResourceSupport) support.getEmbeddedResource("author")).hasLink("self")).isTrue();
+		assertThat(((ResourceSupport) support.getEmbeddedResource("author")).getLinks()).contains(new Link("/people/alan-watts", "self"));
 		assertThat(((Author) support.getEmbeddedResource("author")).getName()).isEqualTo("Alan Watts");
 		assertThat(((Author) support.getEmbeddedResource("author")).getBorn()).isEqualTo("January 6, 1915");
 		assertThat(((Author) support.getEmbeddedResource("author")).getDied()).isEqualTo("November 16, 1973");

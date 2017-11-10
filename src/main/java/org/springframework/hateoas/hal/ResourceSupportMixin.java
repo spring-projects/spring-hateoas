@@ -43,5 +43,5 @@ abstract class ResourceSupportMixin extends ResourceSupport {
 	@XmlElement(name = "embedded")
 	@JsonProperty("_embedded")
 	@JsonInclude(Include.NON_EMPTY)
-	public abstract Map<String, ResourceSupport> getEmbeddedResources();
+	public abstract Map<String, Object> getEmbeddedResources();
 }

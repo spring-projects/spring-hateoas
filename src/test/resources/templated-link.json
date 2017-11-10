@@ -1,0 +1,8 @@
+{
+  "_links" : {
+    "order" : {
+      "href" : "/orders{?id}",
+      "templated" : true
+    }
+  }
+}

@@ -149,6 +149,17 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * In order to ignore "templated" value settings, this setter is needed. Any value submitted, though, is ignore
+	 * since this is a virtual attribute, not always rendered.
+	 *
+	 * @param __
+	 */
+	@JsonIgnore
+	@XmlTransient
+	public void setTemplated(boolean __) {
+	}
+
+	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
 	 * 
 	 * @param arguments

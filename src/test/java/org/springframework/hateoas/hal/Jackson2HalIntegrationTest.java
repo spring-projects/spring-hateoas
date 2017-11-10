@@ -17,6 +17,14 @@ package org.springframework.hateoas.hal;
 
 import static org.assertj.core.api.Assertions.*;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +38,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
@@ -46,7 +55,10 @@ import org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.support.Author;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -436,6 +448,90 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(write(resourceSupport)).isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
+	}
+
+	@Test
+	public void handleTemplatedLinks() throws IOException {
+
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+		ResourceSupport resource = new ResourceSupport();
+		resource.add(new Link("/orders{?id}", "order"));
+
+		String serialized = mapper.writeValueAsString(resource);
+		String expected = readFile(new ClassPathResource("templated-link.json"));
+
+		assertThat(serialized).isEqualTo(expected);
+
+		ResourceSupport deserialized = mapper.readValue(serialized, ResourceSupport.class);
+
+		assertThat(deserialized).isEqualTo(resource);
+	}
+
+	@Test
+	public void embedComplexDocument() throws Exception {
+
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		
+		HalObject halObject = new HalObject(14, 20);
+		halObject.add(new Link("/orders", Link.REL_SELF));
+		halObject.add(new Link("/orders?page=2", Link.REL_NEXT));
+		halObject.add(new Link("/orders{?id}", "find"));
+
+		HalOrder order1 = new HalOrder(30.00f, "USD", "shipped");
+		order1.add(new Link("/orders/123", Link.REL_SELF));
+		order1.add(new Link("/baskets/98712", "basket"));
+		order1.add(new Link("/customers/7809", "customer"));
+
+		HalOrder order2 = new HalOrder(20.00f, "USD", "processing");
+		order2.add(new Link("/orders/124", Link.REL_SELF));
+		order2.add(new Link("/baskets/97213", "basket"));
+		order2.add(new Link("/customers/12369", "customer"));
+
+		halObject.addEmbeddedResource("orders", Arrays.asList(
+			order1,
+			order2
+		));
+
+		String serialized = write(halObject);
+
+		String expected = readFile(new ClassPathResource("embedded-hal.json"));
+		
+		assertThat(serialized).isEqualTo(expected);
+
+		HalObject deserialized = mapper.readValue(expected, HalObject.class);
+
+		assertThat(deserialized).isEqualTo(halObject);
+	}
+
+	@Data
+	@AllArgsConstructor
+	static class HalObject extends ResourceSupport {
+
+		private int currentlyProcessing;
+		private int shippedToday;
+	}
+
+	@Data
+	@AllArgsConstructor
+	static class HalOrder extends ResourceSupport {
+
+		private float total;
+		private String currency;
+		private String status;
+	}
+
+	static String readFile(org.springframework.core.io.Resource resource) throws IOException {
+
+		FileInputStream stream = new FileInputStream(resource.getFile());
+
+		try {
+			FileChannel fc = stream.getChannel();
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+			return Charset.defaultCharset().decode(bb).toString();
+		} finally {
+			stream.close();
+		}
 	}
 
 	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {

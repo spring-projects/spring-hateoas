@@ -39,11 +39,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ResourceSupport implements Identifiable<Link> {
 
 	private final List<Link> links;
-	private final Map<String, ResourceSupport> embeddedResources;
+	private final Map<String, Object> embeddedResources;
 
 	public ResourceSupport() {
 		this.links = new ArrayList<>();
-		this.embeddedResources = new HashMap<String, ResourceSupport>();
+		this.embeddedResources = new HashMap<String, Object>();
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class ResourceSupport implements Identifiable<Link> {
 				.collect(Collectors.toList());
 	}
 
-	public void addEmbeddedResource(String rel, ResourceSupport embeddableResource) {
+	public void addEmbeddedResource(String rel, Object embeddableResource) {
 		this.embeddedResources.put(rel, embeddableResource);
 	}
 
@@ -166,11 +166,11 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	@JsonProperty("embedded")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	public Map<String, ResourceSupport> getEmbeddedResources() {
+	public Map<String, Object> getEmbeddedResources() {
 		return this.embeddedResources;
 	}
 
-	public ResourceSupport getEmbeddedResource(String rel) {
+	public Object getEmbeddedResource(String rel) {
 		return this.embeddedResources.get(rel);
 	}
 

@@ -1,0 +1,49 @@
+{
+  "currentlyProcessing" : 14,
+  "shippedToday" : 20,
+  "_links" : {
+    "self" : {
+      "href" : "/orders"
+    },
+    "next" : {
+      "href" : "/orders?page=2"
+    },
+    "find" : {
+      "href" : "/orders{?id}",
+      "templated" : true
+    }
+  },
+  "_embedded" : {
+    "orders" : [ {
+      "total" : 30.0,
+      "currency" : "USD",
+      "status" : "shipped",
+      "_links" : {
+        "self" : {
+          "href" : "/orders/123"
+        },
+        "basket" : {
+          "href" : "/baskets/98712"
+        },
+        "customer" : {
+          "href" : "/customers/7809"
+        }
+      }
+    }, {
+      "total" : 20.0,
+      "currency" : "USD",
+      "status" : "processing",
+      "_links" : {
+        "self" : {
+          "href" : "/orders/124"
+        },
+        "basket" : {
+          "href" : "/baskets/97213"
+        },
+        "customer" : {
+          "href" : "/customers/12369"
+        }
+      }
+    } ]
+  }
+}
