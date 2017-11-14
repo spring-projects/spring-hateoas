@@ -207,12 +207,24 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Returns whether the link is templated.
+	 * Returns whether or not the link is templated.
 	 * 
 	 * @return
 	 */
 	public boolean isTemplated() {
 		return !getUriTemplate().getVariables().isEmpty();
+	}
+
+	/**
+	 * This no-op setter is required to deserialize a link that contains a templated URL. It allows Jackson to
+	 * "set" the property, but since {@code templated} is a virtual property, the injected value {@code true} or
+	 * {@code false) is ignored.
+	 *
+	 * The method is kept private so no one attempts to actually use it.
+	 *
+	 * @param __ - don't care what value is passed in. The true value {@link #isTemplated()} is based upon the {@link UriTemplate}.
+	 */
+	private void setTemplated(boolean __) {
 	}
 
 	/**
