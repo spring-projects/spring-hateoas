@@ -221,6 +221,18 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * This noop setter is required to deserialize a HAL document that contains a templated URL. It allows
+	 * Jackson to "set" the property, but since it's a virtual property, the injected value (true or false) is
+	 * ignored.
+	 *
+	 * The method is kept private so no one attempts to actually use it.
+	 *
+	 * @param __ - don't care what value is passed in. The true value {@link #isTemplated()} is based upon the {@link UriTemplate}.
+	 */
+	private void setTemplated(boolean __) {
+	}
+
+	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
 	 * 
 	 * @param arguments

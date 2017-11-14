@@ -17,6 +17,7 @@ package org.springframework.hateoas.hal;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -451,6 +452,23 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(write(resourceSupport)).isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
+	}
+
+	@Test
+	public void handleTemplatedLinks() throws IOException {
+
+		ResourceSupport original = new ResourceSupport();
+		original.add(new Link("/orders{?id}", "order"));
+
+		String serialized = mapper.writeValueAsString(original);
+
+		String expected = "{\"_links\":{\"order\":{\"href\":\"/orders{?id}\",\"templated\":true}}}";
+
+		assertThat(serialized).isEqualTo(expected);
+
+		ResourceSupport deserialized = mapper.readValue(serialized, ResourceSupport.class);
+
+		assertThat(deserialized).isEqualTo(original);
 	}
 
 	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {
