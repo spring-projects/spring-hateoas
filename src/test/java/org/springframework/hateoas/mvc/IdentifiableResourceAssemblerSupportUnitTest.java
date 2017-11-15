@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mvc;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.Arrays;
@@ -67,18 +68,18 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Optional<Link> selfLink = resource.getId();
 
 		assertThat(selfLink.map(Link::getHref)) //
-				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
+				.hasValueSatisfying(it -> assertTrue(it.endsWith("/people/id")));
 	}
 
 	@Test
-	public void unwrapsIdentifyablesForParameters() {
+	public void unwrapsIdentifiablesForParameters() {
 
 		PersonResource resource = new PersonResourceAssembler(ParameterizedController.class).createResource(person, person,
 				"bar");
 		Optional<Link> selfLink = resource.getId();
 
 		assertThat(selfLink.map(Link::getHref)) //
-				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
+				.hasValueSatisfying(it -> assertTrue(it.endsWith("/people/10/bar/addresses/10")));
 	}
 
 	@Test

@@ -68,7 +68,7 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 		Assert.notNull(id, "Id must not be null!");
 
 		D instance = instantiateResource(entity);
-		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
+		instance.add(linkTo(controllerClass, unwrapIdentifiables(parameters)).slash(id).withSelfRel());
 		return instance;
 	}
 
@@ -78,10 +78,10 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 	 * @param values must not be {@literal null}.
 	 * @return
 	 */
-	private Object[] unwrapIdentifyables(Object[] values) {
+	private Object[] unwrapIdentifiables(Object[] values) {
 
 		return Arrays.stream(values) //
-				.map(element -> element instanceof Identifiable ? ((Identifiable<?>) element).getId() : element) //
+				.map(element -> element instanceof Identifiable ? ((Identifiable<?>) element).getId().get() : element) //
 				.toArray();
 	}
 }
