@@ -123,7 +123,9 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @return the link with the given rel or {@link Optional#empty()} if none found.
 	 */
 	public Optional<Link> getLink(String rel) {
-		return getLinks(rel).stream().findFirst();
+		return links.stream() //
+				.filter(link -> link.getRel().equals(rel)) //
+				.findFirst();
 	}
 
 	/**
