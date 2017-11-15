@@ -14,4 +14,4 @@ cache:
     - $HOME/.m2
 sudo: false
 install: true
-script: "mvn clean dependency:list test -P${PROFILE} -Dsort"
+script: "./mvnw clean dependency:list test -P${PROFILE} -Dsort"

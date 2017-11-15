@@ -4,5 +4,5 @@
 #
 #
 
-mvn clean package &&
-mvn clean package -Pspring5-next
+./mvnw clean package &&
+./mvnw clean package -Pspring5-next
