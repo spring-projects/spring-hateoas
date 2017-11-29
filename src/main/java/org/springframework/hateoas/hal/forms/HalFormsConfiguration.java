@@ -63,5 +63,4 @@ public class HalFormsConfiguration {
 
 		throw new IllegalStateException("Don't know how to translate " + this);
 	}
-
 }

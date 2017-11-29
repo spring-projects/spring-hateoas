@@ -19,14 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
@@ -73,18 +72,9 @@ class HalFormsAffordanceModel implements AffordanceModel {
 	 */
 	public List<HalFormsProperty> getProperties() {
 
-		List<HalFormsProperty> halFormsProperties = new ArrayList<HalFormsProperty>();
-
-		for (Entry<String, Class<?>> entry : this.properties.entrySet()) {
-
-			HalFormsProperty property = HalFormsProperty//
-					.named(entry.getKey())//
-					.withRequired(required);
-
-			halFormsProperties.add(property);
-		}
-
-		return halFormsProperties;
+		return properties.entrySet().stream() //
+				.map(entry -> entry.getKey()) //
+				.map(key -> HalFormsProperty.named(key).withRequired(required)).collect(Collectors.toList());
 	}
 
 	public String getPath() {
@@ -136,7 +126,7 @@ class HalFormsAffordanceModel implements AffordanceModel {
 
 		LOG.debug("Gathering details about " + method.getDeclaringClass().getCanonicalName() + "." + method.getName());
 
-		Map<String, Class<?>> properties = new TreeMap<String, Class<?>>();
+		Map<String, Class<?>> properties = new TreeMap<>();
 		MethodParameters parameters = new MethodParameters(method);
 
 		for (MethodParameter parameter : parameters.getParametersWith(RequestBody.class)) {

@@ -99,12 +99,8 @@ class HalFormsDeserializers {
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			if (property != null) {
-				JavaType vc = property.getType().getContentType();
-				return new HalFormsResourcesDeserializer(vc);
-			} else {
-				return new HalFormsResourcesDeserializer(ctxt.getContextualType());
-			}
+			return new HalFormsResourcesDeserializer(
+					property == null ? ctxt.getContextualType() : property.getType().getContentType());
 		}
 	}
 

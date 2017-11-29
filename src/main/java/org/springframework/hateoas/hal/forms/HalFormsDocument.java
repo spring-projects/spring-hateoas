@@ -61,8 +61,7 @@ public class HalFormsDocument<T> {
 	@Wither(AccessLevel.PRIVATE) //
 	private T resource;
 
-	@JsonInclude(Include.NON_EMPTY)
-	@JsonIgnore //
+	@JsonInclude(Include.NON_EMPTY) @JsonIgnore //
 	@Wither(AccessLevel.PRIVATE) //
 	private Collection<T> resources;
 
@@ -87,8 +86,7 @@ public class HalFormsDocument<T> {
 	private Map<String, HalFormsTemplate> templates;
 
 	private HalFormsDocument() {
-		this(null, null, Collections.<String, Object> emptyMap(), null, Collections.<Link> emptyList(),
-				Collections.<String, HalFormsTemplate> emptyMap());
+		this(null, null, Collections.emptyMap(), null, Collections.emptyList(), Collections.emptyMap());
 	}
 
 	/**
@@ -120,7 +118,7 @@ public class HalFormsDocument<T> {
 	 * @return
 	 */
 	public static HalFormsDocument<?> empty() {
-		return new HalFormsDocument<Object>();
+		return new HalFormsDocument<>();
 	}
 
 	/**
@@ -157,7 +155,7 @@ public class HalFormsDocument<T> {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		List<Link> links = new ArrayList<Link>(this.links);
+		List<Link> links = new ArrayList<>(this.links);
 		links.add(link);
 
 		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
@@ -175,7 +173,7 @@ public class HalFormsDocument<T> {
 		Assert.hasText(name, "Template name must not be null or empty!");
 		Assert.notNull(template, "Template must not be null!");
 
-		Map<String, HalFormsTemplate> templates = new HashMap<String, HalFormsTemplate>(this.templates);
+		Map<String, HalFormsTemplate> templates = new HashMap<>(this.templates);
 		templates.put(name, template);
 
 		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);

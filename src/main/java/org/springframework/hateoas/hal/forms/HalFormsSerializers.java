@@ -192,7 +192,8 @@ class HalFormsSerializers {
 		Map<String, HalFormsTemplate> templates = new HashMap<String, HalFormsTemplate>();
 
 		if (resource.hasLink(Link.REL_SELF)) {
-			for (Affordance affordance : resource.getLink(Link.REL_SELF).map(Link::getAffordances).orElse(Collections.emptyList())) {
+			for (Affordance affordance : resource.getLink(Link.REL_SELF).map(Link::getAffordances)
+					.orElse(Collections.emptyList())) {
 
 				HalFormsAffordanceModel model = affordance.getAffordanceModel(MediaTypes.HAL_FORMS_JSON);
 
@@ -224,6 +225,7 @@ class HalFormsSerializers {
 	private static void validate(ResourceSupport resource, Affordance affordance, HalFormsAffordanceModel model) {
 
 		try {
+
 			Optional<Link> selfLink = resource.getLink(Link.REL_SELF);
 			URI selfLinkUri = new URI(selfLink.map(link -> link.expand().getHref()).orElse(""));
 

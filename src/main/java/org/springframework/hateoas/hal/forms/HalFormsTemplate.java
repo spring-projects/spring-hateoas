@@ -26,7 +26,6 @@ import lombok.experimental.Wither;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.hateoas.hal.forms.HalFormsDeserializers.MediaTypesDeserializer;
 import org.springframework.http.HttpMethod;
@@ -39,7 +38,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Value object for a HAL-FORMS template. Describes the available state transition details.
@@ -67,7 +65,7 @@ public class HalFormsTemplate {
 	private List<MediaType> contentTypes;
 
 	private HalFormsTemplate() {
-		this(null, null, Collections.<HalFormsProperty> emptyList(), Collections.<MediaType> emptyList());
+		this(null, null, Collections.emptyList(), Collections.emptyList());
 	}
 
 	public static HalFormsTemplate forMethod(HttpMethod httpMethod) {
@@ -84,7 +82,7 @@ public class HalFormsTemplate {
 
 		Assert.notNull(property, "Property must not be null!");
 
-		ArrayList<HalFormsProperty> properties = new ArrayList<HalFormsProperty>(this.properties);
+		List<HalFormsProperty> properties = new ArrayList<>(this.properties);
 		properties.add(property);
 
 		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
@@ -100,7 +98,7 @@ public class HalFormsTemplate {
 
 		Assert.notNull(mediaType, "Media type must not be null!");
 
-		ArrayList<MediaType> contentTypes = new ArrayList<MediaType>(this.contentTypes);
+		List<MediaType> contentTypes = new ArrayList<>(this.contentTypes);
 		contentTypes.add(mediaType);
 
 		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
