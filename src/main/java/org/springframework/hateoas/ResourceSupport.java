@@ -126,7 +126,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	public Optional<Link> getLink(String rel) {
 
 		return links.stream() //
-				.filter(link -> link.getRel().equals(rel)) //
+				.filter(link -> link.hasRel(rel)) //
 				.findFirst();
 	}
 
@@ -151,7 +151,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	public List<Link> getLinks(String rel) {
 
 		return links.stream() //
-				.filter(link -> link.getRel().equals(rel)) //
+				.filter(link -> link.hasRel(rel)) //
 				.collect(Collectors.toList());
 	}
 

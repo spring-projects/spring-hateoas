@@ -223,4 +223,28 @@ public class LinkUnitTest {
 		assertThat(Link.valueOf("<http://localhost>; rel=\"http://acme.com/rels/foo-bar\"").getRel()) //
 				.isEqualTo("http://acme.com/rels/foo-bar");
 	}
+
+	/**
+	 * @see #671
+	 */
+	@Test
+	public void exposesLinkRelation() {
+
+		Link link = new Link("/", "foo");
+
+		assertThat(link.hasRel("foo")).isTrue();
+		assertThat(link.hasRel("bar")).isFalse();
+	}
+
+	/**
+	 * @see #671
+	 */
+	@Test
+	public void rejectsInvalidRelationsOnHasRel() {
+
+		Link link = new Link("/");
+
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(null));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(""));
+	}
 }

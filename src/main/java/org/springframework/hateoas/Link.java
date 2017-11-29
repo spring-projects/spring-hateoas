@@ -168,6 +168,19 @@ public class Link implements Serializable {
 		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
 	}
 
+	/**
+	 * Returns whether the current {@link Link} has the given link relation.
+	 * 
+	 * @param rel must not be {@literal null} or empty.
+	 * @return
+	 */
+	public boolean hasRel(String rel) {
+
+		Assert.hasText(rel, "Link relation must not be null or empty!");
+
+		return this.rel.equals(rel);
+	}
+
 	private UriTemplate getUriTemplate() {
 
 		if (template == null) {
