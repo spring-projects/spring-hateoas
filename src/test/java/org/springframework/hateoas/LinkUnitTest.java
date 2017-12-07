@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,7 @@ public class LinkUnitTest {
 	/**
 	 * @see #54
 	 * @see #100
+	 * @see #678
 	 */
 	@Test
 	public void parsesRFC5988HeaderIntoLink() {
@@ -122,13 +123,15 @@ public class LinkUnitTest {
 				+ "media=\"pdf\";" //
 				+ "title=\"pdf customer copy\";" //
 				+ "type=\"portable document\";" //
-				+ "deprecation=\"http://example.com/customers/deprecated\"")) //
+				+ "deprecation=\"http://example.com/customers/deprecated\";" //
+				+ "profile=\"my-profile\"")) //
 						.isEqualTo(new Link("/customer/1") //
 								.withHreflang("en") //
 								.withMedia("pdf") //
 								.withTitle("pdf customer copy") //
 								.withType("portable document") //
-								.withDeprecation("http://example.com/customers/deprecated"));
+								.withDeprecation("http://example.com/customers/deprecated")
+								.withProfile("my-profile"));
 	}
 
 	/**
