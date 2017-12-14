@@ -15,7 +15,7 @@ NOTE: Copies of this document may be made for your own use and for distribution 
 toc::[]
 
 [[fundamentals]]
-== Fundmentals
+== Fundamentals
 
 [[fundamentals.jaxb-json]]
 === Jackson / JAXB integration
