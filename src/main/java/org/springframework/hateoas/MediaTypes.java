@@ -22,10 +22,7 @@ import org.springframework.http.MediaType;
  * 
  * @author Oliver Gierke
  * @author Przemek Nowak
-<<<<<<< HEAD
  * @author Drummond Dawson
-=======
->>>>>>> f5bf966... #340 - Add new Affordances API + HAL-FORMS mediatype.
  * @author Greg Turnquist
  */
 public class MediaTypes {
