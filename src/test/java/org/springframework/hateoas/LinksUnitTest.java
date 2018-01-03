@@ -34,6 +34,7 @@ public class LinksUnitTest {
 	static final String FIRST = "</something>;rel=\"foo\"";
 	static final String SECOND = "</somethingElse>;rel=\"bar\"";
 	static final String WITH_COMMA = "<http://localhost:8080/test?page=0&filter=foo,bar>;rel=\"foo\"";
+	static final String WITH_WHITESPACE = "</something>; rel=\"foo\"," + SECOND;
 
 	static final String LINKS = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIRST, SECOND));
 
@@ -92,5 +93,13 @@ public class LinksUnitTest {
 
 		assertThat(twoWithCommaInFirst.getLink("foo")).hasValue(withComma);
 		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
+	}
+
+	/**
+	 * @see https://tools.ietf.org/html/rfc5988#section-5.5
+	 */
+	@Test
+	public void parsesLinksWithWhitespace() {
+		assertThat(Links.valueOf(WITH_WHITESPACE)).isEqualTo(reference);
 	}
 }

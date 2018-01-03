@@ -88,6 +88,7 @@
 			<id>spring5-next</id>
 			<properties>
 				<spring.version>5.0.2.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.9.2</jackson.version>
 			</properties>
 			<repositories>
 				<repository>

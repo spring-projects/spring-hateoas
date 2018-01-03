@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  */
 public class Links implements Iterable<Link> {
 
-	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\w+=\"[^\"]*\")+)");
+	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\s*\\w+=\"[^\"]*\")+)");
 
 	static final Links NO_LINKS = new Links(Collections.emptyList());
 
