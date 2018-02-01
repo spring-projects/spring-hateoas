@@ -19,8 +19,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
@@ -89,7 +87,6 @@ public class Jackson2HalFormsModule extends SimpleModule {
 	abstract class ResourcesMixin<T> extends Resources<T> {
 
 		@Override
-		@XmlElement(name = "embedded")
 		@JsonProperty("_embedded")
 		@JsonInclude(Include.NON_EMPTY)
 		@JsonDeserialize(using = HalFormsResourcesDeserializer.class)

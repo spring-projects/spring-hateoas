@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -104,7 +102,6 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * 
 	 * @return
 	 */
-	@XmlElement(name = "link", namespace = Link.ATOM_NAMESPACE)
 	@JsonProperty("links")
 	public List<Link> getLinks() {
 		return links;

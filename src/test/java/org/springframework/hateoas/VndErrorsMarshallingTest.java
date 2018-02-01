@@ -49,8 +49,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson2Mapper;
-	Marshaller marshaller;
-	Unmarshaller unmarshaller;
 
 	RelProvider relProvider = new EvoInflectorRelProvider();
 
@@ -74,10 +72,6 @@ public class VndErrorsMarshallingTest {
 		jackson2Mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
 		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
-		JAXBContext context = JAXBContext.newInstance(VndErrors.class);
-		marshaller = context.createMarshaller();
-		unmarshaller = context.createUnmarshaller();
-
 		VndError error = new VndError("42", "Validation failed!", //
 				new Link("http://...", "describes"), new Link("http://...", "help"));
 		errors = new VndErrors(error, error, error);
@@ -92,32 +86,11 @@ public class VndErrorsMarshallingTest {
 	}
 
 	/**
-	 * @see #62, #154
-	 */
-	@Test
-	public void jaxbMarshalling() throws Exception {
-
-		Writer writer = new StringWriter();
-		marshaller.marshal(errors, writer);
-
-		assertThat(new Diff(xmlReference, writer.toString()).similar()).isTrue();
-	}
-
-	/**
 	 * @see #93, #94
 	 */
 	@Test
 	public void jackson2UnMarshalling() throws Exception {
 		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class)).isEqualTo(errors);
-	}
-
-	/**
-	 * @see #93, #94
-	 */
-	@Test
-	public void jaxbUnMarshalling() throws Exception {
-		VndErrors actual = (VndErrors) unmarshaller.unmarshal(new StringReader(xmlReference));
-		assertThat(actual).isEqualTo(errors);
 	}
 
 	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {

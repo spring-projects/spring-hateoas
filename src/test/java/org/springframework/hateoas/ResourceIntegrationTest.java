@@ -38,7 +38,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
-	static final String XML_REFERENCE = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><personResource xmlns:ns2=\"http://www.w3.org/2005/Atom\"><ns2:link href=\"/foo\" rel=\"bar\"/><person lastname=\"Matthews\" firstname=\"Dave\"/></personResource>";
 
 	@Test
 	public void inlinesContent() throws Exception {
@@ -51,29 +50,6 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		resource.add(new Link("localhost"));
 
 		assertThat(write(resource)).isEqualTo(REFERENCE);
-	}
-
-	/**
-	 * @see #124
-	 * @see #154
-	 */
-	@Test
-	public void marshalsResourceToXml() throws Exception {
-
-		Person person = new Person();
-		person.firstname = "Dave";
-		person.lastname = "Matthews";
-
-		PersonResource resource = new PersonResource(person);
-		resource.add(new Link("/foo", "bar"));
-
-		JAXBContext context = JAXBContext.newInstance(PersonResource.class, Person.class);
-		StringWriter writer = new StringWriter();
-
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.marshal(resource, writer);
-
-		assertThat(new Diff(XML_REFERENCE, writer.toString()).similar()).isTrue();
 	}
 
 	/**
@@ -90,7 +66,6 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}
 
-	@XmlRootElement
 	static class PersonResource extends Resource<Person> {
 
 		public PersonResource(Person person) {
@@ -101,10 +76,9 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 	}
 
 	@JsonAutoDetect(fieldVisibility = Visibility.ANY)
-	@XmlRootElement
 	static class Person {
 
-		@XmlAttribute String firstname;
-		@XmlAttribute String lastname;
+		String firstname;
+		String lastname;
 	}
 }
