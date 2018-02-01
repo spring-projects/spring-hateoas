@@ -20,11 +20,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -38,10 +33,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * @see https://github.com/blongden/vnd.error
  * @author Oliver Gierke
  */
-@XmlRootElement(name = "errors")
 public class VndErrors implements Iterable<VndErrors.VndError> {
 
-	@XmlElement(name = "error")//
 	private final List<VndError> vndErrors;
 
 	/**
@@ -162,11 +155,10 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * 
 	 * @author Oliver Gierke
 	 */
-	@XmlType
 	public static class VndError extends ResourceSupport {
 
-		@XmlAttribute @JsonProperty private final String logref;
-		@XmlElement @JsonProperty private final String message;
+		@JsonProperty private final String logref;
+		@JsonProperty private final String message;
 
 		/**
 		 * Creates a new {@link VndError} with the given logref, a message as well as some {@link Link}s.

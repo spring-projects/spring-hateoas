@@ -20,9 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,10 +30,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author Oliver Gierke
  */
-@XmlRootElement(name = "pagedEntities")
 public class PagedResources<T> extends Resources<T> {
 
-	public static PagedResources<?> NO_PAGE = new PagedResources<Object>();
+	public static PagedResources<?> NO_PAGE = new PagedResources<>();
 
 	private PageMetadata metadata;
 
@@ -169,10 +165,10 @@ public class PagedResources<T> extends Resources<T> {
 	 */
 	public static class PageMetadata {
 
-		@XmlAttribute @JsonProperty private long size;
-		@XmlAttribute @JsonProperty private long totalElements;
-		@XmlAttribute @JsonProperty private long totalPages;
-		@XmlAttribute @JsonProperty private long number;
+		@JsonProperty private long size;
+		@JsonProperty private long totalElements;
+		@JsonProperty private long totalPages;
+		@JsonProperty private long number;
 
 		protected PageMetadata() {
 

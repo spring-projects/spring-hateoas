@@ -18,9 +18,6 @@ package org.springframework.hateoas;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -31,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@XmlRootElement
 public class Resource<T> extends ResourceSupport {
 
 	private final T content;
@@ -73,7 +69,6 @@ public class Resource<T> extends ResourceSupport {
 	 * @return the content
 	 */
 	@JsonUnwrapped
-	@XmlAnyElement
 	public T getContent() {
 		return content;
 	}

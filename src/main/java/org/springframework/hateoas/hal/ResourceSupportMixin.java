@@ -17,8 +17,6 @@ package org.springframework.hateoas.hal;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -38,7 +36,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public abstract class ResourceSupportMixin extends ResourceSupport {
 
 	@Override
-	@XmlElement(name = "link")
 	@JsonProperty("_links")
 	@JsonInclude(Include.NON_EMPTY)
 	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)

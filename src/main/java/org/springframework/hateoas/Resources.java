@@ -21,10 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author Oliver Gierke
  */
-@XmlRootElement(name = "entities")
 public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	private final Collection<T> content;
@@ -98,8 +93,6 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * 
 	 * @return the content will never be {@literal null}.
 	 */
-	@XmlAnyElement
-	@XmlElementWrapper
 	@JsonProperty("content")
 	public Collection<T> getContent() {
 		return Collections.unmodifiableCollection(content);

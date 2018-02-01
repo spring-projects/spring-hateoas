@@ -30,10 +30,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -47,7 +43,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
@@ -66,15 +61,15 @@ public class Link implements Serializable {
 	public static final String REL_NEXT = "next";
 	public static final String REL_LAST = "last";
 
-	private @XmlAttribute @Wither String rel;
-	private @XmlAttribute @Wither String href;
-	private @XmlAttribute @Wither String hreflang;
-	private @XmlAttribute @Wither String media;
-	private @XmlAttribute @Wither String title;
-	private @XmlAttribute @Wither String type;
-	private @XmlAttribute @Wither String deprecation;
-	private @XmlTransient @JsonIgnore UriTemplate template;
-	private @XmlTransient @JsonIgnore List<Affordance> affordances;
+	private @Wither String rel;
+	private @Wither String href;
+	private @Wither String hreflang;
+	private @Wither String media;
+	private @Wither String title;
+	private @Wither String type;
+	private @Wither String deprecation;
+	private @JsonIgnore UriTemplate template;
+	private @JsonIgnore List<Affordance> affordances;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
