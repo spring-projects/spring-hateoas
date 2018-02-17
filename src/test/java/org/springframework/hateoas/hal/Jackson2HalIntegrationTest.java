@@ -52,6 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Alexander Baetz
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Jeffrey Walraven
  */
 public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
@@ -118,6 +119,24 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		assertThat(write(resourceSupport)).isEqualTo(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES);
 	}
 
+	/**
+	 * HAL doesn't support "media" so it's removed from the "expected" link.
+	 * 
+	 * @see #699
+	 */
+	@Test
+	public void deserializeAllExtraRFC5988Attributes() throws Exception {
+
+		ResourceSupport expected = new ResourceSupport();
+		expected.add(new Link("localhost", "self") //
+				.withHreflang("en") //
+				.withTitle("the title") //
+				.withType("the type") //
+				.withDeprecation("/customers/deprecated"));
+
+		assertThat(read(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, ResourceSupport.class)).isEqualTo(expected);
+	}
+
 	@Test
 	public void rendersWithOneExtraRFC5988Attribute() throws Exception {
 
@@ -125,6 +144,18 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
 
 		assertThat(write(resourceSupport)).isEqualTo(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES);
+	}
+
+	/**
+	 * @see #699
+	 */
+	@Test
+	public void deserializeOneExtraRFC5988Attribute() throws Exception {
+
+		ResourceSupport expected = new ResourceSupport();
+		expected.add(new Link("localhost", "self").withTitle("the title"));
+
+		assertThat(read(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES, ResourceSupport.class)).isEqualTo(expected);
 	}
 
 	@Test

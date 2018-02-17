@@ -82,6 +82,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * 
  * @author Alexander Baetz
  * @author Oliver Gierke
+ * @author Jeffrey Walraven
  */
 public class Jackson2HalModule extends SimpleModule {
 
@@ -573,11 +574,19 @@ public class Jackson2HalModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						link = jp.readValueAs(Link.class);
-						result.add(new Link(link.getHref(), relation));
+						result.add(new Link(link.getHref(), relation)
+							.withHreflang(link.getHreflang())
+							.withTitle(link.getTitle())
+							.withType(link.getType())
+							.withDeprecation(link.getDeprecation()));
 					}
 				} else {
 					link = jp.readValueAs(Link.class);
-					result.add(new Link(link.getHref(), relation));
+					result.add(new Link(link.getHref(), relation)
+						.withHreflang(link.getHreflang())
+						.withTitle(link.getTitle())
+						.withType(link.getType())
+						.withDeprecation(link.getDeprecation()));
 				}
 			}
 
