@@ -573,11 +573,21 @@ public class Jackson2HalModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						link = jp.readValueAs(Link.class);
-						result.add(new Link(link.getHref(), relation));
+						result.add(new Link(link.getHref(), relation)
+								.withHreflang(link.getHreflang())
+								.withMedia(link.getMedia())
+								.withTitle(link.getTitle())
+								.withType(link.getType())
+								.withDeprecation(link.getDeprecation()));
 					}
 				} else {
 					link = jp.readValueAs(Link.class);
-					result.add(new Link(link.getHref(), relation));
+					result.add(new Link(link.getHref(), relation)
+							.withHreflang(link.getHreflang())
+							.withMedia(link.getMedia())
+							.withTitle(link.getTitle())
+							.withType(link.getType())
+							.withDeprecation(link.getDeprecation()));
 				}
 			}
 
