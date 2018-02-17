@@ -79,7 +79,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String LINK_WITH_TITLE = "{\"_links\":{\"ns:foobar\":{\"href\":\"target\",\"title\":\"Foobar's title!\"}}}";
 
 	static final String SINGLE_WITH_ONE_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"title\":\"the title\"}}}";
-	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
+	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"media\":\"the media\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
 
 	@Before
 	public void setUpModule() {
@@ -119,12 +119,35 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
+	public void deserializeAllExtraRFC5988Attributes() throws Exception {
+
+		ResourceSupport expected = new ResourceSupport();
+		expected.add(new Link("localhost", "self") //
+				.withHreflang("en") //
+				.withTitle("the title") //
+				.withType("the type") //
+				.withMedia("the media") //
+				.withDeprecation("/customers/deprecated"));
+
+		assertThat(read(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, ResourceSupport.class)).isEqualTo(expected);
+	}
+
+	@Test
 	public void rendersWithOneExtraRFC5988Attribute() throws Exception {
 
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
 
 		assertThat(write(resourceSupport)).isEqualTo(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES);
+	}
+
+	@Test
+	public void deserializeOneExtraRFC5988Attribute() throws Exception {
+
+		ResourceSupport expected = new ResourceSupport();
+		expected.add(new Link("localhost", "self").withTitle("the title"));
+
+		assertThat(read(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES, ResourceSupport.class)).isEqualTo(expected);
 	}
 
 	@Test
