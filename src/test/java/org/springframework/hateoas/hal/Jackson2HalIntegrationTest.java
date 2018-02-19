@@ -129,10 +129,10 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost", "self") //
-				.withHreflang("en") //
-				.withTitle("the title") //
-				.withType("the type") //
-				.withDeprecation("/customers/deprecated"));
+			.withHreflang("en") //
+			.withTitle("the title") //
+			.withType("the type") //
+			.withDeprecation("/customers/deprecated"));
 
 		assertThat(read(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, ResourceSupport.class)).isEqualTo(expected);
 	}
