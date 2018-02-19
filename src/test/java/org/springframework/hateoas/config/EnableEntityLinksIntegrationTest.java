@@ -17,8 +17,6 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import javax.ws.rs.Path;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +46,6 @@ public class EnableEntityLinksIntegrationTest {
 		public SampleController controller() {
 			return new SampleController();
 		}
-
-		@Bean
-		public SampleResource resource() {
-			return new SampleResource();
-		}
 	}
 
 	@Autowired DelegatingEntityLinks builder;
@@ -62,7 +55,7 @@ public class EnableEntityLinksIntegrationTest {
 
 		assertThat(builder).isNotNull();
 		assertThat(builder.supports(Person.class)).isTrue();
-		assertThat(builder.supports(Address.class)).isTrue();
+		assertThat(builder.supports(Address.class)).isFalse();
 		assertThat(builder.supports(Object.class)).isFalse();
 	}
 
@@ -70,12 +63,6 @@ public class EnableEntityLinksIntegrationTest {
 	@ExposesResourceFor(Person.class)
 	@RequestMapping("/person")
 	static class SampleController {
-
-	}
-
-	@Path("/address")
-	@ExposesResourceFor(Address.class)
-	static class SampleResource {
 
 	}
 

@@ -74,7 +74,6 @@
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson.version>2.9.1</jackson.version>
 		<java-module-name>spring.hateoas</java-module-name>
-		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
 		<slf4j.version>1.7.25</slf4j.version>
@@ -451,13 +450,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
-			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>${jaxrs.version}</version>
 			<optional>true</optional>
 		</dependency>
 

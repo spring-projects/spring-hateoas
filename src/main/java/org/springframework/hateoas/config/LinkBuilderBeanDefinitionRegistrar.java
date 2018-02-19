@@ -17,9 +17,6 @@ package org.springframework.hateoas.config;
 
 import java.lang.annotation.Annotation;
 
-import javax.ws.rs.Path;
-
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -30,7 +27,6 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkBuilderFactory;
 import org.springframework.hateoas.core.ControllerEntityLinksFactoryBean;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
-import org.springframework.hateoas.jaxrs.JaxRsLinkBuilderFactory;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderFactory;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.stereotype.Controller;
@@ -69,12 +65,6 @@ class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		registry.registerBeanDefinition("controllerEntityLinks", builder.getBeanDefinition());
 		delegateBuilder.addDependsOn("controllerEntityLinks");
 
-		if (IS_JAX_RS_PRESENT) {
-			JaxRsEntityControllerBuilderDefinitionBuilder definitionBuilder = new JaxRsEntityControllerBuilderDefinitionBuilder();
-			registry.registerBeanDefinition("jaxRsEntityLinks", definitionBuilder.getBeanDefinition());
-			delegateBuilder.addDependsOn("jaxRsEntityLinks");
-		}
-
 		AbstractBeanDefinition beanDefinition = delegateBuilder.getBeanDefinition();
 		beanDefinition.setPrimary(true);
 		registry.registerBeanDefinition("delegatingEntityLinks", beanDefinition);
@@ -91,13 +81,5 @@ class LinkBuilderBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		builder.addPropertyValue("linkBuilderFactory", definition);
 
 		return builder;
-	}
-
-	static class JaxRsEntityControllerBuilderDefinitionBuilder {
-
-		public BeanDefinition getBeanDefinition() {
-			BeanDefinitionBuilder builder = getEntityControllerLinksFor(Path.class, JaxRsLinkBuilderFactory.class);
-			return builder.getBeanDefinition();
-		}
 	}
 }
