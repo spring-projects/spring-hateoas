@@ -67,7 +67,7 @@ This would render as follows in JSON:
 {
     "firstname" : "Dave",
     "lastname" : "Matthews",
-    _"links" : [
+    "_links" : [
         {
             "rel" : "self",
             "href" : "http://myhost/people"
