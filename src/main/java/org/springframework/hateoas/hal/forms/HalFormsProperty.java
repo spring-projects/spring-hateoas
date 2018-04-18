@@ -22,8 +22,6 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Wither;
 
-import org.springframework.util.Assert;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -37,28 +35,26 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @Value
 @Wither
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
-public class HalFormsProperty {
+@NoArgsConstructor(force = true)
+class HalFormsProperty {
 
-	private @Wither(AccessLevel.PRIVATE) @NonNull String name;
+	private @NonNull String name;
 	private Boolean readOnly;
 	private String value;
 	private String prompt;
 	private String regex;
 	private boolean templated;
-	private @JsonInclude(Include.ALWAYS) boolean required;
+	private @JsonInclude boolean required;
 	private boolean multi;
 
 	/**
 	 * Creates a new {@link HalFormsProperty} with the given name.
 	 * 
-	 * @param name must not be {@literal null} or empty.
+	 * @param name must not be {@literal null}.
 	 * @return
 	 */
+
 	public static HalFormsProperty named(String name) {
-
-		Assert.hasText(name, "Property name must not be null or empty!");
-
 		return new HalFormsProperty().withName(name);
 	}
 }

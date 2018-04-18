@@ -20,14 +20,12 @@ import static org.springframework.hateoas.collectionjson.Jackson2CollectionJsonM
 import org.springframework.hateoas.PagedResources;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Jackson 2 mixin to handle {@link PagedResources}.
  *
  * @author Greg Turnquist
  */
-@JsonSerialize(using = CollectionJsonPagedResourcesSerializer.class)
 @JsonDeserialize(using = CollectionJsonPagedResourcesDeserializer.class)
 abstract class PagedResourcesMixin<T> extends PagedResources<T> {
 

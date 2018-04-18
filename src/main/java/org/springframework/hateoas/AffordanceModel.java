@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,61 @@
  */
 package org.springframework.hateoas;
 
-import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-import org.springframework.http.MediaType;
+import java.util.List;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpMethod;
 
 /**
- * An affordance model is a media type specific description of an affordance.
+ * Collection of attributes needed to render any form of hypermedia.
  * 
  * @author Greg Turnquist
- * @author Oliver Gierke
  */
-public interface AffordanceModel {
+@EqualsAndHashCode
+@AllArgsConstructor
+@Getter
+public abstract class AffordanceModel {
 
 	/**
-	 * The media types this is a model for. Can be multiple ones as often media types come in different flavors like an
-	 * XML and JSON one and in simple cases a single model might serve them all.
-	 * 
-	 * @return will never be {@literal null}.
+	 * Name for the REST action of this resource.
 	 */
-	Collection<MediaType> getMediaTypes();
+	private String name;
+
+	/**
+	 * {@link Link} for the URI of the resource.
+	 */
+	private Link link;
+
+	/**
+	 * Request method verb for this resource. For multiple methods, add multiple {@link Affordance}s.
+	 */
+	private HttpMethod httpMethod;
+
+	/**
+	 * Domain type used to create a new resource.
+	 */
+	private ResolvableType inputType;
+
+	/**
+	 * Collection of {@link QueryParameter}s to interrogate a resource.
+	 */
+	private List<QueryParameter> queryMethodParameters;
+	
+	/**
+	 * Response body domain type.
+	 */
+	private ResolvableType outputType;
+
+	/**
+	 * Expand the {@link Link} into an {@literal href} with no parameters.
+	 *
+	 * @return
+	 */
+	public String getURI() {
+		return this.link.expand().getHref();
+	}
 }

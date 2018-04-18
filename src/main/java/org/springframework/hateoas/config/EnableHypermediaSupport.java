@@ -20,11 +20,14 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.EnumSet;
+import java.util.Set;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.http.MediaType;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans available for
@@ -84,5 +87,17 @@ public @interface EnableHypermediaSupport {
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
 		COLLECTION_JSON;
+
+		private static Set<HypermediaType> HAL_BASED_MEDIATYPES = EnumSet.of(HAL, HAL_FORMS);
+
+		/**
+		 * Is this {@literal HAL} or one of its derivatives?
+		 *
+		 * @param hypermediaType
+		 * @return
+		 */
+		public static boolean isHalBasedMediaType(HypermediaType hypermediaType) {
+			return HAL_BASED_MEDIATYPES.contains(hypermediaType);
+		}
 	}
 }

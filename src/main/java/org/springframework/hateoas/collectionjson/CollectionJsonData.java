@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.collectionjson;
 
-import lombok.AccessLevel;
 import lombok.Value;
 import lombok.experimental.Wither;
 
@@ -29,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  */
 @Value
-@Wither(AccessLevel.PACKAGE)
+@Wither
 @JsonIgnoreProperties()
 class CollectionJsonData {
 

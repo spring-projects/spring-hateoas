@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -43,6 +44,20 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 
 		Assert.notNull(type, "Type must not be null!");
 		this.type = type;
+	}
+
+	/**
+	 * Convenience constructor to supply all parameters at once.
+	 *
+	 * @param type
+	 * @param supportedMediaTypes
+	 * @param objectMapper
+	 */
+	public TypeConstrainedMappingJackson2HttpMessageConverter(Class<?> type, List<MediaType> supportedMediaTypes, ObjectMapper objectMapper) {
+
+		this(type);
+		setSupportedMediaTypes(supportedMediaTypes);
+		setObjectMapper(objectMapper);
 	}
 
 	/* 

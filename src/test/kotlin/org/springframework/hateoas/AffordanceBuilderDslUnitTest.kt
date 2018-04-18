@@ -37,8 +37,10 @@ class AffordanceBuilderDslUnitTest : TestUtils() {
 
         val delete = afford<CustomerController> { delete("15") }
 
-        assertThat(delete.httpMethod).isEqualTo(HttpMethod.DELETE)
-        assertThat(delete.name).isEqualTo("delete")
+        val affordanceModel = delete.getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON)
+
+        assertThat(affordanceModel.httpMethod).isEqualTo(HttpMethod.DELETE)
+        assertThat(affordanceModel.name).isEqualTo("delete")
     }
     
     /**
@@ -58,20 +60,19 @@ class AffordanceBuilderDslUnitTest : TestUtils() {
         assertThat(selfWithAffordances.href).isEqualTo("http://localhost/customers/15")
         
         assertThat(selfWithAffordances.affordances).hasSize(3)
-        assertThat(selfWithAffordances.affordances[0].httpMethod).isEqualTo(HttpMethod.GET)
-        assertThat(selfWithAffordances.affordances[0].name).isEqualTo("findById")
+        assertThat(selfWithAffordances.affordances[0].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.GET)
+        assertThat(selfWithAffordances.affordances[0].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("findById")
 
-        assertThat(selfWithAffordances.affordances[1].httpMethod).isEqualTo(HttpMethod.PUT)
-        assertThat(selfWithAffordances.affordances[1].name).isEqualTo("update")
+        assertThat(selfWithAffordances.affordances[1].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.PUT)
+        assertThat(selfWithAffordances.affordances[1].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("update")
 
-        assertThat(selfWithAffordances.affordances[2].httpMethod).isEqualTo(HttpMethod.DELETE)
-        assertThat(selfWithAffordances.affordances[2].name).isEqualTo("delete")
+        assertThat(selfWithAffordances.affordances[2].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.DELETE)
+        assertThat(selfWithAffordances.affordances[2].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("delete")
 
         assertThat(selfWithAffordances.hashCode()).isNotEqualTo(self.hashCode())
         assertThat(selfWithAffordances).isNotEqualTo(self)
     }
 
-    data class Customer(val id: String, val name: String)
     data class CustomerDTO(val name: String)
     open class CustomerResource(val id: String, val name: String) : ResourceSupport()
     open class ProductResource(val id: String) : ResourceSupport()
