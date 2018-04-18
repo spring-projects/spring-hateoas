@@ -1,0 +1,22 @@
+{
+  "template": {
+    "data": [
+      {
+        "name": "name",
+        "value": "W. Chandry"
+      },
+      {
+        "name": "role",
+        "value": "developer"
+      },
+      {
+        "name": "blog",
+        "value": "http://example.org/blogs/wchandry"
+      },
+      {
+        "name": "avatar",
+        "value": "http://example.org/images/wchandry"
+      }
+    ]
+  }
+}

@@ -41,6 +41,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.support.Employee;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -88,8 +89,8 @@ public class HalFormsValidationIntegrationTest {
 				.andReturn() //
 				.getResolvedException();
 
-		assertThat(exception.getMessage(), containsString("Affordance's URI /employees"));
-		assertThat(exception.getMessage(), containsString("doesn't match self link /employees/0"));
+		assertThat(exception.getMessage(), containsString("Affordance's URI http://localhost/employees"));
+		assertThat(exception.getMessage(), containsString("doesn't match self link http://localhost/employees/0"));
 	}
 
 	@Test
@@ -99,8 +100,8 @@ public class HalFormsValidationIntegrationTest {
 				.andExpect(status().is5xxServerError()) //
 				.andReturn().getResolvedException();
 
-		assertThat(exception.getMessage(), containsString("Affordance's URI /employees/0"));
-		assertThat(exception.getMessage(), containsString("doesn't match self link /employees"));
+		assertThat(exception.getMessage(), containsString("Affordance's URI http://localhost/employees/0"));
+		assertThat(exception.getMessage(), containsString("doesn't match self link http://localhost/employees"));
 	}
 
 	/**

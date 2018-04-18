@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -35,12 +36,16 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.support.Employee;
+import org.springframework.hateoas.support.MappingUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -56,8 +61,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * @author Greg Turnquist
  */
@@ -67,7 +70,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class HalFormsWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
-	@Autowired ObjectMapper mapper;
 
 	MockMvc mockMvc;
 
@@ -124,6 +126,19 @@ public class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)));
 	}
 
+	@Test
+	public void createNewEmployee() throws Exception {
+
+		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
+
+		this.mockMvc.perform(post("/employees")
+			.content(specBasedJson)
+			.contentType(MediaTypes.HAL_FORMS_JSON_VALUE))
+			.andDo(print())
+			.andExpect(status().isCreated())
+			.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
+	}
+
 	@RestController
 	static class EmployeeController {
 
@@ -177,7 +192,7 @@ public class HalFormsWebMvcIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.created(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());

@@ -20,6 +20,8 @@ import static org.springframework.test.web.client.MockRestServiceServer.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
+import lombok.Data;
+
 import java.util.Collection;
 
 import org.junit.Before;
@@ -33,7 +35,6 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.mvc.TypeReferences.ResourceType;
 import org.springframework.hateoas.mvc.TypeReferences.ResourcesType;
 import org.springframework.http.HttpMethod;
@@ -47,20 +48,31 @@ import org.springframework.web.client.RestTemplate;
  * Integration tests for {@link TypeReferences}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 public class TypeReferencesIntegrationTest {
 
-	private static final String USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
-	private static final String RESOURCE = String.format("{ \"_links\" : { \"self\" : \"/resource\" }, %s }", USER);
-	private static final String RESOURCES_OF_USER = String
-			.format("{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ { %s } ] }}", USER);
-	private static final String RESOURCES_OF_RESOURCE = String
-			.format("{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE);
+	private static final String HAL_USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
+
+	private static final String COLLECTION_JSON_USER = "{ \"name\" : \"firstname\", \"value\" : \"Dave\" }, { \"name\" : \"lastname\", \"value\" : \"Matthews\" }";
+
+	private static final String RESOURCE_HAL = String.format("{ \"_links\" : { \"self\" : \"/resource\" }, %s }", HAL_USER);
+	private static final String RESOURCES_OF_USER_HAL = String.format(
+			"{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ { %s } ] }}", HAL_USER);
+	private static final String RESOURCES_OF_RESOURCE_HAL = String.format(
+			"{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE_HAL);
+
+	private static final String RESOURCE_COLLECTION_JSON =
+			String.format("{ \"collection\": { \"version\": \"1.0\", \"href\": \"localhost\", \"links\": [{ \"rel\": \"self\", \"href\": \"localhost\" }], \"items\": [{\"href\": \"localhost\", \"data\": [%s]}]}}", COLLECTION_JSON_USER);
+	private static final String RESOURCES_OF_USER_COLLECTION_JSON =
+			String.format("{ \"collection\": { \"version\": \"1.0\", \"href\": \"localhost\", \"links\": [{ \"rel\": \"self\", \"href\": \"localhost\" }], \"items\": [{\"href\": \"localhost\", \"data\": [%s]}]}}", COLLECTION_JSON_USER);
+	private static final String RESOURCES_OF_RESOURCE_COLLECTION_JSON =
+			String.format("{ \"collection\": { \"version\": \"1.0\", \"href\": \"localhost\", \"links\": [{ \"rel\": \"self\", \"href\": \"localhost\" }], \"items\": [{\"href\": \"localhost\", \"data\": [%s], \"links\": [{\"rel\":\"self\", \"href\": \"localhost\"}]}]}}", COLLECTION_JSON_USER);
 
 	@Configuration
-	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	@EnableHypermediaSupport(type = { HypermediaType.HAL, HypermediaType.COLLECTION_JSON})
 	static class Config {
 
 		public @Bean RestTemplate template() {
@@ -80,9 +92,23 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourceTypeReference() {
+	public void usesResourceTypeReferenceWithHal() {
 
-		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE, MediaTypes.HAL_JSON));
+		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE_HAL, MediaTypes.HAL_JSON));
+
+		ResponseEntity<Resource<User>> response = template.exchange("/resource", HttpMethod.GET, null,
+				new ResourceType<User>() {});
+
+		assertExpectedUserResource(response.getBody());
+	}
+
+	/**
+	 * @see #482
+	 */
+	@Test
+	public void usesResourceTypeReferenceWithCollectionJson() {
+
+		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
 
 		ResponseEntity<Resource<User>> response = template.exchange("/resource", HttpMethod.GET, null,
 				new ResourceType<User>() {});
@@ -94,9 +120,29 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesTypeReference() {
+	public void usesResourcesTypeReferenceWithHal() {
 
-		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER, MediaTypes.HAL_JSON));
+		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER_HAL, MediaTypes.HAL_JSON));
+
+		ResponseEntity<Resources<User>> response = template.exchange("/resources", HttpMethod.GET, null,
+				new ResourcesType<User>() {});
+		Resources<User> body = response.getBody();
+
+		assertThat(body.hasLink("self")).isTrue();
+
+		Collection<User> nested = body.getContent();
+
+		assertThat(nested).hasSize(1);
+		assertExpectedUser(nested.iterator().next());
+	}
+
+	/**
+	 * @see #482
+	 */
+	@Test
+	public void usesResourcesTypeReferenceWithCollectionJson() {
+
+		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
 
 		ResponseEntity<Resources<User>> response = template.exchange("/resources", HttpMethod.GET, null,
 				new ResourcesType<User>() {});
@@ -114,9 +160,29 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesOfResourceTypeReference() {
+	public void usesResourcesOfResourceTypeReferenceWithHal() {
 
-		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE, MediaTypes.HAL_JSON));
+		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE_HAL, MediaTypes.HAL_JSON));
+
+		ResponseEntity<Resources<Resource<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
+				new ResourcesType<Resource<User>>() {});
+		Resources<Resource<User>> body = response.getBody();
+
+		assertThat(body.hasLink("self")).isTrue();
+
+		Collection<Resource<User>> nested = body.getContent();
+
+		assertThat(nested).hasSize(1);
+		assertExpectedUserResource(nested.iterator().next());
+	}
+
+	/**
+	 * @see #482
+	 */
+	@Test
+	public void usesResourcesOfResourceTypeReferenceWithCollectionJson() {
+
+		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
 
 		ResponseEntity<Resources<Resource<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
 				new ResourcesType<Resource<User>>() {});
@@ -142,6 +208,7 @@ public class TypeReferencesIntegrationTest {
 		assertThat(user.lastname).isEqualTo("Matthews");
 	}
 
+	@Data
 	static class User {
 		public String firstname, lastname;
 	}
