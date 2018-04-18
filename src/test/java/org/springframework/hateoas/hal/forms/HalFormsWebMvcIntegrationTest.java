@@ -19,7 +19,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -131,12 +130,11 @@ public class HalFormsWebMvcIntegrationTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
 
-		this.mockMvc.perform(post("/employees")
-			.content(specBasedJson)
-			.contentType(MediaTypes.HAL_FORMS_JSON_VALUE))
-			.andDo(print())
-			.andExpect(status().isCreated())
-			.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
+		this.mockMvc.perform(post("/employees") //
+				.content(specBasedJson) //
+				.contentType(MediaTypes.HAL_FORMS_JSON_VALUE)) //
+				.andExpect(status().isCreated())
+				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 	}
 
 	@RestController
@@ -161,7 +159,7 @@ public class HalFormsWebMvcIntegrationTest {
 			}
 
 			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
+			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel() //
 					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)));
 
 			// Return the collection of employee resources along with the composite affordance
@@ -178,10 +176,10 @@ public class HalFormsWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id),
-				findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
-					.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
-				employeesLink);
+			return new Resource<>(EMPLOYEES.get(id), //
+					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
+							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
+					employeesLink);
 		}
 
 		@PostMapping("/employees")
@@ -192,8 +190,7 @@ public class HalFormsWebMvcIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee);
 
 			try {
-				return ResponseEntity.created(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.created(toUri(newEmployeeId)).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -205,8 +202,7 @@ public class HalFormsWebMvcIntegrationTest {
 			EMPLOYEES.put(id, employee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.noContent().location(toUri(id)).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -229,11 +225,19 @@ public class HalFormsWebMvcIntegrationTest {
 			EMPLOYEES.put(id, newEmployee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.noContent().location(toUri(id)).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
+		}
+
+		private URI toUri(Integer id) throws URISyntaxException {
+
+			String uri = findOne(id).getLink(Link.REL_SELF) //
+					.map(link -> link.expand().getHref()) //
+					.orElse("");
+
+			return new URI(uri);
 		}
 	}
 
