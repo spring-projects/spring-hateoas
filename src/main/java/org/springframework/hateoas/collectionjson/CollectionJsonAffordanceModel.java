@@ -18,95 +18,79 @@ package org.springframework.hateoas.collectionjson;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.GenericAffordanceModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.support.PropertyUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.web.util.UriComponents;
 
 /**
  * @author Greg Turnquist
  */
-class CollectionJsonAffordanceModel implements AffordanceModel {
+public class CollectionJsonAffordanceModel extends GenericAffordanceModel {
 
-	private static final List<HttpMethod> METHODS_FOR_INPUT_DETECTION = Arrays.asList(HttpMethod.POST, HttpMethod.PUT,
-		HttpMethod.PATCH);
-
-	private final Affordance affordance;
-	private final UriComponents components;
 	private final @Getter List<CollectionJsonData> inputProperties;
 	private final @Getter List<CollectionJsonData> queryProperties;
+	
+	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 
-	CollectionJsonAffordanceModel(Affordance affordance, UriComponents components) {
+		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
-		this.affordance = affordance;
-		this.components = components;
-
-		this.inputProperties = determineAffordanceInputs();
+		this.inputProperties = determineInputs();
 		this.queryProperties = determineQueryProperties();
 	}
 
-	@Override
-	public Collection<MediaType> getMediaTypes() {
-		return Collections.singleton(MediaTypes.COLLECTION_JSON);
-	}
+	/**
+	 * Look at the input's domain type to extract the {@link Affordance}'s properties.
+	 * Then transform them into a list of {@link CollectionJsonData} objects.
+	 */
+	private List<CollectionJsonData> determineInputs() {
 
-	public String getRel() {
-		return isHttpGetMethod() ? this.affordance.getName() : "";
-	}
+		if (Arrays.asList(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH).contains(getHttpMethod())) {
 
-	public String getUri() {
-		return isHttpGetMethod() ? this.components.toUriString() : "";
+			return PropertyUtils.findPropertyNames(getInputType()).stream()
+				.map(propertyName -> new CollectionJsonData()
+					.withName(propertyName)
+					.withValue(""))
+				.collect(Collectors.toList());
+
+		} else {
+			return Collections.emptyList();
+
+		}
 	}
 
 	/**
-	 * Transform a list of {@link QueryParameter}s into a list of {@link CollectionJsonData} objects.
-	 * 
+	 * Transform a list of general {@link QueryParameter}s into a list of {@link CollectionJsonData} objects.
+	 *
 	 * @return
 	 */
 	private List<CollectionJsonData> determineQueryProperties() {
 
-		if (!isHttpGetMethod()) {
+		if (getHttpMethod().equals(HttpMethod.GET)) {
+
+			return getQueryMethodParameters().stream()
+				.map(queryProperty -> new CollectionJsonData()
+					.withName(queryProperty.getName())
+					.withValue(""))
+				.collect(Collectors.toList());
+		} else {
 			return Collections.emptyList();
 		}
-
-		return this.affordance.getQueryMethodParameters().stream()
-			.map(queryProperty -> new CollectionJsonData().withName(queryProperty.getName()).withValue(""))
-			.collect(Collectors.toList());
 	}
 
-	private boolean isHttpGetMethod() {
-		return this.affordance.getHttpMethod().equals(HttpMethod.GET);
+	public String getRel() {
+		return getHttpMethod() == HttpMethod.GET ? getName() : "";
 	}
 
-	/**
-	 * Look at the inputs for a Spring MVC controller method to decide the {@link Affordance}'s properties.
-	 * Then transform them into a list of {@link CollectionJsonData} objects.
-	 */
-	private List<CollectionJsonData> determineAffordanceInputs() {
-
-		if (!METHODS_FOR_INPUT_DETECTION.contains(affordance.getHttpMethod())) {
-			return Collections.emptyList();
-		}
-
-		return this.affordance.getInputMethodParameters().stream()
-			.findFirst()
-			.map(methodParameter -> {
-				ResolvableType resolvableType = ResolvableType.forMethodParameter(methodParameter);
-				return PropertyUtils.findProperties(resolvableType);
-			})
-			.orElse(Collections.emptyList())
-			.stream()
-			.map(property -> new CollectionJsonData().withName(property).withValue(""))
-			.collect(Collectors.toList());
+	public String getURI() {
+		return getHttpMethod() == HttpMethod.GET ? getLink().expand().getHref() : "";
 	}
+
 }

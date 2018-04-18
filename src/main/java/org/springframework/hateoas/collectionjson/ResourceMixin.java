@@ -20,14 +20,12 @@ import static org.springframework.hateoas.collectionjson.Jackson2CollectionJsonM
 import org.springframework.hateoas.Resource;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Jackson 2 mixin to invoke the related serializer/deserizer.
  *
  * @author Greg Turnquist
  */
-@JsonSerialize(using = CollectionJsonResourceSerializer.class)
 @JsonDeserialize(using = CollectionJsonResourceDeserializer.class)
 abstract class ResourceMixin<T> extends Resource<T> {
 

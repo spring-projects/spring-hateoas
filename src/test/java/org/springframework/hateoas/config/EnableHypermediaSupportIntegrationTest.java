@@ -16,6 +16,7 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.config.HypermediaSupportBeanDefinitionRegistrar.*;
 import static org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks.*;
 
 import java.lang.reflect.Method;
@@ -147,7 +148,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		withContext(HalConfig.class, context -> {
 
-			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new Jackson2ModuleRegisteringBeanPostProcessor();
 			postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
@@ -182,7 +183,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		withContext(HalFormsConfig.class, context -> {
 
-			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new Jackson2ModuleRegisteringBeanPostProcessor();
 			postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
@@ -220,7 +221,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 		withContext(CollectionJsonConfig.class, context -> {
 
-			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
+			Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new Jackson2ModuleRegisteringBeanPostProcessor();
 			postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);

@@ -17,31 +17,28 @@ package org.springframework.hateoas.collectionjson;
 
 import lombok.Getter;
 
-import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
+import java.util.List;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.GenericAffordanceModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.core.AffordanceModelFactory;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.util.UriComponents;
 
 /**
+ * Factory for creating {@link CollectionJsonAffordanceModel}s.
+ *
  * @author Greg Turnquist
  */
 class CollectionJsonAffordanceModelFactory implements AffordanceModelFactory {
 
 	private final @Getter MediaType mediaType = MediaTypes.COLLECTION_JSON;
 
-	/**
-	 * Look up the {@link AffordanceModel} for this factory.
-	 *
-	 * @param affordance
-	 * @param invocationValue
-	 * @param components
-	 * @return
-	 */
 	@Override
-	public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components) {
-		return new CollectionJsonAffordanceModel(affordance, components);
+	public GenericAffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+		return new CollectionJsonAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 	}
 }

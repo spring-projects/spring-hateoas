@@ -18,6 +18,9 @@ package org.springframework.hateoas.config;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 import static org.springframework.beans.factory.support.BeanDefinitionReaderUtils.*;
 import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule.*;
+import static org.springframework.hateoas.hal.Jackson2HalModule.*;
+import static org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -311,7 +314,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				if (converter instanceof MappingJackson2HttpMessageConverter) {
 					MappingJackson2HttpMessageConverter halConverterCandidate = (MappingJackson2HttpMessageConverter) converter;
 					ObjectMapper objectMapper = halConverterCandidate.getObjectMapper();
-					if (Jackson2HalModule.isAlreadyRegisteredIn(objectMapper)) {
+					if (isAlreadyRegisteredIn(objectMapper)) {
 						return converters;
 					}
 				}
@@ -332,10 +335,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				try {
 					HalConfiguration halConfiguration = beanFactory.getBean(HalConfiguration.class);
-					halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider,
+					halObjectMapper.setHandlerInstantiator(new HalHandlerInstantiator(relProvider, curieProvider,
 						linkRelationMessageSource, halConfiguration));
 				} catch (BeansException e) {
-					halObjectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider,
+					halObjectMapper.setHandlerInstantiator(new HalHandlerInstantiator(relProvider, curieProvider,
 						linkRelationMessageSource, new HalConfiguration()));
 				}
 
@@ -356,10 +359,10 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				try {
 					HalFormsConfiguration halFormsConfiguration = beanFactory.getBean(HalFormsConfiguration.class);
-					halFormsObjectMapper.setHandlerInstantiator(new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider, curieProvider,
+					halFormsObjectMapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(relProvider, curieProvider,
 						linkRelationMessageSource, true, halFormsConfiguration));
 				} catch (BeansException e) {
-					halFormsObjectMapper.setHandlerInstantiator(new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider, curieProvider,
+					halFormsObjectMapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(relProvider, curieProvider,
 						linkRelationMessageSource, true, new HalFormsConfiguration()));
 				}
 
@@ -378,8 +381,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 
 				collectionJsonObjectMapper.registerModule(new Jackson2CollectionJsonModule());
 				
-				collectionJsonObjectMapper.setHandlerInstantiator(
-						new Jackson2CollectionJsonModule.CollectionJsonHandlerInstantiator(linkRelationMessageSource));
+				collectionJsonObjectMapper.setHandlerInstantiator(new CollectionJsonHandlerInstantiator(linkRelationMessageSource));
 
 				MappingJackson2HttpMessageConverter jsonCollectionConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 						ResourceSupport.class);

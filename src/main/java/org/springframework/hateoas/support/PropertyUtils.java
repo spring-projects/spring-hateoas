@@ -22,21 +22,22 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Resource;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Greg Turnquist
@@ -54,36 +55,30 @@ public class PropertyUtils {
 			return findProperties(((Resource<?>) object).getContent());
 		}
 
-		return Arrays.asList(BeanUtils.getPropertyDescriptors(object.getClass())).stream()
-			.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
-			.filter(descriptor -> hasJsonIgnoreOnTheField(object.getClass(), descriptor))
-			.filter(PropertyUtils::hasJsonIgnoreOnTheReader)
-			.collect(Collectors.toMap(
-				FeatureDescriptor::getName,
-				descriptor -> {
+		return getPropertyDescriptors(object.getClass())
+			.collect(HashMap::new,
+				(hashMap, descriptor) -> {
 					try {
-						return descriptor.getReadMethod().invoke(object);
+						hashMap.put(descriptor.getName(), descriptor.getReadMethod().invoke(object));
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new RuntimeException(e);
 					}
-				}));
+				},
+				HashMap::putAll);
 	}
-
-	public static List<String> findProperties(ResolvableType resolvableType) {
+	
+	public static List<String> findPropertyNames(ResolvableType resolvableType) {
 
 		if (resolvableType.getRawClass().equals(Resource.class)) {
-			return findProperties(resolvableType.resolveGeneric(0));
+			return findPropertyNames(resolvableType.resolveGeneric(0));
 		} else {
-			return findProperties(resolvableType.getRawClass());
+			return findPropertyNames(resolvableType.getRawClass());
 		}
 	}
 
-	public static List<String> findProperties(Class<?> clazz) {
+	public static List<String> findPropertyNames(Class<?> clazz) {
 
-		return Arrays.asList(BeanUtils.getPropertyDescriptors(clazz)).stream()
-			.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
-			.filter(descriptor -> hasJsonIgnoreOnTheField(clazz, descriptor))
-			.filter(PropertyUtils::hasJsonIgnoreOnTheReader)
+		return getPropertyDescriptors(clazz)
 			.map(FeatureDescriptor::getName)
 			.collect(Collectors.toList());
 	}
@@ -92,13 +87,13 @@ public class PropertyUtils {
 		
 		Object obj = BeanUtils.instantiateClass(clazz);
 
-		properties.entrySet().stream().forEach(entry -> {
-			Optional<PropertyDescriptor> possibleProperty = Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, entry.getKey()));
+		properties.forEach((key, value) -> {
+			Optional<PropertyDescriptor> possibleProperty = Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, key));
 			possibleProperty.ifPresent(property -> {
 				try {
 					Method writeMethod = property.getWriteMethod();
 					ReflectionUtils.makeAccessible(writeMethod);
-					writeMethod.invoke(obj, entry.getValue());
+					writeMethod.invoke(obj, value);
 				} catch (IllegalAccessException | InvocationTargetException e) {
 					throw new RuntimeException(e);
 				}
@@ -109,28 +104,42 @@ public class PropertyUtils {
 	}
 
 	/**
+	 * Take a {@link Class} and find all properties that are NOT to be ignored, and return them as a {@link Stream}.
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	private static Stream<PropertyDescriptor> getPropertyDescriptors(Class<?> clazz) {
+
+		return Arrays.stream(BeanUtils.getPropertyDescriptors(clazz))
+			.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
+			.filter(descriptor -> fieldIsNotToBeIgnored(clazz, descriptor))
+			.filter(descriptor -> !isToBeIgnored(clazz, descriptor.getName()))
+			.filter(PropertyUtils::readerIsNotToBeIgnored);
+	}
+
+	/**
 	 * Check if a given {@link PropertyDescriptor} has {@link JsonIgnore} applied to the field declaration.
 	 *
-	 * @param object
+	 * @param clazz
 	 * @param descriptor
 	 * @return
 	 */
-	private static boolean hasJsonIgnoreOnTheField(Class<?> clazz, PropertyDescriptor descriptor) {
+	private static boolean fieldIsNotToBeIgnored(Class<?> clazz, PropertyDescriptor descriptor) {
 
 		Field descriptorField = ReflectionUtils.findField(clazz, descriptor.getName());
 
-		return isToBeIgnored(AnnotationUtils.getAnnotations(descriptorField));
+		return isNotToBeIgnored(AnnotationUtils.getAnnotations(descriptorField));
 	}
 
 	/**
 	 * Check if a given {@link PropertyDescriptor} has {@link JsonIgnore} on the getter.
 	 * 
-	 * @param object
 	 * @param descriptor
 	 * @return
 	 */
-	private static boolean hasJsonIgnoreOnTheReader(PropertyDescriptor descriptor) {
-		return isToBeIgnored(AnnotationUtils.getAnnotations(descriptor.getReadMethod()));
+	private static boolean readerIsNotToBeIgnored(PropertyDescriptor descriptor) {
+		return isNotToBeIgnored(AnnotationUtils.getAnnotations(descriptor.getReadMethod()));
 	}
 
 	/**
@@ -139,7 +148,7 @@ public class PropertyUtils {
 	 * @param annotations
 	 * @return
 	 */
-	private static boolean isToBeIgnored(Annotation[] annotations) {
+	private static boolean isNotToBeIgnored(Annotation[] annotations) {
 
 		if (annotations != null) {
 			for (Annotation annotation : annotations) {
@@ -150,6 +159,22 @@ public class PropertyUtils {
 		}
 
 		return true;
+	}
+
+	private static boolean isToBeIgnored(Class<?> clazz, String field) {
+
+		for (Annotation annotation : AnnotationUtils.getAnnotations(clazz)) {
+			if (annotation.annotationType().equals(JsonIgnoreProperties.class)) {
+				String[] namesOfPropertiesToIgnore = (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value");
+				for (String propertyToIgnore : namesOfPropertiesToIgnore) {
+					if (propertyToIgnore.equalsIgnoreCase(field)) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 
 }

@@ -33,8 +33,6 @@ import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.collectionjson.CollectionJsonWebMvcConfigurer;
-import org.springframework.hateoas.hal.forms.HalFormsWebMvcConfigurer;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans available for
@@ -86,14 +84,14 @@ public @interface EnableHypermediaSupport {
 		 * 
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
-		HAL_FORMS(HalFormsWebMvcConfigurer.class),
+		HAL_FORMS,
 
 		/**
 		 * Collection+JSON
 		 *
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
-		COLLECTION_JSON(CollectionJsonWebMvcConfigurer.class);
+		COLLECTION_JSON;
 
 
 		private final List<Class<?>> configurations;

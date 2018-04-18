@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Greg Turnquist
@@ -79,16 +80,16 @@ public class PropertyUtilsTest {
 			.map(methodParameter -> ResolvableType.forMethodParameter(methodParameter.getMethod(), methodParameter.getParameterIndex()))
 			.orElseThrow(() -> new RuntimeException("Didn't find a parameter annotated with @RequestBody!"));
 
-		List<String> properties = PropertyUtils.findProperties(resolvableType);
+		List<String> propertyNames = PropertyUtils.findPropertyNames(resolvableType);
 
-		assertThat(properties).hasSize(2);
-		assertThat(properties).contains("name", "role");
+		assertThat(propertyNames).hasSize(2);
+		assertThat(propertyNames).contains("name", "role");
 	}
 
 	@Test
 	public void objectWithIgnorableAttributes() {
 
-		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer", "password", "fbaggins");
+		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer", "password", "fbaggins", "ignore this one");
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employee);
 
@@ -103,8 +104,23 @@ public class PropertyUtilsTest {
 			new SimpleEntry<>("usernameAndLastName", "fbaggins+++Baggins"));
 	}
 
+	@Test
+	public void objectWithNullReturningGetter() {
+
+		EmployeeWithNullReturningGetter employee = new EmployeeWithNullReturningGetter("Frodo");
+
+		Map<String, Object> properties = PropertyUtils.findProperties(employee);
+
+		assertThat(properties).hasSize(2);
+		assertThat(properties.keySet()).containsExactlyInAnyOrder("name", "father");
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder(
+			new SimpleEntry<>("name", "Frodo"),
+			new SimpleEntry<>("father", null));
+	}
+
 	@Data
 	@AllArgsConstructor
+	@JsonIgnoreProperties({"ignoreThisProperty"})
 	static class EmployeeWithCustomizedReaders {
 
 		private String firstName;
@@ -112,6 +128,7 @@ public class PropertyUtilsTest {
 		private String role;
 		@JsonIgnore private String password;
 		@JsonIgnore(false) private String username;
+		private String ignoreThisProperty;
 
 		public String getFullName() {
 			return this.firstName + " " + this.lastName;
@@ -125,6 +142,17 @@ public class PropertyUtilsTest {
 		@JsonIgnore(false)
 		public String getUsernameAndLastName() {
 			return this.username + "+++" + this.lastName;
+		}
+	}
+
+	@Data
+	static class EmployeeWithNullReturningGetter {
+
+		private String name;
+		private String father;
+
+		EmployeeWithNullReturningGetter(String name) {
+			this.name = name;
 		}
 	}
 

@@ -19,11 +19,15 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -34,6 +38,8 @@ import org.springframework.http.MediaType;
  * @author Greg Turnquist
  */
 public class LinkUnitTest {
+
+	private static final Affordance TEST_AFFORDANCE = new Affordance(null, null, HttpMethod.GET, null, Collections.emptyList(), null);
 
 	@Test
 	public void linkWithHrefOnlyBecomesSelfLink() {
@@ -232,8 +238,8 @@ public class LinkUnitTest {
 	public void linkWithAffordancesShouldWorkProperly() {
 
 		Link originalLink = new Link("/foo");
-		Link linkWithAffordance = originalLink.andAffordance(new TestAffordance());
-		Link linkWithTwoAffordances = linkWithAffordance.andAffordance(new TestAffordance());
+		Link linkWithAffordance = originalLink.andAffordance(TEST_AFFORDANCE);
+		Link linkWithTwoAffordances = linkWithAffordance.andAffordance(TEST_AFFORDANCE);
 
 		assertThat(originalLink.getAffordances()).hasSize(0);
 		assertThat(linkWithAffordance.getAffordances()).hasSize(1);
@@ -270,43 +276,67 @@ public class LinkUnitTest {
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(""));
 	}
 
-	static class TestAffordance implements Affordance {
+	@Test
+	public void affordanceConvenienceMethodChainsExistingLink() {
 
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.Affordance#getAffordanceModel(org.springframework.http.MediaType)
-		 */
-		@Override
-		public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
-			return null;
-		}
+		Link link = new Link("/").andAffordance("name", HttpMethod.POST, ResolvableType.forClass(Employee.class), Collections.emptyList(), ResolvableType.forClass(Employee.class));
 
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.Affordance#getHttpMethod()
-		 */
-		@Override
-		public HttpMethod getHttpMethod() {
-			return HttpMethod.PATCH;
-		}
-
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.Affordance#getName()
-		 */
-		@Override
-		public String getName() {
-			return null;
-		}
-
-		@Override
-		public List<MethodParameter> getInputMethodParameters() {
-			return null;
-		}
-
-		@Override
-		public List<QueryParameter> getQueryMethodParameters() {
-			return null;
-		}
+		assertThat(link.getHref()).isEqualTo("/");
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getAffordances()).hasSize(1);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(2);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("name");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("name");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
 	}
+
+	@Test
+	public void affordanceConvenienceMethodDefaultsNameBasedOnHttpVerb() {
+
+		Link link = new Link("/").andAffordance(HttpMethod.POST, ResolvableType.forClass(Employee.class), Collections.emptyList(), ResolvableType.forClass(Employee.class));
+
+		assertThat(link.getHref()).isEqualTo("/");
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getAffordances()).hasSize(1);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(2);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+	}
+
+	@Test
+	public void affordanceConvenienceMethodHandlesBareClasses() {
+
+		Link link = new Link("/").andAffordance(HttpMethod.POST, Employee.class, Collections.emptyList(), Employee.class);
+
+		assertThat(link.getHref()).isEqualTo("/");
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getAffordances()).hasSize(1);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(2);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+	}
+
 }

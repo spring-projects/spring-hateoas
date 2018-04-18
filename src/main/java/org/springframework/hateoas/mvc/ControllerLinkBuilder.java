@@ -71,7 +71,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
-	private static final SpringMvcAffordanceBuilder AFFORDANCE_BUILDER;
 
 	static {
 
@@ -80,7 +79,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		PluginRegistry<? extends AffordanceModelFactory, MediaType> MODEL_FACTORIES = OrderAwarePluginRegistry
 				.create(factories);
-		AFFORDANCE_BUILDER = new SpringMvcAffordanceBuilder(MODEL_FACTORIES);
 	}
 
 	private final TemplateVariables variables;
@@ -346,15 +344,14 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Look up {@link Affordance}s and {@link org.springframework.hateoas.AffordanceModel}s based on the
-	 * {@link MethodInvocation} and {@link UriComponents}.
+	 * Look up {@link Affordance}s based on the {@link MethodInvocation} and {@link UriComponents}.
 	 *
 	 * @param invocation
 	 * @param components
 	 * @return
 	 */
 	private static Collection<Affordance> findAffordances(MethodInvocation invocation, UriComponents components) {
-		return AFFORDANCE_BUILDER.create(invocation, DISCOVERER, components);
+		return SpringMvcAffordanceBuilder.create(invocation, DISCOVERER, components);
 	}
 
 	@RequiredArgsConstructor

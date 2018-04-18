@@ -18,28 +18,25 @@ package org.springframework.hateoas.mvc;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
-import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
+import org.springframework.hateoas.GenericAffordanceModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.core.AffordanceModelFactory;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
-import org.springframework.web.util.UriComponents;
 
 /**
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
 public class SpringMvcAffordanceBuilderUnitTest {
-
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullPluginRegistry() {
-		new SpringMvcAffordanceBuilder(null);
-	}
 
 	@Test
 	public void favorsCustomLinkDiscovererOverDefault() {
@@ -57,8 +54,7 @@ public class SpringMvcAffordanceBuilderUnitTest {
 	static class LowPriorityModelFactory implements AffordanceModelFactory {
 
 		@Override
-		public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue,
-				UriComponents components) {
+		public GenericAffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 			return null;
 		}
 
@@ -72,8 +68,7 @@ public class SpringMvcAffordanceBuilderUnitTest {
 	static class HighPriorityModelFactory implements AffordanceModelFactory {
 
 		@Override
-		public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue,
-				UriComponents components) {
+		public GenericAffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 			return null;
 		}
 

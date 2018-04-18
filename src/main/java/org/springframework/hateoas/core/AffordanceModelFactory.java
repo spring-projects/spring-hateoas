@@ -15,18 +15,19 @@
  */
 package org.springframework.hateoas.core;
 
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.GenericAffordanceModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.QueryParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.Plugin;
-import org.springframework.web.util.UriComponents;
 
 /**
- * TODO: Replace this with an interface and a default implementation of {@link #supports(MediaType)} in Java 8.
- * 
+ *
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
@@ -42,14 +43,17 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 	};
 
 	/**
-	 * Look up the {@link AffordanceModel} for this factory.
+	 * Look up the {@link GenericAffordanceModel} for this factory.
 	 * 
-	 * @param affordance
-	 * @param invocationValue
-	 * @param components
+	 * @param name
+	 * @param link
+	 * @param httpMethod
+	 * @param inputType
+	 * @param queryMethodParameters
+	 * @param outputType
 	 * @return
 	 */
-	AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue, UriComponents components);
+	GenericAffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType);
 
 	/**
 	 * Returns if a plugin should be invoked according to the given delimiter.

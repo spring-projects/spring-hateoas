@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  * @author Greg Turnquist
  */
-@JsonSerialize(using = CollectionJsonResourceSupportSerializer.class)
 @JsonDeserialize(using = CollectionJsonResourceSupportDeserializer.class)
 abstract class ResourceSupportMixin extends ResourceSupport {
 

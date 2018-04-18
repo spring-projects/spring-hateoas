@@ -19,7 +19,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Web framework-neutral representation of a web request's query parameter (http://example.com?name=foo).
+ * Representation of a web request's query parameter (http://example.com?name=foo) => {"name", true, "foo"}.
  *
  * @author Greg Turnquist
  */
@@ -28,6 +28,6 @@ import lombok.RequiredArgsConstructor;
 public class QueryParameter {
 
 	private final String name;
-	private final boolean required;
 	private final String value;
+	private final boolean required;
 }

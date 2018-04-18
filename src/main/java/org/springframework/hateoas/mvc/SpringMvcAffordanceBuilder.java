@@ -15,32 +15,30 @@
  */
 package org.springframework.hateoas.mvc;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.plugin.core.PluginRegistry;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
 
 /**
- * Construct {@link SpringMvcAffordance}s using a collection of {@link AffordanceModelFactory}s.
+ * Extract information needed to assemble an {@link Affordance} from a Spring MVC web method.
  * 
  * @author Greg Turnquist
  */
-@RequiredArgsConstructor
 class SpringMvcAffordanceBuilder {
-
-	private final @NonNull PluginRegistry<? extends AffordanceModelFactory, MediaType> factories;
 
 	/**
 	 * Use the attributes of the current method call along with a collection of {@link AffordanceModelFactory}'s to create
@@ -51,21 +49,33 @@ class SpringMvcAffordanceBuilder {
 	 * @param components
 	 * @return
 	 */
-	public Collection<Affordance> create(MethodInvocation invocation, MappingDiscoverer discoverer,
+	public static Collection<Affordance> create(MethodInvocation invocation, MappingDiscoverer discoverer,
 			UriComponents components) {
 
-		Method method = invocation.getMethod();
-		List<Affordance> affordances = new ArrayList<Affordance>();
+		List<Affordance> affordances = new ArrayList<>();
 
-		for (HttpMethod requestMethod : discoverer.getRequestMethod(invocation.getTargetType(), method)) {
+		for (HttpMethod requestMethod : discoverer.getRequestMethod(invocation.getTargetType(), invocation.getMethod())) {
 
-			SpringMvcAffordance affordance = new SpringMvcAffordance(requestMethod, invocation.getMethod());
+			String methodName = invocation.getMethod().getName();
 
-			for (AffordanceModelFactory factory : factories) {
-				affordance.addAffordanceModel(factory.getAffordanceModel(affordance, invocation, components));
-			}
+			Link affordanceLink = new Link(components.toUriString()).withRel(methodName);
 
-			affordances.add(affordance);
+			MethodParameters invocationMethodParameters = new MethodParameters(invocation.getMethod());
+			
+			ResolvableType inputType = invocationMethodParameters.getParametersWith(RequestBody.class).stream()
+				.findFirst()
+				.map(ResolvableType::forMethodParameter)
+				.orElse(ResolvableType.NONE);
+
+			List<QueryParameter> queryMethodParameters = invocationMethodParameters.getParametersWith(RequestParam.class).stream()
+				.map(methodParameter -> methodParameter.getParameterAnnotation(RequestParam.class))
+				.map(requestParam -> new QueryParameter(requestParam.name(), requestParam.value(), requestParam.required()))
+				.collect(Collectors.toList());
+
+			ResolvableType outputType = ResolvableType.forMethodReturnType(invocation.getMethod());
+
+			affordances.add(new Affordance(methodName, affordanceLink, requestMethod, inputType, queryMethodParameters, outputType));
+
 		}
 
 		return affordances;
