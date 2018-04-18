@@ -32,16 +32,19 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule;
+import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule.CollectionJsonHandlerInstantiator;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.hal.Jackson2HalModule;
-import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.hal.Jackson2HalModule.*;
 import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
 import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule;
+import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -50,6 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @Configuration
 @RequiredArgsConstructor
@@ -89,35 +93,47 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 
-		for (HttpMessageConverter<?> converter : converters) {
-			if (converter instanceof MappingJackson2HttpMessageConverter) {
-				MappingJackson2HttpMessageConverter halConverterCandidate = (MappingJackson2HttpMessageConverter) converter;
-				ObjectMapper objectMapper = halConverterCandidate.getObjectMapper();
-				if (Jackson2HalModule.isAlreadyRegisteredIn(objectMapper)) {
-					return;
-				}
-			}
+		if (converters.stream()
+			.filter(MappingJackson2HttpMessageConverter.class::isInstance)
+			.map(AbstractJackson2HttpMessageConverter.class::cast)
+			.map(converter -> converter.getObjectMapper())
+			.anyMatch(Jackson2HalModule::isAlreadyRegisteredIn)) {
+
+			return;
 		}
 
-		ObjectMapper objectMapper = mapper.getIfAvailable(() -> new ObjectMapper());
-
-		CurieProvider curieProvider = this.curieProvider.getIfAvailable();
-		RelProvider relProvider = this.relProvider.getObject();
-
+		ObjectMapper objectMapper = mapper.getIfAvailable(ObjectMapper::new);
+		
 		MessageSourceAccessor linkRelationMessageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
 				MessageSourceAccessor.class);
 
-		if (hypermediaTypes.contains(HypermediaType.HAL)) {
-			converters.add(0, createHalConverter(objectMapper, curieProvider, relProvider, linkRelationMessageSource));
-		}
+		if (hypermediaTypes.stream().anyMatch(ConverterRegisteringWebMvcConfigurer::isHalBasedMediaType)) {
 
-		if (hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
-			converters.add(0, createHalFormsConverter(objectMapper, curieProvider, relProvider, linkRelationMessageSource));
-		}
+			CurieProvider curieProvider = this.curieProvider.getIfAvailable();
+			RelProvider relProvider = this.relProvider.getObject();
 
+			if (hypermediaTypes.contains(HypermediaType.HAL)) {
+				converters.add(0, createHalConverter(objectMapper, curieProvider, relProvider, linkRelationMessageSource));
+			}
+
+			if (hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
+				converters.add(0, createHalFormsConverter(objectMapper, curieProvider, relProvider, linkRelationMessageSource));
+			}
+		}
+		
 		if (hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
 			converters.add(0, createCollectionJsonConverter(objectMapper, linkRelationMessageSource));
 		}
+	}
+
+	/**
+	 * Is this {@literal HAL} or one of its derivatives?
+	 *
+	 * @param hypermediaType
+	 * @return
+	 */
+	private static boolean isHalBasedMediaType(HypermediaType hypermediaType) {
+		return Arrays.asList(HypermediaType.HAL, HypermediaType.HAL_FORMS).contains(hypermediaType);
 	}
 
 	/**
@@ -127,18 +143,15 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 	 */
 	protected MappingJackson2HttpMessageConverter createCollectionJsonConverter(ObjectMapper objectMapper,
 			MessageSourceAccessor linkRelationMessageSource) {
-		ObjectMapper collectionJsonObjectMapper = objectMapper.copy();
 
-		collectionJsonObjectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		collectionJsonObjectMapper.registerModule(new Jackson2CollectionJsonModule());
-		collectionJsonObjectMapper.setHandlerInstantiator(
-				new Jackson2CollectionJsonModule.CollectionJsonHandlerInstantiator(linkRelationMessageSource));
+		ObjectMapper mapper = objectMapper.copy();
 
-		MappingJackson2HttpMessageConverter collectionJsonConverter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class);
-		collectionJsonConverter.setSupportedMediaTypes(Arrays.asList(COLLECTION_JSON));
-		collectionJsonConverter.setObjectMapper(collectionJsonObjectMapper);
-		return collectionJsonConverter;
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.registerModule(new Jackson2CollectionJsonModule());
+		mapper.setHandlerInstantiator(new CollectionJsonHandlerInstantiator(linkRelationMessageSource));
+
+		return new TypeConstrainedMappingJackson2HttpMessageConverter(
+				ResourceSupport.class, Arrays.asList(COLLECTION_JSON), mapper);
 	}
 
 	/**
@@ -151,21 +164,16 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 	private MappingJackson2HttpMessageConverter createHalFormsConverter(ObjectMapper objectMapper,
 			CurieProvider curieProvider, RelProvider relProvider, MessageSourceAccessor linkRelationMessageSource) {
 
-		Jackson2HalFormsModule.HalFormsHandlerInstantiator hi = new Jackson2HalFormsModule.HalFormsHandlerInstantiator(
-				relProvider, curieProvider, linkRelationMessageSource, true,
-				this.halFormsConfiguration.getIfAvailable(() -> new HalFormsConfiguration()));
 		ObjectMapper mapper = objectMapper.copy();
 
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalFormsModule());
-		mapper.setHandlerInstantiator(hi);
+		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(
+				relProvider, curieProvider, linkRelationMessageSource, true,
+				this.halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new)));
 
-		MappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class);
-		converter.setSupportedMediaTypes(Arrays.asList(HAL_FORMS_JSON));
-		converter.setObjectMapper(mapper);
-
-		return converter;
+		return new TypeConstrainedMappingJackson2HttpMessageConverter(
+				ResourceSupport.class, Arrays.asList(HAL_FORMS_JSON), mapper);
 	}
 
 	/**
@@ -178,21 +186,14 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 	private MappingJackson2HttpMessageConverter createHalConverter(ObjectMapper objectMapper, CurieProvider curieProvider,
 			RelProvider relProvider, MessageSourceAccessor linkRelationMessageSource) {
 
-		HalConfiguration halConfiguration = this.halConfiguration.getIfAvailable(() -> new HalConfiguration());
-
-		HalHandlerInstantiator instantiator = new Jackson2HalModule.HalHandlerInstantiator(relProvider, curieProvider,
-				linkRelationMessageSource, halConfiguration);
-
 		ObjectMapper mapper = objectMapper.copy();
+		
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(instantiator);
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(relProvider, curieProvider,
+				linkRelationMessageSource, this.halConfiguration.getIfAvailable(HalConfiguration::new)));
 
-		MappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class);
-		converter.setSupportedMediaTypes(Arrays.asList(HAL_JSON, HAL_JSON_UTF8));
-		converter.setObjectMapper(mapper);
-
-		return converter;
+		return new TypeConstrainedMappingJackson2HttpMessageConverter(
+				ResourceSupport.class, Arrays.asList(HAL_JSON, HAL_JSON_UTF8), mapper);
 	}
 }

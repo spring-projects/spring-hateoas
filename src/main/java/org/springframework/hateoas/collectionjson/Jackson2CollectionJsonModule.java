@@ -75,6 +75,11 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		setMixInAnnotation(Resource.class, ResourceMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
 		setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
+
+		addSerializer(new CollectionJsonPagedResourcesSerializer());
+		addSerializer(new CollectionJsonResourcesSerializer());
+		addSerializer(new CollectionJsonResourceSerializer());
+		addSerializer(new CollectionJsonResourceSupportSerializer());
 	}
 
 	/**
@@ -853,11 +858,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 				/**
 				 * For Collection+JSON, "queries" are only collected for GET affordances where the URI is NOT a self link.
 				 */
-				if (affordance.getHttpMethod().equals(HttpMethod.GET) && !model.getUri().equals(selfLink.getHref())) {
+				if (model.getHttpMethod() == HttpMethod.GET && !model.getURI().equals(selfLink.getHref())) {
+
 
 					queries.add(new CollectionJsonQuery()
 						.withRel(model.getRel())
-						.withHref(model.getUri())
+						.withHref(model.getURI())
 						.withData(model.getQueryProperties()));
 				}
 			});
@@ -883,7 +889,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 				/**
 				 * For Collection+JSON, "templates" are made of any non-GET affordances.
 				 */
-				if (!affordance.getHttpMethod().equals(HttpMethod.GET)) {
+				if (!(model.getHttpMethod() == HttpMethod.GET)) {
 
 					CollectionJsonTemplate template = new CollectionJsonTemplate() //
 						.withData(model.getInputProperties());

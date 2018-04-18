@@ -17,13 +17,16 @@ package org.springframework.hateoas.hal.forms;
 
 import lombok.Getter;
 
-import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
+import java.util.List;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.GenericAffordanceModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.core.AffordanceModelFactory;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.util.UriComponents;
 
 /**
  * Factory for creating {@link HalFormsAffordanceModel}s.
@@ -35,13 +38,8 @@ class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
 	private final @Getter MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(org.springframework.hateoas.Affordance, org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation, org.springframework.web.util.UriComponents)
-	 */
 	@Override
-	public AffordanceModel getAffordanceModel(Affordance affordance, MethodInvocation invocationValue,
-			UriComponents components) {
-		return new HalFormsAffordanceModel(affordance, components);
+	public GenericAffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 	}
 }

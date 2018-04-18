@@ -24,7 +24,6 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.hal.CurieProvider;
@@ -74,10 +73,12 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-		setMixInAnnotation(Resource.class, ResourceMixin.class);
 		setMixInAnnotation(Resources.class, ResourcesMixin.class);
 		setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
+
+		addSerializer(new HalFormsResourceSerializer());
+
 	}
 
 	@JsonSerialize(using = HalFormsResourceSerializer.class)
@@ -105,7 +106,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 	@JsonSerialize(using = ToStringSerializer.class)
 	@JsonDeserialize(using = MediaTypeDeserializer.class)
-	static interface MediaTypeMixin {}
+	interface MediaTypeMixin {}
 
 	/**
 	 * Create new HAL-FORMS serializers based on the context.
