@@ -22,6 +22,8 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import org.springframework.hateoas.UriTemplate;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -46,4 +48,12 @@ class HalFormsProperty {
 	private boolean templated;
 	private @JsonInclude boolean required;
 	private boolean multi;
+
+	public void setTemplated(boolean dontCare) {
+		// ignore input value since this is driven by {@literal value}.
+	}
+	
+	public boolean isTemplated() {
+		return this.value != null && !(new UriTemplate(this.value).getVariables().isEmpty());
+	}
 }

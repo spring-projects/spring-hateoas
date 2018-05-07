@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -103,10 +104,10 @@ public class MultiMediatypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$.collection.items.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("Frodo Baggins")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("ring bearer")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("Frodo Baggins")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("ring bearer")))
 
 				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
@@ -129,19 +130,19 @@ public class MultiMediatypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$.collection.items.*", hasSize(2)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("Frodo Baggins")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("ring bearer")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("Frodo Baggins")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("ring bearer")))
 
 				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
 				.andExpect(jsonPath("$.collection.items[0].links[0].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$.collection.items[1].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[1].data[1].value", is("Bilbo Baggins")))
-				.andExpect(jsonPath("$.collection.items[1].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[1].data[0].value", is("burglar")))
+				.andExpect(jsonPath("$.collection.items[1].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[1].data[0].value", is("Bilbo Baggins")))
+				.andExpect(jsonPath("$.collection.items[1].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[1].data[1].value", is("burglar")))
 
 				.andExpect(jsonPath("$.collection.items[1].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[1].links[0].rel", is("employees")))
@@ -174,10 +175,10 @@ public class MultiMediatypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$.collection.items.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("W. Chandry")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("developer")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("W. Chandry")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("developer")))
 
 				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
@@ -195,6 +196,7 @@ public class MultiMediatypeWebMvcIntegrationTest {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
+				.andDo(print())
 				.andExpect(jsonPath("$.name", is("Frodo Baggins"))).andExpect(jsonPath("$.role", is("ring bearer")))
 
 				.andExpect(jsonPath("$._links.*", hasSize(2)))
@@ -203,12 +205,14 @@ public class MultiMediatypeWebMvcIntegrationTest {
 
 				.andExpect(jsonPath("$._templates.*", hasSize(2)))
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
+				.andExpect(jsonPath("$._templates['default'].contentType", is("application/json")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
 				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
 
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].contentType", is("application/json")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
@@ -233,6 +237,7 @@ public class MultiMediatypeWebMvcIntegrationTest {
 
 				.andExpect(jsonPath("$._templates.*", hasSize(1)))
 				.andExpect(jsonPath("$._templates['default'].method", is("post")))
+				.andExpect(jsonPath("$._templates['default'].contentType", is("application/json")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
@@ -258,12 +263,14 @@ public class MultiMediatypeWebMvcIntegrationTest {
 
 				.andExpect(jsonPath("$._templates.*", hasSize(2)))
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
+				.andExpect(jsonPath("$._templates['default'].contentType", is("application/json")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
 				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
 
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].contentType", is("application/json")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))

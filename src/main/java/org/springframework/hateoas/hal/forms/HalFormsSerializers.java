@@ -29,6 +29,7 @@ import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -136,7 +137,7 @@ class HalFormsSerializers {
 
 			if (value instanceof PagedResources) {
 
-				doc = HalFormsDocument.empty() //
+				doc = new HalFormsDocument<>() //
 						.withEmbedded(embeddeds) //
 						.withPageMetadata(((PagedResources<?>) value).getMetadata()) //
 						.withLinks(value.getLinks()) //
@@ -144,7 +145,7 @@ class HalFormsSerializers {
 
 			} else {
 
-				doc = HalFormsDocument.empty() //
+				doc = new HalFormsDocument<>() //
 						.withEmbedded(embeddeds) //
 						.withLinks(value.getLinks()) //
 						.withTemplates(findTemplates(value));
@@ -205,7 +206,8 @@ class HalFormsSerializers {
 					validate(resource, affordance, model);
 
 					HalFormsTemplate template = HalFormsTemplate.forMethod(model.getHttpMethod()) //
-							.withProperties(model.getInputProperties());
+							.withProperties(model.getInputProperties())
+							.withContentType(MediaType.APPLICATION_JSON);
 
 					/**
 					 * First template in HAL-FORMS is "default".

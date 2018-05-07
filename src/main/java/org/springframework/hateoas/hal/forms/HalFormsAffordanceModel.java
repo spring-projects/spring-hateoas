@@ -40,7 +40,7 @@ public class HalFormsAffordanceModel extends GenericAffordanceModel {
 
 	private final @Getter List<HalFormsProperty> inputProperties;
 
-	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 		
@@ -55,12 +55,17 @@ public class HalFormsAffordanceModel extends GenericAffordanceModel {
 
 		if (Arrays.asList(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH).contains(getHttpMethod())) {
 			
-			return PropertyUtils.findPropertyNames(getInputType()).stream()
-				.map(propertyName -> new HalFormsProperty()
-					.withName(propertyName)
+			return PropertyUtils.findPropertiesAndDetails(getInputType()).entrySet().stream()
+				.map(property -> property.getValue()
+					.map(affordancePropertyDetails -> new HalFormsProperty()
+						.withName(property.getKey())
+						.withRequired(Arrays.asList(HttpMethod.POST, HttpMethod.PUT).contains(getHttpMethod()))
+						.withPrompt(affordancePropertyDetails.getPrompt())
+						.withRegex(affordancePropertyDetails.getPattern())
+						.withReadOnly(affordancePropertyDetails.getReadOnly()))
+					.orElse(new HalFormsProperty().withName(property.getKey()))
 					.withRequired(Arrays.asList(HttpMethod.POST, HttpMethod.PUT).contains(getHttpMethod())))
 				.collect(Collectors.toList());
-			
 		} else {
 			return Collections.emptyList();
 		}

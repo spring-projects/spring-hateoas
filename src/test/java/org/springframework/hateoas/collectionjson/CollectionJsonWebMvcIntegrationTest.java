@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -92,6 +93,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 
 		this.mockMvc.perform(get("/employees/0") //
 				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
+				.andDo(print())
 				.andExpect(status().isOk()) //
 
 				.andExpect(jsonPath("$.collection.version", is("1.0")))
@@ -102,10 +104,10 @@ public class CollectionJsonWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$.collection.items.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("Frodo Baggins")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("ring bearer")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("Frodo Baggins")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("ring bearer")))
 
 				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
@@ -114,8 +116,11 @@ public class CollectionJsonWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.template.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.template.data[0].name", is("name")))
 				.andExpect(jsonPath("$.collection.template.data[0].value", is("")))
+				.andExpect(jsonPath("$.collection.template.data[0].prompt", is("Full name")))
 				.andExpect(jsonPath("$.collection.template.data[1].name", is("role")))
-				.andExpect(jsonPath("$.collection.template.data[1].value", is("")));
+				.andExpect(jsonPath("$.collection.template.data[1].value", is("")))
+				.andExpect(jsonPath("$.collection.template.data[1].prompt", is("Main role")))
+				;
 	}
 
 	@Test
@@ -129,19 +134,19 @@ public class CollectionJsonWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$.collection.items.*", hasSize(2)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("Frodo Baggins")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("ring bearer")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("Frodo Baggins")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("ring bearer")))
 
 				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
 				.andExpect(jsonPath("$.collection.items[0].links[0].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$.collection.items[1].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[1].data[1].value", is("Bilbo Baggins")))
-				.andExpect(jsonPath("$.collection.items[1].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[1].data[0].value", is("burglar")))
+				.andExpect(jsonPath("$.collection.items[1].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[1].data[0].value", is("Bilbo Baggins")))
+				.andExpect(jsonPath("$.collection.items[1].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[1].data[1].value", is("burglar")))
 
 				.andExpect(jsonPath("$.collection.items[1].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[1].links[0].rel", is("employees")))
@@ -150,8 +155,10 @@ public class CollectionJsonWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.template.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.template.data[0].name", is("name")))
 				.andExpect(jsonPath("$.collection.template.data[0].value", is("")))
+				.andExpect(jsonPath("$.collection.template.data[0].prompt", is("Full name")))
 				.andExpect(jsonPath("$.collection.template.data[1].name", is("role")))
-				.andExpect(jsonPath("$.collection.template.data[1].value", is("")));
+				.andExpect(jsonPath("$.collection.template.data[1].value", is("")))
+				.andExpect(jsonPath("$.collection.template.data[1].prompt", is("Main role")));
 	}
 
 	@Test
@@ -175,10 +182,10 @@ public class CollectionJsonWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$.collection.items.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("W. Chandry")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("developer")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("name")))
+				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("W. Chandry")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("role")))
+				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("developer")))
 
 				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
@@ -187,8 +194,10 @@ public class CollectionJsonWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.template.*", hasSize(1)))
 				.andExpect(jsonPath("$.collection.template.data[0].name", is("name")))
 				.andExpect(jsonPath("$.collection.template.data[0].value", is("")))
+				.andExpect(jsonPath("$.collection.template.data[0].prompt", is("Full name")))
 				.andExpect(jsonPath("$.collection.template.data[1].name", is("role")))
-				.andExpect(jsonPath("$.collection.template.data[1].value", is("")));
+				.andExpect(jsonPath("$.collection.template.data[1].value", is("")))
+				.andExpect(jsonPath("$.collection.template.data[1].prompt", is("Main role")));
 	}
 
 	@RestController

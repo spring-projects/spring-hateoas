@@ -54,12 +54,16 @@ public class CollectionJsonAffordanceModel extends GenericAffordanceModel {
 
 		if (Arrays.asList(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH).contains(getHttpMethod())) {
 
-			return PropertyUtils.findPropertyNames(getInputType()).stream()
-				.map(propertyName -> new CollectionJsonData()
-					.withName(propertyName)
-					.withValue(""))
+			return PropertyUtils.findPropertiesAndDetails(getInputType()).entrySet().stream()
+				.map(property -> property.getValue()
+					.map(affordancePropertyDetails -> new CollectionJsonData()
+						.withName(property.getKey())
+						.withValue("")
+						.withPrompt(affordancePropertyDetails.getPrompt()))
+					.orElse(new CollectionJsonData()
+						.withName(property.getKey())
+						.withValue("")))
 				.collect(Collectors.toList());
-
 		} else {
 			return Collections.emptyList();
 

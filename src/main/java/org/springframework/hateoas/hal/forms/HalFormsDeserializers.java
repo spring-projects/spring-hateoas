@@ -107,12 +107,12 @@ class HalFormsDeserializers {
 	/**
 	 * Deserialize a {@link MediaType} embedded inside a HAL-FORMS document.
 	 */
-	static class MediaTypesDeserializer extends ContainerDeserializerBase<List<MediaType>> {
+	static class MediaTypeDeserializer extends ContainerDeserializerBase<MediaType> {
 
 		private static final long serialVersionUID = -7218376603548438390L;
 
-		public MediaTypesDeserializer() {
-			super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, MediaType.class));
+		public MediaTypeDeserializer() {
+			super(TypeFactory.defaultInstance().constructSimpleType(MediaType.class, new JavaType[]{}));
 		}
 
 		/*
@@ -138,8 +138,8 @@ class HalFormsDeserializers {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public List<MediaType> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-			return MediaType.parseMediaTypes(p.getText());
+		public MediaType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+			return MediaType.parseMediaType(p.getText());
 		}
 	}
 }

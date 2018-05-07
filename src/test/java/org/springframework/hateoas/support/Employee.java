@@ -19,6 +19,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Wither;
 
+import org.springframework.hateoas.AffordancePattern;
+import org.springframework.hateoas.AffordancePrompt;
+import org.springframework.hateoas.AffordanceProperty;
+import org.springframework.hateoas.AffordanceReadOnly;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
@@ -30,7 +35,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Employee {
 
+	@AffordanceProperty(prompt = "Full name", pattern = "s* s*")
 	private String name;
+
+	@AffordancePrompt("Main role")
+	@AffordancePattern("Chief .*")
+	@AffordanceReadOnly
 	private String role;
 
 	Employee() {

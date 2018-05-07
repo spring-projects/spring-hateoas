@@ -22,17 +22,22 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.hateoas.AffordancePattern;
+import org.springframework.hateoas.AffordancePrompt;
+import org.springframework.hateoas.AffordanceProperty;
+import org.springframework.hateoas.AffordancePropertyDetails;
+import org.springframework.hateoas.AffordanceReadOnly;
 import org.springframework.hateoas.Resource;
 import org.springframework.util.ReflectionUtils;
 
@@ -56,7 +61,7 @@ public class PropertyUtils {
 		}
 
 		return getPropertyDescriptors(object.getClass())
-			.collect(HashMap::new,
+			.collect(TreeMap::new,
 				(hashMap, descriptor) -> {
 					try {
 						hashMap.put(descriptor.getName(), descriptor.getReadMethod().invoke(object));
@@ -64,9 +69,39 @@ public class PropertyUtils {
 						throw new RuntimeException(e);
 					}
 				},
-				HashMap::putAll);
+				TreeMap::putAll);
 	}
-	
+
+	public static Map<String, Optional<AffordancePropertyDetails>> findPropertiesAndDetails(Class<?> clazz) {
+
+		return getPropertyDescriptors(clazz)
+			.collect(TreeMap::new,
+				(hashMap, descriptor) -> {
+					try {
+						Field descriptorField = clazz.getDeclaredField(descriptor.getName());
+
+						AffordancePropertyDetails details = new AffordancePropertyDetails(AnnotationUtils.findAnnotation(descriptorField, AffordanceProperty.class))
+							.withAffordancePrompt(AnnotationUtils.findAnnotation(descriptorField, AffordancePrompt.class))
+							.withAffordancePattern(AnnotationUtils.findAnnotation(descriptorField, AffordancePattern.class))
+							.withAffordanceReadOnly(AnnotationUtils.findAnnotation(descriptorField, AffordanceReadOnly.class));
+
+						hashMap.put(descriptor.getName(), Optional.of(details));
+					} catch (NoSuchFieldException e) {
+						throw new RuntimeException(e);
+					}
+				},
+				TreeMap::putAll);
+	}
+
+	public static Map<String, Optional<AffordancePropertyDetails>> findPropertiesAndDetails(ResolvableType resolvableType) {
+
+		if (resolvableType.getRawClass().equals(Resource.class)) {
+			return findPropertiesAndDetails(resolvableType.resolveGeneric(0));
+		} else {
+			return findPropertiesAndDetails(resolvableType.getRawClass());
+		}
+	}
+
 	public static List<String> findPropertyNames(ResolvableType resolvableType) {
 
 		if (resolvableType.getRawClass().equals(Resource.class)) {

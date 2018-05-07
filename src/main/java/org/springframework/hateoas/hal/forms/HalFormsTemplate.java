@@ -27,11 +27,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.hateoas.hal.forms.HalFormsDeserializers.MediaTypesDeserializer;
+import org.springframework.hateoas.hal.forms.HalFormsDeserializers.MediaTypeDeserializer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -53,66 +52,26 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @EqualsAndHashCode
 @ToString
 @JsonAutoDetect(getterVisibility = Visibility.NON_PRIVATE)
-@JsonIgnoreProperties({ "httpMethod", "contentTypes" })
+@JsonIgnoreProperties({ "httpMethod" })
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
-public class HalFormsTemplate {
-
-	public static final String DEFAULT_KEY = "default";
+class HalFormsTemplate {
 
 	private String title;
 	private @Wither(AccessLevel.PRIVATE) HttpMethod httpMethod;
 	private List<HalFormsProperty> properties;
-	private List<MediaType> contentTypes;
+	private MediaType contentType;
 
 	private HalFormsTemplate() {
-		this(null, null, Collections.emptyList(), Collections.emptyList());
+		this(null, null, Collections.emptyList(), null);
 	}
 
-	public static HalFormsTemplate forMethod(HttpMethod httpMethod) {
+	static HalFormsTemplate forMethod(HttpMethod httpMethod) {
 		return new HalFormsTemplate().withHttpMethod(httpMethod);
 	}
 
-	/**
-	 * Returns a new {@link HalFormsTemplate} with the given {@link HalFormsProperty} added.
-	 * 
-	 * @param property must not be {@literal null}.
-	 * @return
-	 */
-	public HalFormsTemplate andProperty(HalFormsProperty property) {
-
-		Assert.notNull(property, "Property must not be null!");
-
-		List<HalFormsProperty> properties = new ArrayList<>(this.properties);
-		properties.add(property);
-
-		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
-	}
-
-	/**
-	 * Returns a new {@link HalFormsTemplate} with the given {@link MediaType} added as content type.
-	 * 
-	 * @param mediaType must not be {@literal null}.
-	 * @return
-	 */
-	public HalFormsTemplate andContentType(MediaType mediaType) {
-
-		Assert.notNull(mediaType, "Media type must not be null!");
-
-		List<MediaType> contentTypes = new ArrayList<>(this.contentTypes);
-		contentTypes.add(mediaType);
-
-		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
-	}
-
-	// Jackson helper methods to create the right representation format
-
-	String getContentType() {
-		return StringUtils.collectionToDelimitedString(contentTypes, ", ");
-	}
-
-	@JsonDeserialize(using = MediaTypesDeserializer.class)
-	void setContentType(List<MediaType> mediaTypes) {
-		this.contentTypes = mediaTypes;
+	@JsonDeserialize(using = MediaTypeDeserializer.class)
+	void setContentType(MediaType mediaType) {
+		this.contentType = mediaType;
 	}
 
 	String getMethod() {
