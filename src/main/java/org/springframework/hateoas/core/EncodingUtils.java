@@ -46,7 +46,7 @@ public class EncodingUtils {
 		try {
 			return UriUtils.encodePath(source.toString(), ENCODING);
 		} catch (Throwable e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class EncodingUtils {
 		try {
 			return UriUtils.encodeQueryParam(source.toString(), ENCODING);
 		} catch (Throwable e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -80,7 +80,7 @@ public class EncodingUtils {
 		try {
 			return UriUtils.encodeFragment(source.toString(), ENCODING);
 		} catch (Throwable e) {
-			throw new RuntimeException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 }
