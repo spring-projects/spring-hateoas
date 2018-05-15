@@ -17,8 +17,6 @@ package org.springframework.hateoas.core;
 
 import lombok.experimental.UtilityClass;
 
-import java.io.UnsupportedEncodingException;
-
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriUtils;
 
@@ -26,6 +24,7 @@ import org.springframework.web.util.UriUtils;
  * Utilities for URI encoding.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @since 0.22
  * @soundtrack Don Philippe - Between Now And Now (Between Now And Now)
  */
@@ -46,8 +45,8 @@ public class EncodingUtils {
 
 		try {
 			return UriUtils.encodePath(source.toString(), ENCODING);
-		} catch (UnsupportedEncodingException o_O) {
-			throw new IllegalStateException(o_O);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -63,8 +62,8 @@ public class EncodingUtils {
 
 		try {
 			return UriUtils.encodeQueryParam(source.toString(), ENCODING);
-		} catch (UnsupportedEncodingException o_O) {
-			throw new IllegalStateException(o_O);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -80,8 +79,8 @@ public class EncodingUtils {
 
 		try {
 			return UriUtils.encodeFragment(source.toString(), ENCODING);
-		} catch (UnsupportedEncodingException o_O) {
-			throw new IllegalStateException(o_O);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

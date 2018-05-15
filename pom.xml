@@ -68,7 +68,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.0.1.RELEASE</spring.version>
+		<spring.version>5.0.6.RELEASE</spring.version>
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
@@ -86,7 +86,7 @@
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.2.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.0.7.BUILD-SNAPSHOT</spring.version>
 				<jackson.version>2.9.2</jackson.version>
 			</properties>
 			<repositories>
