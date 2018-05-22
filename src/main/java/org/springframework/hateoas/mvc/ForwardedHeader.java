@@ -15,29 +15,61 @@
  */
 package org.springframework.hateoas.mvc;
 
+import static org.springframework.util.StringUtils.hasText;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Value object to partially implement the {@literal Forwarded} header defined in RFC 7239.
  *
  * @author Oliver Gierke
  * @see http://tools.ietf.org/html/rfc7239
+ * @deprecated In Spring 5.1, all Forwarded headers will by handled by Spring MVC.
  */
+@Deprecated
 class ForwardedHeader {
 
-	public static String NAME = "Forwarded";
 	private static final ForwardedHeader NO_HEADER = new ForwardedHeader(Collections.emptyMap());
-
 	private final Map<String, String> elements;
 
 	private ForwardedHeader(Map<String, String> elements) {
 		this.elements = elements;
+	}
+
+	/**
+	 * Utility method to pull handling of {@literal X-Forwarded-Ssl} into a class that will be removed when
+	 * rebaselined against Spring 5.1
+	 *
+	 * @param request
+	 * @param builder
+	 * @return
+	 * @deprecated No longer needed with Spring 5.1
+	 */
+	@Deprecated
+	public static UriComponentsBuilder handleXForwardedSslHeader(HttpServletRequest request, UriComponentsBuilder builder) {
+
+		// special case handling for X-Forwarded-Ssl:
+		// apply it, but only if X-Forwarded-Proto is unset.
+
+		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
+		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader("Forwarded"));
+		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
+
+		if (!hasText(proto) && hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+			builder.scheme("https");
+		}
+
+		return builder;
+
 	}
 
 	/**
@@ -46,7 +78,7 @@ class ForwardedHeader {
 	 * @param source can be {@literal null}.
 	 * @return
 	 */
-	public static ForwardedHeader of(String source) {
+	static ForwardedHeader of(String source) {
 
 		if (!StringUtils.hasText(source)) {
 			return NO_HEADER;
@@ -67,7 +99,7 @@ class ForwardedHeader {
 	 * 
 	 * @return
 	 */
-	public String getProto() {
+	String getProto() {
 		return elements.get("proto");
 	}
 
@@ -76,7 +108,7 @@ class ForwardedHeader {
 	 * 
 	 * @return
 	 */
-	public String getHost() {
+	String getHost() {
 		return elements.get("host");
 	}
 }

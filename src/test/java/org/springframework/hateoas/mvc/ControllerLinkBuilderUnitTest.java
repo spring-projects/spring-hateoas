@@ -20,10 +20,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.ServletException;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -162,6 +165,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Host", "somethingDifferent");
 
+		adaptRequestFromForwardedHeaders();
+
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
 	}
@@ -173,6 +178,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void usesForwardedSslIfHeaderIsSet() {
 
 		request.addHeader("X-Forwarded-Ssl", "on");
+
+		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("https://"));
@@ -186,6 +193,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Ssl", "off");
 
+		adaptRequestFromForwardedHeaders();
+
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("http://"));
 	}
@@ -198,6 +207,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Host", "somethingDifferent");
 		request.addHeader("X-Forwarded-Ssl", "on");
+
+		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("https://somethingDifferent"));
@@ -270,6 +281,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
 
+		adaptRequestFromForwardedHeaders();
+
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("http://foobar:8088"));
 	}
@@ -281,6 +294,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void usesFirstHostOfXForwardedHost() {
 
 		request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
+
+		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("http://barfoo:8888"));
@@ -335,6 +350,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		request.addHeader("X-Forwarded-Port", "9090");
 		request.setServerPort(8080);
 
+		adaptRequestFromForwardedHeaders();
+
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 
 		assertThat(link.getHref(), startsWith("http://foobarhost:9090/"));
@@ -348,6 +365,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Host", "foobarhost");
 		request.setServerPort(8080);
+
+		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("http://foobarhost/"));
@@ -410,12 +429,14 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #257, #107
 	 */
 	@Test
-	public void usesXForwardedProtoHeaderAsLinkSchema() {
+	public void usesXForwardedProtoHeaderAsLinkSchema() throws ServletException, IOException {
 
 		for (String proto : Arrays.asList("http", "https")) {
 
 			setUp();
 			request.addHeader("X-Forwarded-Proto", proto);
+			
+			adaptRequestFromForwardedHeaders();
 
 			Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 			assertThat(link.getHref(), startsWith(proto + "://"));
@@ -433,6 +454,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 			setUp();
 			request.addHeader("Forwarded", new String[] { "proto=" + proto });
 
+			adaptRequestFromForwardedHeaders();
+
 			Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 			assertThat(link.getHref(), startsWith(proto.concat("://")));
 		}
@@ -445,7 +468,9 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void favorsStandardForwardHeaderOverXForwardedProto() {
 
 		request.addHeader("X-Forwarded-Proto", "foo");
-		request.addHeader(ForwardedHeader.NAME, "proto=bar");
+		request.addHeader("Forwarded", "proto=bar");
+		
+		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getHref(), startsWith("bar://"));
@@ -526,6 +551,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Port", "1443,8443");
 		request.addHeader("X-Forwarded-Host", "proxy1,proxy2");
+
+		adaptRequestFromForwardedHeaders();
 
 		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), startsWith("http://proxy1:1443"));
 	}
