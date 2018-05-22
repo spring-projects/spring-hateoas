@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.util.StringUtils.*;
+import static org.springframework.hateoas.mvc.ForwardedHeader.handleXForwardedSslHeader;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
@@ -28,6 +28,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
@@ -313,20 +314,30 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		}
 
 		HttpServletRequest request = getCurrentRequest();
-		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
+		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
 
-		// special case handling for X-Forwarded-Ssl:
-		// apply it, but only if X-Forwarded-Proto is unset.
-
-		String forwardedSsl = request.getHeader("X-Forwarded-Ssl");
-		ForwardedHeader forwarded = ForwardedHeader.of(request.getHeader(ForwardedHeader.NAME));
-		String proto = hasText(forwarded.getProto()) ? forwarded.getProto() : request.getHeader("X-Forwarded-Proto");
-
-		if (!hasText(proto) && hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
-			builder.scheme("https");
+		// Spring 5.1 can handle X-Forwarded-Ssl headers...
+		if (isSpringAtLeast5_1()) {
+			return builder;
+		} else {
+			return handleXForwardedSslHeader(request, builder);
 		}
+	}
 
-		return builder;
+	/**
+	 * Check if the current version of Spring Framework is 5.1 or higher.
+	 * 
+	 * @return
+	 */
+	private static boolean isSpringAtLeast5_1() {
+		
+		String versionOfSpringFramework = ApplicationContext.class.getPackage().getImplementationVersion();
+
+		String[] parts = versionOfSpringFramework.split("\\.");
+		int majorVersion = Integer.parseInt(parts[0]);
+		int minorVersion = Integer.parseInt(parts[1]);
+
+		return (majorVersion >= 5 && minorVersion >= 1) || (majorVersion > 5);
 	}
 
 	/**

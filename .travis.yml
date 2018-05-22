@@ -5,6 +5,7 @@ env:
   matrix:
     - PROFILE=non-existant
     - PROFILE=spring5-next
+    - PROFILE=spring51-next
 addons:
   apt:
     packages:
