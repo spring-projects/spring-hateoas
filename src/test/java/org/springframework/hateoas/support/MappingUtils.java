@@ -50,7 +50,7 @@ public final class MappingUtils {
 				builder.append(scanner.nextLine());
 
 				if (scanner.hasNextLine()) {
-					builder.append("\n");
+					builder.append(System.lineSeparator());
 				}
 			}
 
