@@ -1,0 +1,25 @@
+{
+  "uber" :
+  {
+    "version" : "1.0",
+    "data" :
+    [
+      {
+        "rel" : ["self"],
+        "url" : "selfHref"
+      },
+      {
+        "rel" : ["relation"],
+        "url" : "firstHref"
+      },
+      {
+        "rel" : ["relation"],
+        "url" : "secondHref"
+      },
+      {
+        "rel" : ["http://foo.com/bar"],
+        "url" : "fullRelHref"
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "self" ],
+      "url" : "localhost"
+    }, {
+      "rel" : [ "next" ],
+      "url" : "foo"
+    }, {
+      "rel" : [ "prev" ],
+      "url" : "bar"
+    }, {
+      "data" : [ {
+        "rel" : [ "self" ],
+        "url" : "/employees/1"
+      }, {
+        "name" : "employee",
+        "data" : [ {
+          "name" : "role",
+          "value" : "ring bearer"
+        }, {
+          "name" : "name",
+          "value" : "Frodo"
+        } ]
+      } ]
+    }, {
+      "name" : "page",
+      "data" : [ {
+        "name" : "number",
+        "value" : 0
+      }, {
+        "name" : "size",
+        "value" : 2
+      }, {
+        "name" : "totalElements",
+        "value" : 4
+      }, {
+        "name" : "totalPages",
+        "value" : 2
+      } ]
+    } ]
+  }
+}

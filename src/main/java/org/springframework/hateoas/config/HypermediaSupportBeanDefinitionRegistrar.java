@@ -37,6 +37,7 @@ import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
+import org.springframework.hateoas.uber.UberLinkDiscoverer;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -95,6 +96,9 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 				break;
 			case COLLECTION_JSON:
 				definition = new RootBeanDefinition(CollectionJsonLinkDiscoverer.class);
+				break;
+			case UBER:
+				definition = new RootBeanDefinition(UberLinkDiscoverer.class);
 				break;
 			default:
 				throw new IllegalStateException(String.format("Unsupported hypermedia type %s!", type));

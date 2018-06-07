@@ -1,1 +1,1 @@
-org.springframework.hateoas.core.AffordanceModelFactory=org.springframework.hateoas.hal.forms.HalFormsAffordanceModelFactory,org.springframework.hateoas.collectionjson.CollectionJsonAffordanceModelFactory
+org.springframework.hateoas.core.AffordanceModelFactory=org.springframework.hateoas.hal.forms.HalFormsAffordanceModelFactory,org.springframework.hateoas.collectionjson.CollectionJsonAffordanceModelFactory,org.springframework.hateoas.uber.UberAffordanceModelFactory

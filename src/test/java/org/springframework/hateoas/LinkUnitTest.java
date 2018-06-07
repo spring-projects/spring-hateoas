@@ -314,17 +314,25 @@ public class LinkUnitTest {
 		assertThat(link.getHref()).isEqualTo("/");
 		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 		assertThat(link.getAffordances()).hasSize(1);
-		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(2);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
+		
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("name");
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve()).isEqualTo(Employee.class);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters()).hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("name");
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve()).isEqualTo(Employee.class);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters()).hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getName()).isEqualTo("name");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
 	}
 
 	@Test
@@ -335,17 +343,25 @@ public class LinkUnitTest {
 		assertThat(link.getHref()).isEqualTo("/");
 		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 		assertThat(link.getAffordances()).hasSize(1);
-		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(2);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
+
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("postEmployee");
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve()).isEqualTo(Employee.class);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters()).hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("postEmployee");
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve()).isEqualTo(Employee.class);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters()).hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getName()).isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
 	}
 
 	@Test
@@ -356,17 +372,24 @@ public class LinkUnitTest {
 		assertThat(link.getHref()).isEqualTo("/");
 		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 		assertThat(link.getAffordances()).hasSize(1);
-		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(2);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("postEmployee");
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve()).isEqualTo(Employee.class);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters()).hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("postEmployee");
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve()).isEqualTo(Employee.class);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters()).hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getName()).isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getHttpMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getInputType().resolve()).isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getQueryMethodParameters()).hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve()).isEqualTo(Employee.class);
 	}
 
 }

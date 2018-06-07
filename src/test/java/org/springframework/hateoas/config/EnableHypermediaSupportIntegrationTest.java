@@ -46,6 +46,7 @@ import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
 import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.uber.UberLinkDiscoverer;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
@@ -87,8 +88,14 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertHalFormsSetupForConfigClass(HalFormsConfig.class);
 	}
 
+	@Test
 	public void bootstrapJsonCollectionConfiguration() {
 		assertCollectionJsonSetupForConfigClass(CollectionJsonConfig.class);
+	}
+
+	@Test
+	public void bootstrapUberConfiguration() {
+		assertUberSetupForConfigClass(UberConfig.class);
 	}
 
 	@Test
@@ -134,6 +141,19 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
+	public void registersUberLinkDiscoverers() {
+
+		withContext(UberConfig.class, context -> {
+
+			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+			assertThat(discoverers).isNotNull();
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.UBER_JSON)).isInstanceOf(UberLinkDiscoverer.class);
+			assertRelProvidersSetUp(context);
+		});
+	}
+
+	@Test
 	public void bootstrapsHalConfigurationForSubclass() {
 		assertHalSetupForConfigClass(ExtendedHalConfig.class);
 	}
@@ -146,6 +166,11 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void bootstrapsCollectionJsonConfigurationForSubclass() {
 		assertCollectionJsonSetupForConfigClass(ExtendedCollectionJsonConfig.class);
+	}
+
+	@Test
+	public void bootstrapsUberConfigurationForSubclass() {
+		assertUberSetupForConfigClass(ExtendedUberConfig.class);
 	}
 
 	/**
@@ -247,11 +272,46 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void uberSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+
+		withContext(UberConfig.class, context -> {
+
+			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+
+			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes())
+				.hasSize(1)
+				.contains(MediaTypes.UBER_JSON);
+
+			boolean found = false;
+
+			for (HandlerMethodArgumentResolver resolver : getResolvers(adapter)) {
+
+				if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
+
+					found = true;
+
+					AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
+					List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils
+						.getField(processor, "messageConverters");
+
+					assertThat(converters.get(0)).isInstanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class);
+					assertThat(converters.get(0).getSupportedMediaTypes())
+						.hasSize(1)
+						.contains(MediaTypes.UBER_JSON);
+				}
+			}
+
+			assertThat(found).isTrue();
+		});
+	}
+
 	/**
 	 * @see #293
 	 */
 	@Test
-	public void registersHttpMessageConvertersForRestTemplate() {
+	public void registersHalHttpMessageConvertersForRestTemplate() {
 
 		withContext(HalConfig.class, context -> {
 
@@ -323,6 +383,18 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	@Test
+	public void registersUberHttpMessageConvertersForRestTemplate() {
+
+		withContext(UberConfig.class, context -> {
+			RestTemplate template = context.getBean(RestTemplate.class);
+
+			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes())
+				.hasSize(1)
+				.contains(MediaTypes.UBER_JSON);
+		});
+	}
+
 	/**
 	 * @see #341
 	 */
@@ -363,6 +435,17 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
+	public void configuresDefaultObjectMapperForUberToIgnoreUnknownProperties() {
+
+		withContext(UberConfig.class, context -> {
+
+			assertObjectMapper(context, MediaTypes.UBER_JSON, mapper -> {
+				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+			});
+		});
+	}
+
+	@Test
 	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
 
 		withContext(HalConfig.class, context -> {
@@ -389,7 +472,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void verifyRenderSingleLinkAsArrayViaOverridingBean() throws JsonProcessingException {
+	public void verifyRenderSingleLinkAsArrayViaOverridingBean() {
 
 		withContext(RenderLinkAsSingleLinksConfig.class, context -> {
 
@@ -462,6 +545,18 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			assertEntityLinksSetUp(context);
 			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(CollectionJsonLinkDiscoverer.class);
+
+			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
+			assertThat(rmha.getMessageConverters().get(0)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
+		});
+	}
+
+	private static void assertUberSetupForConfigClass(Class<?> configClass) {
+
+		withContext(configClass, context -> {
+
+			assertEntityLinksSetUp(context);
+			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(UberLinkDiscoverer.class);
 
 			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
 			assertThat(rmha.getMessageConverters().get(0)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
@@ -579,6 +674,28 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	@EnableHypermediaSupport(type = HypermediaType.COLLECTION_JSON)
 	static class AlternateDelegateConfig {
+
+	}
+
+	@EnableWebMvc
+	@Configuration
+	@Import(DelegateUberHypermediaConfig.class)
+	static class UberConfig {
+
+		@Bean
+		public RestTemplate restTemplate() {
+			return new RestTemplate();
+		}
+	}
+
+	@Configuration
+	static class ExtendedUberConfig extends UberConfig {
+
+	}
+
+	@Configuration
+	@EnableHypermediaSupport(type = HypermediaType.UBER)
+	static class DelegateUberHypermediaConfig {
 
 	}
 }

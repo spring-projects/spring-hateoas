@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas.support;
 
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
+
 import com.fasterxml.jackson.databind.JavaType;
 
 /**
@@ -35,5 +38,19 @@ public final class JacksonHelper {
 		} else {
 			return contentType;
 		}
+	}
+
+	/**
+	 * Is this a {@literal Resources<Resource<?>>}?
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public static boolean isResourcesOfResource(JavaType type) {
+
+		return
+			Resources.class.isAssignableFrom(type.getRawClass())
+			&&
+			Resource.class.isAssignableFrom(type.containedType(0).getRawClass());
 	}
 }

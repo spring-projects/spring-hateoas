@@ -1,0 +1,20 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "self", "http://example.org/rels/todo" ],
+      "url" : "localhost"
+    }, {
+      "rel" : [ "second" ],
+      "url" : "second"
+    }, {
+      "rel" : [ "third" ],
+      "url" : "third"
+    }, {
+      "name" : "string",
+      "data" : [ {
+        "value" : "third"
+      } ]
+    } ]
+  }
+}

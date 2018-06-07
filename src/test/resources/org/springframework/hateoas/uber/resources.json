@@ -1,0 +1,23 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "self" ],
+      "url" : "localhost"
+    }, {
+      "data" : [ {
+        "name" : "string",
+        "data" : [ {
+          "value" : "first"
+        } ]
+      } ]
+    }, {
+      "data" : [ {
+        "name" : "string",
+        "data" : [ {
+          "value" : "second"
+        } ]
+      } ]
+    } ]
+  }
+}

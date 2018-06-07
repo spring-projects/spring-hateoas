@@ -43,6 +43,8 @@ import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
 import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule;
 import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.uber.Jackson2UberModule;
+import org.springframework.hateoas.uber.Jackson2UberModule.UberHandlerInstantiator;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -96,7 +98,7 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 		if (converters.stream()
 			.filter(MappingJackson2HttpMessageConverter.class::isInstance)
 			.map(AbstractJackson2HttpMessageConverter.class::cast)
-			.map(converter -> converter.getObjectMapper())
+			.map(AbstractJackson2HttpMessageConverter::getObjectMapper)
 			.anyMatch(Jackson2HalModule::isAlreadyRegisteredIn)) {
 
 			return;
@@ -124,7 +126,28 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 		if (hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
 			converters.add(0, createCollectionJsonConverter(objectMapper, linkRelationMessageSource));
 		}
+
+		if (hypermediaTypes.contains(HypermediaType.UBER)) {
+			converters.add(0, createUberJsonConverter(objectMapper));
+		}
 	}
+
+	/**
+	 * @param objectMapper
+	 * @return
+	 */
+	protected MappingJackson2HttpMessageConverter createUberJsonConverter(ObjectMapper objectMapper) {
+
+		ObjectMapper mapper = objectMapper.copy();
+
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.registerModule(new Jackson2UberModule());
+		mapper.setHandlerInstantiator(new UberHandlerInstantiator());
+
+		return new TypeConstrainedMappingJackson2HttpMessageConverter(
+			ResourceSupport.class, Arrays.asList(UBER_JSON), mapper);
+	}
+
 
 	/**
 	 * @param objectMapper

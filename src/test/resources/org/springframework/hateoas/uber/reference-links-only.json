@@ -1,0 +1,10 @@
+{
+  "_links" : {
+    "collection" : {
+      "href" : "/employees"
+    },
+    "self" : {
+      "href" : "/employees/1"
+    }
+  }
+}

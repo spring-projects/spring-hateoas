@@ -86,7 +86,14 @@ public @interface EnableHypermediaSupport {
 		 *
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
-		COLLECTION_JSON;
+		COLLECTION_JSON,
+
+		/**
+		 * UBER Hypermedia
+		 *
+		 * @see http://uberhypermedia.org/
+		 */
+		UBER;
 
 		private static Set<HypermediaType> HAL_BASED_MEDIATYPES = EnumSet.of(HAL, HAL_FORMS);
 

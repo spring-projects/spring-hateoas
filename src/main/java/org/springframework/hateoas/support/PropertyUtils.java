@@ -61,7 +61,9 @@ public class PropertyUtils {
 			.collect(HashMap::new,
 				(hashMap, descriptor) -> {
 					try {
-						hashMap.put(descriptor.getName(), descriptor.getReadMethod().invoke(object));
+						Method readMethod = descriptor.getReadMethod();
+						ReflectionUtils.makeAccessible(readMethod);
+						hashMap.put(descriptor.getName(), readMethod.invoke(object));
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new RuntimeException(e);
 					}
@@ -85,7 +87,8 @@ public class PropertyUtils {
 			.collect(Collectors.toList());
 	}
 
-	public static Object createObjectFromProperties(Class<?> clazz, Map<String, Object> properties) {
+	@SuppressWarnings("unchecked")
+	public static <T> T createObjectFromProperties(Class<T> clazz, Map<String, Object> properties) {
 		
 		Object obj = BeanUtils.instantiateClass(clazz);
 
@@ -102,7 +105,7 @@ public class PropertyUtils {
 			});
 		});
 
-		return obj;
+		return (T) obj;
 	}
 
 	/**

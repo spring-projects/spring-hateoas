@@ -1,0 +1,9 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "self" ],
+      "url" : "localhost"
+    } ]
+  }
+}
