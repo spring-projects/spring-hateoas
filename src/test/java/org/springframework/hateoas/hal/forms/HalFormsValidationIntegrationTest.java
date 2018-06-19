@@ -57,8 +57,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Test that when an {@link org.springframework.hateoas.Affordance} is included that does NOT match the self link, an
  * exception is thrown.
@@ -71,8 +69,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class HalFormsValidationIntegrationTest {
 
 	@Autowired WebApplicationContext context;
-
-	@Autowired ObjectMapper mapper;
 
 	MockMvc mockMvc;
 
@@ -148,7 +144,7 @@ public class HalFormsValidationIntegrationTest {
 
 			// Return the affordance + a link back to the entire collection resource.
 			return new Resource<>(EMPLOYEES.get(id), findOneLink.andAffordances(employeesLink.getAffordances()),
-				employeesLink);
+					employeesLink);
 		}
 
 		@PostMapping("/employees")
@@ -159,8 +155,10 @@ public class HalFormsValidationIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.noContent()
+						.location(
+								new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -172,8 +170,9 @@ public class HalFormsValidationIntegrationTest {
 			EMPLOYEES.put(id, employee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.noContent()
+						.location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -197,8 +196,9 @@ public class HalFormsValidationIntegrationTest {
 			EMPLOYEES.put(id, newEmployee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.noContent()
+						.location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}

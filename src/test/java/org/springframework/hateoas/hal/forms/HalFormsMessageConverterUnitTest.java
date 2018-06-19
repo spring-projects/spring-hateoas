@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
@@ -40,6 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
 public class HalFormsMessageConverterUnitTest {
 
@@ -50,15 +53,13 @@ public class HalFormsMessageConverterUnitTest {
 	public void setUp() {
 
 		this.mapper = new ObjectMapper();
-		this.messageConverter = new HalFormsMessageConverter(this.mapper);
-	}
+		this.mapper.registerModule(new Jackson2HalFormsModule());
 
-	@Test
-	public void verifyBasicAttributes() {
+		TypeConstrainedMappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+				ResourceSupport.class);
+		converter.setObjectMapper(mapper);
 
-		assertThat(this.messageConverter.getSupportedMediaTypes(), hasItems(MediaTypes.HAL_FORMS_JSON));
-		assertThat(this.messageConverter.canRead(HalFormsDocument.class, MediaTypes.HAL_FORMS_JSON), is(true));
-		assertThat(this.messageConverter.canWrite(HalFormsDocument.class, MediaTypes.HAL_FORMS_JSON), is(true));
+		this.messageConverter = converter;
 	}
 
 	@Test
