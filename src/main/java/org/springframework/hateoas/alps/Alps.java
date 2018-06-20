@@ -24,6 +24,7 @@ import org.springframework.hateoas.alps.Descriptor.DescriptorBuilder;
 import org.springframework.hateoas.alps.Doc.DocBuilder;
 import org.springframework.hateoas.alps.Ext.ExtBuilder;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -37,12 +38,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Value
 @Builder(builderMethodName = "alps")
-@JsonPropertyOrder({"version", "doc", "descriptor"})
+@JsonPropertyOrder({ "version", "doc", "descriptor" })
 public class Alps {
 
 	private final String version = "1.0";
 	private final Doc doc;
-	private final List<Descriptor> descriptor;
+	private final @JsonProperty("descriptor") List<Descriptor> descriptors;
 
 	/**
 	 * Returns a new {@link DescriptorBuilder}.

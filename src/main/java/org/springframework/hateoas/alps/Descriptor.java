@@ -20,6 +20,7 @@ import lombok.Value;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -32,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Value
 @Builder
-@JsonPropertyOrder({"id", "href", "name", "type", "doc", "descriptor", "ext"})
+@JsonPropertyOrder({ "id", "href", "name", "type", "doc", "descriptor", "ext" })
 public class Descriptor {
 
 	private final String id, href, name;
@@ -40,5 +41,5 @@ public class Descriptor {
 	private final Type type;
 	private final Ext ext;
 	private final String rt;
-	private final List<Descriptor> descriptor;
+	private final @JsonProperty("descriptor") List<Descriptor> descriptors;
 }

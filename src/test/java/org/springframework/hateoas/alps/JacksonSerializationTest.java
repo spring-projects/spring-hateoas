@@ -58,10 +58,10 @@ public class JacksonSerializationTest {
 
 		Alps alps = alps().//
 				doc(doc().href("http://example.org/samples/full/doc.html").build()). //
-				descriptor(Arrays.asList(//
+				descriptors(Arrays.asList(//
 						descriptor().id("search").type(Type.SAFE).//
 								doc(new Doc("A search form with two inputs.", Format.TEXT)).//
-								descriptor(Arrays.asList( //
+								descriptors(Arrays.asList( //
 										descriptor().href("#resultType").build(), //
 										descriptor().id("value").name("search").type(Type.SEMANTIC).build())//
 								).build(), //
