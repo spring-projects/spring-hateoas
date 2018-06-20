@@ -202,7 +202,7 @@
 				<dependency>
 					<groupId>org.springframework.data.build</groupId>
 					<artifactId>spring-data-build-resources</artifactId>
-					<version>1.9.8.RELEASE</version>
+					<version>1.9.13.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
 				</dependency>
@@ -566,7 +566,7 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-			<version>2.9.9</version>
+			<version>2.10</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -636,7 +636,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
+				<version>3.1.0</version>
 				<configuration>
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -661,7 +661,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>3.0.1</version>
 				<configuration>
 					<breakiterator>true</breakiterator>
 					<header>${project.name}</header>
@@ -670,7 +670,7 @@
 					<additionalparam>-Xdoclint:none</additionalparam>
 					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
 					<links>
-						<link>http://static.springframework.org/spring/docs/4.1.x/javadoc-api</link>
+						<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 					</links>
 				</configuration>
