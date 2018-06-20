@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -40,19 +40,23 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.HalConfiguration;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
@@ -76,7 +80,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersLinkDiscoverers() {
 
-		ApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+		ConfigurableApplicationContext context = createApplicationContext(HalConfig.class);
 		LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
 
 		assertThat(discoverers, is(notNullValue()));
@@ -97,10 +101,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	@SuppressWarnings("unchecked")
 	public void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
-
-		Jackson2ModuleRegisteringBeanPostProcessor postProcessor = new HypermediaSupportBeanDefinitionRegistrar.Jackson2ModuleRegisteringBeanPostProcessor();
-		postProcessor.setBeanFactory(context.getAutowireCapableBeanFactory());
+		ConfigurableApplicationContext context = createApplicationContext(HalConfig.class);
 
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
@@ -133,12 +134,11 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersHttpMessageConvertersForRestTemplate() {
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
+		ConfigurableApplicationContext context = createApplicationContext(HalConfig.class);
 		RestTemplate template = context.getBean(RestTemplate.class);
 
 		assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes(),
 				hasItems(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-		context.close();
 	}
 
 	/**
@@ -147,42 +147,32 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
-		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+		ObjectMapper mapper = getObjectMapperFor(MediaTypes.HAL_JSON, createApplicationContext(HalConfig.class));
 
 		assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES), is(false));
-		context.close();
 	}
 
 	@Test
 	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(HalConfig.class);
-
-		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+		ObjectMapper mapper = getObjectMapperFor(MediaTypes.HAL_JSON, createApplicationContext(HalConfig.class));
 
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(mapper.writeValueAsString(resourceSupport), is("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}"));
-
-		context.close();
 	}
 
 	@Test
 	public void verifyRenderSingleLinkAsArrayViaOverridingBean() throws JsonProcessingException {
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				RenderLinkAsSingleLinksConfig.class);
-
-		ObjectMapper mapper = context.getBean("_halObjectMapper", ObjectMapper.class);
+		ObjectMapper mapper = getObjectMapperFor(MediaTypes.HAL_JSON,
+				createApplicationContext(RenderLinkAsSingleLinksConfig.class));
 
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(mapper.writeValueAsString(resourceSupport), is("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"));
-
-		context.close();
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -200,10 +190,10 @@ public class EnableHypermediaSupportIntegrationTest {
 	@SuppressWarnings({ "unchecked" })
 	private static void assertHalSetupForConfigClass(Class<?> configClass) {
 
-		ApplicationContext context = new AnnotationConfigApplicationContext(configClass);
+		ConfigurableApplicationContext context = createApplicationContext(HalConfig.class);
+
 		assertEntityLinksSetUp(context);
 		assertThat(context.getBean(LinkDiscoverer.class), is(instanceOf(HalLinkDiscoverer.class)));
-		assertThat(context.getBean(ObjectMapper.class), is(notNullValue()));
 
 		RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(rmha.getMessageConverters(),
@@ -233,19 +223,33 @@ public class EnableHypermediaSupportIntegrationTest {
 		throw new IllegalStateException("Unexpected result when looking up argument resolvers!");
 	}
 
+	private static ConfigurableApplicationContext createApplicationContext(Class<?>... configurations) {
+
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(configurations);
+		context.refresh();
+
+		return context;
+	}
+
+	private static ObjectMapper getObjectMapperFor(MediaType mediaType, ApplicationContext context) {
+
+		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+
+		for (HttpMessageConverter<?> converter : adapter.getMessageConverters()) {
+			if (converter.getSupportedMediaTypes().contains(mediaType)) {
+				return ((AbstractJackson2HttpMessageConverter) converter).getObjectMapper();
+			}
+		}
+
+		throw new IllegalArgumentException("Did not find HttpMessageConverter supporting " + mediaType + "!");
+	}
+
+	@EnableWebMvc
 	@Configuration
 	@Import(DelegateConfig.class)
 	static class HalConfig {
-
-		static int numberOfMessageConverters = 0;
-		static int numberOfMessageConvertersLegacy = 0;
-
-		@Bean
-		public RequestMappingHandlerAdapter rmh() {
-			RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
-			numberOfMessageConverters = adapter.getMessageConverters().size();
-			return adapter;
-		}
 
 		@Bean
 		public RestTemplate restTemplate() {
@@ -264,6 +268,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	}
 
+	@EnableWebMvc
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.HAL)
 	static class RenderLinkAsSingleLinksConfig {
@@ -271,11 +276,6 @@ public class EnableHypermediaSupportIntegrationTest {
 		@Bean
 		HalConfiguration halConfiguration() {
 			return new HalConfiguration().withRenderSingleLinks(AS_ARRAY);
-		}
-
-		@Bean
-		public RequestMappingHandlerAdapter rmh() {
-			return new RequestMappingHandlerAdapter();
 		}
 	}
 }

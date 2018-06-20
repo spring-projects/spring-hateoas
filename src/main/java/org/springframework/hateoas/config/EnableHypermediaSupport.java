@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,16 @@ import org.springframework.hateoas.LinkDiscoverer;
  * @see LinkDiscoverer
  * @see EntityLinks
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class })
+@EnableEntityLinks
+@Import({ //
+		HypermediaSupportBeanDefinitionRegistrar.class, //
+		HateoasConfiguration.class //
+})
 public @interface EnableHypermediaSupport {
 
 	/**

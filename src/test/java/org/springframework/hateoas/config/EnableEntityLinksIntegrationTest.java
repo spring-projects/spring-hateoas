@@ -57,15 +57,15 @@ public class EnableEntityLinksIntegrationTest {
 	}
 
 	@Autowired
-	DelegatingEntityLinks builder;
+	DelegatingEntityLinks links;
 
 	@Test
 	public void initializesDelegatingEntityLinks() {
 
-		assertThat(builder, is(notNullValue()));
-		assertThat(builder.supports(Person.class), is(true));
-		assertThat(builder.supports(Address.class), is(true));
-		assertThat(builder.supports(Object.class), is(false));
+		assertThat(links, is(notNullValue()));
+		assertThat(links.supports(Person.class), is(true));
+		assertThat(links.supports(Address.class), is(true));
+		assertThat(links.supports(Object.class), is(false));
 	}
 
 	@Controller
