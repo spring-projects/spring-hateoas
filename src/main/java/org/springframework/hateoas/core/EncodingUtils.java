@@ -17,7 +17,7 @@ package org.springframework.hateoas.core;
 
 import lombok.experimental.UtilityClass;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriUtils;
@@ -32,7 +32,7 @@ import org.springframework.web.util.UriUtils;
 @UtilityClass
 public class EncodingUtils {
 
-	private static final String ENCODING = "UTF-8";
+	private static final String ENCODING = StandardCharsets.UTF_8.name();
 
 	/**
 	 * Encodes the given path value.
@@ -46,7 +46,7 @@ public class EncodingUtils {
 
 		try {
 			return UriUtils.encodePath(source.toString(), ENCODING);
-		} catch (UnsupportedEncodingException o_O) {
+		} catch (Throwable o_O) {
 			throw new IllegalStateException(o_O);
 		}
 	}
@@ -63,7 +63,7 @@ public class EncodingUtils {
 
 		try {
 			return UriUtils.encodeQueryParam(source.toString(), ENCODING);
-		} catch (UnsupportedEncodingException o_O) {
+		} catch (Throwable o_O) {
 			throw new IllegalStateException(o_O);
 		}
 	}
@@ -80,7 +80,7 @@ public class EncodingUtils {
 
 		try {
 			return UriUtils.encodeFragment(source.toString(), ENCODING);
-		} catch (UnsupportedEncodingException o_O) {
+		} catch (Throwable o_O) {
 			throw new IllegalStateException(o_O);
 		}
 	}
