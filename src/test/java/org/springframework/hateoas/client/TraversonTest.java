@@ -22,11 +22,7 @@ import static org.springframework.hateoas.client.Hop.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,9 +33,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -53,6 +47,7 @@ import org.springframework.web.client.RestTemplate;
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Haroun Pacquee
  * @since 0.11
  */
 public class TraversonTest {
@@ -411,4 +406,76 @@ public class TraversonTest {
 			super("$.%s_url", MediaType.APPLICATION_JSON);
 		}
 	}
+
+
+	/**
+	 * @see #225
+	 */
+	@Test
+	public void doesPost() {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new MappingJackson2HttpMessageConverter());
+		restTemplate.setMessageConverters(messageConverters);
+
+		traverson = new Traverson(URI.create(server.rootResource() + "/225"), MediaTypes.HAL_JSON);
+		traverson.setRestOperations(restTemplate);
+
+		final Item item = new Item("img", "desc");
+		ResponseEntity<Void> voidResponseEntity = traverson.follow()
+				.post(item, MediaType.APPLICATION_JSON)
+				.toEntity(Void.class);
+
+		assertThat(voidResponseEntity.getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(voidResponseEntity.getHeaders().get("location"), contains("1"));
+	}
+
+	/**
+	 * @see #225
+	 */
+	@Test
+	public void doesPatch() {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new MappingJackson2HttpMessageConverter());
+		restTemplate.setMessageConverters(messageConverters);
+
+		traverson = new Traverson(URI.create(server.rootResource() + "/225"), MediaTypes.HAL_JSON);
+		traverson.setRestOperations(restTemplate);
+
+		ResponseEntity<Void> voidResponseEntity = traverson.follow()
+				.delete()
+				.toEntity(Void.class);
+
+		assertThat(voidResponseEntity.getStatusCode(), is(HttpStatus.ACCEPTED));
+	}
+
+	/**
+	 * @see #225
+	 */
+	@Test
+	public void doesPut() {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new MappingJackson2HttpMessageConverter());
+		restTemplate.setMessageConverters(messageConverters);
+
+		traverson = new Traverson(URI.create(server.rootResource() + "/225"), MediaTypes.HAL_JSON);
+		traverson.setRestOperations(restTemplate);
+
+		final Item item = new Item("img", "desc");
+		ResponseEntity<Void> voidResponseEntity = traverson.follow()
+				.put(item, MediaType.APPLICATION_JSON)
+				.toEntity(Void.class);
+
+		assertThat(voidResponseEntity.getStatusCode(), is(HttpStatus.NO_CONTENT));
+		assertThat(voidResponseEntity.getHeaders().get("location"), contains("1"));
+	}
+
 }

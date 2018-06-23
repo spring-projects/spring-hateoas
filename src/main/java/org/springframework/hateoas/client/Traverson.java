@@ -37,10 +37,7 @@ import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.client.Rels.Rel;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.Jackson2HalModule;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -62,6 +59,7 @@ import com.jayway.jsonpath.JsonPath;
  * @author Dietrich Schulten
  * @author Greg Turnquist
  * @author Tom Bunting
+ * @author Haroun Pacquee
  * @since 0.11
  */
 public class Traverson {
@@ -230,7 +228,7 @@ public class Traverson {
 		return new TraversalBuilder().follow(hop);
 	}
 
-	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
+	private HttpEntity<?> prepareRequest(HttpHeaders headers, Object payload) {
 
 		HttpHeaders toSend = new HttpHeaders();
 		toSend.putAll(headers);
@@ -239,7 +237,11 @@ public class Traverson {
 			toSend.setAccept(mediaTypes);
 		}
 
-		return new HttpEntity<Void>(toSend);
+		if(payload == null) {
+			return new HttpEntity<Void>(toSend);
+		} else {
+			return new HttpEntity<Object>(payload, toSend);
+		}
 	}
 
 	/**
@@ -252,6 +254,8 @@ public class Traverson {
 		private final List<Hop> rels = new ArrayList<>();
 		private Map<String, Object> templateParameters = new HashMap<>();
 		private HttpHeaders headers = new HttpHeaders();
+		private HttpMethod method = GET;
+		private Object payload;
 
 		private TraversalBuilder() {}
 
@@ -324,7 +328,7 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToExpandedFinalUrl(), method, prepareRequest(headers, payload), type).getBody();
 		}
 
 		/**
@@ -337,7 +341,7 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
+			return operations.exchange(traverseToExpandedFinalUrl(), method, prepareRequest(headers, payload), type).getBody();
 		}
 
 		/**
@@ -351,7 +355,7 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), String.class)
+			String forObject = operations.exchange(traverseToExpandedFinalUrl(), method, prepareRequest(headers, payload), String.class)
 					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
@@ -365,7 +369,7 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type);
+			return operations.exchange(traverseToExpandedFinalUrl(), method, prepareRequest(headers, payload), type);
 		}
 
 		/**
@@ -415,7 +419,7 @@ public class Traverson {
 				return uri;
 			}
 
-			HttpEntity<?> request = prepareRequest(headers);
+			HttpEntity<?> request = prepareRequest(headers, payload);
 			UriTemplate template = new UriTemplate(uri);
 
 			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
@@ -440,6 +444,40 @@ public class Traverson {
 			} else {
 				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels);
 			}
+		}
+
+		public <T> TraversalBuilder post(T payload, MediaType contentType) {
+			addWriteContent(payload, contentType);
+			this.method = POST;
+			return this;
+		}
+
+		public <T> TraversalBuilder put(T payload, MediaType contentType) {
+			addWriteContent(payload, contentType);
+			this.method = PUT;
+			return this;
+		}
+
+		private <T> void addWriteContent(T payload, MediaType contentType) {
+			Assert.notNull(payload, "Payload must not be null!");
+			Assert.notNull(contentType, "ContentType must not be null!");
+			this.payload = payload;
+			this.headers.setContentType(contentType);
+		}
+
+		public TraversalBuilder head() {
+			this.method = HEAD;
+			return this;
+		}
+
+		public TraversalBuilder delete() {
+			this.method = DELETE;
+			return this;
+		}
+
+		public TraversalBuilder get() {
+			this.method = GET;
+			return this;
 		}
 	}
 }
