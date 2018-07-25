@@ -1,6 +1,39 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.24.0.RELEASE (2017-10-30)
+----------------------------------------------
+- #661 - Release 0.24.
+- #658 - Remove unused Enhancer variable.
+- #639 - Add support for Optional parameters in ControllerLinkBuilder.
+- #638 - Fix typos in Javadoc.
+- #635 - Upgrade Spring Framework 5 build profile to 5.0 GA.
+- #623 - Upgrade Spring 5 build profile to Jackson 2.9.1.
+- #621 - #617 - Use SynthesizingMethodParameter to support AliasFor attributes.
+- #617 - Parameter names not detected in case @AliasFor'ed attributes are used.
+- #604 - Make JacksonSerializationTest platform independent.
+- #603 - Fix typos.
+- #601 - #597 - Add ALPS mediatype and LinkDiscoverer.
+- #600 - Fix typo in UriTemplate.
+- #597 - Migrate ALPS media type and LinkDiscoverer from Spring Data REST.
+- #594 - Guard against Spring 5's Not Nullable policy.
+- #586 - #585 - Add script to run ALL build profiles.
+- #585 - Make it easier to test all profiles.
+- #584 - #580 - Update IANA relation types.
+- #583 - Make sure build profile for Spring 5 uses compatible Jackson version.
+- #582 - LinkBuilderSupport.slash(…) fails to append path segments with a colon.
+- #580 - Update IANA relation types.
+- #575 - spring5-next profile breaks Spring HATEOAS.
+- #567 - Add extra attributes to Link and use for HAL mediatype.
+- #564 - Add license file to the project.
+- #558 - HypermediaSupportBeanDefinitionRegistrar double registers message converters.
+- #557 - Update "JSON" to "Jackson" in reference docs.
+- #555 - Fixed syntax highlighting and content of a few code blocks in the reference guide.
+- #553 - Fix typo in build file.
+- #552 - Upgrade Spring 5 next to M5.
+- #542 - "Get Link functionality" of ResourceSupport class.
+- #538 - Update location of static resources.
+
 Changes in version 0.23.0.RELEASE (2016-12-22)
 ----------------------------------------------
 - #529 - Release 0.23.
