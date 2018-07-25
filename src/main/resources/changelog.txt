@@ -1,6 +1,16 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.25.0.RELEASE (2018-07-25)
+----------------------------------------------
+- #730 - Release 0.25.
+- #724 - Ensure Spring 4.3 / 5 compatibility in EncodingUtils.
+- #723 - Backport simplified configuration setup.
+- #722 - Update build plugins.
+- #721 - Upgrade to Lombok 1.18.0.
+- #720 - Upgrade to Spring 4.3.18.
+- #665 - ALPS spec name is "descriptor" not "descriptors".
+
 Changes in version 0.24.0.RELEASE (2017-10-30)
 ----------------------------------------------
 - #661 - Release 0.24.
