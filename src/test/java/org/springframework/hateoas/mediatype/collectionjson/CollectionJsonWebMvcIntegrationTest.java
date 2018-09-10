@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mvc;
+package org.springframework.hateoas.mediatype.collectionjson;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
@@ -63,14 +63,12 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
- * Test one controller, rendered into multiple mediatypes.
- * 
  * @author Greg Turnquist
  */
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class MultiMediatypeWebMvcIntegrationTest {
+public class CollectionJsonWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
@@ -90,9 +88,10 @@ public class MultiMediatypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void singleEmployeeCollectionJson() throws Exception {
+	public void singleEmployee() throws Exception {
 
-		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.COLLECTION_JSON_VALUE)) //
+		this.mockMvc.perform(get("/employees/0") //
+				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
 				.andExpect(status().isOk()) //
 
 				.andExpect(jsonPath("$.collection.version", is("1.0")))
@@ -120,9 +119,10 @@ public class MultiMediatypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployeesCollectionJson() throws Exception {
+	public void collectionOfEmployees() throws Exception {
 
-		this.mockMvc.perform(get("/employees").accept(MediaTypes.COLLECTION_JSON_VALUE)) //
+		this.mockMvc.perform(get("/employees") //
+				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
 				.andExpect(status().isOk()) //
 
 				.andExpect(jsonPath("$.collection.version", is("1.0")))
@@ -155,13 +155,14 @@ public class MultiMediatypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void createNewEmployeeCollectionJson() throws Exception {
+	public void createNewEmployee() throws Exception {
 
-		String specBasedJson = MappingUtils
-				.read(new ClassPathResource("../mediatype/collectionjson/spec-part7-adjusted.json", getClass()));
+		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 
-		this.mockMvc.perform(post("/employees").content(specBasedJson).contentType(MediaTypes.COLLECTION_JSON_VALUE))
-				.andExpect(status().isCreated())
+		this.mockMvc.perform(post("/employees") //
+				.content(specBasedJson) //
+				.contentType(MediaTypes.COLLECTION_JSON_VALUE)) //
+				.andExpect(status().isCreated()) //
 				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 
 		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.COLLECTION_JSON)).andExpect(status().isOk()) //
@@ -188,86 +189,6 @@ public class MultiMediatypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.collection.template.data[0].value", is("")))
 				.andExpect(jsonPath("$.collection.template.data[1].name", is("role")))
 				.andExpect(jsonPath("$.collection.template.data[1].value", is("")));
-	}
-
-	@Test
-	public void singleEmployeeHalForms() throws Exception {
-
-		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
-				.andExpect(status().isOk()) //
-				.andExpect(jsonPath("$.name", is("Frodo Baggins"))).andExpect(jsonPath("$.role", is("ring bearer")))
-
-				.andExpect(jsonPath("$._links.*", hasSize(2)))
-				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
-				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
-
-				.andExpect(jsonPath("$._templates.*", hasSize(2)))
-				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
-
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
-		;
-	}
-
-	@Test
-	public void collectionOfEmployeesHalForms() throws Exception {
-
-		this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
-				.andExpect(status().isOk()) //
-				.andExpect(jsonPath("$._embedded.employees[0].name", is("Frodo Baggins")))
-				.andExpect(jsonPath("$._embedded.employees[0].role", is("ring bearer")))
-				.andExpect(jsonPath("$._embedded.employees[0]._links['self'].href", is("http://localhost/employees/0")))
-				.andExpect(jsonPath("$._embedded.employees[1].name", is("Bilbo Baggins")))
-				.andExpect(jsonPath("$._embedded.employees[1].role", is("burglar")))
-				.andExpect(jsonPath("$._embedded.employees[1]._links['self'].href", is("http://localhost/employees/1")))
-
-				.andExpect(jsonPath("$._links.*", hasSize(1)))
-				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
-
-				.andExpect(jsonPath("$._templates.*", hasSize(1)))
-				.andExpect(jsonPath("$._templates['default'].method", is("post")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)));
-	}
-
-	@Test
-	public void createNewEmployeeHalForms() throws Exception {
-
-		String specBasedJson = MappingUtils.read(new ClassPathResource("../mediatype/halforms/new-employee.json", getClass()));
-
-		this.mockMvc.perform(post("/employees").content(specBasedJson).contentType(MediaTypes.HAL_FORMS_JSON_VALUE))
-				.andExpect(status().isCreated())
-				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
-
-		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.HAL_FORMS_JSON)) //
-				.andExpect(status().isOk()) //
-				.andExpect(jsonPath("$.name", is("Samwise Gamgee"))).andExpect(jsonPath("$.role", is("gardener")))
-
-				.andExpect(jsonPath("$._links.*", hasSize(2)))
-				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/2")))
-				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
-
-				.andExpect(jsonPath("$._templates.*", hasSize(2)))
-				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
-
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
 	}
 
 	@RestController
@@ -348,7 +269,10 @@ public class MultiMediatypeWebMvcIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee.getContent());
 
 			try {
-				return ResponseEntity.created(toUri(newEmployeeId)).build();
+				return ResponseEntity
+						.created(
+								new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -360,7 +284,9 @@ public class MultiMediatypeWebMvcIntegrationTest {
 			EMPLOYEES.put(id, employee.getContent());
 
 			try {
-				return ResponseEntity.noContent().location(toUri(id)).build();
+				return ResponseEntity.noContent()
+						.location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -384,26 +310,18 @@ public class MultiMediatypeWebMvcIntegrationTest {
 			EMPLOYEES.put(id, newEmployee);
 
 			try {
-				return ResponseEntity.noContent().location(toUri(id)).build();
+				return ResponseEntity.noContent()
+						.location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
-		}
-
-		private URI toUri(Integer id) throws URISyntaxException {
-
-			String uri = findOne(id) //
-					.getLink(Link.REL_SELF) //
-					.map(link -> link.expand().getHref()) //
-					.orElse("");
-
-			return new URI(uri);
 		}
 	}
 
 	@Configuration
 	@EnableWebMvc
-	@EnableHypermediaSupport(type = { HypermediaType.COLLECTION_JSON, HypermediaType.HAL_FORMS })
+	@EnableHypermediaSupport(type = { HypermediaType.COLLECTION_JSON })
 	static class TestConfig {
 
 		@Bean

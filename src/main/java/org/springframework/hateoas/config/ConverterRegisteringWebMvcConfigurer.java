@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.mediatype.MediaTypes.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,15 +31,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule;
+import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.DelegatingRelProvider;
-import org.springframework.hateoas.hal.CurieProvider;
-import org.springframework.hateoas.hal.HalConfiguration;
-import org.springframework.hateoas.hal.Jackson2HalModule;
-import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
-import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
-import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule;
+import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.mediatype.halforms.HalFormsConfiguration;
+import org.springframework.hateoas.mediatype.halforms.Jackson2HalFormsModule;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;

@@ -16,7 +16,7 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks.*;
+import static org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks.*;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -34,17 +34,17 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
-import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.MediaTypes;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
+import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
 import org.springframework.hateoas.core.DelegatingRelProvider;
-import org.springframework.hateoas.hal.HalConfiguration;
-import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
-import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
+import org.springframework.hateoas.mediatype.halforms.HalFormsConfiguration;
+import org.springframework.hateoas.mediatype.halforms.HalFormsLinkDiscoverer;
 import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;

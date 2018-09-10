@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas;
 
+import org.springframework.hateoas.mediatype.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
