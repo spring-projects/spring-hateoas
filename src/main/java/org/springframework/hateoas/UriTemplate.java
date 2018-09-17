@@ -204,6 +204,28 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
+	 * Expands the {@link UriTemplate} using the given parameters. The values will be applied in the order of the
+	 * variables discovered.
+	 *
+	 * @param parameters
+	 * @return
+	 * @see #expand(Map)
+	 */
+	public URI checkParams(Object... parameters) {
+		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
+
+		for (TemplateVariable variable : getOptionalVariables()) {
+
+			Object value = iterator.hasNext() ? iterator.next() : null;
+			appendToBuilder(builder, variable, value);
+		}
+
+		return URI.create(baseUri);
+	}
+
+	/**
 	 * Expands the {@link UriTemplate} using the given parameters.
 	 * 
 	 * @param parameters must not be {@literal null}.

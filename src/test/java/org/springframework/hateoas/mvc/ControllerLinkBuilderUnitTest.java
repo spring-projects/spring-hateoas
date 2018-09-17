@@ -384,6 +384,27 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/something/with%20blank/foo");
 	}
 
+	@Test
+	public void uriComponentsToMethodWithPathVariableContainingBlankAnsOptionalQueryParams() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("with blank", 0, 10)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.toUriString(), containsString("/something/with%20blank/foo"));
+		assertThat(components.toUriString(), containsString("offset=0"));
+		assertThat(components.toUriString(), containsString("limit=10"));
+	}
+
+	@Test
+	public void uriComponentsToMethodWithPathVariableContainingBlankAnsOptionalQueryParamNull() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("with blank", null, 10)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.toUriString(), containsString("/something/with%20blank/foo"));
+		assertThat(components.toUriString(), containsString("limit=10"));
+	}
+
 	/**
 	 * @see #192
 	 */
@@ -588,6 +609,18 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithAlternatePathVariable("bar")).withSelfRel();
 		assertThat(link.getHref()).isEqualTo("http://localhost/something/bar/foo");
+	}
+
+	@Test
+	public void uriComponentsToMethodWithPathVariableAndRequestParamsContainingNull()
+	{
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 10)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath(), is(equalTo("/something/1/foo")));
+
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("10"));
 	}
 
 	private static UriComponents toComponents(Link link) {
