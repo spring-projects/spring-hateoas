@@ -230,7 +230,7 @@ public class Link implements Serializable {
 	public Link expand(Object... arguments) {
 
 		URI uri = (arguments == null || arguments.length == 0) ?
-				getUriTemplate().checkParams(arguments) :
+				getUriTemplate().checkRequiredParams() :
 				getUriTemplate().expand(arguments);
 
 		return new Link(uri.toString(), getRel());
