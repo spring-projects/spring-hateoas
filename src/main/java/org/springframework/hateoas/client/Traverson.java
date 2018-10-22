@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.sun.jndi.toolkit.url.Uri;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
@@ -324,7 +325,9 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
+
+			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
+			return operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), type).getBody();
 		}
 
 		/**
@@ -337,7 +340,9 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
+
+			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
+			return operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), type).getBody();
 		}
 
 		/**
@@ -351,7 +356,8 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), String.class)
+			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
+			String forObject = operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), String.class)
 					.getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
@@ -365,7 +371,8 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type);
+			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
+			return operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), type);
 		}
 
 		/**
@@ -393,26 +400,24 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().toString() : traverseToFinalUrl(),
+			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().uriAsURI.toString() : traverseToFinalUrl(),
 					rels.get(rels.size() - 1).getRel());
 		}
 
 		private String traverseToFinalUrl() {
 
-			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).toString();
+			return getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), headers).uriAsString;
 		}
 
-		private URI traverseToExpandedFinalUrl() {
+		private LinkWithHeader traverseToExpandedFinalUrl() {
 
-			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).expand(templateParameters);
+			return getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), headers);
 		}
 
-		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
+		private LinkWithHeader getAndFindLinkWithRel(String uri, Iterator<Hop> rels, HttpHeaders headers) {
 
 			if (!rels.hasNext()) {
-				return uri;
+				return new LinkWithHeader(uri, headers);
 			}
 
 			HttpEntity<?> request = prepareRequest(headers);
@@ -436,9 +441,45 @@ public class Traverson {
 			 * Don't expand if the parameters are empty
 			 */
 			if (!thisHop.hasParameters()) {
-				return getAndFindLinkWithRel(link.getHref(), rels);
+				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getMergedHeaders(this.headers));
 			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels);
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels, thisHop.getMergedHeaders(this.headers));
+			}
+		}
+
+		private class LinkWithHeader{
+			private String uriAsString;
+			private URI uriAsURI;
+			private HttpHeaders httpHeaders;
+
+			LinkWithHeader(String uri, HttpHeaders httpHeaders){
+				this.uriAsString = new UriTemplate(uri).toString();
+				this.uriAsURI = new UriTemplate(uri).expand(templateParameters);
+				this.httpHeaders = httpHeaders;
+			}
+
+			public URI getUriAsURI() {
+				return uriAsURI;
+			}
+
+			public void setUriAsURI(URI uriAsURI) {
+				this.uriAsURI = uriAsURI;
+			}
+
+			public String getUriAsString() {
+				return uriAsString;
+			}
+
+			public void setUriAsString(String uriAsString) {
+				this.uriAsString = uriAsString;
+			}
+
+			public HttpHeaders getHttpHeaders() {
+				return httpHeaders;
+			}
+
+			public void setHttpHeaders(HttpHeaders httpHeaders) {
+				this.httpHeaders = httpHeaders;
 			}
 		}
 	}
