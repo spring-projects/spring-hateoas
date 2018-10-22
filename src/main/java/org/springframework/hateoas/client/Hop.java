@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
@@ -47,11 +48,13 @@ public class Hop {
 	/**
 	 * Collection of URI Template parameters.
 	 */
-	private final @Wither Map<String, ? extends Object> parameters;
+	private final @Wither Map<String, Object> parameters;
+
+	private final HttpHeaders headers;
 
 	/**
 	 * Creates a new {@link Hop} for the given relation name.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -59,7 +62,7 @@ public class Hop {
 
 		Assert.hasText(rel, "Relation must not be null or empty!");
 
-		return new Hop(rel, Collections.<String, Object> emptyMap());
+		return new Hop(rel, Collections.<String, Object> emptyMap(), null);
 	}
 
 	/**
@@ -76,16 +79,39 @@ public class Hop {
 		HashMap<String, Object> parameters = new HashMap<String, Object>(this.parameters);
 		parameters.put(name, value);
 
-		return new Hop(rel, parameters);
+		if (this.hasHeaders())
+			return new Hop(rel, parameters, this.headers);
+		else
+			return new Hop(rel, parameters, null);
+	}
+
+	public Hop withHeader(String headerName, String headerValue){
+		Assert.notNull(headers, "Headers must not be null!");
+
+		HttpHeaders headers = new HttpHeaders();
+
+		if(this.hasHeaders())
+			headers.addAll(this.headers);
+
+		headers.add(headerName, headerValue);
+
+		if(this.hasParameters())
+			return new Hop(rel, this.parameters, headers);
+		else
+			return new Hop(rel, Collections.<String, Object> emptyMap(), headers);
 	}
 
 	/**
 	 * Returns whether the {@link Hop} has parameters declared.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean hasParameters() {
 		return !this.parameters.isEmpty();
+	}
+
+	boolean hasHeaders() {
+		return this.headers != null && !this.headers.isEmpty();
 	}
 
 	/**
@@ -105,5 +131,14 @@ public class Hop {
 		mergedParameters.putAll(this.parameters);
 
 		return mergedParameters;
+	}
+
+	HttpHeaders getMergedHeaders(HttpHeaders globalHeaders){
+		Assert.notNull(globalHeaders, "Global Headers must not be null!");
+
+		if(this.hasHeaders())
+			globalHeaders.addAll(this.headers);
+
+		return globalHeaders;
 	}
 }
