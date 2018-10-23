@@ -17,6 +17,9 @@ package org.springframework.hateoas.client;
 
 import static org.springframework.http.HttpMethod.*;
 
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -190,7 +193,7 @@ public class Traverson {
 	 */
 	public Traverson setRestOperations(RestOperations operations) {
 
-		this.operations = operations == null ? createDefaultTemplate(mediaTypes) : operations;
+		this.operations = operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
 		return this;
 	}
 
@@ -203,7 +206,7 @@ public class Traverson {
 	 */
 	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
 
-		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS
+		this.discoverers = this.discoverers == null ? DEFAULT_LINK_DISCOVERERS
 				: new LinkDiscoverers(OrderAwarePluginRegistry.create(discoverer));
 
 		return this;
@@ -299,6 +302,8 @@ public class Traverson {
 		 */
 		public TraversalBuilder withTemplateParameters(Map<String, Object> parameters) {
 
+			Assert.notNull(parameters, "Parameters must not be null!");
+
 			this.templateParameters = parameters;
 			return this;
 		}
@@ -310,6 +315,8 @@ public class Traverson {
 		 * @return
 		 */
 		public TraversalBuilder withHeaders(HttpHeaders headers) {
+
+			Assert.notNull(headers, "Headers must not be null!");
 
 			this.headers = headers;
 			return this;
@@ -324,7 +331,11 @@ public class Traverson {
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
+
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type).getBody();
 		}
 
 		/**
@@ -337,7 +348,11 @@ public class Traverson {
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type).getBody();
+
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+			
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type).getBody();
 		}
 
 		/**
@@ -351,8 +366,10 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			String forObject = operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), String.class)
-					.getBody();
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			String forObject = operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, String.class).getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
 
@@ -365,7 +382,11 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			return operations.exchange(traverseToExpandedFinalUrl(), GET, prepareRequest(headers), type);
+
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+			
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type);
 		}
 
 		/**
@@ -393,29 +414,32 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().toString() : traverseToFinalUrl(),
-					rels.get(rels.size() - 1).getRel());
+
+			URIAndHeaders expandedFinalUriAndHeaders = traverseToExpandedFinalUrl();
+			UriStringAndHeaders finalUriAndHeaders = traverseToFinalUrl();
+
+			return new Link(expandFinalUrl ? expandedFinalUriAndHeaders.getUri().toString() : finalUriAndHeaders.getUri(), rels.get(rels.size() - 1).getRel());
 		}
 
-		private String traverseToFinalUrl() {
+		private UriStringAndHeaders traverseToFinalUrl() {
 
-			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).toString();
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
+			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(), uriAndHeaders.getHttpHeaders());
 		}
 
-		private URI traverseToExpandedFinalUrl() {
+		private URIAndHeaders traverseToExpandedFinalUrl() {
 
-			String uri = getAndFindLinkWithRel(baseUri.toString(), rels.iterator());
-			return new UriTemplate(uri).expand(templateParameters);
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
+			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(this.templateParameters), uriAndHeaders.getHttpHeaders());
 		}
 
-		private String getAndFindLinkWithRel(String uri, Iterator<Hop> rels) {
+		private UriStringAndHeaders getAndFindLinkWithRel(String uri, Iterator<Hop> rels, HttpHeaders extraHeaders) {
 
 			if (!rels.hasNext()) {
-				return uri;
+				return new UriStringAndHeaders(uri, extraHeaders);
 			}
 
-			HttpEntity<?> request = prepareRequest(headers);
+			HttpEntity<?> request = prepareRequest(mergeHeaders(this.headers, extraHeaders));
 			UriTemplate template = new UriTemplate(uri);
 
 			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
@@ -436,10 +460,37 @@ public class Traverson {
 			 * Don't expand if the parameters are empty
 			 */
 			if (!thisHop.hasParameters()) {
-				return getAndFindLinkWithRel(link.getHref(), rels);
+				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getExtraHeaders());
 			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels);
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(this.templateParameters)).getHref(), rels, thisHop.getExtraHeaders());
 			}
 		}
+
+		private HttpHeaders mergeHeaders(HttpHeaders headersA, HttpHeaders headersB) {
+
+			HttpHeaders mergedHeaders = new HttpHeaders();
+
+			mergedHeaders.addAll(headersA);
+			mergedHeaders.addAll(headersB);
+
+			return mergedHeaders;
+		}
+
+	}
+
+	@Value
+	@RequiredArgsConstructor
+	private static class UriStringAndHeaders {
+
+		private final String uri;
+		private final HttpHeaders httpHeaders;
+	}
+
+	@Value
+	@RequiredArgsConstructor
+	private static class URIAndHeaders {
+
+		private final URI uri;
+		private final HttpHeaders httpHeaders;
 	}
 }

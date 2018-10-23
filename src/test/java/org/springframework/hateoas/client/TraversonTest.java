@@ -380,6 +380,49 @@ public class TraversonTest {
 				.isEqualTo(server.rootResource() + "/springagram/items");
 	}
 
+	@Test
+	public void customHeaders() {
+
+		traverson
+			.follow(rel("movies")
+				.header("X-CustomHeader", "alpha")
+				.header("X-OtherHeader", "delta"))
+			.follow(rel("movie").header("X-CustomHeader", "bravo"))
+			.follow(rel("actor").header("X-CustomHeader", "charlie"))
+			.toObject("$.name");
+
+//		traverson
+//			.follow(rel("movies", header("X-CustomHeader", "alpha").header("X-OtherHeader", "delta").build()))
+//			.follow(rel("movie", header("X-CustomHeader", "bravo").build()))
+//			.follow(rel("actor", header("X-CustomHeader", "charlie").build()))
+//			.toObject("$.name");
+
+		verifyThatRequest() //
+			.havingPathEqualTo("/") //
+			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+			.receivedOnce();
+
+		verifyThatRequest()
+			.havingPathEqualTo("/movies") // aggregate root movies
+			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+			.havingHeader("X-CustomHeader", contains("alpha")) //
+			.havingHeader("X-OtherHeader", contains("delta")) //
+			.receivedOnce();
+
+		verifyThatRequest()
+			.havingPath(startsWith("/movies/")) // single movie
+			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+			.havingHeader("X-CustomHeader", contains("bravo")) //
+			.receivedOnce();
+
+		verifyThatRequest()
+			.havingPath(startsWith("/actors/")) // single actor
+			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+			.havingHeader("X-CustomHeader", contains("charlie")) //
+			.receivedOnce();
+	}
+
+
 	private void setUpActors() {
 
 		Resource<Actor> actor = new Resource<>(new Actor("Keanu Reaves"));

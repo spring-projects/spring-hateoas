@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
@@ -50,6 +51,11 @@ public class Hop {
 	private final @Wither Map<String, Object> parameters;
 
 	/**
+	 * Extra headers to apply on this hop.
+	 */
+	private final HttpHeaders extraHeaders;
+
+	/**
 	 * Creates a new {@link Hop} for the given relation name.
 	 * 
 	 * @param rel must not be {@literal null} or empty.
@@ -59,7 +65,7 @@ public class Hop {
 
 		Assert.hasText(rel, "Relation must not be null or empty!");
 
-		return new Hop(rel, Collections.<String, Object> emptyMap());
+		return new Hop(rel, Collections.emptyMap(), HttpHeaders.EMPTY);
 	}
 
 	/**
@@ -76,7 +82,7 @@ public class Hop {
 		HashMap<String, Object> parameters = new HashMap<String, Object>(this.parameters);
 		parameters.put(name, value);
 
-		return new Hop(rel, parameters);
+		return new Hop(rel, parameters, HttpHeaders.EMPTY);
 	}
 
 	/**
@@ -105,5 +111,21 @@ public class Hop {
 		mergedParameters.putAll(this.parameters);
 
 		return mergedParameters;
+	}
+
+	public Hop header(String headerName, String headerValue) {
+
+		Assert.notNull(headerName, "headerName must not be null!");
+		Assert.notNull(headerValue, "headerValue must not be null!");
+
+		if (this.extraHeaders == HttpHeaders.EMPTY) {
+			HttpHeaders newHeaders = new HttpHeaders();
+			newHeaders.add(headerName, headerValue);
+
+			return new Hop(this.rel, this.parameters, newHeaders);
+		}
+
+		this.extraHeaders.add(headerName, headerValue);
+		return this;
 	}
 }
