@@ -50,7 +50,7 @@ public class Hop {
 	 */
 	private final @Wither Map<String, Object> parameters;
 
-	private final HttpHeaders headers;
+	private final @Wither HttpHeaders headers;
 
 	/**
 	 * Creates a new {@link Hop} for the given relation name.
@@ -85,6 +85,13 @@ public class Hop {
 			return new Hop(rel, parameters, null);
 	}
 
+	/**
+	 * Add one header to the HttpHeaders collection.
+	 *
+	 * @param headerName must not be {@literal null} or empty.
+	 * @param headerValue can be {@literal null}.
+	 * @return
+	 */
 	public Hop withHeader(String headerName, String headerValue){
 		Assert.notNull(headers, "Headers must not be null!");
 
@@ -110,6 +117,11 @@ public class Hop {
 		return !this.parameters.isEmpty();
 	}
 
+	/**
+	 * Returns whether the {@link Hop} has headers declared.
+	 *
+	 * @return
+	 */
 	boolean hasHeaders() {
 		return this.headers != null && !this.headers.isEmpty();
 	}
@@ -133,6 +145,13 @@ public class Hop {
 		return mergedParameters;
 	}
 
+	/**
+	 * Create a new {@link Map} starting with the supplied headers. Then add the ones for this hop. This
+	 * allows a local hop to override global headers.
+	 *
+	 * @param globalHeaders must not be {@literal null}.
+	 * @return
+	 */
 	HttpHeaders getMergedHeaders(HttpHeaders globalHeaders){
 		Assert.notNull(globalHeaders, "Global Headers must not be null!");
 
