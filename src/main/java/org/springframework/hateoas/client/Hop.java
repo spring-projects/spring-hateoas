@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
  *
  * @author Greg Turnquist
  * @author Oliver Gierke
+ * @author Manish Misra
  * @since 0.18
  */
 @Value
@@ -50,6 +51,9 @@ public class Hop {
 	 */
 	private final @Wither Map<String, Object> parameters;
 
+	/**
+	 * Extra {@link HttpHeaders} to apply to this hop.
+	 */
 	private final @Wither HttpHeaders headers;
 
 	/**
@@ -62,7 +66,7 @@ public class Hop {
 
 		Assert.hasText(rel, "Relation must not be null or empty!");
 
-		return new Hop(rel, Collections.<String, Object> emptyMap(), null);
+		return new Hop(rel, Collections.emptyMap(), HttpHeaders.EMPTY);
 	}
 
 	/**
@@ -76,13 +80,10 @@ public class Hop {
 
 		Assert.hasText(name, "Name must not be null or empty!");
 
-		HashMap<String, Object> parameters = new HashMap<String, Object>(this.parameters);
+		HashMap<String, Object> parameters = new HashMap<>(this.parameters);
 		parameters.put(name, value);
 
-		if (this.hasHeaders())
-			return new Hop(rel, parameters, this.headers);
-		else
-			return new Hop(rel, parameters, null);
+		return new Hop(this.rel, parameters, this.headers);
 	}
 
 	/**
@@ -92,20 +93,21 @@ public class Hop {
 	 * @param headerValue can be {@literal null}.
 	 * @return
 	 */
-	public Hop withHeader(String headerName, String headerValue){
-		Assert.notNull(headers, "Headers must not be null!");
+	public Hop header(String headerName, String headerValue) {
 
-		HttpHeaders headers = new HttpHeaders();
+		Assert.notNull(headerName, "headerName must not be null!");
+		Assert.notNull(headerValue, "headerValue must not be null!");
 
-		if(this.hasHeaders())
-			headers.addAll(this.headers);
+		if (this.headers == HttpHeaders.EMPTY) {
 
-		headers.add(headerName, headerValue);
+			HttpHeaders newHeaders = new HttpHeaders();
+			newHeaders.add(headerName, headerValue);
 
-		if(this.hasParameters())
-			return new Hop(rel, this.parameters, headers);
-		else
-			return new Hop(rel, Collections.<String, Object> emptyMap(), headers);
+			return new Hop(this.rel, this.parameters, newHeaders);
+		}
+
+		this.headers.add(headerName, headerValue);
+		return this;
 	}
 
 	/**
@@ -115,15 +117,6 @@ public class Hop {
 	 */
 	boolean hasParameters() {
 		return !this.parameters.isEmpty();
-	}
-
-	/**
-	 * Returns whether the {@link Hop} has headers declared.
-	 *
-	 * @return
-	 */
-	boolean hasHeaders() {
-		return this.headers != null && !this.headers.isEmpty();
 	}
 
 	/**
@@ -143,21 +136,5 @@ public class Hop {
 		mergedParameters.putAll(this.parameters);
 
 		return mergedParameters;
-	}
-
-	/**
-	 * Create a new {@link Map} starting with the supplied headers. Then add the ones for this hop. This
-	 * allows a local hop to override global headers.
-	 *
-	 * @param globalHeaders must not be {@literal null}.
-	 * @return
-	 */
-	HttpHeaders getMergedHeaders(HttpHeaders globalHeaders){
-		Assert.notNull(globalHeaders, "Global Headers must not be null!");
-
-		if(this.hasHeaders())
-			globalHeaders.addAll(this.headers);
-
-		return globalHeaders;
 	}
 }

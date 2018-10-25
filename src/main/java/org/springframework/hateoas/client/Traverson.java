@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package org.springframework.hateoas.client;
 
 import static org.springframework.http.HttpMethod.*;
 
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -28,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.sun.jndi.toolkit.url.Uri;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
@@ -63,6 +65,7 @@ import com.jayway.jsonpath.JsonPath;
  * @author Dietrich Schulten
  * @author Greg Turnquist
  * @author Tom Bunting
+ * @author Manish Misra
  * @since 0.11
  */
 public class Traverson {
@@ -191,7 +194,7 @@ public class Traverson {
 	 */
 	public Traverson setRestOperations(RestOperations operations) {
 
-		this.operations = operations == null ? createDefaultTemplate(mediaTypes) : operations;
+		this.operations = operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
 		return this;
 	}
 
@@ -204,7 +207,7 @@ public class Traverson {
 	 */
 	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
 
-		this.discoverers = discoverers == null ? DEFAULT_LINK_DISCOVERERS
+		this.discoverers = this.discoverers == null ? DEFAULT_LINK_DISCOVERERS
 				: new LinkDiscoverers(OrderAwarePluginRegistry.create(discoverer));
 
 		return this;
@@ -300,6 +303,8 @@ public class Traverson {
 		 */
 		public TraversalBuilder withTemplateParameters(Map<String, Object> parameters) {
 
+			Assert.notNull(parameters, "Parameters must not be null!");
+
 			this.templateParameters = parameters;
 			return this;
 		}
@@ -311,6 +316,8 @@ public class Traverson {
 		 * @return
 		 */
 		public TraversalBuilder withHeaders(HttpHeaders headers) {
+
+			Assert.notNull(headers, "Headers must not be null!");
 
 			this.headers = headers;
 			return this;
@@ -326,8 +333,10 @@ public class Traverson {
 
 			Assert.notNull(type, "Target type must not be null!");
 
-			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
-			return operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), type).getBody();
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type).getBody();
 		}
 
 		/**
@@ -341,8 +350,10 @@ public class Traverson {
 
 			Assert.notNull(type, "Target type must not be null!");
 
-			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
-			return operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), type).getBody();
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type).getBody();
 		}
 
 		/**
@@ -356,9 +367,10 @@ public class Traverson {
 
 			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
 
-			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
-			String forObject = operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), String.class)
-					.getBody();
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			String forObject = operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, String.class).getBody();
 			return JsonPath.read(forObject, jsonPath);
 		}
 
@@ -371,8 +383,11 @@ public class Traverson {
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
-			LinkWithHeader linkWithHeader = traverseToExpandedFinalUrl();
-			return operations.exchange(linkWithHeader.uriAsURI, GET, prepareRequest(linkWithHeader.httpHeaders), type);
+
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type);
 		}
 
 		/**
@@ -399,28 +414,34 @@ public class Traverson {
 
 		private Link traverseToLink(boolean expandFinalUrl) {
 
-			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
-			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().uriAsURI.toString() : traverseToFinalUrl(),
-					rels.get(rels.size() - 1).getRel());
+			Assert.isTrue(this.rels.size() > 0, "At least one rel needs to be provided!");
+
+			URIAndHeaders expandedFinalUriAndHeaders = traverseToExpandedFinalUrl();
+			UriStringAndHeaders finalUriAndHeaders = traverseToFinalUrl();
+
+			return new Link(expandFinalUrl ? expandedFinalUriAndHeaders.getUri().toString() : finalUriAndHeaders.getUri(),
+				this.rels.get(this.rels.size() - 1).getRel());
 		}
 
-		private String traverseToFinalUrl() {
+		private UriStringAndHeaders traverseToFinalUrl() {
 
-			return getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), headers).uriAsString;
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
+			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(), uriAndHeaders.getHttpHeaders());
 		}
 
-		private LinkWithHeader traverseToExpandedFinalUrl() {
+		private URIAndHeaders traverseToExpandedFinalUrl() {
 
-			return getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), headers);
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
+			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(this.templateParameters), uriAndHeaders.getHttpHeaders());
 		}
 
-		private LinkWithHeader getAndFindLinkWithRel(String uri, Iterator<Hop> rels, HttpHeaders headers) {
+		private UriStringAndHeaders getAndFindLinkWithRel(String uri, Iterator<Hop> rels, HttpHeaders extraHeaders) {
 
 			if (!rels.hasNext()) {
-				return new LinkWithHeader(uri, headers);
+				return new UriStringAndHeaders(uri, extraHeaders);
 			}
 
-			HttpEntity<?> request = prepareRequest(headers);
+			HttpEntity<?> request = prepareRequest(mergeHeaders(this.headers, extraHeaders));
 			UriTemplate template = new UriTemplate(uri);
 
 			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
@@ -437,50 +458,53 @@ public class Traverson {
 						String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody));
 			}
 
-			/**
+			/*
 			 * Don't expand if the parameters are empty
 			 */
 			if (!thisHop.hasParameters()) {
-				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getMergedHeaders(this.headers));
+				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getHeaders());
 			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(templateParameters)).getHref(), rels, thisHop.getMergedHeaders(this.headers));
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(this.templateParameters)).getHref(), rels, thisHop.getHeaders());
 			}
 		}
 
-		private class LinkWithHeader{
-			private String uriAsString;
-			private URI uriAsURI;
-			private HttpHeaders httpHeaders;
+		/**
+		 * Combine two sets of {@link HttpHeaders} into one.
+		 * 
+		 * @param headersA
+		 * @param headersB
+		 * @return
+		 */
+		private HttpHeaders mergeHeaders(HttpHeaders headersA, HttpHeaders headersB) {
 
-			LinkWithHeader(String uri, HttpHeaders httpHeaders){
-				this.uriAsString = new UriTemplate(uri).toString();
-				this.uriAsURI = new UriTemplate(uri).expand(templateParameters);
-				this.httpHeaders = httpHeaders;
-			}
+			HttpHeaders mergedHeaders = new HttpHeaders();
 
-			public URI getUriAsURI() {
-				return uriAsURI;
-			}
+			mergedHeaders.addAll(headersA);
+			mergedHeaders.addAll(headersB);
 
-			public void setUriAsURI(URI uriAsURI) {
-				this.uriAsURI = uriAsURI;
-			}
-
-			public String getUriAsString() {
-				return uriAsString;
-			}
-
-			public void setUriAsString(String uriAsString) {
-				this.uriAsString = uriAsString;
-			}
-
-			public HttpHeaders getHttpHeaders() {
-				return httpHeaders;
-			}
-
-			public void setHttpHeaders(HttpHeaders httpHeaders) {
-				this.httpHeaders = httpHeaders;
-			}
+			return mergedHeaders;
 		}
+	}
+
+	/**
+	 * Temporary container for a string-base {@literal URI} and {@link HttpHeaders}.
+	 */
+	@Value
+	@RequiredArgsConstructor
+	private static class UriStringAndHeaders {
+
+		private final String uri;
+		private final HttpHeaders httpHeaders;
+	}
+
+	/**
+	 * Temporary container for a {@link URI}-based {@literal URI} and {@link HttpHeaders}.
+	 */
+	@Value
+	@RequiredArgsConstructor
+	private static class URIAndHeaders {
+
+		private final URI uri;
+		private final HttpHeaders httpHeaders;
 	}
 }
