@@ -475,7 +475,6 @@ public class Traverson {
 
 			return mergedHeaders;
 		}
-
 	}
 
 	@Value

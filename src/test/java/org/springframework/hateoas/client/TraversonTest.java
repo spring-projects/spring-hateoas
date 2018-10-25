@@ -383,19 +383,15 @@ public class TraversonTest {
 	@Test
 	public void customHeaders() {
 
+		String customHeaderName = "X-CustomHeader";
+		
 		traverson
 			.follow(rel("movies")
-				.header("X-CustomHeader", "alpha")
-				.header("X-OtherHeader", "delta"))
-			.follow(rel("movie").header("X-CustomHeader", "bravo"))
-			.follow(rel("actor").header("X-CustomHeader", "charlie"))
+				.header(customHeaderName, "alpha")
+				.header(HttpHeaders.LOCATION, "http://localhost:8080/my/custom/location"))
+			.follow(rel("movie").header(customHeaderName, "bravo"))
+			.follow(rel("actor").header(customHeaderName, "charlie"))
 			.toObject("$.name");
-
-//		traverson
-//			.follow(rel("movies", header("X-CustomHeader", "alpha").header("X-OtherHeader", "delta").build()))
-//			.follow(rel("movie", header("X-CustomHeader", "bravo").build()))
-//			.follow(rel("actor", header("X-CustomHeader", "charlie").build()))
-//			.toObject("$.name");
 
 		verifyThatRequest() //
 			.havingPathEqualTo("/") //
@@ -405,20 +401,20 @@ public class TraversonTest {
 		verifyThatRequest()
 			.havingPathEqualTo("/movies") // aggregate root movies
 			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.havingHeader("X-CustomHeader", contains("alpha")) //
-			.havingHeader("X-OtherHeader", contains("delta")) //
+			.havingHeader(customHeaderName, contains("alpha")) //
+			.havingHeader(HttpHeaders.LOCATION, contains("http://localhost:8080/my/custom/location")) //
 			.receivedOnce();
 
 		verifyThatRequest()
 			.havingPath(startsWith("/movies/")) // single movie
 			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.havingHeader("X-CustomHeader", contains("bravo")) //
+			.havingHeader(customHeaderName, contains("bravo")) //
 			.receivedOnce();
 
 		verifyThatRequest()
 			.havingPath(startsWith("/actors/")) // single actor
 			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.havingHeader("X-CustomHeader", contains("charlie")) //
+			.havingHeader(customHeaderName, contains("charlie")) //
 			.receivedOnce();
 	}
 
