@@ -61,6 +61,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	private static final CachingAnnotationMappingDiscoverer DISCOVERER = new CachingAnnotationMappingDiscoverer(
 			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
+	private static final String CACHE_KEY = ControllerLinkBuilder.class.getName() + "#BUILDER_CACHE";
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
 	private final TemplateVariables variables;
@@ -233,7 +234,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return UriComponentsBuilder.fromUri(toUri());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.LinkBuilderSupport#toString()
 	 */
@@ -259,14 +260,25 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
 	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
 	 * back to relative URIs.
-	 * 
+	 *
 	 * @return
 	 */
 	static UriComponentsBuilder getBuilder() {
-
 		if (RequestContextHolder.getRequestAttributes() == null) {
 			return UriComponentsBuilder.fromPath("/");
 		}
+
+		URI baseUri = getCachedBaseUri();
+		if (baseUri == null) {
+			UriComponentsBuilder builderFromRequest = createBuilderFromRequest();
+			cacheBaseUri(builderFromRequest.build().toUri());
+			return builderFromRequest;
+		} else {
+			return UriComponentsBuilder.fromUri(baseUri);
+		}
+	}
+
+	private static UriComponentsBuilder createBuilderFromRequest() {
 
 		HttpServletRequest request = getCurrentRequest();
 		UriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
@@ -292,13 +304,25 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	@SuppressWarnings("null")
 	private static HttpServletRequest getCurrentRequest() {
-
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
-		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
+        RequestAttributes requestAttributes = getRequestAttributes();
 		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
 		return servletRequest;
+	}
+
+	private static RequestAttributes getRequestAttributes() {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
+		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
+		return requestAttributes;
+	}
+
+	private static void cacheBaseUri(URI uri) {
+		getRequestAttributes().setAttribute(CACHE_KEY, uri, RequestAttributes.SCOPE_REQUEST);
+	}
+
+	private static URI getCachedBaseUri() {
+		return (URI) getRequestAttributes().getAttribute(CACHE_KEY, RequestAttributes.SCOPE_REQUEST);
 	}
 
 	@RequiredArgsConstructor
@@ -328,7 +352,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			setStrictEncoding(true);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.util.Map)
 		 */
@@ -337,7 +361,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			return super.expandAndEncode(builder, uriVariables);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.lang.Object[])
 		 */
