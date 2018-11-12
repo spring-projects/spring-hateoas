@@ -37,6 +37,7 @@ import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
@@ -67,12 +68,14 @@ import org.springframework.web.util.UriTemplate;
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
-	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final MappingDiscoverer DISCOVERER = new CachingMappingDiscoverer(
+			new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
+	private UriTemplateFactory uriTemplateFactory = new UriTemplateFactory();
 
 	/**
 	 * Configures the {@link UriComponentsContributor} to be used when building {@link Link} instances from method
@@ -103,7 +106,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.util.Map)
 	 */
@@ -138,7 +141,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
 		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
 
-		UriTemplate template = new UriTemplate(mapping);
+		UriTemplate template = uriTemplateFactory.templateFor(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();
 		Iterator<String> names = template.getVariableNames().iterator();
 
@@ -280,7 +283,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			super(new AnnotationAttribute(RequestParam.class));
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#createParameter(org.springframework.core.MethodParameter, java.lang.Object, org.springframework.hateoas.core.AnnotationAttribute)
 		 */
@@ -290,7 +293,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 			return new BoundMethodParameter(parameter, value, attribute) {
 
-				/* 
+				/*
 				 * (non-Javadoc)
 				 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter#isRequired()
 				 */
@@ -309,7 +312,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			};
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#verifyParameterValue(org.springframework.core.MethodParameter, java.lang.Object)
 		 */
