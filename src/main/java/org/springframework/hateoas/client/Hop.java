@@ -95,8 +95,7 @@ public class Hop {
 	 */
 	public Hop header(String headerName, String headerValue) {
 
-		Assert.notNull(headerName, "headerName must not be null!");
-		Assert.notNull(headerValue, "headerValue must not be null!");
+		Assert.hasText(headerName, "headerName must not be null or empty!");
 
 		if (this.headers == HttpHeaders.EMPTY) {
 
