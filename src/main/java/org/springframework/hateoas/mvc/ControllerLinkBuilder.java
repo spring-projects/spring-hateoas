@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ForwardedHeader.handleXForwardedSslHeader;
+import static org.springframework.hateoas.mvc.ForwardedHeader.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
@@ -330,7 +330,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	private static boolean isSpringAtLeast5_1() {
-		
+
 		String versionOfSpringFramework = ApplicationContext.class.getPackage().getImplementationVersion();
 
 		String[] parts = versionOfSpringFramework.split("\\.");
@@ -377,7 +377,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		public UriTemplate getMappingAsUriTemplate(Class<?> type, Method method) {
 
 			String mapping = delegate.getMapping(type, method);
-			
+
 			return templates.computeIfAbsent(mapping, UriTemplate::new);
 		}
 	}

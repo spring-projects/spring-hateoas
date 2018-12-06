@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ class ForwardedHeader {
 	}
 
 	/**
-	 * Utility method to pull handling of {@literal X-Forwarded-Ssl} into a class that will be removed when
-	 * rebaselined against Spring 5.1
+	 * Utility method to pull handling of {@literal X-Forwarded-Ssl} into a class that will be removed when rebaselined
+	 * against Spring 5.1
 	 *
 	 * @param request
 	 * @param builder
@@ -55,7 +55,8 @@ class ForwardedHeader {
 	 * @deprecated No longer needed with Spring 5.1
 	 */
 	@Deprecated
-	public static UriComponentsBuilder handleXForwardedSslHeader(HttpServletRequest request, UriComponentsBuilder builder) {
+	public static UriComponentsBuilder handleXForwardedSslHeader(HttpServletRequest request,
+			UriComponentsBuilder builder) {
 
 		// special case handling for X-Forwarded-Ssl:
 		// apply it, but only if X-Forwarded-Proto is unset.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2013 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
  * Utility class to ease testing.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class TestUtils {
 
@@ -52,13 +53,13 @@ public class TestUtils {
 	}
 
 	/**
-	 * Provide a mechanism to simulate inserting a {@link ForwardedHeaderFilter} into the servlet
-	 * filter chain, so {@literal Forwarded} headers are properly inserted into the test web request.
+	 * Provide a mechanism to simulate inserting a {@link ForwardedHeaderFilter} into the servlet filter chain, so
+	 * {@literal Forwarded} headers are properly inserted into the test web request.
 	 *
 	 * @see https://jira.spring.io/browse/SPR-16668
 	 */
 	protected void adaptRequestFromForwardedHeaders() {
-		
+
 		MockFilterChain chain = new MockFilterChain();
 		try {
 			new ForwardedHeaderFilter().doFilter(this.request, new MockHttpServletResponse(), chain);

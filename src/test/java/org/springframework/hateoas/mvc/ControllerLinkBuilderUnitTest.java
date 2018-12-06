@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -435,7 +435,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 			setUp();
 			request.addHeader("X-Forwarded-Proto", proto);
-			
+
 			adaptRequestFromForwardedHeaders();
 
 			Link link = linkTo(PersonControllerImpl.class).withSelfRel();
@@ -469,7 +469,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		request.addHeader("X-Forwarded-Proto", "foo");
 		request.addHeader("Forwarded", "proto=bar");
-		
+
 		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
@@ -588,8 +588,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void considersEmptyOptionalMethodParameterOptional() {
 
-		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithJdk8Optional(Optional.empty()))
-				.withSelfRel();
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithJdk8Optional(Optional.empty())).withSelfRel();
 
 		assertThat(link.isTemplated()).isTrue();
 		assertThat(link.getVariableNames(), contains("value"));
