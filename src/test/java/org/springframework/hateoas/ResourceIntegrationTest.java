@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2014 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,6 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.StringWriter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.custommonkey.xmlunit.Diff;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -32,8 +24,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 /**
  * Integration tests for {@link Resource}.
- * 
+ *
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 

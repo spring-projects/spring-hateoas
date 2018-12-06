@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,14 @@ package org.springframework.hateoas.hal;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import lombok.Data;
 import lombok.experimental.Wither;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,23 +40,19 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -79,36 +70,38 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 
 	/**
 	 * Verify the default {@literal Accept} header used by a browser (which favors XML/HTML) still yields HAL-JSON.
+	 *
+	 * @see #695
 	 */
 	@Test
 	public void browserBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.APPLICATION_XHTML_XML, MediaType.ALL)) //
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
+				.andExpect(status().isOk())
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
 	}
 
 	/**
 	 * Verify the default {@literal Accept} header used by cURL still yields HAL-JSON.
+	 *
+	 * @see #695
 	 */
 	@Test
 	public void curlBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.ALL)) //
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
+				.andExpect(status().isOk())
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
 	}
 
 	@RestController
 	static class EmployeeController {
 
-		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<>();
+		private final static List<Employee> EMPLOYEES = new ArrayList<>();
 
 		static {
-			EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
-			EMPLOYEES.put(1, new Employee("Bilbo Baggins", "burglar"));
+			EMPLOYEES.add(new Employee("Frodo Baggins", "ring bearer"));
+			EMPLOYEES.add(new Employee("Bilbo Baggins", "burglar"));
 		}
 
 		@GetMapping("/employees")
@@ -140,58 +133,6 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 
 			// Return the affordance + a link back to the entire collection resource.
 			return new Resource<>(EMPLOYEES.get(id), findOneLink, employeesLink);
-		}
-
-		@PostMapping("/employees")
-		public ResponseEntity<?> newEmployee(@RequestBody Employee employee) {
-
-			int newEmployeeId = EMPLOYEES.size();
-
-			EMPLOYEES.put(newEmployeeId, employee);
-
-			try {
-				return ResponseEntity.noContent().location(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		@PutMapping("/employees/{id}")
-		public ResponseEntity<?> updateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
-
-			EMPLOYEES.put(id, employee);
-
-			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
-
-			Employee oldEmployee = EMPLOYEES.get(id);
-			Employee newEmployee = oldEmployee;
-
-			if (employee.getName() != null) {
-				newEmployee = newEmployee.withName(employee.getName());
-			}
-
-			if (employee.getRole() != null) {
-				newEmployee = newEmployee.withRole(employee.getRole());
-			}
-
-			EMPLOYEES.put(id, newEmployee);
-
-			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
-					.build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
 		}
 	}
 

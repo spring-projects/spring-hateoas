@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,10 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-import org.custommonkey.xmlunit.Diff;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -43,8 +35,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration tests for marshalling of {@link VndErrors}.
- * 
+ *
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class VndErrorsMarshallingTest {
 
@@ -55,13 +48,11 @@ public class VndErrorsMarshallingTest {
 	VndErrors errors;
 	String jsonReference;
 	String json2Reference;
-	String xmlReference;
 
 	public VndErrorsMarshallingTest() throws IOException {
 
 		jsonReference = readFile(new ClassPathResource("vnderror.json"));
 		json2Reference = readFile(new ClassPathResource("vnderror2.json"));
-		xmlReference = readFile(new ClassPathResource("vnderror.xml"));
 	}
 
 	@Before

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * 
  * @see https://github.com/blongden/vnd.error
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class VndErrors implements Iterable<VndErrors.VndError> {
 
@@ -87,7 +88,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	/**
 	 * Adds an additional {@link VndError} to the wrapper.
 	 * 
-	 * @param errors
+	 * @param error
 	 */
 	public VndErrors add(VndError error) {
 		this.vndErrors.add(error);
