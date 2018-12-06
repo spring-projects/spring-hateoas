@@ -72,7 +72,7 @@
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.9.1</jackson.version>
+		<jackson.version>2.9.7</jackson.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
