@@ -19,18 +19,10 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-import org.custommonkey.xmlunit.Diff;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -43,7 +35,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration tests for marshalling of {@link VndErrors}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class VndErrorsMarshallingTest {

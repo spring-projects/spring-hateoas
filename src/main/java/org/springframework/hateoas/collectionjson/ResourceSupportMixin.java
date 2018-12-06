@@ -19,8 +19,6 @@ import static org.springframework.hateoas.collectionjson.Jackson2CollectionJsonM
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 
@@ -33,18 +31,17 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * Jackson 2 mixin to invoke the related serializer/deserializer.
  *
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 @JsonSerialize(using = CollectionJsonResourceSupportSerializer.class)
 @JsonDeserialize(using = CollectionJsonResourceSupportDeserializer.class)
 abstract class ResourceSupportMixin extends ResourceSupport {
 
 	@Override
-	@XmlElement(name = "collection")
 	@JsonProperty("collection")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JsonSerialize(using = CollectionJsonLinkListSerializer.class)
 	@JsonDeserialize(using = CollectionJsonLinkListDeserializer.class)
 	public abstract List<Link> getLinks();
-
 
 }
