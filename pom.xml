@@ -72,7 +72,7 @@
 		<logback.version>1.1.11</logback.version>
 		<jacoco>0.7.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.8.10</jackson.version>
+		<jackson.version>2.8.11.20180608</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
@@ -422,6 +422,18 @@
 
 	</profiles>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 
 		<dependency>
@@ -476,14 +488,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
 
