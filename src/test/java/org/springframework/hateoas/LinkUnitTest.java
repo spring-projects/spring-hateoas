@@ -22,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -32,20 +33,27 @@ import org.springframework.http.MediaType;
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 public class LinkUnitTest {
 
 	@Test
 	public void linkWithHrefOnlyBecomesSelfLink() {
+
 		Link link = new Link("foo");
 		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 	}
 
 	@Test
 	public void createsLinkFromRelAndHref() {
+
 		Link link = new Link("foo", Link.REL_SELF);
-		assertThat(link.getHref()).isEqualTo("foo");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+
+		SoftAssertions.assertSoftly(softly -> {
+
+			softly.assertThat(link.getHref()).isEqualTo("foo");
+			softly.assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		});
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -103,8 +111,11 @@ public class LinkUnitTest {
 	@Test
 	public void returnsNullForNullOrEmptyLink() {
 
-		assertThat(Link.valueOf(null)).isNull();
-		assertThat(Link.valueOf("")).isNull();
+		SoftAssertions.assertSoftly(softly -> {
+
+			softly.assertThat(Link.valueOf(null)).isNull();
+			softly.assertThat(Link.valueOf("")).isNull();
+		});
 	}
 
 	/**
@@ -115,23 +126,26 @@ public class LinkUnitTest {
 	@Test
 	public void parsesRFC5988HeaderIntoLink() {
 
-		assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(new Link("/something", "foo"));
-		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\"")).isEqualTo(new Link("/something", "foo"));
-		assertThat(Link.valueOf("</customer/1>;" //
-				+ "rel=\"self\";" //
-				+ "hreflang=\"en\";" //
-				+ "media=\"pdf\";" //
-				+ "title=\"pdf customer copy\";" //
-				+ "type=\"portable document\";" //
-				+ "deprecation=\"http://example.com/customers/deprecated\";" //
-				+ "profile=\"my-profile\"")) //
-						.isEqualTo(new Link("/customer/1") //
-								.withHreflang("en") //
-								.withMedia("pdf") //
-								.withTitle("pdf customer copy") //
-								.withType("portable document") //
-								.withDeprecation("http://example.com/customers/deprecated")
-								.withProfile("my-profile"));
+		SoftAssertions.assertSoftly(softly -> {
+
+			softly.assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(new Link("/something", "foo"));
+			softly.assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""))
+					.isEqualTo(new Link("/something", "foo"));
+			softly.assertThat(Link.valueOf("</customer/1>;" //
+					+ "rel=\"self\";" //
+					+ "hreflang=\"en\";" //
+					+ "media=\"pdf\";" //
+					+ "title=\"pdf customer copy\";" //
+					+ "type=\"portable document\";" //
+					+ "deprecation=\"http://example.com/customers/deprecated\";" //
+					+ "profile=\"my-profile\"")) //
+					.isEqualTo(new Link("/customer/1") //
+							.withHreflang("en") //
+							.withMedia("pdf") //
+							.withTitle("pdf customer copy") //
+							.withType("portable document") //
+							.withDeprecation("http://example.com/customers/deprecated").withProfile("my-profile"));
+		});
 	}
 
 	/**
@@ -141,8 +155,11 @@ public class LinkUnitTest {
 	public void ignoresUnrecognizedAttributes() {
 		Link link = Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
 
-		assertThat(link.getHref()).isEqualTo("/something");
-		assertThat(link.getRel()).isEqualTo("foo");
+		SoftAssertions.assertSoftly(softly -> {
+
+			softly.assertThat(link.getHref()).isEqualTo("/something");
+			softly.assertThat(link.getRel()).isEqualTo("foo");
+		});
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -168,10 +185,13 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo{?page}");
 
-		assertThat(link.isTemplated()).isTrue();
-		assertThat(link.getVariableNames()).hasSize(1);
-		assertThat(link.getVariableNames()).contains("page");
-		assertThat(link.expand("2")).isEqualTo(new Link("/foo?page=2"));
+		SoftAssertions.assertSoftly(softly -> {
+
+			softly.assertThat(link.isTemplated()).isTrue();
+			softly.assertThat(link.getVariableNames()).hasSize(1);
+			softly.assertThat(link.getVariableNames()).contains("page");
+			softly.assertThat(link.expand("2")).isEqualTo(new Link("/foo?page=2"));
+		});
 	}
 
 	/**
@@ -182,8 +202,11 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo");
 
-		assertThat(link.isTemplated()).isFalse();
-		assertThat(link.getVariableNames()).hasSize(0);
+		SoftAssertions.assertSoftly(softly -> {
+
+			softly.assertThat(link.isTemplated()).isFalse();
+			softly.assertThat(link.getVariableNames()).hasSize(0);
+		});
 	}
 
 	/**
@@ -214,6 +237,7 @@ public class LinkUnitTest {
 	 */
 	@Test
 	public void parsesLinkRelationWithDotAndMinus() {
+
 		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").getRel())
 				.isEqualTo("rel-with-minus-and-.");
 	}
@@ -238,15 +262,18 @@ public class LinkUnitTest {
 		Link linkWithAffordance = originalLink.andAffordance(new TestAffordance());
 		Link linkWithTwoAffordances = linkWithAffordance.andAffordance(new TestAffordance());
 
-		assertThat(originalLink.getAffordances()).hasSize(0);
-		assertThat(linkWithAffordance.getAffordances()).hasSize(1);
-		assertThat(linkWithTwoAffordances.getAffordances()).hasSize(2);
+		SoftAssertions.assertSoftly(softly -> {
 
-		assertThat(originalLink.hashCode()).isNotEqualTo(linkWithAffordance.hashCode());
-		assertThat(originalLink).isNotEqualTo(linkWithAffordance);
+			softly.assertThat(originalLink.getAffordances()).hasSize(0);
+			softly.assertThat(linkWithAffordance.getAffordances()).hasSize(1);
+			softly.assertThat(linkWithTwoAffordances.getAffordances()).hasSize(2);
 
-		assertThat(linkWithAffordance.hashCode()).isNotEqualTo(linkWithTwoAffordances.hashCode());
-		assertThat(linkWithAffordance).isNotEqualTo(linkWithTwoAffordances);
+			softly.assertThat(originalLink.hashCode()).isNotEqualTo(linkWithAffordance.hashCode());
+			softly.assertThat(originalLink).isNotEqualTo(linkWithAffordance);
+
+			softly.assertThat(linkWithAffordance.hashCode()).isNotEqualTo(linkWithTwoAffordances.hashCode());
+			softly.assertThat(linkWithAffordance).isNotEqualTo(linkWithTwoAffordances);
+		});
 	}
 
 	/**
