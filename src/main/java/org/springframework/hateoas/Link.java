@@ -42,6 +42,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
@@ -52,6 +53,10 @@ public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
 	private static final String URI_PATTERN = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+
+	private static final Pattern URI_AND_ATTRIBUTES_PATTERN = Pattern.compile("<(.*)>;(.*)");
+	private static final Pattern KEY_AND_VALUE_PATTERN = Pattern
+			.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
@@ -308,7 +313,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
-	 * link. Will return {@literal null} if an empty or {@literal null} {@link String} is given.
+	 * link. Will return {@literal null} if input {@link String} is either empty or {@literal null}.
 	 * 
 	 * @param element an RFC-5899 compatible representation of a link.
 	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
@@ -321,8 +326,7 @@ public class Link implements Serializable {
 			return null;
 		}
 
-		Pattern uriAndAttributes = Pattern.compile("<(.*)>;(.*)");
-		Matcher matcher = uriAndAttributes.matcher(element);
+		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);
 
 		if (matcher.find()) {
 
@@ -378,9 +382,7 @@ public class Link implements Serializable {
 		}
 
 		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern
-				.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
-		Matcher matcher = keyAndValue.matcher(source);
+		Matcher matcher = KEY_AND_VALUE_PATTERN.matcher(source);
 
 		while (matcher.find()) {
 			attributes.put(matcher.group(1), matcher.group(2));
