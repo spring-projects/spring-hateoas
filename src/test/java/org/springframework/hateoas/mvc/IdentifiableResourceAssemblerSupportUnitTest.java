@@ -94,7 +94,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Person second = new Person();
 		second.id = 2L;
 
-		List<PersonResource> result = assembler.toList(Arrays.asList(first, second));
+		List<PersonResource> result = assembler.build(Arrays.asList(first, second)).toListOfResources();
 
 		LinkBuilder builder = linkTo(PersonController.class);
 
@@ -119,7 +119,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Person second = new Person();
 		second.id = 2L;
 
-		Resources<PersonResource> result = assembler.toResources(Arrays.asList(first, second));
+		Resources<PersonResource> result = assembler.build(Arrays.asList(first, second)).toResources();
 
 		LinkBuilder builder = linkTo(PersonController.class);
 

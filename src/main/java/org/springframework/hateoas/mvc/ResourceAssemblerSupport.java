@@ -19,12 +19,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.util.Assert;
 
 /**
  * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
@@ -46,44 +46,15 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 */
 	public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
 
-		Assert.notNull(controllerClass, "ControllerClass must not be null!");
-		Assert.notNull(resourceType, "ResourceType must not be null!");
+		Objects.requireNonNull(controllerClass, "ControllerClass must not be null!");
+		Objects.requireNonNull(resourceType, "ResourceType must not be null!");
 
 		this.controllerClass = controllerClass;
 		this.resourceType = resourceType;
 	}
 
-	/**
-	 * Transform a list of {@code T}s into a list of {@link ResourceSupport}s.
-	 *
-	 * @see {@link #toResources(Iterable)} if you need this transformed list rendered as hypermedia
-	 * 
-	 * @param entities
-	 * @return
-	 */
-	public List<D> toList(Iterable<? extends T> entities) {
-
-		Assert.notNull(entities, "Entities must not be null!");
-		List<D> result = new ArrayList<>();
-
-		for (T entity : entities) {
-			result.add(toResource(entity));
-		}
-
-		return result;
-	}
-
-	/**
-	 * Converts all given entities into resources.
-	 *
-	 * @see #toResource(Object)
-	 * @param entities must not be {@literal null}.
-	 * @return
-	 */
-	public Resources<D> toResources(Iterable<? extends T> entities) {
-
-		Assert.notNull(entities, "Entities must not be null!");
-		return new Resources<D>(toList(entities));
+	public Builder<T, D> build(Iterable<? extends T> entities) {
+		return new Builder<>(entities, this);
 	}
 
 	/**
@@ -99,8 +70,8 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
-		Assert.notNull(entity, "Entity must not be null!");
-		Assert.notNull(id, "Id must not be null!");
+		Objects.requireNonNull(entity, "Entity must not be null!");
+		Objects.requireNonNull(id, "Id must not be null!");
 
 		D instance = instantiateResource(entity);
 		instance.add(linkTo(controllerClass, parameters).slash(id).withSelfRel());
@@ -117,5 +88,47 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 */
 	protected D instantiateResource(T entity) {
 		return BeanUtils.instantiateClass(resourceType);
+	}
+
+	static class Builder<T, D extends ResourceSupport> {
+
+		private final Iterable<? extends T> entities;
+		private final ResourceAssemblerSupport<T, D> resourceAssembler;
+
+		Builder(Iterable<? extends T> entities, ResourceAssemblerSupport<T, D> resourceAssembler) {
+
+			this.entities = Objects.requireNonNull(entities, "entities must not null!");
+			this.resourceAssembler = resourceAssembler;
+		}
+
+		/**
+		 * Transform a list of {@code T}s into a list of {@link ResourceSupport}s.
+		 *
+		 * @see {@link #toListOfResources()} if you need this transformed list rendered as hypermedia
+		 *
+		 * @return
+		 */
+		public List<D> toListOfResources() {
+
+			List<D> result = new ArrayList<>();
+
+			for (T entity : this.entities) {
+				result.add(this.resourceAssembler.toResource(entity));
+			}
+
+			return result;
+		}
+
+		/**
+		 * Converts all given entities into {@link Resources}.
+		 *
+		 * @see {@link #toListOfResources()}} and {@link ResourceAssembler#toResource(Object)}
+		 * @return
+		 */
+		public Resources<D> toResources() {
+			return new Resources<>(toListOfResources());
+		}
+
+
 	}
 }
