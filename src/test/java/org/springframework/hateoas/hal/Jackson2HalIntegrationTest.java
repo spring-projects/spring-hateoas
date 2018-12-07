@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.hateoas.hal;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -421,6 +422,27 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(write(resourceSupport), is("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"));
+	}
+
+	/**
+	 * @see #667
+	 * @see #762
+	 */
+	@Test
+	public void handleTemplatedLinksOnDeserialization() throws IOException {
+
+		ResourceSupport original = new ResourceSupport();
+		original.add(new Link("/orders{?id}", "order"));
+
+		String serialized = mapper.writeValueAsString(original);
+
+		String expected = "{\"_links\":{\"order\":{\"href\":\"/orders{?id}\",\"templated\":true}}}";
+
+		assertThat(serialized ,is(expected));
+
+		ResourceSupport deserialized = mapper.readValue(serialized, ResourceSupport.class);
+
+		assertThat(deserialized, is(original));
 	}
 
 	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {
