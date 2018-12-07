@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@JsonIgnoreProperties({ "rel", "media", "affordances", "template" })
+@JsonIgnoreProperties(value = { "rel", "media", "affordances", "template" }, ignoreUnknown = true)
 public abstract class LinkMixin extends Link {
 
 	private static final long serialVersionUID = 4720588561299667409L;
