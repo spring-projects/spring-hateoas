@@ -6,3 +6,4 @@ target/
 .idea
 *.orig
 .springBeans
+credentials.yml

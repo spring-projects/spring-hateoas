@@ -380,8 +380,45 @@
 								</goals>
 							</execution>
 
+							<execution>
+								<id>package-and-attach-docs-zip</id>
+								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+											<fileset dir="${project.build.directory}/site"/>
+										</zip>
+									</tasks>
+								</configuration>
+							</execution>
+
 						</executions>
 
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.10</version>
+						<executions>
+							<execution>
+								<id>attach-zip</id>
+								<goals>
+									<goal>attach-artifact</goal>
+								</goals>
+								<configuration>
+									<artifacts>
+										<artifact>
+											<file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+											<type>zip</type>
+										</artifact>
+									</artifacts>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 
 					<plugin>
@@ -401,32 +438,6 @@
 									</descriptors>
 									<finalName>static-resources</finalName>
 									<appendAssemblyId>false</appendAssemblyId>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>wagon-maven-plugin</artifactId>
-						<version>1.0</version>
-						<configuration>
-							<fromDir>${project.build.directory}</fromDir>
-						</configuration>
-						<executions>
-							<execution>
-								<id>upload-static-resources</id>
-								<phase>deploy</phase>
-								<goals>
-									<goal>upload</goal>
-								</goals>
-								<configuration>
-									<fromDir>${project.build.directory}/static-resources</fromDir>
-									<includes>**</includes>
-									<serverId>static-dot-s2</serverId>
-									<url>scp://docs.af.pivotal.io</url>
-									<toDir>/var/www/domains/spring.io/www/htdocs/autorepo/docs/${project.artifactId}/${project.version}</toDir>
-									<optimize>true</optimize>
 								</configuration>
 							</execution>
 						</executions>
@@ -635,7 +646,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>${source.level}</source>
 					<target>${source.level}</target>
@@ -694,11 +705,28 @@
 					<source>${source.level}</source>
 					<quiet>true</quiet>
 					<additionalparam>-Xdoclint:none</additionalparam>
-					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
+					<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
 					<links>
 						<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
 					</links>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
 			</plugin>
 
@@ -706,9 +734,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.8.2</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 
 		</plugins>

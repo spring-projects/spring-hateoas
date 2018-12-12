@@ -1,0 +1,235 @@
+---
+resource_types:
+- name: artifactory-resource
+  type: docker-image
+  source:
+    repository: springio/artifactory-resource
+    tag:        0.0.6
+
+- name: github-status
+  type: docker-image
+  source:
+    repository: dpb587/github-status-resource
+    tag:        master
+
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+    tag:        latest
+
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: nebhale/slack-notification-resource
+
+resources:
+- name: openjdk:8-jdk
+  type: docker-image
+  source:
+    repository: openjdk
+    tag:        8-jdk
+
+- name: spring-hateoas-github
+  type: git
+  source:
+    uri: https://github.com/spring-projects/spring-hateoas.git
+    branch: ((branch))
+
+- name: spring-hateoas-artifactory
+  type: artifactory-resource
+  source:
+    uri: https://repo.spring.io
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: spring-hateoas
+
+- name: spring-hateoas-pull-requests
+  type: pull-request
+  source:
+    access_token: ((github-access-token))
+    repo: spring-projects/spring-hateoas
+    base: ((branch))
+
+- name: spring-hateoas-status
+  type: github-status
+  source:
+    access_token: ((github-access-token))
+    repository:   spring-projects/spring-hateoas
+    branch: ((branch))
+
+- name: slack
+  type: slack-notification
+  source:
+    url: ((slack))
+    
+groups:
+- name: spring-hateoas
+  jobs:
+  - Test - JDK 8
+  - Test - JDK 8 and Spring 5.0 (snapshots)
+  - Test - JDK 8 and Spring 5.1 (snapshots)
+  - Build
+- name: pull-requests
+  jobs:
+  - spring-hateoas-pull-requests
+
+jobs:
+- name: Test - JDK 8
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "non-existent" }
+  <<: *slack-failure
+
+- name: Test - JDK 8 and Spring 5.0 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring5-next" }
+  <<: *slack-failure
+
+- name: Test - JDK 8 and Spring 5.1 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-failure
+
+- name: Build
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+    passed: [
+      Test - JDK 8,
+      Test - JDK 8 and Spring 5.0 (snapshots),
+      Test - JDK 8 and Spring 5.1 (snapshots)
+    ]
+  - put: spring-hateoas-status
+    params:
+      commit: spring-hateoas-github
+      state: pending
+  - task: build
+    file: spring-hateoas-github/ci/build.yml
+  - put: spring-hateoas-artifactory
+    params:
+      build_number:   ${BUILD_NAME}
+      build_uri:      ${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}
+      repo:           libs-snapshot-local
+      folder:         spring-hateoas-artifactory
+      artifact_set:
+      - include:
+        - "/**"
+        properties:
+          archives: '*:*:*:*@zip zip.name:spring-hateoas, zip.displayname:Spring HATEOAS, zip.deployed:false'
+  on_failure:
+    aggregate:
+    - put: spring-hateoas-status
+      params:
+        commit: spring-hateoas-github
+        state: failure
+    - put: slack
+      params:
+        attachments:
+          - color: danger
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+            text: "Build has failed"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_success:
+    aggregate:
+    - put: spring-hateoas-status
+      params:
+        commit: spring-hateoas-github
+        state: success
+    - put: slack
+      params:
+        attachments:
+          - color: good
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <SUCCESS>"
+            text: "Build has succeeded!"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: spring-hateoas-pull-requests
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    resource: spring-hateoas-pull-requests
+    trigger: true
+    version: every
+  - put: spring-hateoas-pull-requests
+    params:
+      path: spring-hateoas-github
+      status: pending
+  - aggregate:
+    - task: test (JDK 8)
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "non-existent" }
+    - task: test (JDK 8 and Spring 5.0 snapshots)
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring5-next" }
+    - task: test (JDK 8 and Spring 5.1 snapshots)
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+  on_failure:
+    aggregate:
+    - put: spring-hateoas-pull-requests
+      params:
+        path: spring-hateoas-github
+        status: failure
+    - put: slack
+      params:
+        attachments:
+          - color: danger
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+            text: "Pull request has failed"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_success:
+    aggregate:
+    - put: spring-hateoas-pull-requests
+      params:
+        path: spring-hateoas-github
+        status: success
+    - put: slack
+      params:
+        attachments:
+          - color: good
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <SUCCESS>"
+            text: "Pull request has succeeded!"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+slack-failure: &slack-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+
