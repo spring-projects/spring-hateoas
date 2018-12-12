@@ -13,7 +13,7 @@
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2017</inceptionYear>
+	<inceptionYear>2012-2018</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
@@ -48,7 +48,7 @@
 			<name>Apache License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-			Copyright 2011 the original author or authors.
+			Copyright 2011-2018 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
 			you may not use this file except in compliance with the License.
@@ -68,17 +68,18 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.0.10.RELEASE</spring.version>
+		<source.level>1.8</source.level>
+		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson.version>2.9.7</jackson.version>
 		<java-module-name>spring.hateoas</java-module-name>
-		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
+		<minidevjson.version>2.2.1</minidevjson.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<evo.version>1.2.2</evo.version>
-		<source.level>1.8</source.level>
+		<spring.version>5.0.11.RELEASE</spring.version>
+		<spring-plugin.version>2.0.0.BUILD-SNAPSHOT</spring-plugin.version>
 	</properties>
 
 	<profiles>
@@ -86,7 +87,7 @@
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.11.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.0.12.BUILD-SNAPSHOT</spring.version>
 				<jackson.version>2.9.2</jackson.version>
 			</properties>
 			<repositories>
@@ -100,7 +101,7 @@
 		<profile>
 			<id>spring51-next</id>
 			<properties>
-				<spring.version>5.1.0.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.1.4.BUILD-SNAPSHOT</spring.version>
 				<jackson.version>2.9.2</jackson.version>
 			</properties>
 			<repositories>
@@ -449,8 +450,7 @@
 		<dependency>
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
-			<version>2.0.0.BUILD-SNAPSHOT</version>
-			<optional>true</optional>
+			<version>${spring-plugin.version}</version>
 		</dependency>
 
 		<dependency>
