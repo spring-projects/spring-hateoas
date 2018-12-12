@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: openjdk
+    tag: 8-jdk
+
+inputs:
+- name: spring-hateoas-github
+
+outputs:
+- name: spring-hateoas-artifactory
+
+caches:
+- path: maven
+
+run:
+  path: spring-hateoas-github/ci/build.sh

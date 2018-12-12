@@ -1,0 +1,38 @@
+== Spring HATEOAS CI
+
+Spring HATEOAS uses Concourse as it's CI tool of choice. This provides support for:
+
+* Pipeline against the `master` branch
+* Support for pull requests
+
+=== Creating a pipeline
+
+Using the `fly` command, you can execute a series of commands to create multiple pipelines to manage everything. But
+first, some critical credentials are needed.
+
+Create a `credentials.yml` file like this:
+
+[source,yml]
+----
+github-access-token: <your Personal Access Token from github>
+docker-email: <your docker hub email address>
+docker-username: <your docker hub username>
+docker-password: <your docker hub password>
+artifactory-username: <your artifactory username>
+artifactory-password: <your artifactory encoded password>
+----
+
+WARNING: Do NOT check this file into source control! If you'll check, `credentials.yml` is listed in `.gitignore` to prevent this.
+
+With this in place, run the following `fly` commands to create pipelines:
+
+----
+% fly -t spring-data sp -p spring-hateoas -c ci/pipeline-template.yml -l credentials.yml -v branch=master
+----
+
+With this pipeline in place, you can now activate and expose it:
+
+----
+% fly -t spring-data unpause-pipeline -p spring-hateoas
+% fly -t spring-data expose-pipeline -p spring-hateoas
+----
