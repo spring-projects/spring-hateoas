@@ -141,7 +141,10 @@ jobs:
       - include:
         - "/**"
         properties:
-          archives: '*:*:*:*@zip zip.name:spring-hateoas, zip.displayname:Spring HATEOAS, zip.deployed:false'
+          zip.deployed: false
+          zip.displayname: "Spring HATEOAS"
+          zip.name: "spring-hateoas"
+          zip.type: "docs"
   on_failure:
     aggregate:
     - put: spring-hateoas-status
