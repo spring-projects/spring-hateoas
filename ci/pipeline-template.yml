@@ -290,6 +290,7 @@ jobs:
     trigger: true
     version: every
   - get: openjdk:11-jdk
+  - get: openjdk:12-jdk
   - put: spring-hateoas-pull-requests
     params:
       path: spring-hateoas-github
