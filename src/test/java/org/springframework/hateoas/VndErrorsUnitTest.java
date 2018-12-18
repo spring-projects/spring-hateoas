@@ -17,6 +17,8 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.springframework.hateoas.VndErrors.VndError;
 
@@ -24,17 +26,62 @@ import org.springframework.hateoas.VndErrors.VndError;
  * Unit tests for {@link VndErrors}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class VndErrorsUnitTest {
 
+	/**
+	 * @see #775
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void vndErrorsDoesntTakeNull() {
+		new VndErrors().withErrors(null);
+	}
+
+	/**
+	 * @see #775
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void vndErrorsDoesntTakeEmptyCollection() {
+		new VndErrors().withErrors(new ArrayList<>());
+	}
+
+	/**
+	 * @see #775
+	 */
 	@Test
-	public void rendersToStringCorrectly() {
+	public void vndErrorsUsingSingleErrorArguments() {
 
-		VndError error = new VndErrors.VndError("logref", "message", new Link("foo", "bar"));
-		assertThat(error.toString()).isEqualTo("VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]");
+		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
 
-		VndErrors errors = new VndErrors(error);
+		assertThat(errors.getTotal()).isEqualTo(1);
+		assertThat(errors.getContent()).hasSize(1);
+		assertThat(errors.getContent())
+			.containsExactly(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+	}
+
+	/**
+	 * @see #775
+	 */
+	@Test
+	public void appendingVndErrorsShouldWork() {
+
+		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+
+		errors.getContent().add(new VndError("message2", "/path2", 51, new Link("/link2", "link2")));
+	}
+
+	/**
+	 * @see #775
+	 */
+	@Test
+	public void vndErrorRendersToStringCorrectly() {
+
+		VndError error = new VndErrors.VndError("message", "path", 50, new Link("foo", "bar"));
+		assertThat(error.toString()).isEqualTo("VndError{message='message', path='path', logref=50, links=[<foo>;rel=\"bar\"]}");
+
+		VndErrors errors = new VndErrors().withError(error);
 		assertThat(errors.toString()) //
-				.isEqualTo("VndErrors[VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]]");
+				.isEqualTo("VndErrors(errors=[VndError{message='message', path='path', logref=50, links=[<foo>;rel=\"bar\"]}], message=null, logref=null)");
 	}
 }

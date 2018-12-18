@@ -76,4 +76,14 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/vnd.collection+json}.
 	 */
 	public static final MediaType COLLECTION_JSON = MediaType.valueOf(COLLECTION_JSON_VALUE);
+
+	/**
+	 * A stringl equivalent of {@link MediaTypes#VND_ERROR_JSON}.
+	 */
+	public static final String VND_ERROR_JSON_VALUE = "application/vnd.error+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.error+json}.
+	 */
+	public static final MediaType VND_ERROR_JSON = MediaType.valueOf(VND_ERROR_JSON_VALUE);
 }
