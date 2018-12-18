@@ -33,7 +33,8 @@ import org.springframework.hateoas.core.Objects;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> implements ResourceAssembler<T, D> {
+public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport>
+	implements ResourceAssembler<T, D> {
 
 	private final Class<?> controllerClass;
 	private final Class<D> resourceType;
@@ -53,8 +54,15 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 		this.resourceType = resourceType;
 	}
 
+	/**
+	 * Converts all given entities into resources.
+	 *
+	 * @see #toResource(Object)
+	 * @param entities must not be {@literal null}.
+	 * @return
+	 */
 	@Override
-	public Resources<D> toResources(List<T> entities) {
+	public Resources<D> toResources(Iterable<? extends T> entities) {
 		return this.map(entities).toResources();
 	}
 

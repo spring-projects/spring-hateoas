@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Interface for components that convert a domain type into an {@link ResourceSupport}.
+ * Interface for components that convert a domain type into a {@link ResourceSupport}.
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
@@ -27,7 +27,7 @@ import java.util.List;
 public interface ResourceAssembler<T, D extends ResourceSupport> {
 
 	/**
-	 * Converts the given entity into an {@link ResourceSupport}.
+	 * Converts the given entity into a {@code D}, which extends {@link ResourceSupport}.
 	 * 
 	 * @param entity
 	 * @return
@@ -38,10 +38,10 @@ public interface ResourceAssembler<T, D extends ResourceSupport> {
 	 * Converts an {@link Iterable} or {@code T}s into an {@link Iterable} of {@link ResourceSupport} and wraps
 	 * them in a {@link Resources} instance.
 	 * 
-	 * @param entities
-	 * @return
+	 * @param entities must not be {@literal null}.
+	 * @return {@link Resources} containing {@code D}.
 	 */
-	default Resources<D> toResources(List<T> entities) {
+	default Resources<D> toResources(Iterable<? extends T> entities) {
 		
 		List<D> resources = new ArrayList<>();
 		for (T entity : entities) {
