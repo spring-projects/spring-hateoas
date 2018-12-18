@@ -54,7 +54,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	}
 
 	@Override
-	public Resources<D> toResources(List<T> entities) {
+	public Resources<D> toResources(Iterable<? extends T> entities) {
 		return this.map(entities).toResources();
 	}
 
