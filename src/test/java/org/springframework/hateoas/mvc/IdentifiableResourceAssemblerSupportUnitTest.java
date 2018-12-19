@@ -24,7 +24,6 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
@@ -70,7 +69,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Optional<Link> selfLink = resource.getId();
 
 		assertThat(selfLink.map(Link::getHref)) //
-				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
+				.hasValueSatisfying(it -> assertThat(it).endsWith("/people/id"));
 	}
 
 	@Test
@@ -81,7 +80,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Optional<Link> selfLink = resource.getId();
 
 		assertThat(selfLink.map(Link::getHref)) //
-				.hasValueSatisfying(it -> assertThat(it.endsWith("/people/id")));
+				.hasValueSatisfying(it -> assertThat(it).endsWith("/people/id"));
 	}
 
 	/**
@@ -103,10 +102,9 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		firstResource.add(builder.slash(1L).withSelfRel());
 
 		PersonResource secondResource = new PersonResource();
-		secondResource.add(builder.slash(1L).withSelfRel());
+		secondResource.add(builder.slash(2L).withSelfRel());
 
-		assertThat(result).hasSize(2);
-		assertThat(result).contains(firstResource, secondResource);
+		assertThat(result).containsExactlyInAnyOrder(firstResource, secondResource);
 	}
 
 	/**
@@ -128,10 +126,9 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		firstResource.add(builder.slash(1L).withSelfRel());
 
 		PersonResource secondResource = new PersonResource();
-		secondResource.add(builder.slash(1L).withSelfRel());
+		secondResource.add(builder.slash(2L).withSelfRel());
 
-		assertThat(result).hasSize(2);
-		assertThat(result).contains(firstResource, secondResource);
+		assertThat(result).containsExactlyInAnyOrder(firstResource, secondResource);
 	}
 
 	@RequestMapping("/people")
