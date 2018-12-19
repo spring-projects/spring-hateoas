@@ -51,11 +51,8 @@ public class SimpleResourceAssemblerTest {
 		TestResourceAssembler assembler = new TestResourceAssembler();
 		Resources<Resource<Employee>> resources = assembler.toResources(Collections.singletonList(new Employee("Frodo")));
 
-		assertThat(resources.getContent()).hasSize(1);
 		assertThat(resources.getContent()).containsExactly(new Resource<>(new Employee("Frodo")));
 		assertThat(resources.getLinks()).isEmpty();
-
-		assertThat(resources.getContent().iterator().next()).isEqualTo(new Resource<>(new Employee("Frodo")));
 	}
 
 	/**
@@ -68,7 +65,6 @@ public class SimpleResourceAssemblerTest {
 		Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
 
 		assertThat(resource.getContent().getName()).isEqualTo("Frodo");
-		assertThat(resource.getLinks()).hasSize(1);
 		assertThat(resource.getLinks()).containsExactly(new Link("/employees").withRel("employees"));
 	}
 
@@ -81,15 +77,10 @@ public class SimpleResourceAssemblerTest {
 		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
 		Resources<Resource<Employee>> resources = assembler.toResources(Collections.singletonList(new Employee("Frodo")));
 
-		assertThat(resources.getContent()).hasSize(1);
 		assertThat(resources.getContent())
-			.containsExactly(new Resource<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
+				.containsExactly(new Resource<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
 		assertThat(resources.getLinks()).isEmpty();
-
-		assertThat(resources.getContent().iterator().next())
-			.isEqualTo(new Resource<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
 	}
-
 
 	class TestResourceAssembler implements SimpleResourceAssembler<Employee> {}
 
