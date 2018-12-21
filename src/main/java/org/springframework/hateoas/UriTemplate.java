@@ -318,8 +318,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 				builder.queryParam(name, valuePart);
 			}
 		} else if (value instanceof Map) {
-			for (Entry<String, Object> queryParam : (Set<Entry<String, Object>>) ((Map) value).entrySet()) {
-				builder.queryParam(queryParam.getKey(), queryParam.getValue());
+			for (Entry<Object, Object> queryParam : (Set<Entry<Object, Object>>) ((Map) value).entrySet()) {
+				builder.queryParam(queryParam.getKey().toString(), queryParam.getValue());
 			}
 		} else {
 			builder.queryParam(name, value);
