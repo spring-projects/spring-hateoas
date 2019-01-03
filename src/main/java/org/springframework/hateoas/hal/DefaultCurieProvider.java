@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.hateoas.IanaRels;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
@@ -35,6 +35,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
  * 
  * @author Oliver Gierke
  * @author Jeff Stano
+ * @author Greg Turnquist
  * @since 0.9
  */
 public class DefaultCurieProvider implements CurieProvider {
@@ -119,7 +120,7 @@ public class DefaultCurieProvider implements CurieProvider {
 	@Override
 	public String getNamespacedRelFor(String rel) {
 
-		boolean prefixingNeeded = defaultCurie != null && !IanaRels.isIanaRel(rel) && !rel.contains(":");
+		boolean prefixingNeeded = defaultCurie != null && !IanaLinkRelation.isIanaRel(rel) && !rel.contains(":");
 		return prefixingNeeded ? String.format("%s:%s", defaultCurie, rel) : rel;
 	}
 

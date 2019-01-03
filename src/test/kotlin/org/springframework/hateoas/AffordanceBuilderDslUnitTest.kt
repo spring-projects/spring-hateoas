@@ -48,13 +48,13 @@ class AffordanceBuilderDslUnitTest : TestUtils() {
     fun `creates link to controller method with affordances`() {
 
         val id = "15"
-        val self = linkTo<CustomerController> { findById(id) } withRel Link.REL_SELF
+        val self = linkTo<CustomerController> { findById(id) } withRel IanaLinkRelation.SELF.value()
         val selfWithAffordances = self andAffordances {
             afford<CustomerController> { update(id, CustomerDTO("John Doe")) }
             afford<CustomerController> { delete(id) }
         }
 
-        assertThat(selfWithAffordances.rel).isEqualTo(Link.REL_SELF)
+        assertThat(selfWithAffordances.rel).isEqualTo(IanaLinkRelation.SELF.value())
         assertThat(selfWithAffordances.href).isEqualTo("http://localhost/customers/15")
         
         assertThat(selfWithAffordances.affordances).hasSize(3)

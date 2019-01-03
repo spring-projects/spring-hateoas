@@ -36,10 +36,10 @@ class LinkBuilderDslUnitTest : TestUtils() {
     @Test
     fun `creates link to controller method`() {
 
-        val self = linkTo<CustomerController> { findById("15") } withRel Link.REL_SELF
+        val self = linkTo<CustomerController> { findById("15") } withRel IanaLinkRelation.SELF.value()
 
         assertPointsToMockServer(self)
-        assertThat(self.rel).isEqualTo(Link.REL_SELF)
+        assertThat(self.rel).isEqualTo(IanaLinkRelation.SELF.value())
         assertThat(self.href).endsWith("/customers/15")
     }
 
@@ -52,12 +52,12 @@ class LinkBuilderDslUnitTest : TestUtils() {
         val customer = Resource(Customer("15", "John Doe"))
 
         customer.add(CustomerController::class) {
-            linkTo { findById(it.content.id) } withRel Link.REL_SELF
+            linkTo { findById(it.content.id) } withRel IanaLinkRelation.SELF.value()
             linkTo { findProductsById(it.content.id) } withRel REL_PRODUCTS
         }
 
         customer.links.forEach { assertPointsToMockServer(it) }
-        assertThat(customer.hasLink(Link.REL_SELF)).isTrue()
+        assertThat(customer.hasLink(IanaLinkRelation.SELF.value())).isTrue()
         assertThat(customer.hasLink(REL_PRODUCTS)).isTrue()
     }
 
@@ -70,12 +70,12 @@ class LinkBuilderDslUnitTest : TestUtils() {
         val customer = CustomerResource("15", "John Doe")
 
         customer.add(CustomerController::class) {
-            linkTo { findById(it.id) } withRel Link.REL_SELF
+            linkTo { findById(it.id) } withRel IanaLinkRelation.SELF.value()
             linkTo { findProductsById(it.id) } withRel REL_PRODUCTS
         }
 
         customer.links.forEach { assertPointsToMockServer(it) }
-        assertThat(customer.hasLink(Link.REL_SELF)).isTrue()
+        assertThat(customer.hasLink(IanaLinkRelation.SELF.value())).isTrue()
         assertThat(customer.hasLink(REL_PRODUCTS)).isTrue()
     }
 
