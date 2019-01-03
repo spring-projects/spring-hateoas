@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,16 @@
  */
 package org.springframework.hateoas;
 
-import lombok.experimental.UtilityClass;
-
 /**
- * Static class to find out whether a relation type is defined by the IANA.
- * 
- * @see http://www.iana.org/assignments/link-relations/link-relations.xhtml
- * @author Oliver Gierke
- * @author Roland Kulcsár
+ * Interface for defining link relations. Can be used for implementing spec-based link relations as well as custom ones.
+ *
  * @author Greg Turnquist
+ * @since 1.0
  */
-@UtilityClass
-public class IanaRels {
+public interface LinkRelation {
 
 	/**
-	 * Returns whether the given relation type is defined by the IANA.
-	 * 
-	 * @param rel the relation type to check
-	 * @return
-	 * @deprecated Migrate to {@link IanaLinkRelation#isIanaRel(String)}.
+	 * Return the link relation's value.
 	 */
-	@Deprecated
-	public static boolean isIanaRel(String rel) {
-		return IanaLinkRelation.isIanaRel(rel);
-	}
+	String value();
 }

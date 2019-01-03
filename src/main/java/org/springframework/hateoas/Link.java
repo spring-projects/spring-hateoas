@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,11 +60,35 @@ public class Link implements Serializable {
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
-	public static final String REL_SELF = "self";
-	public static final String REL_FIRST = "first";
-	public static final String REL_PREVIOUS = "prev";
-	public static final String REL_NEXT = "next";
-	public static final String REL_LAST = "last";
+	/**
+	 * @deprecated Use {@link IanaLinkRelation#SELF} instead.
+	 */
+	@Deprecated
+	public static final String REL_SELF = IanaLinkRelation.SELF.value();
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelation#FIRST} instead.
+	 */
+	@Deprecated
+	public static final String REL_FIRST = IanaLinkRelation.FIRST.value();
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelation#PREV} instead.
+	 */
+	@Deprecated
+	public static final String REL_PREVIOUS = IanaLinkRelation.PREV.value();
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelation#NEXT} instead.
+	 */
+	@Deprecated
+	public static final String REL_NEXT = IanaLinkRelation.NEXT.value();
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelation#LAST} instead.
+	 */
+	@Deprecated
+	public static final String REL_LAST = IanaLinkRelation.LAST.value();
 
 	private @Wither String rel;
 	private @Wither String href;
