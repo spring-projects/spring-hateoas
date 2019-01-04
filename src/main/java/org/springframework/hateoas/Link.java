@@ -320,34 +320,41 @@ public class Link implements Serializable {
 
 			Map<String, String> attributes = getAttributeMap(matcher.group(2));
 
-			if (!attributes.containsKey("rel")) {
+			String rel = attributes.get("rel");
+			if (rel == null) {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			Link link = new Link(matcher.group(1), attributes.get("rel"));
+			Link link = new Link(matcher.group(1), rel);
 
-			if (attributes.containsKey("hreflang")) {
-				link = link.withHreflang(attributes.get("hreflang"));
+			String hreflang = attributes.get("hreflang");
+			if (hreflang != null) {
+				link = link.withHreflang(hreflang);
 			}
 
-			if (attributes.containsKey("media")) {
-				link = link.withMedia(attributes.get("media"));
+			String media = attributes.get("media");
+			if (media != null) {
+				link = link.withMedia(media);
 			}
 
-			if (attributes.containsKey("title")) {
-				link = link.withTitle(attributes.get("title"));
+			String title = attributes.get("title");
+			if (title != null) {
+				link = link.withTitle(title);
 			}
 
-			if (attributes.containsKey("type")) {
-				link = link.withType(attributes.get("type"));
+			String type = attributes.get("type");
+			if (type != null) {
+				link = link.withType(type);
 			}
 
-			if (attributes.containsKey("deprecation")) {
-				link = link.withDeprecation(attributes.get("deprecation"));
+			String deprecation = attributes.get("deprecation");
+			if (deprecation != null) {
+				link = link.withDeprecation(deprecation);
 			}
 
-			if (attributes.containsKey("profile")) {
-				link = link.withProfile(attributes.get("profile"));
+			String profile = attributes.get("profile");
+			if (profile != null) {
+				link = link.withProfile(profile);
 			}
 
 			return link;
