@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,6 @@ class HalFormsSerializers {
 
 		if (resource.hasLink(Link.REL_SELF)) {
 
-
 			for (Affordance affordance : resource.getLink(Link.REL_SELF).map(Link::getAffordances)
 					.orElse(Collections.emptyList())) {
 
@@ -207,9 +206,7 @@ class HalFormsSerializers {
 					HalFormsTemplate template = HalFormsTemplate.forMethod(model.getHttpMethod()) //
 							.withProperties(model.getInputProperties());
 
-					/**
-					 * First template in HAL-FORMS is "default".
-					 */
+					// First template in HAL-FORMS is "default".
 					templates.put(templates.isEmpty() ? "default" : model.getName(), template);
 				}
 			}

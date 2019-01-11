@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 public class PropertyUtilsTest {
 
+	/**
+	 * @see #482
+	 */
 	@Test
 	public void simpleObject() {
 
@@ -49,12 +53,15 @@ public class PropertyUtilsTest {
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employee);
 
-		assertThat(properties).hasSize(2);
-		assertThat(properties.keySet()).contains("name", "role");
-		assertThat(properties.get("name")).isEqualTo("Frodo Baggins");
-		assertThat(properties.get("role")).isEqualTo("ring bearer");
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder( //
+				new SimpleEntry<>("name", "Frodo Baggins"), //
+				new SimpleEntry<>("role", "ring bearer") //
+		);
 	}
 
+	/**
+	 * @see #482
+	 */
 	@Test
 	public void simpleObjectWrappedAsResource() {
 
@@ -63,12 +70,15 @@ public class PropertyUtilsTest {
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employeeResource);
 
-		assertThat(properties).hasSize(2);
-		assertThat(properties.keySet()).contains("name", "role");
-		assertThat(properties.get("name")).isEqualTo("Frodo Baggins");
-		assertThat(properties.get("role")).isEqualTo("ring bearer");
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder( //
+				new SimpleEntry<>("name", "Frodo Baggins"), //
+				new SimpleEntry<>("role", "ring bearer") //
+		);
 	}
 
+	/**
+	 * @see #482
+	 */
 	@Test
 	public void resourceWrappedSpringMvcParameter() throws NoSuchMethodException {
 
@@ -82,10 +92,12 @@ public class PropertyUtilsTest {
 
 		List<String> propertyNames = PropertyUtils.findPropertyNames(resolvableType);
 
-		assertThat(propertyNames).hasSize(2);
-		assertThat(propertyNames).contains("name", "role");
+		assertThat(propertyNames).containsExactlyInAnyOrder("name", "role");
 	}
 
+	/**
+	 * @see #482
+	 */
 	@Test
 	public void objectWithIgnorableAttributes() {
 
@@ -93,8 +105,6 @@ public class PropertyUtilsTest {
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employee);
 
-		assertThat(properties).hasSize(6);
-		assertThat(properties.keySet()).containsExactlyInAnyOrder("firstName", "lastName", "role", "username", "fullName", "usernameAndLastName");
 		assertThat(properties.entrySet()).containsExactlyInAnyOrder(
 			new SimpleEntry<>("firstName", "Frodo"),
 			new SimpleEntry<>("lastName", "Baggins"),
@@ -104,6 +114,9 @@ public class PropertyUtilsTest {
 			new SimpleEntry<>("usernameAndLastName", "fbaggins+++Baggins"));
 	}
 
+	/**
+	 * @see #707
+	 */
 	@Test
 	public void objectWithNullReturningGetter() {
 
@@ -111,8 +124,6 @@ public class PropertyUtilsTest {
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employee);
 
-		assertThat(properties).hasSize(2);
-		assertThat(properties.keySet()).containsExactlyInAnyOrder("name", "father");
 		assertThat(properties.entrySet()).containsExactlyInAnyOrder(
 			new SimpleEntry<>("name", "Frodo"),
 			new SimpleEntry<>("father", null));
@@ -158,12 +169,11 @@ public class PropertyUtilsTest {
 
 	@RestController
 	static class TestController {
-		
+
 		@GetMapping("/")
 		public Employee newEmployee(@RequestBody Resource<Employee> employee) {
 			return employee.getContent();
 		}
 	}
-
 
 }
