@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
@@ -344,6 +345,21 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		Resource<Employee> expected = new Resource<>(employee, new Link("/employees/1").withSelfRel());
 
 		Resource<Employee> actual = mapper.readValue(MappingUtils.read(new ClassPathResource("resource-with-simple-pojo.json", getClass())),
+			mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
+
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	/**
+	 * @see #784
+	 */
+	@Test
+	public void deserializeWrappedEmptyPojo() throws IOException {
+
+		Employee employee = new Employee();
+		Resource<Employee> expected = new Resource<>(employee, new Link("/employees/1").withSelfRel());
+
+		Resource<Employee> actual = mapper.readValue(MappingUtils.read(new ClassPathResource("resource-with-empty-pojo.json", getClass())),
 			mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
 
 		assertThat(actual).isEqualTo(expected);

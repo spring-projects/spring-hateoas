@@ -371,7 +371,8 @@ public class Jackson2UberModule extends SimpleModule {
 			if (data == null) {
 				properties = new HashMap<>();
 			} else {
-				properties = data.stream().collect(Collectors.toMap(UberData::getName, UberData::getValue));
+				properties = data.stream() //
+						.collect(Collectors.toMap(UberData::getName, UberData::getValue));
 			}
 			ResourceSupport resourceSupport = (ResourceSupport) PropertyUtils
 					.createObjectFromProperties(this.getContentType().getRawClass(), properties);
@@ -440,13 +441,19 @@ public class Jackson2UberModule extends SimpleModule {
 		private Resource<Object> convertUberDataToResource(UberData uberData, List<Link> links) {
 
 			// Primitive type
-			if (uberData.getData().size() == 1 && uberData.getData().get(0).getName() == null) {
-				Object scalarValue = uberData.getData().get(0).getValue();
+			List<UberData> data = uberData.getData();
+			if (data != null && data.size() == 1 && data.get(0).getName() == null) {
+				Object scalarValue = data.get(0).getValue();
 				return new Resource<>(scalarValue, links);
 			}
 
-			Map<String, Object> properties = uberData.getData().stream()
-					.collect(Collectors.toMap(UberData::getName, UberData::getValue));
+			Map<String, Object> properties;
+			if (data == null) {
+				properties = new HashMap<>();
+			} else {
+				properties = data.stream()
+						.collect(Collectors.toMap(UberData::getName, UberData::getValue));
+			}
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 
