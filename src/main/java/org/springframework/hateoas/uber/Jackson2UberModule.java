@@ -451,8 +451,7 @@ public class Jackson2UberModule extends SimpleModule {
 			if (data == null) {
 				properties = new HashMap<>();
 			} else {
-				properties = data.stream()
-						.collect(Collectors.toMap(UberData::getName, UberData::getValue));
+				properties = data.stream().collect(Collectors.toMap(UberData::getName, UberData::getValue));
 			}
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
@@ -629,7 +628,12 @@ public class Jackson2UberModule extends SimpleModule {
 				List<Link> resourceLinks = new ArrayList<>();
 				Resource<?> resource = null;
 
-				for (UberData item : uberData.getData()) {
+				List<UberData> data = uberData.getData();
+				if (data == null) {
+					throw new RuntimeException("No content!");
+				}
+
+				for (UberData item : data) {
 
 					if (item.getRel() != null) {
 						item.getRel().forEach(rel -> resourceLinks.add(new Link(item.getUrl(), rel)));
