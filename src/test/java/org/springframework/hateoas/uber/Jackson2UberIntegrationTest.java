@@ -303,6 +303,28 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
+	public void deserializeEmptyValue() throws Exception {
+
+		List<Resource<String>> data = new ArrayList<Resource<String>>();
+		data.add(new Resource<>("", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+
+		Resources expected = new Resources<>(data);
+		expected.add(new Link("localhost"));
+		expected.add(new Link("/page/2").withRel("next"));
+
+		Resources<Resource<String>> actual = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("resources-with-resource-objects-and-empty-value.json", getClass())),
+				mapper.getTypeFactory().constructParametricType(Resources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, String.class)));
+
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	/**
+	 * @see #784
+	 */
+	@Test
 	public void deserializeEmptyResources() throws Exception {
 
 		List<Resource<String>> data = new ArrayList<Resource<String>>();
@@ -321,7 +343,6 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 								mapper.getTypeFactory().constructParametricType(Resource.class, String.class) //
 						) //
 		)).isInstanceOf(RuntimeException.class);
-
 	}
 
 	/**

@@ -640,14 +640,21 @@ public class Jackson2UberModule extends SimpleModule {
 					} else {
 
 						// Primitive type
-						if (item.getData().size() == 1 && item.getData().get(0).getName() == null) {
+						List<UberData> itemData = item.getData();
+						if (itemData != null && itemData.size() == 1 && itemData.get(0).getName() == null) {
 
-							Object scalarValue = item.getData().get(0).getValue();
+							Object scalarValue = itemData.get(0).getValue();
 							resource = new Resource<>(scalarValue, uberData.getLinks());
 						} else {
 
-							Map<String, Object> properties = item.getData().stream()
-									.collect(Collectors.toMap(UberData::getName, UberData::getValue));
+							Map<String, Object> properties;
+							if (itemData == null) {
+								properties = new HashMap<>();
+							} else {
+								properties = itemData.stream() //
+										.collect(Collectors.toMap(UberData::getName, UberData::getValue));
+							}
+
 							Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 							resource = new Resource<>(obj, uberData.getLinks());
 						}
