@@ -349,8 +349,11 @@ public class Jackson2UberModule extends SimpleModule {
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
 			List<Link> links = doc.getUber().getLinks();
 
-			return doc.getUber().getData().stream().filter(uberData -> !StringUtils.isEmpty(uberData.getName())).findFirst()
-					.map(uberData -> convertToResourceSupport(uberData, links)).orElseGet(() -> {
+			return doc.getUber().getData().stream() //
+					.filter(uberData -> !StringUtils.isEmpty(uberData.getName())) //
+					.findFirst() //
+					.map(uberData -> convertToResourceSupport(uberData, links)) //
+					.orElseGet(() -> {
 
 						ResourceSupport resourceSupport = new ResourceSupport();
 						resourceSupport.add(links);
@@ -362,9 +365,14 @@ public class Jackson2UberModule extends SimpleModule {
 		@NotNull
 		private ResourceSupport convertToResourceSupport(UberData uberData, List<Link> links) {
 
-			Map<String, Object> properties = uberData.getData().stream()
-					.collect(Collectors.toMap(UberData::getName, UberData::getValue));
+			List<UberData> data = uberData.getData();
+			Map<String, Object> properties;
 
+			if (data == null) {
+				properties = new HashMap<>();
+			} else {
+				properties = data.stream().collect(Collectors.toMap(UberData::getName, UberData::getValue));
+			}
 			ResourceSupport resourceSupport = (ResourceSupport) PropertyUtils
 					.createObjectFromProperties(this.getContentType().getRawClass(), properties);
 
@@ -588,6 +596,7 @@ public class Jackson2UberModule extends SimpleModule {
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
+
 	}
 
 	/**

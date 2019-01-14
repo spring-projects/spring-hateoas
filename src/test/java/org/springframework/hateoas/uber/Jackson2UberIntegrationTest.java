@@ -385,6 +385,23 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
+	public void deserializeEmptyConcreteResourceSupport() throws Exception {
+
+		EmployeeResource expected = new EmployeeResource(null, null);
+		expected.add(new Link("/employees/1").withSelfRel());
+		expected.add(new Link("/employees").withRel("employees"));
+
+		EmployeeResource actual = mapper.readValue(
+			MappingUtils.read(new ClassPathResource("resource-support-pojo-empty.json", getClass())),
+			EmployeeResource.class);
+
+		assertThat(actual).isEqualTo(expected);
+	}
+
+	/**
+	 * @see #784
+	 */
+	@Test
 	public void serializesPagedResource() throws Exception {
 
 		String actual = write(setupAnnotatedPagedResources());
