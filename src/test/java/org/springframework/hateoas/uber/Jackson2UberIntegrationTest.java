@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -484,14 +485,34 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
 
+	/**
+	 * @see #784
+	 */
+	@Test
+	public void deserializesPagedResourceWithEmptyPageInformation() throws Exception {
+
+		PagedResources<Resource<Employee>> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("paged-resources-empty-page.json", getClass())),
+				mapper.getTypeFactory().constructParametricType(PagedResources.class,
+						mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class)));
+
+		assertThat(result).isEqualTo(setupAnnotatedPagedResources(0,0));
+	}
+
 	private static Resources<Resource<Employee>> setupAnnotatedPagedResources() {
+
+		return setupAnnotatedPagedResources(2, 4);
+	}
+
+	@NotNull
+	private static Resources<Resource<Employee>> setupAnnotatedPagedResources(int size, int totalElements) {
 
 		List<Resource<Employee>> content = new ArrayList<>();
 		Employee employee = new Employee("Frodo", "ring bearer");
 		Resource<Employee> employeeResource = new Resource<>(employee, new Link("/employees/1").withSelfRel());
 		content.add(employeeResource);
 
-		return new PagedResources<>(content, new PagedResources.PageMetadata(2, 0, 4), PAGINATION_LINKS);
+		return new PagedResources<>(content, new PagedResources.PageMetadata(size, 0, totalElements), PAGINATION_LINKS);
 	}
 
 	@Data

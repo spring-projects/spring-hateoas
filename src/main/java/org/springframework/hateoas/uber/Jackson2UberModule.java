@@ -703,27 +703,30 @@ public class Jackson2UberModule extends SimpleModule {
 		int totalElements = 0;
 		int totalPages = 0;
 
-		for (UberData data : uberData.getData()) {
+		List<UberData> content = uberData.getData();
+		if (content != null) {
+			for (UberData data : content) {
 
-			String name = data.getName();
-			switch (name) {
+				String name = data.getName();
+				switch (name) {
 
-				case "size":
-					size = (int) data.getValue();
-					break;
+					case "size":
+						size = (int) data.getValue();
+						break;
 
-				case "number":
-					number = (int) data.getValue();
-					break;
+					case "number":
+						number = (int) data.getValue();
+						break;
 
-				case "totalElements":
-					totalElements = (int) data.getValue();
-					break;
+					case "totalElements":
+						totalElements = (int) data.getValue();
+						break;
 
-				case "totalPages":
-					totalPages = (int) data.getValue();
+					case "totalPages":
+						totalPages = (int) data.getValue();
 
-				default:
+					default:
+				}
 			}
 		}
 
