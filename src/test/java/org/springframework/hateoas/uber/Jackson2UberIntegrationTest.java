@@ -46,10 +46,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
-	static final Links PAGINATION_LINKS = new Links(
-		new Link("localhost", Link.REL_SELF),
-		new Link("foo", Link.REL_NEXT),
-		new Link("bar", Link.REL_PREVIOUS));
+	static final Links PAGINATION_LINKS = new Links( //
+			new Link("localhost", Link.REL_SELF), //
+			new Link("foo", Link.REL_NEXT), //
+			new Link("bar", Link.REL_PREVIOUS) //
+	);
 
 	@Before
 	public void setUpModule() {
@@ -79,6 +80,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost"));
+
 		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), ResourceSupport.class))
 			.isEqualTo(expected);
 	}
@@ -176,6 +178,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	public void renderSimpleResource() throws Exception {
 
 		Resource<String> data = new Resource<>("first", new Link("localhost"));
+
 		assertThat(write(data)).isEqualTo(MappingUtils.read(new ClassPathResource("resource.json", getClass())));
 	}
 
@@ -186,6 +189,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	public void renderResourceWithCustomRel() throws Exception {
 
 		Resource<String> data2 = new Resource<>("second", new Link("localhost").withRel("custom"));
+
 		assertThat(write(data2)).isEqualTo(MappingUtils.read(new ClassPathResource("resource2.json", getClass())));
 	}
 
@@ -199,6 +203,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 			new Link("localhost"),
 			new Link("second").withRel("second"),
 			new Link("third").withRel("third"));
+
 		assertThat(write(data3)).isEqualTo(MappingUtils.read(new ClassPathResource("resource3.json", getClass())));
 	}
 
@@ -213,6 +218,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 			new Link("localhost").withRel("http://example.org/rels/todo"),
 			new Link("second").withRel("second"),
 			new Link("third").withRel("third"));
+
 		assertThat(write(data4)).isEqualTo(MappingUtils.read(new ClassPathResource("resource4.json", getClass())));
 	}
 

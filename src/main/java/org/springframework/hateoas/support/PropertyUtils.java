@@ -87,10 +87,9 @@ public class PropertyUtils {
 			.collect(Collectors.toList());
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> T createObjectFromProperties(Class<T> clazz, Map<String, Object> properties) {
 		
-		Object obj = BeanUtils.instantiateClass(clazz);
+		T obj = BeanUtils.instantiateClass(clazz);
 
 		properties.forEach((key, value) -> {
 			Optional<PropertyDescriptor> possibleProperty = Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, key));
@@ -105,7 +104,7 @@ public class PropertyUtils {
 			});
 		});
 
-		return (T) obj;
+		return obj;
 	}
 
 	/**

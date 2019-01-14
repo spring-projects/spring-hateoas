@@ -65,12 +65,6 @@ class UberDocument {
 			return (UberDocument) object;
 		}
 
-		if (object instanceof Iterable) {
-
-		} else if (object instanceof Map) {
-
-		}
-
 		throw new IllegalArgumentException("Don't know how to handle type : " + object.getClass());
 	}
 }
