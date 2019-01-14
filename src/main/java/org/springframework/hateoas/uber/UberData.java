@@ -252,7 +252,7 @@ class UberData {
 						.withName("totalPages")
 						.withValue(resources.getMetadata().getTotalPages()))));
 		}
-		
+
 		return collectionOfResources;
 	}
 
@@ -326,7 +326,7 @@ class UberData {
 
 		return extractLinksAndContent(new Resource<>(item));
 	}
-	
+
 	/**
 	 * Turn a {@list List} of {@link Link}s into a {@link Map}, where you can see ALL the rels of a given
 	 * link.
@@ -359,7 +359,7 @@ class UberData {
 			.flatMap(link -> link.getAffordances().stream())
 			.map(affordance -> (UberAffordanceModel) affordance.getAffordanceModel(MediaTypes.UBER_JSON))
 			.map(model -> {
-				
+
 				if (model.getHttpMethod().equals(HttpMethod.GET)) {
 
 					String suffix = model.getQueryProperties().stream()
@@ -372,7 +372,7 @@ class UberData {
 
 					return new UberData()
 						.withName(model.getName())
-						.withRel(Arrays.asList(model.getName()))
+						.withRel(Collections.singletonList(model.getName()))
 						.withUrl(model.getLink().expand().getHref() + suffix)
 						.withAction(model.getAction());
 
@@ -380,7 +380,7 @@ class UberData {
 
 					return new UberData()
 						.withName(model.getName())
-						.withRel(Arrays.asList(model.getName()))
+						.withRel(Collections.singletonList(model.getName()))
 						.withUrl(model.getLink().expand().getHref())
 						.withModel(model.getInputProperties().stream()
 							.map(UberData::getName)
@@ -431,8 +431,8 @@ class UberData {
 	private static List<UberData> extractProperties(Object obj) {
 
 		if (PRIMITIVE_TYPES.contains(obj.getClass())) {
-			return Arrays.asList(new UberData()
-				.withValue(obj));
+			return Collections.singletonList(new UberData()
+					.withValue(obj));
 		}
 
 		return PropertyUtils.findProperties(obj).entrySet().stream()

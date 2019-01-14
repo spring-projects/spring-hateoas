@@ -55,7 +55,9 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @param link
 	 */
 	public void add(Link link) {
+
 		Assert.notNull(link, "Link must not be null!");
+
 		this.links.add(link);
 	}
 
@@ -65,7 +67,9 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @param links
 	 */
 	public void add(Iterable<Link> links) {
+
 		Assert.notNull(links, "Given links must not be null!");
+
 		links.forEach(this::add);
 	}
 
@@ -75,7 +79,9 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @param links must not be {@literal null}.
 	 */
 	public void add(Link... links) {
+
 		Assert.notNull(links, "Given links must not be null!");
+
 		add(Arrays.asList(links));
 	}
 

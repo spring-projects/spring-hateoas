@@ -1,0 +1,26 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "self" ],
+      "url" : "localhost"
+    }, {
+      "rel" : [ "next" ],
+      "url" : "/page/2"
+    }, {
+      "data" : [ {
+        "rel" : [ "self" ],
+        "url" : "localhost"
+      }, {
+        "rel" : [ "orders" ],
+        "url" : "orders"
+      }, {
+        "name" : "string",
+        "data" : [ {
+          "value" : "first"
+        } ]
+      } ]
+    }, {
+      "data" : []    } ]
+  }
+}
