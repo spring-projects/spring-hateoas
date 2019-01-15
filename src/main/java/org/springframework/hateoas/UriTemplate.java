@@ -214,6 +214,22 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
+	 * Checks the {@link UriTemplate} for unset but required params.
+	 *
+	 * @return
+	 */
+	public URI checkRequiredParams() {
+		for (TemplateVariable variable : getOptionalVariables()) {
+			if (variable.isRequired()) {
+				throw new IllegalArgumentException(
+					String.format("Template variable %s is required but no value was given!", variable.getName()));
+			}
+		}
+
+		return URI.create(baseUri);
+	}
+
+	/**
 	 * Expands the {@link UriTemplate} using the given parameters.
 	 * 
 	 * @param parameters must not be {@literal null}.

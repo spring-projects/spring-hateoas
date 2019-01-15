@@ -242,6 +242,42 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 		assertThat(queryParams.get("offset"), contains("10"));
 	}
 
+	@Test
+	public void linksToMethodWithPathVariableAndRequestParamsWithNull() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath()).isEqualTo("/something/1/foo");
+
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+	}
+
+	@Test
+	public void linksToMethodWithPathVariableWithBlankAndRequestParamsWithNull() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("with blank", null, 5)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath()).isEqualTo("/something/with%20blank/foo");
+
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+	}
+
+	@Test
+	public void linksToMethodWithRequestParam() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("with blank", null, 5)).withSelfRel();
+
+		UriComponents components = toComponents(link);
+		assertThat(components.getPath()).isEqualTo("/something/with%20blank/foo");
+
+		MultiValueMap<String, String> queryParams = components.getQueryParams();
+		assertThat(queryParams.get("limit"), contains("5"));
+	}
+
 	/**
 	 * @see #26, #39
 	 */
@@ -497,6 +533,15 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
 		assertThat(link.getHref()).endsWith("/something/foo?id=Spring%23%0A");
+	}
+
+	@Test
+	public void encodesAndExpandsPathvariableWithSpecialValueAndRequestParameterWithNull() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("Spring#\n", null, 10)).withSelfRel().expand();
+
+		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getHref()).endsWith("/something/Spring%23%0A/foo?limit=10");
 	}
 
 	/**

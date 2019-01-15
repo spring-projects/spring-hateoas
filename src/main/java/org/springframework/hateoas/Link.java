@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.experimental.Wither;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -158,7 +159,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns safe copy of {@link Affordance}s.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Affordance> getAffordances() {
@@ -235,7 +236,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Create new {@link Link} with additional {@link Affordance}s.
-	 * 
+	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
@@ -250,7 +251,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Creats a new {@link Link} with the given {@link Affordance}s.
-	 * 
+	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
@@ -296,7 +297,12 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Object... arguments) {
-		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+
+		URI uri = (arguments == null || arguments.length == 0) ?
+				getUriTemplate().checkRequiredParams() :
+				getUriTemplate().expand(arguments);
+
+		return new Link(uri.toString(), getRel());
 	}
 
 	/**
@@ -311,7 +317,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns whether the current {@link Link} has the given link relation.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
