@@ -29,7 +29,7 @@ import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Find links by rel in an UBER representation.
+ * Find links by rel in an {@literal UBER+JSON} representation.
  *
  * TODO: Pending https://github.com/json-path/JsonPath/issues/429, replace deserializing solution with JsonPath-based expression "$.uber.data[?(@.rel.indexOf('%s') != -1)].url"
  *

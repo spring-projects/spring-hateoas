@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,16 +433,16 @@ public class Jackson2UberModule extends SimpleModule {
 			List<Link> links = doc.getUber().getLinks();
 
 			return doc.getUber().getData().stream().filter(uberData -> !StringUtils.isEmpty(uberData.getName())).findFirst()
-					.map(uberData -> convertUberDataToResource(uberData, links)).orElseThrow(
+					.map(uberData -> convertToResource(uberData, links)).orElseThrow(
 							() -> new IllegalStateException("No data entry containing a 'value' was found in this document!"));
 		}
 
 		@NotNull
-		private Resource<Object> convertUberDataToResource(UberData uberData, List<Link> links) {
+		private Resource<Object> convertToResource(UberData uberData, List<Link> links) {
 
 			// Primitive type
 			List<UberData> data = uberData.getData();
-			if (data != null && data.size() == 1 && data.get(0).getName() == null) {
+			if (isPrimitiveType(data)) {
 				Object scalarValue = data.get(0).getValue();
 				return new Resource<>(scalarValue, links);
 			}
@@ -641,7 +641,7 @@ public class Jackson2UberModule extends SimpleModule {
 
 						// Primitive type
 						List<UberData> itemData = item.getData();
-						if (itemData != null && itemData.size() == 1 && itemData.get(0).getName() == null) {
+						if (isPrimitiveType(itemData)) {
 
 							Object scalarValue = itemData.get(0).getValue();
 							resource = new Resource<>(scalarValue, uberData.getLinks());
@@ -681,18 +681,26 @@ public class Jackson2UberModule extends SimpleModule {
 			 * ...or return a Resources<T>
 			 */
 
-			List<Object> resourceLessContent = content.stream().map(item -> (Resource<?>) item).map(Resource::getContent)
+			List<Object> resourceLessContent = content.stream()
+					.map(item -> (Resource<?>) item)
+					.map(Resource::getContent)
 					.collect(Collectors.toList());
 
 			return new Resources<>(resourceLessContent, doc.getUber().getLinks());
 		}
 	}
 
+	private static boolean isPrimitiveType(List<UberData> data) {
+		return data != null && data.size() == 1 && data.get(0).getName() == null;
+	}
+
 	private static PageMetadata extractPagingMetadata(UberDocument doc) {
 
 		return doc.getUber().getData().stream()
-				.filter(uberData -> uberData.getName() != null && uberData.getName().equals("page")).findFirst()
-				.map(Jackson2UberModule::convertUberDataToPageMetaData).orElse(null);
+				.filter(uberData -> uberData.getName() != null && uberData.getName().equals("page"))
+				.findFirst()
+				.map(Jackson2UberModule::convertUberDataToPageMetaData)
+				.orElse(null);
 	}
 
 	@NotNull
@@ -724,6 +732,7 @@ public class Jackson2UberModule extends SimpleModule {
 
 					case "totalPages":
 						totalPages = (int) data.getValue();
+						break;
 
 					default:
 				}

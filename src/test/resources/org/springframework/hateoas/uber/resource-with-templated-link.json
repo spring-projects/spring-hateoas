@@ -1,0 +1,10 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "order" ],
+      "url" : "/orders{?id}",
+      "templated" : true
+    } ]
+  }
+}

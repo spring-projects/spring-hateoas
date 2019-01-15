@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
@@ -49,9 +50,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final Links PAGINATION_LINKS = new Links( //
-			new Link("localhost", Link.REL_SELF), //
-			new Link("foo", Link.REL_NEXT), //
-			new Link("bar", Link.REL_PREVIOUS)//
+			new Link("localhost", IanaLinkRelation.SELF.value()), //
+			new Link("foo", IanaLinkRelation.NEXT.value()), //
+			new Link("bar", IanaLinkRelation.PREV.value())//
 	);
 
 	@Before
@@ -284,7 +285,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeResources() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<Resource<String>>();
+		List<Resource<String>> data = new ArrayList<>();
 		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
@@ -306,7 +307,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeEmptyValue() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<Resource<String>>();
+		List<Resource<String>> data = new ArrayList<>();
 		data.add(new Resource<>("", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
@@ -326,9 +327,27 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeEmptyResources() throws Exception {
+	public void serializeEmptyResources() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<Resource<String>>();
+		List<Resource<String>> data = new ArrayList<>();
+		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+
+		Resources source = new Resources<>(data);
+		source.add(new Link("localhost"));
+		source.add(new Link("/page/2").withRel("next"));
+
+		assertThat(write(source))
+			.isEqualTo(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())));
+	}
+
+	/**
+	 * @see #784
+	 */
+	@Test
+	public void deserializeEmptyResources() {
+
+		List<Resource<String>> data = new ArrayList<>();
 		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
@@ -497,6 +516,26 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 						mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class)));
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources(0,0));
+	}
+
+	/**
+	 * @see #784
+	 */
+	@Test
+	public void handleTemplatedLinksOnDeserialization() throws IOException {
+
+		ResourceSupport original = new ResourceSupport();
+		original.add(new Link("/orders{?id}", "order"));
+
+		String serialized = mapper.writeValueAsString(original);
+
+		String expected = MappingUtils.read(new ClassPathResource("resource-with-templated-link.json", getClass()));
+
+		assertThat(serialized).isEqualTo(expected);
+
+		ResourceSupport deserialized = mapper.readValue(serialized, ResourceSupport.class);
+
+		assertThat(deserialized).isEqualTo(original);
 	}
 
 	private static Resources<Resource<Employee>> setupAnnotatedPagedResources() {

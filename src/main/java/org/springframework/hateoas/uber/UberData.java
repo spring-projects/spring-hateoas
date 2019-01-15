@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -57,6 +58,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Value
 @Wither(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 class UberData {
 
 	private String id;
@@ -110,28 +112,6 @@ class UberData {
 	}
 
 	/*
-	 * Don't render if {@literal null}.
-	 */
-	public List<String> getRel() {
-
-		if (this.rel == null || this.rel.isEmpty()) {
-			return null;
-		}
-		return this.rel;
-	}
-
-	/*
-	 * Don't render if {@literal null}.
-	 */
-	public List<UberData> getData() {
-
-		if (this.data == null || this.data.isEmpty()) {
-			return null;
-		}
-		return this.data;
-	}
-
-	/*
 	 * Use a {@link Boolean} to support returning {@literal null}, and if it is {@literal null}, don't render.
 	 */
 	public Boolean isTemplated() {
@@ -139,10 +119,6 @@ class UberData {
 		return Optional.ofNullable(this.url)
 			.map(s -> s.contains("{?") ? true : null)
 			.orElse(null);
-	}
-
-	public void setTemplated(boolean __) {
-		// Ignore since "templated" is a virtual property
 	}
 
 	/*
