@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
@@ -56,7 +57,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	public void createsInstanceWithSelfLinkToController() {
 
 		PersonResource resource = assembler.createResource(person);
-		Link link = resource.getRequiredLink(Link.REL_SELF);
+		Link link = resource.getRequiredLink(IanaLinkRelation.SELF.value());
 
 		assertThat(link).isNotNull();
 		assertThat(resource.getLinks()).hasSize(1);

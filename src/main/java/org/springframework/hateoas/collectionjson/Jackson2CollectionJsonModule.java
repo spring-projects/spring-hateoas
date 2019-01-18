@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
@@ -111,7 +112,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
-				.withHref(resource.getRequiredLink(Link.REL_SELF).expand().getHref())
+				.withHref(resource.getRequiredLink(IanaLinkRelation.SELF.value()).expand().getHref())
 				.withLinks(withoutSelfLink(value))
 				.withItems(Collections.EMPTY_LIST);
 
@@ -168,7 +169,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		public void serialize(ResourceSupport value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			String href = value.getRequiredLink(Link.REL_SELF).getHref();
+			String href = value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref();
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
@@ -236,7 +237,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		public void serialize(Resource<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			String href = value.getRequiredLink(Link.REL_SELF).getHref();
+			String href = value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref();
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
@@ -301,7 +302,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
-				.withHref(value.getRequiredLink(Link.REL_SELF).getHref())
+				.withHref(value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref())
 				.withLinks(withoutSelfLink(value.getLinks()))
 				.withItems(resourcesToCollectionJsonItems(value))
 				.withQueries(findQueries(value))
@@ -364,7 +365,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
-				.withHref(value.getRequiredLink(Link.REL_SELF).getHref())
+				.withHref(value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref())
 				.withLinks(withoutSelfLink(value.getLinks()))
 				.withItems(resourcesToCollectionJsonItems(value))
 				.withQueries(findQueries(value))
@@ -797,7 +798,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 			return Collections.singletonList(new Link(href));
 		}
 
-		if (href == null || links.stream().map(Link::getRel).anyMatch(s -> s.equals(Link.REL_SELF))) {
+		if (href == null || links.stream().map(Link::getRel).anyMatch(s -> s.equals(IanaLinkRelation.SELF.value()))) {
 			return links;
 		}
 
@@ -813,7 +814,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 	private static List<Link> withoutSelfLink(List<Link> links) {
 
 		return links.stream()
-			.filter(link -> !link.getRel().equals(Link.REL_SELF))
+			.filter(link -> !link.getRel().equals(IanaLinkRelation.SELF.value()))
 			.collect(Collectors.toList());
 	}
 
@@ -826,7 +827,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 					Resource resource = (Resource) content;
 
 					return new CollectionJsonItem<>()
-						.withHref(resource.getRequiredLink(Link.REL_SELF).getHref())
+						.withHref(resource.getRequiredLink(IanaLinkRelation.SELF.value()).getHref())
 						.withLinks(withoutSelfLink(resource.getLinks()))
 						.withRawData(resource.getContent());
 				} else {
@@ -846,8 +847,8 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		List<CollectionJsonQuery> queries = new ArrayList<>();
 
-		if (resource.hasLink(Link.REL_SELF)) {
-			Link selfLink = resource.getRequiredLink(Link.REL_SELF);
+		if (resource.hasLink(IanaLinkRelation.SELF.value())) {
+			Link selfLink = resource.getRequiredLink(IanaLinkRelation.SELF.value());
 
 			selfLink.getAffordances().forEach(affordance -> {
 
@@ -879,8 +880,8 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		List<CollectionJsonTemplate> templates = new ArrayList<>();
 
-		if (resource.hasLink(Link.REL_SELF)) {
-			resource.getRequiredLink(Link.REL_SELF).getAffordances().forEach(affordance -> {
+		if (resource.hasLink(IanaLinkRelation.SELF.value())) {
+			resource.getRequiredLink(IanaLinkRelation.SELF.value()).getAffordances().forEach(affordance -> {
 
 				CollectionJsonAffordanceModel model = affordance.getAffordanceModel(MediaTypes.COLLECTION_JSON);
 

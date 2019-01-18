@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
@@ -192,10 +193,10 @@ class HalFormsSerializers {
 
 		Map<String, HalFormsTemplate> templates = new HashMap<>();
 
-		if (resource.hasLink(Link.REL_SELF)) {
+		if (resource.hasLink(IanaLinkRelation.SELF.value())) {
 
 
-			for (Affordance affordance : resource.getLink(Link.REL_SELF).map(Link::getAffordances)
+			for (Affordance affordance : resource.getLink(IanaLinkRelation.SELF.value()).map(Link::getAffordances)
 					.orElse(Collections.emptyList())) {
 
 				HalFormsAffordanceModel model = affordance.getAffordanceModel(MediaTypes.HAL_FORMS_JSON);
@@ -228,7 +229,7 @@ class HalFormsSerializers {
 	private static void validate(ResourceSupport resource, Affordance affordance, HalFormsAffordanceModel model) {
 
 		String affordanceUri = model.getURI();
-		String selfLinkUri = resource.getRequiredLink(Link.REL_SELF).expand().getHref();
+		String selfLinkUri = resource.getRequiredLink(IanaLinkRelation.SELF.value()).expand().getHref();
 
 		if (!affordanceUri.equals(selfLinkUri)) {
 			throw new IllegalStateException("Affordance's URI " + affordanceUri + " doesn't match self link "

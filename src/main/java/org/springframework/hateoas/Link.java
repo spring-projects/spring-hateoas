@@ -106,11 +106,11 @@ public class Link implements Serializable {
 	/**
 	 * Creates a new link to the given URI with the self rel.
 	 * 
-	 * @see #REL_SELF
+	 * @see IanaLinkRelation#SELF
 	 * @param href must not be {@literal null} or empty.
 	 */
 	public Link(String href) {
-		this(href, REL_SELF);
+		this(href, IanaLinkRelation.SELF.value());
 	}
 
 	/**
@@ -171,7 +171,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link withSelfRel() {
-		return withRel(Link.REL_SELF);
+		return withRel(IanaLinkRelation.SELF.value());
 	}
 
 	/**

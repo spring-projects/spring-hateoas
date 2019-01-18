@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilderUnitTest.ControllerWithMethods;
@@ -60,7 +61,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonControllerImpl.class).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people");
 	}
 
@@ -70,7 +71,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonsAddressesController.class, 15).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people/15/addresses");
 	}
 
@@ -108,7 +109,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	public void linksToMethodWithPathVariableContainingBlank() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/something/with%20blank/foo");
 	}
 
@@ -121,7 +122,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonsAddressesController.class, "with blank").withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people/with%20blank/addresses");
 	}
 
@@ -138,7 +139,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithMap(queryParams)).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/sample/mapsupport?firstKey=firstValue&secondKey=secondValue");
 	}
 
@@ -155,7 +156,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithMap(queryParams)).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()) //
 				.endsWith("/sample/multivaluemapsupport?key1=value1a&key1=value1b&key2=value2a&key2=value2b");
 	}
@@ -169,7 +170,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = factory.linkTo(PersonsAddressesController.class, Collections.singletonMap("id", "17")).withSelfRel();
 
 		assertPointsToMockServer(link);
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people/17/addresses");
 	}
 

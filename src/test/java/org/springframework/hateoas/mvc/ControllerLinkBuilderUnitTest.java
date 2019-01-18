@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
@@ -66,7 +67,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void createsLinkToControllerRoot() {
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people");
 	}
 
@@ -74,7 +75,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void createsLinkToParameterizedControllerRoot() {
 
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people/15/addresses");
 	}
 
@@ -85,7 +86,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void createsLinkToMethodOnParameterizedControllerRoot() {
 
 		Link link = linkTo(methodOn(PersonsAddressesController.class, 15).getAddressesForCountry("DE")).withSelfRel();
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people/15/addresses/DE");
 	}
 
@@ -93,15 +94,15 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void createsLinkToSubResource() {
 
 		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/people/something");
 	}
 
 	@Test
 	public void createsLinkWithCustomRel() {
 
-		Link link = linkTo(PersonControllerImpl.class).withRel(Link.REL_NEXT);
-		assertThat(link.getRel()).isEqualTo(Link.REL_NEXT);
+		Link link = linkTo(PersonControllerImpl.class).withRel(IanaLinkRelation.NEXT.value());
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.NEXT.value());
 		assertThat(link.getHref()).endsWith("/people");
 	}
 
@@ -399,7 +400,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	public void linksToMethodWithPathVariableContainingBlank() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/something/with%20blank/foo");
 	}
 
@@ -495,7 +496,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam("Spring#\n")).withSelfRel();
 
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getHref()).endsWith("/something/foo?id=Spring%23%0A");
 	}
 

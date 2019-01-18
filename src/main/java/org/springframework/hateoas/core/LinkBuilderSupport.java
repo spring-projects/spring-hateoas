@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
@@ -163,7 +164,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#withSelfRel()
 	 */
 	public Link withSelfRel() {
-		return withRel(Link.REL_SELF);
+		return withRel(IanaLinkRelation.SELF.value());
 	}
 
 	/*

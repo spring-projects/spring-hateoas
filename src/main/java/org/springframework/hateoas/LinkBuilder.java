@@ -60,7 +60,7 @@ public interface LinkBuilder {
 	/**
 	 * Creates the {@link Link} built by the current builder instance with the default self rel.
 	 * 
-	 * @see Link#REL_SELF
+	 * @see IanaLinkRelation#SELF
 	 * @return
 	 */
 	Link withSelfRel();

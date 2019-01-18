@@ -47,18 +47,18 @@ public class LinkUnitTest {
 	public void linkWithHrefOnlyBecomesSelfLink() {
 
 		Link link = new Link("foo");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 	}
 
 	@Test
 	public void createsLinkFromRelAndHref() {
 
-		Link link = new Link("foo", Link.REL_SELF);
+		Link link = new Link("foo", IanaLinkRelation.SELF.value());
 
 		assertSoftly(softly -> {
 
 			softly.assertThat(link.getHref()).isEqualTo("foo");
-			softly.assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+			softly.assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		});
 	}
 
@@ -85,8 +85,8 @@ public class LinkUnitTest {
 	@Test
 	public void sameRelAndHrefMakeSameLink() {
 
-		Link left = new Link("foo", Link.REL_SELF);
-		Link right = new Link("foo", Link.REL_SELF);
+		Link left = new Link("foo", IanaLinkRelation.SELF.value());
+		Link right = new Link("foo", IanaLinkRelation.SELF.value());
 
 		TestUtils.assertEqualAndSameHashCode(left, right);
 	}
@@ -94,8 +94,8 @@ public class LinkUnitTest {
 	@Test
 	public void differentRelMakesDifferentLink() {
 
-		Link left = new Link("foo", Link.REL_PREVIOUS);
-		Link right = new Link("foo", Link.REL_NEXT);
+		Link left = new Link("foo", IanaLinkRelation.PREV.value());
+		Link right = new Link("foo", IanaLinkRelation.NEXT.value());
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
@@ -103,8 +103,8 @@ public class LinkUnitTest {
 	@Test
 	public void differentHrefMakesDifferentLink() {
 
-		Link left = new Link("foo", Link.REL_SELF);
-		Link right = new Link("bar", Link.REL_SELF);
+		Link left = new Link("foo", IanaLinkRelation.SELF.value());
+		Link right = new Link("bar", IanaLinkRelation.SELF.value());
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
@@ -312,7 +312,7 @@ public class LinkUnitTest {
 		Link link = new Link("/").andAffordance("name", HttpMethod.POST, ResolvableType.forClass(Employee.class), Collections.emptyList(), ResolvableType.forClass(Employee.class));
 
 		assertThat(link.getHref()).isEqualTo("/");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getAffordances()).hasSize(1);
 		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
 		
@@ -341,7 +341,7 @@ public class LinkUnitTest {
 		Link link = new Link("/").andAffordance(HttpMethod.POST, ResolvableType.forClass(Employee.class), Collections.emptyList(), ResolvableType.forClass(Employee.class));
 
 		assertThat(link.getHref()).isEqualTo("/");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getAffordances()).hasSize(1);
 		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
 
@@ -370,7 +370,7 @@ public class LinkUnitTest {
 		Link link = new Link("/").andAffordance(HttpMethod.POST, Employee.class, Collections.emptyList(), Employee.class);
 
 		assertThat(link.getHref()).isEqualTo("/");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
 		assertThat(link.getAffordances()).hasSize(1);
 		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("postEmployee");

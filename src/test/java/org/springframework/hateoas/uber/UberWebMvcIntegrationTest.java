@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -347,7 +348,7 @@ public class UberWebMvcIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee.getContent());
 
 			try {
-				return ResponseEntity.created(new URI(findOne(newEmployeeId).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.created(new URI(findOne(newEmployeeId).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
@@ -360,7 +361,7 @@ public class UberWebMvcIntegrationTest {
 			EMPLOYEES.put(id, employee.getContent());
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
@@ -384,7 +385,7 @@ public class UberWebMvcIntegrationTest {
 			EMPLOYEES.put(id, newEmployee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(Link.REL_SELF).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
 					.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());

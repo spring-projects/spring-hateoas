@@ -104,7 +104,7 @@ public class PagedResources<T> extends Resources<T> {
 	 */
 	@JsonIgnore
 	public Optional<Link> getNextLink() {
-		return getLink(Link.REL_NEXT);
+		return getLink(IanaLinkRelation.NEXT.value());
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class PagedResources<T> extends Resources<T> {
 	 */
 	@JsonIgnore
 	public Optional<Link> getPreviousLink() {
-		return getLink(Link.REL_PREVIOUS);
+		return getLink(IanaLinkRelation.PREV.value());
 	}
 
 	/* 

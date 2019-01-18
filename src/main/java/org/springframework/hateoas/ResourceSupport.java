@@ -42,11 +42,11 @@ public class ResourceSupport implements Identifiable<Link> {
 	}
 
 	/**
-	 * Returns the {@link Link} with a rel of {@link Link#REL_SELF}.
+	 * Returns the {@link Link} with a rel of {@link IanaLinkRelation#SELF}.
 	 */
 	@JsonIgnore
 	public Optional<Link> getId() {
-		return getLink(Link.REL_SELF);
+		return getLink(IanaLinkRelation.SELF.value());
 	}
 
 	/**

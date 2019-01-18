@@ -30,7 +30,7 @@ The `Link` value object follows the Atom link definition and consists of a `rel`
 ----
 Link link = new Link("http://localhost:8080/something");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
-assertThat(link.getRel(), is(Link.REL_SELF));
+assertThat(link.getRel(), is(IanaLinkRelation.SELF.value()));
 
 Link link = new Link("http://localhost:8080/something", "my-rel");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
@@ -95,7 +95,7 @@ You can also easily access links contained in that resource:
 ----
 Link selfLink = new Link("http://myhost/people");
 assertThat(resource.getId(), is(selfLink));
-assertThat(resource.getLink(Link.REL_SELF), is(selfLink));
+assertThat(resource.getLink(IanaLinkRelation.SELF.value()), is(selfLink));
 ----
 [[fundamentals.obtaining-links]]
 === Obtaining links
@@ -143,7 +143,7 @@ The `ControllerLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under th
 Person person = new Person(1L, "Dave", "Matthews");
 //                 /person                 /     1
 Link link = linkTo(PersonController.class).slash(person.getId()).withSelfRel();
-assertThat(link.getRel(), is(Link.REL_SELF));
+assertThat(link.getRel(), is(IanaLinkRelation.SELF.value()));
 assertThat(link.getHref(), endsWith("/people/1"));
 ----
 

@@ -33,6 +33,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
@@ -58,7 +59,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
-	static final Links PAGINATION_LINKS = new Links(new Link("foo", Link.REL_NEXT), new Link("bar", Link.REL_PREVIOUS));
+	static final Links PAGINATION_LINKS = new Links(new Link("foo", IanaLinkRelation.NEXT.value()), new Link("bar", IanaLinkRelation.PREV.value()));
 
 	@Before
 	public void setUpModule() {

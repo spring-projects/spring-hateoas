@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.MediaTypes;
@@ -45,7 +46,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	@Override
 	public Link findLinkWithRel(String rel, String representation) {
 
-		if (rel.equals(Link.REL_SELF)) {
+		if (rel.equals(IanaLinkRelation.SELF.value())) {
 			return findSelfLink(representation);
 		} else {
 			return super.findLinkWithRel(rel, representation);
@@ -55,7 +56,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	@Override
 	public Link findLinkWithRel(String rel, InputStream representation) {
 
-		if (rel.equals(Link.REL_SELF)) {
+		if (rel.equals(IanaLinkRelation.SELF.value())) {
 			return findSelfLink(representation);
 		} else {
 			return super.findLinkWithRel(rel, representation);
@@ -65,7 +66,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	@Override
 	public List<Link> findLinksWithRel(String rel, String representation) {
 
-		if (rel.equals(Link.REL_SELF)) {
+		if (rel.equals(IanaLinkRelation.SELF.value())) {
 			return addSelfLink(super.findLinksWithRel(rel, representation), representation);
 		} else {
 			return super.findLinksWithRel(rel, representation);
@@ -75,7 +76,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	@Override
 	public List<Link> findLinksWithRel(String rel, InputStream representation) {
 
-		if (rel.equals(Link.REL_SELF)) {
+		if (rel.equals(IanaLinkRelation.SELF.value())) {
 			return addSelfLink(super.findLinksWithRel(rel, representation), representation);
 		} else {
 			return super.findLinksWithRel(rel, representation);
@@ -87,11 +88,11 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	//
 
 	private Link findSelfLink(String representation) {
-		return this.selfLinkDiscoverer.findLinkWithRel(Link.REL_SELF, representation);
+		return this.selfLinkDiscoverer.findLinkWithRel(IanaLinkRelation.SELF.value(), representation);
 	}
 
 	private Link findSelfLink(InputStream representation) {
-		return this.selfLinkDiscoverer.findLinkWithRel(Link.REL_SELF, representation);
+		return this.selfLinkDiscoverer.findLinkWithRel(IanaLinkRelation.SELF.value(), representation);
 	}
 
 	private List<Link> addSelfLink(List<Link> links, String representation) {
