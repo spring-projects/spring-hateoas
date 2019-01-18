@@ -214,7 +214,6 @@ public class MultiMediatypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
-		;
 	}
 
 	@Test

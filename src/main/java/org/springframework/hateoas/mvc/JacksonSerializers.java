@@ -52,7 +52,7 @@ public class JacksonSerializers {
 		 */
 		@Override
 		public MediaType deserialize(JsonParser p, DeserializationContext ctxt)
-				throws IOException, JsonProcessingException {
+				throws IOException {
 			return MediaType.parseMediaType(p.getText());
 		}
 	}

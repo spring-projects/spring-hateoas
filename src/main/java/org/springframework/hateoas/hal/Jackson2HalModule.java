@@ -42,25 +42,12 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
@@ -79,7 +66,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Jackson 2 module implementation to render {@link Link} and {@link ResourceSupport} instances in HAL compatible JSON.
- * 
+ *
  * @author Alexander Baetz
  * @author Oliver Gierke
  * @author Jeffrey Walraven
@@ -100,7 +87,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * Returns whether the module was already registered in the given {@link ObjectMapper}.
-	 * 
+	 *
 	 * @param mapper must not be {@literal null}.
 	 * @return
 	 */
@@ -112,7 +99,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON.
-	 * 
+	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
@@ -129,12 +116,12 @@ public class Jackson2HalModule extends SimpleModule {
 		private final HalConfiguration halConfiguration;
 
 		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper, MessageSourceAccessor accessor,
-				HalConfiguration halConfiguration) {
+									 HalConfiguration halConfiguration) {
 			this(null, curieProvider, mapper, accessor, halConfiguration);
 		}
 
 		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageSourceAccessor accessor, HalConfiguration halConfiguration) {
+									 MessageSourceAccessor accessor, HalConfiguration halConfiguration) {
 
 			super(TypeFactory.defaultInstance().constructType(List.class));
 
@@ -158,7 +145,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException, JsonGenerationException {
+			throws IOException {
 
 			// sort links according to their relation
 			Map<String, List<Object>> sortedLinks = new LinkedHashMap<>();
@@ -189,8 +176,8 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 
 				sortedLinks //
-						.computeIfAbsent(rel, key -> new ArrayList<>())//
-						.add(toHalLink(link));
+					.computeIfAbsent(rel, key -> new ArrayList<>())//
+					.add(toHalLink(link));
 
 				links.add(link);
 			}
@@ -208,15 +195,15 @@ public class Jackson2HalModule extends SimpleModule {
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
-			MapSerializer serializer = MapSerializer.construct(Collections.<String> emptySet(), mapType, true, null,
-					provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration), null);
+			MapSerializer serializer = MapSerializer.construct(Collections.emptySet(), mapType, true, null,
+				provider.findKeySerializer(keyType, null), new OptionalListJackson2Serializer(property, halConfiguration), null);
 
 			serializer.serialize(sortedLinks, jgen, provider);
 		}
 
 		/**
 		 * Wraps the given link into a HAL specific extension.
-		 * 
+		 *
 		 * @param link must not be {@literal null}.
 		 * @return
 		 */
@@ -235,7 +222,7 @@ public class Jackson2HalModule extends SimpleModule {
 		/**
 		 * Returns the title for the given local link relation resolved through the configured {@link MessageSourceAccessor}
 		 * .
-		 * 
+		 *
 		 * @param localRel must not be {@literal null} or empty.
 		 * @return
 		 */
@@ -256,7 +243,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
-				throws JsonMappingException {
+			throws JsonMappingException {
 			return new HalLinkListSerializer(property, curieProvider, mapper, accessor, halConfiguration);
 		}
 
@@ -307,12 +294,12 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
-	 * 
+	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
 	public static class HalResourcesSerializer extends ContainerSerializer<Collection<?>>
-			implements ContextualSerializer {
+		implements ContextualSerializer {
 
 		private static final long serialVersionUID = 8030706944344625390L;
 
@@ -333,13 +320,13 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.codehaus.jackson.map.ser.std.SerializerBase#serialize(java.lang.Object, org.codehaus.jackson.JsonGenerator,
 		 * org.codehaus.jackson.map.SerializerProvider)
 		 */
 		@Override
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException, JsonGenerationException {
+			throws IOException {
 
 			Map<String, Object> embeddeds = embeddedMapper.map(value);
 
@@ -357,7 +344,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-				throws JsonMappingException {
+			throws JsonMappingException {
 			return new HalResourcesSerializer(property, embeddedMapper);
 		}
 
@@ -389,12 +376,12 @@ public class Jackson2HalModule extends SimpleModule {
 	/**
 	 * Custom {@link JsonSerializer} to render Link instances in HAL compatible JSON. Renders the {@link Link} as
 	 * immediate object if we have a single one or as array if we have multiple ones.
-	 * 
+	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
 	public static class OptionalListJackson2Serializer extends ContainerSerializer<Object>
-			implements ContextualSerializer {
+		implements ContextualSerializer {
 
 		private static final long serialVersionUID = 3700806118177419817L;
 
@@ -404,7 +391,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/**
 		 * Creates a new {@link OptionalListJackson2Serializer} using the given {@link BeanProperty}.
-		 * 
+		 *
 		 * @param property
 		 */
 		public OptionalListJackson2Serializer(BeanProperty property, HalConfiguration halConfiguration) {
@@ -449,7 +436,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException, JsonGenerationException {
+			throws IOException {
 
 			while (value.hasNext()) {
 				Object elem = value.next();
@@ -462,7 +449,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		private JsonSerializer<Object> getOrLookupSerializerFor(Class<?> type, SerializerProvider provider)
-				throws JsonMappingException {
+			throws JsonMappingException {
 
 			JsonSerializer<Object> serializer = serializers.get(type);
 
@@ -494,7 +481,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
@@ -512,13 +499,13 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider,
 		 * com.fasterxml.jackson.databind.BeanProperty)
 		 */
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
-				throws JsonMappingException {
+			throws JsonMappingException {
 			return new OptionalListJackson2Serializer(property, halConfiguration);
 		}
 	}
@@ -555,7 +542,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt)
-				throws IOException, JsonProcessingException {
+			throws IOException {
 
 			List<Link> result = new ArrayList<>();
 			String relation;
@@ -595,7 +582,7 @@ public class Jackson2HalModule extends SimpleModule {
 	}
 
 	public static class HalResourcesDeserializer extends ContainerDeserializerBase<List<Object>>
-			implements ContextualDeserializer {
+		implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 4755806754621032622L;
 
@@ -639,7 +626,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt)
-				throws IOException, JsonProcessingException {
+			throws IOException {
 
 			List<Object> result = new ArrayList<>();
 			JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
@@ -668,7 +655,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		@Override
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
-				throws JsonMappingException {
+			throws JsonMappingException {
 
 			JavaType vc = property.getType().getContentType();
 			HalResourcesDeserializer des = new HalResourcesDeserializer(vc);
@@ -687,7 +674,7 @@ public class Jackson2HalModule extends SimpleModule {
 		private final AutowireCapableBeanFactory delegate;
 
 		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
-				MessageSourceAccessor messageSourceAccessor) {
+									  MessageSourceAccessor messageSourceAccessor) {
 			this(provider, curieProvider, messageSourceAccessor, new HalConfiguration());
 		}
 
@@ -695,13 +682,13 @@ public class Jackson2HalModule extends SimpleModule {
 		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
 		 * {@link MessageSourceAccessor}. Registers a prepared {@link HalResourcesSerializer} and
 		 * {@link HalLinkListSerializer} falling back to instantiation expecting a default constructor.
-		 * 
+		 *
 		 * @param provider must not be {@literal null}.
 		 * @param curieProvider can be {@literal null}.
 		 * @param messageSourceAccessor can be {@literal null}.
 		 */
 		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
-				MessageSourceAccessor messageSourceAccessor, HalConfiguration halConfiguration) {
+									  MessageSourceAccessor messageSourceAccessor, HalConfiguration halConfiguration) {
 			this(provider, curieProvider, messageSourceAccessor, true, halConfiguration);
 		}
 
@@ -710,19 +697,19 @@ public class Jackson2HalModule extends SimpleModule {
 		 * {@link MessageSourceAccessor} and whether to enforce embedded collections. Registers a prepared
 		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation expecting a
 		 * default constructor.
-		 * 
+		 *
 		 * @param provider must not be {@literal null}.
 		 * @param curieProvider can be {@literal null}
 		 * @param accessor can be {@literal null}.
 		 * @param enforceEmbeddedCollections
 		 */
 		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
-				boolean enforceEmbeddedCollections, HalConfiguration halConfiguration) {
+									  boolean enforceEmbeddedCollections, HalConfiguration halConfiguration) {
 			this(provider, curieProvider, accessor, enforceEmbeddedCollections, null, halConfiguration);
 		}
 
 		private HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
-				boolean enforceEmbeddedCollections, AutowireCapableBeanFactory delegate, HalConfiguration halConfiguration) {
+									   boolean enforceEmbeddedCollections, AutowireCapableBeanFactory delegate, HalConfiguration halConfiguration) {
 
 			Assert.notNull(provider, "RelProvider must not be null!");
 
@@ -732,7 +719,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			this.serializers.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
 			this.serializers.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, accessor, halConfiguration));
+				new HalLinkListSerializer(curieProvider, mapper, accessor, halConfiguration));
 		}
 
 		/*
@@ -741,7 +728,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
-				Class<?> deserClass) {
+														Class<?> deserClass) {
 			return (JsonDeserializer<?>) findInstance(deserClass);
 		}
 
@@ -751,7 +738,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated,
-				Class<?> keyDeserClass) {
+													   Class<?> keyDeserClass) {
 			return (KeyDeserializer) findInstance(keyDeserClass);
 		}
 
@@ -770,7 +757,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated,
-				Class<?> builderClass) {
+																  Class<?> builderClass) {
 			return (TypeResolverBuilder<?>) findInstance(builderClass);
 		}
 
@@ -793,7 +780,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 	/**
 	 * {@link JsonSerializer} to only render {@link Boolean} values if they're set to {@literal true}.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 * @since 0.9
 	 */
@@ -819,7 +806,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public void serialize(Boolean value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException, JsonGenerationException {
+			throws IOException {
 			jgen.writeBoolean(value.booleanValue());
 		}
 
@@ -838,7 +825,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		@Override
 		public void acceptJsonFormatVisitor(JsonFormatVisitorWrapper visitor, JavaType typeHint)
-				throws JsonMappingException {
+			throws JsonMappingException {
 			if (visitor != null) {
 				visitor.expectBooleanFormat(typeHint);
 			}
@@ -859,7 +846,7 @@ public class Jackson2HalModule extends SimpleModule {
 		/**
 		 * Creates a new {@link EmbeddedMapper} for the given {@link RelProvider}, {@link CurieProvider} and flag whether to
 		 * prefer collection relations.
-		 * 
+		 *
 		 * @param relProvider must not be {@literal null}.
 		 * @param curieProvider can be {@literal null}.
 		 * @param preferCollectionRels
@@ -875,7 +862,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/**
 		 * Maps the given source elements as embedded values.
-		 * 
+		 *
 		 * @param source must not be {@literal null}.
 		 * @return
 		 */
@@ -894,14 +881,14 @@ public class Jackson2HalModule extends SimpleModule {
 
 		/**
 		 * Returns whether the given source elements will be namespaced.
-		 * 
+		 *
 		 * @param source must not be {@literal null}.
 		 * @return
 		 */
 		public boolean hasCuriedEmbed(Iterable<?> source) {
 
 			return map(source).keySet().stream() //
-					.anyMatch(rel -> rel.contains(":"));
+				.anyMatch(rel -> rel.contains(":"));
 		}
 	}
 

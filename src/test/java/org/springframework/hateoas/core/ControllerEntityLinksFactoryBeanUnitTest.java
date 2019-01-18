@@ -35,7 +35,7 @@ import org.springframework.stereotype.Controller;
 public class ControllerEntityLinksFactoryBeanUnitTest {
 
 	@Test
-	public void rejectsFactoryBeanIfAnnotationNotSet() throws Exception {
+	public void rejectsFactoryBeanIfAnnotationNotSet() {
 
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
 

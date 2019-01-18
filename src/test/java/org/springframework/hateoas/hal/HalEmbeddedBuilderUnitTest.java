@@ -51,8 +51,8 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(null, "foo", 1L);
 
-		assertThat(map.get("string")).isEqualTo((Object) "foo");
-		assertThat(map.get("long")).isEqualTo((Object) 1L);
+		assertThat(map.get("string")).isEqualTo("foo");
+		assertThat(map.get("long")).isEqualTo(1L);
 	}
 
 	@Test
@@ -121,8 +121,8 @@ public class HalEmbeddedBuilderUnitTest {
 
 		Map<String, Object> map = setUpBuilder(curieProvider, "foo", 1L);
 
-		assertThat(map.get("curie:string")).isEqualTo((Object) "foo");
-		assertThat(map.get("curie:long")).isEqualTo((Object) 1L);
+		assertThat(map.get("curie:string")).isEqualTo("foo");
+		assertThat(map.get("curie:long")).isEqualTo(1L);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class HalEmbeddedBuilderUnitTest {
 		Map<String, Object> map = setUpBuilder(curieProvider, "foo", "bar", 1L);
 
 		assertThat(map.containsKey("curie:string")).isFalse();
-		assertThat(map.get("curie:long")).isEqualTo((Object) 1L);
+		assertThat(map.get("curie:long")).isEqualTo(1L);
 		assertHasValues(map, "curie:strings", "foo", "bar");
 	}
 
@@ -148,7 +148,7 @@ public class HalEmbeddedBuilderUnitTest {
 
 		assertThat(map.containsKey("curie:string")).isFalse();
 		assertHasValues(map, "curie:strings", "foo", "bar", "foobar");
-		assertThat(map.get("curie:long")).isEqualTo((Object) 1L);
+		assertThat(map.get("curie:long")).isEqualTo(1L);
 	}
 
 	/**

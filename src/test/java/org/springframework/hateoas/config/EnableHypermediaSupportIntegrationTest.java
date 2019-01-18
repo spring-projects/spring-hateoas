@@ -446,7 +446,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
+	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() {
 
 		withContext(HalConfig.class, context -> {
 

@@ -40,7 +40,7 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 	 */
 	default MediaType getMediaType() {
 		return null;
-	};
+	}
 
 	/**
 	 * Look up the {@link AffordanceModel} for this factory.

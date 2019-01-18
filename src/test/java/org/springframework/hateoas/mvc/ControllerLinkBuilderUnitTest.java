@@ -429,7 +429,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #257, #107
 	 */
 	@Test
-	public void usesXForwardedProtoHeaderAsLinkSchema() throws ServletException, IOException {
+	public void usesXForwardedProtoHeaderAsLinkSchema() {
 
 		for (String proto : Arrays.asList("http", "https")) {
 

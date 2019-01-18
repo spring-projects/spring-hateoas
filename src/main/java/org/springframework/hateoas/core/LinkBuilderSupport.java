@@ -21,10 +21,10 @@ import static org.springframework.web.util.UriComponentsBuilder.*;
 import lombok.Getter;
 
 import java.net.URI;
-import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Identifiable;

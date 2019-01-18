@@ -49,8 +49,8 @@ public class PropertyUtils {
 	static {
 		FIELDS_TO_IGNORE.add("class");
 		FIELDS_TO_IGNORE.add("links");
-	};
-	
+	}
+
 	public static Map<String, Object> findProperties(Object object) {
 
 		if (object.getClass().equals(Resource.class)) {

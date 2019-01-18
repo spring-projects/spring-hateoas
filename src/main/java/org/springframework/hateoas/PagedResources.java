@@ -144,7 +144,7 @@ public class PagedResources<T> extends Resources<T> {
 		PagedResources<?> that = (PagedResources<?>) obj;
 		boolean metadataEquals = this.metadata == null ? that.metadata == null : this.metadata.equals(that.metadata);
 
-		return metadataEquals ? super.equals(obj) : false;
+		return metadataEquals && super.equals(obj);
 	}
 
 	/* 

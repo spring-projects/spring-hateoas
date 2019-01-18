@@ -34,7 +34,7 @@ import org.springframework.hateoas.Resources;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Relation {
 
-	static final String NO_RELATION = "";
+	String NO_RELATION = "";
 
 	/**
 	 * Defines the relation to be used when referring to a single resource.

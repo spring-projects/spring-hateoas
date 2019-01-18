@@ -135,7 +135,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 		Resources<?> that = (Resources<?>) obj;
 
 		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
-		return contentEqual ? super.equals(obj) : false;
+		return contentEqual && super.equals(obj);
 	}
 
 	/* 

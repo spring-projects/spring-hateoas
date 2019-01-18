@@ -56,7 +56,7 @@ public class VndErrorsMarshallingTest {
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());

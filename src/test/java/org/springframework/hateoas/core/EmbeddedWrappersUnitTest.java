@@ -42,7 +42,7 @@ public class EmbeddedWrappersUnitTest {
 
 		assertEmptyCollectionValue(wrapper);
 		assertThat(wrapper.getRel()).isNull();
-		assertThat(wrapper.getRelTargetType()).isEqualTo((Class) String.class);
+		assertThat(wrapper.getRelTargetType()).isEqualTo(String.class);
 	}
 
 	/**

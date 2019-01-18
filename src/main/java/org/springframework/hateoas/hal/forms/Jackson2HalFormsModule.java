@@ -82,7 +82,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 	}
 
 	@JsonSerialize(using = HalFormsResourceSerializer.class)
-	static interface ResourceMixin {}
+	interface ResourceMixin {}
 
 	@JsonSerialize(using = HalFormsResourcesSerializer.class)
 	abstract class ResourcesMixin<T> extends Resources<T> {

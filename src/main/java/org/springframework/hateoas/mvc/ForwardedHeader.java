@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.StringUtils.*;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -100,7 +100,7 @@ public class Resource<T> extends ResourceSupport {
 		Resource<?> that = (Resource<?>) obj;
 
 		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
-		return contentEqual ? super.equals(obj) : false;
+		return contentEqual && super.equals(obj);
 	}
 
 	/* 

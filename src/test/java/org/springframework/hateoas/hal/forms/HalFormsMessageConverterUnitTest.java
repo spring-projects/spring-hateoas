@@ -119,7 +119,7 @@ public class HalFormsMessageConverterUnitTest {
 
 		HttpOutputMessage convertedMessage = new HttpOutputMessage() {
 			@Override
-			public OutputStream getBody() throws IOException {
+			public OutputStream getBody() {
 				return stream;
 			}
 

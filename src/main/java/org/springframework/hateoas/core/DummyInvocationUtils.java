@@ -117,7 +117,7 @@ public class DummyInvocationUtils {
 		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 		 */
 		@Override
-		public Object invoke(org.aopalliance.intercept.MethodInvocation invocation) throws Throwable {
+		public Object invoke(org.aopalliance.intercept.MethodInvocation invocation) {
 			return intercept(invocation.getThis(), invocation.getMethod(), invocation.getArguments(), null);
 		}
 

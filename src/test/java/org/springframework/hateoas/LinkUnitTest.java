@@ -111,7 +111,7 @@ public class LinkUnitTest {
 
 	@Test
 	public void differentTypeDoesNotEqual() {
-		assertThat(new Link("foo")).isNotEqualTo((Object) new ResourceSupport());
+		assertThat(new Link("foo")).isNotEqualTo(new ResourceSupport());
 	}
 
 	@Test

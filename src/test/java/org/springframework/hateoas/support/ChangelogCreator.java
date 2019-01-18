@@ -33,7 +33,7 @@ class ChangelogCreator {
 	private static final int MILESTONE_ID = 23;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
-	public static void main(String... args) throws Exception {
+	public static void main(String... args) {
 
 		RestTemplate template = new RestTemplate();
 		String response = template.getForObject(URI_TEMPLATE, String.class, MILESTONE_ID);

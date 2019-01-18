@@ -70,7 +70,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void resourceWrappedSpringMvcParameter() throws NoSuchMethodException {
+	public void resourceWrappedSpringMvcParameter() {
 
 		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", Resource.class);
 		MethodParameters parameters = new MethodParameters(method);

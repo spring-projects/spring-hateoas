@@ -222,7 +222,7 @@ public class Server implements Closeable {
 	 * @see java.io.Closeable#close()
 	 */
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		closeJadler();
 	}
 }

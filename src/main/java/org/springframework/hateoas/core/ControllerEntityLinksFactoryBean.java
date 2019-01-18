@@ -85,7 +85,7 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 	 * @see org.springframework.beans.factory.config.AbstractFactoryBean#createInstance()
 	 */
 	@Override
-	protected ControllerEntityLinks createInstance() throws Exception {
+	protected ControllerEntityLinks createInstance() {
 
 		Collection<Class<?>> controllerTypes = new HashSet<Class<?>>();
 

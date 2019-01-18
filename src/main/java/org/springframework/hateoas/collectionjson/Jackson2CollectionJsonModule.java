@@ -299,7 +299,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public void serialize(Resources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
+		public void serialize(Resources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
@@ -362,7 +362,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public void serialize(PagedResources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonGenerationException {
+		public void serialize(PagedResources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			CollectionJson<?> collectionJson = new CollectionJson()
 				.withVersion("1.0")
@@ -427,7 +427,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public List<Link> deserialize(JsonParser jp, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+		public List<Link> deserialize(JsonParser jp, DeserializationContext deserializationContext) throws IOException {
 
 			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, CollectionJsonDocument.class);
 
@@ -617,7 +617,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public Resources deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+		public Resources deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
@@ -690,7 +690,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public PagedResources deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+		public PagedResources deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
