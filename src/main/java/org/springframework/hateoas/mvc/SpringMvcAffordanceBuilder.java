@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.hateoas.core.MethodInvocation;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,7 +58,10 @@ class SpringMvcAffordanceBuilder {
 		for (HttpMethod requestMethod : discoverer.getRequestMethod(invocation.getTargetType(), invocation.getMethod())) {
 
 			String methodName = invocation.getMethod().getName();
-			Link affordanceLink = new Link(components.toUriString()).withRel(LinkRelation.of(methodName));
+
+			String href = components.toUriString().equals("") ? "/" : components.toUriString();
+			Link affordanceLink = new Link(href).withRel(LinkRelation.of(methodName));
+
 			MethodParameters invocationMethodParameters = new MethodParameters(invocation.getMethod());
 
 			ResolvableType inputType = invocationMethodParameters.getParametersWith(RequestBody.class).stream() //

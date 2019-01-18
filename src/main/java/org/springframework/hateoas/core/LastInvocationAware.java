@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.client;
+package org.springframework.hateoas.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import java.util.Iterator;
 
-@JsonAutoDetect(fieldVisibility = Visibility.ANY)
-public class Movie {
+/**
+ * @author Oliver Drotbohm
+ * @author Greg Turnquist
+ */
+public interface LastInvocationAware {
 
-	String title;
+	Iterator<Object> getObjectParameters();
 
-	public Movie(String title) {
-		this.title = title;
-	}
+	MethodInvocation getLastInvocation();
 }

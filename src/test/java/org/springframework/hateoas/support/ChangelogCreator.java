@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas.support;
 
-import net.minidev.json.JSONArray;
-
 import java.util.Iterator;
 
+import net.minidev.json.JSONArray;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;

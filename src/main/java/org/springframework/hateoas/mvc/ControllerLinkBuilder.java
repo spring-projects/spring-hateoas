@@ -26,9 +26,9 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.hateoas.core.MethodInvocation;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -78,7 +78,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		this(uriComponents, TemplateVariables.NONE, null);
 	}
 
-	ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, MethodInvocation invocation) {
+	public ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, MethodInvocation invocation) {
 
 		super(uriComponents);
 
@@ -271,10 +271,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
-	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
-	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
-	 * back to relative URIs.
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping. If no
+	 * {@link RequestContextHolder} exists (you're outside a Spring Web call), fall back to relative URIs.
 	 *
 	 * @return
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 package org.springframework.hateoas.mvc;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.util.ReflectionUtils.*;
 
@@ -50,7 +52,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 
 /**
- * Unit tests for {@link org.springframework.data.rest.webmvc.ResourceProcessorHandlerMethodReturnValueHandler}.
+ * Unit tests for {@link ResourceProcessorHandlerMethodReturnValueHandler}.
  * 
  * @author Oliver Gierke
  * @author Jon Brisbin
