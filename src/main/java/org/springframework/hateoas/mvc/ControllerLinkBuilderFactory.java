@@ -74,7 +74,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
 
-	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<UriComponentsContributor>();
+	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<>();
 
 	/**
 	 * Configures the {@link UriComponentsContributor} to be used when building {@link Link} instances from method
@@ -142,7 +142,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
 
 		UriTemplate template = new UriTemplate(mapping);
-		Map<String, Object> values = new HashMap<String, Object>();
+		Map<String, Object> values = new HashMap<>();
 		Iterator<String> names = template.getVariableNames().iterator();
 
 		while (classMappingParameters.hasNext()) {
@@ -153,7 +153,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			values.put(parameter.getVariableName(), encodePath(parameter.asString()));
 		}
 
-		List<String> optionalEmptyParameters = new ArrayList<String>();
+		List<String> optionalEmptyParameters = new ArrayList<>();
 
 		for (BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation)) {
 

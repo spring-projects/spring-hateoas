@@ -87,7 +87,7 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 	@Override
 	protected ControllerEntityLinks createInstance() {
 
-		Collection<Class<?>> controllerTypes = new HashSet<Class<?>>();
+		Collection<Class<?>> controllerTypes = new HashSet<>();
 
 		for (Class<?> controllerType : getBeanTypesWithAnnotation(annotation)) {
 			if (AnnotationUtils.findAnnotation(controllerType, ExposesResourceFor.class) != null) {
@@ -112,7 +112,7 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 
 	private Iterable<Class<?>> getBeanTypesWithAnnotation(Class<? extends Annotation> type) {
 
-		Set<Class<?>> annotatedTypes = new HashSet<Class<?>>();
+		Set<Class<?>> annotatedTypes = new HashSet<>();
 
 		for (String beanName : context.getBeanDefinitionNames()) {
 

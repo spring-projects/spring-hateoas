@@ -60,7 +60,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 		Assert.notNull(error, "Error must not be null");
 
-		this.vndErrors = new ArrayList<VndError>(errors.length + 1);
+		this.vndErrors = new ArrayList<>(errors.length + 1);
 		this.vndErrors.add(error);
 		this.vndErrors.addAll(Arrays.asList(errors));
 	}
@@ -82,7 +82,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * Protected default constructor to allow JAXB marshalling.
 	 */
 	protected VndErrors() {
-		this.vndErrors = new ArrayList<VndError>();
+		this.vndErrors = new ArrayList<>();
 	}
 
 	/**

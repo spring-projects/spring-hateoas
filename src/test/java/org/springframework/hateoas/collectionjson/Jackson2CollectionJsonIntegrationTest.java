@@ -121,11 +121,11 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void rendersSimpleResourcesAsEmbedded() throws Exception {
 
-		List<String> content = new ArrayList<String>();
+		List<String> content = new ArrayList<>();
 		content.add("first");
 		content.add("second");
 
-		Resources<String> resources = new Resources<String>(content);
+		Resources<String> resources = new Resources<>(content);
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources)).isEqualTo(MappingUtils.read(new ClassPathResource("resources.json", getClass())));
@@ -134,11 +134,11 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializesSimpleResourcesAsEmbedded() throws Exception {
 
-		List<String> content = new ArrayList<String>();
+		List<String> content = new ArrayList<>();
 		content.add("first");
 		content.add("second");
 
-		Resources<String> expected = new Resources<String>(content);
+		Resources<String> expected = new Resources<>(content);
 		expected.add(new Link("localhost"));
 
 		Resources<String> result = mapper.readValue(MappingUtils.read(new ClassPathResource("resources.json", getClass())),
@@ -151,7 +151,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void renderResource() throws Exception {
 
-		Resource<String> data = new Resource<String>("first", new Link("localhost"));
+		Resource<String> data = new Resource<>("first", new Link("localhost"));
 
 		assertThat(write(data)).isEqualTo(MappingUtils.read(new ClassPathResource("resource.json", getClass())));
 	}
@@ -170,11 +170,11 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void renderComplexStructure() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<Resource<String>>();
-		data.add(new Resource<String>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<String>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<Resource<String>> data = new ArrayList<>();
+		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<Resource<String>> resources = new Resources<Resource<String>>(data);
+		Resources<Resource<String>> resources = new Resources<>(data);
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
@@ -184,11 +184,11 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializeResources() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<Resource<String>>();
-		data.add(new Resource<String>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<String>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<Resource<String>> data = new ArrayList<>();
+		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources expected = new Resources<Resource<String>>(data);
+		Resources expected = new Resources<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
@@ -203,11 +203,11 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void renderSimplePojos() throws Exception {
 
-		List<Resource<SimplePojo>> data = new ArrayList<Resource<SimplePojo>>();
+		List<Resource<SimplePojo>> data = new ArrayList<>();
 		data.add(new Resource<>(new SimplePojo("text", 1), new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>(new SimplePojo("text2", 2), new Link("localhost")));
 
-		Resources<Resource<SimplePojo>> resources = new Resources<Resource<SimplePojo>>(data);
+		Resources<Resource<SimplePojo>> resources = new Resources<>(data);
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
@@ -233,7 +233,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 
 	private static Resources<Resource<SimplePojo>> setupAnnotatedPagedResources() {
 
-		List<Resource<SimplePojo>> content = new ArrayList<Resource<SimplePojo>>();
+		List<Resource<SimplePojo>> content = new ArrayList<>();
 		content.add(new Resource<>(new SimplePojo("test1", 1), new Link("localhost")));
 		content.add(new Resource<>(new SimplePojo("test2", 2), new Link("localhost")));
 

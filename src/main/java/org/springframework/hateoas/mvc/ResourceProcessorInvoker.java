@@ -18,7 +18,6 @@ package org.springframework.hateoas.mvc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.Ordered;
@@ -54,7 +53,7 @@ public class ResourceProcessorInvoker {
 
 		Assert.notNull(processors, "ResourceProcessors must not be null!");
 
-		this.processors = new ArrayList<ProcessorWrapper>();
+		this.processors = new ArrayList<>();
 
 		for (ResourceProcessor<?> processor : processors) {
 
@@ -70,7 +69,7 @@ public class ResourceProcessorInvoker {
 			}
 		}
 
-		Collections.sort(this.processors, AnnotationAwareOrderComparator.INSTANCE);
+		this.processors.sort(AnnotationAwareOrderComparator.INSTANCE);
 	}
 
 	/**
@@ -105,7 +104,7 @@ public class ResourceProcessorInvoker {
 			Resources<?> resources = (Resources<?>) value;
 			ResolvableType elementTargetType = ResolvableType.forClass(Resources.class, referenceType.getRawClass())
 					.getGeneric(0);
-			List<Object> result = new ArrayList<Object>(resources.getContent().size());
+			List<Object> result = new ArrayList<>(resources.getContent().size());
 
 			for (Object element : resources) {
 

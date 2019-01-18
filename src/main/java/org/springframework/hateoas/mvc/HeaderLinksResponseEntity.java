@@ -71,9 +71,9 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 		Assert.notNull(entity, "Given HttpEntity must not be null!");
 
 		if (entity instanceof ResponseEntity) {
-			return new HeaderLinksResponseEntity<S>((ResponseEntity<S>) entity);
+			return new HeaderLinksResponseEntity<>((ResponseEntity<S>) entity);
 		} else {
-			return new HeaderLinksResponseEntity<S>(entity);
+			return new HeaderLinksResponseEntity<>(entity);
 		}
 	}
 

@@ -807,7 +807,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@Override
 		public void serialize(Boolean value, JsonGenerator jgen, SerializerProvider provider)
 			throws IOException {
-			jgen.writeBoolean(value.booleanValue());
+			jgen.writeBoolean(value);
 		}
 
 		/*

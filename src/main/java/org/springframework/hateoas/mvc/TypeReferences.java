@@ -87,7 +87,7 @@ public class TypeReferences {
 			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, String.format("Type must have exactly one generic type argument but has %s.", parameterizedType.getActualTypeArguments().length));
 
 			Class<?> resourceType = GenericTypeResolver.resolveType(parameterizedType.getActualTypeArguments()[0],
-					new HashMap<TypeVariable, Type>());
+				new HashMap<>());
 
 			this.type = new SyntheticParameterizedType(resourceType, domainType);
 		}

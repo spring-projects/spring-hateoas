@@ -59,7 +59,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 		Assert.notNull(builder, "UriComponentsBuilder must not be null!");
 		this.uriComponents = builder.build();
-		this.affordances = new ArrayList<Affordance>();
+		this.affordances = new ArrayList<>();
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 		Assert.notNull(uriComponents, "UriComponents must not be null!");
 		this.uriComponents = uriComponents;
-		this.affordances = new ArrayList<Affordance>();
+		this.affordances = new ArrayList<>();
 	}
 
 	/*

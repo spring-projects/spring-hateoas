@@ -41,7 +41,7 @@ class HalEmbeddedBuilder {
 	private static final String DEFAULT_REL = "content";
 	private static final String INVALID_EMBEDDED_WRAPPER = "Embedded wrapper %s returned null for both the static rel and the rel target type! Make sure one of the two returns a non-null value!";
 
-	private final Map<String, Object> embeddeds = new HashMap<String, Object>();
+	private final Map<String, Object> embeddeds = new HashMap<>();
 	private final RelProvider provider;
 	private final CurieProvider curieProvider;
 	private final EmbeddedWrappers wrappers;
@@ -90,7 +90,7 @@ class HalEmbeddedBuilder {
 			return;
 		}
 
-		List<Object> list = new ArrayList<Object>();
+		List<Object> list = new ArrayList<>();
 		list.addAll(asCollection(currentValue));
 		list.addAll(asCollection(wrapper.getValue()));
 

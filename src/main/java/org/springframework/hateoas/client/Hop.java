@@ -129,7 +129,7 @@ public class Hop {
 
 		Assert.notNull(globalParameters, "Global parameters must not be null!");
 
-		Map<String, Object> mergedParameters = new HashMap<String, Object>();
+		Map<String, Object> mergedParameters = new HashMap<>();
 
 		mergedParameters.putAll(globalParameters);
 		mergedParameters.putAll(this.parameters);

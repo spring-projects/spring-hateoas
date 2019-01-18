@@ -38,11 +38,8 @@ public final class MappingUtils {
 	 */
 	public static String read(Resource resource) throws IOException {
 
-		Scanner scanner = null;
+		try (Scanner scanner = new Scanner(resource.getInputStream())) {
 
-		try {
-
-			scanner = new Scanner(resource.getInputStream());
 			StringBuilder builder = new StringBuilder();
 
 			while (scanner.hasNextLine()) {
@@ -55,11 +52,6 @@ public final class MappingUtils {
 			}
 
 			return builder.toString();
-
-		} finally {
-			if (scanner != null) {
-				scanner.close();
-			}
 		}
 	}
 }

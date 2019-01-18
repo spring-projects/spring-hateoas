@@ -41,7 +41,7 @@ public class PagedResources<T> extends Resources<T> {
 	 * Default constructor to allow instantiation by reflection.
 	 */
 	protected PagedResources() {
-		this(new ArrayList<T>(), null);
+		this(new ArrayList<>(), null);
 	}
 
 	/**
@@ -88,13 +88,13 @@ public class PagedResources<T> extends Resources<T> {
 	public static <T extends Resource<S>, S> PagedResources<T> wrap(Iterable<S> content, PageMetadata metadata) {
 
 		Assert.notNull(content, "Content must not be null!");
-		ArrayList<T> resources = new ArrayList<T>();
+		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new Resource<S>(element));
+			resources.add((T) new Resource<>(element));
 		}
 
-		return new PagedResources<T>(resources, metadata);
+		return new PagedResources<>(resources, metadata);
 	}
 
 	/**

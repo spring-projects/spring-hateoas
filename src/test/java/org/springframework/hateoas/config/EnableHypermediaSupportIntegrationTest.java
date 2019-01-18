@@ -325,14 +325,8 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersHalFormsHttpMessageConvertersForRestTemplate() {
 
-		withContext(HalFormsConfig.class, context -> {
-
-			foo(context, RestTemplate.class, it -> it.getMessageConverters().get(0), converter -> {
-
-				assertThat(converter.getSupportedMediaTypes()) //
-						.hasSize(1).contains(MediaTypes.HAL_FORMS_JSON);
-			});
-		});
+		withContext(HalFormsConfig.class, context -> foo(context, RestTemplate.class, it -> it.getMessageConverters().get(0), converter -> assertThat(converter.getSupportedMediaTypes()) //
+					.hasSize(1).contains(MediaTypes.HAL_FORMS_JSON)));
 	}
 
 	private static <T, S> void foo(ApplicationContext context, Class<T> beanType, Function<T, S> extractor,
@@ -356,7 +350,7 @@ public class EnableHypermediaSupportIntegrationTest {
 			Optional<ObjectMapper> result = adapter.getMessageConverters().stream()//
 					.filter(it -> it.getSupportedMediaTypes().contains(mediaType)).findFirst() //
 					.map(AbstractJackson2HttpMessageConverter.class::cast) //
-					.map(it -> it.getObjectMapper());
+					.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
 
 			if (!result.isPresent()) {
 				fail("Couldn't find ObjectMapper from HttpMessageConverter supporting " + mediaType);
@@ -401,12 +395,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
 
-		withContext(HalConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+		withContext(HalConfig.class, context -> assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
 	}
 
 	/**
@@ -415,34 +404,19 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
 
-		withContext(HalFormsConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.HAL_FORMS_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+		withContext(HalFormsConfig.class, context -> assertObjectMapper(context, MediaTypes.HAL_FORMS_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
 	}
 
 	@Test
 	public void configuresDefaultObjectMapperForCollectionJsonToIgnoreUnknownProperties() {
 
-		withContext(CollectionJsonConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.COLLECTION_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+		withContext(CollectionJsonConfig.class, context -> assertObjectMapper(context, MediaTypes.COLLECTION_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
 	}
 
 	@Test
 	public void configuresDefaultObjectMapperForUberToIgnoreUnknownProperties() {
 
-		withContext(UberConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.UBER_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+		withContext(UberConfig.class, context -> assertObjectMapper(context, MediaTypes.UBER_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
 	}
 
 	@Test
@@ -474,18 +448,14 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void verifyRenderSingleLinkAsArrayViaOverridingBean() {
 
-		withContext(RenderLinkAsSingleLinksConfig.class, context -> {
+		withContext(RenderLinkAsSingleLinksConfig.class, context -> assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> {
 
-			assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> {
+			ResourceSupport resourceSupport = new ResourceSupport();
+			resourceSupport.add(new Link("localhost").withSelfRel());
 
-				ResourceSupport resourceSupport = new ResourceSupport();
-				resourceSupport.add(new Link("localhost").withSelfRel());
-
-				assertThat(mapper.writeValueAsString(resourceSupport))
-						.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
-			});
-
-		});
+			assertThat(mapper.writeValueAsString(resourceSupport))
+					.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
+		}));
 	}
 
 	private static <E extends Exception> void withContext(Class<?> configuration,

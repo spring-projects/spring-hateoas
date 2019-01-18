@@ -133,10 +133,10 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 
 		if (originalValue instanceof ResponseEntity) {
 			ResponseEntity<?> source = (ResponseEntity<?>) originalValue;
-			entity = new ResponseEntity<ResourceSupport>(newBody, source.getHeaders(), source.getStatusCode());
+			entity = new ResponseEntity<>(newBody, source.getHeaders(), source.getStatusCode());
 		} else {
 			HttpEntity<?> source = (HttpEntity<?>) originalValue;
-			entity = new HttpEntity<ResourceSupport>(newBody, source.getHeaders());
+			entity = new HttpEntity<>(newBody, source.getHeaders());
 		}
 
 		return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(entity) : entity;

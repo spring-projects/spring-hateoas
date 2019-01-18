@@ -113,7 +113,7 @@ public class Jackson2HalFormsModule extends SimpleModule {
 	 */
 	public static class HalFormsHandlerInstantiator extends HalHandlerInstantiator {
 
-		private final Map<Class<?>, Object> serializers = new HashMap<Class<?>, Object>();
+		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
 		public HalFormsHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
 										   MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,

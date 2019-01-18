@@ -158,7 +158,7 @@ public class HalFormsDocument<T> {
 		List<Link> links = new ArrayList<>(this.links);
 		links.add(link);
 
-		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class HalFormsDocument<T> {
 		Map<String, HalFormsTemplate> templates = new HashMap<>(this.templates);
 		templates.put(name, template);
 
-		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
 	}
 
 	/**
@@ -191,9 +191,9 @@ public class HalFormsDocument<T> {
 		Assert.notNull(key, "Embedded key must not be null!");
 		Assert.notNull(value, "Embedded value must not be null!");
 
-		Map<String, Object> embedded = new HashMap<String, Object>(this.embedded);
+		Map<String, Object> embedded = new HashMap<>(this.embedded);
 		embedded.put(key, value);
 
-		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
 	}
 }

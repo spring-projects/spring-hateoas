@@ -40,10 +40,8 @@ import org.springframework.hateoas.support.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
@@ -624,7 +622,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
 
-			List<Object> contentList = new ArrayList<Object>();
+			List<Object> contentList = new ArrayList<>();
 
 			if (document.getCollection().getItems() != null) {
 				for (CollectionJsonItem<?> item : document.getCollection().getItems()) {
@@ -738,7 +736,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 	public static class CollectionJsonHandlerInstantiator extends HandlerInstantiator {
 
-		private final Map<Class<?>, Object> instanceMap = new HashMap<Class<?>, Object>();
+		private final Map<Class<?>, Object> instanceMap = new HashMap<>();
 
 		public CollectionJsonHandlerInstantiator(MessageSourceAccessor messageSource) {
 

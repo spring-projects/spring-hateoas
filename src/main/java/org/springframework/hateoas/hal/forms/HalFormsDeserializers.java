@@ -60,7 +60,7 @@ class HalFormsDeserializers {
 		@Override
 		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
 			Object object;
 

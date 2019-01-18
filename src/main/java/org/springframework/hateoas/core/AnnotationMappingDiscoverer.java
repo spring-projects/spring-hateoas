@@ -131,7 +131,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		RequestMethod[] requestMethods = (RequestMethod[]) value;
 
-		List<HttpMethod> requestMethodNames = new ArrayList<HttpMethod>();
+		List<HttpMethod> requestMethodNames = new ArrayList<>();
 
 		for (RequestMethod requestMethod : requestMethods) {
 			requestMethodNames.add(HttpMethod.valueOf(requestMethod.toString()));

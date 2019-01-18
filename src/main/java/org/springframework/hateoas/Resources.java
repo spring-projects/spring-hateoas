@@ -39,7 +39,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	 * Creates an empty {@link Resources} instance.
 	 */
 	protected Resources() {
-		this(new ArrayList<T>());
+		this(new ArrayList<>());
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 		Assert.notNull(content, "Content must not be null!");
 
-		this.content = new ArrayList<T>();
+		this.content = new ArrayList<>();
 
 		for (T element : content) {
 			this.content.add(element);
@@ -80,13 +80,13 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	public static <T extends Resource<S>, S> Resources<T> wrap(Iterable<S> content) {
 
 		Assert.notNull(content, "Content must not be null!");
-		ArrayList<T> resources = new ArrayList<T>();
+		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new Resource<S>(element));
+			resources.add((T) new Resource<>(element));
 		}
 
-		return new Resources<T>(resources);
+		return new Resources<>(resources);
 	}
 
 	/**

@@ -63,7 +63,7 @@ public class ResourceProcessorInvokingHandlerAdapter extends RequestMappingHandl
 		HandlerMethodReturnValueHandlerComposite oldHandlers = getReturnValueHandlersComposite();
 
 		// Set up ResourceProcessingHandlerMethodResolver to delegate to originally configured ones
-		List<HandlerMethodReturnValueHandler> newHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> newHandlers = new ArrayList<>();
 		newHandlers.add(new ResourceProcessorHandlerMethodReturnValueHandler(oldHandlers, invoker));
 
 		// Configure the new handler to be used

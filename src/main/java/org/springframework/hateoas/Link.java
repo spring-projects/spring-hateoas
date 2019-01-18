@@ -137,7 +137,7 @@ public class Link implements Serializable {
 		this.template = template;
 		this.href = template.toString();
 		this.rel = rel;
-		this.affordances = new ArrayList<Affordance>();
+		this.affordances = new ArrayList<>();
 	}
 
 	public Link(String href, String rel, List<Affordance> affordances) {
@@ -153,7 +153,7 @@ public class Link implements Serializable {
 	 * Empty constructor required by the marshalling framework.
 	 */
 	protected Link() {
-		this.affordances = new ArrayList<Affordance>();
+		this.affordances = new ArrayList<>();
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class Link implements Serializable {
 
 		Assert.notNull(affordance, "Affordance must not be null!");
 
-		List<Affordance> newAffordances = new ArrayList<Affordance>();
+		List<Affordance> newAffordances = new ArrayList<>();
 		newAffordances.addAll(this.affordances);
 		newAffordances.add(affordance);
 
@@ -241,7 +241,7 @@ public class Link implements Serializable {
 	 */
 	public Link andAffordances(List<Affordance> affordances) {
 
-		List<Affordance> newAffordances = new ArrayList<Affordance>();
+		List<Affordance> newAffordances = new ArrayList<>();
 		newAffordances.addAll(this.affordances);
 		newAffordances.addAll(affordances);
 
@@ -437,7 +437,7 @@ public class Link implements Serializable {
 			return Collections.emptyMap();
 		}
 
-		Map<String, String> attributes = new HashMap<String, String>();
+		Map<String, String> attributes = new HashMap<>();
 		Matcher matcher = KEY_AND_VALUE_PATTERN.matcher(source);
 
 		while (matcher.find()) {
