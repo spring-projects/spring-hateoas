@@ -36,7 +36,7 @@ public class DelegatingRelProviderUnitTest {
 	public void foo() {
 
 		List<RelProvider> providers = Arrays.asList(new AnnotationRelProvider(), new DefaultRelProvider());
-		PluginRegistry<RelProvider, Class<?>> registry = OrderAwarePluginRegistry.create(providers);
+		PluginRegistry<RelProvider, Class<?>> registry = OrderAwarePluginRegistry.of(providers);
 
 		RelProvider delegatingProvider = new DelegatingRelProvider(registry);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ForwardedHeader.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
@@ -28,7 +26,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModelFactory;
@@ -36,9 +33,9 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
-import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
+import org.springframework.hateoas.core.MethodInvocation;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
@@ -79,7 +76,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 				ControllerLinkBuilder.class.getClassLoader());
 
 		PluginRegistry<? extends AffordanceModelFactory, MediaType> MODEL_FACTORIES = OrderAwarePluginRegistry
-				.create(factories);
+				.of(factories);
 	}
 
 	private final TemplateVariables variables;
@@ -105,7 +102,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		this(uriComponents, TemplateVariables.NONE, null);
 	}
 
-	ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, MethodInvocation invocation) {
+	public ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, MethodInvocation invocation) {
 
 		super(uriComponents);
 
@@ -298,10 +295,8 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	}
 
 	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
-	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
-	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
-	 * back to relative URIs.
+	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping. If no
+	 * {@link RequestContextHolder} exists (you're outside a Spring Web call), fall back to relative URIs.
 	 * 
 	 * @return
 	 */
@@ -311,31 +306,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			return UriComponentsBuilder.fromPath("/");
 		}
 
-		HttpServletRequest request = getCurrentRequest();
-		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
-
-		// Spring 5.1 can handle X-Forwarded-Ssl headers...
-		if (isSpringAtLeast5_1()) {
-			return builder;
-		} else {
-			return handleXForwardedSslHeader(request, builder);
-		}
-	}
-
-	/**
-	 * Check if the current version of Spring Framework is 5.1 or higher.
-	 * 
-	 * @return
-	 */
-	private static boolean isSpringAtLeast5_1() {
-
-		String versionOfSpringFramework = ApplicationContext.class.getPackage().getImplementationVersion();
-
-		String[] parts = versionOfSpringFramework.split("\\.");
-		int majorVersion = Integer.parseInt(parts[0]);
-		int minorVersion = Integer.parseInt(parts[1]);
-
-		return (majorVersion >= 5 && minorVersion >= 1) || (majorVersion > 5);
+		return ServletUriComponentsBuilder.fromServletMapping(getCurrentRequest());
 	}
 
 	/**

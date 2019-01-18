@@ -47,13 +47,6 @@ public class DummyInvocationUtils {
 	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<>(16,
 			ReferenceType.WEAK);
 
-	public interface LastInvocationAware {
-
-		Iterator<Object> getObjectParameters();
-
-		MethodInvocation getLastInvocation();
-	}
-
 	/**
 	 * Method interceptor that records the last method invocation and creates a proxy for the return value that exposes
 	 * the method invocation.
@@ -179,15 +172,6 @@ public class DummyInvocationUtils {
 		return (T) factory;
 	}
 
-	public interface MethodInvocation {
-
-		Object[] getArguments();
-
-		Method getMethod();
-
-		Class<?> getTargetType();
-	}
-
 	/**
 	 * Returns the already created proxy class for the given source type or creates a new one.
 	 * 
@@ -213,7 +197,7 @@ public class DummyInvocationUtils {
 	}
 
 	@Value
-	static class SimpleMethodInvocation implements MethodInvocation {
+	private static class SimpleMethodInvocation implements MethodInvocation {
 
 		@NonNull Class<?> targetType;
 		@NonNull Method method;

@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
 
 import lombok.Value;
 

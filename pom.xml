@@ -13,7 +13,7 @@
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2018</inceptionYear>
+	<inceptionYear>2012-2019</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
@@ -48,7 +48,7 @@
 			<name>Apache License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-			Copyright 2011-2018 the original author or authors.
+			Copyright 2011-2019 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
 			you may not use this file except in compliance with the License.
@@ -77,8 +77,9 @@
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.2.0</jsonpath.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
+		<reactor-bom.version>Californium-SR4</reactor-bom.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<spring.version>5.0.11.RELEASE</spring.version>
+		<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
 		<spring-plugin.version>2.0.0.BUILD-SNAPSHOT</spring-plugin.version>
 		<kotlin.version>1.2.71</kotlin.version>
 	</properties>
@@ -88,8 +89,6 @@
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.12.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.2</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -102,9 +101,9 @@
 		<profile>
 			<id>spring51-next</id>
 			<properties>
-				<spring.version>5.1.4.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.2</jackson.version>
 			</properties>
+			<dependencies>
+			</dependencies>
 			<repositories>
 				<repository>
 					<id>spring-libs-snapshot</id>
@@ -462,6 +461,18 @@
 
 	</profiles>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>${reactor-bom.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 
 		<!-- Kotlin extension -->
@@ -518,6 +529,14 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webflux</artifactId>
+			<version>${spring.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -623,6 +642,18 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
 		<!--  Needs to be after Jadler to make sure it sees the Servlet 3.0 dependency pulled in for testing -->
 
 		<dependency>

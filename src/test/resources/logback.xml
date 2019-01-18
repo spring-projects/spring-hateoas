@@ -7,7 +7,13 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.springframework.hateoas" level="error" />
+	<!--<logger name="org.springframework.hateoas" level="error" />-->
+	<logger name="org.springframework.hateoas" level="trace" />
+	<logger name="io.reactor" level="trace" />
+	<logger name="org.springframework.test" level="trace" />
+	<logger name="org.springframework.web" level="trace" />
+	<logger name="org.springframework.webmvc" level="trace" />
+	<logger name="org.springframework.webflux" level="trace" />
 
 	<root level="error">
 		<appender-ref ref="console" />
