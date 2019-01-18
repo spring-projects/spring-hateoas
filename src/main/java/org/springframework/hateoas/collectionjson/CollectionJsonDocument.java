@@ -45,6 +45,6 @@ class CollectionJsonDocument<T> {
 						   @JsonProperty("queries") List<CollectionJsonQuery> queries,
 						   @JsonProperty("template") CollectionJsonTemplate template,
 						   @JsonProperty("error") CollectionJsonError error) {
-		this.collection = new CollectionJson(version, href, links, items, queries, template, error);
+		this.collection = new CollectionJson<>(version, href, links, items, queries, template, error);
 	}
 }
