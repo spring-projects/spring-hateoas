@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.config;
+package org.springframework.hateoas.config.mvc;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
- * {@link BeanPostProcessor} to register {@link Jackson2HalModule} with {@link ObjectMapper} instances registered in the
- * {@link ApplicationContext}.
+ * {@link BeanPostProcessor} to register hypermedia support with {@link RestTemplate} instances found in the
+ * application context.
  *
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 @RequiredArgsConstructor
-class ConverterRegisteringBeanPostProcessor implements BeanPostProcessor {
+public class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-	private final ObjectFactory<ConverterRegisteringWebMvcConfigurer> configurer;
+	private final HypermediaWebMvcConfigurer configurer;
 
 	/* 
 	 * (non-Javadoc)
@@ -45,9 +41,7 @@ class ConverterRegisteringBeanPostProcessor implements BeanPostProcessor {
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
 		if (bean instanceof RestTemplate) {
-
-			ConverterRegisteringWebMvcConfigurer object = configurer.getObject();
-			object.extendMessageConverters(((RestTemplate) bean).getMessageConverters());
+			this.configurer.extendMessageConverters(((RestTemplate) bean).getMessageConverters());
 		}
 
 		return bean;

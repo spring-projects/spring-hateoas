@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.springframework.hateoas.config;
 
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -39,6 +38,7 @@ import org.springframework.util.ClassUtils;
  * Common HATEOAS specific configuration.
  *
  * @author Oliver Gierke
+ * @author Greg Turnquist
  * @soundtrack Elephants Crossing - Wait (Live at Stadtfest Dresden)
  * @since 0.19
  */
@@ -64,12 +64,6 @@ class HateoasConfiguration {
 		} catch (Exception o_O) {
 			throw new BeanCreationException("resourceDescriptionMessageSourceAccessor", "", o_O);
 		}
-	}
-
-	@Bean
-	ConverterRegisteringBeanPostProcessor jackson2ModuleRegisteringBeanPostProcessor(
-			ObjectFactory<ConverterRegisteringWebMvcConfigurer> configurer) {
-		return new ConverterRegisteringBeanPostProcessor(configurer);
 	}
 
 	// RelProvider

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.config.mvc.WebMvcHateoasConfiguration;
+import org.springframework.hateoas.config.reactive.WebFluxHateoasConfiguration;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
+import org.springframework.hateoas.support.WebStack;
 import org.springframework.hateoas.uber.UberLinkDiscoverer;
 import org.springframework.util.ClassUtils;
 
@@ -62,6 +65,19 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
 		Collection<HypermediaType> types = Arrays.asList((HypermediaType[]) attributes.get("type"));
 
+		/*
+		 * Register all the {@link HypermediaType}s as individual beans, so they can be gathered as needed into a
+		 * collection using the application context.
+		 */
+		for (HypermediaType type : types) {
+			
+			BeanDefinitionBuilder hypermediaTypeBeanDefinition = genericBeanDefinition(HypermediaType.class, () -> type);
+			registerSourcedBeanDefinition(hypermediaTypeBeanDefinition, metadata, registry);
+		}
+
+		/*
+		 * Only register JSONPath-based {@link LinkDiscoverer}s based on the registered {@link HypermediaType}s.
+		 */
 		if (JSONPATH_PRESENT) {
 
 			for (HypermediaType type : types) {
@@ -72,9 +88,24 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 			}
 		}
 
-		BeanDefinitionBuilder configurerBeanDefinition = rootBeanDefinition(ConverterRegisteringWebMvcConfigurer.class);
-		configurerBeanDefinition.addPropertyValue("hypermediaTypes", types);
-		registerSourcedBeanDefinition(configurerBeanDefinition, metadata, registry);
+		/*
+		 * Register a Spring MVC-specific HATEOAS configuration.
+		 */
+		if (WebStack.WEBMVC.isAvailable()) {
+			
+			BeanDefinitionBuilder webMvcHateosConfiguration = rootBeanDefinition(WebMvcHateoasConfiguration.class);
+			registerSourcedBeanDefinition(webMvcHateosConfiguration, metadata, registry);
+		}
+
+		/*
+		 * Register a Spring WebFlux-specific HATEOAS configuration.
+		 */
+		if (WebStack.WEBFLUX.isAvailable()) {
+
+			BeanDefinitionBuilder webFluxHateoasConfiguration = rootBeanDefinition(WebFluxHateoasConfiguration.class);
+			registerSourcedBeanDefinition(webFluxHateoasConfiguration, metadata, registry);
+		}
+
 	}
 
 	/**
