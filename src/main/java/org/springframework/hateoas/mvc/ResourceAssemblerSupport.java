@@ -109,7 +109,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 		/**
 		 * Transform a list of {@code T}s into a list of {@link ResourceSupport}s.
 		 *
-		 * @see {@link #toListOfResources()} if you need this transformed list rendered as hypermedia
+		 * @see #toListOfResources() if you need this transformed list rendered as hypermedia
 		 *
 		 * @return
 		 */
@@ -127,7 +127,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 		/**
 		 * Converts all given entities into resources and wraps the result in a {@link Resources} instance.
 		 *
-		 * @see {@link #toListOfResources()}} and {@link ResourceAssembler#toResource(Object)}
+		 * @see #toListOfResources() and {@link ResourceAssembler#toResource(Object)}
 		 * @return
 		 */
 		public Resources<D> toResources() {

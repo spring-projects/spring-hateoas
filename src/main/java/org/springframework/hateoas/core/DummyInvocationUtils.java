@@ -145,7 +145,7 @@ public class DummyInvocationUtils {
 	 * equips it with an {@link InvocationRecordingMethodInterceptor}. The interceptor records the last invocation and
 	 * returns a proxy of the return type that also implements {@link LastInvocationAware} so that the last method
 	 * invocation can be inspected. Parameters passed to the subsequent method invocation are generally neglected except
-	 * the ones that might be mapped into the URI translation eventually, e.g. {@linke PathVariable} in the case of Spring
+	 * the ones that might be mapped into the URI translation eventually, e.g. {@link org.springframework.web.bind.annotation.PathVariable} in the case of Spring
 	 * MVC. Note, that the return types of the methods have to be capable to be proxied.
 	 * 
 	 * @param type must not be {@literal null}.

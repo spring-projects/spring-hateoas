@@ -53,7 +53,6 @@ public class Server implements Closeable {
 	private final RelProvider relProvider;
 
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<>();
-	private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public Server() {
 
@@ -96,6 +95,7 @@ public class Server implements Closeable {
 				withContentType(MediaTypes.HAL_JSON.toString());
 
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
+		ResourceLoader resourceLoader = new DefaultResourceLoader();
 		org.springframework.core.io.Resource springagramRoot = resourceLoader
 				.getResource("classpath:springagram-root.json");
 		org.springframework.core.io.Resource springagramItems = resourceLoader
@@ -171,7 +171,7 @@ public class Server implements Closeable {
 
 		Object content = resource.getContent();
 
-		Class<? extends Object> type = content.getClass();
+		Class<?> type = content.getClass();
 		String collectionRel = relProvider.getCollectionResourceRelFor(type);
 		String singleRel = relProvider.getItemResourceRelFor(type);
 

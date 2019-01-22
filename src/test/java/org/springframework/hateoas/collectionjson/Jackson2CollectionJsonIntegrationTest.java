@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -242,6 +243,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Data
+	@EqualsAndHashCode(callSuper = true)
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ResourceWithAttributes extends ResourceSupport {

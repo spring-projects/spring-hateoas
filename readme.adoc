@@ -5,6 +5,70 @@ image:https://spring.io/badges/spring-hateoas/snapshot.svg[http://projects.sprin
 
 This project provides some APIs to ease creating REST representations that follow the http://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 
+== Project Status
+
+We go to great lengths to ensure smooth upgrades. We also seek to make your upgrade on major versions of Java can be as smooth
+as possible.
+
+Check the matrix below to see the status of supported versions:
+
+.`master` branch
+[cols=4]
+|===
+| Job | `1.0` status | `0.25` status | `0.x` status
+
+| Test - JDK 8
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%208/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.25.x/jobs/Test%20-%20JDK%208/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas-0.25.x"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.x/jobs/Test%20-%20JDK%208/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas-0.25.x"]
+
+| Test - JDK 8 and Spring 5.0 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%208%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.25.x/jobs/Test%20-%20JDK%208%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.x/jobs/Test%20-%20JDK%208%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+
+| Test - JDK 8 and Spring 5.1 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%208%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.25.x/jobs/Test%20-%20JDK%208%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.x/jobs/Test%20-%20JDK%208%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+
+| Test - JDK 11
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2011/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Not supported
+| Not supported
+
+| Test - JDK 11 and Spring 5.0 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2011%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Not supported
+| Not supported
+
+| Test - JDK 11 and Spring 5.1 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2011%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Not supported
+| Not supported
+
+| Test - JDK 12
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2012/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Not supported
+| Not supported
+
+| Test - JDK 12 and Spring 5.0 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2012%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Not supported
+| Not supported
+
+| Test - JDK 12 and Spring 5.1 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2012%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Not supported
+| Not supported
+
+| Build - Release to repo.spring.io
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Build/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.25.x/jobs/Build/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas-0.25.x"]
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas-0.x/jobs/Build/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas-0.25.x"]
+|===
+
+
 == Working with Spring HATEOAS
 
 Since all commits are headlined with its github issue, git will treat it as a comment. To get around this, apply the following configuration to your clone:

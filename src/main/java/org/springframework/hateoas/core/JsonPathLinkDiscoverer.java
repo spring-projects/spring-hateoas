@@ -75,7 +75,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * 
 	 * @param pathTemplate must not be {@literal null} or empty and contain a single placeholder.
 	 * @param mediaType the primary {@link MediaType}s to support.
-	 * @param additional {@link MediaTypes} to support.
+	 * @param others {@link MediaType}s to support.
 	 */
 	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType, MediaType... others) {
 

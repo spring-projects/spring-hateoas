@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
-	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("\\/{2,}");
+	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/{2,}");
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;

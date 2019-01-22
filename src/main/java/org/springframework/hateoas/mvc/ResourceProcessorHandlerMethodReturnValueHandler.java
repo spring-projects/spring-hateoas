@@ -90,7 +90,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 		}
 
 		// No post-processable type found - proceed with delegate
-		if (!ResourceSupport.class.isInstance(value)) {
+		if (!(value instanceof ResourceSupport)) {
 			delegate.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 			return;
 		}

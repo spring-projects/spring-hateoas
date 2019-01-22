@@ -73,7 +73,7 @@ public class TypeReferences {
 		private final Type type;
 
 		@SuppressWarnings({ "rawtypes", "deprecation" })
-		protected SyntheticParameterizedTypeReference() {
+		SyntheticParameterizedTypeReference() {
 
 			Class<? extends SyntheticParameterizedTypeReference> foo = getClass();
 			Type genericSuperclass = foo.getGenericSuperclass();
@@ -154,7 +154,7 @@ public class TypeReferences {
 		private final Type rawType;
 		private final Type[] typeArguments;
 
-		public SyntheticParameterizedType(Type rawType, Type... typeArguments) {
+		SyntheticParameterizedType(Type rawType, Type... typeArguments) {
 
 			this.rawType = rawType;
 			this.typeArguments = typeArguments;

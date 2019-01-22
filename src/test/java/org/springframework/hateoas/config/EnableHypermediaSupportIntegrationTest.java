@@ -280,9 +280,9 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
-			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes())
-				.hasSize(1)
-				.contains(MediaTypes.UBER_JSON);
+			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes()) //
+					.hasSize(1) //
+					.contains(MediaTypes.UBER_JSON);
 
 			boolean found = false;
 
@@ -294,11 +294,11 @@ public class EnableHypermediaSupportIntegrationTest {
 
 					AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
 					List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils
-						.getField(processor, "messageConverters");
+							.getField(processor, "messageConverters");
 
 					assertThat(converters.get(0)).isInstanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class);
-					assertThat(converters.get(0).getSupportedMediaTypes())
-						.hasSize(1)
+					assertThat(converters.get(0).getSupportedMediaTypes()) //
+						.hasSize(1) //
 						.contains(MediaTypes.UBER_JSON);
 				}
 			}
@@ -325,8 +325,17 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersHalFormsHttpMessageConvertersForRestTemplate() {
 
-		withContext(HalFormsConfig.class, context -> foo(context, RestTemplate.class, it -> it.getMessageConverters().get(0), converter -> assertThat(converter.getSupportedMediaTypes()) //
-					.hasSize(1).contains(MediaTypes.HAL_FORMS_JSON)));
+		withContext( //
+				HalFormsConfig.class, //
+				context -> foo( //
+						context, //
+						RestTemplate.class, //
+						it -> it.getMessageConverters().get(0), //
+						converter -> assertThat(converter.getSupportedMediaTypes()) // //
+								.hasSize(1) //
+								.contains(MediaTypes.HAL_FORMS_JSON) //
+				) //
+		);
 	}
 
 	private static <T, S> void foo(ApplicationContext context, Class<T> beanType, Function<T, S> extractor,
@@ -383,8 +392,8 @@ public class EnableHypermediaSupportIntegrationTest {
 		withContext(UberConfig.class, context -> {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
-			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes())
-				.hasSize(1)
+			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
+				.hasSize(1) //
 				.contains(MediaTypes.UBER_JSON);
 		});
 	}
@@ -395,7 +404,15 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
 
-		withContext(HalConfig.class, context -> assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
+		withContext( //
+				HalConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.HAL_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	/**
@@ -404,23 +421,47 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
 
-		withContext(HalFormsConfig.class, context -> assertObjectMapper(context, MediaTypes.HAL_FORMS_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
+		withContext( //
+				HalFormsConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.HAL_FORMS_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	@Test
 	public void configuresDefaultObjectMapperForCollectionJsonToIgnoreUnknownProperties() {
 
-		withContext(CollectionJsonConfig.class, context -> assertObjectMapper(context, MediaTypes.COLLECTION_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
+		withContext( //
+				CollectionJsonConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.COLLECTION_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	@Test
 	public void configuresDefaultObjectMapperForUberToIgnoreUnknownProperties() {
 
-		withContext(UberConfig.class, context -> assertObjectMapper(context, MediaTypes.UBER_JSON, mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse()));
+		withContext( //
+				UberConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.UBER_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	@Test
-	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() {
+	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
 
 		withContext(HalConfig.class, context -> {
 
@@ -437,10 +478,10 @@ public class EnableHypermediaSupportIntegrationTest {
 				ResourceSupport resourceSupport = new ResourceSupport();
 				resourceSupport.add(new Link("localhost").withSelfRel());
 
-				assertThatCode(() -> { //
+				assertThatCode(() -> {
 					assertThat(it.writeValueAsString(resourceSupport)) //
-							.isEqualTo("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}");
-				});
+						.isEqualTo("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}");
+				}).doesNotThrowAnyException();
 			});
 		});
 	}
@@ -448,14 +489,19 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void verifyRenderSingleLinkAsArrayViaOverridingBean() {
 
-		withContext(RenderLinkAsSingleLinksConfig.class, context -> assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> {
-
-			ResourceSupport resourceSupport = new ResourceSupport();
-			resourceSupport.add(new Link("localhost").withSelfRel());
-
-			assertThat(mapper.writeValueAsString(resourceSupport))
-					.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
-		}));
+		withContext( //
+				RenderLinkAsSingleLinksConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.HAL_JSON, //
+						mapper -> { //
+							ResourceSupport resourceSupport = new ResourceSupport(); //
+							resourceSupport.add(new Link("localhost").withSelfRel()); //
+							assertThat(mapper.writeValueAsString(resourceSupport)) //
+									.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"); //
+						} //
+				) //
+		);
 	}
 
 	private static <E extends Exception> void withContext(Class<?> configuration,

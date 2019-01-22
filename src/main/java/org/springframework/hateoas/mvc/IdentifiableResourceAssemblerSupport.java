@@ -81,7 +81,7 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 	private Object[] unwrapIdentifyables(Object[] values) {
 
 		return Arrays.stream(values) //
-				.map(element -> element instanceof Identifiable ? ((Identifiable<?>) element).getId() : element) //
+				.map(element -> element instanceof Identifiable ? ((Identifiable<?>) element).getId().get() : element) //
 				.toArray();
 	}
 }

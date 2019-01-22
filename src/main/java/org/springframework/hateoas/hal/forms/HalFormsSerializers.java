@@ -203,12 +203,12 @@ class HalFormsSerializers {
 
 				if (!(model.getHttpMethod() == HttpMethod.GET)) {
 
-					validate(resource, affordance, model);
+					validate(resource, model);
 
 					HalFormsTemplate template = HalFormsTemplate.forMethod(model.getHttpMethod()) //
 							.withProperties(model.getInputProperties());
 
-					/**
+					/*
 					 * First template in HAL-FORMS is "default".
 					 */
 					templates.put(templates.isEmpty() ? "default" : model.getName(), template);
@@ -221,12 +221,11 @@ class HalFormsSerializers {
 
 	/**
 	 * Verify that the resource's self link and the affordance's URI have the same relative path.
-	 * 
+	 *
 	 * @param resource
-	 * @param affordance
 	 * @param model
 	 */
-	private static void validate(ResourceSupport resource, Affordance affordance, HalFormsAffordanceModel model) {
+	private static void validate(ResourceSupport resource, HalFormsAffordanceModel model) {
 
 		String affordanceUri = model.getURI();
 		String selfLinkUri = resource.getRequiredLink(IanaLinkRelation.SELF.value()).expand().getHref();

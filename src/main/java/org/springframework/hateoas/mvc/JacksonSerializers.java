@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 public class JacksonSerializers {
 
 	/**
-	 * Custom {@link JsonDeserializer} for Spring's {@link MediaType} using the {@link MediaType#paparseMediaType(String)}
+	 * Custom {@link JsonDeserializer} for Spring's {@link MediaType} using the {@link MediaType#parseMediaType(String)}
 	 * method.
 	 *
 	 * @author Oliver Gierke

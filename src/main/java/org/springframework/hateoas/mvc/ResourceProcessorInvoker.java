@@ -196,7 +196,7 @@ public class ResourceProcessorInvoker {
 		 * 
 		 * @param processor must not be {@literal null}.
 		 */
-		public DefaultProcessorWrapper(ResourceProcessor<?> processor) {
+		DefaultProcessorWrapper(ResourceProcessor<?> processor) {
 
 			Assert.notNull(processor, "Processor must not be null!");
 

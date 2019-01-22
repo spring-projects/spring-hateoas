@@ -79,7 +79,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	public void appliesParameterValueIfContributorConfigured() {
 
 		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
-		factory.setUriComponentsContributors(Arrays.asList(new SampleUriComponentsContributor()));
+		factory.setUriComponentsContributors(Collections.singletonList(new SampleUriComponentsContributor()));
 
 		SpecialType specialType = new SpecialType();
 		specialType.parameterValue = "value";

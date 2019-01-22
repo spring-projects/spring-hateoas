@@ -54,7 +54,6 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * Creates a new {@link VndErrors} wrapper for at least one {@link VndError}.
 	 * 
 	 * @param errors must not be {@literal null}.
-	 * @param errors
 	 */
 	public VndErrors(VndError error, VndError... errors) {
 

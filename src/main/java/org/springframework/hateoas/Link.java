@@ -58,7 +58,7 @@ public class Link implements Serializable {
 
 	private static final Pattern URI_AND_ATTRIBUTES_PATTERN = Pattern.compile("<(.*)>;(.*)");
 	private static final Pattern KEY_AND_VALUE_PATTERN = Pattern
-			.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
+			.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}.\\-\\s]*|" + URI_PATTERN + ")\"");
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 

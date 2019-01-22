@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.BeansException;
@@ -145,7 +146,7 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 		mapper.setHandlerInstantiator(new UberHandlerInstantiator());
 
 		return new TypeConstrainedMappingJackson2HttpMessageConverter(
-			ResourceSupport.class, Arrays.asList(UBER_JSON), mapper);
+			ResourceSupport.class, Collections.singletonList(UBER_JSON), mapper);
 	}
 
 
@@ -164,7 +165,7 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 		mapper.setHandlerInstantiator(new CollectionJsonHandlerInstantiator(linkRelationMessageSource));
 
 		return new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class, Arrays.asList(COLLECTION_JSON), mapper);
+				ResourceSupport.class, Collections.singletonList(COLLECTION_JSON), mapper);
 	}
 
 	/**
@@ -186,7 +187,7 @@ public class ConverterRegisteringWebMvcConfigurer implements WebMvcConfigurer, B
 				this.halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new)));
 
 		return new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class, Arrays.asList(HAL_FORMS_JSON), mapper);
+				ResourceSupport.class, Collections.singletonList(HAL_FORMS_JSON), mapper);
 	}
 
 	/**

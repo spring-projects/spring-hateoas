@@ -156,10 +156,8 @@ public class HalFormsValidationIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee);
 
 			try {
-				return ResponseEntity.noContent()
-						.location(
-								new URI(findOne(newEmployeeId).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
-						.build();
+				return ResponseEntity.noContent().location(new URI(findOne(newEmployeeId).getLink(IanaLinkRelation.SELF.value())
+						.map(link -> link.expand().getHref()).orElse(""))).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -171,9 +169,13 @@ public class HalFormsValidationIntegrationTest {
 			EMPLOYEES.put(id, employee);
 
 			try {
-				return ResponseEntity.noContent()
-						.location(new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
-						.build();
+				return ResponseEntity //
+						.noContent() //
+						.location( //
+								new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()) //
+										.map(link -> link.expand().getHref()) //
+										.orElse("")) //
+						).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -182,9 +184,7 @@ public class HalFormsValidationIntegrationTest {
 		@PatchMapping("/employees/{id}")
 		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
 
-			Employee oldEmployee = EMPLOYEES.get(id);
-
-			Employee newEmployee = oldEmployee;
+			Employee newEmployee = EMPLOYEES.get(id);
 
 			if (employee.getName() != null) {
 				newEmployee = newEmployee.withName(employee.getName());
@@ -197,8 +197,13 @@ public class HalFormsValidationIntegrationTest {
 			EMPLOYEES.put(id, newEmployee);
 
 			try {
-				return ResponseEntity.noContent()
-						.location(new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
+				return ResponseEntity //
+						.noContent() //
+						.location( //
+								new URI(findOne(id) //
+										.getLink(IanaLinkRelation.SELF.value()) //
+										.map(link -> link.expand().getHref()) //
+										.orElse(""))) //
 						.build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());

@@ -96,41 +96,40 @@ public class UberWebMvcIntegrationTest {
 	public void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.UBER_JSON)) //
-			.andDo(print())
-			.andExpect(status().isOk()) //
+				.andDo(print()) //
+				.andExpect(status().isOk()) //
 
-			.andExpect(jsonPath("$.uber.version", is("1.0")))
+				.andExpect(jsonPath("$.uber.version", is("1.0")))
 
-			.andExpect(jsonPath("$.uber.data.*", hasSize(5)))
-			.andExpect(jsonPath("$.uber.data[0].name", is("self")))
-			.andExpect(jsonPath("$.uber.data[0].rel[0]", is("self")))
-			.andExpect(jsonPath("$.uber.data[0].rel[1]", is("findOne")))
-			.andExpect(jsonPath("$.uber.data[0].url", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$.uber.data.*", hasSize(5))) //
+				.andExpect(jsonPath("$.uber.data[0].name", is("self"))) //
+				.andExpect(jsonPath("$.uber.data[0].rel[0]", is("self"))) //
+				.andExpect(jsonPath("$.uber.data[0].rel[1]", is("findOne"))) //
+				.andExpect(jsonPath("$.uber.data[0].url", is("http://localhost/employees/0")))
 
-			.andExpect(jsonPath("$.uber.data[1].name", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[1].rel[0]", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[1].url", is("http://localhost/employees/0")))
-			.andExpect(jsonPath("$.uber.data[1].action", is("replace")))
-			.andExpect(jsonPath("$.uber.data[1].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[1].name", is("updateEmployee")))
+				.andExpect(jsonPath("$.uber.data[1].rel[0]", is("updateEmployee")))
+				.andExpect(jsonPath("$.uber.data[1].url", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$.uber.data[1].action", is("replace")))
+				.andExpect(jsonPath("$.uber.data[1].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[2].name", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].rel[0]", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].url", is("http://localhost/employees/0")))
-			.andExpect(jsonPath("$.uber.data[2].action", is("partial")))
-			.andExpect(jsonPath("$.uber.data[2].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[2].name", is("partiallyUpdateEmployee")))
+				.andExpect(jsonPath("$.uber.data[2].rel[0]", is("partiallyUpdateEmployee")))
+				.andExpect(jsonPath("$.uber.data[2].url", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$.uber.data[2].action", is("partial")))
+				.andExpect(jsonPath("$.uber.data[2].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[3].name", is("employees")))
-			.andExpect(jsonPath("$.uber.data[3].rel[0]", is("employees")))
-			.andExpect(jsonPath("$.uber.data[3].rel[1]", is("all")))
-			.andExpect(jsonPath("$.uber.data[3].url", is("http://localhost/employees")))
+				.andExpect(jsonPath("$.uber.data[3].name", is("employees")))
+				.andExpect(jsonPath("$.uber.data[3].rel[0]", is("employees")))
+				.andExpect(jsonPath("$.uber.data[3].rel[1]", is("all")))
+				.andExpect(jsonPath("$.uber.data[3].url", is("http://localhost/employees")))
 
-			.andExpect(jsonPath("$.uber.data[4].name", is("employee")))
-			.andExpect(jsonPath("$.uber.data[4].data.*", hasSize(2)))
-			.andExpect(jsonPath("$.uber.data[4].data[0].name", is("role")))
-			.andExpect(jsonPath("$.uber.data[4].data[0].value", is("ring bearer")))
-			.andExpect(jsonPath("$.uber.data[4].data[1].name", is("name")))
-			.andExpect(jsonPath("$.uber.data[4].data[1].value", is("Frodo Baggins")))
-		;
+				.andExpect(jsonPath("$.uber.data[4].name", is("employee")))
+				.andExpect(jsonPath("$.uber.data[4].data.*", hasSize(2)))
+				.andExpect(jsonPath("$.uber.data[4].data[0].name", is("role")))
+				.andExpect(jsonPath("$.uber.data[4].data[0].value", is("ring bearer")))
+				.andExpect(jsonPath("$.uber.data[4].data[1].name", is("name")))
+				.andExpect(jsonPath("$.uber.data[4].data[1].value", is("Frodo Baggins")));
 	}
 
 	/**
@@ -140,78 +139,77 @@ public class UberWebMvcIntegrationTest {
 	public void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.UBER_JSON)) //
-			.andDo(print())
-			.andExpect(status().isOk()) //
+				.andDo(print()) //
+				.andExpect(status().isOk()) //
 
-			.andExpect(jsonPath("$.uber.version", is("1.0")))
+				.andExpect(jsonPath("$.uber.version", is("1.0")))
 
-			.andExpect(jsonPath("$.uber.data.*", hasSize(4)))
+				.andExpect(jsonPath("$.uber.data.*", hasSize(4)))
 
-			.andExpect(jsonPath("$.uber.data[0].name", is("self")))
-			.andExpect(jsonPath("$.uber.data[0].rel[0]", is("self")))
-			.andExpect(jsonPath("$.uber.data[0].rel[1]", is("all")))
-			.andExpect(jsonPath("$.uber.data[0].url", is("http://localhost/employees")))
+				.andExpect(jsonPath("$.uber.data[0].name", is("self"))) //
+				.andExpect(jsonPath("$.uber.data[0].rel[0]", is("self")))
+				.andExpect(jsonPath("$.uber.data[0].rel[1]", is("all")))
+				.andExpect(jsonPath("$.uber.data[0].url", is("http://localhost/employees")))
 
-			.andExpect(jsonPath("$.uber.data[1].name", is("newEmployee")))
-			.andExpect(jsonPath("$.uber.data[1].rel[0]", is("newEmployee")))
-			.andExpect(jsonPath("$.uber.data[1].url", is("http://localhost/employees")))
-			.andExpect(jsonPath("$.uber.data[1].action", is("append")))
-			.andExpect(jsonPath("$.uber.data[1].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[1].name", is("newEmployee")))
+				.andExpect(jsonPath("$.uber.data[1].rel[0]", is("newEmployee")))
+				.andExpect(jsonPath("$.uber.data[1].url", is("http://localhost/employees")))
+				.andExpect(jsonPath("$.uber.data[1].action", is("append")))
+				.andExpect(jsonPath("$.uber.data[1].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[2].data[0].name", is("self")))
-			.andExpect(jsonPath("$.uber.data[2].data[0].rel[0]", is("self")))
-			.andExpect(jsonPath("$.uber.data[2].data[0].rel[1]", is("findOne")))
-			.andExpect(jsonPath("$.uber.data[2].data[0].url", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$.uber.data[2].data[0].name", is("self")))
+				.andExpect(jsonPath("$.uber.data[2].data[0].rel[0]", is("self")))
+				.andExpect(jsonPath("$.uber.data[2].data[0].rel[1]", is("findOne")))
+				.andExpect(jsonPath("$.uber.data[2].data[0].url", is("http://localhost/employees/0")))
 
-			.andExpect(jsonPath("$.uber.data[2].data[1].name", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].data[1].rel[0]", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].data[1].url", is("http://localhost/employees/0")))
-			.andExpect(jsonPath("$.uber.data[2].data[1].action", is("replace")))
-			.andExpect(jsonPath("$.uber.data[2].data[1].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[2].data[1].name", is("updateEmployee")))
+				.andExpect(jsonPath("$.uber.data[2].data[1].rel[0]", is("updateEmployee")))
+				.andExpect(jsonPath("$.uber.data[2].data[1].url", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$.uber.data[2].data[1].action", is("replace")))
+				.andExpect(jsonPath("$.uber.data[2].data[1].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[2].data[2].name", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].data[2].rel[0]", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].data[2].url", is("http://localhost/employees/0")))
-			.andExpect(jsonPath("$.uber.data[2].data[2].action", is("partial")))
-			.andExpect(jsonPath("$.uber.data[2].data[2].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[2].data[2].name", is("partiallyUpdateEmployee")))
+				.andExpect(jsonPath("$.uber.data[2].data[2].rel[0]", is("partiallyUpdateEmployee")))
+				.andExpect(jsonPath("$.uber.data[2].data[2].url", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$.uber.data[2].data[2].action", is("partial")))
+				.andExpect(jsonPath("$.uber.data[2].data[2].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[2].data[3].rel[0]", is("employees")))
-			.andExpect(jsonPath("$.uber.data[2].data[3].rel[1]", is("all")))
-			.andExpect(jsonPath("$.uber.data[2].data[3].url", is("http://localhost/employees")))
+				.andExpect(jsonPath("$.uber.data[2].data[3].rel[0]", is("employees")))
+				.andExpect(jsonPath("$.uber.data[2].data[3].rel[1]", is("all")))
+				.andExpect(jsonPath("$.uber.data[2].data[3].url", is("http://localhost/employees")))
 
-			.andExpect(jsonPath("$.uber.data[2].data[4].name", is("employee")))
-			.andExpect(jsonPath("$.uber.data[2].data[4].data[0].name", is("role")))
-			.andExpect(jsonPath("$.uber.data[2].data[4].data[0].value", is("ring bearer")))
-			.andExpect(jsonPath("$.uber.data[2].data[4].data[1].name", is("name")))
-			.andExpect(jsonPath("$.uber.data[2].data[4].data[1].value", is("Frodo Baggins")))
+				.andExpect(jsonPath("$.uber.data[2].data[4].name", is("employee")))
+				.andExpect(jsonPath("$.uber.data[2].data[4].data[0].name", is("role")))
+				.andExpect(jsonPath("$.uber.data[2].data[4].data[0].value", is("ring bearer")))
+				.andExpect(jsonPath("$.uber.data[2].data[4].data[1].name", is("name")))
+				.andExpect(jsonPath("$.uber.data[2].data[4].data[1].value", is("Frodo Baggins")))
 
-			.andExpect(jsonPath("$.uber.data[3].data[0].name", is("self")))
-			.andExpect(jsonPath("$.uber.data[3].data[0].rel[0]", is("self")))
-			.andExpect(jsonPath("$.uber.data[3].data[0].rel[1]", is("findOne")))
-			.andExpect(jsonPath("$.uber.data[3].data[0].url", is("http://localhost/employees/1")))
+				.andExpect(jsonPath("$.uber.data[3].data[0].name", is("self")))
+				.andExpect(jsonPath("$.uber.data[3].data[0].rel[0]", is("self")))
+				.andExpect(jsonPath("$.uber.data[3].data[0].rel[1]", is("findOne")))
+				.andExpect(jsonPath("$.uber.data[3].data[0].url", is("http://localhost/employees/1")))
 
-			.andExpect(jsonPath("$.uber.data[3].data[1].name", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[3].data[1].rel[0]", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[3].data[1].url", is("http://localhost/employees/1")))
-			.andExpect(jsonPath("$.uber.data[3].data[1].action", is("replace")))
-			.andExpect(jsonPath("$.uber.data[3].data[1].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[3].data[1].name", is("updateEmployee")))
+				.andExpect(jsonPath("$.uber.data[3].data[1].rel[0]", is("updateEmployee")))
+				.andExpect(jsonPath("$.uber.data[3].data[1].url", is("http://localhost/employees/1")))
+				.andExpect(jsonPath("$.uber.data[3].data[1].action", is("replace")))
+				.andExpect(jsonPath("$.uber.data[3].data[1].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[3].data[2].name", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[3].data[2].rel[0]", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[3].data[2].url", is("http://localhost/employees/1")))
-			.andExpect(jsonPath("$.uber.data[3].data[2].action", is("partial")))
-			.andExpect(jsonPath("$.uber.data[3].data[2].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[3].data[2].name", is("partiallyUpdateEmployee")))
+				.andExpect(jsonPath("$.uber.data[3].data[2].rel[0]", is("partiallyUpdateEmployee")))
+				.andExpect(jsonPath("$.uber.data[3].data[2].url", is("http://localhost/employees/1")))
+				.andExpect(jsonPath("$.uber.data[3].data[2].action", is("partial")))
+				.andExpect(jsonPath("$.uber.data[3].data[2].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[3].data[3].rel[0]", is("employees")))
-			.andExpect(jsonPath("$.uber.data[3].data[3].rel[1]", is("all")))
-			.andExpect(jsonPath("$.uber.data[3].data[3].url", is("http://localhost/employees")))
+				.andExpect(jsonPath("$.uber.data[3].data[3].rel[0]", is("employees")))
+				.andExpect(jsonPath("$.uber.data[3].data[3].rel[1]", is("all")))
+				.andExpect(jsonPath("$.uber.data[3].data[3].url", is("http://localhost/employees")))
 
-			.andExpect(jsonPath("$.uber.data[3].data[4].name", is("employee")))
-			.andExpect(jsonPath("$.uber.data[3].data[4].data[0].name", is("role")))
-			.andExpect(jsonPath("$.uber.data[3].data[4].data[0].value", is("burglar")))
-			.andExpect(jsonPath("$.uber.data[3].data[4].data[1].name", is("name")))
-			.andExpect(jsonPath("$.uber.data[3].data[4].data[1].value", is("Bilbo Baggins")))
-		;
+				.andExpect(jsonPath("$.uber.data[3].data[4].name", is("employee")))
+				.andExpect(jsonPath("$.uber.data[3].data[4].data[0].name", is("role")))
+				.andExpect(jsonPath("$.uber.data[3].data[4].data[0].value", is("burglar")))
+				.andExpect(jsonPath("$.uber.data[3].data[4].data[1].name", is("name")))
+				.andExpect(jsonPath("$.uber.data[3].data[4].data[1].value", is("Bilbo Baggins")));
 	}
 
 	/**
@@ -222,49 +220,48 @@ public class UberWebMvcIntegrationTest {
 
 		String input = read(new ClassPathResource("create-employee.json", getClass()));
 
-		this.mockMvc.perform(post("/employees")
-			.content(input)
-			.contentType(MediaTypes.UBER_JSON))
-			.andDo(print())
-			.andExpect(status().isCreated())
-			.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
+		this.mockMvc.perform(post("/employees") //
+				.content(input) //
+				.contentType(MediaTypes.UBER_JSON)) //
+				.andDo(print()) //
+				.andExpect(status().isCreated()) //
+				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 
-		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.UBER_JSON))
-			.andDo(print())
-			.andExpect(status().isOk()) //
+		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.UBER_JSON)) //
+				.andDo(print()) //
+				.andExpect(status().isOk())
 
-			.andExpect(jsonPath("$.uber.version", is("1.0")))
+				.andExpect(jsonPath("$.uber.version", is("1.0")))
 
-			.andExpect(jsonPath("$.uber.data.*", hasSize(5)))
-			.andExpect(jsonPath("$.uber.data[0].name", is("self")))
-			.andExpect(jsonPath("$.uber.data[0].rel[0]", is("self")))
-			.andExpect(jsonPath("$.uber.data[0].rel[1]", is("findOne")))
-			.andExpect(jsonPath("$.uber.data[0].url", is("http://localhost/employees/2")))
+				.andExpect(jsonPath("$.uber.data.*", hasSize(5))) //
+				.andExpect(jsonPath("$.uber.data[0].name", is("self"))) //
+				.andExpect(jsonPath("$.uber.data[0].rel[0]", is("self"))) //
+				.andExpect(jsonPath("$.uber.data[0].rel[1]", is("findOne"))) //
+				.andExpect(jsonPath("$.uber.data[0].url", is("http://localhost/employees/2")))
 
-			.andExpect(jsonPath("$.uber.data[1].name", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[1].rel[0]", is("updateEmployee")))
-			.andExpect(jsonPath("$.uber.data[1].url", is("http://localhost/employees/2")))
-			.andExpect(jsonPath("$.uber.data[1].action", is("replace")))
-			.andExpect(jsonPath("$.uber.data[1].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[1].name", is("updateEmployee"))) //
+				.andExpect(jsonPath("$.uber.data[1].rel[0]", is("updateEmployee"))) //
+				.andExpect(jsonPath("$.uber.data[1].url", is("http://localhost/employees/2"))) //
+				.andExpect(jsonPath("$.uber.data[1].action", is("replace"))) //
+				.andExpect(jsonPath("$.uber.data[1].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[2].name", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].rel[0]", is("partiallyUpdateEmployee")))
-			.andExpect(jsonPath("$.uber.data[2].url", is("http://localhost/employees/2")))
-			.andExpect(jsonPath("$.uber.data[2].action", is("partial")))
-			.andExpect(jsonPath("$.uber.data[2].model", is("name={name}&role={role}")))
+				.andExpect(jsonPath("$.uber.data[2].name", is("partiallyUpdateEmployee"))) //
+				.andExpect(jsonPath("$.uber.data[2].rel[0]", is("partiallyUpdateEmployee"))) //
+				.andExpect(jsonPath("$.uber.data[2].url", is("http://localhost/employees/2"))) //
+				.andExpect(jsonPath("$.uber.data[2].action", is("partial"))) //
+				.andExpect(jsonPath("$.uber.data[2].model", is("name={name}&role={role}")))
 
-			.andExpect(jsonPath("$.uber.data[3].name", is("employees")))
-			.andExpect(jsonPath("$.uber.data[3].rel[0]", is("employees")))
-			.andExpect(jsonPath("$.uber.data[3].rel[1]", is("all")))
-			.andExpect(jsonPath("$.uber.data[3].url", is("http://localhost/employees")))
+				.andExpect(jsonPath("$.uber.data[3].name", is("employees"))) //
+				.andExpect(jsonPath("$.uber.data[3].rel[0]", is("employees"))) //
+				.andExpect(jsonPath("$.uber.data[3].rel[1]", is("all"))) //
+				.andExpect(jsonPath("$.uber.data[3].url", is("http://localhost/employees")))
 
-			.andExpect(jsonPath("$.uber.data[4].name", is("employee")))
-			.andExpect(jsonPath("$.uber.data[4].data.*", hasSize(2)))
-			.andExpect(jsonPath("$.uber.data[4].data[0].name", is("role")))
-			.andExpect(jsonPath("$.uber.data[4].data[0].value", is("gardener")))
-			.andExpect(jsonPath("$.uber.data[4].data[1].name", is("name")))
-			.andExpect(jsonPath("$.uber.data[4].data[1].value", is("Samwise Gamgee")))
-		;
+				.andExpect(jsonPath("$.uber.data[4].name", is("employee"))) //
+				.andExpect(jsonPath("$.uber.data[4].data.*", hasSize(2))) //
+				.andExpect(jsonPath("$.uber.data[4].data[0].name", is("role"))) //
+				.andExpect(jsonPath("$.uber.data[4].data[0].value", is("gardener"))) //
+				.andExpect(jsonPath("$.uber.data[4].data[1].name", is("name"))) //
+				.andExpect(jsonPath("$.uber.data[4].data[1].value", is("Samwise Gamgee")));
 	}
 
 	@RestController
@@ -282,32 +279,33 @@ public class UberWebMvcIntegrationTest {
 			}
 
 			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
-				.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)))
-				.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
+			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel() //
+					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null))) //
+					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
 			return new Resources<>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/search")
-		public Resources<Resource<Employee>> search(@RequestParam(value="name", required=false) String name,
-													@RequestParam(value="role", required=false) String role) {
+		public Resources<Resource<Employee>> search(@RequestParam(value = "name", required = false) String name,
+				@RequestParam(value = "role", required = false) String role) {
 
 			// Create a list of Resource<Employee>'s to return
 			List<Resource<Employee>> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
+
 				Resource<Employee> employeeResource = findOne(i);
 
-				boolean nameMatches = Optional.ofNullable(name)
-					.map(s -> employeeResource.getContent().getName().contains(s))
-					.orElse(true);
+				boolean nameMatches = Optional.ofNullable(name) //
+						.map(s -> employeeResource.getContent().getName().contains(s)) //
+						.orElse(true);
 
-				boolean roleMatches = Optional.ofNullable(role)
-					.map( s -> employeeResource.getContent().getRole().contains(s))
-					.orElse(true);
+				boolean roleMatches = Optional.ofNullable(role) //
+						.map(s -> employeeResource.getContent().getRole().contains(s)) //
+						.orElse(true);
 
 				if (nameMatches && roleMatches) {
 					employees.add(employeeResource);
@@ -315,9 +313,10 @@ public class UberWebMvcIntegrationTest {
 			}
 
 			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
-				.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)))
-				.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
+			Link selfLink = linkTo(methodOn(EmployeeController.class).all()) //
+					.withSelfRel() //
+					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null))) //
+					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
 			return new Resources<>(employees, selfLink);
@@ -333,11 +332,11 @@ public class UberWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id),
-				findOneLink
-					.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
-					.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
-				employeesLink);
+			return new Resource<>(EMPLOYEES.get(id), //
+					findOneLink //
+							.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) // //
+							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))), //
+					employeesLink);
 		}
 
 		@PostMapping("/employees")
@@ -348,8 +347,13 @@ public class UberWebMvcIntegrationTest {
 			EMPLOYEES.put(newEmployeeId, employee.getContent());
 
 			try {
-				return ResponseEntity.created(new URI(findOne(newEmployeeId).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity.created( //
+						new URI(findOne(newEmployeeId) //
+								.getLink(IanaLinkRelation.SELF.value()) //
+								.map(link -> link.expand().getHref()) //
+								.orElse("") //
+						) //
+				).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -361,15 +365,23 @@ public class UberWebMvcIntegrationTest {
 			EMPLOYEES.put(id, employee.getContent());
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity //
+						.noContent() //
+						.location( //
+								new URI(findOne(id) //
+										.getLink(IanaLinkRelation.SELF.value()) //
+										.map(link -> link.expand().getHref()) //
+										.orElse("") //
+								) //
+						).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
 		}
 
 		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Resource<Employee> employee, @PathVariable Integer id) {
+		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Resource<Employee> employee,
+				@PathVariable Integer id) {
 
 			Employee oldEmployee = EMPLOYEES.get(id);
 			Employee newEmployee = oldEmployee;
@@ -385,8 +397,15 @@ public class UberWebMvcIntegrationTest {
 			EMPLOYEES.put(id, newEmployee);
 
 			try {
-				return ResponseEntity.noContent().location(new URI(findOne(id).getLink(IanaLinkRelation.SELF.value()).map(link -> link.expand().getHref()).orElse("")))
-					.build();
+				return ResponseEntity //
+						.noContent() //
+						.location( //
+								new URI(findOne(id) //
+										.getLink(IanaLinkRelation.SELF.value()) //
+										.map(link -> link.expand().getHref()) //
+										.orElse("") //
+								) //
+						).build();
 			} catch (URISyntaxException e) {
 				return ResponseEntity.badRequest().body(e.getMessage());
 			}
@@ -395,7 +414,7 @@ public class UberWebMvcIntegrationTest {
 
 	@Configuration
 	@EnableWebMvc
-	@EnableHypermediaSupport(type = { HypermediaType.UBER})
+	@EnableHypermediaSupport(type = { HypermediaType.UBER })
 	static class TestConfig {
 
 		@Bean

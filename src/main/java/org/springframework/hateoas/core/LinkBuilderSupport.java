@@ -81,7 +81,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 */
 	public T slash(Object object) {
 
-		object = Optional.class.isInstance(object) ? ((Optional<?>) object).orElse(null) : object;
+		object = object instanceof Optional ? ((Optional<?>) object).orElse(null) : object;
 
 		if (object == null) {
 			return getThis();

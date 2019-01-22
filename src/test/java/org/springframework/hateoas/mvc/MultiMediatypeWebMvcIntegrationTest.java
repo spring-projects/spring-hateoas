@@ -541,8 +541,7 @@ public class MultiMediatypeWebMvcIntegrationTest {
 		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Resource<Employee> employee,
 				@PathVariable Integer id) {
 
-			Employee oldEmployee = EMPLOYEES.get(id);
-			Employee newEmployee = oldEmployee;
+			Employee newEmployee = EMPLOYEES.get(id);
 
 			if (employee.getContent().getName() != null) {
 				newEmployee = newEmployee.withName(employee.getContent().getName());
