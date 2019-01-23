@@ -47,18 +47,18 @@ Check the matrix below to see the status of supported versions:
 | Not supported
 | Not supported
 
-| Test - JDK 12
-| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2012/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Test - JDK 13
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2013/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
 | Not supported
 | Not supported
 
-| Test - JDK 12 and Spring 5.0 (snapshots)
-| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2012%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Test - JDK 13 and Spring 5.0 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2013%20and%20Spring%205.0%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
 | Not supported
 | Not supported
 
-| Test - JDK 12 and Spring 5.1 (snapshots)
-| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2012%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
+| Test - JDK 13 and Spring 5.1 (snapshots)
+| image:https://ci.spring.io/api/v1/teams/spring-data/pipelines/spring-hateoas/jobs/Test%20-%20JDK%2013%20and%20Spring%205.1%20(snapshots)/badge[link="https://ci.spring.io/teams/spring-data/pipelines/spring-hateoas"]
 | Not supported
 | Not supported
 
