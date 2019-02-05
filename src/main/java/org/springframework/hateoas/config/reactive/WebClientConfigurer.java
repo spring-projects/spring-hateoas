@@ -15,31 +15,22 @@
  */
 package org.springframework.hateoas.config.reactive;
 
-import static org.springframework.hateoas.config.HypermediaObjectMapperCreator.*;
-
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.core.DelegatingRelProvider;
-import org.springframework.hateoas.hal.CurieProvider;
-import org.springframework.hateoas.hal.HalConfiguration;
-import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
+import org.springframework.hateoas.config.Hypermedia;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.util.MimeType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -53,23 +44,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Configuration
 @RequiredArgsConstructor
-public class WebClientConfigurer implements BeanFactoryAware {
-
-	private static final String MESSAGE_SOURCE_BEAN_NAME = "linkRelationMessageSource";
+public class WebClientConfigurer {
 
 	private final ObjectMapper mapper;
-	private final DelegatingRelProvider relProvider;
-	private final CurieProvider curieProvider;
-	private final HalConfiguration halConfiguration;
-	private final HalFormsConfiguration halFormsConfiguration;
-	private final Collection<HypermediaType> hypermediaTypes;
-
-	private BeanFactory beanFactory;
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
+	private final Collection<Hypermedia> hypermediaTypes;
 
 	/**
 	 * Return a set of {@link ExchangeStrategies} driven by registered {@link HypermediaType}s.
@@ -78,45 +56,16 @@ public class WebClientConfigurer implements BeanFactoryAware {
 	 */
 	public ExchangeStrategies hypermediaExchangeStrategies() {
 
-		MessageSourceAccessor linkRelationMessageSource = this.beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
-				MessageSourceAccessor.class);
-
 		List<Encoder<?>> encoders = new ArrayList<>();
 		List<Decoder<?>> decoders = new ArrayList<>();
 
-		if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
+		this.hypermediaTypes.forEach(hypermedia -> {
 
-			ObjectMapper halObjectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
-				linkRelationMessageSource, this.halConfiguration);
+			ObjectMapper objectMapper = hypermedia.createObjectMapper(this.mapper);
 
-			encoders.add(new Jackson2JsonEncoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-			decoders.add(new Jackson2JsonDecoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-		}
-
-		if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
-
-			ObjectMapper halFormsObjectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
-				this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
-
-			encoders.add(new Jackson2JsonEncoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-			decoders.add(new Jackson2JsonDecoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-		}
-
-		if (this.hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
-
-			ObjectMapper collectionJsonObjectMapper = createCollectionJsonObjectMapper(this.mapper);
-
-			encoders.add(new Jackson2JsonEncoder(collectionJsonObjectMapper, MediaTypes.COLLECTION_JSON));
-			decoders.add(new Jackson2JsonDecoder(collectionJsonObjectMapper, MediaTypes.COLLECTION_JSON));
-		}
-
-		if (this.hypermediaTypes.contains(HypermediaType.UBER)) {
-
-			ObjectMapper uberObjectMapper = createUberObjectMapper(this.mapper);
-
-			encoders.add(new Jackson2JsonEncoder(uberObjectMapper, MediaTypes.UBER_JSON));
-			decoders.add(new Jackson2JsonDecoder(uberObjectMapper, MediaTypes.UBER_JSON));
-		}
+			encoders.add(new Jackson2JsonEncoder(objectMapper, hypermedia.getMediaTypes().toArray(new MimeType[]{})));
+			decoders.add(new Jackson2JsonDecoder(objectMapper, hypermedia.getMediaTypes().toArray(new MimeType[]{})));
+		});
 
 		encoders.add(CharSequenceEncoder.allMimeTypes());
 		decoders.add(StringDecoder.allMimeTypes());

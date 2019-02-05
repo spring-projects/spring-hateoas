@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,23 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.collectionjson.CollectionJsonConfigurer;
+import org.springframework.hateoas.hal.HalConfigurer;
+import org.springframework.hateoas.hal.forms.HalFormsConfigurer;
+import org.springframework.hateoas.uber.UberConfigurer;
+import org.springframework.http.MediaType;
 
 /**
- * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans available for
- * injection to ease building hypermedia related code. Which components get registered depends on the hypermedia type
- * being activated through the {@link #type()} attribute. Hypermedia-type-specific implementations of the following
- * components will be registered:
- * <ul>
- * <li>{@link LinkDiscoverer}</li>
- * <li>a Jackson 2 module to correctly marshal the resource model classes into the appropriate representation.
- * </ul>
+ * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans to support all
+ * appropriate web stacks based on selected {@link Hypermedia}-type as well as the classpath.
  *
- * @see LinkDiscoverer
- * @see EntityLinks
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -61,7 +60,7 @@ public @interface EnableHypermediaSupport {
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
 	 */
-	enum HypermediaType {
+	enum HypermediaType implements Hypermedia {
 
 		/**
 		 * HAL - Hypermedia Application Language.
@@ -69,27 +68,47 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL,
+		HAL(HalConfigurer.class, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
 		 *
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
-		HAL_FORMS,
+		HAL_FORMS(HalFormsConfigurer.class, MediaTypes.HAL_FORMS_JSON),
 
 		/**
 		 * Collection+JSON
 		 *
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
-		COLLECTION_JSON,
+		COLLECTION_JSON(CollectionJsonConfigurer.class, MediaTypes.COLLECTION_JSON),
 
 		/**
 		 * UBER Hypermedia
 		 *
 		 * @see http://uberhypermedia.org/
 		 */
-		UBER;
+		UBER(UberConfigurer.class, MediaTypes.UBER_JSON);
+
+		private final Class<?> configurer;
+		private final List<MediaType> mediaTypes;
+
+		HypermediaType(Class<?> configurer, MediaType... mediaTypes) {
+
+			this.configurer = configurer;
+			this.mediaTypes = Arrays.asList(mediaTypes);
+		}
+
+		@Override
+		public List<MediaType> getMediaTypes() {
+			return this.mediaTypes;
+		}
+
+		@Override
+		public Optional<Class<?>> configurer() {
+			return Optional.ofNullable(this.configurer);
+		}
+
 	}
 }
