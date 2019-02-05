@@ -1,5 +1,5 @@
 = Spring HATEOAS - Reference Documentation
-Oliver Gierke, Greg Turnquist;
+Oliver Gierke; Greg Turnquist; Jay Bryant
 :revnumber: {version}
 :revdate: {localdate}
 :toc:
@@ -17,15 +17,19 @@ toc::[]
 [[fundamentals]]
 == Fundamentals
 
-[[fundamentals.jaxb-json]]
-=== Jackson / JAXB integration
+This section covers the basics of Spring HATEOAS.
 
-As representations for REST web services are usually rendered in either XML or JSON the natural choice of technology to achieve this is either Jackson, JAXB, or both in combination. To follow HATEOAS principles you need to incorporate links into those representation. Spring HATEOAS provides a set of useful types to ease working with those.
+[[fundamentals.jaxb-json]]
+=== Jackson integration
+
+As representations for REST web services are usually rendered in JSON, the natural choice of technology to achieve this is Jackson. To follow HATEOAS principles, you need to incorporate links into those representations. Spring HATEOAS provides a set of useful types to ease working with those representations.
 
 [[fundamentals.links]]
 === Links
-The `Link` value object follows the Atom link definition and consists of a `rel` and an `href` attribute. It contains a few constants for well known rels such as `self`, `next` etc. The XML representation will render in the Atom namespace.
+The `Link` value object follows the Atom link definition and consists of a `rel` attribute and an `href` attribute. It contains a few constants for well known `rel` values, such as `self`, `next`, and others.
+The following example shows some typical links and how you might test them:
 
+====
 [source, java]
 ----
 Link link = new Link("http://localhost:8080/something");
@@ -36,11 +40,15 @@ Link link = new Link("http://localhost:8080/something", "my-rel");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
 assertThat(link.getRel(), is("my-rel"));
 ----
+====
 
 [[fundamentals.resources]]
 === Resources
-As pretty much every representation of a resource will contain some links (at least the `self` one) we provide a base class to actually inherit from when designing representation classes.
 
+As pretty much every representation of a resource contains some links (at least the `self` one), we provide a base class (called `ResourceSupport`) to actually inherit from when designing representation classes.
+The following example shows a `PersonResource` class that extends the `ResourceSupport` base class:
+
+====
 [source, java]
 ----
 class PersonResource extends ResourceSupport {
@@ -49,9 +57,12 @@ class PersonResource extends ResourceSupport {
   String lastname;
 }
 ----
+====
 
-Inheriting from `ResourceSupport` will allow adding links easily:
+Inheriting from `ResourceSupport` lets you add links.
+The following example shows how to do so:
 
+====
 [source, java]
 ----
 PersonResource resource = new PersonResource();
@@ -75,37 +86,32 @@ This would render as follows in JSON:
     ]
 }
 ----
+====
 
-… or slightly more verbose in XML …
+You can then access links contained in that resource.
+The following example shows how to do so:
 
-[source, xml]
-----
-<person xmlns:atom="http://www.w3.org/2005/Atom">
-  <firstname>Dave</firstname>
-  <lastname>Matthews</lastname>
-  <links>
-    <atom:link rel="self" href="http://myhost/people" />
-  </links>
-</person>
-----
-
-You can also easily access links contained in that resource:
-
+====
 [source, java]
 ----
 Link selfLink = new Link("http://myhost/people");
 assertThat(resource.getId(), is(selfLink));
 assertThat(resource.getLink(IanaLinkRelation.SELF.value()), is(selfLink));
 ----
+====
+
 [[fundamentals.obtaining-links]]
-=== Obtaining links
+=== Obtaining Links
+
+This section describes how to obtain links by using the link builder.
 
 [[fundamentals.obtaining-links.builder]]
-==== Link builder
-Now we've got the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link`s in a less fragile way. Right now we'd have to duplicate URI strings all over the place which is brittle and unmaintainable.
+==== Link Builder
+Now we have the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link` instances in a less fragile way. Right now, we would have to duplicate URI strings all over the place. Doing so is brittle and unmaintainable.
 
 Assume you have your Spring MVC controllers implemented as follows:
 
+====
 [source, java]
 ----
 @Controller
@@ -119,14 +125,17 @@ class PersonController {
   public HttpEntity<PersonResource> show(@PathVariable Long person) { … }
 }
 ----
+====
 
-We see two conventions here. There's a collection resource exposed through the controller class' `@RequestMapping` annotation with individual elements of that collections exposed as direct sub resource. The collection resource might be exposed at a simple URI (as just shown) or more complex ones like `/people/{id}/addresses`. Let's say you would like to actually link to the collection resource of all people. Following the approach from up above would cause two problems:
+We see two conventions here. The first is a collection resource that is exposed through `@RequestMapping` annotation of the controller class, with individual elements of that collection exposed as direct sub resources. The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as `/people/{id}/addresses`). Suppose you would like to link to the collection resource of all people. Following the approach from up above would cause two problems:
 
-1. To create an absolute URI you'd need to lookup the protocol, hostname, port, servlet base etc. This is cumbersome and requires ugly manual string concatenation code.
-2. You probably don't want to concatenate the `/people` on top of your base URI because you'd have to maintain the information in multiple places then. Change the mapping, change all the clients pointing to it.
+* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values. This is cumbersome and requires ugly manual string concatenation code.
+* You probably do not want to concatenate the `/people` on top of your base URI, because you would then have to maintain the information in multiple places. If you change the mapping, you then have to change all the clients pointing to it.
 
-Spring Hateoas now provides a `ControllerLinkBuilder` that allows to create links by pointing to controller classes:
+Spring Hateoas now provides a `ControllerLinkBuilder` that lets you create links by pointing to controller classes.
+The following example shows how to do so:
 
+====
 [source, java]
 ----
 import static org.sfw.hateoas.mvc.ControllerLinkBuilder.*;
@@ -135,9 +144,12 @@ Link link = linkTo(PersonController.class).withRel("people");
 assertThat(link.getRel(), is("people"));
 assertThat(link.getHref(), endsWith("/people"));
 ----
+====
 
-The `ControllerLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at `http://localhost:8080/your-app` This will be exactly the URI you're constructing additional parts on top. The builder now inspects the given controller class for its root mapping and thus end up with `http://localhost:8080/your-app/people`. You can also easily build more nested links as well:
+The `ControllerLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at `http://localhost:8080/your-app`, this is exactly the URI on top of which you are constructing additional parts. The builder now inspects the given controller class for its root mapping and, thus, ends up with `http://localhost:8080/your-app/people`. You can also build more nested links as well.
+The following example shows how to do so:
 
+====
 [source, java]
 ----
 Person person = new Person(1L, "Dave", "Matthews");
@@ -146,9 +158,11 @@ Link link = linkTo(PersonController.class).slash(person.getId()).withSelfRel();
 assertThat(link.getRel(), is(IanaLinkRelation.SELF.value()));
 assertThat(link.getHref(), endsWith("/people/1"));
 ----
+====
 
-If your domain class implements the `Identifiable` interface the `slash(…)` method will rather invoke `getId()` on the given object instead of `toString()`. Thus the just shown link creation can be abbreviated to:
+If your domain class implements the `Identifiable` interface, the `slash(…)` method invokes `getId()` on the given object instead of `toString()`. Thus, you can abbreviate the link creation shown in the preceding example to the following:
 
+====
 [source, java]
 ----
 class Person implements Identifiable<Long> {
@@ -157,20 +171,26 @@ class Person implements Identifiable<Long> {
 
 Link link = linkTo(PersonController.class).slash(person).withSelfRel();
 ----
+====
 
-The builder also allows creating URI instances to build up e.g. response header values:
+The builder also allows creating URI instances to build up (for example, response header values):
 
+====
 [source, java]
 ----
 HttpHeaders headers = new HttpHeaders();
 headers.setLocation(linkTo(PersonController.class).slash(person).toUri());
 return new ResponseEntity<PersonResource>(headers, HttpStatus.CREATED);
 ----
+====
+
 [[fundamentals.obtaining-links.builder.methods]]
-==== Building links pointing to methods
+==== Building Links that Point to Methods
 
-As of version 0.4 you can even easily build links pointing to methods or creating dummy controller method invocations. The first approach is to hand a `Method` instance to the `ControllerLinkBuilder`:
+As of version 0.4, you can even build links that point to methods or create dummy controller method invocations. The first approach is to hand a `Method` instance to the `ControllerLinkBuilder`.
+The following example shows how to do so:
 
+====
 [source, java]
 ----
 Method method = PersonController.class.getMethod("show", Long.class);
@@ -178,36 +198,44 @@ Link link = linkTo(method, 2L).withSelfRel();
 
 assertThat(link.getHref(), endsWith("/people/2")));
 ----
+====
 
-This is still a bit dissatisfying as we have to get a `Method` instance first, which throws an exception and is generally quite cumbersome. At least we don't repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy we can create easily using the `methodOn(…)` helper.
+This is still a bit dissatisfying, as we have to first get a `Method` instance, which throws an exception and is generally quite cumbersome. At least we do not repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy, which we can create byi using the `methodOn(…)` helper.
+The following example shows how to do so:
 
+====
 [source, java]
 ----
 Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
 assertThat(link.getHref(), endsWith("/people/2")));
 ----
+====
 
-`methodOn(…)` creates a proxy of the controller class that is recording the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method we want to obtain the mapping for. However there are a few constraints on the methods that can be obtained using this technique:
+`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method for which we want to obtain the mapping. However, there are a few constraints on the methods that can be obtained byusing this technique:
 
-1. The return type has to be capable of proxying as we need to expose the method invocation on it.
-2. The parameters handed into the methods are generally neglected, except the ones referred to through `@PathVariable` as they make up the URI.
+* The return type has to be capable of proxying, as we need to expose the method invocation on it.
+* The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
 
 [[fundamentals.obtaining-links.entity-links]]
-==== EntityLinks
+==== Using the `EntityLinks` Interface
 
-So far we have created links by pointing to the web-framework implementations (i.e. Spring MVC controllers or JAX-RS resource classes) and inspected the mapping. In many cases these classes essentially read and write representations backed by a model class.
+So far, we have created links by pointing to the web-framework implementations (that is, the Spring MVC controllers) and inspected the mapping. In many cases, these classes essentially read and write representations backed by a model class.
 
-The `EntityLinks` interface now exposes an API to lookup a `Link` or `LinkBuilder` based on the model types. The methods essentially return links to either point to the collection resource (e.g. `/people`) or a single resource (e.g. `/people/1`).
+The `EntityLinks` interface now exposes an API to look up a `Link` or `LinkBuilder` based on the model types. The methods essentially return links that point either to the collection resource (such as `/people`) or to a single resource (such as `/people/1`).
+The following example shows how to use `EntityLinks`:
 
+====
 [source, java]
 ----
 EntityLinks links = …;
 LinkBuilder builder = links.linkFor(CustomerResource.class);
 Link link = links.linkToSingleResource(CustomerResource.class, 1L);
 ----
+====
 
-`EntityLinks` is available for dependency injection by activating `@EnableEntityLinks` in your Spring MVC configuration. Activating this functionality will cause all your Spring MVC controllers and JAX-RS resource implementations available in the current `ApplicationContext` being inspected for the `@ExposesResourceFor(…)` annotation. The annotation exposes which model type the controller manages. Beyond that we assume you follow the URI mapping convention of a class level base mapping and assuming you have controller methods handling an appended `/{id}`. Here's an example implementation of an `EntityLinks` capable controller:
+`EntityLinks` is available for dependency injection by activating `@EnableEntityLinks` in your Spring MVC configuration. Activating this functionality causes all the Spring MVC controllers available in the current `ApplicationContext` to be inspected for the `@ExposesResourceFor(…)` annotation. The annotation exposes which model type the controller manages. Beyond that, we assume that you follow the URI mapping convention of a class level base mapping and assume that you have controller methods handling an appended `/{id}`. The following example shows an implementation of an `EntityLinks`-capable controller:
 
+====
 [source, java]
 ----
 @Controller
@@ -222,9 +250,11 @@ class OrderController {
   ResponseEntity order(@PathVariable("id") … ) { … }
 }
 ----
+====
 
-The controller exposes that it manages `Order` instances and exposes handler methods that are mapped to our convention. Enabling `EntityLinks` through `@EnableEntityLinks` in your Spring MVC configuration you can now go ahead and create links to the just shown controller as follows.
+The controller exposes that it manages `Order` instances and exposes handler methods that are mapped to our convention. When youy enable `EntityLinks` through `@EnableEntityLinks` in your Spring MVC configuration, you can create links to the controller, as follows:
 
+====
 [source, java]
 ----
 @Controller
@@ -240,19 +270,22 @@ class PaymentController {
   }
 }
 ----
+====
 
-As you can see you can refer to the `Order` instances without even referring to the `OrderController`.
+You can then refer to the `Order` instances without referring to the `OrderController`.
 
 [[fundamentals.resource-assembler]]
-=== Resource assembler
+=== Resource Assembler
 
-As the mapping from an entity to a resource type will have to be used in multiple places it makes sense to create a dedicated class responsible for doing so. The conversion will of course contain very custom steps but also a few boilerplate ones:
+As the mapping from an entity to a resource type must be used in multiple places, it makes sense to create a dedicated class responsible for doing so. The conversion contains very custom steps but also a few boilerplate steps:
 
-1. Instantiation of the resource class
-2. Adding a link with rel `self` pointing to the resource that gets rendered.
+. Instantiation of the resource class
+. Adding a link with a `rel` of `self` pointing to the resource that gets rendered.
 
-Spring Hateoas now provides a `ResourceAssemblerSupport` base class that helps reducing the amount of code needed to be written:
+Spring Hateoas now provides a `ResourceAssemblerSupport` base class that helps reduce the amount of code you need to write.
+The following example shows how to use it:
 
+====
 [source, java]
 ----
 class PersonResourceAssembler extends ResourceAssemblerSupport<Person, PersonResource> {
@@ -270,11 +303,17 @@ class PersonResourceAssembler extends ResourceAssemblerSupport<Person, PersonRes
   }
 }
 ----
+====
 
-Setting the class up like this gives you the following benefits: there are a handful of `createResource(…)` methods that will allow you to create an instance of the resource and have a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controller's request mapping plus the id of the `Identifiable` (e.g. `/people/1` in our case). The resource type gets instantiated by reflection and expects a no-arg constructor. Simply override `instantiateResource(…)` in case you'd like to use a dedicated constructor or avoid the reflection performance overhead.
+Setting the class up as we did in the preceding example gives you the following benefits:
 
-The assembler can then be used to either assemble a single resource or an `Iterable` of them:
+* There are a handful of `createResource(…)` methods that let you create an instance of the resource and have a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controller's request mapping plus the ID of the `Identifiable` (for example, `/people/1`).
+* The resource type gets instantiated by reflection and expects a no-arg constructor. If you want to use a dedicated constructor or avoid the reflection performance overhead, you can override `instantiateResource(…)`.
 
+You can then use the assembler to either assemble a single resource or an `Iterable` of the resources.
+The following example creates a list of `Person` resources:
+
+====
 [source, java]
 ----
 Person person = new Person(…);
@@ -284,44 +323,51 @@ PersonResourceAssembler assembler = new PersonResourceAssembler();
 PersonResource resource = assembler.toResource(person);
 List<PersonResource> resources = assembler.toResources(people);
 ----
+====
 
 [[configuration]]
 == Configuration
 
-[[configuration.at-enable]]
-=== @EnableHypermediaSupport
-To enable the `ResourceSupport` subtypes be rendered according to the specification of various hypermedia representations types, the support for a particular hypermedia representation format can be activated through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as argument. Currently we support http://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
+This section describes how to configure Spring HATEOAS.
 
-* registers necessary Jackson modules to render `Resource`/`Resources` in the hypermedia specific format.
-* if JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to lookup links by their `rel` in plain JSON representations (see <<client.link-discoverer>>).
-* enables `@EnableEntityLinks` by default (see <<fundamentals.obtaining-links.entity-links>>), will automatically pick up `EntityLinks` implementations and bundle them into a `DelegatingEntityLinks` instance available for autowiring.
-* automatically picks up all `RelProvider` implementations in the `ApplicationContext` and bundles them into a `DelegatingRelProvider` available for autowiring. Registers providers to consider `@Relation` on domain types as well as Spring MVC controllers. If https://github.com/atteo/evo-inflector[EVO inflector] is on the classpath collection rels are derived using the pluralizing algorithm implemented in the library (see <<spis.rel-provider>>).
+[[configuration.at-enable]]
+=== Using `@EnableHypermediaSupport`
+
+To let the `ResourceSupport` subtypes be rendered according to the specification of various hypermedia representations types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support http://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
+
+* It registers necessary Jackson modules to render `Resource` and `Resources` in the hypermedia specific format.
+* If JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to look up links by their `rel` in plain JSON representations (see <<client.link-discoverer>>).
+* By default, it enables `@EnableEntityLinks` (see <<fundamentals.obtaining-links.entity-links>>) and automatically picks up `EntityLinks` implementations and bundles them into a `DelegatingEntityLinks` instance that you can autowire.
+* It automatically picks up all `RelProvider` implementations in the `ApplicationContext` and bundles them into a `DelegatingRelProvider` that you can autowire. It registers providers to consider `@Relation` on domain types as well as Spring MVC controllers. If the https://github.com/atteo/evo-inflector[EVO inflector] is on the classpath, collection `rel` values are derived by using the pluralizing algorithm implemented in the library (see <<spis.rel-provider>>).
 
 
 [[spis]]
 == SPIs
 
+This section describes the service provider interfaces (SPIs) available in Spring HATEOAS.
+
 [[spis.rel-provider]]
-=== RelProvider API
+=== Using the `RelProvider` API
 
-When building links you usually need to determine the relation type to be used for the link. In most cases the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to lookup the relation types behind a `RelProvider` API that allows to determine the relation types for single and collection resources. Here's the algorithm the relation type is looked up:
+When building links, you usually need to determine the relation type to be used for the link. In most cases, the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to look up the relation types behind a `RelProvider` API that lets you determine the relation types for single and collection resources. The algorithm for looking up the relation type follows:
 
-1. If the type is annotated with `@Relation` we use the values configured in the annotation.
-2. if not, we default to the uncapitalized simple class name plus an appended `List` for the collection rel.
-3. in case the https://github.com/atteo/evo-inflector[EVO inflector] JAR is in the classpath, we rather use the plural of the single resource rel provided by the pluralizing algorithm.
-4. `@Controller` classes annotated with `@ExposesResourceFor` (see <<fundamentals.obtaining-links.entity-links>> for details) will transparently lookup the relation types for the type configured in the annotation, so that you can use `relProvider.getSingleResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
+. If the type is annotated with `@Relation`, we use the values configured in the annotation.
+. If not, we default to the uncapitalized simple class name plus an appended `List` for the collection `rel`.
+. If the https://github.com/atteo/evo-inflector[EVO inflector] JAR is in the classpath, we use the plural of the single resource `rel` provided by the pluralizing algorithm.
+. `@Controller` classes annotated with `@ExposesResourceFor` (see <<fundamentals.obtaining-links.entity-links>> for details) transparently look up the relation types for the type configured in the annotation, so that you can use `relProvider.getSingleResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
 
-A `RelProvider` is exposed as Spring bean when using `@EnableHypermediaSupport` automatically. You can plug in custom providers by simply implementing the interface and exposing them as Spring bean in turn.
+A `RelProvider` is automatically exposed as a Spring bean when you use `@EnableHypermediaSupport`. You can plug in custom providers by implementing the interface and exposing them as Spring beans in turn.
 
 [[spis.curie-provider]]
-=== CurieProvider API
+=== Using the `CurieProvider` API
 
-The http://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the http://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension rels can be used by applications that do not wish to register a relation type. They are a URI that uniquely identifies the relation type. The rel URI can be serialized as a compact URI or http://www.w3.org/TR/curie[Curie]. E.g. a curie `ex:persons` stands for the link relation type `http://example.com/rels/persons` if `ex` is defined as `http://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
+The http://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the http://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension `rel` URIs can be used by applications that do not wish to register a relation type. Each one is a URI that uniquely identifies the relation type. The `rel` URI can be serialized as a compact URI or http://www.w3.org/TR/curie[Curie]. For example, a curie of `ex:persons` stands for the link relation type `http://example.com/rels/persons` if `ex` is defined as `http://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
 
-The rels created by the default `RelProvider` are extension relation types and as such must be URIs, which can cause a lot of overhead. The `CurieProvider` API takes care of that: it allows to define a base URI as URI template and a prefix which stands for that base URI. If a `CurieProvider` is present, the `RelProvider` prepends all rels with the curie prefix. Furthermore a `curies` link is automatically added to the HAL resource.
+The `rel` values created by the default `RelProvider` are extension relation types and, as a result, must be URIs, which can cause a lot of overhead. The `CurieProvider` API takes care of that: It lets you define a base URI as a URI template and a prefix that stands for that base URI. If a `CurieProvider` is present, the `RelProvider` prepends all `rel` values with the curie prefix. Furthermore a `curies` link is automatically added to the HAL resource.
 
-The configuration below defines a default curie provider.
+The following configuration defines a default curie provider:
 
+====
 [source, java]
 ----
 @Configuration
@@ -335,9 +381,12 @@ public class Config {
   }
 }
 ----
+====
 
-Note that now the prefix `ex:` automatically appears before all rels which are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form:
+Note that now the `ex:` prefix automatically appears before all rel values that are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form.
+The following example shows how to do so:
 
+====
 [source, json]
 ----
 {
@@ -354,17 +403,22 @@ Note that now the prefix `ex:` automatically appears before all rels which are n
   "lastname" : "Matthews"
 }
 ----
+====
 
 Since the purpose of the `CurieProvider` API is to allow for automatic curie creation, you can define only one `CurieProvider` bean per application scope.
 
 [[client]]
-== Client side support
+== Client-side Support
+
+This section describes Spring HATEOAS's support for clients.
 
 [[client.traverson]]
 === Traverson
 
-Spring HATEOAS provides an API for client side service traversal inspired by the https://blog.codecentric.de/en/2013/11/traverson/[Traverson JavaScript library].
+Spring HATEOAS provides an API for client-side service traversal. It is inspired by the https://blog.codecentric.de/en/2013/11/traverson/[Traverson JavaScript library].
+The following example shows how to use it:
 
+====
 [source, java]
 ----
 Map<String, Object> parameters = new HashMap<>();
@@ -375,39 +429,44 @@ String name = traverson.follow("movies", "movie", "actor").
   withTemplateParameters(parameters).
   toObject("$.name");
 ----
+====
 
-You set up a `Traverson` instance by pointing it to a REST server and configure the media types you want to set as `Accept` header. You then go ahead and define the relation names you want to discover and follow. relation names can either be simple names or JSONPath expressions (starting with an `$`).
+You can set up a `Traverson` instance by pointing it to a REST server and configuring the media types you want to set as `Accept` headers. You can then define the relation names you want to discover and follow. Relation names can either be simple names or JSONPath expressions (starting with an `$`).
 
-The sample then hands a parameter map into the execution. The parameters will be used to expand URIs found during the traversal that are templated. The traversal is concluded by accessing the representation of the final traversal. In the case of the sample we evaluate a JSONPath expression to access the actor's name.
+The sample then hands a parameter map into the execution. The parameters are used to expand URIs (which are templated) found during the traversal. The traversal is concluded by accessing the representation of the final traversal. In the preceding example, we evaluate a JSONPath expression to access the actor's name.
 
-The example listed above is the simplest version of traversal, where the rels are strings, and at each hop, the same template parameters are applied.
+The preceding example is the simplest version of traversal, where the `rel` values are strings and, at each hop, the same template parameters are applied.
 
 There are more options to customize template parameters at each level.
+The following example shows these options.
 
 [source,java,indent=0]
 ----
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
 ----
 
-The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI Template variables.
+The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI template variables.
 
-NOTE: `.withParameter()` returns a new Hop object that is chainable. You can string together as many `.withParameter` as you like. The result is a single Hop definition.
+NOTE: `.withParameter()` returns a new `Hop` object that is chainable. You can string together as many `.withParameter` as you like. The result is a single `Hop` definition.
+The following example shows one way to do so:
 
+====
 [source,java,indent=0]
 ----
 include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
 ----
+====
 
-It's also possible to load an entire `Map` of parameters via `.withParameters(Map)`.
+You can also load an entire `Map` of parameters by using `.withParameters(Map)`.
 
-NOTE: `follow()` is chainable, meaning you can string together multiple hops as shown above. You can either put multiple, simple string-based rels (`follow("items", "item")`) or a single hop with specific parameters.
+NOTE: `follow()` is chainable, meaning you can string together multiple hops, as shown in the preceding examples. You can either put multiple string-based `rel` values (`follow("items", "item")`) or a single hop with specific parameters.
 
 ==== `Resource<T>` vs. `Resources<T>`
 
-The examples shown so far demonstrate how to side step Java's type erasure and convert a single JSON-formatted resource into a `Resource<Item>` object. But what if you get a collection like an *_embedded* HAL collection?
+The examples shown so far demonstrate how to sidestep Java's type erasure and convert a single JSON-formatted resource into a `Resource<Item>` object. However, what if you get a collection like an _embedded HAL collection?
+You can do so with only one slight tweak, as the following example shows:
 
-One slight tweak and you're set.
-
+====
 [source,java]
 ----
 ParameterizedTypeReference<Resources<Item>> resourceParameterizedTypeReference =
@@ -417,16 +476,18 @@ Resources<Item> itemResource = traverson.//
         follow(rel("items")).//
         toObject(resourceParameterizedTypeReference);
 ----
+====
 
 Instead of fetching a single resource, this one deserializes a collection into `Resources`.
 
 [[client.link-discoverer]]
-=== LinkDiscoverers
+=== Using `LinkDiscoverer` Instances
 
-When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in them. Spring HATEOAS provides https://code.google.com/p/json-path[JSONPath] based implementations of the `LinkDiscoverer` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport` we automatically expose an instance supporting the configured hypermedia type as Spring bean.
+When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in it. Spring HATEOAS provides https://code.google.com/p/json-path[JSONPath]-based implementations of the `LinkDiscoverer` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport`, we automatically expose an instance supporting the configured hypermedia type as a Spring bean.
 
-Alternatively you can simply setup and use an instance like this:
+Alternatively, you can setup and use an instance as follows:
 
+====
 [source, java]
 ----
 String content = "{'_links' :  { 'foo' : { 'href' : '/foo/bar' }}}";
@@ -436,3 +497,4 @@ Link link = discoverer.findLinkWithRel("foo", content);
 assertThat(link.getRel(), is("foo"));
 assertThat(link.getHref(), is("/foo/bar"));
 ----
+====
