@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
@@ -96,6 +97,21 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 		});
 	}
 
+	@Test
+	public void shouldRegisterCustomHypermediaMessageConverters() {
+
+		withContext(CustomHypermediaConfig.class, context -> {
+
+			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class)))
+				.containsExactlyInAnyOrder(
+					MediaTypes.HAL_JSON,
+					MediaTypes.HAL_JSON_UTF8,
+					MediaType.parseMediaType("application/frodo+json"),
+					MediaType.APPLICATION_JSON,
+					MediaType.parseMediaType("application/*+json"));
+		});
+	}
+
 	private List<MediaType> lookupSupportedHypermediaTypes(RestTemplate restTemplate) {
 
 		return restTemplate.getMessageConverters().stream().filter(MappingJackson2HttpMessageConverter.class::isInstance)
@@ -123,4 +139,14 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	@EnableHypermediaSupport(
 			type = { HypermediaType.HAL, HypermediaType.HAL_FORMS, HypermediaType.COLLECTION_JSON, HypermediaType.UBER })
 	static class AllHypermediaConfig extends BaseConfig {}
+
+	@Configuration
+	@EnableHypermediaSupport(type = HypermediaType.HAL)
+	static class CustomHypermediaConfig extends  BaseConfig {
+
+		@Bean
+		CustomHypermediaType customHypermediaType() {
+			return new CustomHypermediaType();
+		}
+	}
 }

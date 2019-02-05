@@ -89,7 +89,6 @@ public final class HypermediaObjectMapperCreator {
 	 * Create a {@link org.springframework.hateoas.MediaTypes#COLLECTION_JSON}-based {@link ObjectMapper}.
 	 *
 	 * @param objectMapper
-	 * @param linkRelationMessageSource
 	 * @return properly configured objectMapper
 	 */
 	public static ObjectMapper createCollectionJsonObjectMapper(ObjectMapper objectMapper) {

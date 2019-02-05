@@ -20,7 +20,7 @@ import java.util.Collection;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.config.Hypermedia;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.HalConfiguration;
@@ -40,7 +40,7 @@ public class WebMvcHateoasConfiguration {
 	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(ObjectProvider<ObjectMapper> mapper,
 			DelegatingRelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
 			ObjectProvider<HalConfiguration> halConfiguration, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
-			Collection<HypermediaType> hypermediaTypes) {
+			Collection<Hypermedia> hypermediaTypes) {
 
 		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), relProvider,
 				curieProvider.getIfAvailable(), halConfiguration.getIfAvailable(HalConfiguration::new),

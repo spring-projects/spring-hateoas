@@ -30,6 +30,7 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.config.Hypermedia;
 import org.springframework.hateoas.core.DelegatingRelProvider;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.HalConfiguration;
@@ -60,7 +61,7 @@ public class HypermediaWebFluxConfigurer implements WebFluxConfigurer, BeanFacto
 	private final CurieProvider curieProvider;
 	private final HalConfiguration halConfiguration;
 	private final HalFormsConfiguration halFormsConfiguration;
-	private final Collection<HypermediaType> hypermediaTypes;
+	private final Collection<Hypermedia> hypermediaTypes;
 
 	private BeanFactory beanFactory;
 
@@ -94,43 +95,36 @@ public class HypermediaWebFluxConfigurer implements WebFluxConfigurer, BeanFacto
 
 		CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
 
-		if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
+		this.hypermediaTypes.forEach(hypermedia -> {
 
-			ObjectMapper halObjectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
-				linkRelationMessageSource, this.halConfiguration);
+			ObjectMapper objectMapper;
 
-			customCodecs.encoder(
-				new Jackson2JsonEncoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-			customCodecs.decoder(
-				new Jackson2JsonDecoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-		}
+			if (hypermedia == HypermediaType.HAL) {
 
-		if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
+				objectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
+					linkRelationMessageSource, this.halConfiguration);
 
-			ObjectMapper halFormsObjectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
-				this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
+			} else if (hypermedia == HypermediaType.HAL_FORMS) {
 
-			customCodecs.encoder(
-				new Jackson2JsonEncoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-			customCodecs.decoder(
-				new Jackson2JsonDecoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-		}
+				objectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
+					this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
 
-		if (this.hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
+			} else if (hypermedia == HypermediaType.COLLECTION_JSON) {
 
-			ObjectMapper collectionJsonObjectMapper = createCollectionJsonObjectMapper(this.mapper);
+				objectMapper = createCollectionJsonObjectMapper(this.mapper);
 
-			customCodecs.encoder(new Jackson2JsonEncoder(collectionJsonObjectMapper, MediaTypes.COLLECTION_JSON));
-			customCodecs.decoder(new Jackson2JsonDecoder(collectionJsonObjectMapper, MediaTypes.COLLECTION_JSON));
-		}
+			} else if (hypermedia == HypermediaType.UBER) {
 
-		if (this.hypermediaTypes.contains(HypermediaType.UBER)) {
+				objectMapper = createUberObjectMapper(this.mapper);
 
-			ObjectMapper uberObjectMapper = createUberObjectMapper(this.mapper);
+			} else {
 
-			customCodecs.encoder(new Jackson2JsonEncoder(uberObjectMapper, MediaTypes.UBER_JSON));
-			customCodecs.decoder(new Jackson2JsonDecoder(uberObjectMapper, MediaTypes.UBER_JSON));
-		}
+				objectMapper = hypermedia.createObjectMapper(this.mapper);
+			}
+
+			customCodecs.encoder(new Jackson2JsonEncoder(objectMapper, hypermedia.getMimeTypes()));
+			customCodecs.decoder(new Jackson2JsonDecoder(objectMapper, hypermedia.getMimeTypes()));
+		});
 
 		customCodecs.encoder(CharSequenceEncoder.allMimeTypes());
 		customCodecs.decoder(StringDecoder.allMimeTypes());
