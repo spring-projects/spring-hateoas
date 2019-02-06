@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,16 @@
  */
 package org.springframework.hateoas.hal.forms;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.hateoas.support.MappingUtils.read;
+
+import java.io.IOException;
 
 import org.junit.Test;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 
@@ -31,16 +36,36 @@ import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 public class HalFormsLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalFormsLinkDiscoverer();
-	static final String SAMPLE = "{ _links : { self : { href : 'selfHref' }, " + //
-			"relation : [ { href : 'firstHref' }, { href : 'secondHref' }], " + //
-			"'http://foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
 
 	/**
 	 * @see #314
 	 */
 	@Test
 	public void discoversFullyQualifiedRel() {
-		assertThat(getDiscoverer().findLinkWithRel("http://foo.com/bar", SAMPLE), is(notNullValue()));
+		assertThat(getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString())).isNotNull();
+	}
+
+	/**
+	 * @see #787
+	 */
+	@Test
+	public void discoversAllTheLinkAttributes() throws IOException {
+
+		String linkText = read(new ClassPathResource("hal-forms-link.json", getClass()));
+
+		Link actual = getDiscoverer().findLinkWithRel(IanaLinkRelation.SELF.value(), linkText);
+
+		Link expected = Link.valueOf("</customer/1>;" //
+			+ "rel=\"self\";" //
+			+ "hreflang=\"en\";" //
+			+ "media=\"pdf\";" //
+			+ "title=\"pdf customer copy\";" //
+			+ "type=\"portable document\";" //
+			+ "deprecation=\"http://example.com/customers/deprecated\";" //
+			+ "profile=\"my-profile\"" //
+			+ "name=\"my-name\"");
+
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Override
@@ -50,7 +75,12 @@ public class HalFormsLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTe
 
 	@Override
 	protected String getInputString() {
-		return SAMPLE;
+
+		try {
+			return read(new ClassPathResource("hal-forms-link-discoverer.json", getClass()));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

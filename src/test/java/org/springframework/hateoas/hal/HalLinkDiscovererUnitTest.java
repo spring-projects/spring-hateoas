@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,28 @@
 package org.springframework.hateoas.hal;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.support.MappingUtils.read;
+
+import java.io.IOException;
 
 import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
+import org.springframework.hateoas.support.MappingUtils;
 
 /**
  * Unit tests for {@link HalLinkDiscoverer}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
-	static final String SAMPLE = "{ _links : { self : { href : 'selfHref' }, " + //
-			"relation : [ { href : 'firstHref' }, { href : 'secondHref' }], " + //
-			"'http://foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
 
 	/**
 	 * @see #314
@@ -41,10 +45,33 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	@Test
 	public void discoversFullyQualifiedRel() {
 
-		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", SAMPLE);
+		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString());
 
 		assertThat(link).isNotNull();
 		assertThat(link.getHref()).isEqualTo("fullRelHref");
+	}
+
+	/**
+	 * @see #787
+	 */
+	@Test
+	public void discoversAllTheLinkAttributes() throws IOException {
+
+		String linkText = read(new ClassPathResource("hal-link.json", getClass()));
+
+		Link actual = getDiscoverer().findLinkWithRel(IanaLinkRelation.SELF.value(), linkText);
+
+		Link expected = Link.valueOf("</customer/1>;" //
+			+ "rel=\"self\";" //
+			+ "hreflang=\"en\";" //
+			+ "media=\"pdf\";" //
+			+ "title=\"pdf customer copy\";" //
+			+ "type=\"portable document\";" //
+			+ "deprecation=\"http://example.com/customers/deprecated\";" //
+			+ "profile=\"my-profile\"" //
+			+ "name=\"my-name\"");
+		
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	/**
@@ -62,7 +89,12 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 	@Override
 	protected String getInputString() {
-		return SAMPLE;
+
+		try {
+			return read(new ClassPathResource("hal-link-discoverer.json", getClass()));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
