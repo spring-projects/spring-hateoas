@@ -81,5 +81,5 @@ git config core.commentchar "/"
 == Resources
 
 * Reference documentation - http://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], http://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
-* http://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/api/[JavaDoc]
+* https://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/[JavaDoc]
 * https://spring.io/guides/gs/rest-hateoas/[Getting started guide]
