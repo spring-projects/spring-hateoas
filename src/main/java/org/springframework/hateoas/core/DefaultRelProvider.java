@@ -16,7 +16,6 @@
 package org.springframework.hateoas.core;
 
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.util.StringUtils;
 
@@ -25,11 +24,16 @@ import org.springframework.util.StringUtils;
  * single resource rel as well as an appended {@code List} for the collection resource rel.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
-@Order(Ordered.LOWEST_PRECEDENCE)
-public class DefaultRelProvider implements RelProvider {
+public class DefaultRelProvider implements RelProvider, Ordered {
 
-	/* 
+	@Override
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
