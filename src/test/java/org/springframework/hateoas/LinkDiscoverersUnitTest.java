@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.Ordered;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
@@ -30,6 +30,7 @@ import org.springframework.plugin.core.PluginRegistry;
  * Unit tests for {@link LinkDiscoverers}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class LinkDiscoverersUnitTest {
 
@@ -48,16 +49,24 @@ public class LinkDiscoverersUnitTest {
 		assertThat(registry.getRequiredPluginFor(MediaType.APPLICATION_JSON)).isEqualTo(high);
 	}
 
-	@Order(20)
-	static class LowPriorityLinkDiscoverer extends JsonPathLinkDiscoverer {
+	static class LowPriorityLinkDiscoverer extends JsonPathLinkDiscoverer implements Ordered {
+
+		@Override
+		public int getOrder() {
+			return 20;
+		}
 
 		public LowPriorityLinkDiscoverer() {
 			super("$.links.%s", MediaType.APPLICATION_JSON);
 		}
 	}
 
-	@Order(10)
-	static class HighPriorityLinkDiscoverer extends JsonPathLinkDiscoverer {
+	static class HighPriorityLinkDiscoverer extends JsonPathLinkDiscoverer implements Ordered {
+
+		@Override
+		public int getOrder() {
+			return 10;
+		}
 
 		public HighPriorityLinkDiscoverer() {
 			super("$.links.%s", MediaType.APPLICATION_JSON);

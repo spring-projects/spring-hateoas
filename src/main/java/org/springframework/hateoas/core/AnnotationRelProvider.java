@@ -18,18 +18,23 @@ package org.springframework.hateoas.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.RelProvider;
 
 /**
  * @author Oliver Gierke
  * @author Alexander Baetz
+ * @author Greg Turnquist
  */
-@Order(100)
-public class AnnotationRelProvider implements RelProvider {
+public class AnnotationRelProvider implements RelProvider, Ordered {
 
 	private final Map<Class<?>, Relation> annotationCache = new HashMap<>();
+
+	@Override
+	public int getOrder() {
+		return 100;
+	}
 
 	/*
 	 * (non-Javadoc)

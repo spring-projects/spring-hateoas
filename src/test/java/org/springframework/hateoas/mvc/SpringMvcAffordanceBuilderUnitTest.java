@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.Order;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
@@ -50,8 +50,12 @@ public class SpringMvcAffordanceBuilderUnitTest {
 		assertThat(registry.getPluginFor(MediaType.APPLICATION_JSON).get()).isEqualTo(high);
 	}
 
-	@Order(20)
-	static class LowPriorityModelFactory implements AffordanceModelFactory {
+	static class LowPriorityModelFactory implements AffordanceModelFactory, Ordered {
+
+		@Override
+		public int getOrder() {
+			return 20;
+		}
 
 		@Override
 		public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
@@ -64,8 +68,12 @@ public class SpringMvcAffordanceBuilderUnitTest {
 		}
 	}
 
-	@Order(10)
-	static class HighPriorityModelFactory implements AffordanceModelFactory {
+	static class HighPriorityModelFactory implements AffordanceModelFactory, Ordered {
+
+		@Override
+		public int getOrder() {
+			return 10;
+		}
 
 		@Override
 		public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
