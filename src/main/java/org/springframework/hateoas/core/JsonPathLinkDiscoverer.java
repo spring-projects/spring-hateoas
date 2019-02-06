@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import net.minidev.json.JSONArray;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -40,6 +40,7 @@ import com.jayway.jsonpath.JsonPath;
  * {@link LinkDiscoverer} that uses {@link JsonPath} to find links inside a representation.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
@@ -74,24 +75,15 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * The template has to contain a single {@code %s} placeholder which will be replaced by the relation type.
 	 * 
 	 * @param pathTemplate must not be {@literal null} or empty and contain a single placeholder.
-	 * @param mediaType the primary {@link MediaType}s to support.
-	 * @param others {@link MediaType}s to support.
+	 * @param mediaTypes the {@link MediaType}s to support.
 	 */
-	public JsonPathLinkDiscoverer(String pathTemplate, MediaType mediaType, MediaType... others) {
+	public JsonPathLinkDiscoverer(String pathTemplate, MediaType... mediaTypes) {
 
 		Assert.hasText(pathTemplate, "Path template must not be null!");
-//		Assert.isTrue(StringUtils.countOccurrencesOf(pathTemplate, "%s") == 1,
-//				"Path template must contain a single placeholder!");
-		Assert.notNull(mediaType, "Primary MediaType must not be null!");
-		Assert.notNull(others, "Other MediaTypes must not be null!");
+		Assert.notNull(mediaTypes, "Primary MediaType must not be null!");
 
 		this.pathTemplate = pathTemplate;
-
-		List<MediaType> mediaTypes = new ArrayList<>(others.length + 1);
-		mediaTypes.add(mediaType);
-		mediaTypes.addAll(Arrays.asList(others));
-
-		this.mediaTypes = mediaTypes;
+		this.mediaTypes = Arrays.asList(mediaTypes);
 	}
 
 	/* 
@@ -167,15 +159,34 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 		if (parseResult instanceof JSONArray) {
 
-			JSONArray array = (JSONArray) parseResult;
-
-			return array.stream() //
-					.map(element -> new Link(element.toString(), rel)) //
+			return ((JSONArray) parseResult).stream() //
+					.flatMap(o -> {
+						if (o instanceof JSONArray) {
+							return ((JSONArray) o).stream();
+						} else {
+							return Stream.of(o);
+						}
+					})
+					.map(element -> extractLink(element, rel)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+		} else if (parseResult instanceof Map) {
+
+			return Collections.singletonList(extractLink(parseResult, rel));
 		}
 
 		return Collections.unmodifiableList(Collections.singletonList(new Link(parseResult.toString(), rel)));
 	}
+
+	/**
+	 * Callback for each {@link LinkDiscoverer} to extract relevant attributes and generate a {@link Link}.
+	 *
+	 * @param element
+	 * @param rel
+	 * @return link
+	 */
+	protected Link extractLink(Object element, String rel) {
+		return new Link(element.toString(), rel);
+	};
 
 	/* 
 	 * (non-Javadoc)

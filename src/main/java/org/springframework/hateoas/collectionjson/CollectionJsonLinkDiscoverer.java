@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	private final CollectionJsonSelfLinkDiscoverer selfLinkDiscoverer;
 
 	public CollectionJsonLinkDiscoverer() {
+
 		super("$.collection..links..[?(@.rel == '%s')].href", MediaTypes.COLLECTION_JSON);
 		this.selfLinkDiscoverer = new CollectionJsonSelfLinkDiscoverer();
 	}
@@ -117,6 +118,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	 * {@link JsonPathLinkDiscoverer} that looks for the non-parameterized {@literal collection.href} link.
 	 */
 	private static class CollectionJsonSelfLinkDiscoverer extends JsonPathLinkDiscoverer {
+
 		CollectionJsonSelfLinkDiscoverer() {
 			super("$.collection.href", MediaTypes.COLLECTION_JSON);
 		}
