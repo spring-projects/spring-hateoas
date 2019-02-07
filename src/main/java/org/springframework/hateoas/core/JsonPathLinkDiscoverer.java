@@ -44,29 +44,6 @@ import com.jayway.jsonpath.JsonPath;
  */
 public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
-	private static Method compileMethod;
-	private static Object emptyFilters;
-
-	static {
-
-		// Reflective bridging between JsonPath 0.9.x and 1.x
-		for (Method candidate : JsonPath.class.getMethods()) {
-
-			if (candidate.getName().equals("compile")) {
-
-				Class<?>[] paramTypes = candidate.getParameterTypes();
-
-				if (paramTypes.length == 2 && paramTypes[0].equals(String.class) && paramTypes[1].isArray()) {
-					compileMethod = candidate;
-					emptyFilters = Array.newInstance(paramTypes[1].getComponentType(), 0);
-					break;
-				}
-			}
-		}
-
-		Assert.state(compileMethod != null, "Unexpected JsonPath API - no compile(String, ...) method found");
-	}
-
 	private final String pathTemplate;
 	private final List<MediaType> mediaTypes;
 
@@ -145,7 +122,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @return
 	 */
 	private JsonPath getExpression(String rel) {
-		return (JsonPath) ReflectionUtils.invokeMethod(compileMethod, null, String.format(pathTemplate, rel), emptyFilters);
+		return JsonPath.compile(String.format(pathTemplate, rel));
 	}
 
 	/**
