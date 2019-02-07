@@ -69,6 +69,22 @@ public abstract class LinkMixin extends Link {
 
 	/*
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Link#getProfile()
+	 */
+	@Override
+	@JsonInclude(Include.NON_NULL)
+	public abstract String getProfile();
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.Link#getName()
+	 */
+	@Override
+	@JsonInclude(Include.NON_NULL)
+	public abstract String getName();
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.Link#isTemplate()
 	 */
 	@Override

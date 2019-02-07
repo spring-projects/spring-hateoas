@@ -50,7 +50,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
-@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "deprecation", "affordances" })
+@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -100,6 +100,7 @@ public class Link implements Serializable {
 	private @Wither String type;
 	private @Wither String deprecation;
 	private @Wither String profile;
+	private @Wither String name;
 	private @JsonIgnore UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 
@@ -257,7 +258,7 @@ public class Link implements Serializable {
 	public Link withAffordances(List<Affordance> affordances) {
 
 		return new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
-				this.profile, this.template, affordances);
+				this.profile, this.name, this.template, affordances);
 	}
 
 	/**
@@ -324,11 +325,11 @@ public class Link implements Serializable {
 
 	private UriTemplate getUriTemplate() {
 
-		if (template == null) {
+		if (this.template == null) {
 			this.template = new UriTemplate(href);
 		}
 
-		return template;
+		return this.template;
 	}
 
 	/*
@@ -362,6 +363,10 @@ public class Link implements Serializable {
 
 		if (profile != null) {
 			linkString += ";profile=\"" + profile + "\"";
+		}
+
+		if (name != null) {
+			linkString += ";name=\"" + name + "\"";
 		}
 
 		return linkString;
@@ -416,6 +421,10 @@ public class Link implements Serializable {
 
 			if (attributes.containsKey("profile")) {
 				link = link.withProfile(attributes.get("profile"));
+			}
+
+			if (attributes.containsKey("name")) {
+				link = link.withName(attributes.get("name"));
 			}
 
 			return link;
