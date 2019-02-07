@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.core;
 
+import net.minidev.json.JSONArray;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,19 +26,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import net.minidev.json.JSONArray;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
 
 /**
  * {@link LinkDiscoverer} that uses {@link JsonPath} to find links inside a representation.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -50,7 +48,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	/**
 	 * Creates a new {@link JsonPathLinkDiscoverer} using the given path template supporting the given {@link MediaType}.
 	 * The template has to contain a single {@code %s} placeholder which will be replaced by the relation type.
-	 * 
+	 *
 	 * @param pathTemplate must not be {@literal null} or empty and contain a single placeholder.
 	 * @param mediaTypes the {@link MediaType}s to support.
 	 */
@@ -63,7 +61,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 		this.mediaTypes = Arrays.asList(mediaTypes);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(java.lang.String, java.lang.String)
 	 */
@@ -74,7 +72,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 		return links.isEmpty() ? null : links.get(0);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(java.lang.String, java.io.InputStream)
 	 */
@@ -85,7 +83,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 		return links.isEmpty() ? null : links.get(0);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkDiscoverer#findLinksWithRel(java.lang.String, java.lang.String)
 	 */
@@ -100,7 +98,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 		}
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkDiscoverer#findLinksWithRel(java.lang.String, java.io.InputStream)
 	 */
@@ -115,41 +113,15 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 		}
 	}
 
-	/**
-	 * Returns the {@link JsonPath} to find links with the given relation type.
-	 * 
-	 * @param rel
-	 * @return
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
-	private JsonPath getExpression(String rel) {
-		return JsonPath.compile(String.format(pathTemplate, rel));
-	}
+	@Override
+	public boolean supports(MediaType delimiter) {
 
-	/**
-	 * Creates {@link Link} instances from the given parse result.
-	 * 
-	 * @param parseResult the result originating from parsing the source content using the JSON path expression.
-	 * @param rel the relation type that was parsed for.
-	 * @return
-	 */
-	private List<Link> createLinksFrom(Object parseResult, String rel) {
-
-		if (parseResult instanceof JSONArray) {
-
-			JSONArray jsonArray = (JSONArray) parseResult;
-
-			return jsonArray.stream() //
-					.flatMap(element -> (element instanceof JSONArray)
-						? ((JSONArray) element).stream()
-						: Stream.of(element))
-					.map(element -> extractLink(element, rel)) //
-					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
-		} else if (parseResult instanceof Map) {
-
-			return Collections.singletonList(extractLink(parseResult, rel));
-		}
-
-		return Collections.unmodifiableList(Collections.singletonList(new Link(parseResult.toString(), rel)));
+		return this.mediaTypes.stream() //
+				.anyMatch(mediaType -> mediaType.isCompatibleWith(delimiter));
 	}
 
 	/**
@@ -161,16 +133,39 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 */
 	protected Link extractLink(Object element, String rel) {
 		return new Link(element.toString(), rel);
-	};
+	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
+	/**
+	 * Returns the {@link JsonPath} to find links with the given relation type.
+	 *
+	 * @param rel
+	 * @return
 	 */
-	@Override
-	public boolean supports(MediaType delimiter) {
+	private JsonPath getExpression(String rel) {
+		return JsonPath.compile(String.format(pathTemplate, rel));
+	}
 
-		return this.mediaTypes.stream() //
-				.anyMatch(mediaType -> mediaType.isCompatibleWith(delimiter));
+	/**
+	 * Creates {@link Link} instances from the given parse result.
+	 *
+	 * @param parseResult the result originating from parsing the source content using the JSON path expression.
+	 * @param rel the relation type that was parsed for.
+	 * @return
+	 */
+	private List<Link> createLinksFrom(Object parseResult, String rel) {
+
+		if (parseResult instanceof JSONArray) {
+
+			JSONArray jsonArray = (JSONArray) parseResult;
+
+			return jsonArray.stream() //
+					.flatMap(it -> JSONArray.class.isInstance(it) ? ((JSONArray) it).stream() : Stream.of(it)) //
+					.map(it -> extractLink(it, rel)) //
+					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+		}
+
+		return parseResult instanceof Map //
+				? Collections.singletonList(extractLink(parseResult, rel)) //
+				: Collections.singletonList(new Link(parseResult.toString(), rel));
 	}
 }
