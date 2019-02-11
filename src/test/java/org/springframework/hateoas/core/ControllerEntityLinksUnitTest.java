@@ -15,9 +15,9 @@
  */
 package org.springframework.hateoas.core;
 
+import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
@@ -49,7 +49,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	public void rejectsUnannotatedController() {
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
-				.isThrownBy(() -> new ControllerEntityLinks(Arrays.asList(InvalidController.class), linkBuilderFactory)) //
+				.isThrownBy(() -> new ControllerEntityLinks(singletonList(InvalidController.class), linkBuilderFactory)) //
 				.withMessageContaining(InvalidController.class.getName());
 	}
 
@@ -63,14 +63,14 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	public void rejectsNullLinkBuilderFactory() {
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
-				.isThrownBy(() -> new ControllerEntityLinks(Arrays.asList(SampleController.class), null));
+				.isThrownBy(() -> new ControllerEntityLinks(singletonList(SampleController.class), null));
 	}
 
 	@Test
 	public void registersControllerForEntity() {
 
 		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
-		EntityLinks links = new ControllerEntityLinks(Arrays.asList(SampleController.class), linkBuilderFactory);
+		EntityLinks links = new ControllerEntityLinks(singletonList(SampleController.class), linkBuilderFactory);
 
 		assertThat(links.supports(Person.class)).isTrue();
 		assertThat(links.linkFor(Person.class)).isNotNull();
@@ -85,7 +85,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 		when(linkBuilderFactory.linkTo(eq(ControllerWithParameters.class), (Object[]) any())) //
 				.thenReturn(linkTo(ControllerWithParameters.class, "1"));
 
-		ControllerEntityLinks links = new ControllerEntityLinks(Arrays.asList(ControllerWithParameters.class),
+		ControllerEntityLinks links = new ControllerEntityLinks(singletonList(ControllerWithParameters.class),
 				linkBuilderFactory);
 		LinkBuilder builder = links.linkFor(Order.class, "1");
 

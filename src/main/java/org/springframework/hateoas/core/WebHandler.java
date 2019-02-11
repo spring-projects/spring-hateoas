@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas;
+package org.springframework.hateoas.core;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 import static org.springframework.hateoas.TemplateVariables.*;
@@ -38,12 +38,10 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.hateoas.core.AnnotationAttribute;
-import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
-import org.springframework.hateoas.core.LastInvocationAware;
-import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.hateoas.core.MethodInvocation;
-import org.springframework.hateoas.core.MethodParameters;
+import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.LinkBuilder;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -59,19 +57,29 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * Utility for taking a a method invocation and extracting a {@link ControllerLinkBuilder}.
+ * Utility for taking a method invocation and extracting a {@link ControllerLinkBuilder}.
  *
  * @author Greg Turnquist
  */
 public class WebHandler {
 
 	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
-	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
-			new AnnotationAttribute(PathVariable.class));
-	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
+	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR //
+			= new AnnotatedParametersParameterAccessor(new AnnotationAttribute(PathVariable.class));
+	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR //
+			= new RequestParamParameterAccessor();
 
-	public static ControllerLinkBuilder linkTo(Object invocationValue,
-			Function<String, UriComponentsBuilder> mappingToUriComponentsBuilder,
+	public interface LinkBuilderCreator<T extends LinkBuilder> {
+		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
+	}
+
+	public static <T extends LinkBuilder> T linkTo(Object invocationValue,
+			Function<String, UriComponentsBuilder> mappingToUriComponentsBuilder, LinkBuilderCreator<T> creator) {
+		return linkTo(invocationValue, mappingToUriComponentsBuilder, creator, null);
+	}
+
+	public static <T extends LinkBuilder> T linkTo(Object invocationValue,
+			Function<String, UriComponentsBuilder> mappingToUriComponentsBuilder, LinkBuilderCreator<T> creator,
 			BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
@@ -92,13 +100,15 @@ public class WebHandler {
 			values.put(names.next(), encodePath(classMappingParameters.next()));
 		}
 
-		for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR.getBoundParameters(invocation)) {
+		for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR
+				.getBoundParameters(invocation)) {
 			values.put(parameter.getVariableName(), encodePath(parameter.asString()));
 		}
 
 		List<String> optionalEmptyParameters = new ArrayList<>();
 
-		for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR.getBoundParameters(invocation)) {
+		for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR
+				.getBoundParameters(invocation)) {
 
 			bindRequestParameters(builder, parameter);
 
@@ -132,7 +142,9 @@ public class WebHandler {
 			variables = variables.concat(variable);
 		}
 
-		return new ControllerLinkBuilder(components, variables, invocation);
+		List<Affordance> affordances = SpringAffordanceBuilder.create(invocation, DISCOVERER, components);
+
+		return creator.createBuilder(components, variables, affordances);
 	}
 
 	/**
@@ -143,7 +155,8 @@ public class WebHandler {
 	 * @param parameter must not be {@literal null}.
 	 */
 	@SuppressWarnings("unchecked")
-	private static void bindRequestParameters(UriComponentsBuilder builder, AnnotatedParametersParameterAccessor.BoundMethodParameter parameter) {
+	private static void bindRequestParameters(UriComponentsBuilder builder,
+			AnnotatedParametersParameterAccessor.BoundMethodParameter parameter) {
 
 		Object value = parameter.getValue();
 		String key = parameter.getVariableName();
@@ -248,15 +261,16 @@ public class WebHandler {
 	}
 
 	/**
-	 * Value object to allow accessing {@link MethodInvocation} parameters with the configured {@link AnnotationAttribute}.
+	 * Value object to allow accessing {@link MethodInvocation} parameters with the configured
+	 * {@link AnnotationAttribute}.
 	 *
 	 * @author Oliver Gierke
 	 */
 	@RequiredArgsConstructor
 	private static class AnnotatedParametersParameterAccessor {
 
-		private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<>(
-				16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
+		private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<>(16,
+				ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
 		private final @NonNull AnnotationAttribute attribute;
 
@@ -297,7 +311,7 @@ public class WebHandler {
 		 * @return
 		 */
 		protected BoundMethodParameter createParameter(MethodParameter parameter, Object value,
-													   AnnotationAttribute attribute) {
+				AnnotationAttribute attribute) {
 			return new BoundMethodParameter(parameter, value, attribute);
 		}
 

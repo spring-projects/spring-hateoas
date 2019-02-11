@@ -35,11 +35,8 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.mvc.WebMvcHateoasConfiguration;
-import org.springframework.hateoas.config.reactive.WebFluxHateoasConfiguration;
 import org.springframework.hateoas.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
-import org.springframework.hateoas.support.WebStack;
 import org.springframework.hateoas.uber.UberLinkDiscoverer;
 import org.springframework.util.ClassUtils;
 
@@ -47,7 +44,7 @@ import org.springframework.util.ClassUtils;
  * {@link ImportBeanDefinitionRegistrar} implementation to activate hypermedia support based on the configured
  * hypermedia type. Activates {@link EntityLinks} support as well (essentially as if {@link EnableEntityLinks} was
  * activated as well).
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -70,7 +67,7 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		 * collection using the application context.
 		 */
 		for (HypermediaType type : types) {
-			
+
 			BeanDefinitionBuilder hypermediaTypeBeanDefinition = genericBeanDefinition(HypermediaType.class, () -> type);
 			registerSourcedBeanDefinition(hypermediaTypeBeanDefinition, metadata, registry);
 		}
@@ -87,30 +84,11 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 						BeanDefinitionReaderUtils.generateBeanName(linkDiscovererBeanDefinition, registry)), registry);
 			}
 		}
-
-		/*
-		 * Register a Spring MVC-specific HATEOAS configuration.
-		 */
-		if (WebStack.WEBMVC.isAvailable()) {
-			
-			BeanDefinitionBuilder webMvcHateosConfiguration = rootBeanDefinition(WebMvcHateoasConfiguration.class);
-			registerSourcedBeanDefinition(webMvcHateosConfiguration, metadata, registry);
-		}
-
-		/*
-		 * Register a Spring WebFlux-specific HATEOAS configuration.
-		 */
-		if (WebStack.WEBFLUX.isAvailable()) {
-
-			BeanDefinitionBuilder webFluxHateoasConfiguration = rootBeanDefinition(WebFluxHateoasConfiguration.class);
-			registerSourcedBeanDefinition(webFluxHateoasConfiguration, metadata, registry);
-		}
-
 	}
 
 	/**
 	 * Returns a {@link LinkDiscoverer} {@link BeanDefinition} suitable for the given {@link HypermediaType}.
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */

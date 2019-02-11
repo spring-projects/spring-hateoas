@@ -19,10 +19,15 @@ import static org.springframework.hateoas.reactive.HypermediaWebFilter.*;
 
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
+import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.WebHandler;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.TemplateVariables;
+import org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport;
+import org.springframework.hateoas.core.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -31,12 +36,14 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Greg Turnquist
  * @since 1.0
  */
-public class ReactiveLinkBuilder {
+public class ReactiveLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<ReactiveLinkBuilder> {
 
-	private final ControllerLinkBuilder controllerLinkBuilder;
+	private ReactiveLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
+		super(builder, variables, affordances);
+	}
 
-	private ReactiveLinkBuilder(ControllerLinkBuilder controllerLinkBuilder) {
-		this.controllerLinkBuilder = controllerLinkBuilder;
+	private ReactiveLinkBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances) {
+		super(components, variables, affordances);
 	}
 
 	/**
@@ -61,26 +68,9 @@ public class ReactiveLinkBuilder {
 	 */
 	public static ReactiveLinkBuilder linkTo(Object invocationValue, ServerWebExchange exchange) {
 
-		ControllerLinkBuilder controllerLinkBuilder = WebHandler //
-				.linkTo(invocationValue, path -> getBuilder(exchange).replacePath(path == null ? "/" : path), null);
-
-		return new ReactiveLinkBuilder(controllerLinkBuilder);
-	}
-
-	/**
-	 * Utility method to transform {@link ReactiveLinkBuilder} into a {@link Link}.
-	 */
-	public Link withSelfRel() {
-		return this.controllerLinkBuilder.withSelfRel();
-	}
-
-	/**
-	 * Utility method to transform {@link ReactiveLinkBuilder} into a {@link Link}.
-	 *
-	 * @param rel
-	 */
-	public Link withRel(String rel) {
-		return this.controllerLinkBuilder.withRel(rel);
+		return WebHandler.linkTo(invocationValue, //
+				path -> getBuilder(exchange).replacePath(path == null ? "/" : path), //
+				ReactiveLinkBuilder::new);
 	}
 
 	/**
@@ -93,5 +83,24 @@ public class ReactiveLinkBuilder {
 		return exchange == null //
 				? UriComponentsBuilder.fromPath("/") //
 				: UriComponentsBuilder.fromHttpRequest(exchange.getRequest());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
+	 */
+	@Override
+	protected ReactiveLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+			TemplateVariables variables) {
+		return new ReactiveLinkBuilder(builder, variables, affordances);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.LinkBuilderSupport#getThis()
+	 */
+	@Override
+	protected ReactiveLinkBuilder getThis() {
+		return this;
 	}
 }

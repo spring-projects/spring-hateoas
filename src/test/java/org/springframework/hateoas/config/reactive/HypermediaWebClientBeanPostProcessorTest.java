@@ -20,7 +20,6 @@ import static org.springframework.hateoas.support.ContextTester.*;
 
 import reactor.test.StepVerifier;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.junit.After;
@@ -42,6 +41,8 @@ import org.springframework.hateoas.mvc.TypeReferences.ResourceType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
+ * Tests registration of proper decoders by the {@link HypermediaWebClientBeanPostProcessor}.
+ * 
  * @author Greg Turnquist
  */
 public class HypermediaWebClientBeanPostProcessorTest {
@@ -75,6 +76,9 @@ public class HypermediaWebClientBeanPostProcessorTest {
 		}
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shouldHandleRootHalDocument() {
 
@@ -96,6 +100,9 @@ public class HypermediaWebClientBeanPostProcessorTest {
 		});
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shouldHandleNavigatingToAResourceObject() {
 

@@ -20,8 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.EnumSet;
-import java.util.Set;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
@@ -37,7 +35,7 @@ import org.springframework.hateoas.LinkDiscoverer;
  * <li>{@link LinkDiscoverer}</li>
  * <li>a Jackson 2 module to correctly marshal the resource model classes into the appropriate representation.
  * </ul>
- * 
+ *
  * @see LinkDiscoverer
  * @see EntityLinks
  * @author Oliver Gierke
@@ -47,19 +45,19 @@ import org.springframework.hateoas.LinkDiscoverer;
 @Target(ElementType.TYPE)
 @Documented
 @EnableEntityLinks
-@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class })
+@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class, WebStackImportSelector.class })
 public @interface EnableHypermediaSupport {
 
 	/**
 	 * The hypermedia type to be supported.
-	 * 
+	 *
 	 * @return
 	 */
 	HypermediaType[] type();
 
 	/**
 	 * Hypermedia representation types supported.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
 	 */
@@ -67,7 +65,7 @@ public @interface EnableHypermediaSupport {
 
 		/**
 		 * HAL - Hypermedia Application Language.
-		 * 
+		 *
 		 * @see http://stateless.co/hal_specification.html
 		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
@@ -75,7 +73,7 @@ public @interface EnableHypermediaSupport {
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
-		 * 
+		 *
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
 		HAL_FORMS,
@@ -93,7 +91,5 @@ public @interface EnableHypermediaSupport {
 		 * @see http://uberhypermedia.org/
 		 */
 		UBER;
-
-		private static Set<HypermediaType> HAL_BASED_MEDIATYPES = EnumSet.of(HAL, HAL_FORMS);
 	}
 }
