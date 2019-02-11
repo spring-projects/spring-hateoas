@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.hateoas.support.MappingUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -96,7 +95,6 @@ public class UberWebMvcIntegrationTest {
 	public void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.UBER_JSON)) //
-				.andDo(print()) //
 				.andExpect(status().isOk()) //
 
 				.andExpect(jsonPath("$.uber.version", is("1.0")))
@@ -139,7 +137,6 @@ public class UberWebMvcIntegrationTest {
 	public void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.UBER_JSON)) //
-				.andDo(print()) //
 				.andExpect(status().isOk()) //
 
 				.andExpect(jsonPath("$.uber.version", is("1.0")))
@@ -223,12 +220,10 @@ public class UberWebMvcIntegrationTest {
 		this.mockMvc.perform(post("/employees") //
 				.content(input) //
 				.contentType(MediaTypes.UBER_JSON)) //
-				.andDo(print()) //
 				.andExpect(status().isCreated()) //
 				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 
 		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.UBER_JSON)) //
-				.andDo(print()) //
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.uber.version", is("1.0")))
