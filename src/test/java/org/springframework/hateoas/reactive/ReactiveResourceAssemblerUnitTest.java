@@ -57,6 +57,9 @@ public class ReactiveResourceAssemblerUnitTest {
 		this.exchange = mock(ServerWebExchange.class);
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void simpleConversionShouldWork() {
 
@@ -71,6 +74,9 @@ public class ReactiveResourceAssemblerUnitTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void defaultResourcesConversionShouldWork() {
 
@@ -90,6 +96,9 @@ public class ReactiveResourceAssemblerUnitTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void customResourcesShouldWork() {
 
@@ -151,5 +160,4 @@ public class ReactiveResourceAssemblerUnitTest {
 	class EmployeeResource extends ResourceSupport {
 		private Employee employee;
 	}
-
 }

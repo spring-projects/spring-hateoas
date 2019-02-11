@@ -17,13 +17,17 @@ package org.springframework.hateoas.core;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
+import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Unit tests for {@link LinkBuilderSupport}.
- * 
+ *
  * @author Oliver Gierke
  * @author Kamill Sokol
  */
@@ -32,14 +36,14 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 	@Test
 	public void callingSlashWithEmptyStringIsNoOp() {
 
-		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
+		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 		assertThat(builder.slash("")).isEqualTo(builder);
 	}
 
 	@Test
 	public void appendsFragmentCorrectly() {
 
-		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
+		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 		builder = builder.slash("foo#bar");
 		assertThat(builder.toString()).endsWith("foo#bar");
 		builder = builder.slash("bar");
@@ -58,7 +62,7 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 	@Test
 	public void appendsPathContainingColonsCorrectly() {
 
-		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance());
+		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 
 		builder = builder.slash("47:11");
 
@@ -67,8 +71,8 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 
 	static class SampleLinkBuilder extends LinkBuilderSupport<SampleLinkBuilder> {
 
-		public SampleLinkBuilder(UriComponentsBuilder builder) {
-			super(builder);
+		public SampleLinkBuilder(UriComponentsBuilder builder, List<Affordance> afforances) {
+			super(builder, afforances);
 		}
 
 		@Override
@@ -76,9 +80,13 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 			return this;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.core.LinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List)
+		 */
 		@Override
-		protected SampleLinkBuilder createNewInstance(UriComponentsBuilder builder) {
-			return new SampleLinkBuilder(builder);
+		protected SampleLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances) {
+			return new SampleLinkBuilder(builder, affordances);
 		}
 	}
 }

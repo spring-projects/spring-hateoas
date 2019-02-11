@@ -50,6 +50,9 @@ public class ReactiveLinkBuilderTest {
 	@Mock ServerWebExchange exchange;
 	@Mock ServerHttpRequest request;
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void linkAtSameLevelAsExplicitServerExchangeShouldWork() throws URISyntaxException {
 
@@ -64,6 +67,9 @@ public class ReactiveLinkBuilderTest {
 		assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void linkAtSameLevelAsContextProvidedServerExchangeShouldWork() throws URISyntaxException {
 
@@ -83,6 +89,9 @@ public class ReactiveLinkBuilderTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shallowLinkFromDeepExplicitServerExchangeShouldWork() throws URISyntaxException {
 
@@ -97,6 +106,9 @@ public class ReactiveLinkBuilderTest {
 		assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shallowLinkFromDeepContextProvidedServerExchangeShouldWork() throws URISyntaxException {
 
@@ -116,6 +128,9 @@ public class ReactiveLinkBuilderTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void deepLinkFromShallowExplicitServerExchangeShouldWork() throws URISyntaxException {
 
@@ -130,6 +145,9 @@ public class ReactiveLinkBuilderTest {
 		assertThat(link.getHref()).isEqualTo("http://localhost:8080/api/employees");
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void deepLinkFromShallowContextProvidedServerExchangeShouldWork() throws URISyntaxException {
 
@@ -149,6 +167,9 @@ public class ReactiveLinkBuilderTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void linkToRouteWithNoMappingShouldWork() throws URISyntaxException {
 
@@ -168,6 +189,9 @@ public class ReactiveLinkBuilderTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() throws URISyntaxException {
 
@@ -183,6 +207,9 @@ public class ReactiveLinkBuilderTest {
 				}).verifyComplete();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void linkToRouteWithExplictExchangeBeingNullShouldFallbackToRelativeUris() throws URISyntaxException {
 

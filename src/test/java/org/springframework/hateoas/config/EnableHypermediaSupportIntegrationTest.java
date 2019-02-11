@@ -17,7 +17,7 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks.*;
-import static org.springframework.hateoas.support.ContextTester.withServletContext;
+import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -52,12 +52,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

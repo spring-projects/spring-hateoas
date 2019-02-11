@@ -35,64 +35,72 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * Tests the registration of media types by the {@link HypermediaRestTemplateBeanPostProcessor}.
+ *
  * @author Greg Turnquist
  */
 public class HypermediaRestTemplateBeanPostProcessorTest {
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shouldRegisterJustHal() {
 
 		withContext(HalConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class)))
-				.containsExactlyInAnyOrder(
-					MediaTypes.HAL_JSON,
-					MediaTypes.HAL_JSON_UTF8,
-					MediaType.APPLICATION_JSON,
-					MediaType.parseMediaType("application/*+json"));
+			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+					.containsExactlyInAnyOrder( //
+							MediaTypes.HAL_JSON, //
+							MediaTypes.HAL_JSON_UTF8, //
+							MediaType.APPLICATION_JSON, //
+							MediaType.parseMediaType("application/*+json"));
 		});
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shouldRegisterHalAndCollectionJsonMessageConverters() {
 
 		withContext(HalAndCollectionJsonConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class)))
-				.containsExactlyInAnyOrder(
-					MediaTypes.HAL_JSON,
-					MediaTypes.HAL_JSON_UTF8,
-					MediaTypes.COLLECTION_JSON,
-					MediaType.APPLICATION_JSON,
-					MediaType.parseMediaType("application/*+json"));
+			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+					.containsExactlyInAnyOrder( //
+							MediaTypes.HAL_JSON, //
+							MediaTypes.HAL_JSON_UTF8, //
+							MediaTypes.COLLECTION_JSON, //
+							MediaType.APPLICATION_JSON, //
+							MediaType.parseMediaType("application/*+json"));
 		});
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void shouldRegisterHypermediaMessageConverters() {
 
 		withContext(AllHypermediaConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class)))
-				.containsExactlyInAnyOrder(
-					MediaTypes.HAL_JSON,
-					MediaTypes.HAL_JSON_UTF8,
-					MediaTypes.HAL_FORMS_JSON,
-					MediaTypes.COLLECTION_JSON,
-					MediaTypes.UBER_JSON,
-					MediaType.APPLICATION_JSON,
-					MediaType.parseMediaType("application/*+json"));
+			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+					.containsExactlyInAnyOrder( //
+							MediaTypes.HAL_JSON, //
+							MediaTypes.HAL_JSON_UTF8, //
+							MediaTypes.HAL_FORMS_JSON, //
+							MediaTypes.COLLECTION_JSON, //
+							MediaTypes.UBER_JSON, //
+							MediaType.APPLICATION_JSON, //
+							MediaType.parseMediaType("application/*+json"));
 		});
 	}
 
 	private List<MediaType> lookupSupportedHypermediaTypes(RestTemplate restTemplate) {
-		
-		return restTemplate.getMessageConverters().stream()
-			.filter(MappingJackson2HttpMessageConverter.class::isInstance)
-			.map(AbstractJackson2HttpMessageConverter.class::cast)
-			.map(AbstractHttpMessageConverter::getSupportedMediaTypes)
-			.flatMap(Collection::stream)
-			.collect(Collectors.toList());
+
+		return restTemplate.getMessageConverters().stream().filter(MappingJackson2HttpMessageConverter.class::isInstance)
+				.map(AbstractJackson2HttpMessageConverter.class::cast).map(AbstractHttpMessageConverter::getSupportedMediaTypes)
+				.flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	static class BaseConfig {
@@ -105,16 +113,14 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.HAL)
-	static class HalConfig extends BaseConfig {
-	}
+	static class HalConfig extends BaseConfig {}
 
 	@Configuration
-	@EnableHypermediaSupport(type = {HypermediaType.HAL, HypermediaType.COLLECTION_JSON})
-	static class HalAndCollectionJsonConfig extends BaseConfig {
-	}
+	@EnableHypermediaSupport(type = { HypermediaType.HAL, HypermediaType.COLLECTION_JSON })
+	static class HalAndCollectionJsonConfig extends BaseConfig {}
 
 	@Configuration
-	@EnableHypermediaSupport(type = {HypermediaType.HAL, HypermediaType.HAL_FORMS, HypermediaType.COLLECTION_JSON, HypermediaType.UBER})
-	static class AllHypermediaConfig extends BaseConfig {
-	}
+	@EnableHypermediaSupport(
+			type = { HypermediaType.HAL, HypermediaType.HAL_FORMS, HypermediaType.COLLECTION_JSON, HypermediaType.UBER })
+	static class AllHypermediaConfig extends BaseConfig {}
 }

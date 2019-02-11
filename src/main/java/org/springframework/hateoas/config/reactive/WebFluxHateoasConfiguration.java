@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring WebFlux HATEOAS configuration.
- * 
+ *
  * @author Greg Turnquist
  * @since 1.0
  */
@@ -39,45 +39,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WebFluxHateoasConfiguration {
 
 	@Bean
-	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
-											DelegatingRelProvider relProvider,
-											ObjectProvider<CurieProvider> curieProvider,
-											ObjectProvider<HalConfiguration> halConfiguration,
-											ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
-											Collection<HypermediaType> hypermediaTypes) {
-		
-		return new WebClientConfigurer(
-			mapper.getIfAvailable(ObjectMapper::new),
-			relProvider,
-			curieProvider.getIfAvailable(),
-			halConfiguration.getIfAvailable(HalConfiguration::new),
-			halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new),
-			hypermediaTypes);
+	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper, DelegatingRelProvider relProvider,
+			ObjectProvider<CurieProvider> curieProvider, ObjectProvider<HalConfiguration> halConfiguration,
+			ObjectProvider<HalFormsConfiguration> halFormsConfiguration, Collection<HypermediaType> hypermediaTypes) {
+
+		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), relProvider,
+				curieProvider.getIfAvailable(), halConfiguration.getIfAvailable(HalConfiguration::new),
+				halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new), hypermediaTypes);
 	}
 
 	@Bean
 	HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(WebClientConfigurer configurer) {
 		return new HypermediaWebClientBeanPostProcessor(configurer);
 	}
-	
+
 	@Bean
 	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
-															DelegatingRelProvider relProvider,
-															ObjectProvider<CurieProvider> curieProvider,
-															ObjectProvider<HalConfiguration> halConfiguration,
-															ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
-															Collection<HypermediaType> hypermediaTypes) {
+			DelegatingRelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
+			ObjectProvider<HalConfiguration> halConfiguration, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
+			Collection<HypermediaType> hypermediaTypes) {
 
-		return new HypermediaWebFluxConfigurer(
-			mapper.getIfAvailable(ObjectMapper::new),
-			relProvider,
-			curieProvider.getIfAvailable(),
-			halConfiguration.getIfAvailable(HalConfiguration::new),
-			halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new), hypermediaTypes);
+		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), relProvider,
+				curieProvider.getIfAvailable(), halConfiguration.getIfAvailable(HalConfiguration::new),
+				halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new), hypermediaTypes);
 	}
 
 	/**
-	 * TODO: Replace with Spring Framework filter when https://github.com/spring-projects/spring-framework/issues/21746 is completed.
+	 * TODO: Replace with Spring Framework filter when https://github.com/spring-projects/spring-framework/issues/21746 is
+	 * completed.
 	 */
 	@Bean
 	HypermediaWebFilter hypermediaWebFilter() {

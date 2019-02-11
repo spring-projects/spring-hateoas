@@ -60,6 +60,9 @@ public class HypermediaWebFilterTest {
 				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
 	}
 
+	/**
+	 * @see #728
+	 */
 	@Test
 	public void webFilterShouldEmbedExchangeIntoContext() {
 

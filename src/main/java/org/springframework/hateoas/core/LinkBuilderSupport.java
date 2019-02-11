@@ -16,15 +16,16 @@
 package org.springframework.hateoas.core;
 
 import static org.springframework.hateoas.core.EncodingUtils.*;
-import static org.springframework.web.util.UriComponentsBuilder.*;
 
 import lombok.Getter;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -48,32 +49,36 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkBuilder {
 
-	private final UriComponents uriComponents;
-
-	private @Getter final List<Affordance> affordances;
-
-	/**
-	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponentsBuilder}.
-	 *
-	 * @param builder must not be {@literal null}.
-	 */
-	public LinkBuilderSupport(UriComponentsBuilder builder) {
-
-		Assert.notNull(builder, "UriComponentsBuilder must not be null!");
-		this.uriComponents = builder.build();
-		this.affordances = new ArrayList<>();
-	}
+	private final UriComponentsBuilder builder;
+	private final @Getter List<Affordance> affordances;
 
 	/**
 	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponents}.
 	 *
-	 * @param uriComponents must not be {@literal null}.
+	 * @param builder must not be {@literal null}.
 	 */
-	public LinkBuilderSupport(UriComponents uriComponents) {
+	protected LinkBuilderSupport(UriComponentsBuilder builder) {
+		this(builder, Collections.emptyList());
+	}
 
-		Assert.notNull(uriComponents, "UriComponents must not be null!");
-		this.uriComponents = uriComponents;
-		this.affordances = new ArrayList<>();
+	protected LinkBuilderSupport(UriComponentsBuilder builder, List<Affordance> affordances) {
+
+		Assert.notNull(builder, "UriComponents must not be null!");
+		Assert.notNull(affordances, "Affordances must not be null!");
+
+		this.builder = builder.cloneBuilder();
+		this.affordances = affordances;
+	}
+
+	protected LinkBuilderSupport(UriComponents components, List<Affordance> affordances) {
+
+		String uriString = components.toUriString();
+		UriComponentsBuilder builder = uriString.isEmpty() //
+				? UriComponentsBuilder.fromUri(components.toUri()) //
+				: UriComponentsBuilder.fromUriString(uriString);
+
+		this.builder = builder;
+		this.affordances = affordances;
 	}
 
 	/*
@@ -109,20 +114,20 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	protected T slash(UriComponents components, boolean encoded) {
 
-		String uriString = uriComponents.toUriString();
-		UriComponentsBuilder builder = uriString.isEmpty() ? fromUri(uriComponents.toUri()) : fromUriString(uriString);
+		return withFreshBuilder(builder -> {
 
-		for (String pathSegment : components.getPathSegments()) {
-			builder.pathSegment(encoded ? pathSegment : encodePath(pathSegment));
-		}
+			for (String pathSegment : components.getPathSegments()) {
+				builder.pathSegment(encoded ? pathSegment : encodePath(pathSegment));
+			}
 
-		String fragment = components.getFragment();
+			String fragment = components.getFragment();
 
-		if (StringUtils.hasText(fragment)) {
-			builder.fragment(encoded ? fragment : encodeFragment(fragment));
-		}
+			if (StringUtils.hasText(fragment)) {
+				builder.fragment(encoded ? fragment : encodeFragment(fragment));
+			}
 
-		return createNewInstance(builder.query(components.getQuery()));
+			return createNewInstance(builder.query(components.getQuery()), affordances);
+		});
 	}
 
 	/*
@@ -143,13 +148,16 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#toUri()
 	 */
 	public URI toUri() {
-		return uriComponents.encode().toUri().normalize();
+		return builder.build().toUri().normalize();
 	}
 
 	public T addAffordances(Collection<Affordance> affordances) {
 
-		this.affordances.addAll(affordances);
-		return getThis();
+		List<Affordance> newAffordances = new ArrayList<>();
+		newAffordances.addAll(this.affordances);
+		newAffordances.addAll(affordances);
+
+		return createNewInstance(builder, newAffordances);
 	}
 
 	/*
@@ -176,7 +184,20 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 */
 	@Override
 	public String toString() {
-		return uriComponents.toUriString();
+		return builder.build().toUriString();
+	}
+
+	/**
+	 * Executes the given {@link Function} using a freshly cloned {@link UriComponentsBuilder}.
+	 *
+	 * @param function must not be {@literal null}.
+	 * @return
+	 */
+	protected <S> S withFreshBuilder(Function<UriComponentsBuilder, S> function) {
+
+		Assert.notNull(function, "Function must not be null!");
+
+		return function.apply(builder.cloneBuilder());
 	}
 
 	/**
@@ -192,5 +213,5 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @param builder will never be {@literal null}.
 	 * @return
 	 */
-	protected abstract T createNewInstance(UriComponentsBuilder builder);
+	protected abstract T createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances);
 }

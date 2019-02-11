@@ -28,7 +28,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MethodParameters;
-import org.springframework.hateoas.WebHandler;
+import org.springframework.hateoas.core.WebHandler;
 
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
@@ -44,12 +44,6 @@ import org.springframework.hateoas.WebHandler;
  * @author Greg Turnquist
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
-
-	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
-			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
-	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
-			new AnnotationAttribute(PathVariable.class));
-	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<>();
 
@@ -107,26 +101,25 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	@Override
 	public ControllerLinkBuilder linkTo(Object invocationValue) {
 
-		return WebHandler.linkTo(invocationValue,
-			mapping -> ControllerLinkBuilder.getBuilder().path(mapping),
-			(builder, invocation) -> {
-			
-				MethodParameters parameters = new MethodParameters(invocation.getMethod());
-				Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
+		return WebHandler.linkTo(invocationValue, mapping -> ControllerLinkBuilder.getBuilder().path(mapping),
+				ControllerLinkBuilder::new, (builder, invocation) -> {
 
-				for (MethodParameter parameter : parameters.getParameters()) {
-					Object parameterValue = parameterValues.next();
-					
-					for (UriComponentsContributor contributor : this.uriComponentsContributors) {
-						
-						if (contributor.supportsParameter(parameter)) {
-							contributor.enhance(builder, parameter, parameterValue);
+					MethodParameters parameters = new MethodParameters(invocation.getMethod());
+					Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
+
+					for (MethodParameter parameter : parameters.getParameters()) {
+						Object parameterValue = parameterValues.next();
+
+						for (UriComponentsContributor contributor : this.uriComponentsContributors) {
+
+							if (contributor.supportsParameter(parameter)) {
+								contributor.enhance(builder, parameter, parameterValue);
+							}
 						}
 					}
-				}
 
-				return builder;
-			});
+					return builder;
+				});
 	}
 
 	/*

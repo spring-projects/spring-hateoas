@@ -17,7 +17,8 @@ package org.springframework.hateoas.mvc;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.Affordance;
@@ -26,9 +27,8 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
 import org.springframework.hateoas.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
-import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.hateoas.core.MethodInvocation;
+import org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -48,14 +48,12 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Trosien
  * @author Greg Turnquist
  */
-public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
+public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<ControllerLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
 			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
-
-	private final TemplateVariables variables;
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -63,27 +61,15 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @param builder must not be {@literal null}.
 	 */
 	ControllerLinkBuilder(UriComponentsBuilder builder) {
-
-		super(builder);
-
-		this.variables = TemplateVariables.NONE;
+		this(builder, TemplateVariables.NONE, Collections.emptyList());
 	}
 
-	/**
-	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponents}.
-	 *
-	 * @param uriComponents must not be {@literal null}.
-	 */
-	ControllerLinkBuilder(UriComponents uriComponents) {
-		this(uriComponents, TemplateVariables.NONE, null);
+	ControllerLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
+		super(builder, variables, affordances);
 	}
 
-	public ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, MethodInvocation invocation) {
-
-		super(uriComponents);
-
-		this.variables = variables;
-		this.addAffordances(findAffordances(invocation, uriComponents));
+	ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, List<Affordance> affordances) {
+		super(uriComponents, variables, affordances);
 	}
 
 	/**
@@ -233,11 +219,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
+	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder) {
-		return new ControllerLinkBuilder(builder);
+	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+			TemplateVariables variables) {
+		return new ControllerLinkBuilder(builder, variables, affordances);
 	}
 
 	/**
@@ -249,27 +236,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return UriComponentsBuilder.fromUri(toUri());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.LinkBuilderSupport#toString()
-	 */
-	@Override
-	public String toString() {
-
-		String result = super.toString();
-
-		if (variables == TemplateVariables.NONE) {
-			return result;
-		}
-
-		if (!result.contains("#")) {
-			return result.concat(variables.toString());
-		}
-
-		String[] parts = result.split("#");
-		return parts[0].concat(variables.toString()).concat("#").concat(parts[0]);
-	}
-
 	/**
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping. If no
 	 * {@link RequestContextHolder} exists (you're outside a Spring Web call), fall back to relative URIs.
@@ -278,17 +244,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	public static UriComponentsBuilder getBuilder() {
 		return UriComponentsBuilderFactory.getBuilder();
-	}
-
-	/**
-	 * Look up {@link Affordance}s based on the {@link MethodInvocation} and {@link UriComponents}.
-	 *
-	 * @param invocation
-	 * @param components
-	 * @return
-	 */
-	private static Collection<Affordance> findAffordances(MethodInvocation invocation, UriComponents components) {
-		return SpringMvcAffordanceBuilder.create(invocation, DISCOVERER, components);
 	}
 
 	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
