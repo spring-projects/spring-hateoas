@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.BeansException;
@@ -104,7 +105,7 @@ public class HypermediaWebMvcConfigurer implements WebMvcConfigurer, BeanFactory
 			if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
 
 				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-					ResourceSupport.class, Arrays.asList(HAL_FORMS_JSON),
+					ResourceSupport.class, Collections.singletonList(HAL_FORMS_JSON),
 					createHalFormsObjectMapper(this.mapper, this.curieProvider, this.relProvider, linkRelationMessageSource,
 						this.halFormsConfiguration)));
 			}
@@ -113,14 +114,14 @@ public class HypermediaWebMvcConfigurer implements WebMvcConfigurer, BeanFactory
 		if (this.hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
 
 			converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class, Arrays.asList(COLLECTION_JSON),
+				ResourceSupport.class, Collections.singletonList(COLLECTION_JSON),
 				createCollectionJsonObjectMapper(this.mapper, linkRelationMessageSource)));
 		}
 
 		if (this.hypermediaTypes.contains(HypermediaType.UBER)) {
 
 			converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class, Arrays.asList(UBER_JSON), createUberObjectMapper(this.mapper)));
+				ResourceSupport.class, Collections.singletonList(UBER_JSON), createUberObjectMapper(this.mapper)));
 		}
 	}
 }

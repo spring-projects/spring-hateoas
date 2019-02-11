@@ -46,7 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * Utility for taking a a method invocation and extracting a {@link ControllerLinkBuilder}.
+ * Utility for taking a method invocation and extracting a {@link ControllerLinkBuilder}.
  * 
  * @author Greg Turnquist
  */

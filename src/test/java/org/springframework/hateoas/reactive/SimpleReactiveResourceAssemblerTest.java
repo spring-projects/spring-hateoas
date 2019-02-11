@@ -48,7 +48,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	}
 
 	/**
-	 * @see #
+	 * @see  #728
 	 */
 	@Test
 	public void convertingToResourceShouldWork() {
@@ -65,7 +65,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	}
 
 	/**
-	 * @see #
+	 * @see #728
 	 */
 	@Test
 	public void convertingToResourcesShouldWork() {
@@ -82,7 +82,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	}
 
 	/**
-	 * @see #
+	 * @see #728
 	 */
 	@Test
 	public void convertingToResourceWithCustomLinksShouldWork() {
@@ -100,7 +100,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	}
 
 	/**
-	 * @see #
+	 * @see #728
 	 */
 	@Test
 	public void convertingToResourcesWithCustomLinksShouldWork() {

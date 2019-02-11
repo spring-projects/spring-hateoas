@@ -61,6 +61,9 @@ public class HypermediaWebFilterTest {
 			.build();
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void webFilterShouldEmbedExchangeIntoContext() {
 

@@ -75,6 +75,9 @@ public class HypermediaWebFluxConfigurerTest {
 			.build();
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringHalShouldServeHal() {
 
@@ -85,6 +88,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringHalFormsShouldServeHalForms() {
 
@@ -95,6 +101,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringCollectionJsonShouldServerCollectionJson() {
 
@@ -105,6 +114,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.COLLECTION_JSON);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringUberShouldServerUber() {
 
@@ -115,6 +127,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.UBER_JSON);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringHalAndHalFormsShouldServerHalAndHalForms() {
 
@@ -129,6 +144,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringHalAndCollectionJsonShouldServerHalAndCollectionJson() {
 
@@ -147,6 +165,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.COLLECTION_JSON);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void registeringAllHypermediaTypesShouldServerThemAll() {
 
@@ -169,6 +190,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifySingleItemResourceServesHypermedia(MediaTypes.UBER_JSON);
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void callingForUnregisteredMediaTypeShouldFail() {
 
@@ -184,6 +208,9 @@ public class HypermediaWebFluxConfigurerTest {
 			.verifyComplete();
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void reactorTypesShouldWork() {
 

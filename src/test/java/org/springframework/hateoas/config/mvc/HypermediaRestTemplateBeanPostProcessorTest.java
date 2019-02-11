@@ -35,10 +35,16 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 /**
+ *
+ * Tests the registration of media types by the {@link HypermediaRestTemplateBeanPostProcessor}.
+ *
  * @author Greg Turnquist
  */
 public class HypermediaRestTemplateBeanPostProcessorTest {
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void shouldRegisterJustHal() {
 
@@ -53,6 +59,9 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 		});
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void shouldRegisterHalAndCollectionJsonMessageConverters() {
 
@@ -68,6 +77,9 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 		});
 	}
 
+	/**
+	 * @see  #728
+	 */
 	@Test
 	public void shouldRegisterHypermediaMessageConverters() {
 
