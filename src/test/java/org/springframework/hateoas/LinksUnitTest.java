@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Unit test for {@link Links}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */

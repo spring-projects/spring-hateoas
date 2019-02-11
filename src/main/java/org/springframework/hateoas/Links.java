@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Value object to represent a list of {@link Link}s.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -43,7 +43,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Creates a new {@link Links} instance from the given {@link Link}s.
-	 * 
+	 *
 	 * @param links
 	 */
 	public Links(List<Link> links) {
@@ -52,7 +52,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Creates a new {@link Links} instance from the given {@link Link}s.
-	 * 
+	 *
 	 * @param links
 	 */
 	public Links(Link... links) {
@@ -61,7 +61,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Returns the {@link Link} with the given rel.
-	 * 
+	 *
 	 * @param rel the relation type to lookup a link for.
 	 * @return the link with the given rel or {@literal Optional#empty()} if none found.
 	 */
@@ -84,9 +84,10 @@ public class Links implements Iterable<Link> {
 		return getLink(rel) //
 				.orElseThrow(() -> new IllegalArgumentException(String.format("Couldn't find link with rel '%s'!", rel)));
 	}
+
 	/**
 	 * Returns all {@link Links} with the given relation type.
-	 * 
+	 *
 	 * @return the links
 	 */
 	public List<Link> getLinks(String rel) {
@@ -97,7 +98,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Returns whether the {@link Links} container contains a {@link Link} with the given rel.
-	 * 
+	 *
 	 * @param rel
 	 * @return
 	 */
@@ -107,7 +108,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Creates a {@link Links} instance from the given RFC5988-compatible link format.
-	 * 
+	 *
 	 * @param source a comma separated list of {@link Link} representations.
 	 * @return the {@link Links} represented by the given {@link String}.
 	 */
@@ -134,7 +135,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Returns whether the {@link Links} container is empty.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean isEmpty() {
@@ -150,7 +151,7 @@ public class Links implements Iterable<Link> {
 		return StringUtils.collectionToCommaDelimitedString(links);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
@@ -159,7 +160,7 @@ public class Links implements Iterable<Link> {
 		return links.iterator();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -175,7 +176,7 @@ public class Links implements Iterable<Link> {
 		return this.links.equals(that.links);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
