@@ -102,4 +102,23 @@ public class LinksUnitTest {
 	public void parsesLinksWithWhitespace() {
 		assertThat(Links.valueOf(WITH_WHITESPACE)).isEqualTo(reference);
 	}
+
+	@Test // #805
+	public void returnsRequiredLink() {
+
+		Link reference = new Link("http://localhost", "someRel");
+		Links links = new Links(reference);
+
+		assertThat(links.getRequiredLink("someRel")).isEqualTo(reference);
+	}
+
+	@Test // #805
+	public void rejectsMissingLinkWithIllegalArgumentException() {
+
+		Links links = new Links();
+
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> links.getRequiredLink("self")) //
+				.withMessageContaining("self");
+	}
 }

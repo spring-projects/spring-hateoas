@@ -72,6 +72,19 @@ public class Links implements Iterable<Link> {
 	}
 
 	/**
+	 * Returns the {@link Link} with the given relation.
+	 *
+	 * @param rel the relation type to lookup a link for.
+	 * @return
+	 * @throws IllegalArgumentException if no link with the given relation was present.
+	 * @since 1.0
+	 */
+	public Link getRequiredLink(String rel) {
+
+		return getLink(rel) //
+				.orElseThrow(() -> new IllegalArgumentException(String.format("Couldn't find link with rel '%s'!", rel)));
+	}
+	/**
 	 * Returns all {@link Links} with the given relation type.
 	 * 
 	 * @return the links
