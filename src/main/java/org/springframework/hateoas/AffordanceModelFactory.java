@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.plugin.core.Plugin;
 
 /**
- *
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
@@ -32,7 +31,7 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 
 	/**
 	 * Declare the {@link MediaType} this factory supports.
-	 * 
+	 *
 	 * @return
 	 */
 	default MediaType getMediaType() {
@@ -41,7 +40,7 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 
 	/**
 	 * Look up the {@link AffordanceModel} for this factory.
-	 * 
+	 *
 	 * @param name
 	 * @param link
 	 * @param httpMethod
@@ -50,7 +49,8 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 	 * @param outputType
 	 * @return
 	 */
-	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType);
+	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType);
 
 	/**
 	 * Returns if a plugin should be invoked according to the given delimiter.
@@ -60,9 +60,9 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 	 */
 	@Override
 	default boolean supports(MediaType delimiter) {
-		
-		return Optional.ofNullable(getMediaType())
-			.map(mediaType -> mediaType.equals(delimiter))
-			.orElse(false);
+
+		return Optional.ofNullable(getMediaType()) //
+				.map(mediaType -> mediaType.equals(delimiter)) //
+				.orElse(false);
 	}
 }
