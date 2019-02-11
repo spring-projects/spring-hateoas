@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.core;
+package org.springframework.hateoas;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.Plugin;

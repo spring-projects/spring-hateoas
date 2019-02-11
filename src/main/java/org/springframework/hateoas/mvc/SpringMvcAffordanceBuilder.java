@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.hateoas.core.MethodParameters;

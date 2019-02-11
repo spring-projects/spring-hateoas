@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -37,20 +36,23 @@ import org.springframework.util.Assert;
 @Value
 public class Affordance {
 
-	private static List<AffordanceModelFactory> factories = SpringFactoriesLoader.loadFactories(AffordanceModelFactory.class, Affordance.class.getClassLoader());
+	private static List<AffordanceModelFactory> factories = SpringFactoriesLoader
+			.loadFactories(AffordanceModelFactory.class, Affordance.class.getClassLoader());
 
 	/**
 	 * Collection of {@link AffordanceModel}s related to this affordance.
 	 */
 	private final Map<MediaType, AffordanceModel> affordanceModels = new HashMap<>();
 
-	public Affordance(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public Affordance(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 
 		Assert.notNull(httpMethod, "httpMethod must not be null!");
 		Assert.notNull(queryMethodParameters, "queryMethodParameters must not be null!");
 
 		for (AffordanceModelFactory factory : factories) {
-			this.affordanceModels.put(factory.getMediaType(), factory.getAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType));
+			this.affordanceModels.put(factory.getMediaType(),
+					factory.getAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType));
 		}
 	}
 

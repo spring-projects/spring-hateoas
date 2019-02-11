@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.hateoas
+package org.springframework.hateoas.mvc
 
+import org.springframework.hateoas.Link
+import org.springframework.hateoas.ResourceSupport
 import org.springframework.hateoas.mvc.ControllerLinkBuilder
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
+
 import kotlin.reflect.KClass
 
 /**

@@ -21,10 +21,10 @@ import java.util.List;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel;
+import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.core.AffordanceModelFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 

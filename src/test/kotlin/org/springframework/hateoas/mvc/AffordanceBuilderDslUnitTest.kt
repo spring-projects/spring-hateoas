@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.springframework.hateoas
+package org.springframework.hateoas.mvc
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import org.springframework.hateoas.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
