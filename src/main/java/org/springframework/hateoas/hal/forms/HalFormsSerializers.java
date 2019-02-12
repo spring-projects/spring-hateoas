@@ -18,16 +18,18 @@ package org.springframework.hateoas.hal.forms;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.hal.HalLinkRelation;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpMethod;
 
@@ -74,9 +76,7 @@ class HalFormsSerializers {
 					.withLinks(value.getLinks()) //
 					.withTemplates(findTemplates(value));
 
-			provider
-				.findValueSerializer(HalFormsDocument.class, property)
-				.serialize(doc, gen, provider);
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
 
 		@Override
@@ -131,7 +131,7 @@ class HalFormsSerializers {
 		@Override
 		public void serialize(Resources<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
-			Map<String, Object> embeddeds = embeddedMapper.map(value);
+			Map<HalLinkRelation, Object> embeddeds = embeddedMapper.map(value);
 
 			HalFormsDocument<?> doc;
 
@@ -151,9 +151,7 @@ class HalFormsSerializers {
 						.withTemplates(findTemplates(value));
 			}
 
-			provider
-				.findValueSerializer(HalFormsDocument.class, property)
-				.serialize(doc, gen, provider);
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
 
 		@Override
@@ -191,30 +189,29 @@ class HalFormsSerializers {
 	 */
 	private static Map<String, HalFormsTemplate> findTemplates(ResourceSupport resource) {
 
+		if (!resource.hasLink(IanaLinkRelations.SELF)) {
+			return Collections.emptyMap();
+		}
+
 		Map<String, HalFormsTemplate> templates = new HashMap<>();
+		List<Affordance> affordances = resource.getLink(IanaLinkRelations.SELF).map(Link::getAffordances)
+				.orElse(Collections.emptyList());
 
-		if (resource.hasLink(IanaLinkRelation.SELF.value())) {
+		affordances.stream() //
+				.map(it -> it.getAffordanceModel(MediaTypes.HAL_FORMS_JSON)) //
+				.map(HalFormsAffordanceModel.class::cast) //
+				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
+				.peek(it -> validate(resource, it)) //
+				.forEach(it -> {
 
-
-			for (Affordance affordance : resource.getLink(IanaLinkRelation.SELF.value()).map(Link::getAffordances)
-					.orElse(Collections.emptyList())) {
-
-				HalFormsAffordanceModel model = affordance.getAffordanceModel(MediaTypes.HAL_FORMS_JSON);
-
-				if (!(model.getHttpMethod() == HttpMethod.GET)) {
-
-					validate(resource, model);
-
-					HalFormsTemplate template = HalFormsTemplate.forMethod(model.getHttpMethod()) //
-							.withProperties(model.getInputProperties());
+					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
+							.withProperties(it.getInputProperties());
 
 					/*
 					 * First template in HAL-FORMS is "default".
 					 */
-					templates.put(templates.isEmpty() ? "default" : model.getName(), template);
-				}
-			}
-		}
+					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
+				});
 
 		return templates;
 	}
@@ -228,11 +225,11 @@ class HalFormsSerializers {
 	private static void validate(ResourceSupport resource, HalFormsAffordanceModel model) {
 
 		String affordanceUri = model.getURI();
-		String selfLinkUri = resource.getRequiredLink(IanaLinkRelation.SELF.value()).expand().getHref();
+		String selfLinkUri = resource.getRequiredLink(IanaLinkRelations.SELF.value()).expand().getHref();
 
 		if (!affordanceUri.equals(selfLinkUri)) {
-			throw new IllegalStateException("Affordance's URI " + affordanceUri + " doesn't match self link "
-				+ selfLinkUri + " as expected in HAL-FORMS");
+			throw new IllegalStateException("Affordance's URI " + affordanceUri + " doesn't match self link " + selfLinkUri
+					+ " as expected in HAL-FORMS");
 		}
 	}
 }

@@ -16,12 +16,13 @@
 package org.springframework.hateoas.core;
 
 import org.atteo.evo.inflector.English;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 
 /**
  * {@link RelProvider} implementation using the Evo Inflector implementation of an algorithmic approach to English
  * plurals.
- * 
+ *
  * @see http://www.csse.monash.edu.au/~damian/papers/HTML/Plurals.html
  * @author Oliver Gierke
  */
@@ -32,7 +33,7 @@ public class EvoInflectorRelProvider extends DefaultRelProvider {
 	 * @see org.springframework.hateoas.core.DefaultRelProvider#getCollectionResourceRelFor(java.lang.Class)
 	 */
 	@Override
-	public String getCollectionResourceRelFor(Class<?> type) {
-		return English.plural(getItemResourceRelFor(type));
+	public LinkRelation getCollectionResourceRelFor(Class<?> type) {
+		return LinkRelation.of(English.plural(getItemResourceRelFor(type).value()));
 	}
 }

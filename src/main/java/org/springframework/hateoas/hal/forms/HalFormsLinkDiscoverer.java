@@ -15,41 +15,19 @@
  */
 package org.springframework.hateoas.hal.forms;
 
-import java.util.Map;
-
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
+import org.springframework.hateoas.hal.HalLinkDiscoverer;
 
 /**
  * HAL-FORMS based {@link JsonPathLinkDiscoverer}.
- * 
+ *
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
-public class HalFormsLinkDiscoverer extends JsonPathLinkDiscoverer {
+public class HalFormsLinkDiscoverer extends HalLinkDiscoverer {
 
 	public HalFormsLinkDiscoverer() {
-		super("$._links..['%s']", MediaTypes.HAL_FORMS_JSON);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	protected Link extractLink(Object element, String rel) {
-
-		if (element instanceof Map) {
-
-			Map<String, String> json = (Map<String, String>) element;
-
-			return new Link(json.get("href"), rel)
-				.withHreflang(json.get("hreflang"))
-				.withMedia(json.get("media"))
-				.withTitle(json.get("title"))
-				.withType(json.get("type"))
-				.withDeprecation(json.get("deprecation"))
-				.withProfile(json.get("profile"))
-				.withName(json.get("name"));
-		}
-
-		return super.extractLink(element, rel);
+		super(MediaTypes.HAL_FORMS_JSON);
 	}
 }

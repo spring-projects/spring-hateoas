@@ -17,20 +17,19 @@ package org.springframework.hateoas.collectionjson;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.Links.MergeMode;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -39,19 +38,20 @@ import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.support.JacksonHelper;
 import org.springframework.hateoas.support.PropertyUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.ClassUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
-import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
@@ -59,12 +59,14 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
- * Jackson 2 module implementation to render {@link Resources}, {@link Resource}, and {@link ResourceSupport}
- * instances in Collection+JSON compatible JSON.
+ * Jackson 2 module implementation to render {@link Resources}, {@link Resource}, and {@link ResourceSupport} instances
+ * in Collection+JSON compatible JSON.
  *
  * @author Greg Turnquist
  */
 public class Jackson2CollectionJsonModule extends SimpleModule {
+
+	private static final long serialVersionUID = -6540574644565592709L;
 
 	public Jackson2CollectionJsonModule() {
 
@@ -79,6 +81,8 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		addSerializer(new CollectionJsonResourcesSerializer());
 		addSerializer(new CollectionJsonResourceSerializer());
 		addSerializer(new CollectionJsonResourceSupportSerializer());
+		addSerializer(new CollectionJsonLinksSerializer());
+		addDeserializer(Links.class, new CollectionJsonLinksDeserializer());
 	}
 
 	/**
@@ -87,72 +91,78 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	static class CollectionJsonLinkListSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
+	static class CollectionJsonLinksSerializer extends ContainerSerializer<Links> {
 
-		private final BeanProperty property;
-		private final MessageSourceAccessor messageSource;
+		private static final long serialVersionUID = 5959299073301391055L;
 
-		CollectionJsonLinkListSerializer(MessageSourceAccessor messageSource) {
-			this(null, messageSource);
+		CollectionJsonLinksSerializer() {
+			super(Links.class);
 		}
 
-		CollectionJsonLinkListSerializer(BeanProperty property, MessageSourceAccessor messageSource) {
-
-			super(List.class, false);
-			this.property = property;
-			this.messageSource = messageSource;
-		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 
 		@Override
-		public void serialize(List<Link> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
+		public void serialize(Links links, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			ResourceSupport resource = new ResourceSupport();
-			resource.add(value);
+			JavaType type = provider.getTypeFactory().constructCollectionType(List.class, Link.class);
 
-			CollectionJson<?> collectionJson = new CollectionJson()
-				.withVersion("1.0")
-				.withHref(resource.getRequiredLink(IanaLinkRelation.SELF.value()).expand().getHref())
-				.withLinks(withoutSelfLink(value))
-				.withItems(Collections.EMPTY_LIST);
-
-			provider
-				.findValueSerializer(CollectionJson.class, property)
-				.serialize(collectionJson, jgen, provider);
+			provider.findValueSerializer(type) //
+					.serialize(links.toList(), jgen, provider);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
+		 */
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
-			return new CollectionJsonLinkListSerializer(property, messageSource);
+		public boolean isEmpty(SerializerProvider provider, Links value) {
+			return value.isEmpty();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		public JavaType getContentType() {
-			return null;
+			return TypeFactory.defaultInstance().constructType(Link.class);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
-		public boolean isEmpty(List<Link> value) {
-			return value.isEmpty();
+		public boolean hasSingleElement(Links value) {
+			return false;
 		}
 
-		@Override
-		public boolean hasSingleElement(List<Link> value) {
-			return value.size() == 1;
-		}
-
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	static class CollectionJsonResourceSupportSerializer extends ContainerSerializer<ResourceSupport> implements ContextualSerializer {
+	static class CollectionJsonResourceSupportSerializer extends ContainerSerializer<ResourceSupport>
+			implements ContextualSerializer {
+
+		private static final long serialVersionUID = 6127711241993352699L;
 
 		private final BeanProperty property;
 
@@ -169,33 +179,32 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		public void serialize(ResourceSupport value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			String href = value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref();
+			String href = value.getRequiredLink(IanaLinkRelations.SELF.value()).getHref();
 
-			CollectionJson<?> collectionJson = new CollectionJson()
-				.withVersion("1.0")
-				.withHref(href)
-				.withLinks(withoutSelfLink(value.getLinks()))
-				.withQueries(findQueries(value))
-				.withTemplate(findTemplate(value));
+			CollectionJson<Object> collectionJson = new CollectionJson<>() //
+					.withVersion("1.0") //
+					.withHref(href) //
+					.withLinks(value.getLinks().without(IanaLinkRelations.SELF)) //
+					.withQueries(findQueries(value)) //
+					.withTemplate(findTemplate(value));
 
-			CollectionJsonItem item = new CollectionJsonItem()
-				.withHref(href)
-				.withLinks(withoutSelfLink(value.getLinks()))
-				.withRawData(value);
+			CollectionJsonItem<Object> item = new CollectionJsonItem<>() //
+					.withHref(href) //
+					.withLinks(value.getLinks().without(IanaLinkRelations.SELF)) //
+					.withRawData(value);
 
 			if (!item.getData().isEmpty()) {
-				collectionJson = collectionJson.withItems(Collections.singletonList(item));
+				collectionJson = collectionJson.withItems(item);
 			}
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider
-				.findValueSerializer(CollectionJsonDocument.class, property)
-				.serialize(doc, jgen, provider);
+			provider.findValueSerializer(CollectionJsonDocument.class, property).serialize(doc, jgen, provider);
 		}
 
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
 			return new CollectionJsonResourceSupportSerializer(property);
 		}
 
@@ -220,7 +229,10 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourceSerializer extends ContainerSerializer<Resource<?>> implements ContextualSerializer {
+	static class CollectionJsonResourceSerializer extends ContainerSerializer<Resource<?>>
+			implements ContextualSerializer {
+
+		private static final long serialVersionUID = 2212535956767860364L;
 
 		private final BeanProperty property;
 
@@ -237,28 +249,29 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		public void serialize(Resource<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			String href = value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref();
+			String href = value.getRequiredLink(IanaLinkRelations.SELF).getHref();
+			Links withoutSelfLink = value.getLinks().without(IanaLinkRelations.SELF);
 
-			CollectionJson<?> collectionJson = new CollectionJson()
-				.withVersion("1.0")
-				.withHref(href)
-				.withLinks(withoutSelfLink(value.getLinks()))
-				.withItems(Collections.singletonList(new CollectionJsonItem<>()
-					.withHref(href)
-					.withLinks(withoutSelfLink(value.getLinks()))
-					.withRawData(value.getContent())))
-				.withQueries(findQueries(value))
-				.withTemplate(findTemplate(value));
+			CollectionJson<Object> collectionJson = new CollectionJson<>() //
+					.withVersion("1.0") //
+					.withHref(href) //
+					.withLinks(withoutSelfLink) //
+					.withItems(new CollectionJsonItem<>() //
+							.withHref(href) //
+							.withLinks(withoutSelfLink) //
+							.withRawData(value.getContent()))
+					.withQueries(findQueries(value)) //
+					.withTemplate(findTemplate(value));
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider
-				.findValueSerializer(CollectionJsonDocument.class, property)
-				.serialize(doc, jgen, provider);
+			provider.findValueSerializer(CollectionJsonDocument.class, property) //
+					.serialize(doc, jgen, provider);
 		}
 
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
 			return new CollectionJsonResourceSerializer(property);
 		}
 
@@ -283,70 +296,85 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourcesSerializer extends ContainerSerializer<Resources<?>> implements ContextualSerializer {
+	static class CollectionJsonResourcesSerializer extends ContainerSerializer<Resources<?>> {
 
-		private final BeanProperty property;
+		private static final long serialVersionUID = -278986431091914402L;
 
 		CollectionJsonResourcesSerializer() {
-			this(null);
-		}
-
-		CollectionJsonResourcesSerializer(BeanProperty property) {
-
 			super(Resources.class, false);
-			this.property = property;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 		@Override
 		public void serialize(Resources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			CollectionJson<?> collectionJson = new CollectionJson()
-				.withVersion("1.0")
-				.withHref(value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref())
-				.withLinks(withoutSelfLink(value.getLinks()))
-				.withItems(resourcesToCollectionJsonItems(value))
-				.withQueries(findQueries(value))
-				.withTemplate(findTemplate(value));
+			CollectionJson<Object> collectionJson = new CollectionJson<>() //
+					.withVersion("1.0") //
+					.withHref(value.getRequiredLink(IanaLinkRelations.SELF).getHref()) //
+					.withLinks(value.getLinks().without(IanaLinkRelations.SELF)) //
+					.withItems(resourcesToCollectionJsonItems(value)) //
+					.withQueries(findQueries(value)) //
+					.withTemplate(findTemplate(value));
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider
-				.findValueSerializer(CollectionJsonDocument.class, property)
-				.serialize(doc, jgen, provider);
+			provider.findValueSerializer(CollectionJsonDocument.class) //
+					.serialize(doc, jgen, provider);
 		}
 
-		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
-			return new CollectionJsonResourcesSerializer(property);
-		}
-
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
+		 */
 		@Override
-		public boolean isEmpty(Resources<?> value) {
-			return value.getContent().size() == 0;
+		public boolean isEmpty(SerializerProvider provider, Resources<?> value) {
+			return value.getContent().isEmpty();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
 		public boolean hasSingleElement(Resources<?> value) {
 			return value.getContent().size() == 1;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	static class CollectionJsonPagedResourcesSerializer extends ContainerSerializer<PagedResources<?>> implements ContextualSerializer {
+	static class CollectionJsonPagedResourcesSerializer extends ContainerSerializer<PagedResources<?>>
+			implements ContextualSerializer {
+
+		private static final long serialVersionUID = -6703190072925382402L;
 
 		private final BeanProperty property;
 
@@ -363,23 +391,22 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		public void serialize(PagedResources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			CollectionJson<?> collectionJson = new CollectionJson()
-				.withVersion("1.0")
-				.withHref(value.getRequiredLink(IanaLinkRelation.SELF.value()).getHref())
-				.withLinks(withoutSelfLink(value.getLinks()))
-				.withItems(resourcesToCollectionJsonItems(value))
-				.withQueries(findQueries(value))
-				.withTemplate(findTemplate(value));
+			CollectionJson<?> collectionJson = new CollectionJson<>() //
+					.withVersion("1.0") //
+					.withHref(value.getRequiredLink(IanaLinkRelations.SELF).getHref()) //
+					.withLinks(value.getLinks().without(IanaLinkRelations.SELF)) //
+					.withItems(resourcesToCollectionJsonItems(value)) //
+					.withQueries(findQueries(value)) //
+					.withTemplate(findTemplate(value));
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider
-				.findValueSerializer(CollectionJsonDocument.class, property)
-				.serialize(doc, jgen, provider);
+			provider.findValueSerializer(CollectionJsonDocument.class, property).serialize(doc, jgen, provider);
 		}
 
 		@Override
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
+				throws JsonMappingException {
 			return new CollectionJsonPagedResourcesSerializer(property);
 		}
 
@@ -409,33 +436,49 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonLinkListDeserializer extends ContainerDeserializerBase<List<Link>> {
+	static class CollectionJsonLinksDeserializer extends ContainerDeserializerBase<Links> {
 
-		CollectionJsonLinkListDeserializer() {
+		private static final long serialVersionUID = 4260899521055619665L;
+
+		CollectionJsonLinksDeserializer() {
 			super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 */
 		@Override
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 */
 		@Override
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 */
 		@Override
-		public List<Link> deserialize(JsonParser jp, DeserializationContext deserializationContext) throws IOException {
+		public Links deserialize(JsonParser jp, DeserializationContext ctx) throws IOException {
 
-			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, CollectionJsonDocument.class);
+			JavaType type = ctx.getTypeFactory().constructCollectionLikeType(List.class, Link.class);
 
-			return potentiallyAddSelfLink(document.getCollection().getLinks(), document.getCollection().getHref());
+			return Links.of(jp.getCodec().<List<Link>> readValue(jp, type));
 		}
 	}
 
 	static class CollectionJsonResourceSupportDeserializer extends ContainerDeserializerBase<ResourceSupport>
-		implements ContextualDeserializer {
+			implements ContextualDeserializer {
+
+		private static final long serialVersionUID = 502737712634617739L;
 
 		private final JavaType contentType;
 
@@ -449,65 +492,84 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 			this.contentType = contentType;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 */
 		@Override
 		public JavaType getContentType() {
 			return this.contentType;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 */
 		@Override
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 */
 		@Override
 		public ResourceSupport deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
-			JavaType rootType = ctxt.getTypeFactory().constructSimpleType(Object.class, new JavaType[]{});
-			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
+			TypeFactory typeFactory = ctxt.getTypeFactory();
+
+			JavaType rootType = typeFactory.constructSimpleType(Object.class, new JavaType[] {});
+			JavaType wrappedType = typeFactory.constructParametricType(CollectionJsonDocument.class, rootType);
 
 			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
+			CollectionJson<?> collection = document.getCollection();
 
-			List<? extends CollectionJsonItem<?>> items = Optional.ofNullable(document.getCollection().getItems()).orElse(new ArrayList<>());
-			List<Link> links = Optional.ofNullable(document.getCollection().getLinks()).orElse(new ArrayList<>());
+			List<? extends CollectionJsonItem<?>> items = collection.getItems();
+			Links links = collection.getLinks();
 
-			if (items.size() == 0) {
-				if (document.getCollection().getTemplate() != null) {
+			CollectionJson<?> withOwnSelfLink = collection.withOwnSelfLink();
 
-					Map<String, Object> properties = document.getCollection().getTemplate().getData().stream()
+			if (!items.isEmpty()) {
+
+				Links merged = items.stream() //
+						.map(CollectionJsonItem::getLinks) //
+						.reduce(links, //
+								(left, right) -> left.merge(right), //
+								(left, right) -> right);
+
+				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
+
+				ResourceSupport resource = (ResourceSupport) firstItem.toRawData(this.contentType);
+				resource.add(firstItem.getLinks().merge(merged));
+
+				return resource;
+			}
+
+			if (withOwnSelfLink.getTemplate() != null) {
+
+				Map<String, Object> properties = withOwnSelfLink.getTemplate().getData().stream()
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
-					ResourceSupport obj = (ResourceSupport) PropertyUtils.createObjectFromProperties(this.contentType.getRawClass(), properties);
+				ResourceSupport resourceSupport = (ResourceSupport) PropertyUtils
+						.createObjectFromProperties(this.contentType.getRawClass(), properties);
 
-					obj.add(potentiallyAddSelfLink(links, document.getCollection().getHref()));
+				resourceSupport.add(withOwnSelfLink.getLinks());
 
-					return obj;
-				} else {
-					ResourceSupport resource = new ResourceSupport();
-					resource.add(potentiallyAddSelfLink(links, document.getCollection().getHref()));
+				return resourceSupport;
 
-					return resource;
-				}
 			} else {
 
-				items.stream()
-					.flatMap(item -> Optional.ofNullable(item.getLinks())
-						.map(Collection::stream)
-						.orElse(Stream.empty()))
-					.forEach(link -> {
-						if (!links.contains(link))
-							links.add(link);
-					});
-
-				ResourceSupport resource = (ResourceSupport) items.get(0).toRawData(this.contentType);
-				resource.add(potentiallyAddSelfLink(links, items.get(0).getHref()));
+				ResourceSupport resource = new ResourceSupport();
+				resource.add(withOwnSelfLink.getLinks());
 
 				return resource;
 			}
 		}
 
 		@Override
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt,
-													BeanProperty property) throws JsonMappingException {
+		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
+				throws JsonMappingException {
 
 			if (property != null) {
 				return new CollectionJsonResourceSupportDeserializer(property.getType().getContentType());
@@ -519,6 +581,8 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<Resource<?>>
 			implements ContextualDeserializer {
+
+		private static final long serialVersionUID = -5911687423054932523L;
 
 		private final JavaType contentType;
 
@@ -543,298 +607,187 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public Resource<?> deserialize(JsonParser jp, DeserializationContext ctxt)
-				throws IOException {
+		public Resource<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
 
 			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
 
-			List<? extends CollectionJsonItem<?>> items = Optional.ofNullable(document.getCollection().getItems()).orElse(new ArrayList<>());
-			List<Link> links = Optional.ofNullable(document.getCollection().getLinks()).orElse(new ArrayList<>());
+			List<? extends CollectionJsonItem<?>> items = Optional.ofNullable(document.getCollection().getItems())
+					.orElse(new ArrayList<>());
+			Links links = document.getCollection().withOwnSelfLink().getLinks();
 
 			if (items.size() == 0 && document.getCollection().getTemplate() != null) {
 
 				Map<String, Object> properties = document.getCollection().getTemplate().getData().stream()
-					.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
+						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
 				Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
-				return new Resource<>(obj, potentiallyAddSelfLink(links, document.getCollection().getHref()));
+				return new Resource<>(obj, links);
 			} else {
 
-				items.stream()
-					.flatMap(item -> Optional.ofNullable(item.getLinks())
-						.map(Collection::stream)
-						.orElse(Stream.empty()))
-					.forEach(link -> {
-						if (!links.contains(link))
-							links.add(link);
-					});
+				Links merged = items.stream() //
+						.map(CollectionJsonItem::getLinks) //
+						.reduce(links, //
+								(left, right) -> left.merge(MergeMode.REPLACE_BY_REL, right), //
+								(left, right) -> right);
 
-				return new Resource<>(items.get(0).toRawData(rootType),
-					potentiallyAddSelfLink(links, items.get(0).getHref()));
+				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
+
+				return new Resource<>(firstItem.toRawData(rootType),
+						merged.merge(MergeMode.REPLACE_BY_REL, firstItem.getLinks()));
 			}
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt,
-													BeanProperty property) throws JsonMappingException {
+		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
+				throws JsonMappingException {
 
-			if (property != null) {
-				return new CollectionJsonResourceDeserializer(property.getType().getContentType());
-			} else {
-				return new CollectionJsonResourceDeserializer(ctxt.getContextualType());
-			}
+			return new CollectionJsonResourceDeserializer(
+					property == null ? ctxt.getContextualType() : property.getType().getContentType());
 		}
 	}
 
-	static class CollectionJsonResourcesDeserializer extends ContainerDeserializerBase<Resources>
+	static abstract class CollectionJsonDeserializerBase<T extends Resources<?>> extends ContainerDeserializerBase<T>
 			implements ContextualDeserializer {
 
+		private static final long serialVersionUID = 1007769482339850545L;
+
 		private final JavaType contentType;
+		private final BiFunction<List<Object>, Links, T> finalizer;
+		private final Function<JavaType, CollectionJsonDeserializerBase<T>> creator;
+
+		CollectionJsonDeserializerBase(BiFunction<List<Object>, Links, T> finalizer,
+				Function<JavaType, CollectionJsonDeserializerBase<T>> creator) {
+			this(TypeFactory.defaultInstance().constructType(CollectionJson.class), finalizer, creator);
+		}
+
+		private CollectionJsonDeserializerBase(JavaType contentType, BiFunction<List<Object>, Links, T> finalizer,
+				Function<JavaType, CollectionJsonDeserializerBase<T>> creator) {
+
+			super(contentType);
+
+			this.contentType = contentType;
+			this.finalizer = finalizer;
+			this.creator = creator;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 */
+		@Override
+		public JavaType getContentType() {
+			return this.contentType;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 */
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 */
+		@Override
+		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
+				throws JsonMappingException {
+
+			JavaType contextualType = property == null //
+					? ctxt.getContextualType() //
+					: property.getType().getContentType();
+
+			return creator.apply(contextualType);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 */
+		@Override
+		public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+
+			JavaType rootType = JacksonHelper.findRootType(contentType);
+			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
+
+			CollectionJsonDocument<?> document = parser.getCodec().readValue(parser, wrappedType);
+			CollectionJson<?> collection = document.getCollection().withOwnSelfLink();
+
+			Links links = collection.getLinks();
+
+			if (!collection.hasItems() || !contentType.hasGenericTypes()) {
+				return finalizer.apply(Collections.emptyList(), links);
+			}
+
+			boolean isResource = contentType.hasGenericTypes() && contentType.containedType(0).hasRawClass(Resource.class);
+
+			return collection.getItems().stream() //
+					.map(CollectionJsonItem::withOwnSelfLink) //
+					.<Object> map(it -> isResource //
+							? new Resource<>(it.toRawData(rootType), it.getLinks()) //
+							: it.toRawData(rootType)) //
+					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));
+		}
+	}
+
+	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<Resources<?>> {
+
+		private static final long serialVersionUID = 6406522912020578141L;
+		private static final BiFunction<List<Object>, Links, Resources<?>> FINISHER = Resources::new;
+		private static final Function<JavaType, CollectionJsonDeserializerBase<Resources<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
 
 		CollectionJsonResourcesDeserializer() {
-			this(TypeFactory.defaultInstance().constructType(CollectionJson.class));
+			super(FINISHER, CONTEXTUAL_CREATOR);
 		}
 
-		CollectionJsonResourcesDeserializer(JavaType contentType) {
-
-			super(contentType);
-			this.contentType = contentType;
-		}
-
-		@Override
-		public JavaType getContentType() {
-			return this.contentType;
-		}
-
-		@Override
-		public JsonDeserializer<Object> getContentDeserializer() {
-			return null;
-		}
-
-		@Override
-		public Resources deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-
-			JavaType rootType = JacksonHelper.findRootType(this.contentType);
-			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
-
-			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
-
-			List<Object> contentList = new ArrayList<>();
-
-			if (document.getCollection().getItems() != null) {
-				for (CollectionJsonItem<?> item : document.getCollection().getItems()) {
-
-					Object data = item.toRawData(rootType);
-
-					if (this.contentType.hasGenericTypes()) {
-						if (isResource(this.contentType)) {
-							contentList.add(new Resource<>(data, potentiallyAddSelfLink(item.getLinks(), item.getHref())));
-						} else {
-							contentList.add(data);
-						}
-					}
-				}
-			}
-
-			return new Resources(contentList, potentiallyAddSelfLink(document.getCollection().getLinks(), document.getCollection().getHref()));
-		}
-
-		static boolean isResource(JavaType type) {
-			return type.containedType(0).hasRawClass(Resource.class);
-		}
-
-		@Override
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt,
-													BeanProperty property) throws JsonMappingException {
-
-			if (property != null) {
-
-				JavaType vc = property.getType().getContentType();
-				CollectionJsonResourcesDeserializer des = new CollectionJsonResourcesDeserializer(vc);
-				
-				return des;
-			} else {
-				return new CollectionJsonResourcesDeserializer(ctxt.getContextualType());
-			}
+		private CollectionJsonResourcesDeserializer(JavaType contentType) {
+			super(contentType, FINISHER, CONTEXTUAL_CREATOR);
 		}
 	}
 
-	static class CollectionJsonPagedResourcesDeserializer extends ContainerDeserializerBase<PagedResources>
-			implements ContextualDeserializer {
+	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedResources<?>> {
 
-		private final JavaType contentType;
+		private static final long serialVersionUID = -7465448422501330790L;
+		private static final BiFunction<List<Object>, Links, PagedResources<?>> FINISHER = (content,
+				links) -> new PagedResources<>(content, null, links);
+		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedResources<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {
-			this(TypeFactory.defaultInstance().constructType(CollectionJson.class));
+			super(FINISHER, CONTEXTUAL_CREATOR);
 		}
 
-		CollectionJsonPagedResourcesDeserializer(JavaType contentType) {
-
-			super(contentType);
-			this.contentType = contentType;
-		}
-
-		@Override
-		public JavaType getContentType() {
-			return this.contentType;
-		}
-
-		@Override
-		public JsonDeserializer<Object> getContentDeserializer() {
-			return null;
-		}
-
-		@Override
-		public PagedResources deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-
-			JavaType rootType = JacksonHelper.findRootType(this.contentType);
-			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
-
-			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
-
-			List<Object> items = new ArrayList<>();
-
-			document.getCollection().getItems().forEach(item -> {
-
-				Object data = item.toRawData(rootType);
-				List<Link> links = item.getLinks() == null ? Collections.EMPTY_LIST : item.getLinks();
-
-				if (this.contentType.hasGenericTypes()) {
-
-					if (this.contentType.containedType(0).hasRawClass(Resource.class)) {
-						items.add(new Resource<>(data, potentiallyAddSelfLink(links, item.getHref())));
-					} else {
-						items.add(data);
-					}
-				}
-			});
-
-			PagedResources.PageMetadata pageMetadata = null;
-
-			return new PagedResources(items, pageMetadata,
-				potentiallyAddSelfLink(document.getCollection().getLinks(), document.getCollection().getHref()));
-		}
-
-		@Override
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
-
-			if (property != null) {
-
-				JavaType vc = property.getType().getContentType();
-				CollectionJsonPagedResourcesDeserializer des = new CollectionJsonPagedResourcesDeserializer(vc);
-				
-				return des;
-			} else {
-				return new CollectionJsonPagedResourcesDeserializer(ctxt.getContextualType());
-			}
-		}
-
-	}
-
-	public static class CollectionJsonHandlerInstantiator extends HandlerInstantiator {
-
-		private final Map<Class<?>, Object> instanceMap = new HashMap<>();
-
-		public CollectionJsonHandlerInstantiator(MessageSourceAccessor messageSource) {
-
-			this.instanceMap.put(CollectionJsonPagedResourcesSerializer.class, new CollectionJsonPagedResourcesSerializer());
-			this.instanceMap.put(CollectionJsonResourcesSerializer.class, new CollectionJsonResourcesSerializer());
-			this.instanceMap.put(CollectionJsonResourceSerializer.class, new CollectionJsonResourceSerializer());
-			this.instanceMap.put(CollectionJsonResourceSupportSerializer.class, new CollectionJsonResourceSupportSerializer());
-			this.instanceMap.put(CollectionJsonLinkListSerializer.class, new CollectionJsonLinkListSerializer(messageSource));
-		}
-
-		private Object findInstance(Class<?> type) {
-
-			Object result = instanceMap.get(type);
-			return result != null ? result : BeanUtils.instantiateClass(type);
-		}
-
-		@Override
-		public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated, Class<?> deserClass) {
-			return (JsonDeserializer<?>) findInstance(deserClass);
-		}
-
-		@Override
-		public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated, Class<?> keyDeserClass) {
-			return (KeyDeserializer) findInstance(keyDeserClass);
-		}
-
-		@Override
-		public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
-			return (JsonSerializer<?>) findInstance(serClass);
-		}
-
-		@Override
-		public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated, Class<?> builderClass) {
-			return (TypeResolverBuilder<?>) findInstance(builderClass);
-		}
-
-		@Override
-		public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> resolverClass) {
-			return (TypeIdResolver) findInstance(resolverClass);
+		private CollectionJsonPagedResourcesDeserializer(JavaType contentType) {
+			super(contentType, FINISHER, CONTEXTUAL_CREATOR);
 		}
 	}
 
-	/**
-	 * Return a list of {@link Link}s that includes a "self" link.
-	 * 
-	 * @param links - base set of {@link Link}s.
-	 * @param href - the URI of the "self" link
-	 * @return
-	 */
-	private static List<Link> potentiallyAddSelfLink(List<Link> links, String href) {
+	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(Resources<?> resources) {
 
-		if (links == null) {
+		return resources.getContent().stream().map(content -> {
 
-			if (href == null) {
-				return Collections.emptyList();
+			if (!Resource.class.isInstance(content)) {
+				return new CollectionJsonItem<>().withRawData(content);
 			}
 
-			return Collections.singletonList(new Link(href));
-		}
+			Resource<?> resource = (Resource<?>) content;
 
-		if (href == null || links.stream().map(Link::getRel).anyMatch(s -> s.equals(IanaLinkRelation.SELF.value()))) {
-			return links;
-		}
+			return new CollectionJsonItem<>() //
+					.withHref(resource.getRequiredLink(IanaLinkRelations.SELF).getHref())
+					.withLinks(resource.getLinks().without(IanaLinkRelations.SELF)) //
+					.withRawData(resource.getContent());
 
-		// Clone and add the self link
-
-		List<Link> newLinks = new ArrayList<>();
-		newLinks.add(new Link(href));
-		newLinks.addAll(links);
-
-		return newLinks;
-	}
-
-	private static List<Link> withoutSelfLink(List<Link> links) {
-
-		return links.stream()
-			.filter(link -> !link.getRel().equals(IanaLinkRelation.SELF.value()))
-			.collect(Collectors.toList());
-	}
-
-	private static List<CollectionJsonItem<?>> resourcesToCollectionJsonItems(Resources<?> resources) {
-		
-		return resources.getContent().stream()
-			.map(content -> {
-				if (ClassUtils.isAssignableValue(Resource.class, content)) {
-
-					Resource resource = (Resource) content;
-
-					return new CollectionJsonItem<>()
-						.withHref(resource.getRequiredLink(IanaLinkRelation.SELF.value()).getHref())
-						.withLinks(withoutSelfLink(resource.getLinks()))
-						.withRawData(resource.getContent());
-				} else {
-					return new CollectionJsonItem<>().withRawData(content);
-				}
-			})
-			.collect(Collectors.toList());
+		}).collect(Collectors.toList());
 	}
 
 	/**
@@ -845,65 +798,42 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 	 */
 	private static List<CollectionJsonQuery> findQueries(ResourceSupport resource) {
 
-		List<CollectionJsonQuery> queries = new ArrayList<>();
-
-		if (resource.hasLink(IanaLinkRelation.SELF.value())) {
-			Link selfLink = resource.getRequiredLink(IanaLinkRelation.SELF.value());
-
-			selfLink.getAffordances().forEach(affordance -> {
-
-				CollectionJsonAffordanceModel model = affordance.getAffordanceModel(MediaTypes.COLLECTION_JSON);
-
-				/**
-				 * For Collection+JSON, "queries" are only collected for GET affordances where the URI is NOT a self link.
-				 */
-				if (model.getHttpMethod() == HttpMethod.GET && !model.getURI().equals(selfLink.getHref())) {
-
-
-					queries.add(new CollectionJsonQuery()
-						.withRel(model.getName())
-						.withHref(model.getURI())
-						.withData(model.getQueryProperties()));
-				}
-			});
+		if (!resource.hasLink(IanaLinkRelations.SELF)) {
+			return Collections.emptyList();
 		}
 
-		return queries;
+		Link selfLink = resource.getRequiredLink(IanaLinkRelations.SELF);
+
+		return selfLink.getAffordances().stream() //
+				.map(it -> it.getAffordanceModel(MediaTypes.COLLECTION_JSON)) //
+				.map(CollectionJsonAffordanceModel.class::cast) //
+				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
+				.filter(it -> !it.pointsToTargetOf(selfLink)) //
+				.map(it -> new CollectionJsonQuery() //
+						.withRel(it.getName()) //
+						.withHref(it.getURI()) //
+						.withData(it.getQueryProperties())) //
+				.collect(Collectors.toList());
 	}
 
 	/**
 	 * Scan through the {@link Affordance}s and
+	 *
 	 * @param resource
 	 * @return
 	 */
 	private static CollectionJsonTemplate findTemplate(ResourceSupport resource) {
 
-		List<CollectionJsonTemplate> templates = new ArrayList<>();
-
-		if (resource.hasLink(IanaLinkRelation.SELF.value())) {
-			resource.getRequiredLink(IanaLinkRelation.SELF.value()).getAffordances().forEach(affordance -> {
-
-				CollectionJsonAffordanceModel model = affordance.getAffordanceModel(MediaTypes.COLLECTION_JSON);
-
-				/**
-				 * For Collection+JSON, "templates" are made of any non-GET affordances.
-				 */
-				if (!(model.getHttpMethod() == HttpMethod.GET)) {
-
-					CollectionJsonTemplate template = new CollectionJsonTemplate() //
-						.withData(model.getInputProperties());
-
-					templates.add(template);
-				}
-			});
+		if (!resource.hasLink(IanaLinkRelations.SELF)) {
+			return null;
 		}
 
-		/**
-		 * Collection+JSON can only have one template, so grab the first one.
-		 */
-		return templates.stream()
-			.findFirst()
-			.orElse(null);
+		return resource.getRequiredLink(IanaLinkRelations.SELF).getAffordances() //
+				.stream() //
+				.map(it -> it.getAffordanceModel(MediaTypes.COLLECTION_JSON)) //
+				.map(CollectionJsonAffordanceModel.class::cast) //
+				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
+				.map(it -> new CollectionJsonTemplate().withData(it.getInputProperties())) //
+				.findFirst().orElse(null);
 	}
-
 }

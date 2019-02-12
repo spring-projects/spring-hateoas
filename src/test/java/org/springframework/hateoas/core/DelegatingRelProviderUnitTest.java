@@ -18,6 +18,7 @@ package org.springframework.hateoas.core;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
@@ -38,12 +39,12 @@ public class DelegatingRelProviderUnitTest {
 		RelProvider delegatingProvider = new DelegatingRelProvider(registry);
 
 		assertThat(delegatingProvider.supports(Sample.class)).isTrue();
-		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class)).isEqualTo("foo");
-		assertThat(delegatingProvider.getCollectionResourceRelFor(Sample.class)).isEqualTo("bar");
+		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class)).isEqualTo(LinkRelation.of("foo"));
+		assertThat(delegatingProvider.getCollectionResourceRelFor(Sample.class)).isEqualTo(LinkRelation.of("bar"));
 
 		assertThat(delegatingProvider.supports(String.class)).isTrue();
-		assertThat(delegatingProvider.getItemResourceRelFor(String.class)).isEqualTo("string");
-		assertThat(delegatingProvider.getCollectionResourceRelFor(String.class)).isEqualTo("stringList");
+		assertThat(delegatingProvider.getItemResourceRelFor(String.class)).isEqualTo(LinkRelation.of("string"));
+		assertThat(delegatingProvider.getCollectionResourceRelFor(String.class)).isEqualTo(LinkRelation.of("stringList"));
 	}
 
 	@Relation(value = "foo", collectionRelation = "bar")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.hateoas.collectionjson;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +31,7 @@ import org.springframework.hateoas.support.MappingUtils;
  * Unit tests for {@link CollectionJsonLinkDiscoverer}.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class CollectionJsonLinkDiscovererUnitTest {
 
@@ -46,10 +47,11 @@ public class CollectionJsonLinkDiscovererUnitTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
 
-		Link link = this.discoverer.findLinkWithRel("self", specBasedJson);
+		Optional<Link> link = this.discoverer.findLinkWithRel("self", specBasedJson);
 
-		assertThat(link).isNotNull();
-		assertThat(link.getHref()).isEqualTo("http://example.org/friends/");
+		assertThat(link) //
+				.map(Link::getHref) //
+				.hasValue("http://example.org/friends/");
 	}
 
 	@Test
@@ -57,32 +59,22 @@ public class CollectionJsonLinkDiscovererUnitTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
 
-		Link selfLink = this.discoverer.findLinkWithRel("self", specBasedJson);
+		assertThat(this.discoverer.findLinkWithRel("self", specBasedJson)) //
+				.map(Link::getHref) //
+				.hasValue("http://example.org/friends/");
 
-		assertThat(selfLink).isNotNull();
-		assertThat(selfLink.getHref()).isEqualTo("http://example.org/friends/");
+		assertThat(this.discoverer.findLinkWithRel("feed", specBasedJson)) //
+				.map(Link::getHref) //
+				.hasValue("http://example.org/friends/rss");
 
-		Link feedLink = this.discoverer.findLinkWithRel("feed", specBasedJson);
+		assertThat(this.discoverer.findLinksWithRel("blog", specBasedJson)) //
+				.extracting("href") //
+				.containsExactlyInAnyOrder("http://examples.org/blogs/jdoe", "http://examples.org/blogs/msmith",
+						"http://examples.org/blogs/rwilliams");
 
-		assertThat(feedLink).isNotNull();
-		assertThat(feedLink.getHref()).isEqualTo("http://example.org/friends/rss");
-
-		List<Link> links = this.discoverer.findLinksWithRel("blog", specBasedJson);
-
-		assertThat(links)
-			.extracting("href")
-			.containsExactlyInAnyOrder(
-				"http://examples.org/blogs/jdoe",
-				"http://examples.org/blogs/msmith",
-				"http://examples.org/blogs/rwilliams");
-
-		links = this.discoverer.findLinksWithRel("avatar", specBasedJson);
-
-		assertThat(links)
-			.extracting("href")
-			.containsExactlyInAnyOrder(
-				"http://examples.org/images/jdoe",
-				"http://examples.org/images/msmith",
-				"http://examples.org/images/rwilliams");
+		assertThat(this.discoverer.findLinksWithRel("avatar", specBasedJson)) //
+				.extracting("href") //
+				.containsExactlyInAnyOrder("http://examples.org/images/jdoe", "http://examples.org/images/msmith",
+						"http://examples.org/images/rwilliams");
 	}
 }

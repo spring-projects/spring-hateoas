@@ -19,7 +19,7 @@ import java.net.URI;
 
 /**
  * Builder to ease building {@link Link} instances.
- * 
+ *
  * @author Ricardo Gladwell
  */
 public interface LinkBuilder {
@@ -27,7 +27,7 @@ public interface LinkBuilder {
 	/**
 	 * Adds the given object's {@link String} representation as sub-resource to the current URI. Will unwrap
 	 * {@link Identifiable}s to their id value (see {@link Identifiable#getId()}).
-	 * 
+	 *
 	 * @param object
 	 * @return
 	 */
@@ -36,7 +36,7 @@ public interface LinkBuilder {
 	/**
 	 * Adds the given {@link Identifiable}'s id as sub-resource. Will simply return the {@link LinkBuilder} as is if the
 	 * given entity is {@literal null}.
-	 * 
+	 *
 	 * @param identifiable
 	 * @return
 	 */
@@ -44,23 +44,33 @@ public interface LinkBuilder {
 
 	/**
 	 * Creates a URI of the link built by the current builder instance.
-	 * 
+	 *
 	 * @return
 	 */
 	URI toUri();
 
 	/**
-	 * Creates the {@link Link} built by the current builder instance with the given rel.
-	 * 
+	 * Creates the {@link Link} built by the current builder instance with the given link relation.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @return
+	 */
+	default Link withRel(String rel) {
+		return withRel(LinkRelation.of(rel));
+	}
+
+	/**
+	 * Creates the {@link Link} built by the current builder instance with the given {@link LinkRelation}.
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
-	Link withRel(String rel);
+	Link withRel(LinkRelation rel);
 
 	/**
-	 * Creates the {@link Link} built by the current builder instance with the default self rel.
-	 * 
-	 * @see IanaLinkRelation#SELF
+	 * Creates the {@link Link} built by the current builder instance with the default self link relation.
+	 *
+	 * @see IanaLinkRelations#SELF
 	 * @return
 	 */
 	Link withSelfRel();

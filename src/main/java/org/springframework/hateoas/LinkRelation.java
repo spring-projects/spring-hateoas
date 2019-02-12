@@ -15,10 +15,19 @@
  */
 package org.springframework.hateoas;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Interface for defining link relations. Can be used for implementing spec-based link relations as well as custom ones.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  * @since 1.0
  */
 public interface LinkRelation {
@@ -26,5 +35,44 @@ public interface LinkRelation {
 	/**
 	 * Return the link relation's value.
 	 */
+	@JsonValue
 	String value();
+
+	/**
+	 * Creates a new {@link LinkRelation}.
+	 *
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 */
+	@JsonCreator
+	static LinkRelation of(String relation) {
+		return StringLinkRelation.of(relation);
+	}
+
+	/**
+	 * Creates a new {@link Iterable} of {@link LinkRelation} for each of the given {@link String}s.
+	 *
+	 * @param others must not be {@literal null}.
+	 * @return
+	 */
+	static Iterable<LinkRelation> manyOf(String... others) {
+
+		return Arrays.stream(others) //
+				.map(LinkRelation::of) //
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns whether the given {@link LinkRelation} is logically the same as the current one, independent of
+	 * implementation, i.e. whether the plain {@link String} values match.
+	 *
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 */
+	default boolean isSameAs(LinkRelation relation) {
+
+		Assert.notNull(relation, "LinkRelation must not be null!");
+
+		return this.value().equals(relation.value());
+	}
 }

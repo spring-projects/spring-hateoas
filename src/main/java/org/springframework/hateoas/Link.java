@@ -41,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Value object for links.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @author Jens Schauder
@@ -50,7 +50,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
-@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
+@EqualsAndHashCode(
+		of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -63,36 +64,31 @@ public class Link implements Serializable {
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
 	/**
-	 * @deprecated Use {@link IanaLinkRelation#SELF} instead.
+	 * @deprecated Use {@link IanaLinkRelations#SELF} instead.
 	 */
-	@Deprecated
-	public static final String REL_SELF = IanaLinkRelation.SELF.value();
+	public static final @Deprecated LinkRelation REL_SELF = IanaLinkRelations.SELF;
 
 	/**
-	 * @deprecated Use {@link IanaLinkRelation#FIRST} instead.
+	 * @deprecated Use {@link IanaLinkRelations#FIRST} instead.
 	 */
-	@Deprecated
-	public static final String REL_FIRST = IanaLinkRelation.FIRST.value();
+	public static final @Deprecated LinkRelation REL_FIRST = IanaLinkRelations.FIRST;
 
 	/**
-	 * @deprecated Use {@link IanaLinkRelation#PREV} instead.
+	 * @deprecated Use {@link IanaLinkRelations#PREV} instead.
 	 */
-	@Deprecated
-	public static final String REL_PREVIOUS = IanaLinkRelation.PREV.value();
+	public static final @Deprecated LinkRelation REL_PREVIOUS = IanaLinkRelations.PREV;
 
 	/**
-	 * @deprecated Use {@link IanaLinkRelation#NEXT} instead.
+	 * @deprecated Use {@link IanaLinkRelations#NEXT} instead.
 	 */
-	@Deprecated
-	public static final String REL_NEXT = IanaLinkRelation.NEXT.value();
+	public static final @Deprecated LinkRelation REL_NEXT = IanaLinkRelations.NEXT;
 
 	/**
-	 * @deprecated Use {@link IanaLinkRelation#LAST} instead.
+	 * @deprecated Use {@link IanaLinkRelations#LAST} instead.
 	 */
-	@Deprecated
-	public static final String REL_LAST = IanaLinkRelation.LAST.value();
+	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
 
-	private @Wither String rel;
+	private LinkRelation rel;
 	private @Wither String href;
 	private @Wither String hreflang;
 	private @Wither String media;
@@ -106,52 +102,74 @@ public class Link implements Serializable {
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
-	 * 
-	 * @see IanaLinkRelation#SELF
+	 *
+	 * @see IanaLinkRelations#SELF
 	 * @param href must not be {@literal null} or empty.
 	 */
 	public Link(String href) {
-		this(href, IanaLinkRelation.SELF.value());
+		this(href, IanaLinkRelations.SELF);
 	}
 
 	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
-	 * 
+	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(String href, String rel) {
+		this(new UriTemplate(href), LinkRelation.of(rel));
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given URI with the given rel.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	public Link(String href, LinkRelation rel) {
 		this(new UriTemplate(href), rel);
 	}
 
 	/**
 	 * Creates a new Link from the given {@link UriTemplate} and rel.
-	 * 
+	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(UriTemplate template, String rel) {
-
-		Assert.notNull(template, "UriTemplate must not be null!");
-		Assert.hasText(rel, "Rel must not be null or empty!");
-
-		this.template = template;
-		this.href = template.toString();
-		this.rel = rel;
-		this.affordances = new ArrayList<>();
+		this(template, LinkRelation.of(rel));
 	}
 
-	public Link(String href, String rel, List<Affordance> affordances) {
+	/**
+	 * Creates a new Link from the given {@link UriTemplate} and rel.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	public Link(UriTemplate template, LinkRelation rel) {
+		this(template, rel, Collections.emptyList());
+	}
 
-		this(href, rel);
+	/**
+	 * Creates a new Link from the given {@link UriTemplate}, link relation and affordances.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	private Link(UriTemplate template, LinkRelation rel, List<Affordance> affordances) {
 
-		Assert.notNull(affordances, "affordances must not be null!");
+		Assert.notNull(template, "UriTemplate must not be null!");
+		Assert.notNull(rel, "LinkRelation must not be null!");
+		Assert.notNull(affordances, "Affordances must not be null!");
 
+		this.template = template;
+		this.rel = rel;
+		this.href = template.toString();
 		this.affordances = affordances;
 	}
 
 	/**
-	 * Empty constructor required by the marshalling framework.
+	 * Empty constructor required by the marshaling framework.
 	 */
 	protected Link() {
 		this.affordances = new ArrayList<>();
@@ -159,7 +177,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns safe copy of {@link Affordance}s.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Affordance> getAffordances() {
@@ -168,11 +186,11 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
-	 * 
+	 *
 	 * @return
 	 */
 	public Link withSelfRel() {
-		return withRel(IanaLinkRelation.SELF.value());
+		return withRel(IanaLinkRelations.SELF);
 	}
 
 	/**
@@ -194,7 +212,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Convenience method when chaining an existing {@link Link}.
-	 * 
+	 *
 	 * @param name
 	 * @param httpMethod
 	 * @param inputType
@@ -202,13 +220,14 @@ public class Link implements Serializable {
 	 * @param outputType
 	 * @return
 	 */
-	public Link andAffordance(String name, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public Link andAffordance(String name, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 		return andAffordance(new Affordance(name, this, httpMethod, inputType, queryMethodParameters, outputType));
 	}
 
 	/**
-	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname, e.g.
-	 * {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
+	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
+	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
 	 *
 	 * @param httpMethod
 	 * @param inputType
@@ -216,13 +235,15 @@ public class Link implements Serializable {
 	 * @param outputType
 	 * @return
 	 */
-	public Link andAffordance(HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
-		return andAffordance(httpMethod.toString().toLowerCase() + inputType.resolve().getSimpleName(), httpMethod, inputType, queryMethodParameters, outputType);
+	public Link andAffordance(HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters,
+			ResolvableType outputType) {
+		return andAffordance(httpMethod.toString().toLowerCase() + inputType.resolve().getSimpleName(), httpMethod,
+				inputType, queryMethodParameters, outputType);
 	}
 
 	/**
-	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname, e.g.
-	 * {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
+	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
+	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
 	 *
 	 * @param httpMethod
 	 * @param inputType
@@ -230,13 +251,15 @@ public class Link implements Serializable {
 	 * @param outputType
 	 * @return
 	 */
-	public Link andAffordance(HttpMethod httpMethod, Class<?> inputType, List<QueryParameter> queryMethodParameters, Class<?> outputType) {
-		return andAffordance(httpMethod, ResolvableType.forClass(inputType), queryMethodParameters, ResolvableType.forClass(outputType));
+	public Link andAffordance(HttpMethod httpMethod, Class<?> inputType, List<QueryParameter> queryMethodParameters,
+			Class<?> outputType) {
+		return andAffordance(httpMethod, ResolvableType.forClass(inputType), queryMethodParameters,
+				ResolvableType.forClass(outputType));
 	}
 
 	/**
 	 * Create new {@link Link} with additional {@link Affordance}s.
-	 * 
+	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
@@ -251,7 +274,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Creats a new {@link Link} with the given {@link Affordance}s.
-	 * 
+	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
@@ -263,7 +286,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns the variable names contained in the template.
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
@@ -273,7 +296,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns all {@link TemplateVariables} contained in the {@link Link}.
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
@@ -283,7 +306,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns whether or not the link is templated.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean isTemplated() {
@@ -292,7 +315,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
-	 * 
+	 *
 	 * @param arguments
 	 * @return
 	 */
@@ -302,7 +325,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
-	 * 
+	 *
 	 * @param arguments must not be {@literal null}.
 	 * @return
 	 */
@@ -311,8 +334,31 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Creates a new {@link Link} with the same href but given {@link LinkRelation}.
+	 *
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 */
+	public Link withRel(LinkRelation relation) {
+
+		Assert.notNull(relation, "LinkRelation must not be null!");
+
+		return new Link(relation, href, hreflang, media, title, type, deprecation, profile, name, template, affordances);
+	}
+
+	/**
+	 * Creates a new {@link Link} with the same href but given {@link LinkRelation}.
+	 *
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 */
+	public Link withRel(String relation) {
+		return withRel(LinkRelation.of(relation));
+	}
+
+	/**
 	 * Returns whether the current {@link Link} has the given link relation.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -320,7 +366,20 @@ public class Link implements Serializable {
 
 		Assert.hasText(rel, "Link relation must not be null or empty!");
 
-		return this.rel.equals(rel);
+		return hasRel(LinkRelation.of(rel));
+	}
+
+	/**
+	 * Returns whether the {@link Link} has the given {@link LinkRelation}.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @return
+	 */
+	public boolean hasRel(LinkRelation rel) {
+
+		Assert.notNull(rel, "Link relation must not be null!");
+
+		return this.rel.isSameAs(rel);
 	}
 
 	private UriTemplate getUriTemplate() {
@@ -339,7 +398,7 @@ public class Link implements Serializable {
 	@Override
 	public String toString() {
 
-		String linkString = String.format("<%s>;rel=\"%s\"", href, rel);
+		String linkString = String.format("<%s>;rel=\"%s\"", href, rel.value());
 
 		if (hreflang != null) {
 			linkString += ";hreflang=\"" + hreflang + "\"";
@@ -375,7 +434,7 @@ public class Link implements Serializable {
 	/**
 	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
 	 * link. Will return {@literal null} if input {@link String} is either empty or {@literal null}.
-	 * 
+	 *
 	 * @param element an RFC-5899 compatible representation of a link.
 	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
@@ -436,7 +495,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Parses the links attributes from the given source {@link String}.
-	 * 
+	 *
 	 * @param source
 	 * @return
 	 */

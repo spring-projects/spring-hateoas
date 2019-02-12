@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 /**
  * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link HalFormsTemplate} may
  * contain a list of {@link HalFormsProperty}s
- * 
+ *
  * @see http://mamund.site44.com/misc/hal-forms/
  */
 @JsonInclude(Include.NON_DEFAULT)
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @Wither
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(force = true)
-class HalFormsProperty {
+public class HalFormsProperty {
 
 	private @NonNull String name;
 	private Boolean readOnly;
@@ -49,7 +49,7 @@ class HalFormsProperty {
 
 	/**
 	 * Creates a new {@link HalFormsProperty} with the given name.
-	 * 
+	 *
 	 * @param name must not be {@literal null}.
 	 * @return
 	 */

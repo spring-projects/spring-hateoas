@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import lombok.Value;
@@ -43,11 +44,9 @@ public class LinkRelationUnitTest {
 		assertThat(MyOwnLinkRelation.FOO.value()).isEqualTo("foo");
 		assertThat(MyOwnLinkRelation.BAR.value()).isEqualTo("bar");
 
-		Set<LinkRelation> myOwnLinkRelations = Arrays.stream(MyOwnLinkRelation.values())
-			.collect(Collectors.toSet());
+		Set<LinkRelation> myOwnLinkRelations = Arrays.stream(MyOwnLinkRelation.values()).collect(Collectors.toSet());
 
-		assertThat(myOwnLinkRelations)
-			.containsExactlyInAnyOrder(MyOwnLinkRelation.FOO, MyOwnLinkRelation.BAR);
+		assertThat(myOwnLinkRelations).containsExactlyInAnyOrder(MyOwnLinkRelation.FOO, MyOwnLinkRelation.BAR);
 	}
 
 	/**
@@ -58,9 +57,13 @@ public class LinkRelationUnitTest {
 
 		private String value;
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.LinkRelation#value()
+		 */
 		@Override
 		public String value() {
-			return this.value;
+			return value;
 		}
 	}
 
@@ -69,8 +72,7 @@ public class LinkRelationUnitTest {
 	 */
 	enum MyOwnLinkRelation implements LinkRelation {
 
-		FOO("foo"),
-		BAR("bar");
+		FOO("foo"), BAR("bar");
 
 		private final String value;
 
@@ -78,9 +80,13 @@ public class LinkRelationUnitTest {
 			this.value = value;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.LinkRelation#value()
+		 */
 		@Override
 		public String value() {
-			return this.value;
+			return value;
 		}
 	}
 

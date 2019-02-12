@@ -71,7 +71,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 
 	/**
 	 * Creates a {@link Link} pointing to the collection resource of the given type. The relation type of the link will be
-	 * determined by the implementation class and should be defaulted to {@link IanaLinkRelation#SELF}.
+	 * determined by the implementation class and should be defaulted to {@link IanaLinkRelations#SELF}.
 	 * 
 	 * @param type the entity type to point to, must not be {@literal null}.
 	 * @return the {@link Link} pointing to the collection resource exposed for the given entity. Will never be
@@ -82,7 +82,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 
 	/**
 	 * Creates a {@link Link} pointing to single resource backing the given entity type and id. The relation type of the
-	 * link will be determined by the implementation class and should be defaulted to {@link IanaLinkRelation#SELF}.
+	 * link will be determined by the implementation class and should be defaulted to {@link IanaLinkRelations#SELF}.
 	 * 
 	 * @param type the entity type to point to, must not be {@literal null}.
 	 * @param id the identifier of the entity of the given type
@@ -94,7 +94,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 
 	/**
 	 * Creates a {@link Link} pointing to single resource backing the given entity. The relation type of the link will be
-	 * determined by the implementation class and should be defaulted to {@link IanaLinkRelation#SELF}.
+	 * determined by the implementation class and should be defaulted to {@link IanaLinkRelations#SELF}.
 	 * 
 	 * @param entity the entity type to point to, must not be {@literal null}.
 	 * @return the {@link Link} pointing to the resource exposed for the given entity. Will never be {@literal null}.

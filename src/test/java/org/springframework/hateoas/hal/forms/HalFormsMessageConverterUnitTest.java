@@ -15,10 +15,11 @@
  */
 package org.springframework.hateoas.hal.forms;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -83,9 +84,8 @@ public class HalFormsMessageConverterUnitTest {
 
 		HalFormsDocument<?> halFormsDocument = (HalFormsDocument<?>) convertedMessage;
 
-		assertThat(halFormsDocument.getLinks().size(), is(2));
-		assertThat(halFormsDocument.getLinks().get(0).getHref(), is("/employees"));
-		assertThat(halFormsDocument.getLinks().get(1).getHref(), is("/employees/1"));
+		assertThat(halFormsDocument.getLinks()).hasSize(2);
+		assertThat(halFormsDocument.getLinks()).extracting(Link::getHref).containsExactly("/employees", "/employees/1");
 
 		assertThat(halFormsDocument.getTemplates().size(), is(1));
 		assertThat(halFormsDocument.getTemplates().keySet(), hasItems("default"));

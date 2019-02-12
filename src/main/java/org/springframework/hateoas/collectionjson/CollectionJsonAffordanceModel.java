@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,22 @@ import org.springframework.hateoas.support.PropertyUtils;
 import org.springframework.http.HttpMethod;
 
 /**
+ * {@link AffordanceModel} for Collection+JSON.
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 @EqualsAndHashCode(callSuper = true)
-public class CollectionJsonAffordanceModel extends AffordanceModel {
+class CollectionJsonAffordanceModel extends AffordanceModel {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT,
+			HttpMethod.PATCH);
 
 	private final @Getter List<CollectionJsonData> inputProperties;
 	private final @Getter List<CollectionJsonData> queryProperties;
-	
-	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+
+	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
@@ -52,23 +57,20 @@ public class CollectionJsonAffordanceModel extends AffordanceModel {
 	}
 
 	/**
-	 * Look at the input's domain type to extract the {@link Affordance}'s properties.
-	 * Then transform them into a list of {@link CollectionJsonData} objects.
+	 * Look at the input's domain type to extract the {@link Affordance}'s properties. Then transform them into a list of
+	 * {@link CollectionJsonData} objects.
 	 */
 	private List<CollectionJsonData> determineInputs() {
 
-		if (ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
-
-			return PropertyUtils.findPropertyNames(getInputType()).stream()
-				.map(propertyName -> new CollectionJsonData()
-					.withName(propertyName)
-					.withValue(""))
-				.collect(Collectors.toList());
-
-		} else {
+		if (!ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
 			return Collections.emptyList();
-
 		}
+
+		return PropertyUtils.findPropertyNames(getInputType()).stream() //
+				.map(propertyName -> new CollectionJsonData() //
+						.withName(propertyName) //
+						.withValue("")) //
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -78,15 +80,14 @@ public class CollectionJsonAffordanceModel extends AffordanceModel {
 	 */
 	private List<CollectionJsonData> determineQueryProperties() {
 
-		if (getHttpMethod().equals(HttpMethod.GET)) {
-
-			return getQueryMethodParameters().stream()
-				.map(queryProperty -> new CollectionJsonData()
-					.withName(queryProperty.getName())
-					.withValue(""))
-				.collect(Collectors.toList());
-		} else {
+		if (!getHttpMethod().equals(HttpMethod.GET)) {
 			return Collections.emptyList();
 		}
+
+		return getQueryMethodParameters().stream() //
+				.map(queryProperty -> new CollectionJsonData() //
+						.withName(queryProperty.getName()) //
+						.withValue("")) //
+				.collect(Collectors.toList());
 	}
 }

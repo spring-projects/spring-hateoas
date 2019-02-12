@@ -69,7 +69,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Integration tests for {@link EnableHypermediaSupport}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -106,8 +106,10 @@ public class EnableHypermediaSupportIntegrationTest {
 			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
 
 			assertThat(discoverers).isNotNull();
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON)).isInstanceOf(HalLinkDiscoverer.class);
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8)).isInstanceOf(HalLinkDiscoverer.class);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -121,7 +123,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
-					.isInstanceOf(HalFormsLinkDiscoverer.class);
+					.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -135,7 +137,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.COLLECTION_JSON))
-					.isInstanceOf(CollectionJsonLinkDiscoverer.class);
+					.hasValueSatisfying(CollectionJsonLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -148,7 +150,8 @@ public class EnableHypermediaSupportIntegrationTest {
 			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
 
 			assertThat(discoverers).isNotNull();
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.UBER_JSON)).isInstanceOf(UberLinkDiscoverer.class);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.UBER_JSON))
+					.hasValueSatisfying(UberLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -298,8 +301,8 @@ public class EnableHypermediaSupportIntegrationTest {
 
 					assertThat(converters.get(0)).isInstanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class);
 					assertThat(converters.get(0).getSupportedMediaTypes()) //
-						.hasSize(1) //
-						.contains(MediaTypes.UBER_JSON);
+							.hasSize(1) //
+							.contains(MediaTypes.UBER_JSON);
 				}
 			}
 
@@ -393,8 +396,8 @@ public class EnableHypermediaSupportIntegrationTest {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
 			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
-				.hasSize(1) //
-				.contains(MediaTypes.UBER_JSON);
+					.hasSize(1) //
+					.contains(MediaTypes.UBER_JSON);
 		});
 	}
 
@@ -480,7 +483,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 				assertThatCode(() -> {
 					assertThat(it.writeValueAsString(resourceSupport)) //
-						.isEqualTo("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}");
+							.isEqualTo("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}");
 				}).doesNotThrowAnyException();
 			});
 		});
@@ -581,7 +584,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	/**
 	 * Method to mitigate API changes between Spring 3.2 and 4.0.
-	 * 
+	 *
 	 * @param adapter
 	 * @return
 	 */

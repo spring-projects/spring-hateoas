@@ -18,11 +18,12 @@ package org.springframework.hateoas.hal;
 import java.util.Collection;
 
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 
 /**
  * API to provide HAL curie information for links.
- * 
+ *
  * @see http://tools.ietf.org/html/draft-kelly-json-hal#section-8.2
  * @author Oliver Gierke
  * @author Jeff Stano
@@ -33,26 +34,26 @@ public interface CurieProvider {
 	/**
 	 * Returns the rel to be rendered for the given {@link Link}. Will potentially prefix the rel but also might decide
 	 * not to, depending on the actual rel.
-	 * 
+	 *
 	 * @param link
 	 * @return
 	 */
-	String getNamespacedRelFrom(Link link);
+	HalLinkRelation getNamespacedRelFrom(Link link);
 
 	/**
 	 * Returns the rel to be rendered for the given rel. Will potentially prefix the rel but also might decide not to,
 	 * depending on the actual rel.
-	 * 
+	 *
 	 * @param rel
 	 * @return
 	 * @since 0.17
 	 */
-	String getNamespacedRelFor(String rel);
+	HalLinkRelation getNamespacedRelFor(LinkRelation rel);
 
 	/**
 	 * Returns an object to render as the base curie information. Implementations have to make sure, the returned
 	 * instances renders as defined in the spec.
-	 * 
+	 *
 	 * @param links the {@link Links} that have been added to the response so far.
 	 * @return must not be {@literal null}.
 	 */

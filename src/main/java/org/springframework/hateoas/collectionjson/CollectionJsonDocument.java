@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import lombok.experimental.Wither;
 
 import java.util.List;
 
-import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,11 +40,13 @@ class CollectionJsonDocument<T> {
 	private CollectionJson<T> collection;
 
 	@JsonCreator
-	CollectionJsonDocument(@JsonProperty("version") String version, @JsonProperty("href") String href,
-						   @JsonProperty("links") List<Link> links, @JsonProperty("items") List<CollectionJsonItem<T>> items,
-						   @JsonProperty("queries") List<CollectionJsonQuery> queries,
-						   @JsonProperty("template") CollectionJsonTemplate template,
-						   @JsonProperty("error") CollectionJsonError error) {
+	CollectionJsonDocument(@JsonProperty("version") String version, //
+			@JsonProperty("href") String href, //
+			@JsonProperty("links") Links links, //
+			@JsonProperty("items") List<CollectionJsonItem<T>> items, //
+			@JsonProperty("queries") List<CollectionJsonQuery> queries, //
+			@JsonProperty("template") CollectionJsonTemplate template, //
+			@JsonProperty("error") CollectionJsonError error) {
 		this.collection = new CollectionJson<>(version, href, links, items, queries, template, error);
 	}
 }

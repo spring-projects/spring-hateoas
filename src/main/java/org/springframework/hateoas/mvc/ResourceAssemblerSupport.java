@@ -19,17 +19,18 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.core.Objects;
+import org.springframework.util.Assert;
 
 /**
  * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
  * sure a self-link is always added.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -40,19 +41,23 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 
 	/**
 	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
-	 * 
+	 *
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
 	public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
 
-		Objects.requireNonNull(controllerClass, "ControllerClass must not be null!");
-		Objects.requireNonNull(resourceType, "ResourceType must not be null!");
+		Assert.notNull(controllerClass, "ControllerClass must not be null!");
+		Assert.notNull(resourceType, "ResourceType must not be null!");
 
 		this.controllerClass = controllerClass;
 		this.resourceType = resourceType;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.ResourceAssembler#toResources(java.lang.Iterable)
+	 */
 	@Override
 	public Resources<D> toResources(Iterable<? extends T> entities) {
 		return this.map(entities).toResources();
@@ -64,7 +69,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 
 	/**
 	 * Creates a new resource with a self link to the given id.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @param id must not be {@literal null}.
 	 * @return
@@ -75,8 +80,8 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 
 	protected D createResourceWithId(Object id, T entity, Object... parameters) {
 
-		Objects.requireNonNull(entity, "Entity must not be null!");
-		Objects.requireNonNull(id, "Id must not be null!");
+		Assert.notNull(entity, "Entity must not be null!");
+		Assert.notNull(id, "Id must not be null!");
 
 		D instance = instantiateResource(entity);
 		instance.add(linkTo(this.controllerClass, parameters).slash(id).withSelfRel());
@@ -87,7 +92,7 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 * Instantiates the resource object. Default implementation will assume a no-arg constructor and use reflection but
 	 * can be overridden to manually set up the object instance initially (e.g. to improve performance if this becomes an
 	 * issue).
-	 * 
+	 *
 	 * @param entity
 	 * @return
 	 */
@@ -110,7 +115,6 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 		 * Transform a list of {@code T}s into a list of {@link ResourceSupport}s.
 		 *
 		 * @see #toListOfResources() if you need this transformed list rendered as hypermedia
-		 *
 		 * @return
 		 */
 		public List<D> toListOfResources() {

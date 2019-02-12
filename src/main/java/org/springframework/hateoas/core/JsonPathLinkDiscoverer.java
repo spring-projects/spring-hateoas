@@ -20,14 +20,17 @@ import net.minidev.json.JSONArray;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.Links;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
@@ -63,51 +66,51 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(java.lang.String, java.lang.String)
+	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(org.springframework.hateoas.LinkRelation, java.lang.String)
 	 */
 	@Override
-	public Link findLinkWithRel(String rel, String representation) {
-
-		List<Link> links = findLinksWithRel(rel, representation);
-		return links.isEmpty() ? null : links.get(0);
+	public Optional<Link> findLinkWithRel(LinkRelation relation, String representation) {
+		return firstOrEmpty(findLinksWithRel(relation, representation));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(java.lang.String, java.io.InputStream)
+	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(org.springframework.hateoas.LinkRelation, java.io.InputStream)
 	 */
 	@Override
-	public Link findLinkWithRel(String rel, InputStream representation) {
-
-		List<Link> links = findLinksWithRel(rel, representation);
-		return links.isEmpty() ? null : links.get(0);
+	public Optional<Link> findLinkWithRel(LinkRelation relation, InputStream representation) {
+		return firstOrEmpty(findLinksWithRel(relation, representation));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkDiscoverer#findLinksWithRel(java.lang.String, java.lang.String)
+	 * @see org.springframework.hateoas.LinkDiscoverer#findLinksWithRel(org.springframework.hateoas.LinkRelation, java.lang.String)
 	 */
 	@Override
-	public List<Link> findLinksWithRel(String rel, String representation) {
+	public Links findLinksWithRel(LinkRelation relation, String representation) {
+
+		Assert.notNull(relation, "LinkRelation must not be null!");
 
 		try {
-			Object parseResult = getExpression(rel).read(representation);
-			return createLinksFrom(parseResult, rel);
+			Object parseResult = getExpression(relation).read(representation);
+			return createLinksFrom(parseResult, relation);
 		} catch (InvalidPathException e) {
-			return Collections.emptyList();
+			return Links.NONE;
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkDiscoverer#findLinksWithRel(java.lang.String, java.io.InputStream)
+	 * @see org.springframework.hateoas.LinkDiscoverer#findLinksWithRel(org.springframework.hateoas.LinkRelation, java.io.InputStream)
 	 */
 	@Override
-	public List<Link> findLinksWithRel(String rel, InputStream representation) {
+	public Links findLinksWithRel(LinkRelation relation, InputStream representation) {
+
+		Assert.notNull(relation, "LinkRelation must not be null!");
 
 		try {
-			Object parseResult = getExpression(rel).read(representation);
-			return createLinksFrom(parseResult, rel);
+			Object parseResult = getExpression(relation).read(representation);
+			return createLinksFrom(parseResult, relation);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -131,7 +134,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @param rel
 	 * @return link
 	 */
-	protected Link extractLink(Object element, String rel) {
+	protected Link extractLink(Object element, LinkRelation rel) {
 		return new Link(element.toString(), rel);
 	}
 
@@ -141,8 +144,8 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @param rel
 	 * @return
 	 */
-	private JsonPath getExpression(String rel) {
-		return JsonPath.compile(String.format(pathTemplate, rel));
+	private JsonPath getExpression(LinkRelation rel) {
+		return JsonPath.compile(String.format(pathTemplate, rel.value()));
 	}
 
 	/**
@@ -152,7 +155,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @param rel the relation type that was parsed for.
 	 * @return
 	 */
-	private List<Link> createLinksFrom(Object parseResult, String rel) {
+	private Links createLinksFrom(Object parseResult, LinkRelation rel) {
 
 		if (parseResult instanceof JSONArray) {
 
@@ -161,11 +164,18 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 			return jsonArray.stream() //
 					.flatMap(it -> JSONArray.class.isInstance(it) ? ((JSONArray) it).stream() : Stream.of(it)) //
 					.map(it -> extractLink(it, rel)) //
-					.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+					.collect(Collectors.collectingAndThen(Collectors.toList(), Links::of));
 		}
 
-		return parseResult instanceof Map //
-				? Collections.singletonList(extractLink(parseResult, rel)) //
-				: Collections.singletonList(new Link(parseResult.toString(), rel));
+		return Links.of(parseResult instanceof Map //
+				? extractLink(parseResult, rel) //
+				: new Link(parseResult.toString(), rel));
+	}
+
+	private static <T> Optional<T> firstOrEmpty(Iterable<T> source) {
+
+		Iterator<T> iterator = source.iterator();
+
+		return iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
 	}
 }

@@ -15,9 +15,8 @@
  */
 package org.springframework.hateoas.hal;
 
-import java.util.List;
-
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -40,5 +39,5 @@ public abstract class ResourceSupportMixin extends ResourceSupport {
 	@JsonInclude(Include.NON_EMPTY)
 	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)
 	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
-	public abstract List<Link> getLinks();
+	public abstract Links getLinks();
 }

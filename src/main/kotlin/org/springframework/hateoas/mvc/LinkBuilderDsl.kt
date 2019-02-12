@@ -17,8 +17,8 @@
 package org.springframework.hateoas.mvc
 
 import org.springframework.hateoas.Link
+import org.springframework.hateoas.LinkRelation
 import org.springframework.hateoas.ResourceSupport
-import org.springframework.hateoas.mvc.ControllerLinkBuilder
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
 
@@ -28,6 +28,7 @@ import kotlin.reflect.KClass
  * Create a [ControllerLinkBuilder] pointing to a [func] method.
  *
  * @author Roland Kulcsár
+ * @author Oliver Drotbohm
  * @since 1.0
  */
 inline fun <reified C> linkTo(func: C.() -> Unit): ControllerLinkBuilder = linkTo(methodOn(C::class.java).apply(func))
@@ -38,6 +39,7 @@ inline fun <reified C> linkTo(func: C.() -> Unit): ControllerLinkBuilder = linkT
  * @author Roland Kulcsár
  * @since 1.0
  */
+infix fun ControllerLinkBuilder.withRel(rel: LinkRelation): Link = withRel(rel)
 infix fun ControllerLinkBuilder.withRel(rel: String): Link = withRel(rel)
 
 /**
@@ -81,6 +83,13 @@ open class LinkBuilderDsl<C, R : ResourceSupport>(val controller: Class<C>, val 
      * Add a link with the given [rel] to the [resource].
      */
     infix fun ControllerLinkBuilder.withRel(rel: String): Link {
+        return this withRel(LinkRelation.of(rel))
+    }
+
+    /**
+     * Add a link with the given [rel] to the [resource].
+     */
+    infix fun ControllerLinkBuilder.withRel(rel: LinkRelation): Link {
 
         val link = withRel(rel)
         resource.add(link)

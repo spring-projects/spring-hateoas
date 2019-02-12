@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.Resource;
@@ -43,7 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for integration tests.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -172,10 +173,10 @@ public class Server implements Closeable {
 		Object content = resource.getContent();
 
 		Class<?> type = content.getClass();
-		String collectionRel = relProvider.getCollectionResourceRelFor(type);
-		String singleRel = relProvider.getItemResourceRelFor(type);
+		LinkRelation collectionRel = relProvider.getCollectionResourceRelFor(type);
+		LinkRelation singleRel = relProvider.getItemResourceRelFor(type);
 
-		String baseResourceUri = String.format("%s/%s", rootResource(), collectionRel);
+		String baseResourceUri = String.format("%s/%s", rootResource(), collectionRel.value());
 		String resourceUri = String.format("%s/%s", baseResourceUri, UUID.randomUUID().toString());
 
 		baseResources.add(new Link(baseResourceUri, collectionRel), new Link(resourceUri, singleRel));
@@ -217,7 +218,7 @@ public class Server implements Closeable {
 		}
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.io.Closeable#close()
 	 */

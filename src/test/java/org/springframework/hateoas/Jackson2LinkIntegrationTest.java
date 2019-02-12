@@ -21,7 +21,7 @@ import org.junit.Test;
 
 /**
  * Integration tests for {@link org.springframework.hateoas.Link} marshaling.
- * 
+ *
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
@@ -44,6 +44,6 @@ public class Jackson2LinkIntegrationTest extends AbstractJackson2MarshallingInte
 	public void readsLinkCorrectly() throws Exception {
 		Link result = read(REFERENCE, Link.class);
 		assertThat(result.getHref()).isEqualTo("location");
-		assertThat(result.getRel()).isEqualTo("something");
+		assertThat(result.getRel()).isEqualTo(LinkRelation.of("something"));
 	}
 }

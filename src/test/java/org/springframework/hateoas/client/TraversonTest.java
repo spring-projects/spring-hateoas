@@ -28,8 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
@@ -50,34 +51,39 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link Traverson}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.11
  */
 public class TraversonTest {
 
-	URI baseUri;
+	static URI baseUri;
+	static Server server;
 
-	Server server;
-	
 	Traverson traverson;
 
-	@Before
-	public void setUp() {
+	@BeforeClass
+	public static void setUpClass() {
 
-		this.server = new Server();
-		this.baseUri = URI.create(this.server.rootResource());
-		this.traverson = new Traverson(this.baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
+		server = new Server();
+		baseUri = URI.create(server.rootResource());
 
 		setUpActors();
 	}
 
-	@After
-	public void tearDown() throws IOException {
+	@Before
+	public void setUp() {
 
-		if (this.server != null) {
-			this.server.close();
+		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
+
+	}
+
+	@AfterClass
+	public static void tearDown() throws IOException {
+
+		if (server != null) {
+			server.close();
 		}
 	}
 
@@ -94,7 +100,7 @@ public class TraversonTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsEmptyMediaTypes() {
-		new Traverson(this.baseUri);
+		new Traverson(baseUri);
 	}
 
 	/**
@@ -107,8 +113,7 @@ public class TraversonTest {
 
 		verifyThatRequest() //
 				.havingPathEqualTo("/") //
-				.havingHeader("Accept", contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-				.receivedOnce();
+				.havingHeader("Accept", contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
 	}
 
 	/**
@@ -193,7 +198,7 @@ public class TraversonTest {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setInterceptors(Arrays.asList(interceptor));
 
-		this.traverson = new Traverson(this.baseUri, MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
 		this.traverson.setRestOperations(restTemplate);
 
 		traverson.follow("movies", "movie", "actor").<String> toObject("$.name");
@@ -206,7 +211,7 @@ public class TraversonTest {
 	@Test
 	public void usesCustomLinkDiscoverer() {
 
-		this.traverson = new Traverson(URI.create(this.server.rootResource() + "/github"), MediaType.APPLICATION_JSON);
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/github"), MediaType.APPLICATION_JSON);
 		this.traverson.setLinkDiscoverers(Arrays.asList(new GitHubLinkDiscoverer()));
 
 		String value = this.traverson.follow("foo").toObject("$.key");
@@ -222,7 +227,7 @@ public class TraversonTest {
 		Link result = traverson.follow("movies").asLink();
 
 		assertThat(result.getHref()).endsWith("/movies");
-		assertThat(result.getRel()).isEqualTo("movies");
+		assertThat(result.hasRel("movies")).isTrue();
 	}
 
 	/**
@@ -231,7 +236,7 @@ public class TraversonTest {
 	@Test
 	public void returnsTemplatedLinkIfRequested() {
 
-		TraversalBuilder follow = new Traverson(URI.create(this.server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
 				.follow("self");
 
 		Link link = follow.asTemplatedLink();
@@ -269,8 +274,7 @@ public class TraversonTest {
 	@Test
 	public void returnsDefaultMessageConverters() {
 
-		List<HttpMessageConverter<?>> converters = Traverson
-				.getDefaultMessageConverters(Collections.emptyList());
+		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(Collections.emptyList());
 
 		assertThat(converters).hasSize(1);
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
@@ -310,7 +314,7 @@ public class TraversonTest {
 				.isEqualTo(server.rootResource() + "/springagram/items/1");
 
 		final Item item = itemResource.getContent();
-		assertThat(item.image).isEqualTo(this.server.rootResource() + "/springagram/file/cat");
+		assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
 		assertThat(item.description).isEqualTo("cat");
 	}
 
@@ -320,7 +324,7 @@ public class TraversonTest {
 	@Test
 	public void allowAlteringTheDetailsOfASingleHopByMapOperations() {
 
-		this.traverson = new Traverson(URI.create(this.server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		// tag::hop-put[]
 		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
@@ -335,10 +339,10 @@ public class TraversonTest {
 
 		assertThat(itemResource.hasLink("self")).isTrue();
 		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(this.server.rootResource() + "/springagram/items/1");
+				.isEqualTo(server.rootResource() + "/springagram/items/1");
 
 		final Item item = itemResource.getContent();
-		assertThat(item.image).isEqualTo(this.server.rootResource() + "/springagram/file/cat");
+		assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
 		assertThat(item.description).isEqualTo("cat");
 	}
 
@@ -348,7 +352,7 @@ public class TraversonTest {
 	@Test
 	public void allowGlobalsToImpactSingleHops() {
 
-		this.traverson = new Traverson(URI.create(this.server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		Map<String, Object> params = new HashMap<>();
 		params.put("projection", "thisShouldGetOverwrittenByLocalHop");
@@ -360,10 +364,10 @@ public class TraversonTest {
 
 		assertThat(itemResource.hasLink("self")).isTrue();
 		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(this.server.rootResource() + "/springagram/items/1");
+				.isEqualTo(server.rootResource() + "/springagram/items/1");
 
 		final Item item = itemResource.getContent();
-		assertThat(item.image).isEqualTo(this.server.rootResource() + "/springagram/file/cat");
+		assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
 		assertThat(item.description).isEqualTo("cat");
 	}
 
@@ -373,7 +377,7 @@ public class TraversonTest {
 	@Test
 	public void doesNotDoubleEncodeURI() {
 
-		this.traverson = new Traverson(URI.create(this.server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		Resource<?> itemResource = traverson.//
 				follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))).//
@@ -381,7 +385,7 @@ public class TraversonTest {
 
 		assertThat(itemResource.hasLink("self")).isTrue();
 		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(this.server.rootResource() + "/springagram/items");
+				.isEqualTo(server.rootResource() + "/springagram/items");
 	}
 
 	@Test
@@ -390,50 +394,40 @@ public class TraversonTest {
 		String customHeaderName = "X-CustomHeader";
 
 		traverson
-			.follow(rel("movies")
-				.header(customHeaderName, "alpha")
-				.header(HttpHeaders.LOCATION, "http://localhost:8080/my/custom/location"))
-			.follow(rel("movie").header(customHeaderName, "bravo"))
-			.follow(rel("actor").header(customHeaderName, "charlie"))
-			.toObject("$.name");
+				.follow(rel("movies").header(customHeaderName, "alpha").header(HttpHeaders.LOCATION,
+						"http://localhost:8080/my/custom/location"))
+				.follow(rel("movie").header(customHeaderName, "bravo")).follow(rel("actor").header(customHeaderName, "charlie"))
+				.toObject("$.name");
 
 		verifyThatRequest() //
-			.havingPathEqualTo("/") //
-			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.receivedOnce();
+				.havingPathEqualTo("/") //
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
 
-		verifyThatRequest()
-			.havingPathEqualTo("/movies") // aggregate root movies
-			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.havingHeader(customHeaderName, contains("alpha")) //
-			.havingHeader(HttpHeaders.LOCATION, contains("http://localhost:8080/my/custom/location")) //
-			.receivedOnce();
+		verifyThatRequest().havingPathEqualTo("/movies") // aggregate root movies
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.havingHeader(customHeaderName, contains("alpha")) //
+				.havingHeader(HttpHeaders.LOCATION, contains("http://localhost:8080/my/custom/location")); //
 
-		verifyThatRequest()
-			.havingPath(startsWith("/movies/")) // single movie
-			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.havingHeader(customHeaderName, contains("bravo")) //
-			.receivedOnce();
+		verifyThatRequest().havingPath(startsWith("/movies/")) // single movie
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.havingHeader(customHeaderName, contains("bravo")); //
 
-		verifyThatRequest()
-			.havingPath(startsWith("/actors/")) // single actor
-			.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-			.havingHeader(customHeaderName, contains("charlie")) //
-			.receivedOnce();
+		verifyThatRequest().havingPath(startsWith("/actors/")) // single actor
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.havingHeader(customHeaderName, contains("charlie")); //
 	}
 
-
-	private void setUpActors() {
+	private static void setUpActors() {
 
 		Resource<Actor> actor = new Resource<>(new Actor("Keanu Reaves"));
-		String actorUri = this.server.mockResourceFor(actor);
+		String actorUri = server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
 		Resource<Movie> resource = new Resource<>(movie);
 		resource.add(new Link(actorUri, "actor"));
 
-		this.server.mockResourceFor(resource);
-		this.server.finishMocking();
+		server.mockResourceFor(resource);
+		server.finishMocking();
 	}
 
 	static class CountingInterceptor implements ClientHttpRequestInterceptor {

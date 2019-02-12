@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
@@ -38,7 +39,6 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.support.MappingUtils;
-import org.springframework.hateoas.uber.Jackson2UberModule.UberHandlerInstantiator;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -49,17 +49,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
-	static final Links PAGINATION_LINKS = new Links( //
-			new Link("localhost", IanaLinkRelation.SELF.value()), //
-			new Link("foo", IanaLinkRelation.NEXT.value()), //
-			new Link("bar", IanaLinkRelation.PREV.value())//
+	static final Links PAGINATION_LINKS = Links.of( //
+			new Link("localhost", IanaLinkRelations.SELF), //
+			new Link("foo", IanaLinkRelations.NEXT), //
+			new Link("bar", IanaLinkRelations.PREV) //
 	);
 
 	@Before
 	public void setUpModule() {
 
 		this.mapper.registerModule(new Jackson2UberModule());
-		this.mapper.setHandlerInstantiator(new UberHandlerInstantiator());
 		this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
 	}
 
@@ -233,7 +232,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 
 		JavaType resourceStringType = mapper.getTypeFactory().constructParametricType(Resource.class, String.class);
 
-		Resource expected = new Resource<>("first", new Link("localhost"));
+		Resource<?> expected = new Resource<>("first", new Link("localhost"));
 		Resource<String> actual = mapper.readValue(MappingUtils.read(new ClassPathResource("resource.json", getClass())),
 				resourceStringType);
 
@@ -289,7 +288,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources expected = new Resources<>(data);
+		Resources<?> expected = new Resources<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
@@ -311,7 +310,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		data.add(new Resource<>("", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources expected = new Resources<>(data);
+		Resources<?> expected = new Resources<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
@@ -333,12 +332,12 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources source = new Resources<>(data);
+		Resources<?> source = new Resources<>(data);
 		source.add(new Link("localhost"));
 		source.add(new Link("/page/2").withRel("next"));
 
 		assertThat(write(source))
-			.isEqualTo(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())));
+				.isEqualTo(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())));
 	}
 
 	/**
@@ -351,7 +350,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources expected = new Resources<>(data);
+		Resources<?> expected = new Resources<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
@@ -375,7 +374,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		data.add("first");
 		data.add("second");
 
-		Resources expected = new Resources<>(data);
+		Resources<?> expected = new Resources<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
@@ -515,7 +514,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 				mapper.getTypeFactory().constructParametricType(PagedResources.class,
 						mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class)));
 
-		assertThat(result).isEqualTo(setupAnnotatedPagedResources(0,0));
+		assertThat(result).isEqualTo(setupAnnotatedPagedResources(0, 0));
 	}
 
 	/**
@@ -566,6 +565,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
+	@EqualsAndHashCode(callSuper = true)
 	static class EmployeeResource extends ResourceSupport {
 
 		private String name;

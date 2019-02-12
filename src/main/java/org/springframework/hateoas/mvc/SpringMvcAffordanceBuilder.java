@@ -24,6 +24,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.MappingDiscoverer;
@@ -35,7 +36,7 @@ import org.springframework.web.util.UriComponents;
 
 /**
  * Extract information needed to assemble an {@link Affordance} from a Spring MVC web method.
- * 
+ *
  * @author Greg Turnquist
  */
 class SpringMvcAffordanceBuilder {
@@ -43,7 +44,7 @@ class SpringMvcAffordanceBuilder {
 	/**
 	 * Use the attributes of the current method call along with a collection of {@link AffordanceModelFactory}'s to create
 	 * a set of {@link Affordance}s.
-	 * 
+	 *
 	 * @param invocation
 	 * @param discoverer
 	 * @param components
@@ -57,24 +58,24 @@ class SpringMvcAffordanceBuilder {
 		for (HttpMethod requestMethod : discoverer.getRequestMethod(invocation.getTargetType(), invocation.getMethod())) {
 
 			String methodName = invocation.getMethod().getName();
-
-			Link affordanceLink = new Link(components.toUriString()).withRel(methodName);
-
+			Link affordanceLink = new Link(components.toUriString()).withRel(LinkRelation.of(methodName));
 			MethodParameters invocationMethodParameters = new MethodParameters(invocation.getMethod());
-			
-			ResolvableType inputType = invocationMethodParameters.getParametersWith(RequestBody.class).stream()
-				.findFirst()
-				.map(ResolvableType::forMethodParameter)
-				.orElse(ResolvableType.NONE);
 
-			List<QueryParameter> queryMethodParameters = invocationMethodParameters.getParametersWith(RequestParam.class).stream()
-				.map(methodParameter -> methodParameter.getParameterAnnotation(RequestParam.class))
-				.map(requestParam -> new QueryParameter(requestParam.name(), requestParam.value(), requestParam.required()))
-				.collect(Collectors.toList());
+			ResolvableType inputType = invocationMethodParameters.getParametersWith(RequestBody.class).stream() //
+					.findFirst() //
+					.map(ResolvableType::forMethodParameter) //
+					.orElse(ResolvableType.NONE);
+
+			List<QueryParameter> queryMethodParameters = invocationMethodParameters.getParametersWith(RequestParam.class)
+					.stream() //
+					.map(methodParameter -> methodParameter.getParameterAnnotation(RequestParam.class)) //
+					.map(requestParam -> new QueryParameter(requestParam.name(), requestParam.value(), requestParam.required())) //
+					.collect(Collectors.toList());
 
 			ResolvableType outputType = ResolvableType.forMethodReturnType(invocation.getMethod());
 
-			affordances.add(new Affordance(methodName, affordanceLink, requestMethod, inputType, queryMethodParameters, outputType));
+			affordances
+					.add(new Affordance(methodName, affordanceLink, requestMethod, inputType, queryMethodParameters, outputType));
 
 		}
 

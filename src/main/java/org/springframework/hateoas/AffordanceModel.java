@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import java.util.List;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
  * Collection of attributes needed to render any form of hypermedia.
- * 
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -58,7 +60,7 @@ public abstract class AffordanceModel {
 	 * Collection of {@link QueryParameter}s to interrogate a resource.
 	 */
 	private List<QueryParameter> queryMethodParameters;
-	
+
 	/**
 	 * Response body domain type.
 	 */
@@ -71,5 +73,31 @@ public abstract class AffordanceModel {
 	 */
 	public String getURI() {
 		return this.link.expand().getHref();
+	}
+
+	/**
+	 * Returns whether the {@link Affordance} has the given {@link HttpMethod}.
+	 *
+	 * @param method must not be {@literal null}.
+	 * @return
+	 */
+	public boolean hasHttpMethod(HttpMethod method) {
+
+		Assert.notNull(method, "HttpMethod must not be null!");
+
+		return this.httpMethod.equals(method);
+	}
+
+	/**
+	 * Returns whether the {@link Affordance} points to the target of the given {@link Link}.
+	 *
+	 * @param link must not be {@literal null}.
+	 * @return
+	 */
+	public boolean pointsToTargetOf(Link link) {
+
+		Assert.notNull(link, "Link must not be null!");
+
+		return getURI().equals(link.expand().getHref());
 	}
 }

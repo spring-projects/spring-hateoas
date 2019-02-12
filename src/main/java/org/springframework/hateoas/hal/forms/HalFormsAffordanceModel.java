@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 package org.springframework.hateoas.hal.forms;
 
+import static org.springframework.http.HttpMethod.*;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -36,39 +37,40 @@ import org.springframework.http.MediaType;
 
 /**
  * {@link AffordanceModel} for a HAL-FORMS {@link MediaType}.
- * 
+ *
  * @author Greg Turnquist
+ * @author Oliver Gierke
  */
 @EqualsAndHashCode(callSuper = true)
-public class HalFormsAffordanceModel extends AffordanceModel {
+class HalFormsAffordanceModel extends AffordanceModel {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
+	private static final Set<HttpMethod> REQUIRED_METHODS = EnumSet.of(POST, PUT);
 
 	private final @Getter List<HalFormsProperty> inputProperties;
 
-	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
-		
+
 		this.inputProperties = determineInputs();
 	}
 
 	/**
-	 * Look at the input's domain type to extract the {@link Affordance}'s properties.
-	 * Then transform them into a list of {@link HalFormsProperty} objects.
+	 * Look at the input's domain type to extract the {@link Affordance}'s properties. Then transform them into a list of
+	 * {@link HalFormsProperty} objects.
 	 */
 	private List<HalFormsProperty> determineInputs() {
 
-		if (ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
-			
-			return PropertyUtils.findPropertyNames(getInputType()).stream()
-				.map(propertyName -> new HalFormsProperty()
-					.withName(propertyName)
-					.withRequired(Arrays.asList(HttpMethod.POST, HttpMethod.PUT).contains(getHttpMethod())))
-				.collect(Collectors.toList());
-			
-		} else {
+		if (!ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
 			return Collections.emptyList();
 		}
+
+		return PropertyUtils.findPropertyNames(getInputType()).stream() //
+				.map(propertyName -> new HalFormsProperty() //
+						.withName(propertyName) //
+						.withRequired(REQUIRED_METHODS.contains(getHttpMethod()))) //
+				.collect(Collectors.toList());
 	}
 }

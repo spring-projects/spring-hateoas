@@ -21,7 +21,7 @@ import org.junit.Test;
 
 /**
  * Integration tests for {@link Link} marshaling.
- * 
+ *
  * @author Oliver Gierke
  */
 public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
@@ -44,7 +44,7 @@ public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 
 		Link result = read(REFERENCE, Link.class);
 		assertThat(result.getHref()).isEqualTo("location");
-		assertThat(result.getRel()).isEqualTo("something");
+		assertThat(result.getRel()).isEqualTo(LinkRelation.of("something"));
 		assertThat(result.getAffordances()).hasSize(0);
 	}
 }

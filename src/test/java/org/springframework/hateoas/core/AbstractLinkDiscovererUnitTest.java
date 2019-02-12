@@ -19,15 +19,15 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.Links;
 
 /**
  * Base class for unit tests for {@link LinkDiscoverer} implementations.
- * 
+ *
  * @author Oliver Gierke
  */
 public abstract class AbstractLinkDiscovererUnitTest {
@@ -35,9 +35,11 @@ public abstract class AbstractLinkDiscovererUnitTest {
 	@Test
 	public void findsSingleLink() {
 
-		assertThat(getDiscoverer().findLinkWithRel("self", getInputString())).isEqualTo(new Link("selfHref"));
+		assertThat(getDiscoverer().findLinkWithRel("self", getInputString())) //
+				.hasValue(new Link("selfHref"));
 
-		List<Link> links = getDiscoverer().findLinksWithRel("self", getInputString());
+		Links links = getDiscoverer().findLinksWithRel("self", getInputString());
+
 		assertThat(links).hasSize(1);
 		assertThat(links).contains(new Link("selfHref"));
 	}
@@ -46,46 +48,47 @@ public abstract class AbstractLinkDiscovererUnitTest {
 	public void findsFirstLink() {
 
 		assertThat(getDiscoverer().findLinkWithRel("relation", getInputString()))
-				.isEqualTo(new Link("firstHref", "relation"));
+				.hasValue(new Link("firstHref", "relation"));
 	}
 
 	@Test
 	public void findsAllLinks() {
 
-		List<Link> links = getDiscoverer().findLinksWithRel("relation", getInputString());
+		Links links = getDiscoverer().findLinksWithRel("relation", getInputString());
+
 		assertThat(links).hasSize(2);
 		assertThat(links).contains(new Link("firstHref", "relation"), new Link("secondHref", "relation"));
 	}
 
 	@Test
 	public void returnsForInexistingLink() {
-		assertThat(getDiscoverer().findLinkWithRel("something", getInputString())).isNull();
+		assertThat(getDiscoverer().findLinkWithRel("something", getInputString())).isEmpty();
 	}
 
 	@Test
 	public void returnsForInexistingLinkFromInputStream() throws Exception {
 
 		InputStream inputStream = new ByteArrayInputStream(getInputString().getBytes("UTF-8"));
-		assertThat(getDiscoverer().findLinkWithRel("something", inputStream)).isNull();
+		assertThat(getDiscoverer().findLinkWithRel("something", inputStream)).isEmpty();
 	}
 
 	@Test
 	public void returnsNullForNonExistingLinkContainer() {
 
 		assertThat(getDiscoverer().findLinksWithRel("something", getInputStringWithoutLinkContainer())).isEmpty();
-		assertThat(getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer())).isNull();
+		assertThat(getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer())).isEmpty();
 	}
 
 	/**
 	 * Return the {@link LinkDiscoverer} to be tested.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract LinkDiscoverer getDiscoverer();
 
 	/**
 	 * Return the JSON structure we expect to find the links in.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract String getInputString();

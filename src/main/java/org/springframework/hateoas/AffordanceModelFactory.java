@@ -16,27 +16,23 @@
 package org.springframework.hateoas;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.plugin.core.Plugin;
 
 /**
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-public interface AffordanceModelFactory extends Plugin<MediaType> {
+public interface AffordanceModelFactory {
 
 	/**
 	 * Declare the {@link MediaType} this factory supports.
 	 *
 	 * @return
 	 */
-	default MediaType getMediaType() {
-		return null;
-	}
+	MediaType getMediaType();
 
 	/**
 	 * Look up the {@link AffordanceModel} for this factory.
@@ -51,18 +47,4 @@ public interface AffordanceModelFactory extends Plugin<MediaType> {
 	 */
 	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
 			List<QueryParameter> queryMethodParameters, ResolvableType outputType);
-
-	/**
-	 * Returns if a plugin should be invoked according to the given delimiter.
-	 *
-	 * @param delimiter
-	 * @return if the plugin should be invoked
-	 */
-	@Override
-	default boolean supports(MediaType delimiter) {
-
-		return Optional.ofNullable(getMediaType()) //
-				.map(mediaType -> mediaType.equals(delimiter)) //
-				.orElse(false);
-	}
 }

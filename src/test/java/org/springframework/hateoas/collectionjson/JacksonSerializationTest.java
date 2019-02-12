@@ -19,15 +19,14 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.support.MappingUtils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -42,28 +41,26 @@ public class JacksonSerializationTest {
 	public void setUp() {
 
 		mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+		mapper.registerModule(new Jackson2CollectionJsonModule());
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
 	@Test
 	public void createSimpleCollection() throws IOException {
 
-		CollectionJson<?> collection = new CollectionJson<>()
-				.withVersion("1.0")
-				.withHref("localhost")
-				.withLinks(Arrays.asList(new Link("foo").withSelfRel()))
-				.withItems(Arrays.asList(
-					new CollectionJsonItem<>()
-						.withHref("localhost")
-						.withRawData("Greetings programs")
-						.withLinks(Arrays.asList(new Link("localhost").withSelfRel())),
-					new CollectionJsonItem<>()
-						.withHref("localhost")
-						.withRawData("Yo")
-						.withLinks(Arrays.asList(new Link("localhost/orders").withRel("orders")))));
+		CollectionJson<?> collection = new CollectionJson<>().withVersion("1.0").withHref("localhost")
+				.withLinks(Links.of(new Link("foo").withSelfRel())) //
+				.withItems(new CollectionJsonItem<>() //
+						.withHref("localhost") //
+						.withRawData("Greetings programs") //
+						.withLinks(new Link("localhost").withSelfRel()), //
+						new CollectionJsonItem<>() //
+								.withHref("localhost") //
+								.withRawData("Yo") //
+								.withLinks(new Link("localhost/orders").withRel("orders")));
 
 		String actual = mapper.writeValueAsString(collection);
+
 		assertThat(actual, is(MappingUtils.read(new ClassPathResource("reference.json", getClass()))));
 	}
 }

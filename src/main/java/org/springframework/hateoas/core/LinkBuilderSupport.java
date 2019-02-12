@@ -27,10 +27,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkBuilder;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -38,7 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Base class to implement {@link LinkBuilder}s based on a Spring MVC {@link UriComponentsBuilder}.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Kamill Sokol
@@ -53,7 +54,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	/**
 	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	public LinkBuilderSupport(UriComponentsBuilder builder) {
@@ -153,10 +154,12 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#withRel(java.lang.String)
+	 * @see org.springframework.hateoas.LinkBuilder#withRel(org.springframework.hateoas.LinkRelation)
 	 */
-	public Link withRel(String rel) {
-		return new Link(toString(), rel).withAffordances(affordances);
+	public Link withRel(LinkRelation rel) {
+
+		return new Link(toString(), rel) //
+				.withAffordances(affordances);
 	}
 
 	/*
@@ -164,7 +167,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#withSelfRel()
 	 */
 	public Link withSelfRel() {
-		return withRel(IanaLinkRelation.SELF.value());
+		return withRel(IanaLinkRelations.SELF);
 	}
 
 	/*
@@ -178,14 +181,14 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	/**
 	 * Returns the current concrete instance.
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract T getThis();
 
 	/**
 	 * Creates a new instance of the sub-class.
-	 * 
+	 *
 	 * @param builder will never be {@literal null}.
 	 * @return
 	 */

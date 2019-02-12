@@ -22,8 +22,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,7 +34,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Custom URI template to support qualified URI template variables.
- * 
+ *
  * @author Oliver Gierke
  * @author JamesE Richardson
  * @see http://tools.ietf.org/html/rfc6570
@@ -52,7 +50,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Creates a new {@link UriTemplate} using the given template string.
-	 * 
+	 *
 	 * @param template must not be {@literal null} or empty.
 	 */
 	public UriTemplate(String template) {
@@ -71,7 +69,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			String[] names = matcher.group(2).split(",");
 
 			for (String name : names) {
-				
+
 				TemplateVariable variable;
 
 				if (name.endsWith(VariableType.COMPOSITE_PARAM.toString())) {
@@ -94,7 +92,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Creates a new {@link UriTemplate} from the given base URI and {@link TemplateVariables}.
-	 * 
+	 *
 	 * @param baseUri must not be {@literal null} or empty.
 	 * @param variables defaults to {@link TemplateVariables#NONE}.
 	 */
@@ -108,7 +106,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Creates a new {@link UriTemplate} with the current {@link TemplateVariable}s augmented with the given ones.
-	 * 
+	 *
 	 * @param variables can be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
@@ -142,7 +140,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Creates a new {@link UriTemplate} with a {@link TemplateVariable} with the given name and type added.
-	 * 
+	 *
 	 * @param variableName must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
 	 * @return will never be {@literal null}.
@@ -153,7 +151,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Returns whether the given candidate is a URI template.
-	 * 
+	 *
 	 * @param candidate
 	 * @return
 	 */
@@ -168,7 +166,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Returns the {@link TemplateVariable}s discovered.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<TemplateVariable> getVariables() {
@@ -177,7 +175,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Returns the names of the variables discovered.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<String> getVariableNames() {
@@ -189,7 +187,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	/**
 	 * Expands the {@link UriTemplate} using the given parameters. The values will be applied in the order of the
 	 * variables discovered.
-	 * 
+	 *
 	 * @param parameters
 	 * @return
 	 * @see #expand(Map)
@@ -215,7 +213,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Expands the {@link UriTemplate} using the given parameters.
-	 * 
+	 *
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
@@ -237,7 +235,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		return builder.build().toUri();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
@@ -246,7 +244,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		return this.variables.iterator();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -268,7 +266,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Appends the value for the given {@link TemplateVariable} to the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 * @param variable must not be {@literal null}.
 	 * @param value can be {@literal null}.
@@ -311,17 +309,20 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @param value
 	 * @see https://tools.ietf.org/html/rfc6570#section-2.4.2
 	 */
+	@SuppressWarnings("unchecked")
 	private static void appendComposite(UriComponentsBuilder builder, String name, Object value) {
 
 		if (value instanceof Iterable) {
-			for (Object valuePart : (Iterable<?>) value) {
-				builder.queryParam(name, valuePart);
-			}
+
+			((Iterable<?>) value).forEach(it -> builder.queryParam(name, it));
+
 		} else if (value instanceof Map) {
-			for (Entry<Object, Object> queryParam : (Set<Entry<Object, Object>>) ((Map) value).entrySet()) {
-				builder.queryParam(queryParam.getKey().toString(), queryParam.getValue());
-			}
+
+			((Map<Object, Object>) value).entrySet() //
+					.forEach(it -> builder.queryParam(it.getKey().toString(), it.getValue()));
+
 		} else {
+
 			builder.queryParam(name, value);
 		}
 	}

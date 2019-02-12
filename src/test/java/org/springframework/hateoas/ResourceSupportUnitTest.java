@@ -33,15 +33,15 @@ public class ResourceSupportUnitTest {
 
 		ResourceSupport support = new ResourceSupport();
 		assertThat(support.hasLinks()).isFalse();
-		assertThat(support.hasLink(IanaLinkRelation.SELF.value())).isFalse();
+		assertThat(support.hasLink(IanaLinkRelations.SELF.value())).isFalse();
 		assertThat(support.getLinks().isEmpty()).isTrue();
-		assertThat(support.getLinks(IanaLinkRelation.SELF.value()).isEmpty()).isTrue();
+		assertThat(support.getLinks(IanaLinkRelations.SELF.value()).isEmpty()).isTrue();
 	}
 
 	@Test
 	public void addsLinkCorrectly() {
 
-		Link link = new Link("foo", IanaLinkRelation.NEXT.value());
+		Link link = new Link("foo", IanaLinkRelations.NEXT.value());
 		ResourceSupport support = new ResourceSupport();
 		support.add(link);
 
@@ -49,7 +49,7 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLinks()).isTrue();
 		assertThat(support.hasLink(link.getRel())).isTrue();
 		assertThat(support.getLink(link.getRel())).hasValue(link);
-		assertThat(support.getLinks(IanaLinkRelation.NEXT.value())).contains(link);
+		assertThat(support.getLinks(IanaLinkRelations.NEXT.value())).contains(link);
 	}
 
 	@Test
@@ -69,8 +69,8 @@ public class ResourceSupportUnitTest {
 	@Test
 	public void addsLinksCorrectly() {
 
-		Link first = new Link("foo", IanaLinkRelation.PREV.value());
-		Link second = new Link("bar", IanaLinkRelation.NEXT.value());
+		Link first = new Link("foo", IanaLinkRelations.PREV.value());
+		Link second = new Link("bar", IanaLinkRelations.NEXT.value());
 
 		ResourceSupport support = new ResourceSupport();
 		support.add(Arrays.asList(first, second));
@@ -79,8 +79,8 @@ public class ResourceSupportUnitTest {
 		assertThat(support.hasLinks()).isTrue();
 		assertThat(support.getLinks()).contains(first, second);
 		assertThat(support.getLinks()).hasSize(2);
-		assertThat(support.getLinks(IanaLinkRelation.PREV.value())).contains(first);
-		assertThat(support.getLinks(IanaLinkRelation.NEXT.value())).contains(second);
+		assertThat(support.getLinks(IanaLinkRelations.PREV.value())).contains(first);
+		assertThat(support.getLinks(IanaLinkRelations.NEXT.value())).contains(second);
 	}
 
 	@Test

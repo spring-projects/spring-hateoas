@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -233,7 +233,7 @@ public class HalFormsWebMvcIntegrationTest {
 
 		private URI toUri(Integer id) throws URISyntaxException {
 
-			String uri = findOne(id).getLink(IanaLinkRelation.SELF.value()) //
+			String uri = findOne(id).getLink(IanaLinkRelations.SELF.value()) //
 					.map(link -> link.expand().getHref()) //
 					.orElse("");
 

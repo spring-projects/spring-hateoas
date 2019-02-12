@@ -21,17 +21,17 @@ import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.Wither;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListDeserializer;
+import org.springframework.hateoas.hal.HalLinkRelation;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListSerializer;
+import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.HalFormsLinksDeserializer;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Representation of a HAL-FORMS document.
- * 
+ *
  * @author Dietrich Schulten
  * @author Greg Turnquist
  * @author Oliver Gierke
@@ -67,7 +67,7 @@ public class HalFormsDocument<T> {
 
 	@JsonProperty("_embedded") //
 	@JsonInclude(Include.NON_EMPTY) //
-	private Map<String, Object> embedded;
+	private Map<HalLinkRelation, Object> embedded;
 
 	@JsonProperty("page") //
 	@JsonInclude(Include.NON_NULL) //
@@ -77,8 +77,8 @@ public class HalFormsDocument<T> {
 	@JsonProperty("_links") //
 	@JsonInclude(Include.NON_EMPTY) //
 	@JsonSerialize(using = HalLinkListSerializer.class) //
-	@JsonDeserialize(using = HalLinkListDeserializer.class) //
-	private List<Link> links;
+	@JsonDeserialize(using = HalFormsLinksDeserializer.class) //
+	private Links links;
 
 	@Singular //
 	@JsonProperty("_templates") //
@@ -86,12 +86,12 @@ public class HalFormsDocument<T> {
 	private Map<String, HalFormsTemplate> templates;
 
 	private HalFormsDocument() {
-		this(null, null, Collections.emptyMap(), null, Collections.emptyList(), Collections.emptyMap());
+		this(null, null, Collections.emptyMap(), null, Links.NONE, Collections.emptyMap());
 	}
 
 	/**
 	 * Creates a new {@link HalFormsDocument} for the given resource.
-	 * 
+	 *
 	 * @param resource can be {@literal null}.
 	 * @return
 	 */
@@ -101,7 +101,7 @@ public class HalFormsDocument<T> {
 
 	/**
 	 * returns a new {@link HalFormsDocument} for the given resources.
-	 * 
+	 *
 	 * @param resources must not be {@literal null}.
 	 * @return
 	 */
@@ -114,7 +114,7 @@ public class HalFormsDocument<T> {
 
 	/**
 	 * Creates a new empty {@link HalFormsDocument}.
-	 * 
+	 *
 	 * @return
 	 */
 	public static HalFormsDocument<?> empty() {
@@ -123,7 +123,7 @@ public class HalFormsDocument<T> {
 
 	/**
 	 * Returns the default template of the document.
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
@@ -133,7 +133,7 @@ public class HalFormsDocument<T> {
 
 	/**
 	 * Returns the template with the given name.
-	 * 
+	 *
 	 * @param key must not be {@literal null}.
 	 * @return
 	 */
@@ -147,7 +147,7 @@ public class HalFormsDocument<T> {
 
 	/**
 	 * Adds the given {@link Link} to the current document.
-	 * 
+	 *
 	 * @param link must not be {@literal null}.
 	 * @return
 	 */
@@ -155,15 +155,12 @@ public class HalFormsDocument<T> {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		List<Link> links = new ArrayList<>(this.links);
-		links.add(link);
-
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links.and(link), templates);
 	}
 
 	/**
 	 * Adds the given {@link HalFormsTemplate} to the current document.
-	 * 
+	 *
 	 * @param name must not be {@literal null} or empty.
 	 * @param template must not be {@literal null}.
 	 * @return
@@ -181,19 +178,23 @@ public class HalFormsDocument<T> {
 
 	/**
 	 * Adds the given value as embedded one.
-	 * 
+	 *
 	 * @param key must not be {@literal null} or empty.
 	 * @param value must not be {@literal null}.
 	 * @return
 	 */
-	public HalFormsDocument<T> andEmbedded(String key, Object value) {
+	public HalFormsDocument<T> andEmbedded(HalLinkRelation key, Object value) {
 
 		Assert.notNull(key, "Embedded key must not be null!");
 		Assert.notNull(value, "Embedded value must not be null!");
 
-		Map<String, Object> embedded = new HashMap<>(this.embedded);
+		Map<HalLinkRelation, Object> embedded = new HashMap<>(this.embedded);
 		embedded.put(key, value);
 
+		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
+	}
+
+	HalFormsDocument<T> withLinks(Links links) {
 		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
 	}
 }

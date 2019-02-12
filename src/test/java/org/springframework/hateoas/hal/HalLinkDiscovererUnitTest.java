@@ -16,22 +16,21 @@
 package org.springframework.hateoas.hal;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.support.MappingUtils.read;
+import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
-import org.springframework.hateoas.support.MappingUtils;
 
 /**
  * Unit tests for {@link HalLinkDiscoverer}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -45,10 +44,9 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	@Test
 	public void discoversFullyQualifiedRel() {
 
-		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString());
-
-		assertThat(link).isNotNull();
-		assertThat(link.getHref()).isEqualTo("fullRelHref");
+		assertThat(getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString())) //
+				.map(Link::getHref) //
+				.hasValue("fullRelHref");
 	}
 
 	/**
@@ -59,19 +57,18 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 
 		String linkText = read(new ClassPathResource("hal-link.json", getClass()));
 
-		Link actual = getDiscoverer().findLinkWithRel(IanaLinkRelation.SELF.value(), linkText);
-
 		Link expected = Link.valueOf("</customer/1>;" //
-			+ "rel=\"self\";" //
-			+ "hreflang=\"en\";" //
-			+ "media=\"pdf\";" //
-			+ "title=\"pdf customer copy\";" //
-			+ "type=\"portable document\";" //
-			+ "deprecation=\"http://example.com/customers/deprecated\";" //
-			+ "profile=\"my-profile\"" //
-			+ "name=\"my-name\"");
-		
-		assertThat(actual).isEqualTo(expected);
+				+ "rel=\"self\";" //
+				+ "hreflang=\"en\";" //
+				+ "media=\"pdf\";" //
+				+ "title=\"pdf customer copy\";" //
+				+ "type=\"portable document\";" //
+				+ "deprecation=\"http://example.com/customers/deprecated\";" //
+				+ "profile=\"my-profile\"" //
+				+ "name=\"my-name\"");
+
+		assertThat(getDiscoverer().findLinkWithRel(IanaLinkRelations.SELF.value(), linkText)) //
+				.hasValue(expected);
 	}
 
 	/**

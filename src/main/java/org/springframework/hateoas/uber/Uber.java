@@ -20,9 +20,8 @@ import lombok.Value;
 import lombok.experimental.Wither;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -47,7 +46,7 @@ class Uber {
 
 	@JsonCreator
 	Uber(@JsonProperty("version") String version, @JsonProperty("data") List<UberData> data,
-		 @JsonProperty("error") UberError error) {
+			@JsonProperty("error") UberError error) {
 
 		this.version = version;
 		this.data = data;
@@ -64,11 +63,11 @@ class Uber {
 	 * @return
 	 */
 	@JsonIgnore
-	List<Link> getLinks() {
+	Links getLinks() {
 
-		return this.data.stream()
-			.flatMap(uberData -> uberData.getLinks().stream())
-			.collect(Collectors.toList());
+		return data.stream() //
+				.flatMap(uberData -> uberData.getLinks().stream()) //
+				.collect(Links.collector());
 	}
 
 }

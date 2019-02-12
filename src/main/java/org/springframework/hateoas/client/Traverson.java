@@ -453,14 +453,11 @@ public class Traverson {
 			String responseBody = responseEntity.getBody();
 
 			Hop thisHop = rels.next();
-
 			Rel rel = Rels.getRelFor(thisHop.getRel(), discoverers);
-			Link link = rel.findInResponse(responseBody, contentType);
 
-			if (link == null) {
-				throw new IllegalStateException(
-						String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody));
-			}
+			Link link = rel.findInResponse(responseBody, contentType) //
+					.orElseThrow(() -> new IllegalStateException(
+							String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody)));
 
 			/*
 			 * Don't expand if the parameters are empty

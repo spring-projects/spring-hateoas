@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,51 +16,88 @@
 package org.springframework.hateoas;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.Plugin;
 
 /**
  * Interface to allow discovering links by relation type from some source.
- * 
+ *
  * @author Oliver Gierke
  */
 public interface LinkDiscoverer extends Plugin<MediaType> {
 
 	/**
 	 * Finds a single link with the given relation type in the given {@link String} representation.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
-	 * @param representation must not be {@literal null} or empty.
+	 * @param representation must not be {@literal null}.
 	 * @return the first link with the given relation type found, or {@literal null} if none was found.
 	 */
-	Link findLinkWithRel(String rel, String representation);
+	default Optional<Link> findLinkWithRel(String rel, String representation) {
+		return findLinkWithRel(LinkRelation.of(rel), representation);
+	}
+
+	Optional<Link> findLinkWithRel(LinkRelation rel, String representation);
 
 	/**
 	 * Finds a single link with the given relation type in the given {@link InputStream} representation.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
-	 * @param representation must not be {@literal null} or empty.
+	 * @param representation must not be {@literal null}.
 	 * @return the first link with the given relation type found, or {@literal null} if none was found.
 	 */
-	Link findLinkWithRel(String rel, InputStream representation);
+	default Optional<Link> findLinkWithRel(String rel, InputStream representation) {
+		return findLinkWithRel(LinkRelation.of(rel), representation);
+	}
 
 	/**
-	 * Returns all links with the given relation type found in the given {@link String} representation.
-	 * 
-	 * @param rel must not be {@literal null} or empty.
-	 * @param representation must not be {@literal null} or empty.
-	 * @return
+	 * Finds a single link with the given {@link LinkRelation} in the given {@link InputStream} representation.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @param representation must not be {@literal null}.
+	 * @return the first link with the given relation type found, or {@literal null} if none was found.
 	 */
-	List<Link> findLinksWithRel(String rel, String representation);
+	Optional<Link> findLinkWithRel(LinkRelation rel, InputStream representation);
 
 	/**
-	 * Returns all links with the given relation type found in the given {@link InputStream} representation.
-	 * 
+	 * Returns all links with the given link relation found in the given {@link String} representation.
+	 *
 	 * @param rel must not be {@literal null} or empty.
-	 * @param representation must not be {@literal null} or empty.
-	 * @return
+	 * @param representation must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
-	List<Link> findLinksWithRel(String rel, InputStream representation);
+	default Links findLinksWithRel(String rel, String representation) {
+		return findLinksWithRel(LinkRelation.of(rel), representation);
+	}
+
+	/**
+	 * Returns all links with the given {@link LinkRelation} found in the given {@link String} representation.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @param representation must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	Links findLinksWithRel(LinkRelation rel, String representation);
+
+	/**
+	 * Returns all links with the given link relation found in the given {@link InputStream} representation.
+	 *
+	 * @param rel must not be {@literal null} or empty.
+	 * @param representation must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	default Links findLinksWithRel(String rel, InputStream representation) {
+		return findLinksWithRel(LinkRelation.of(rel), representation);
+	}
+
+	/**
+	 * Returns all links with the given {@link LinkRelation} found in the given {@link InputStream} representation.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @param representation must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	Links findLinksWithRel(LinkRelation rel, InputStream representation);
 }

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 
 /**
@@ -41,7 +42,7 @@ public class AnnotationRelProvider implements RelProvider, Ordered {
 	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
 	 */
 	@Override
-	public String getCollectionResourceRelFor(Class<?> type) {
+	public LinkRelation getCollectionResourceRelFor(Class<?> type) {
 
 		Relation annotation = lookupAnnotation(type);
 
@@ -49,15 +50,15 @@ public class AnnotationRelProvider implements RelProvider, Ordered {
 			return null;
 		}
 
-		return annotation.collectionRelation();
+		return LinkRelation.of(annotation.collectionRelation());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Object)
 	 */
 	@Override
-	public String getItemResourceRelFor(Class<?> type) {
+	public LinkRelation getItemResourceRelFor(Class<?> type) {
 
 		Relation annotation = lookupAnnotation(type);
 
@@ -65,10 +66,10 @@ public class AnnotationRelProvider implements RelProvider, Ordered {
 			return null;
 		}
 
-		return annotation.value();
+		return LinkRelation.of(annotation.value());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */

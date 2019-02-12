@@ -42,7 +42,7 @@ public class PagedResourcesUnitTest {
 	@Test
 	public void discoversNextLink() {
 
-		resources.add(new Link("foo", IanaLinkRelation.NEXT.value()));
+		resources.add(new Link("foo", IanaLinkRelations.NEXT.value()));
 
 		assertThat(resources.getNextLink()).isNotNull();
 	}
@@ -50,7 +50,7 @@ public class PagedResourcesUnitTest {
 	@Test
 	public void discoversPreviousLink() {
 
-		resources.add(new Link("custom", IanaLinkRelation.PREV.value()));
+		resources.add(new Link("custom", IanaLinkRelations.PREV.value()));
 
 		assertThat(resources.getPreviousLink()).isNotNull();
 	}

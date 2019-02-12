@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.uber;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.*;
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Value;
@@ -34,6 +32,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -47,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -64,7 +65,7 @@ class UberData {
 	private String id;
 	private String name;
 	private String label;
-	private List<String> rel;
+	private List<LinkRelation> rel;
 	private String url;
 	private UberAction action;
 	private boolean transclude;
@@ -75,12 +76,12 @@ class UberData {
 	private List<UberData> data;
 
 	@JsonCreator
-	UberData(@JsonProperty("id") String id, @JsonProperty("name") String name,
-			 @JsonProperty("label") String label, @JsonProperty("rel") List<String> rel,
-			 @JsonProperty("url") String url, @JsonProperty("action") UberAction action,
-			 @JsonProperty("transclude") boolean transclude, @JsonProperty("model") String model,
-			 @JsonProperty("sending") List<String> sending, @JsonProperty("accepting") List<String> accepting,
-			 @JsonProperty("value") Object value, @JsonProperty("data") List<UberData> data) {
+	UberData(@JsonProperty("id") String id, @JsonProperty("name") String name, @JsonProperty("label") String label,
+			@JsonProperty("rel") List<LinkRelation> rel, @JsonProperty("url") String url,
+			@JsonProperty("action") UberAction action, @JsonProperty("transclude") boolean transclude,
+			@JsonProperty("model") String model, @JsonProperty("sending") List<String> sending,
+			@JsonProperty("accepting") List<String> accepting, @JsonProperty("value") Object value,
+			@JsonProperty("data") List<UberData> data) {
 
 		this.id = id;
 		this.name = name;
@@ -104,11 +105,7 @@ class UberData {
 	 * Don't render if it's {@link UberAction#READ}.
 	 */
 	public UberAction getAction() {
-
-		if (this.action == UberAction.READ) {
-			return null;
-		}
-		return this.action;
+		return action == UberAction.READ ? null : action;
 	}
 
 	/*
@@ -116,9 +113,9 @@ class UberData {
 	 */
 	public Boolean isTemplated() {
 
-		return Optional.ofNullable(this.url)
-			.map(s -> s.contains("{?") ? true : null)
-			.orElse(null);
+		return Optional.ofNullable(this.url) //
+				.map(s -> s.contains("{?") ? true : null) //
+				.orElse(null);
 	}
 
 	/*
@@ -134,29 +131,23 @@ class UberData {
 	@JsonIgnore
 	public List<Link> getLinks() {
 
-		return Optional.ofNullable(this.rel)
-			.map(rels -> rels.stream()
-				.map(rel -> new Link(this.url, rel))
-				.collect(Collectors.toList()))
-			.orElse(Collections.emptyList());
+		return Optional.ofNullable(this.rel) //
+				.map(rels -> rels.stream() //
+						.map(rel -> new Link(this.url, rel)) //
+						.collect(Collectors.toList())) //
+				.orElse(Collections.emptyList());
 	}
 
 	/**
 	 * Simple scalar types that can be encoded by value, not type.
 	 */
-	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(
-		String.class
-	));
+	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(String.class));
 
 	/**
 	 * Set of all Spring HATEOAS resource types.
 	 */
-	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(Arrays.asList(
-		ResourceSupport.class,
-		Resource.class,
-		Resources.class,
-		PagedResources.class
-	));
+	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(
+			Arrays.asList(ResourceSupport.class, Resource.class, Resources.class, PagedResources.class));
 
 	/**
 	 * Convert a {@link ResourceSupport} into a list of {@link UberData}s, containing links and content.
@@ -198,10 +189,8 @@ class UberData {
 
 		List<UberData> data = extractLinks(resources);
 
-		data.addAll(resources.getContent().stream()
-			.map(UberData::doExtractLinksAndContent)
-			.map(uberData -> new UberData().withData(uberData))
-			.collect(Collectors.toList()));
+		data.addAll(resources.getContent().stream().map(UberData::doExtractLinksAndContent)
+				.map(uberData -> new UberData().withData(uberData)).collect(Collectors.toList()));
 
 		return data;
 	}
@@ -210,23 +199,13 @@ class UberData {
 
 		List<UberData> collectionOfResources = extractLinksAndContent((Resources<?>) resources);
 
-		if (resources.getMetadata() != null ) {
+		if (resources.getMetadata() != null) {
 
-			collectionOfResources.add(new UberData()
-				.withName("page")
-				.withData(Arrays.asList(
-					new UberData()
-						.withName("number")
-						.withValue(resources.getMetadata().getNumber()),
-					new UberData()
-						.withName("size")
-						.withValue(resources.getMetadata().getSize()),
-					new UberData()
-						.withName("totalElements")
-						.withValue(resources.getMetadata().getTotalElements()),
-					new UberData()
-						.withName("totalPages")
-						.withValue(resources.getMetadata().getTotalPages()))));
+			collectionOfResources.add(new UberData().withName("page")
+					.withData(Arrays.asList(new UberData().withName("number").withValue(resources.getMetadata().getNumber()),
+							new UberData().withName("size").withValue(resources.getMetadata().getSize()),
+							new UberData().withName("totalElements").withValue(resources.getMetadata().getTotalElements()),
+							new UberData().withName("totalPages").withValue(resources.getMetadata().getTotalPages()))));
 		}
 
 		return collectionOfResources;
@@ -238,13 +217,13 @@ class UberData {
 	 * @param links
 	 * @return
 	 */
-	private static List<UberData> extractLinks(List<Link> links) {
+	private static List<UberData> extractLinks(Links links) {
 
-		return urlRelMap(links).entrySet().stream()
-			.map(entry -> new UberData()
-				.withUrl(entry.getKey())
-				.withRel(entry.getValue().getRels()))
-			.collect(Collectors.toList());
+		return urlRelMap(links).entrySet().stream() //
+				.map(entry -> new UberData() //
+						.withUrl(entry.getKey()) //
+						.withRel(entry.getValue().getRels())) //
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -277,14 +256,11 @@ class UberData {
 	 */
 	private static Optional<UberData> extractContent(Object content) {
 
-		if (!RESOURCE_TYPES.contains(content.getClass())) {
-
-			return Optional.of(new UberData()
-				.withName(StringUtils.uncapitalize(content.getClass().getSimpleName()))
-				.withData(extractProperties(content)));
-		}
-
-		return Optional.empty();
+		return Optional.of(content) //
+				.filter(it -> !RESOURCE_TYPES.contains(content.getClass())) //
+				.map(it -> new UberData() //
+						.withName(StringUtils.uncapitalize(it.getClass().getSimpleName())) //
+						.withData(extractProperties(it)));
 	}
 
 	/**
@@ -304,13 +280,12 @@ class UberData {
 	}
 
 	/**
-	 * Turn a {@list List} of {@link Link}s into a {@link Map}, where you can see ALL the rels of a given
-	 * link.
+	 * Turn a {@list List} of {@link Link}s into a {@link Map}, where you can see ALL the rels of a given link.
 	 *
 	 * @param links
 	 * @return a map with links mapping onto a {@link List} of rels
 	 */
-	private static Map<String, LinkAndRels> urlRelMap(List<Link> links) {
+	private static Map<String, LinkAndRels> urlRelMap(Links links) {
 
 		Map<String, LinkAndRels> urlRelMap = new LinkedHashMap<>();
 
@@ -329,43 +304,41 @@ class UberData {
 	 * @param links
 	 * @return
 	 */
-	private static List<UberData> extractAffordances(List<Link> links) {
+	private static List<UberData> extractAffordances(Links links) {
 
-		return links.stream()
-			.flatMap(link -> link.getAffordances().stream())
-			.map(affordance -> (UberAffordanceModel) affordance.getAffordanceModel(MediaTypes.UBER_JSON))
-			.map(model -> {
+		return links.stream() //
+				.flatMap(it -> it.getAffordances().stream()) //
+				.map(it -> it.getAffordanceModel(MediaTypes.UBER_JSON)) //
+				.map(UberAffordanceModel.class::cast) //
+				.map(it -> {
 
-				if (model.getHttpMethod().equals(HttpMethod.GET)) {
+					if (it.hasHttpMethod(HttpMethod.GET)) {
 
-					String suffix = model.getQueryProperties().stream()
-						.map(UberData::getName)
-						.collect(Collectors.joining(","));
+						String suffix = it.getQueryProperties().stream() //
+								.map(UberData::getName) //
+								.collect(Collectors.joining(","));
 
-					if (!model.getQueryMethodParameters().isEmpty()) {
-						suffix = "{?" + suffix + "}";
+						if (!it.getQueryMethodParameters().isEmpty()) {
+							suffix = "{?" + suffix + "}";
+						}
+
+						return new UberData() //
+								.withName(it.getName()) //
+								.withRel(Collections.singletonList(LinkRelation.of(it.getName())))
+								.withUrl(it.getLink().expand().getHref() + suffix) //
+								.withAction(it.getAction());
+
+					} else {
+
+						return new UberData() //
+								.withName(it.getName()) //
+								.withRel(Collections.singletonList(LinkRelation.of(it.getName())))
+								.withUrl(it.getLink().expand().getHref()).withModel(it.getInputProperties().stream() //
+										.map(UberData::getName).map(property -> property + "={" + property + "}") //
+										.collect(Collectors.joining("&")))
+								.withAction(it.getAction());
 					}
-
-					return new UberData()
-						.withName(model.getName())
-						.withRel(Collections.singletonList(model.getName()))
-						.withUrl(model.getLink().expand().getHref() + suffix)
-						.withAction(model.getAction());
-
-				} else {
-
-					return new UberData()
-						.withName(model.getName())
-						.withRel(Collections.singletonList(model.getName()))
-						.withUrl(model.getLink().expand().getHref())
-						.withModel(model.getInputProperties().stream()
-							.map(UberData::getName)
-							.map(property -> property + "={" + property + "}")
-							.collect(Collectors.joining("&")))
-						.withAction(model.getAction());
-				}
-			})
-			.collect(Collectors.toList());
+				}).collect(Collectors.toList());
 	}
 
 	/**
@@ -375,27 +348,26 @@ class UberData {
 	 * @param links
 	 * @return
 	 */
-	private static List<UberData> mergeDeclaredLinksIntoAffordanceLinks(List<UberData> affordanceBasedLinks, List<UberData> links) {
+	private static List<UberData> mergeDeclaredLinksIntoAffordanceLinks(List<UberData> affordanceBasedLinks,
+			List<UberData> links) {
 
-		return affordanceBasedLinks.stream()
-			.flatMap(affordance -> links.stream()
-				.filter(link -> link.getUrl().equals(affordance.getUrl()))
-				.map(link -> {
+		return affordanceBasedLinks.stream() //
+				.flatMap(affordance -> links.stream() //
+						.filter(link -> link.getUrl().equals(affordance.getUrl())) //
+						.map(link -> {
 
-					if (link.getAction() == affordance.getAction()) {
+							if (link.getAction() == affordance.getAction()) {
 
-						List<String> rels = new ArrayList<>(link.getRel());
+								List<LinkRelation> rels = new ArrayList<>(link.getRel());
+								rels.addAll(affordance.getRel());
 
-						rels.addAll(affordance.getRel());
-
-						return affordance
-							.withName(rels.get(0))
-							.withRel(rels);
-					} else {
-						return affordance;
-					}
-				}))
-			.collect(Collectors.toList());
+								return affordance.withName(rels.get(0).value()) //
+										.withRel(rels);
+							} else {
+								return affordance;
+							}
+						}))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -407,26 +379,20 @@ class UberData {
 	private static List<UberData> extractProperties(Object obj) {
 
 		if (PRIMITIVE_TYPES.contains(obj.getClass())) {
-			return Collections.singletonList(new UberData()
-					.withValue(obj));
+			return Collections.singletonList(new UberData().withValue(obj));
 		}
 
 		return PropertyUtils.findProperties(obj).entrySet().stream()
-			.map(entry -> new UberData()
-				.withName(entry.getKey())
-				.withValue(entry.getValue()))
-			.collect(Collectors.toList());
+				.map(entry -> new UberData().withName(entry.getKey()).withValue(entry.getValue())).collect(Collectors.toList());
 	}
-
 
 	/**
 	 * Holds both a {@link Link} and related {@literal rels}.
-	 *
 	 */
 	@Data
 	private static class LinkAndRels {
 
 		private Link link;
-		private List<String> rels = new ArrayList<>();
+		private List<LinkRelation> rels = new ArrayList<>();
 	}
 }

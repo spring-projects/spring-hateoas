@@ -38,8 +38,13 @@ class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
 	private final @Getter MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.core.ResolvableType, java.util.List, org.springframework.core.ResolvableType)
+	 */
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 	}
 }

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Custom mixin to avoid rel attributes being rendered for HAL.
- * 
+ *
  * @author Alexander Baetz
  * @author Oliver Gierke
  * @author Greg Turnquist

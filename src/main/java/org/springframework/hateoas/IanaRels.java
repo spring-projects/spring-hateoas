@@ -33,10 +33,10 @@ public class IanaRels {
 	 * 
 	 * @param rel the relation type to check
 	 * @return
-	 * @deprecated Migrate to {@link IanaLinkRelation#isIanaRel(String)}.
+	 * @deprecated Migrate to {@link IanaLinkRelations#isIanaRel(String)}.
 	 */
 	@Deprecated
 	public static boolean isIanaRel(String rel) {
-		return IanaLinkRelation.isIanaRel(rel);
+		return IanaLinkRelations.isIanaRel(rel);
 	}
 }

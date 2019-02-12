@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.hal.DefaultCurieProvider.Curie;
@@ -32,7 +34,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * Unit tests for {@link DefaultCurieProvider}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -69,17 +71,23 @@ public class DefaultCurieProviderUnitTest {
 
 	@Test
 	public void doesNotPrefixIanaRels() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com"))).isEqualTo("self");
+
+		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com"))) //
+				.isEqualTo(HalLinkRelation.of(IanaLinkRelations.SELF));
 	}
 
 	@Test
 	public void prefixesNormalRels() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "book"))).isEqualTo("acme:book");
+
+		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "book"))) //
+				.isEqualTo(HalLinkRelation.curied("acme", "book"));
 	}
 
 	@Test
 	public void doesNotPrefixQualifiedRels() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel"))).isEqualTo("custom:rel");
+
+		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")))
+				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
 	}
 
 	/**
@@ -95,7 +103,8 @@ public class DefaultCurieProviderUnitTest {
 				.withType("the type") //
 				.withDeprecation("http://example.com/custom/deprecated");
 
-		assertThat(provider.getNamespacedRelFrom(link)).isEqualTo("custom:rel");
+		assertThat(provider.getNamespacedRelFrom(link)) //
+				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
 	}
 
 	/**
@@ -103,7 +112,9 @@ public class DefaultCurieProviderUnitTest {
 	 */
 	@Test
 	public void doesNotPrefixIanaRelsForRelAsString() {
-		assertThat(provider.getNamespacedRelFor("self")).isEqualTo("self");
+
+		assertThat(provider.getNamespacedRelFor(IanaLinkRelations.SELF)) //
+				.isEqualTo(HalLinkRelation.uncuried("self"));
 	}
 
 	/**
@@ -111,7 +122,9 @@ public class DefaultCurieProviderUnitTest {
 	 */
 	@Test
 	public void prefixesNormalRelsForRelAsString() {
-		assertThat(provider.getNamespacedRelFor("book")).isEqualTo("acme:book");
+
+		assertThat(provider.getNamespacedRelFor(LinkRelation.of("book"))) //
+				.isEqualTo(HalLinkRelation.curied("acme", "book"));
 	}
 
 	/**
@@ -119,7 +132,9 @@ public class DefaultCurieProviderUnitTest {
 	 */
 	@Test
 	public void doesNotPrefixQualifiedRelsForRelAsString() {
-		assertThat(provider.getNamespacedRelFor("custom:rel")).isEqualTo("custom:rel");
+
+		assertThat(provider.getNamespacedRelFor(HalLinkRelation.curied("custom", "rel")))
+				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
 	}
 
 	/**
@@ -130,8 +145,8 @@ public class DefaultCurieProviderUnitTest {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries());
 
-		assertThat(provider.getCurieInformation(new Links())).hasSize(2);
-		assertThat(provider.getNamespacedRelFor("some")).isEqualTo("some");
+		assertThat(provider.getCurieInformation(Links.of())).hasSize(2);
+		assertThat(provider.getNamespacedRelFor(LinkRelation.of("some"))).isEqualTo(HalLinkRelation.uncuried("some"));
 	}
 
 	/**
@@ -142,8 +157,9 @@ public class DefaultCurieProviderUnitTest {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries(), "foo");
 
-		assertThat(provider.getCurieInformation(new Links())).hasSize(2);
-		assertThat(provider.getNamespacedRelFor("some")).isEqualTo("foo:some");
+		assertThat(provider.getCurieInformation(Links.of())).hasSize(2);
+		assertThat(provider.getNamespacedRelFor(LinkRelation.of("some"))) //
+				.isEqualTo(HalLinkRelation.curied("foo", "some"));
 	}
 
 	/**
@@ -158,7 +174,7 @@ public class DefaultCurieProviderUnitTest {
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
-		Links links = new Links(new Link("http://localhost", "name:foo"));
+		Links links = Links.of(new Link("http://localhost", "name:foo"));
 
 		Collection<? extends Object> curies = provider.getCurieInformation(links);
 		assertThat(curies).hasSize(1);

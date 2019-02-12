@@ -15,22 +15,21 @@
  */
 package org.springframework.hateoas.hal.forms;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.hateoas.support.MappingUtils.read;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.core.AbstractLinkDiscovererUnitTest;
 
 /**
  * Unit tests for {@link HalFormsLinkDiscoverer}.
- * 
+ *
  * @author Greg Turnquist
  */
 public class HalFormsLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
@@ -53,19 +52,18 @@ public class HalFormsLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTe
 
 		String linkText = read(new ClassPathResource("hal-forms-link.json", getClass()));
 
-		Link actual = getDiscoverer().findLinkWithRel(IanaLinkRelation.SELF.value(), linkText);
-
 		Link expected = Link.valueOf("</customer/1>;" //
-			+ "rel=\"self\";" //
-			+ "hreflang=\"en\";" //
-			+ "media=\"pdf\";" //
-			+ "title=\"pdf customer copy\";" //
-			+ "type=\"portable document\";" //
-			+ "deprecation=\"http://example.com/customers/deprecated\";" //
-			+ "profile=\"my-profile\"" //
-			+ "name=\"my-name\"");
+				+ "rel=\"self\";" //
+				+ "hreflang=\"en\";" //
+				+ "media=\"pdf\";" //
+				+ "title=\"pdf customer copy\";" //
+				+ "type=\"portable document\";" //
+				+ "deprecation=\"http://example.com/customers/deprecated\";" //
+				+ "profile=\"my-profile\"" //
+				+ "name=\"my-name\"");
 
-		assertThat(actual).isEqualTo(expected);
+		assertThat(getDiscoverer().findLinkWithRel(IanaLinkRelations.SELF, linkText)) //
+				.hasValue(expected);
 	}
 
 	@Override

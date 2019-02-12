@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.hal.forms;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Map;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.ResourceSupport;
@@ -29,6 +31,7 @@ import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.hal.CurieProvider;
 import org.springframework.hateoas.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListDeserializer;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.hal.LinkMixin;
 import org.springframework.hateoas.hal.ResourceSupportMixin;
@@ -41,8 +44,11 @@ import org.springframework.http.MediaType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
@@ -50,11 +56,13 @@ import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Serialize / deserialize all the parts of HAL-FORMS documents using Jackson.
@@ -78,7 +86,6 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
 
 		addSerializer(new HalFormsResourceSerializer());
-
 	}
 
 	@JsonSerialize(using = HalFormsResourceSerializer.class)
@@ -108,6 +115,35 @@ public class Jackson2HalFormsModule extends SimpleModule {
 	@JsonDeserialize(using = MediaTypeDeserializer.class)
 	interface MediaTypeMixin {}
 
+	static class HalFormsLinksDeserializer extends ContainerDeserializerBase<Links> {
+
+		private static final long serialVersionUID = -848240531474910385L;
+
+		private final HalLinkListDeserializer delegate = new HalLinkListDeserializer();
+
+		public HalFormsLinksDeserializer() {
+			super(TypeFactory.defaultInstance().constructType(Links.class));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 */
+		@Override
+		public JsonDeserializer<Object> getContentDeserializer() {
+			return delegate.getContentDeserializer();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 */
+		@Override
+		public Links deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+			return Links.of(delegate.deserialize(p, ctxt));
+		}
+	}
+
 	/**
 	 * Create new HAL-FORMS serializers based on the context.
 	 */
@@ -116,22 +152,24 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
 		public HalFormsHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
-										   MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
-										   HalFormsConfiguration halFormsConfiguration) {
+				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
+				HalFormsConfiguration halFormsConfiguration) {
 
-			super(resolver, curieProvider, messageSource, enforceEmbeddedCollections, halFormsConfiguration.toHalConfiguration());
+			super(resolver, curieProvider, messageSource, enforceEmbeddedCollections,
+					halFormsConfiguration.toHalConfiguration());
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(mapper));
 			this.serializers.put(HalLinkListSerializer.class,
-				new HalLinkListSerializer(curieProvider, mapper, messageSource, halFormsConfiguration.toHalConfiguration()));
+					new HalLinkListSerializer(curieProvider, mapper, messageSource, halFormsConfiguration.toHalConfiguration()));
 		}
 
 		public HalFormsHandlerInstantiator(RelProvider relProvider, CurieProvider curieProvider,
-										   MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
-										   AutowireCapableBeanFactory beanFactory) {
-			this(relProvider, curieProvider, messageSource, enforceEmbeddedCollections, beanFactory.getBean(HalFormsConfiguration.class));
+				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
+				AutowireCapableBeanFactory beanFactory) {
+			this(relProvider, curieProvider, messageSource, enforceEmbeddedCollections,
+					beanFactory.getBean(HalFormsConfiguration.class));
 		}
 
 		private Object findInstance(Class<?> type) {

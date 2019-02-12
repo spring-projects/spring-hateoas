@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Base class for DTOs to collect links.
- * 
+ *
  * @author Oliver Gierke
  * @author Johhny Lim
  * @author Greg Turnquist
@@ -42,16 +42,16 @@ public class ResourceSupport implements Identifiable<Link> {
 	}
 
 	/**
-	 * Returns the {@link Link} with a rel of {@link IanaLinkRelation#SELF}.
+	 * Returns the {@link Link} with a rel of {@link IanaLinkRelations#SELF}.
 	 */
 	@JsonIgnore
 	public Optional<Link> getId() {
-		return getLink(IanaLinkRelation.SELF.value());
+		return getLink(IanaLinkRelations.SELF);
 	}
 
 	/**
 	 * Adds the given link to the resource.
-	 * 
+	 *
 	 * @param link
 	 */
 	public void add(Link link) {
@@ -63,7 +63,7 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/**
 	 * Adds all given {@link Link}s to the resource.
-	 * 
+	 *
 	 * @param links
 	 */
 	public void add(Iterable<Link> links) {
@@ -87,7 +87,7 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/**
 	 * Returns whether the resource contains {@link Link}s at all.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean hasLinks() {
@@ -96,7 +96,7 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/**
 	 * Returns whether the resource contains a {@link Link} with the given rel.
-	 * 
+	 *
 	 * @param rel
 	 * @return
 	 */
@@ -104,14 +104,18 @@ public class ResourceSupport implements Identifiable<Link> {
 		return getLink(rel).isPresent();
 	}
 
+	public boolean hasLink(LinkRelation rel) {
+		return hasLink(rel.value());
+	}
+
 	/**
 	 * Returns all {@link Link}s contained in this resource.
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonProperty("links")
-	public List<Link> getLinks() {
-		return links;
+	public Links getLinks() {
+		return Links.of(links);
 	}
 
 	/**
@@ -123,20 +127,24 @@ public class ResourceSupport implements Identifiable<Link> {
 
 	/**
 	 * Returns the link with the given rel.
-	 * 
+	 *
 	 * @param rel
 	 * @return the link with the given rel or {@link Optional#empty()} if none found.
 	 */
 	public Optional<Link> getLink(String rel) {
+		return getLink(LinkRelation.of(rel));
+	}
+
+	public Optional<Link> getLink(LinkRelation rel) {
 
 		return links.stream() //
-				.filter(link -> link.hasRel(rel)) //
+				.filter(it -> it.hasRel(rel)) //
 				.findFirst();
 	}
 
 	/**
 	 * Returns the link with the given rel.
-	 * 
+	 *
 	 * @param rel
 	 * @return the link with the given rel.
 	 * @throws IllegalArgumentException in case no link with the given rel can be found.
@@ -145,6 +153,10 @@ public class ResourceSupport implements Identifiable<Link> {
 
 		return getLink(rel) //
 				.orElseThrow(() -> new IllegalArgumentException(String.format("No link with rel %s found!", rel)));
+	}
+
+	public Link getRequiredLink(LinkRelation rel) {
+		return getRequiredLink(rel.value());
 	}
 
 	/**
@@ -159,7 +171,11 @@ public class ResourceSupport implements Identifiable<Link> {
 				.collect(Collectors.toList());
 	}
 
-	/* 
+	public List<Link> getLinks(LinkRelation rel) {
+		return getLinks(rel.value());
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -168,7 +184,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		return String.format("links: %s", links.toString());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -188,7 +204,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		return this.links.equals(that.links);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */

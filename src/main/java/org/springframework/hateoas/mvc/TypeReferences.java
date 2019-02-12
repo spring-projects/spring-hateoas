@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.hateoas.mvc;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 
 import org.springframework.core.GenericTypeResolver;
@@ -27,8 +26,8 @@ import org.springframework.util.Assert;
 
 /**
  * Helper to easily create {@link ParameterizedTypeReference} instances to Spring HATEOAS resource types. They're
- * basically a shortcut over using a verbose {@code new ParameterizedTypeReference<Resources<DomainType>>() .
- * 
+ * basically a shortcut over using a verbose {@code new ParameterizedTypeReference<Resources<DomainType>>()}.
+ *
  * @author Oliver Gierke
  * @since 0.17
  */
@@ -40,8 +39,8 @@ public class TypeReferences {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class ResourceType<T> extends
-			SyntheticParameterizedTypeReference<org.springframework.hateoas.Resource<T>> {}
+	public static class ResourceType<T>
+			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.Resource<T>> {}
 
 	/**
 	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.Resources} of some type.
@@ -49,8 +48,8 @@ public class TypeReferences {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class ResourcesType<T> extends
-			SyntheticParameterizedTypeReference<org.springframework.hateoas.Resources<T>> {}
+	public static class ResourcesType<T>
+			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.Resources<T>> {}
 
 	/**
 	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.PagedResources} of some type.
@@ -58,12 +57,12 @@ public class TypeReferences {
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class PagedResourcesType<T> extends
-			SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedResources<T>> {}
+	public static class PagedResourcesType<T>
+			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedResources<T>> {}
 
 	/**
-	 * Special {@link ParameterizedTypeReference} to customize the generic type detection and eventually return a synthetic
-	 * {@link ParameterizedType} to represent the resource type along side its generic parameter.
+	 * Special {@link ParameterizedTypeReference} to customize the generic type detection and eventually return a
+	 * synthetic {@link ParameterizedType} to represent the resource type along side its generic parameter.
 	 *
 	 * @author Oliver Gierke
 	 * @since 0.17
@@ -72,7 +71,7 @@ public class TypeReferences {
 
 		private final Type type;
 
-		@SuppressWarnings({ "rawtypes", "deprecation" })
+		@SuppressWarnings("rawtypes")
 		SyntheticParameterizedTypeReference() {
 
 			Class<? extends SyntheticParameterizedTypeReference> foo = getClass();
@@ -84,10 +83,12 @@ public class TypeReferences {
 			Type type = parameterizedTypeReferenceSubclass.getGenericSuperclass();
 			Assert.isInstanceOf(ParameterizedType.class, type);
 			ParameterizedType parameterizedType = (ParameterizedType) type;
-			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1, String.format("Type must have exactly one generic type argument but has %s.", parameterizedType.getActualTypeArguments().length));
+			Assert.isTrue(parameterizedType.getActualTypeArguments().length == 1,
+					String.format("Type must have exactly one generic type argument but has %s.",
+							parameterizedType.getActualTypeArguments().length));
 
 			Class<?> resourceType = GenericTypeResolver.resolveType(parameterizedType.getActualTypeArguments()[0],
-				new HashMap<>());
+					new HashMap<>());
 
 			this.type = new SyntheticParameterizedType(resourceType, domainType);
 		}
@@ -96,6 +97,7 @@ public class TypeReferences {
 		 * (non-Javadoc)
 		 * @see org.springframework.core.ParameterizedTypeReference#getType()
 		 */
+		@Override
 		public Type getType() {
 			return this.type;
 		}
@@ -106,8 +108,8 @@ public class TypeReferences {
 		 */
 		@Override
 		public boolean equals(Object obj) {
-			return (this == obj || (obj instanceof SyntheticParameterizedTypeReference && this.type
-					.equals(((SyntheticParameterizedTypeReference<?>) obj).type)));
+			return this == obj || obj instanceof SyntheticParameterizedTypeReference
+					&& this.type.equals(((SyntheticParameterizedTypeReference<?>) obj).type);
 		}
 
 		/*

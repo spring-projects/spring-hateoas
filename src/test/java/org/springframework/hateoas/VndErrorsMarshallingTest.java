@@ -73,7 +73,9 @@ public class VndErrorsMarshallingTest {
 	 */
 	@Test
 	public void jackson2Marshalling() throws Exception {
-		assertThat(jackson2Mapper.writeValueAsString(errors)).isEqualToIgnoringWhitespace(json2Reference);
+
+		assertThat(jackson2Mapper.writeValueAsString(errors)) //
+				.isEqualToIgnoringWhitespace(json2Reference);
 	}
 
 	/**

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * General helper to easily create a wrapper for a collection of entities.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -44,7 +44,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	/**
 	 * Creates a {@link Resources} instance with the given content and {@link Link}s (optional).
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link Resources}.
 	 */
@@ -54,7 +54,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	/**
 	 * Creates a {@link Resources} instance with the given content and {@link Link}s.
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link Resources}.
 	 */
@@ -72,7 +72,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	/**
 	 * Creates a new {@link Resources} instance by wrapping the given domain class instances into a {@link Resource}.
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 * @return
 	 */
@@ -80,6 +80,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	public static <T extends Resource<S>, S> Resources<T> wrap(Iterable<S> content) {
 
 		Assert.notNull(content, "Content must not be null!");
+
 		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
@@ -91,7 +92,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 
 	/**
 	 * Returns the underlying elements.
-	 * 
+	 *
 	 * @return the content will never be {@literal null}.
 	 */
 	@JsonProperty("content")
@@ -99,7 +100,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 		return Collections.unmodifiableCollection(content);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
@@ -117,7 +118,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 		return String.format("Resources { content: %s, %s }", getContent(), super.toString());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
 	 */
@@ -138,7 +139,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 		return contentEqual && super.equals(obj);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#hashCode()
 	 */

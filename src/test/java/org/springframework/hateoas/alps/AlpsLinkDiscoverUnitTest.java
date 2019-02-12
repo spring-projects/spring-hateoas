@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -29,7 +30,7 @@ import org.springframework.util.StreamUtils;
 
 /**
  * Unit tests for {@link AlpsLinkDiscoverer}.
- * 
+ *
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
@@ -40,10 +41,11 @@ public class AlpsLinkDiscoverUnitTest extends AbstractLinkDiscovererUnitTest {
 	@Test
 	public void discoversFullyQualifiedRel() {
 
-		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString());
+		Optional<Link> link = getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString());
 
-		assertThat(link).isNotNull();
-		assertThat(link.getHref()).isEqualTo("fullRelHref");
+		assertThat(link) //
+				.map(Link::getHref) //
+				.hasValue("fullRelHref");
 	}
 
 	/**

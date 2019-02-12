@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@ import java.io.IOException;
 import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * Simple Jackson serializers and deserializers.
- * 
+ *
  * @author Oliver Gierke
  */
 public class JacksonSerializers {
@@ -46,13 +45,12 @@ public class JacksonSerializers {
 			super(MediaType.class);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public MediaType deserialize(JsonParser p, DeserializationContext ctxt)
-				throws IOException {
+		public MediaType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 			return MediaType.parseMediaType(p.getText());
 		}
 	}

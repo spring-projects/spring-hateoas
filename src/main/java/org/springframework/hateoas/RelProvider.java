@@ -19,24 +19,24 @@ import org.springframework.plugin.core.Plugin;
 
 /**
  * API to provide relation types for collections and items of the given type.
- * 
+ *
  * @author Oliver Gierke
  */
 public interface RelProvider extends Plugin<Class<?>> {
 
 	/**
 	 * Returns the relation type to be used to point to an item resource of the given type.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @return
 	 */
-	String getItemResourceRelFor(Class<?> type);
+	LinkRelation getItemResourceRelFor(Class<?> type);
 
 	/**
 	 * Returns the relation type to be used to point to a collection resource of the given type.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @return
 	 */
-	String getCollectionResourceRelFor(Class<?> type);
+	LinkRelation getCollectionResourceRelFor(Class<?> type);
 }

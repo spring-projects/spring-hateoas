@@ -21,10 +21,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.junit.Test;
+import org.springframework.hateoas.LinkRelation;
 
 /**
  * Unit tests for {@link EmbeddedWrappers}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class EmbeddedWrappersUnitTest {
@@ -35,13 +36,12 @@ public class EmbeddedWrappersUnitTest {
 	 * @see #286
 	 */
 	@Test
-	@SuppressWarnings("rawtypes")
 	public void createsWrapperForEmptyCollection() {
 
 		EmbeddedWrapper wrapper = wrappers.emptyCollectionOf(String.class);
 
 		assertEmptyCollectionValue(wrapper);
-		assertThat(wrapper.getRel()).isNull();
+		assertThat(wrapper.getRel()).isEmpty();
 		assertThat(wrapper.getRelTargetType()).isEqualTo(String.class);
 	}
 
@@ -51,10 +51,10 @@ public class EmbeddedWrappersUnitTest {
 	@Test
 	public void createsWrapperForEmptyCollectionAndExplicitRel() {
 
-		EmbeddedWrapper wrapper = wrappers.wrap(Collections.emptySet(), "rel");
+		EmbeddedWrapper wrapper = wrappers.wrap(Collections.emptySet(), LinkRelation.of("rel"));
 
 		assertEmptyCollectionValue(wrapper);
-		assertThat(wrapper.getRel()).isEqualTo("rel");
+		assertThat(wrapper.getRel()).hasValue(LinkRelation.of("rel"));
 		assertThat(wrapper.getRelTargetType()).isNull();
 	}
 
@@ -68,6 +68,8 @@ public class EmbeddedWrappersUnitTest {
 
 	@SuppressWarnings("unchecked")
 	private static void assertEmptyCollectionValue(EmbeddedWrapper wrapper) {
-		assertThat(wrapper.getValue()).isInstanceOfSatisfying(Collection.class, it -> assertThat(it).isEmpty());
+
+		assertThat(wrapper.getValue()) //
+				.isInstanceOfSatisfying(Collection.class, it -> assertThat(it).isEmpty());
 	}
 }

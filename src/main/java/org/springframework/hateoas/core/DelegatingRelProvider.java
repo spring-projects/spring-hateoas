@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.core;
 
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
@@ -32,12 +33,12 @@ public class DelegatingRelProvider implements RelProvider {
 		this.providers = providers;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
 	 */
 	@Override
-	public String getItemResourceRelFor(Class<?> type) {
+	public LinkRelation getItemResourceRelFor(Class<?> type) {
 		return providers.getRequiredPluginFor(type).getItemResourceRelFor(type);
 	}
 
@@ -46,7 +47,7 @@ public class DelegatingRelProvider implements RelProvider {
 	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
 	 */
 	@Override
-	public String getCollectionResourceRelFor(java.lang.Class<?> type) {
+	public LinkRelation getCollectionResourceRelFor(java.lang.Class<?> type) {
 		return providers.getRequiredPluginFor(type).getCollectionResourceRelFor(type);
 	}
 

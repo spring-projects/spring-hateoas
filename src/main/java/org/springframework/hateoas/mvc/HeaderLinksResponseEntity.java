@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mvc;
 
-import java.util.List;
-
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.ResourceProcessor;
@@ -33,14 +31,14 @@ import org.springframework.util.Assert;
  * support code that will transparently invoke the header exposure. If you use this class from a controller directly,
  * the {@link Link}s will not be present in the {@link ResourceSupport} instance anymore when {@link ResourceProcessor}s
  * kick in.
- * 
+ *
  * @author Oliver Gierke
  */
 public class HeaderLinksResponseEntity<T extends ResourceSupport> extends ResponseEntity<T> {
 
 	/**
 	 * Creates a new {@link HeaderLinksResponseEntity} from the given {@link ResponseEntity}.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 */
 	private HeaderLinksResponseEntity(ResponseEntity<T> entity) {
@@ -52,7 +50,7 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	/**
 	 * Creates a new {@link HeaderLinksResponseEntity} from the given {@link HttpEntity} by defaulting the status code to
 	 * {@link HttpStatus#OK}.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 */
 	private HeaderLinksResponseEntity(HttpEntity<T> entity) {
@@ -62,7 +60,7 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	/**
 	 * Wraps the given {@link HttpEntity} into a {@link HeaderLinksResponseEntity}. Will default the status code to
 	 * {@link HttpStatus#OK} if the given value is not a {@link ResponseEntity}.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
@@ -80,7 +78,7 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	/**
 	 * Wraps the given {@link ResourceSupport} into a {@link HeaderLinksResponseEntity}. Will default the status code to
 	 * {@link HttpStatus#OK}.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
@@ -94,17 +92,17 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	/**
 	 * Returns the {@link Link}s contained in the {@link ResourceSupport} of the given {@link ResponseEntity} as
 	 * {@link HttpHeaders}.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
 	private static <T extends ResourceSupport> HttpHeaders getHeadersWithLinks(ResponseEntity<T> entity) {
 
-		List<Link> links = entity.getBody().getLinks();
+		Links links = entity.getBody().getLinks();
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.putAll(entity.getHeaders());
-		httpHeaders.add("Link", new Links(links).toString());
+		httpHeaders.add("Link", links.toString());
 
 		return httpHeaders;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
@@ -45,19 +45,19 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * Integration test for Jackson 2 JSON+Collection
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
-	static final Links PAGINATION_LINKS = new Links(
-		new Link("localhost", IanaLinkRelation.SELF.value()),
-		new Link("foo", IanaLinkRelation.NEXT.value()),
-		new Link("bar", IanaLinkRelation.PREV.value()));
+	static final Links PAGINATION_LINKS = Links.of( //
+			new Link("localhost", IanaLinkRelations.SELF), //
+			new Link("foo", IanaLinkRelations.NEXT), //
+			new Link("bar", IanaLinkRelations.PREV));
 
 	@Before
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2CollectionJsonModule());
-		mapper.setHandlerInstantiator(new Jackson2CollectionJsonModule.CollectionJsonHandlerInstantiator(null));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -67,7 +67,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		ResourceSupport resourceSupport = new ResourceSupport();
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
-		assertThat(write(resourceSupport)).isEqualTo(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())));
+		assertThat(write(resourceSupport))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())));
 	}
 
 	@Test
@@ -76,8 +77,9 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost"));
 
-		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), ResourceSupport.class))
-			.isEqualTo(expected);
+		assertThat(
+				read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), ResourceSupport.class))
+						.isEqualTo(expected);
 	}
 
 	@Test
@@ -87,7 +89,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		resourceSupport.add(new Link("localhost"));
 		resourceSupport.add(new Link("localhost2").withRel("orders"));
 
-		assertThat(write(resourceSupport)).isEqualTo(MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass())));
+		assertThat(write(resourceSupport))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass())));
 	}
 
 	@Test
@@ -96,7 +99,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		ResourceWithAttributes resource = new ResourceWithAttributes("test value");
 		resource.add(new Link("localhost").withSelfRel());
 
-		assertThat(write(resource)).isEqualTo(MappingUtils.read(new ClassPathResource("resource-support-3.json", getClass())));
+		assertThat(write(resource))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("resource-support-3.json", getClass())));
 	}
 
 	@Test
@@ -105,8 +109,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		ResourceWithAttributes expected = new ResourceWithAttributes("test value");
 		expected.add(new Link("localhost").withSelfRel());
 
-		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support-3.json", getClass())), ResourceWithAttributes.class))
-			.isEqualTo(expected);
+		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support-3.json", getClass())),
+				ResourceWithAttributes.class)).isEqualTo(expected);
 	}
 
 	@Test
@@ -116,8 +120,10 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		expected.add(new Link("localhost"));
 		expected.add(new Link("localhost2").withRel("orders"));
 
-		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass())), ResourceSupport.class))
-			.isEqualTo(expected);
+		String read = MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass()));
+		ResourceSupport readResourceSupport = read(read, ResourceSupport.class);
+
+		assertThat(readResourceSupport.getLinks()).containsAll(expected.getLinks());
 	}
 
 	@Test
@@ -149,7 +155,6 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		assertThat(result).isEqualTo(expected);
 	}
 
-
 	@Test
 	public void renderResource() throws Exception {
 
@@ -161,11 +166,12 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializeResource() throws Exception {
 
-		Resource expected = new Resource<>("first", new Link("localhost"));
+		Resource<?> expected = new Resource<>("first", new Link("localhost"));
 
 		String source = MappingUtils.read(new ClassPathResource("resource.json", getClass()));
-		Resource<String> actual = mapper.readValue(source, mapper.getTypeFactory().constructParametricType(Resource.class, String.class));
-		
+		Resource<String> actual = mapper.readValue(source,
+				mapper.getTypeFactory().constructParametricType(Resource.class, String.class));
+
 		assertThat(actual).isEqualTo(expected);
 	}
 
@@ -180,7 +186,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
-		assertThat(write(resources)).isEqualTo(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())));
+		assertThat(write(resources))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())));
 	}
 
 	@Test
@@ -190,11 +197,12 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
 		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources expected = new Resources<>(data);
+		Resources<?> expected = new Resources<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
-		Resources<Resource<String>> actual = mapper.readValue(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())),
+		Resources<Resource<String>> actual = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())),
 				mapper.getTypeFactory().constructParametricType(Resources.class,
 						mapper.getTypeFactory().constructParametricType(Resource.class, String.class)));
 
@@ -213,7 +221,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
-		assertThat(write(resources)).isEqualTo(MappingUtils.read(new ClassPathResource("resources-simple-pojos.json", getClass())));
+		assertThat(write(resources))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("resources-simple-pojos.json", getClass())));
 	}
 
 	@Test
@@ -226,7 +235,8 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializesPagedResource() throws Exception {
 
-		PagedResources<Resource<SimplePojo>> result = mapper.readValue(MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),
+		PagedResources<Resource<SimplePojo>> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),
 				mapper.getTypeFactory().constructParametricType(PagedResources.class,
 						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
 
@@ -247,7 +257,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ResourceWithAttributes extends ResourceSupport {
-		
+
 		private String attribute;
 	}
 

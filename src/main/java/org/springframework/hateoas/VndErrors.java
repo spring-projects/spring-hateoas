@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * A representation model class to be rendered as specified for the media type {@code application/vnd.error}.
- * 
+ *
  * @see https://github.com/blongden/vnd.error
  * @author Oliver Gierke
  * @author Greg Turnquist
@@ -41,7 +41,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	/**
 	 * Creates a new {@link VndErrors} instance containing a single {@link VndError} with the given logref, message and
 	 * optional {@link Link}s.
-	 * 
+	 *
 	 * @param logref must not be {@literal null} or empty.
 	 * @param message must not be {@literal null} or empty.
 	 * @param links
@@ -52,7 +52,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 	/**
 	 * Creates a new {@link VndErrors} wrapper for at least one {@link VndError}.
-	 * 
+	 *
 	 * @param errors must not be {@literal null}.
 	 */
 	public VndErrors(VndError error, VndError... errors) {
@@ -66,7 +66,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 	/**
 	 * Creates a new {@link VndErrors} wrapper for the given {@link VndErrors}.
-	 * 
+	 *
 	 * @param errors must not be {@literal null} or empty.
 	 */
 	@JsonCreator
@@ -86,7 +86,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 	/**
 	 * Adds an additional {@link VndError} to the wrapper.
-	 * 
+	 *
 	 * @param error
 	 */
 	public VndErrors add(VndError error) {
@@ -96,7 +96,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 	/**
 	 * Dummy method to allow {@link JsonValue} to be configured.
-	 * 
+	 *
 	 * @return the vndErrors
 	 */
 	@JsonValue
@@ -113,7 +113,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		return this.vndErrors.iterator();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -152,7 +152,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 	/**
 	 * A single {@link VndError}.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	public static class VndError extends ResourceSupport {
@@ -162,7 +162,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 		/**
 		 * Creates a new {@link VndError} with the given logref, a message as well as some {@link Link}s.
-		 * 
+		 *
 		 * @param logref must not be {@literal null} or empty.
 		 * @param message must not be {@literal null} or empty.
 		 * @param links
@@ -188,7 +188,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 		/**
 		 * Returns the logref of the error.
-		 * 
+		 *
 		 * @return the logref
 		 */
 		public String getLogref() {
@@ -197,21 +197,20 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 		/**
 		 * Returns the message of the error.
-		 * 
+		 *
 		 * @return the message
 		 */
 		public String getMessage() {
 			return message;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.ResourceSupport#toString()
 		 */
 		@Override
 		public String toString() {
-			return String.format("VndError[logref: %s, message: %s, links: [%s]]", logref, message,
-					StringUtils.collectionToCommaDelimitedString(getLinks()));
+			return String.format("VndError[logref: %s, message: %s, links: [%s]]", logref, message, getLinks().toString());
 		}
 
 		/*

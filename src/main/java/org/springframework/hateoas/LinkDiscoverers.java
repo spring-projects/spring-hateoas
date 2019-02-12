@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import java.util.Optional;
+
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
@@ -22,7 +24,7 @@ import org.springframework.util.Assert;
 /**
  * Value object to wrap a {@link PluginRegistry} for {@link LinkDiscoverer} so that it's easier to inject them into
  * clients wanting to lookup a {@link LinkDiscoverer} for a given {@link MediaTypes}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class LinkDiscoverers {
@@ -31,7 +33,7 @@ public class LinkDiscoverers {
 
 	/**
 	 * Creates a new {@link LinkDiscoverers} instance with the given {@link PluginRegistry}.
-	 * 
+	 *
 	 * @param discoverers must not be {@literal null}.
 	 */
 	public LinkDiscoverers(PluginRegistry<LinkDiscoverer, MediaType> discoverers) {
@@ -42,21 +44,41 @@ public class LinkDiscoverers {
 
 	/**
 	 * Returns the {@link LinkDiscoverer} suitable for the given {@link MediaType}.
-	 * 
+	 *
+	 * @param mediaType
+	 * @return will never be {@literal null}.
+	 */
+	public Optional<LinkDiscoverer> getLinkDiscovererFor(MediaType mediaType) {
+		return discoverers.getPluginFor(mediaType);
+	}
+
+	/**
+	 * Returns the {@link LinkDiscoverer} suitable for the given media type.
+	 *
 	 * @param mediaType
 	 * @return
 	 */
-	public LinkDiscoverer getLinkDiscovererFor(MediaType mediaType) {
+	public Optional<LinkDiscoverer> getLinkDiscovererFor(String mediaType) {
+		return getLinkDiscovererFor(MediaType.valueOf(mediaType));
+	}
+
+	/**
+	 * Returns the {@link LinkDiscoverer} suitable for the given {@link MediaType}.
+	 *
+	 * @param mediaType
+	 * @return will never be {@literal null}.
+	 */
+	public LinkDiscoverer getRequiredLinkDiscovererFor(MediaType mediaType) {
 		return discoverers.getRequiredPluginFor(mediaType);
 	}
 
 	/**
 	 * Returns the {@link LinkDiscoverer} suitable for the given media type.
-	 * 
+	 *
 	 * @param mediaType
 	 * @return
 	 */
-	public LinkDiscoverer getLinkDiscovererFor(String mediaType) {
-		return getLinkDiscovererFor(MediaType.valueOf(mediaType));
+	public LinkDiscoverer getRequiredLinkDiscovererFor(String mediaType) {
+		return getRequiredLinkDiscovererFor(MediaType.valueOf(mediaType));
 	}
 }

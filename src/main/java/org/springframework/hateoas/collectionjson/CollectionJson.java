@@ -19,9 +19,13 @@ import lombok.AccessLevel;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.Links.MergeMode;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -39,39 +43,62 @@ class CollectionJson<T> {
 
 	private String version;
 	private String href;
-	
-	@JsonInclude(Include.NON_EMPTY)
-	private List<Link> links;
 
-	@JsonInclude(Include.NON_EMPTY)
-	private List<CollectionJsonItem<T>> items;
-
-	@JsonInclude(Include.NON_EMPTY)
-	private List<CollectionJsonQuery> queries;
-
-	@JsonInclude(Include.NON_NULL)
-	private CollectionJsonTemplate template;
-
-	@JsonInclude(Include.NON_NULL)
-	private CollectionJsonError error;
+	private @JsonInclude(Include.NON_EMPTY) Links links;
+	private @JsonInclude(Include.NON_EMPTY) List<CollectionJsonItem<T>> items;
+	private @JsonInclude(Include.NON_EMPTY) List<CollectionJsonQuery> queries;
+	private @JsonInclude(Include.NON_NULL) CollectionJsonTemplate template;
+	private @JsonInclude(Include.NON_NULL) CollectionJsonError error;
 
 	@JsonCreator
-	CollectionJson(@JsonProperty("version") String version, @JsonProperty("href") String href,
-				   @JsonProperty("links") List<Link> links, @JsonProperty("items") List<CollectionJsonItem<T>> items,
-				   @JsonProperty("queries") List<CollectionJsonQuery> queries,
-				   @JsonProperty("template") CollectionJsonTemplate template,
-				   @JsonProperty("error") CollectionJsonError error) {
+	CollectionJson(@JsonProperty("version") String version, //
+			@JsonProperty("href") String href, //
+			@JsonProperty("links") Links links, //
+			@JsonProperty("items") List<CollectionJsonItem<T>> items, //
+			@JsonProperty("queries") List<CollectionJsonQuery> queries, //
+			@JsonProperty("template") CollectionJsonTemplate template, //
+			@JsonProperty("error") CollectionJsonError error) {
 
 		this.version = version;
 		this.href = href;
-		this.links = links;
-		this.items = items;
+		this.links = links == null ? Links.NONE : links;
+		this.items = items == null ? Collections.emptyList() : items;
 		this.queries = queries;
 		this.template = template;
 		this.error = error;
 	}
 
 	CollectionJson() {
-		this("1.0", null, null, null, null, null, null);
+		this("1.0", null, Links.NONE, Collections.emptyList(), null, null, null);
+	}
+
+	@SafeVarargs
+	final CollectionJson<T> withItems(CollectionJsonItem<T>... items) {
+		return withItems(Arrays.asList(items));
+	}
+
+	CollectionJson<T> withItems(List<CollectionJsonItem<T>> items) {
+		return new CollectionJson<>(version, href, links, items, queries, template, error);
+	}
+
+	CollectionJson<T> withLinks(Link... links) {
+		return withLinks(Links.of(links));
+	}
+
+	CollectionJson<T> withLinks(Links links) {
+		return new CollectionJson<>(version, href, links, items, queries, template, error);
+	}
+
+	CollectionJson<T> withOwnSelfLink() {
+
+		if (href == null) {
+			return this;
+		}
+
+		return withLinks(Links.of(new Link(href)).merge(MergeMode.SKIP_BY_REL, links));
+	}
+
+	boolean hasItems() {
+		return !items.isEmpty();
 	}
 }

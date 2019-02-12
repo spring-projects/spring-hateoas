@@ -19,12 +19,14 @@ import java.util.Map;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
+import org.springframework.http.MediaType;
 
 /**
  * {@link LinkDiscoverer} implementation based on HAL link structure.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -34,27 +36,34 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 	 * Constructor for {@link MediaTypes#HAL_JSON}.
 	 */
 	public HalLinkDiscoverer() {
-		super("$._links..['%s']", MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		this(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
 	}
 
+	protected HalLinkDiscoverer(MediaType... mediaTypes) {
+		super("$._links..['%s']", mediaTypes);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.JsonPathLinkDiscoverer#extractLink(java.lang.Object, org.springframework.hateoas.LinkRelation)
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Link extractLink(Object element, String rel) {
+	protected Link extractLink(Object element, LinkRelation rel) {
 
-		if (element instanceof Map) {
-
-			Map<String, String> json = (Map<String, String>) element;
-
-			return new Link(json.get("href"), rel)
-				.withHreflang(json.get("hreflang"))
-				.withMedia(json.get("media"))
-				.withTitle(json.get("title"))
-				.withType(json.get("type"))
-				.withDeprecation(json.get("deprecation"))
-				.withProfile(json.get("profile"))
-				.withName(json.get("name"));
+		if (!Map.class.isInstance(element)) {
+			return super.extractLink(element, rel);
 		}
 
-		return super.extractLink(element, rel);
+		Map<String, String> json = (Map<String, String>) element;
+
+		return new Link(json.get("href"), rel) //
+				.withHreflang(json.get("hreflang")) //
+				.withMedia(json.get("media")) //
+				.withTitle(json.get("title")) //
+				.withType(json.get("type")) //
+				.withDeprecation(json.get("deprecation")) //
+				.withProfile(json.get("profile")) //
+				.withName(json.get("name"));
 	}
 }

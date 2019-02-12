@@ -17,6 +17,7 @@ package org.springframework.hateoas.mvc;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
@@ -42,25 +43,25 @@ public class ControllerRelProvider implements RelProvider {
 		this.providers = providers;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
 	 */
 	@Override
-	public String getCollectionResourceRelFor(Class<?> resource) {
+	public LinkRelation getCollectionResourceRelFor(Class<?> resource) {
 		return providers.getRequiredPluginFor(entityType).getCollectionResourceRelFor(resource);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
 	 */
 	@Override
-	public String getItemResourceRelFor(Class<?> resource) {
+	public LinkRelation getItemResourceRelFor(Class<?> resource) {
 		return providers.getRequiredPluginFor(entityType).getItemResourceRelFor(resource);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */

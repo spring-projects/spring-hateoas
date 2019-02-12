@@ -18,11 +18,12 @@ package org.springframework.hateoas.core;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 
 /**
  * Unit tests for {@link EvoInflectorRelProvider}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class EvoInflectorRelProviderUnitTest {
@@ -36,8 +37,9 @@ public class EvoInflectorRelProviderUnitTest {
 	}
 
 	private void assertRels(Class<?> type, String singleRel, String collectionRel) {
-		assertThat(provider.getItemResourceRelFor(type)).isEqualTo(singleRel);
-		assertThat(provider.getCollectionResourceRelFor(type)).isEqualTo(collectionRel);
+
+		assertThat(provider.getItemResourceRelFor(type)).isEqualTo(LinkRelation.of(singleRel));
+		assertThat(provider.getCollectionResourceRelFor(type)).isEqualTo(LinkRelation.of(collectionRel));
 	}
 
 	static class Person {

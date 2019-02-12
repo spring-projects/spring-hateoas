@@ -31,7 +31,7 @@ public class IanaLinkRelationUnitTest {
 	 */
 	@Test
 	public void extractingValueOfIanaLinkRelationShouldWork() {
-		assertThat(IanaLinkRelation.ABOUT.value()).isEqualTo("about");
+		assertThat(IanaLinkRelations.ABOUT.value()).isEqualTo("about");
 	}
 
 	/**
@@ -40,13 +40,13 @@ public class IanaLinkRelationUnitTest {
 	@Test
 	public void testingForOfficialIanaLinkRelation() {
 
-		assertThat(IanaLinkRelation.isIanaRel((String) null)).isFalse();
-		assertThat(IanaLinkRelation.isIanaRel((LinkRelation) null)).isFalse();
-		assertThat(IanaLinkRelation.isIanaRel("")).isFalse();
-		assertThat(IanaLinkRelation.isIanaRel("foo-bar")).isFalse();
+		assertThat(IanaLinkRelations.isIanaRel((String) null)).isFalse();
+		assertThat(IanaLinkRelations.isIanaRel((LinkRelation) null)).isFalse();
+		assertThat(IanaLinkRelations.isIanaRel("")).isFalse();
+		assertThat(IanaLinkRelations.isIanaRel("foo-bar")).isFalse();
 
-		assertThat(IanaLinkRelation.isIanaRel("about")).isTrue();
-		assertThat(IanaLinkRelation.isIanaRel("ABOUT")).isTrue();
+		assertThat(IanaLinkRelations.isIanaRel("about")).isTrue();
+		assertThat(IanaLinkRelations.isIanaRel("ABOUT")).isTrue();
 	}
 
 	/**
@@ -55,26 +55,26 @@ public class IanaLinkRelationUnitTest {
 	@Test
 	public void parsingIanaLinkRelationsShouldWork() {
 
-		assertThat(IanaLinkRelation.parse("about")).isEqualTo(IanaLinkRelation.ABOUT);
-		assertThat(IanaLinkRelation.parse("ABOUT")).isEqualTo(IanaLinkRelation.ABOUT);
+		assertThat(IanaLinkRelations.parse("about")).isEqualTo(IanaLinkRelations.ABOUT);
+		assertThat(IanaLinkRelations.parse("ABOUT")).isEqualTo(IanaLinkRelations.ABOUT);
 
-		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelation.parse(null));
-		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelation.parse(""));
-		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelation.parse("faulty"));
-		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelation.parse("FAULTY"));
+		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.parse(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.parse(""));
+		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.parse("faulty"));
+		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.parse("FAULTY"));
 	}
 
 	@Test
 	public void testIanaLinkRelationShouldPass() {
-		assertThat(IanaLinkRelation.isIanaRel(IanaLinkRelation.ABOUT)).isTrue();
+		assertThat(IanaLinkRelations.isIanaRel(IanaLinkRelations.ABOUT)).isTrue();
 	}
 
 	@Test
 	public void comparingNonIanaLinkRelationsToIanaLinkRelationsDontGuaranteeAMatch() {
 
-		assertThat(IanaLinkRelation.isIanaRel(new CustomLinkRelation("about"))).isTrue();
-		assertThat(IanaLinkRelation.isIanaRel(new CustomLinkRelation("ABOUT"))).isTrue();
-		assertThat(IanaLinkRelation.isIanaRel(new CustomLinkRelation("something-new"))).isFalse();
+		assertThat(IanaLinkRelations.isIanaRel(new CustomLinkRelation("about"))).isTrue();
+		assertThat(IanaLinkRelations.isIanaRel(new CustomLinkRelation("ABOUT"))).isTrue();
+		assertThat(IanaLinkRelations.isIanaRel(new CustomLinkRelation("something-new"))).isFalse();
 	}
 
 	/**

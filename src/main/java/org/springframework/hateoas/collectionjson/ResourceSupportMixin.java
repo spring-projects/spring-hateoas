@@ -15,12 +15,11 @@
  */
 package org.springframework.hateoas.collectionjson;
 
-import static org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule.*;
-
-import java.util.List;
-
-import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule.CollectionJsonLinksDeserializer;
+import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule.CollectionJsonLinksSerializer;
+import org.springframework.hateoas.collectionjson.Jackson2CollectionJsonModule.CollectionJsonResourceSupportDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,8 +38,8 @@ abstract class ResourceSupportMixin extends ResourceSupport {
 	@Override
 	@JsonProperty("collection")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonSerialize(using = CollectionJsonLinkListSerializer.class)
-	@JsonDeserialize(using = CollectionJsonLinkListDeserializer.class)
-	public abstract List<Link> getLinks();
+	@JsonSerialize(using = CollectionJsonLinksSerializer.class)
+	@JsonDeserialize(using = CollectionJsonLinksDeserializer.class)
+	public abstract Links getLinks();
 
 }

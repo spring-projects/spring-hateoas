@@ -22,11 +22,13 @@ import lombok.Value;
 import lombok.experimental.Wither;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.Links.MergeMode;
 import org.springframework.hateoas.support.PropertyUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -48,20 +50,17 @@ class CollectionJsonItem<T> {
 
 	private String href;
 	private List<CollectionJsonData> data;
-
-	@JsonInclude(Include.NON_EMPTY)
-	private List<Link> links;
-
-	@Getter(onMethod = @__({@JsonIgnore}), value = AccessLevel.PRIVATE)
-	private T rawData;
+	private @JsonInclude(Include.NON_EMPTY) Links links;
+	private @Getter(onMethod = @__({ @JsonIgnore }), value = AccessLevel.PRIVATE) T rawData;
 
 	@JsonCreator
-	CollectionJsonItem(@JsonProperty("href") String href, @JsonProperty("data") List<CollectionJsonData> data,
-					   @JsonProperty("links") List<Link> links) {
+	CollectionJsonItem(@JsonProperty("href") String href, //
+			@JsonProperty("data") List<CollectionJsonData> data, //
+			@JsonProperty("links") Links links) {
 
 		this.href = href;
 		this.data = data;
-		this.links = links;
+		this.links = links == null ? Links.NONE : links;
 		this.rawData = null;
 	}
 
@@ -72,9 +71,7 @@ class CollectionJsonItem<T> {
 	/**
 	 * Simple scalar types that can be encoded by value, not type.
 	 */
-	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<Class<?>>() {{
-		add(String.class);
-	}};
+	private final static Set<Class<?>> PRIMITIVE_TYPES = Collections.singleton(String.class);
 
 	/**
 	 * Transform a domain object into a collection of {@link CollectionJsonData} objects to serialize properly.
@@ -92,15 +89,13 @@ class CollectionJsonItem<T> {
 		}
 
 		return PropertyUtils.findProperties(this.rawData).entrySet().stream()
-			.map(entry -> new CollectionJsonData()
-				.withName(entry.getKey())
-				.withValue(entry.getValue()))
-			.collect(Collectors.toList());
+				.map(entry -> new CollectionJsonData().withName(entry.getKey()).withValue(entry.getValue()))
+				.collect(Collectors.toList());
 	}
 
 	/**
 	 * Generate an object used the deserialized properties and the provided type from the deserializer.
-	 * 
+	 *
 	 * @param javaType - type of the object to create
 	 * @return
 	 */
@@ -111,9 +106,23 @@ class CollectionJsonItem<T> {
 		}
 
 		return PropertyUtils.createObjectFromProperties(javaType.getRawClass(), //
-			this.data.stream()
-				.collect(Collectors.toMap(
-					CollectionJsonData::getName,
-					CollectionJsonData::getValue)));
+				this.data.stream().collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue)));
+	}
+
+	public CollectionJsonItem<T> withLinks(Link... links) {
+		return new CollectionJsonItem<>(href, data, Links.of(links), rawData);
+	}
+
+	public CollectionJsonItem<T> withLinks(Links links) {
+		return new CollectionJsonItem<>(href, data, links, rawData);
+	}
+
+	public CollectionJsonItem<T> withOwnSelfLink() {
+
+		if (href == null) {
+			return this;
+		}
+
+		return withLinks(Links.of(new Link(href)).merge(MergeMode.SKIP_BY_REL, links));
 	}
 }

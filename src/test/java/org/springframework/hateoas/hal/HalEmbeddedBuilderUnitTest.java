@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@ package org.springframework.hateoas.hal;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.hateoas.hal.HalLinkRelation.*;
 
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.core.EmbeddedWrapper;
@@ -49,20 +51,20 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersSingleElementsWithSingleEntityRel() {
 
-		Map<String, Object> map = setUpBuilder(null, "foo", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(null, "foo", 1L);
 
-		assertThat(map.get("string")).isEqualTo("foo");
-		assertThat(map.get("long")).isEqualTo(1L);
+		assertThat(map.get(uncuried("string"))).isEqualTo("foo");
+		assertThat(map.get(uncuried("long"))).isEqualTo(1L);
 	}
 
 	@Test
 	public void rendersMultipleElementsWithCollectionResourceRel() {
 
-		Map<String, Object> map = setUpBuilder(null, "foo", "bar", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(null, "foo", "bar", 1L);
 
-		assertThat(map.containsKey("string")).isFalse();
-		assertThat(map.get("long")).isEqualTo(1L);
-		assertHasValues(map, "strings", "foo", "bar");
+		assertThat(map.containsKey(uncuried("string"))).isFalse();
+		assertThat(map.get(uncuried("long"))).isEqualTo(1L);
+		assertHasValues(map, uncuried("strings"), "foo", "bar");
 	}
 
 	/**
@@ -71,11 +73,11 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void correctlyPilesUpResourcesInCollectionRel() {
 
-		Map<String, Object> map = setUpBuilder(null, "foo", "bar", "foobar", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(null, "foo", "bar", "foobar", 1L);
 
-		assertThat(map.containsKey("string")).isFalse();
-		assertHasValues(map, "strings", "foo", "bar", "foobar");
-		assertThat(map.get("long")).isEqualTo(1L);
+		assertThat(map.containsKey(uncuried("string"))).isFalse();
+		assertHasValues(map, uncuried("strings"), "foo", "bar", "foobar");
+		assertThat(map.get(uncuried("long"))).isEqualTo(1L);
 	}
 
 	/**
@@ -87,8 +89,8 @@ public class HalEmbeddedBuilderUnitTest {
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, null, true);
 		builder.add("Sample");
 
-		assertThat(builder.asMap().get("string")).isNull();
-		assertHasValues(builder.asMap(), "strings", "Sample");
+		assertThat(builder.asMap().get(uncuried("string"))).isNull();
+		assertHasValues(builder.asMap(), uncuried("strings"), "Sample");
 	}
 
 	/**
@@ -100,9 +102,9 @@ public class HalEmbeddedBuilderUnitTest {
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, null, true);
-		builder.add(wrappers.wrap("MyValue", "foo"));
+		builder.add(wrappers.wrap("MyValue", LinkRelation.of("foo")));
 
-		assertThat(builder.asMap().get("foo")).isInstanceOf(String.class);
+		assertThat(builder.asMap().get(uncuried("foo"))).isInstanceOf(String.class);
 	}
 
 	/**
@@ -119,10 +121,10 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersSingleElementsWithSingleEntityRelWithCurieProvider() {
 
-		Map<String, Object> map = setUpBuilder(curieProvider, "foo", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(curieProvider, "foo", 1L);
 
-		assertThat(map.get("curie:string")).isEqualTo("foo");
-		assertThat(map.get("curie:long")).isEqualTo(1L);
+		assertThat(map.get(curied("curie", "string"))).isEqualTo("foo");
+		assertThat(map.get(curied("curie", "long"))).isEqualTo(1L);
 	}
 
 	/**
@@ -131,11 +133,11 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersMultipleElementsWithCollectionResourceRelWithCurieProvider() {
 
-		Map<String, Object> map = setUpBuilder(curieProvider, "foo", "bar", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(curieProvider, "foo", "bar", 1L);
 
-		assertThat(map.containsKey("curie:string")).isFalse();
-		assertThat(map.get("curie:long")).isEqualTo(1L);
-		assertHasValues(map, "curie:strings", "foo", "bar");
+		assertThat(map.containsKey(curied("curie", "string"))).isFalse();
+		assertThat(map.get(curied("curie", "long"))).isEqualTo(1L);
+		assertHasValues(map, curied("curie", "strings"), "foo", "bar");
 	}
 
 	/**
@@ -144,11 +146,11 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void correctlyPilesUpResourcesInCollectionRelWithCurieprovider() {
 
-		Map<String, Object> map = setUpBuilder(curieProvider, "foo", "bar", "foobar", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(curieProvider, "foo", "bar", "foobar", 1L);
 
-		assertThat(map.containsKey("curie:string")).isFalse();
-		assertHasValues(map, "curie:strings", "foo", "bar", "foobar");
-		assertThat(map.get("curie:long")).isEqualTo(1L);
+		assertThat(map.containsKey(curied("curie", "string"))).isFalse();
+		assertHasValues(map, curied("curie", "strings"), "foo", "bar", "foobar");
+		assertThat(map.get(curied("curie", "long"))).isEqualTo(1L);
 	}
 
 	/**
@@ -160,8 +162,8 @@ public class HalEmbeddedBuilderUnitTest {
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, true);
 		builder.add("Sample");
 
-		assertThat(builder.asMap().get("curie:string")).isNull();
-		assertHasValues(builder.asMap(), "curie:strings", "Sample");
+		assertThat(builder.asMap().get(curied("curie", "string"))).isNull();
+		assertHasValues(builder.asMap(), curied("curie", "strings"), "Sample");
 	}
 
 	/**
@@ -173,7 +175,7 @@ public class HalEmbeddedBuilderUnitTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void assertHasValues(Map<String, Object> source, String rel, Object... values) {
+	private static void assertHasValues(Map<HalLinkRelation, Object> source, HalLinkRelation rel, Object... values) {
 
 		Object value = source.get(rel);
 
@@ -183,7 +185,7 @@ public class HalEmbeddedBuilderUnitTest {
 		});
 	}
 
-	private Map<String, Object> setUpBuilder(CurieProvider curieProvider, Object... values) {
+	private Map<HalLinkRelation, Object> setUpBuilder(CurieProvider curieProvider, Object... values) {
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, false);
 

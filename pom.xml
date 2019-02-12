@@ -631,7 +631,7 @@
 			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
 			<artifactId>archunit</artifactId>
@@ -729,6 +729,9 @@
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
+				<configuration>
+					<jvmTarget>${source.level}</jvmTarget>
+				</configuration>
 				<executions>
 					<execution>
 						<id>compile</id>

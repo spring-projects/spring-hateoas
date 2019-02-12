@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Greg Turnquist
  */
 @JsonPropertyOrder({ "content", "links" })
-public abstract class ResourcesMixin<T> extends Resources<T> {
+abstract class ResourcesMixin<T> extends Resources<T> {
 
 	@Override
 	@JsonProperty("_embedded")

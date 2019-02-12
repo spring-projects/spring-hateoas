@@ -16,13 +16,14 @@
 package org.springframework.hateoas.core;
 
 import org.springframework.core.Ordered;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of {@link RelProvider} to simply use the uncapitalized version of the given type's name as
  * single resource rel as well as an appended {@code List} for the collection resource rel.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -42,21 +43,21 @@ public class DefaultRelProvider implements RelProvider, Ordered {
 		return true;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
 	 */
 	@Override
-	public String getCollectionResourceRelFor(Class<?> type) {
-		return StringUtils.uncapitalize(type.getSimpleName()) + "List";
+	public LinkRelation getCollectionResourceRelFor(Class<?> type) {
+		return LinkRelation.of(StringUtils.uncapitalize(type.getSimpleName()) + "List");
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
 	 */
 	@Override
-	public String getItemResourceRelFor(Class<?> type) {
-		return StringUtils.uncapitalize(type.getSimpleName());
+	public LinkRelation getItemResourceRelFor(Class<?> type) {
+		return LinkRelation.of(StringUtils.uncapitalize(type.getSimpleName()));
 	}
 }

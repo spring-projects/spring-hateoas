@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * DTO to implement binding response representations of pageable collections.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -46,7 +46,7 @@ public class PagedResources<T> extends Resources<T> {
 
 	/**
 	 * Creates a new {@link PagedResources} from the given content, {@link PageMetadata} and {@link Link}s (optional).
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
@@ -57,7 +57,7 @@ public class PagedResources<T> extends Resources<T> {
 
 	/**
 	 * Creates a new {@link PagedResources} from the given content {@link PageMetadata} and {@link Link}s.
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
@@ -69,7 +69,7 @@ public class PagedResources<T> extends Resources<T> {
 
 	/**
 	 * Returns the pagination metadata.
-	 * 
+	 *
 	 * @return the metadata
 	 */
 	@JsonProperty("page")
@@ -79,7 +79,7 @@ public class PagedResources<T> extends Resources<T> {
 
 	/**
 	 * Factory method to easily create a {@link PagedResources} instance from a set of entities and pagination metadata.
-	 * 
+	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @return
@@ -99,25 +99,25 @@ public class PagedResources<T> extends Resources<T> {
 
 	/**
 	 * Returns the Link pointing to the next page (if set).
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
 	public Optional<Link> getNextLink() {
-		return getLink(IanaLinkRelation.NEXT.value());
+		return getLink(IanaLinkRelations.NEXT);
 	}
 
 	/**
 	 * Returns the Link pointing to the previous page (if set).
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
 	public Optional<Link> getPreviousLink() {
-		return getLink(IanaLinkRelation.PREV.value());
+		return getLink(IanaLinkRelations.PREV);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#toString()
 	 */
@@ -126,7 +126,7 @@ public class PagedResources<T> extends Resources<T> {
 		return String.format("PagedResource { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.Resources#equals(java.lang.Object)
 	 */
@@ -147,7 +147,7 @@ public class PagedResources<T> extends Resources<T> {
 		return metadataEquals && super.equals(obj);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.Resources#hashCode()
 	 */
@@ -161,7 +161,7 @@ public class PagedResources<T> extends Resources<T> {
 
 	/**
 	 * Value object for pagination metadata.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	public static class PageMetadata {
@@ -177,7 +177,7 @@ public class PagedResources<T> extends Resources<T> {
 
 		/**
 		 * Creates a new {@link PageMetadata} from the given size, number, total elements and total pages.
-		 * 
+		 *
 		 * @param size
 		 * @param number zero-indexed, must be less than totalPages
 		 * @param totalElements
@@ -198,7 +198,7 @@ public class PagedResources<T> extends Resources<T> {
 
 		/**
 		 * Creates a new {@link PageMetadata} from the given size, number and total elements.
-		 * 
+		 *
 		 * @param size the size of the page
 		 * @param number the number of the page
 		 * @param totalElements the total number of elements available
@@ -209,7 +209,7 @@ public class PagedResources<T> extends Resources<T> {
 
 		/**
 		 * Returns the requested size of the page.
-		 * 
+		 *
 		 * @return the size a positive long.
 		 */
 		public long getSize() {
@@ -218,7 +218,7 @@ public class PagedResources<T> extends Resources<T> {
 
 		/**
 		 * Returns the total number of elements available.
-		 * 
+		 *
 		 * @return the totalElements a positive long.
 		 */
 		public long getTotalElements() {
@@ -227,7 +227,7 @@ public class PagedResources<T> extends Resources<T> {
 
 		/**
 		 * Returns how many pages are available in total.
-		 * 
+		 *
 		 * @return the totalPages a positive long.
 		 */
 		public long getTotalPages() {
@@ -236,14 +236,14 @@ public class PagedResources<T> extends Resources<T> {
 
 		/**
 		 * Returns the number of the current page.
-		 * 
+		 *
 		 * @return the number a positive long.
 		 */
 		public long getNumber() {
 			return number;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
@@ -253,7 +253,7 @@ public class PagedResources<T> extends Resources<T> {
 					totalElements, size);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
@@ -274,7 +274,7 @@ public class PagedResources<T> extends Resources<T> {
 					&& this.totalPages == that.totalPages;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */

@@ -15,11 +15,14 @@
  */
 package org.springframework.hateoas.core;
 
+import java.util.Optional;
+
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Resource;
 
 /**
  * A wrapper to handle values to be embedded into a {@link Resource}.
- * 
+ *
  * @author Oliver Gierke
  */
 public interface EmbeddedWrapper {
@@ -28,30 +31,30 @@ public interface EmbeddedWrapper {
 	 * Returns the rel to be used when embedding. If this returns {@literal null}, the rel will be calculated based on the
 	 * type returned by {@link #getRelTargetType()}. A wrapper returning {@literal null} for both {@link #getRel()} and
 	 * {@link #getRelTargetType()} is considered invalid.
-	 * 
+	 *
 	 * @return
 	 * @see #getRelTargetType()
 	 */
-	String getRel();
+	Optional<LinkRelation> getRel();
 
 	/**
 	 * Returns whether the wrapper has the given rel.
-	 * 
+	 *
 	 * @param rel can be {@literal null}.
 	 * @return
 	 */
-	boolean hasRel(String rel);
+	boolean hasRel(LinkRelation rel);
 
 	/**
 	 * Returns whether the wrapper is a collection value.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isCollectionValue();
 
 	/**
 	 * Returns the actual value to embed.
-	 * 
+	 *
 	 * @return
 	 */
 	Object getValue();
@@ -60,7 +63,7 @@ public interface EmbeddedWrapper {
 	 * Returns the type to be used to calculate a type based rel. Can return {@literal null} in case an explicit rel is
 	 * returned in {@link #getRel()}. A wrapper returning {@literal null} for both {@link #getRel()} and
 	 * {@link #getRelTargetType()} is considered invalid.
-	 * 
+	 *
 	 * @return
 	 */
 	Class<?> getRelTargetType();

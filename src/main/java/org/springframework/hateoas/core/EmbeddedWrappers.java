@@ -17,14 +17,16 @@ package org.springframework.hateoas.core;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Resource;
 import org.springframework.util.Assert;
 
 /**
  * Interface to mark objects that are aware of the rel they'd like to be exposed under.
- * 
+ *
  * @author Oliver Gierke
  */
 public class EmbeddedWrappers {
@@ -33,7 +35,7 @@ public class EmbeddedWrappers {
 
 	/**
 	 * Creates a new {@link EmbeddedWrappers}.
-	 * 
+	 *
 	 * @param preferCollections whether wrappers for single elements should rather treat the value as collection.
 	 */
 	public EmbeddedWrappers(boolean preferCollections) {
@@ -42,7 +44,7 @@ public class EmbeddedWrappers {
 
 	/**
 	 * Creates a new {@link EmbeddedWrapper} that
-	 * 
+	 *
 	 * @param source
 	 * @return
 	 */
@@ -52,7 +54,7 @@ public class EmbeddedWrappers {
 
 	/**
 	 * Creates an {@link EmbeddedWrapper} for an empty {@link Collection} with the given element type.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @return
 	 */
@@ -62,13 +64,13 @@ public class EmbeddedWrappers {
 
 	/**
 	 * Creates a new {@link EmbeddedWrapper} with the given rel.
-	 * 
+	 *
 	 * @param source can be {@literal null}, will return {@literal null} if so.
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public EmbeddedWrapper wrap(Object source, String rel) {
+	public EmbeddedWrapper wrap(Object source, LinkRelation rel) {
 
 		if (source == null) {
 			return null;
@@ -91,40 +93,42 @@ public class EmbeddedWrappers {
 
 	private static abstract class AbstractEmbeddedWrapper implements EmbeddedWrapper {
 
-		private static final String NO_REL = "___norel___";
+		private static final LinkRelation NO_REL = LinkRelation.of("___norel___");
 
-		private final String rel;
+		private final LinkRelation rel;
 
 		/**
 		 * Creates a new {@link AbstractEmbeddedWrapper} with the given rel.
-		 * 
+		 *
 		 * @param rel must not be {@literal null} or empty.
 		 */
-		public AbstractEmbeddedWrapper(String rel) {
+		public AbstractEmbeddedWrapper(LinkRelation rel) {
 
-			Assert.hasText(rel, "Rel must not be null or empty!");
+			Assert.notNull(rel, "Rel must not be null or empty!");
 			this.rel = rel;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.hal.EmbeddedWrapper#getRel()
 		 */
 		@Override
-		public String getRel() {
-			return NO_REL.equals(rel) ? null : rel;
+		public Optional<LinkRelation> getRel() {
+
+			return Optional.ofNullable(rel) //
+					.filter(it -> !it.equals(NO_REL));
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.EmbeddedWrapper#hasRel(java.lang.String)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#hasRel(org.springframework.hateoas.LinkRelation)
 		 */
 		@Override
-		public boolean hasRel(String rel) {
-			return this.rel.equals(rel);
+		public boolean hasRel(LinkRelation rel) {
+			return this.rel.isSameAs(rel);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.hal.EmbeddedWrapper#getRelTargetType()
 		 */
@@ -145,7 +149,7 @@ public class EmbeddedWrappers {
 
 		/**
 		 * Peek into the wrapped element. The object returned is used to determine the actual value type of the wrapper.
-		 * 
+		 *
 		 * @return
 		 */
 		protected abstract Object peek();
@@ -161,19 +165,19 @@ public class EmbeddedWrappers {
 		private final Object value;
 
 		/**
-		 * Creates a new {@link EmbeddedElement} for the given value and rel.
-		 * 
+		 * Creates a new {@link EmbeddedElement} for the given value and link relation.
+		 *
 		 * @param value must not be {@literal null}.
-		 * @param rel must not be {@literal null} or empty.
+		 * @param relation must not be {@literal null}.
 		 */
-		public EmbeddedElement(Object value, String rel) {
+		public EmbeddedElement(Object value, LinkRelation relation) {
 
-			super(rel);
+			super(relation);
 			Assert.notNull(value, "Value must not be null!");
 			this.value = value;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.hal.EmbeddedWrapper#getValue()
 		 */
@@ -182,7 +186,7 @@ public class EmbeddedWrappers {
 			return value;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.EmbeddedWrappers.AbstractElementWrapper#peek()
 		 */
@@ -191,7 +195,7 @@ public class EmbeddedWrappers {
 			return getValue();
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.hal.EmbeddedWrapper#isCollectionValue()
 		 */
@@ -214,7 +218,7 @@ public class EmbeddedWrappers {
 		 * @param value must not be {@literal null} or empty.
 		 * @param rel must not be {@literal null} or empty.
 		 */
-		public EmbeddedCollection(Collection<Object> value, String rel) {
+		public EmbeddedCollection(Collection<Object> value, LinkRelation rel) {
 
 			super(rel);
 
@@ -227,7 +231,7 @@ public class EmbeddedWrappers {
 			this.value = value;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.hal.EmbeddedWrapper#getValue()
 		 */
@@ -267,7 +271,7 @@ public class EmbeddedWrappers {
 
 		/**
 		 * Creates a new {@link EmptyCollectionEmbeddedWrapper}.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 */
 		public EmptyCollectionEmbeddedWrapper(Class<?> type) {
@@ -276,16 +280,16 @@ public class EmbeddedWrappers {
 			this.type = type;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getRel()
 		 */
 		@Override
-		public String getRel() {
-			return null;
+		public Optional<LinkRelation> getRel() {
+			return Optional.empty();
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getValue()
 		 */
@@ -294,7 +298,7 @@ public class EmbeddedWrappers {
 			return Collections.emptySet();
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getRelTargetType()
 		 */
@@ -303,7 +307,7 @@ public class EmbeddedWrappers {
 			return type;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.core.EmbeddedWrapper#isCollectionValue()
 		 */
@@ -312,12 +316,12 @@ public class EmbeddedWrappers {
 			return true;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.core.EmbeddedWrapper#hasRel(java.lang.String)
+		 * @see org.springframework.hateoas.core.EmbeddedWrapper#hasRel(org.springframework.hateoas.LinkRelation)
 		 */
 		@Override
-		public boolean hasRel(String rel) {
+		public boolean hasRel(LinkRelation rel) {
 			return false;
 		}
 	}

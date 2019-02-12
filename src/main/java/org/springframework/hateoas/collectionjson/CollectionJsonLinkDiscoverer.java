@@ -16,23 +16,23 @@
 package org.springframework.hateoas.collectionjson;
 
 import java.io.InputStream;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
 
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
+import org.springframework.util.Assert;
 
 /**
- * {@link LinkDiscoverer} implementation based on JSON Collection link structure.
- *
- * NOTE: Since links can appear in two different places in a Collection+JSON document, this discoverer
- * uses two.
+ * {@link LinkDiscoverer} implementation based on JSON Collection link structure. NOTE: Since links can appear in two
+ * different places in a Collection+JSON document, this discoverer uses two.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 
@@ -41,77 +41,94 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 	public CollectionJsonLinkDiscoverer() {
 
 		super("$.collection..links..[?(@.rel == '%s')].href", MediaTypes.COLLECTION_JSON);
+
 		this.selfLinkDiscoverer = new CollectionJsonSelfLinkDiscoverer();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.JsonPathLinkDiscoverer#findLinkWithRel(org.springframework.hateoas.LinkRelation, java.lang.String)
+	 */
 	@Override
-	public Link findLinkWithRel(String rel, String representation) {
+	public Optional<Link> findLinkWithRel(LinkRelation relation, String representation) {
 
-		if (rel.equals(IanaLinkRelation.SELF.value())) {
-			return findSelfLink(representation);
-		} else {
-			return super.findLinkWithRel(rel, representation);
-		}
+		Assert.notNull(relation, "LinkRelation must not be null!");
+		Assert.notNull(representation, "Representation must not be null!");
+
+		return relation.isSameAs(IanaLinkRelations.SELF) //
+				? findSelfLink(representation) //
+				: super.findLinkWithRel(relation, representation);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkDiscoverer#findLinkWithRel(java.lang.String, java.io.InputStream)
+	 */
 	@Override
-	public Link findLinkWithRel(String rel, InputStream representation) {
+	public Optional<Link> findLinkWithRel(LinkRelation relation, InputStream representation) {
 
-		if (rel.equals(IanaLinkRelation.SELF.value())) {
-			return findSelfLink(representation);
-		} else {
-			return super.findLinkWithRel(rel, representation);
-		}
+		Assert.notNull(relation, "LinkRelation must not be null!");
+		Assert.notNull(representation, "InputStream must not be null!");
+
+		return relation.isSameAs(IanaLinkRelations.SELF) //
+				? findSelfLink(representation) //
+				: super.findLinkWithRel(relation, representation);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.JsonPathLinkDiscoverer#findLinksWithRel(org.springframework.hateoas.LinkRelation, java.lang.String)
+	 */
 	@Override
-	public List<Link> findLinksWithRel(String rel, String representation) {
+	public Links findLinksWithRel(LinkRelation relation, String representation) {
 
-		if (rel.equals(IanaLinkRelation.SELF.value())) {
-			return addSelfLink(super.findLinksWithRel(rel, representation), representation);
-		} else {
-			return super.findLinksWithRel(rel, representation);
-		}
+		Assert.notNull(relation, "LinkRelation must not be null!");
+		Assert.notNull(representation, "Representation must not be null!");
+
+		return relation.isSameAs(IanaLinkRelations.SELF) //
+				? addSelfLink(super.findLinksWithRel(relation, representation), representation) //
+				: super.findLinksWithRel(relation, representation);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.core.JsonPathLinkDiscoverer#findLinksWithRel(org.springframework.hateoas.LinkRelation, java.io.InputStream)
+	 */
 	@Override
-	public List<Link> findLinksWithRel(String rel, InputStream representation) {
+	public Links findLinksWithRel(LinkRelation relation, InputStream representation) {
 
-		if (rel.equals(IanaLinkRelation.SELF.value())) {
-			return addSelfLink(super.findLinksWithRel(rel, representation), representation);
-		} else {
-			return super.findLinksWithRel(rel, representation);
-		}
+		return relation.isSameAs(IanaLinkRelations.SELF) //
+				? addSelfLink(super.findLinksWithRel(relation, representation), representation) //
+				: super.findLinksWithRel(relation, representation);
+
 	}
 
 	//
 	// Internal methods to support discovering the "self" link found at "$.collection.href".
 	//
 
-	private Link findSelfLink(String representation) {
-		return this.selfLinkDiscoverer.findLinkWithRel(IanaLinkRelation.SELF.value(), representation);
+	private Optional<Link> findSelfLink(String representation) {
+		return this.selfLinkDiscoverer.findLinkWithRel(IanaLinkRelations.SELF, representation);
 	}
 
-	private Link findSelfLink(InputStream representation) {
-		return this.selfLinkDiscoverer.findLinkWithRel(IanaLinkRelation.SELF.value(), representation);
+	private Optional<Link> findSelfLink(InputStream representation) {
+		return this.selfLinkDiscoverer.findLinkWithRel(IanaLinkRelations.SELF, representation);
 	}
 
-	private List<Link> addSelfLink(List<Link> links, String representation) {
+	private Links addSelfLink(Links links, String representation) {
 
-		return Stream.concat(
-			Stream.of(findSelfLink(representation)),
-			links.stream()
-		)
-		.collect(Collectors.toList());
+		return findSelfLink(representation) //
+				.map(Links::of) //
+				.map(it -> it.and(links)) //
+				.orElseGet(() -> links);
 	}
 
-	private List<Link> addSelfLink(List<Link> links, InputStream representation) {
+	private Links addSelfLink(Links links, InputStream representation) {
 
-		return Stream.concat(
-			Stream.of(findSelfLink(representation)),
-			links.stream()
-		)
-		.collect(Collectors.toList());
+		return findSelfLink(representation) //
+				.map(Links::of) //
+				.map(it -> it.and(links)) //
+				.orElseGet(() -> links);
 	}
 
 	/**

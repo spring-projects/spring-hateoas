@@ -16,14 +16,13 @@
 
 package org.springframework.hateoas.uber;
 
-import static org.springframework.hateoas.uber.Jackson2UberModule.*;
-
 import java.util.Arrays;
 
+import org.springframework.hateoas.uber.Jackson2UberModule.UberActionDeserializer;
 import org.springframework.http.HttpMethod;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Embodies possible actions for an {@literal UBER+JSON} representation, mapped onto {@link HttpMethod}s.
@@ -32,7 +31,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Greg Turnquist
  * @since 1.0
  */
-@JsonSerialize(using = UberActionSerializer.class)
 @JsonDeserialize(using = UberActionDeserializer.class)
 enum UberAction {
 
@@ -55,7 +53,7 @@ enum UberAction {
 	 * DELETE
 	 */
 	REMOVE(HttpMethod.DELETE),
-	
+
 	/**
 	 * PUT
 	 */
@@ -76,23 +74,24 @@ enum UberAction {
 		return this.httpMethod;
 	}
 
+	@JsonValue
 	@Override
 	public String toString() {
 		return this.name().toLowerCase();
 	}
 
-
 	/**
 	 * Convert an {@link HttpMethod} into an {@link UberAction}.
+	 *
 	 * @param method
 	 * @return
 	 */
 	static UberAction fromMethod(HttpMethod method) {
 
-		return Arrays.stream(UberAction.values())
-			.filter(action -> action.httpMethod == method)
-			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("Unsupported method: " + method));
+		return Arrays.stream(UberAction.values()) //
+				.filter(action -> action.httpMethod == method) //
+				.findFirst() //
+				.orElseThrow(() -> new IllegalArgumentException("Unsupported method: " + method));
 	}
 
 	/**

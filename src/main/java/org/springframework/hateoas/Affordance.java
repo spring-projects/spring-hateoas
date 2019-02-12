@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Value;
 
 import java.util.HashMap;
@@ -42,8 +44,18 @@ public class Affordance {
 	/**
 	 * Collection of {@link AffordanceModel}s related to this affordance.
 	 */
-	private final Map<MediaType, AffordanceModel> affordanceModels = new HashMap<>();
+	private final @Getter(AccessLevel.PACKAGE) Map<MediaType, AffordanceModel> affordanceModels = new HashMap<>();
 
+	/**
+	 * Creates a new {@link Affordance}.
+	 *
+	 * @param name
+	 * @param link
+	 * @param httpMethod
+	 * @param inputType
+	 * @param queryMethodParameters
+	 * @param outputType
+	 */
 	public Affordance(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
 			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 
