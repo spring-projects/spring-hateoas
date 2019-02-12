@@ -25,14 +25,18 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelation;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.MappingUtils;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -52,6 +56,7 @@ public class CollectionJsonSpecTest {
 	public void setUp() {
 
 		mapper = new ObjectMapper();
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2CollectionJsonModule());
 		mapper.setHandlerInstantiator(new Jackson2CollectionJsonModule.CollectionJsonHandlerInstantiator(null));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
@@ -190,9 +195,13 @@ public class CollectionJsonSpecTest {
 	@Test
 	public void specPart7() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7.json", getClass()));
+		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 
-		// TODO: Come up with a way to verify this JSON spec can be used to create a new resource.
+		Resource<Employee> resource = mapper.readValue(specBasedJson,
+			mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
+
+		assertThat(resource.getContent()).isEqualTo(new Employee("W. Chandry", "developer"));
+		assertThat(resource.getLinks()).isEmpty();
 	}
 
 	@Data

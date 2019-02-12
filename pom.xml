@@ -85,33 +85,7 @@
 	</properties>
 
 	<profiles>
-
-		<profile>
-			<id>spring5-next</id>
-			<properties>
-			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>spring51-next</id>
-			<properties>
-			</properties>
-			<dependencies>
-			</dependencies>
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
-				</repository>
-			</repositories>
-		</profile>
-
+		
 		<profile>
 
 			<!-- Profile to be run on the CI server, JARs JavaDocs -->
@@ -651,6 +625,12 @@
 		<dependency>
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor.addons</groupId>
+			<artifactId>reactor-extra</artifactId>
 			<scope>test</scope>
 		</dependency>
 		

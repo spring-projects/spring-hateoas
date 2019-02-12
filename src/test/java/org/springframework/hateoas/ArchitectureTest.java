@@ -39,7 +39,7 @@ public class ArchitectureTest {
 	public void assertNoCyclicPackageDependencies() {
 
 		SliceRule rule = SlicesRuleDefinition.slices() //
-				.matching("org.springframework.(**)..") //
+				.matching("org.springframework.hateoas.(**)..") //
 				.should().beFreeOfCycles();
 
 		rule.check(classes);

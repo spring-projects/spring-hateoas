@@ -30,6 +30,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -72,6 +74,13 @@ public class PropertyUtils {
 	}
 	
 	public static List<String> findPropertyNames(ResolvableType resolvableType) {
+
+		if (WebStack.WEBFLUX.isAvailable()) {
+			if (resolvableType.getRawClass().equals(Mono.class) || resolvableType.getRawClass().equals(Flux.class)) {
+				ResolvableType generic = resolvableType.getGeneric(0);
+				return findPropertyNames(generic);
+			}
+		}
 
 		if (resolvableType.getRawClass().equals(Resource.class)) {
 			return findPropertyNames(resolvableType.resolveGeneric(0));

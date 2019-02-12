@@ -20,7 +20,7 @@ import static org.springframework.hateoas.reactive.HypermediaWebFilter.*;
 import reactor.core.publisher.Mono;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
-import org.springframework.hateoas.core.WebHandler;
+import org.springframework.hateoas.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
 

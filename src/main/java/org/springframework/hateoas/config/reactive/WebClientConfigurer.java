@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
@@ -82,25 +83,22 @@ public class WebClientConfigurer implements BeanFactoryAware {
 		List<Encoder<?>> encoders = new ArrayList<>();
 		List<Decoder<?>> decoders = new ArrayList<>();
 
-		if (this.hypermediaTypes.stream().anyMatch(HypermediaType::isHalBasedMediaType)) {
+		if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
 
-			if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
+			ObjectMapper halObjectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
+				linkRelationMessageSource, this.halConfiguration);
 
-				ObjectMapper halObjectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
-					linkRelationMessageSource, this.halConfiguration);
+			encoders.add(new Jackson2JsonEncoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
+			decoders.add(new Jackson2JsonDecoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
+		}
 
-				encoders.add(new Jackson2JsonEncoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-				decoders.add(new Jackson2JsonDecoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-			}
+		if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
 
-			if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
+			ObjectMapper halFormsObjectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
+				this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
 
-				ObjectMapper halFormsObjectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
-					this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
-
-				encoders.add(new Jackson2JsonEncoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-				decoders.add(new Jackson2JsonDecoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-			}
+			encoders.add(new Jackson2JsonEncoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
+			decoders.add(new Jackson2JsonDecoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
 		}
 
 		if (this.hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
@@ -119,7 +117,7 @@ public class WebClientConfigurer implements BeanFactoryAware {
 			decoders.add(new Jackson2JsonDecoder(uberObjectMapper, MediaTypes.UBER_JSON));
 		}
 
-		// Include ability to decode into a plain string
+		encoders.add(CharSequenceEncoder.allMimeTypes());
 		decoders.add(StringDecoder.allMimeTypes());
 
 		return ExchangeStrategies.builder()

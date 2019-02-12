@@ -86,6 +86,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
 		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
 	}
 
 	/**
@@ -99,6 +102,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_FORMS_JSON);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
 	}
 
 	/**
@@ -112,6 +118,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifyRootUriServesHypermedia(MediaTypes.COLLECTION_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.COLLECTION_JSON);
 		verifySingleItemResourceServesHypermedia(MediaTypes.COLLECTION_JSON);
+
+		verifyCreatingNewEntityWorks(MediaTypes.COLLECTION_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.COLLECTION_JSON);
 	}
 
 	/**
@@ -125,6 +134,9 @@ public class HypermediaWebFluxConfigurerTest {
 		verifyRootUriServesHypermedia(MediaTypes.UBER_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.UBER_JSON);
 		verifySingleItemResourceServesHypermedia(MediaTypes.UBER_JSON);
+
+		verifyCreatingNewEntityWorks(MediaTypes.UBER_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.UBER_JSON);
 	}
 
 	/**
@@ -142,6 +154,21 @@ public class HypermediaWebFluxConfigurerTest {
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_FORMS_JSON);
+	}
+
+	/**
+	 * @see  #728
+	 */
+	@Test
+	public void registeringHalAndHalFormsShouldAllowCreatingViaHalAndHalForms() {
+
+		setUp(AllHalWebFluxConfig.class);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
 	}
 
 	/**
@@ -169,6 +196,24 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see  #728
 	 */
 	@Test
+	public void registeringHalAndCollectionJsonShouldAllowCreatingViaHalAndCollectionJson() {
+
+		setUp(HalAndCollectionJsonWebFluxConfig.class);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
+		
+		verifyCreatingNewEntityWorks(MediaTypes.COLLECTION_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.COLLECTION_JSON);
+	}
+
+	/**
+	 * @see  #728
+	 */
+	@Test
 	public void registeringAllHypermediaTypesShouldServerThemAll() {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
@@ -188,6 +233,27 @@ public class HypermediaWebFluxConfigurerTest {
 		verifyRootUriServesHypermedia(MediaTypes.UBER_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.UBER_JSON);
 		verifySingleItemResourceServesHypermedia(MediaTypes.UBER_JSON);
+	}
+
+	/**
+	 * @see  #728
+	 */
+	@Test
+	public void registeringAllHypermediaTypesShouldAllowCreatingThroughAllFormats() {
+
+		setUp(AllHypermediaTypesWebFluxConfig.class);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
+
+		verifyCreatingNewEntityWorks(MediaTypes.COLLECTION_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.COLLECTION_JSON);
+
+		verifyCreatingNewEntityWorks(MediaTypes.UBER_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.UBER_JSON);
 	}
 
 	/**
@@ -269,7 +335,6 @@ public class HypermediaWebFluxConfigurerTest {
 			.getResponseBody()
 			.as(StepVerifier::create)
 			.expectNextMatches(employee -> {
-				System.out.println(employee);
 
 				assertThat(employee.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 				
@@ -371,7 +436,63 @@ public class HypermediaWebFluxConfigurerTest {
 			})
 			.verifyComplete();
 	}
-	
+
+	private void verifyCreatingNewEntityWorks(MediaType mediaType) {
+		verifyCreatingNewEntityWorks(mediaType, mediaType);
+	}
+
+	private void verifyCreatingNewEntityWorks(MediaType contentType, MediaType responseType) {
+
+		this.testClient.post().uri("/employees")
+			.accept(contentType)
+			.contentType(contentType)
+			.body(Mono.just(new Employee("Samwise Gamgee", "gardener")), Employee.class)
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType(responseType)
+			.returnResult(this.resourceEmployeeType)
+			.getResponseBody()
+			.as(StepVerifier::create)
+			.expectNextMatches(resource -> {
+
+				assertThat(resource.getContent()).isEqualTo(new Employee("Samwise Gamgee", "gardener"));
+				assertThat(resource.getLinks()).containsExactlyInAnyOrder(
+					new Link("/employees/1", IanaLinkRelation.SELF.value()),
+					new Link("/employees", "employees"));
+
+				return true;
+			})
+			.verifyComplete();
+	}
+
+	private void verifyCreatingNewEntityReactivelyShouldWork(MediaType mediaType) {
+		verifyCreatingNewEntityReactivelyShouldWork(mediaType, mediaType);
+	}
+
+	private void verifyCreatingNewEntityReactivelyShouldWork(MediaType contentType, MediaType responseType) {
+		
+		this.testClient.post().uri("/reactive/employees")
+			.accept(contentType)
+			.contentType(contentType)
+			.body(Mono.just(new Employee("Samwise Gamgee", "gardener")), Employee.class)
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType(responseType)
+			.returnResult(this.resourceEmployeeType)
+			.getResponseBody()
+			.as(StepVerifier::create)
+			.expectNextMatches(resource -> {
+
+				assertThat(resource.getContent()).isEqualTo(new Employee("Samwise Gamgee", "gardener"));
+				assertThat(resource.getLinks()).containsExactlyInAnyOrder(
+					new Link("/employees/1", IanaLinkRelation.SELF.value()),
+					new Link("/employees", "employees"));
+				
+				return true;
+			})
+			.verifyComplete();
+	}
+
 	@Configuration
 	@EnableWebFlux
 	static abstract class BaseConfig {
@@ -471,6 +592,18 @@ public class HypermediaWebFluxConfigurerTest {
 				.collectList()
 				.map(employees -> this.assembler.toResources(employees));
 		}
+
+		@PostMapping("/reactive/employees")
+		Mono<Resource<Employee>> reactiveNewEmployee(@RequestBody Mono<Employee> newEmployee) {
+
+			return newEmployee
+				.map(employee -> {
+					this.employees.add(employee);
+					return employee;
+				})
+				.map(this.assembler::toResource);
+		}
+
 
 		@GetMapping("/reactive/employees/{id}")
 		Mono<Resource<Employee>> reactiveEmployee(@PathVariable String id) {

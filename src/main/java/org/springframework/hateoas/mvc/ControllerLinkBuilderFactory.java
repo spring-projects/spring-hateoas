@@ -28,7 +28,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MethodLinkBuilderFactory;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MethodParameters;
-import org.springframework.hateoas.core.WebHandler;
+import org.springframework.hateoas.WebHandler;
 
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.

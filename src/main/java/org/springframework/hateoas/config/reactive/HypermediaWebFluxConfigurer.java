@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -95,29 +96,26 @@ public class HypermediaWebFluxConfigurer implements WebFluxConfigurer, BeanFacto
 
 		CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
 
-		if (this.hypermediaTypes.stream().anyMatch(HypermediaType::isHalBasedMediaType)) {
+		if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
 
-			if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
+			ObjectMapper halObjectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
+				linkRelationMessageSource, this.halConfiguration);
 
-				ObjectMapper halObjectMapper = createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider,
-					linkRelationMessageSource, this.halConfiguration);
+			customCodecs.encoder(
+				new Jackson2JsonEncoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
+			customCodecs.decoder(
+				new Jackson2JsonDecoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
+		}
 
-				customCodecs.encoder(
-					new Jackson2JsonEncoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-				customCodecs.decoder(
-					new Jackson2JsonDecoder(halObjectMapper, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
-			}
+		if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
 
-			if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
+			ObjectMapper halFormsObjectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
+				this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
 
-				ObjectMapper halFormsObjectMapper = createHalFormsObjectMapper(this.mapper, this.curieProvider,
-					this.relProvider, linkRelationMessageSource, this.halFormsConfiguration);
-
-				customCodecs.encoder(
-					new Jackson2JsonEncoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-				customCodecs.decoder(
-					new Jackson2JsonDecoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
-			}
+			customCodecs.encoder(
+				new Jackson2JsonEncoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
+			customCodecs.decoder(
+				new Jackson2JsonDecoder(halFormsObjectMapper, MediaTypes.HAL_FORMS_JSON));
 		}
 
 		if (this.hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
@@ -140,6 +138,7 @@ public class HypermediaWebFluxConfigurer implements WebFluxConfigurer, BeanFacto
 				new Jackson2JsonDecoder(uberObjectMapper, MediaTypes.UBER_JSON));
 		}
 
+		customCodecs.encoder(CharSequenceEncoder.allMimeTypes());
 		customCodecs.decoder(StringDecoder.allMimeTypes());
 
 		configurer.registerDefaults(false);

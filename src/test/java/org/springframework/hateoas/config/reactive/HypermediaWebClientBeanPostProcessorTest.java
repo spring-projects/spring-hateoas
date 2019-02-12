@@ -68,7 +68,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	}
 
 	@After
-	public void tearDown() throws IOException {
+	public void tearDown() {
 
 		if (this.server != null) {
 			this.server.close();
