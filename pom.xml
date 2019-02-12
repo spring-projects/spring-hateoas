@@ -68,11 +68,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.18.RELEASE</spring.version>
+		<spring.version>4.3.22.RELEASE</spring.version>
 		<logback.version>1.1.11</logback.version>
-		<jacoco>0.7.8</jacoco>
+		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.8.11.20180608</jackson.version>
+		<jackson.version>2.8.11.20181123</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
@@ -87,7 +87,7 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.19.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.23.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -100,7 +100,7 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.11.RELEASE</spring.version>
+				<spring.version>5.0.12.RELEASE</spring.version>
 				<jackson.version>2.9.7</jackson.version>
 			</properties>
 		</profile>
@@ -108,8 +108,8 @@
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.8.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.7</jackson.version>
+				<spring.version>5.0.13.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.9.8</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -122,16 +122,16 @@
 		<profile>
 			<id>spring51</id>
 			<properties>
-				<spring.version>5.1.3.RELEASE</spring.version>
-				<jackson.version>2.9.7</jackson.version>
+				<spring.version>5.1.4.RELEASE</spring.version>
+				<jackson.version>2.9.8</jackson.version>
 			</properties>
 		</profile>
 
 		<profile>
 			<id>spring51-next</id>
 			<properties>
-				<spring.version>5.1.0.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.7</jackson.version>
+				<spring.version>5.1.5.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.9.8</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -548,7 +548,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.0</version>
+			<version>1.18.6</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -704,7 +704,7 @@
 					<header>${project.name}</header>
 					<source>${source.level}</source>
 					<quiet>true</quiet>
-					<additionalparam>-Xdoclint:none</additionalparam>
+					<doclint>none</doclint>
 					<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
 					<links>
 						<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
