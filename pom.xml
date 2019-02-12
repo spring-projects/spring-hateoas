@@ -153,7 +153,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
 						<executions>
 							<execution>
 								<goals>
@@ -642,6 +641,28 @@
 			</extension>
 		</extensions>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.0.1</version>
+					<configuration>
+						<breakiterator>true</breakiterator>
+						<header>${project.name}</header>
+						<source>${source.level}</source>
+						<quiet>true</quiet>
+						<doclint>none</doclint>
+						<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
+						<links>
+							<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
+							<link>http://docs.oracle.com/javase/6/docs/api</link>
+						</links>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -698,19 +719,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.1</version>
-				<configuration>
-					<breakiterator>true</breakiterator>
-					<header>${project.name}</header>
-					<source>${source.level}</source>
-					<quiet>true</quiet>
-					<doclint>none</doclint>
-					<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
-					<links>
-						<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
-						<link>http://docs.oracle.com/javase/6/docs/api</link>
-					</links>
-				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -737,6 +745,7 @@
 			</plugin>
 
 		</plugins>
+
 	</build>
 
 	<pluginRepositories>
