@@ -27,7 +27,7 @@ WARNING: Do NOT check this file into source control! If you'll check, `credentia
 With this in place, run the following `fly` commands to create pipelines:
 
 ----
-% fly -t spring-data sp -p spring-hateoas -c ci/pipeline-template.yml -l credentials.yml -v branch=master
+% fly -t spring-data sp -p spring-hateoas -c ci/pipeline-template.yml -l credentials.yml -v branch=0.25.x -v release-branch=release-0.25.x
 ----
 
 With this pipeline in place, you can now activate and expose it:
@@ -36,3 +36,19 @@ With this pipeline in place, you can now activate and expose it:
 % fly -t spring-data unpause-pipeline -p spring-hateoas
 % fly -t spring-data expose-pipeline -p spring-hateoas
 ----
+
+=== Making a release
+
+1. Create a new release (on the main branch).
+----
+% ci/create-release.sh <release version> <next snapshot version>
+----
+
+2. With the release tagged, push the tagged version to the release branch.
+----
+% git checkout -b release-0.25.x
+% git reset --hard <tag>
+% git push -f origin release-0.25.x
+----
+
+NOTE: You can chain the previous set of commands together using `&&`.
