@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ForwardedHeader.*;
-
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
@@ -28,7 +26,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModelFactory;
@@ -311,31 +308,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			return UriComponentsBuilder.fromPath("/");
 		}
 
-		HttpServletRequest request = getCurrentRequest();
-		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
-
-		// Spring 5.1 can handle X-Forwarded-Ssl headers...
-		if (isSpringAtLeast5_1()) {
-			return builder;
-		} else {
-			return handleXForwardedSslHeader(request, builder);
-		}
-	}
-
-	/**
-	 * Check if the current version of Spring Framework is 5.1 or higher.
-	 * 
-	 * @return
-	 */
-	private static boolean isSpringAtLeast5_1() {
-
-		String versionOfSpringFramework = ApplicationContext.class.getPackage().getImplementationVersion();
-
-		String[] parts = versionOfSpringFramework.split("\\.");
-		int majorVersion = Integer.parseInt(parts[0]);
-		int minorVersion = Integer.parseInt(parts[1]);
-
-		return (majorVersion >= 5 && minorVersion >= 1) || (majorVersion > 5);
+		return ServletUriComponentsBuilder.fromServletMapping(getCurrentRequest());
 	}
 
 	/**
