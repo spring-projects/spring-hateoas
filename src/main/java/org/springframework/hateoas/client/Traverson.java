@@ -74,7 +74,7 @@ public class Traverson {
 
 	static {
 		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.of(Arrays.asList(discoverer)));
 	}
 
 	private final URI baseUri;
@@ -208,7 +208,7 @@ public class Traverson {
 	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
 
 		this.discoverers = this.discoverers == null ? DEFAULT_LINK_DISCOVERERS
-				: new LinkDiscoverers(OrderAwarePluginRegistry.create(discoverer));
+				: new LinkDiscoverers(OrderAwarePluginRegistry.of(discoverer));
 
 		return this;
 	}

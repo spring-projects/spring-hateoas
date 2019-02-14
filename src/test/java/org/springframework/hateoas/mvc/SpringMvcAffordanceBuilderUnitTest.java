@@ -45,7 +45,7 @@ public class SpringMvcAffordanceBuilderUnitTest {
 		AffordanceModelFactory high = new HighPriorityModelFactory();
 
 		PluginRegistry<AffordanceModelFactory, MediaType> registry = OrderAwarePluginRegistry
-				.create(Arrays.asList(low, high));
+				.of(Arrays.asList(low, high));
 
 		assertThat(registry.getPluginFor(MediaType.APPLICATION_JSON).get()).isEqualTo(high);
 	}
