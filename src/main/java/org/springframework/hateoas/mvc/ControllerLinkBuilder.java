@@ -79,7 +79,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 				ControllerLinkBuilder.class.getClassLoader());
 
 		PluginRegistry<? extends AffordanceModelFactory, MediaType> MODEL_FACTORIES = OrderAwarePluginRegistry
-				.create(factories);
+				.of(factories);
 	}
 
 	private final TemplateVariables variables;
