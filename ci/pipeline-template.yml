@@ -85,8 +85,14 @@ groups:
 - name: spring-hateoas
   jobs:
   - Test - JDK 8
+  - Test - JDK 8 and Spring 5.1 (snapshots)
+  - Test - JDK 8 and Spring 5.2 (snapshots)
   - Test - JDK 11
+  - Test - JDK 11 and Spring 5.1 (snapshots)
+  - Test - JDK 11 and Spring 5.2 (snapshots)
   - Test - JDK 13
+  - Test - JDK 13 and Spring 5.1 (snapshots)
+  - Test - JDK 13 and Spring 5.2 (snapshots)
   - Build
 - name: pull-requests
   jobs:
@@ -111,6 +117,32 @@ jobs:
     params: { PROFILE: "non-existent" }
   <<: *slack-test-failure
 
+- name: Test - JDK 8 and Spring 5.1 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-test-failure
+
+- name: Test - JDK 8 and Spring 5.2 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring52-next" }
+  <<: *slack-test-failure
+
 - name: Test - JDK 11
   serial: true
   public: true
@@ -123,6 +155,34 @@ jobs:
     image: openjdk:11-jdk
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "non-existant" }
+  <<: *slack-test-failure
+
+- name: Test - JDK 11 and Spring 5.1 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:11-jdk
+    trigger: true
+  - task: test
+    image: openjdk:11-jdk
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-test-failure
+
+- name: Test - JDK 11 and Spring 5.2 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:11-jdk
+    trigger: true
+  - task: test
+    image: openjdk:11-jdk
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring52-next" }
   <<: *slack-test-failure
 
 - name: Test - JDK 13
@@ -139,6 +199,34 @@ jobs:
     params: { PROFILE: "non-existant" }
   <<: *slack-test-failure
 
+- name: Test - JDK 13 and Spring 5.1 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:13-jdk
+    trigger: true
+  - task: test
+    image: openjdk:13-jdk
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-test-failure
+
+- name: Test - JDK 13 and Spring 5.2 (snapshots)
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+  - get: openjdk:13-jdk
+    trigger: true
+  - task: test
+    image: openjdk:13-jdk
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring52-next" }
+  <<: *slack-test-failure
+
 - name: Build
   serial: true
   public: true
@@ -147,8 +235,14 @@ jobs:
     trigger: true
     passed: [
       Test - JDK 8,
+      Test - JDK 8 and Spring 5.1 (snapshots),
+      Test - JDK 8 and Spring 5.2 (snapshots),
       Test - JDK 11,
-      Test - JDK 13
+      Test - JDK 11 and Spring 5.1 (snapshots),
+      Test - JDK 11 and Spring 5.2 (snapshots),
+      Test - JDK 13,
+      Test - JDK 13 and Spring 5.1 (snapshots),
+      Test - JDK 13 and Spring 5.2 (snapshots)
     ]
   - put: spring-hateoas-status
     params:
@@ -216,14 +310,36 @@ jobs:
     - task: test (JDK 8)
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "non-existent" }
+    - task: test (JDK 8 and Spring 5.1 snapshots)
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+    - task: test (JDK 8 and Spring 5.2 snapshots)
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring52-next" }
     - task: test (JDK 11)
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "non-existent" }
+    - task: test (JDK 11 and Spring 5.1 snapshots)
+      image: openjdk:11-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+    - task: test (JDK 11 and Spring 5.2 snapshots)
+      image: openjdk:11-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring52-next" }
     - task: test (JDK 13)
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "non-existent" }
+    - task: test (JDK 13 and Spring 5.1 snapshots)
+      image: openjdk:13-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+    - task: test (JDK 13 and Spring 5.2 snapshots)
+      image: openjdk:13-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "spring52-next" }
   on_failure:
     aggregate:
     - put: spring-hateoas-pull-requests
