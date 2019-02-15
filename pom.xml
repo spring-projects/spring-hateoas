@@ -84,35 +84,7 @@
 	</properties>
 
 	<profiles>
-
-		<profile>
-			<id>spring5-next</id>
-			<properties>
-				<spring.version>5.0.12.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.2</jackson.version>
-			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
-				</repository>
-			</repositories>
-		</profile>
-
-		<profile>
-			<id>spring51-next</id>
-			<properties>
-				<spring.version>5.1.4.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.2</jackson.version>
-			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
-				</repository>
-			</repositories>
-		</profile>
-
+		
 		<profile>
 
 			<!-- Profile to be run on the CI server, JARs JavaDocs -->
