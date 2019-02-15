@@ -17,18 +17,12 @@ package org.springframework.hateoas.uber;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.hateoas.support.MappingUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 
 import org.junit.Before;
@@ -41,25 +35,15 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
+import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -75,17 +59,11 @@ public class UberWebMvcIntegrationTest {
 
 	MockMvc mockMvc;
 
-	private static Map<Integer, Employee> EMPLOYEES;
-
 	@Before
 	public void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
-
-		EMPLOYEES = new TreeMap<>();
-
-		EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
-		EMPLOYEES.put(1, new Employee("Bilbo Baggins", "burglar"));
+		WebMvcEmployeeController.reset();
 	}
 
 	/**
@@ -259,162 +237,14 @@ public class UberWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.uber.data[4].data[1].value", is("Samwise Gamgee")));
 	}
 
-	@RestController
-	static class EmployeeController {
-
-		@GetMapping("/employees")
-		public Resources<Resource<Employee>> all() {
-
-			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
-
-			// Fetch each Resource<Employee> using the controller's findOne method.
-			for (int i = 0; i < EMPLOYEES.size(); i++) {
-				employees.add(findOne(i));
-			}
-
-			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel() //
-					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null))) //
-					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
-
-			// Return the collection of employee resources along with the composite affordance
-			return new Resources<>(employees, selfLink);
-		}
-
-		@GetMapping("/employees/search")
-		public Resources<Resource<Employee>> search(@RequestParam(value = "name", required = false) String name,
-				@RequestParam(value = "role", required = false) String role) {
-
-			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
-
-			// Fetch each Resource<Employee> using the controller's findOne method.
-			for (int i = 0; i < EMPLOYEES.size(); i++) {
-
-				Resource<Employee> employeeResource = findOne(i);
-
-				boolean nameMatches = Optional.ofNullable(name) //
-						.map(s -> employeeResource.getContent().getName().contains(s)) //
-						.orElse(true);
-
-				boolean roleMatches = Optional.ofNullable(role) //
-						.map(s -> employeeResource.getContent().getRole().contains(s)) //
-						.orElse(true);
-
-				if (nameMatches && roleMatches) {
-					employees.add(employeeResource);
-				}
-			}
-
-			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()) //
-					.withSelfRel() //
-					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null))) //
-					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
-
-			// Return the collection of employee resources along with the composite affordance
-			return new Resources<>(employees, selfLink);
-		}
-
-		@GetMapping("/employees/{id}")
-		public Resource<Employee> findOne(@PathVariable Integer id) {
-
-			// Start the affordance with the "self" link, i.e. this method.
-			Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
-
-			// Define final link as means to find entire collection.
-			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
-
-			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id), //
-					findOneLink //
-							.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) // //
-							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))), //
-					employeesLink);
-		}
-
-		@PostMapping("/employees")
-		public ResponseEntity<?> newEmployee(@RequestBody Resource<Employee> employee) {
-
-			int newEmployeeId = EMPLOYEES.size();
-
-			EMPLOYEES.put(newEmployeeId, employee.getContent());
-
-			try {
-				return ResponseEntity.created( //
-						new URI(findOne(newEmployeeId) //
-								.getLink(IanaLinkRelations.SELF.value()) //
-								.map(link -> link.expand().getHref()) //
-								.orElse("") //
-						) //
-				).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		@PutMapping("/employees/{id}")
-		public ResponseEntity<?> updateEmployee(@RequestBody Resource<Employee> employee, @PathVariable Integer id) {
-
-			EMPLOYEES.put(id, employee.getContent());
-
-			try {
-				return ResponseEntity //
-						.noContent() //
-						.location( //
-								new URI(findOne(id) //
-										.getLink(IanaLinkRelations.SELF.value()) //
-										.map(link -> link.expand().getHref()) //
-										.orElse("") //
-								) //
-						).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Resource<Employee> employee,
-				@PathVariable Integer id) {
-
-			Employee oldEmployee = EMPLOYEES.get(id);
-			Employee newEmployee = oldEmployee;
-
-			if (employee.getContent().getName() != null) {
-				newEmployee = newEmployee.withName(employee.getContent().getName());
-			}
-
-			if (employee.getContent().getRole() != null) {
-				newEmployee = newEmployee.withRole(employee.getContent().getRole());
-			}
-
-			EMPLOYEES.put(id, newEmployee);
-
-			try {
-				return ResponseEntity //
-						.noContent() //
-						.location( //
-								new URI(findOne(id) //
-										.getLink(IanaLinkRelations.SELF.value()) //
-										.map(link -> link.expand().getHref()) //
-										.orElse("") //
-								) //
-						).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-	}
-
 	@Configuration
 	@EnableWebMvc
 	@EnableHypermediaSupport(type = { HypermediaType.UBER })
 	static class TestConfig {
 
 		@Bean
-		EmployeeController employeeController() {
-			return new EmployeeController();
+		WebMvcEmployeeController employeeController() {
+			return new WebMvcEmployeeController();
 		}
 	}
 }

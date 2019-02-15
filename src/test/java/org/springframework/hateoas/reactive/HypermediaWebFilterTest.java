@@ -20,14 +20,15 @@ import static org.springframework.hateoas.config.EnableHypermediaSupport.Hyperme
 import static org.springframework.hateoas.core.DummyInvocationUtils.*;
 import static org.springframework.hateoas.reactive.ReactiveLinkBuilder.*;
 
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.ResourceSupport;
@@ -45,7 +46,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 public class HypermediaWebFilterTest {
 
 	WebTestClient testClient;
-	
+
 	@Before
 	public void setUp() {
 
@@ -55,32 +56,28 @@ public class HypermediaWebFilterTest {
 
 		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
 
-		this.testClient = WebTestClient.bindToApplicationContext(ctx).build()
-			.mutate()
-			.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies())
-			.build();
+		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutate()
+				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
 	}
 
 	@Test
 	public void webFilterShouldEmbedExchangeIntoContext() {
 
-		this.testClient.get().uri("http://example.com/api")
-			.accept(MediaTypes.HAL_JSON)
-			.exchange()
-			.expectStatus().isOk()
-			.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8)
-			.returnResult(ResourceSupport.class)
-			.getResponseBody()
-			.as(StepVerifier::create)
-			.expectNextMatches(resourceSupport -> {
+		this.testClient.get().uri("http://example.com/api") //
+				.accept(MediaTypes.HAL_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.returnResult(ResourceSupport.class) //
+				.getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNextMatches(resourceSupport -> {
 
-				assertThat(resourceSupport.getLinks()).containsExactly(
-					new Link("http://example.com/api", IanaLinkRelation.SELF.value()));
+					assertThat(resourceSupport.getLinks())//
+							.containsExactly(new Link("http://example.com/api", IanaLinkRelations.SELF));
 
-				return true;
-			})
-			.verifyComplete();
-
+					return true;
+				}).verifyComplete();
 	}
 
 	@RestController
@@ -90,9 +87,8 @@ public class HypermediaWebFilterTest {
 		@GetMapping
 		Mono<ResourceSupport> root() {
 
-			return linkTo(methodOn(TestController.class).root())
-				.map(ReactiveLinkBuilder::withSelfRel)
-				.map(ResourceSupport::new);
+			return linkTo(methodOn(TestController.class).root()).map(ReactiveLinkBuilder::withSelfRel)
+					.map(ResourceSupport::new);
 		}
 	}
 

@@ -17,6 +17,7 @@ package org.springframework.hateoas.reactive;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
@@ -25,7 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Reactive variant of {@link ResourceAssembler} combined with {@link SimpleResourceAssembler}.
- * 
+ *
  * @author Greg Turnquist
  * @since 1.0
  */
@@ -60,14 +61,14 @@ public interface SimpleReactiveResourceAssembler<T> extends ReactiveResourceAsse
 	 */
 	default Mono<Resources<Resource<T>>> toResources(Flux<? extends T> entities, ServerWebExchange exchange) {
 
-		return entities
-			.flatMap(entity -> toResource(entity, exchange))
-			.collectList()
-			.map(listOfResources -> {
-				Resources<Resource<T>> resources = new Resources<>(listOfResources);
-				addLinks(resources, exchange);
-				return resources;
-			});
+		return entities //
+				.flatMap(entity -> toResource(entity, exchange)) //
+				.collectList() //
+				.map(listOfResources -> {
+					Resources<Resource<T>> resources = new Resources<>(listOfResources);
+					addLinks(resources, exchange);
+					return resources;
+				});
 	}
 
 	/**
@@ -76,5 +77,4 @@ public interface SimpleReactiveResourceAssembler<T> extends ReactiveResourceAsse
 	 * @param resources
 	 */
 	void addLinks(Resources<Resource<T>> resources, ServerWebExchange exchange);
-
 }

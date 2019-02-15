@@ -18,13 +18,14 @@ package org.springframework.hateoas.config.reactive;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
+import reactor.test.StepVerifier;
+
 import java.io.IOException;
 import java.net.URI;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.test.StepVerifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
@@ -52,7 +53,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	public void setUp() {
 
 		this.server = new Server();
-		
+
 		Resource<Actor> actor = new Resource<>(new Actor("Keanu Reaves"));
 		String actorUri = this.server.mockResourceFor(actor);
 
@@ -67,7 +68,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	}
 
 	@After
-	public void tearDown() throws IOException {
+	public void tearDown() {
 
 		if (this.server != null) {
 			this.server.close();
@@ -81,18 +82,17 @@ public class HypermediaWebClientBeanPostProcessorTest {
 
 			WebClient webClient = context.getBean(WebClient.class);
 
-			webClient
-				.get().uri(this.baseUri)
-				.accept(MediaTypes.HAL_JSON)
-				.retrieve()
-				.bodyToMono(ResourceSupport.class)
-				.as(StepVerifier::create)
-				.expectNextMatches(root -> {
-					assertThat(root.getLinks()).hasSize(2);
-					return true;
+			webClient //
+					.get().uri(this.baseUri) //
+					.accept(MediaTypes.HAL_JSON) //
+					.retrieve() //
+					.bodyToMono(ResourceSupport.class) //
+					.as(StepVerifier::create) //
+					.expectNextMatches(root -> { //
+						assertThat(root.getLinks()).hasSize(2);
+						return true;
 
-				})
-				.verifyComplete();
+					}).verifyComplete();
 		});
 	}
 
@@ -105,23 +105,23 @@ public class HypermediaWebClientBeanPostProcessorTest {
 
 			WebClient webClient = context.getBean(WebClient.class);
 
-			webClient
-				.get().uri(this.baseUri)
-				.retrieve()
-				.bodyToMono(ResourceSupport.class)
-				.map(resourceSupport -> resourceSupport.getLink("actors").orElseThrow(() -> new RuntimeException("Link not found!")))
-				.flatMap(link -> webClient
-					.get().uri(link.expand().getHref())
-					.retrieve()
-					.bodyToMono(ResourceSupport.class))
-				.map(resourceSupport -> resourceSupport.getLinks().get(0))
-				.flatMap(link -> webClient
-					.get().uri(link.expand().getHref())
-					.retrieve()
-					.bodyToMono(typeReference))
-				.as(StepVerifier::create)
-				.expectNext(new Resource<>(new Actor("Keanu Reaves")))
-				.verifyComplete();
+			webClient //
+					.get().uri(this.baseUri) //
+					.retrieve() //
+					.bodyToMono(ResourceSupport.class) //
+					.map(resourceSupport -> resourceSupport.getRequiredLink("actors")) //
+					.flatMap(link -> webClient //
+							.get().uri(link.expand().getHref()) //
+							.retrieve() //
+							.bodyToMono(ResourceSupport.class)) //
+					.map(resourceSupport -> resourceSupport.getLinks().toList().get(0)) //
+					.flatMap(link -> webClient //
+							.get().uri(link.expand().getHref()) //
+							.retrieve() //
+							.bodyToMono(typeReference)) //
+					.as(StepVerifier::create) //
+					.expectNext(new Resource<>(new Actor("Keanu Reaves"))) //
+					.verifyComplete();
 		});
 	}
 

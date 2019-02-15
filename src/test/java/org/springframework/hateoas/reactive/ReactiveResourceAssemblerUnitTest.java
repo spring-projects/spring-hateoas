@@ -15,20 +15,21 @@
  */
 package org.springframework.hateoas.reactive;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import java.util.Collections;
+import java.util.Collection;
 
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
@@ -44,7 +45,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	TestAssemblerWithCustomResources assemblerWithCustomResources;
 
 	Employee employee;
-	
+
 	ServerWebExchange exchange;
 
 	@Before
@@ -59,59 +60,53 @@ public class ReactiveResourceAssemblerUnitTest {
 	@Test
 	public void simpleConversionShouldWork() {
 
-		this.assembler.toResource(this.employee, this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(employeeResource -> {
+		this.assembler.toResource(this.employee, this.exchange).as(StepVerifier::create)
+				.expectNextMatches(employeeResource -> {
 
-				assertThat(employeeResource.getEmployee()).isEqualTo(new Employee("Frodo Baggins"));
-				AssertionsForInterfaceTypes.assertThat(employeeResource.getLinks()).containsExactlyInAnyOrder(
-					new Link("/employees", "employees"));
+					assertThat(employeeResource.getEmployee()).isEqualTo(new Employee("Frodo Baggins"));
+					AssertionsForInterfaceTypes.assertThat(employeeResource.getLinks())
+							.containsExactlyInAnyOrder(new Link("/employees", "employees"));
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
+
 	@Test
 	public void defaultResourcesConversionShouldWork() {
 
-		this.assembler.toResources(Flux.just(this.employee), this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(employeeResources -> {
+		this.assembler.toResources(Flux.just(this.employee), this.exchange).as(StepVerifier::create)
+				.expectNextMatches(employeeResources -> {
 
-				assertThat(employeeResources.getContent()).extracting("employee").containsExactly(
-					new Employee("Frodo Baggins"));
+					Collection<EmployeeResource> content = employeeResources.getContent();
 
-				assertThat(employeeResources.getContent()).extracting("links").containsExactly(
-					Collections.singletonList(new Link("/employees", "employees")));
+					assertThat(content) //
+							.extracting("employee") //
+							.containsExactly(new Employee("Frodo Baggins"));
 
-				assertThat(employeeResources.getLinks()).isEmpty();
+					assertThat(content.iterator().next().getLinks()).containsExactly(new Link("/employees", "employees"));
+					assertThat(employeeResources.getLinks()).isEmpty();
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
 
 	@Test
 	public void customResourcesShouldWork() {
 
-		this.assemblerWithCustomResources.toResources(Flux.just(this.employee), this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(employeeResources -> {
+		this.assemblerWithCustomResources.toResources(Flux.just(this.employee), this.exchange) //
+				.as(StepVerifier::create) //
+				.expectNextMatches(employeeResources -> {
 
-				AssertionsForInterfaceTypes.assertThat(employeeResources.getContent()).extracting("employee").containsExactly(
-					new Employee("Frodo Baggins"));
+					assertThat(employeeResources.getLinks()) //
+							.containsExactlyInAnyOrder(new Link("/employees").withSelfRel(), new Link("/", "root"));
 
-				AssertionsForInterfaceTypes.assertThat(employeeResources.getContent()).extracting("links").containsExactly(
-					Collections.singletonList(new Link("/employees", "employees")));
+					EmployeeResource content = employeeResources.getContent().iterator().next();
 
-				AssertionsForInterfaceTypes.assertThat(employeeResources.getLinks()).containsExactlyInAnyOrder(
-					new Link("/employees").withSelfRel(),
-					new Link("/", "root")
-				);
+					assertThat(content.getEmployee()).isEqualTo(new Employee("Frodo Baggins"));
+					assertThat(content.getLinks()).containsExactly(new Link("/employees", "employees"));
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
 
 	class TestAssembler implements ReactiveResourceAssembler<Employee, EmployeeResource> {
@@ -121,7 +116,7 @@ public class ReactiveResourceAssemblerUnitTest {
 
 			EmployeeResource employeeResource = new EmployeeResource(entity);
 			employeeResource.add(new Link("/employees", "employees"));
-			
+
 			return Mono.just(employeeResource);
 		}
 	}
@@ -129,20 +124,18 @@ public class ReactiveResourceAssemblerUnitTest {
 	class TestAssemblerWithCustomResources extends TestAssembler {
 
 		@Override
-		public Mono<Resources<EmployeeResource>> toResources(Flux<? extends Employee> entities, ServerWebExchange exchange) {
+		public Mono<Resources<EmployeeResource>> toResources(Flux<? extends Employee> entities,
+				ServerWebExchange exchange) {
 
-			return entities
-				.flatMap(entity -> toResource(entity, exchange))
-				.collectList()
-				.map(listOfResources -> {
+			return entities.flatMap(entity -> toResource(entity, exchange)).collectList().map(listOfResources -> {
 
-					Resources<EmployeeResource> employeeResources = new Resources<>(listOfResources);
-					
-					employeeResources.add(new Link("/employees").withSelfRel());
-					employeeResources.add(new Link("/", "root"));
+				Resources<EmployeeResource> employeeResources = new Resources<>(listOfResources);
 
-					return employeeResources;
-				});
+				employeeResources.add(new Link("/employees").withSelfRel());
+				employeeResources.add(new Link("/", "root"));
+
+				return employeeResources;
+			});
 		}
 	}
 
@@ -153,6 +146,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	}
 
 	@Data
+	@EqualsAndHashCode(callSuper = true)
 	@AllArgsConstructor
 	class EmployeeResource extends ResourceSupport {
 		private Employee employee;

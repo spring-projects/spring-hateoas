@@ -79,11 +79,11 @@ public class HypermediaWebMvcConfigurer implements WebMvcConfigurer, BeanFactory
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 
-		if (converters.stream()
-			.filter(MappingJackson2HttpMessageConverter.class::isInstance)
-			.map(AbstractJackson2HttpMessageConverter.class::cast)
-			.map(AbstractJackson2HttpMessageConverter::getObjectMapper)
-			.anyMatch(Jackson2HalModule::isAlreadyRegisteredIn)) {
+		if (converters.stream().filter(MappingJackson2HttpMessageConverter.class::isInstance)
+				.filter(AbstractJackson2HttpMessageConverter.class::isInstance)
+				.map(AbstractJackson2HttpMessageConverter.class::cast)
+				.map(AbstractJackson2HttpMessageConverter::getObjectMapper)
+				.anyMatch(Jackson2HalModule::isAlreadyRegisteredIn)) {
 
 			return;
 		}
@@ -91,36 +91,32 @@ public class HypermediaWebMvcConfigurer implements WebMvcConfigurer, BeanFactory
 		MessageSourceAccessor linkRelationMessageSource = this.beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME,
 				MessageSourceAccessor.class);
 
-		if (this.hypermediaTypes.stream().anyMatch(HypermediaType::isHalBasedMediaType)) {
-			
-			if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
+		if (this.hypermediaTypes.contains(HypermediaType.HAL)) {
 
-				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-					ResourceSupport.class, Arrays.asList(HAL_JSON, HAL_JSON_UTF8),
-					createHalObjectMapper(this.mapper, this.curieProvider, this.relProvider, linkRelationMessageSource,
-						this.halConfiguration)));
-			}
-
-			if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
-
-				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-					ResourceSupport.class, Arrays.asList(HAL_FORMS_JSON),
-					createHalFormsObjectMapper(this.mapper, this.curieProvider, this.relProvider, linkRelationMessageSource,
-						this.halFormsConfiguration)));
-			}
+			converters.add(0,
+					new TypeConstrainedMappingJackson2HttpMessageConverter(ResourceSupport.class,
+							Arrays.asList(HAL_JSON, HAL_JSON_UTF8), createHalObjectMapper(this.mapper, this.curieProvider,
+									this.relProvider, linkRelationMessageSource, this.halConfiguration)));
 		}
-		
+
+		if (this.hypermediaTypes.contains(HypermediaType.HAL_FORMS)) {
+
+			converters.add(0,
+					new TypeConstrainedMappingJackson2HttpMessageConverter(ResourceSupport.class,
+							Collections.singletonList(HAL_FORMS_JSON), createHalFormsObjectMapper(this.mapper, this.curieProvider,
+									this.relProvider, linkRelationMessageSource, this.halFormsConfiguration)));
+		}
+
 		if (this.hypermediaTypes.contains(HypermediaType.COLLECTION_JSON)) {
 
-			converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class, Arrays.asList(COLLECTION_JSON),
-				createCollectionJsonObjectMapper(this.mapper, linkRelationMessageSource)));
+			converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(ResourceSupport.class,
+					Arrays.asList(COLLECTION_JSON), createCollectionJsonObjectMapper(this.mapper)));
 		}
 
 		if (this.hypermediaTypes.contains(HypermediaType.UBER)) {
 
-			converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class, Arrays.asList(UBER_JSON), createUberObjectMapper(this.mapper)));
+			converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(ResourceSupport.class,
+					Collections.singletonList(UBER_JSON), createUberObjectMapper(this.mapper)));
 		}
 	}
 }
