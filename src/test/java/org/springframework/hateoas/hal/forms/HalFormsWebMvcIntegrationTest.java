@@ -17,17 +17,9 @@ package org.springframework.hateoas.hal.forms;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,25 +31,15 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.MappingUtils;
+import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -75,7 +57,9 @@ public class HalFormsWebMvcIntegrationTest {
 
 	@Before
 	public void setUp() {
+
 		this.mockMvc = webAppContextSetup(this.context).build();
+		WebMvcEmployeeController.reset();
 	}
 
 	@Test
@@ -138,117 +122,14 @@ public class HalFormsWebMvcIntegrationTest {
 				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 	}
 
-	@RestController
-	static class EmployeeController {
-
-		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<>();
-
-		static {
-			EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
-			EMPLOYEES.put(1, new Employee("Bilbo Baggins", "burglar"));
-		}
-
-		@GetMapping("/employees")
-		public Resources<Resource<Employee>> all() {
-
-			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
-
-			// Fetch each Resource<Employee> using the controller's findOne method.
-			for (int i = 0; i < EMPLOYEES.size(); i++) {
-				employees.add(findOne(i));
-			}
-
-			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel() //
-					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)));
-
-			// Return the collection of employee resources along with the composite affordance
-			return new Resources<>(employees, selfLink);
-		}
-
-		@GetMapping("/employees/{id}")
-		public Resource<Employee> findOne(@PathVariable Integer id) {
-
-			// Start the affordance with the "self" link, i.e. this method.
-			Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
-
-			// Define final link as means to find entire collection.
-			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
-
-			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id), //
-					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
-							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
-					employeesLink);
-		}
-
-		@PostMapping("/employees")
-		public ResponseEntity<?> newEmployee(@RequestBody Employee employee) {
-
-			int newEmployeeId = EMPLOYEES.size();
-
-			EMPLOYEES.put(newEmployeeId, employee);
-
-			try {
-				return ResponseEntity.created(toUri(newEmployeeId)).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		@PutMapping("/employees/{id}")
-		public ResponseEntity<?> updateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
-
-			EMPLOYEES.put(id, employee);
-
-			try {
-				return ResponseEntity.noContent().location(toUri(id)).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
-
-			Employee newEmployee = EMPLOYEES.get(id);
-
-			if (employee.getName() != null) {
-				newEmployee = newEmployee.withName(employee.getName());
-			}
-
-			if (employee.getRole() != null) {
-				newEmployee = newEmployee.withRole(employee.getRole());
-			}
-
-			EMPLOYEES.put(id, newEmployee);
-
-			try {
-				return ResponseEntity.noContent().location(toUri(id)).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
-		}
-
-		private URI toUri(Integer id) throws URISyntaxException {
-
-			String uri = findOne(id).getLink(IanaLinkRelations.SELF.value()) //
-					.map(link -> link.expand().getHref()) //
-					.orElse("");
-
-			return new URI(uri);
-		}
-	}
-
 	@Configuration
 	@EnableWebMvc
 	@EnableHypermediaSupport(type = { HypermediaType.HAL_FORMS })
 	static class TestConfig {
 
 		@Bean
-		EmployeeController employeeController() {
-			return new EmployeeController();
+		WebMvcEmployeeController employeeController() {
+			return new WebMvcEmployeeController();
 		}
 	}
 }

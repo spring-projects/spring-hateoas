@@ -21,6 +21,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.hateoas.reactive.HypermediaWebFilter.*;
 import static org.springframework.hateoas.reactive.ReactiveLinkBuilder.linkTo;
 
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import reactor.util.context.Context;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -28,10 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import reactor.util.context.Context;
-import org.springframework.hateoas.IanaLinkRelation;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -59,7 +60,7 @@ public class ReactiveLinkBuilderTest {
 
 		Link link = linkTo(methodOn(TestController.class).root(), this.exchange).withSelfRel();
 
-		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
 		assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
 	}
 
@@ -71,18 +72,15 @@ public class ReactiveLinkBuilderTest {
 		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
-		linkTo(methodOn(TestController.class).root())
-			.map(ReactiveLinkBuilder::withSelfRel)
-			.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange))
-			.as(StepVerifier::create)
-			.expectNextMatches(link -> {
+		linkTo(methodOn(TestController.class).root()).map(ReactiveLinkBuilder::withSelfRel)
+				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)).as(StepVerifier::create)
+				.expectNextMatches(link -> {
 
-				assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
-				assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
-				
-				return true;
-			})
-			.verifyComplete();
+					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
+
+					return true;
+				}).verifyComplete();
 	}
 
 	@Test
@@ -95,7 +93,7 @@ public class ReactiveLinkBuilderTest {
 
 		Link link = linkTo(methodOn(TestController.class).root(), this.exchange).withSelfRel();
 
-		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
 		assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
 	}
 
@@ -107,31 +105,28 @@ public class ReactiveLinkBuilderTest {
 		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api/employees"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
-		linkTo(methodOn(TestController.class).root())
-			.map(ReactiveLinkBuilder::withSelfRel)
-			.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange))
-			.as(StepVerifier::create)
-			.expectNextMatches(link -> {
+		linkTo(methodOn(TestController.class).root()).map(ReactiveLinkBuilder::withSelfRel)
+				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)).as(StepVerifier::create)
+				.expectNextMatches(link -> {
 
-				assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
-				assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
+					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
 
 	@Test
 	public void deepLinkFromShallowExplicitServerExchangeShouldWork() throws URISyntaxException {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		
+
 		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		Link link = linkTo(methodOn(TestController.class).deep(), this.exchange).withSelfRel();
 
-		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
 		assertThat(link.getHref()).isEqualTo("http://localhost:8080/api/employees");
 	}
 
@@ -143,18 +138,15 @@ public class ReactiveLinkBuilderTest {
 		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
-		linkTo(methodOn(TestController.class).deep())
-			.map(ReactiveLinkBuilder::withSelfRel)
-			.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange))
-			.as(StepVerifier::create)
-			.expectNextMatches(link -> {
+		linkTo(methodOn(TestController.class).deep()).map(ReactiveLinkBuilder::withSelfRel)
+				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)).as(StepVerifier::create)
+				.expectNextMatches(link -> {
 
-				assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
-				assertThat(link.getHref()).isEqualTo("http://localhost:8080/api/employees");
-				
-				return true;
-			})
-			.verifyComplete();
+					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api/employees");
+
+					return true;
+				}).verifyComplete();
 	}
 
 	@Test
@@ -165,34 +157,30 @@ public class ReactiveLinkBuilderTest {
 		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
-		linkTo(methodOn(TestController2.class).root())
-			.map(ReactiveLinkBuilder::withSelfRel)
-			.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange))
-			.as(StepVerifier::create)
-			.expectNextMatches(link -> {
+		linkTo(methodOn(TestController2.class).root()).map(ReactiveLinkBuilder::withSelfRel)
+				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)).as(StepVerifier::create)
+				.expectNextMatches(link -> {
 
-				assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
-				assertThat(link.getHref()).isEqualTo("http://localhost:8080/");
+					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+					assertThat(link.getHref()).isEqualTo("http://localhost:8080/");
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
 
 	@Test
 	public void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() throws URISyntaxException {
 
-		linkTo(methodOn(TestController2.class).root())
-			.map(ReactiveLinkBuilder::withSelfRel)
-			.as(StepVerifier::create)
-			.expectNextMatches(link -> {
+		linkTo(methodOn(TestController2.class).root())//
+				.map(ReactiveLinkBuilder::withSelfRel) //
+				.as(StepVerifier::create) //
+				.expectNextMatches(link -> {
 
-				assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
-				assertThat(link.getHref()).isEqualTo("/");
+					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+					assertThat(link.getHref()).isEqualTo("/");
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
 
 	@Test
@@ -200,10 +188,9 @@ public class ReactiveLinkBuilderTest {
 
 		Link link = linkTo(methodOn(TestController2.class).root(), null).withSelfRel();
 
-		assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF.value());
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
 		assertThat(link.getHref()).isEqualTo("/");
 	}
-
 
 	@RestController
 	@RequestMapping("/api")

@@ -95,15 +95,5 @@ public @interface EnableHypermediaSupport {
 		UBER;
 
 		private static Set<HypermediaType> HAL_BASED_MEDIATYPES = EnumSet.of(HAL, HAL_FORMS);
-
-		/**
-		 * Is this {@literal HAL} or one of its derivatives?
-		 *
-		 * @param hypermediaType
-		 * @return
-		 */
-		public static boolean isHalBasedMediaType(HypermediaType hypermediaType) {
-			return HAL_BASED_MEDIATYPES.contains(hypermediaType);
-		}
 	}
 }

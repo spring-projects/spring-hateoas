@@ -25,10 +25,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +46,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.MappingUtils;
+import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -75,17 +76,11 @@ public class CollectionJsonWebMvcIntegrationTest {
 
 	MockMvc mockMvc;
 
-	private static Map<Integer, Employee> EMPLOYEES;
-
 	@Before
 	public void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
-
-		EMPLOYEES = new TreeMap<>();
-
-		EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
-		EMPLOYEES.put(1, new Employee("Bilbo Baggins", "burglar"));
+		WebMvcEmployeeController.reset();
 	}
 
 	@Test
@@ -195,6 +190,8 @@ public class CollectionJsonWebMvcIntegrationTest {
 
 	@RestController
 	static class EmployeeController {
+
+		private static Map<Integer, Employee> EMPLOYEES = new HashMap<>();
 
 		@GetMapping("/employees")
 		public Resources<Resource<Employee>> all() {
@@ -334,8 +331,8 @@ public class CollectionJsonWebMvcIntegrationTest {
 	static class TestConfig {
 
 		@Bean
-		EmployeeController employeeController() {
-			return new EmployeeController();
+		WebMvcEmployeeController employeeController() {
+			return new WebMvcEmployeeController();
 		}
 	}
 }

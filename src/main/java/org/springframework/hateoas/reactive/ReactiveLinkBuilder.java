@@ -18,9 +18,10 @@ package org.springframework.hateoas.reactive;
 import static org.springframework.hateoas.reactive.HypermediaWebFilter.*;
 
 import reactor.core.publisher.Mono;
+
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.WebHandler;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
-import org.springframework.hateoas.core.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,19 +38,18 @@ public class ReactiveLinkBuilder {
 	private ReactiveLinkBuilder(ControllerLinkBuilder controllerLinkBuilder) {
 		this.controllerLinkBuilder = controllerLinkBuilder;
 	}
-	
+
 	/**
-	 * Create a {@link ReactiveLinkBuilder} by checking if the Reactor Context contains a {@link ServerWebExchange}
-	 * and using that combined with the Spring Web annotations to build a full URI.
-	 *
-	 * If there is no exchange, then fall back to relative URIs.
+	 * Create a {@link ReactiveLinkBuilder} by checking if the Reactor Context contains a {@link ServerWebExchange} and
+	 * using that combined with the Spring Web annotations to build a full URI. If there is no exchange, then fall back to
+	 * relative URIs.
 	 *
 	 * @param invocationValue
 	 */
 	public static Mono<ReactiveLinkBuilder> linkTo(Object invocationValue) {
-		
+
 		return Mono.subscriberContext()
-			.map(context -> linkTo(invocationValue, context.getOrDefault(SERVER_WEB_EXCHANGE, null)));
+				.map(context -> linkTo(invocationValue, context.getOrDefault(SERVER_WEB_EXCHANGE, null)));
 	}
 
 	/**
@@ -61,19 +61,9 @@ public class ReactiveLinkBuilder {
 	 */
 	public static ReactiveLinkBuilder linkTo(Object invocationValue, ServerWebExchange exchange) {
 
-		ControllerLinkBuilder controllerLinkBuilder = WebHandler.linkTo(invocationValue, path -> {
+		ControllerLinkBuilder controllerLinkBuilder = WebHandler //
+				.linkTo(invocationValue, path -> getBuilder(exchange).replacePath(path == null ? "/" : path), null);
 
-			UriComponentsBuilder builder = getBuilder(exchange);
-
-			if (path == null) {
-				builder.replacePath("/");
-			} else {
-				builder.replacePath(path);
-			}
-
-			return builder;
-		}, null);
-		
 		return new ReactiveLinkBuilder(controllerLinkBuilder);
 	}
 
@@ -100,10 +90,8 @@ public class ReactiveLinkBuilder {
 	 */
 	private static UriComponentsBuilder getBuilder(ServerWebExchange exchange) {
 
-		if (exchange == null) {
-			return UriComponentsBuilder.fromPath("/");
-		}
-
-		return UriComponentsBuilder.fromHttpRequest(exchange.getRequest());
+		return exchange == null //
+				? UriComponentsBuilder.fromPath("/") //
+				: UriComponentsBuilder.fromHttpRequest(exchange.getRequest());
 	}
 }
