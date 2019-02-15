@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * Component to ease traversing hypermedia APIs by following links with relation types. Highly inspired by the equally
  * named JavaScript library.
- * 
+ *
  * @see https://github.com/basti1302/traverson
  * @author Oliver Gierke
  * @author Dietrich Schulten
@@ -74,7 +74,7 @@ public class Traverson {
 
 	static {
 		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.of(Arrays.asList(discoverer)));
+		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.of(discoverer));
 	}
 
 	private final URI baseUri;
@@ -86,7 +86,7 @@ public class Traverson {
 	/**
 	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
 	 * interact with the service.
-	 * 
+	 *
 	 * @param baseUri must not be {@literal null}.
 	 * @param mediaTypes must not be {@literal null} or empty.
 	 */
@@ -97,7 +97,7 @@ public class Traverson {
 	/**
 	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
 	 * interact with the service.
-	 * 
+	 *
 	 * @param baseUri must not be {@literal null}.
 	 * @param mediaTypes must not be {@literal null} or empty.
 	 */
@@ -115,7 +115,7 @@ public class Traverson {
 
 	/**
 	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
-	 * 
+	 *
 	 * @param mediaTypes must not be {@literal null}.
 	 * @return
 	 */
@@ -125,7 +125,7 @@ public class Traverson {
 
 	/**
 	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
-	 * 
+	 *
 	 * @param mediaTypes must not be {@literal null}.
 	 * @return
 	 */
@@ -147,7 +147,7 @@ public class Traverson {
 
 	/**
 	 * Returns all HAL JSON compatible media types from the given list.
-	 * 
+	 *
 	 * @param mediaTypes must not be {@literal null}.
 	 * @return
 	 */
@@ -168,7 +168,7 @@ public class Traverson {
 
 	/**
 	 * Creates a new {@link HttpMessageConverter} to support HAL.
-	 * 
+	 *
 	 * @return
 	 */
 	private static final HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
@@ -188,7 +188,7 @@ public class Traverson {
 	/**
 	 * Configures the {@link RestOperations} to use. If {@literal null} is provided a default {@link RestTemplate} will be
 	 * used.
-	 * 
+	 *
 	 * @param operations
 	 * @return
 	 */
@@ -201,7 +201,7 @@ public class Traverson {
 	/**
 	 * Sets the {@link LinkDiscoverers} to use. By default a single {@link HalLinkDiscoverer} is registered. If
 	 * {@literal null} is provided the default is reapplied.
-	 * 
+	 *
 	 * @param discoverer can be {@literal null}.
 	 * @return
 	 */
@@ -215,7 +215,7 @@ public class Traverson {
 
 	/**
 	 * Sets up a {@link TraversalBuilder} to follow the given rels.
-	 * 
+	 *
 	 * @param rels must not be {@literal null} or empty.
 	 * @return
 	 * @see TraversalBuilder
@@ -248,7 +248,7 @@ public class Traverson {
 
 	/**
 	 * Builder API to customize traversals.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	public class TraversalBuilder {
@@ -262,7 +262,7 @@ public class Traverson {
 		/**
 		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
 		 * line.
-		 * 
+		 *
 		 * @param rels must not be {@literal null}.
 		 * @return
 		 */
@@ -297,7 +297,7 @@ public class Traverson {
 		/**
 		 * Adds the given operations parameters to the traversal. If a link discovered by the traversal is templated, the
 		 * given parameters will be used to expand the operations into a resolvable URI.
-		 * 
+		 *
 		 * @param parameters can be {@literal null}.
 		 * @return
 		 */
@@ -311,7 +311,7 @@ public class Traverson {
 
 		/**
 		 * The {@link HttpHeaders} that shall be used for the requests of the traversal.
-		 * 
+		 *
 		 * @param headers can be {@literal null}.
 		 * @return
 		 */
@@ -325,7 +325,7 @@ public class Traverson {
 
 		/**
 		 * Executes the traversal and marshals the final response into an object of the given type.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
@@ -342,7 +342,7 @@ public class Traverson {
 		/**
 		 * Executes the traversal and marshals the final response into an object of the given
 		 * {@link ParameterizedTypeReference}.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
@@ -359,7 +359,7 @@ public class Traverson {
 		/**
 		 * Executes the traversal and returns the result of the given JSON Path expression evaluated against the final
 		 * representation.
-		 * 
+		 *
 		 * @param jsonPath must not be {@literal null} or empty.
 		 * @return
 		 */
@@ -376,7 +376,7 @@ public class Traverson {
 
 		/**
 		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given type.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
@@ -393,7 +393,7 @@ public class Traverson {
 		/**
 		 * Returns the {@link Link} found for the last rel in the rels configured to follow. Will expand the final
 		 * {@link Link} using the
-		 * 
+		 *
 		 * @return
 		 * @see #withTemplateParameters(Map)
 		 * @since 0.15
@@ -404,7 +404,7 @@ public class Traverson {
 
 		/**
 		 * Returns the templated {@link Link} found for the last rel in the rels configured to follow.
-		 * 
+		 *
 		 * @return
 		 * @since 0.17
 		 */
@@ -420,19 +420,23 @@ public class Traverson {
 			UriStringAndHeaders finalUriAndHeaders = traverseToFinalUrl();
 
 			return new Link(expandFinalUrl ? expandedFinalUriAndHeaders.getUri().toString() : finalUriAndHeaders.getUri(),
-				this.rels.get(this.rels.size() - 1).getRel());
+					this.rels.get(this.rels.size() - 1).getRel());
 		}
 
 		private UriStringAndHeaders traverseToFinalUrl() {
 
-			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
-			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(), uriAndHeaders.getHttpHeaders());
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(),
+					HttpHeaders.EMPTY);
+			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(),
+					uriAndHeaders.getHttpHeaders());
 		}
 
 		private URIAndHeaders traverseToExpandedFinalUrl() {
 
-			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
-			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(this.templateParameters), uriAndHeaders.getHttpHeaders());
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(),
+					HttpHeaders.EMPTY);
+			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(this.templateParameters),
+					uriAndHeaders.getHttpHeaders());
 		}
 
 		private UriStringAndHeaders getAndFindLinkWithRel(String uri, Iterator<Hop> rels, HttpHeaders extraHeaders) {
@@ -464,13 +468,14 @@ public class Traverson {
 			if (!thisHop.hasParameters()) {
 				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getHeaders());
 			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(this.templateParameters)).getHref(), rels, thisHop.getHeaders());
+				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(this.templateParameters)).getHref(), rels,
+						thisHop.getHeaders());
 			}
 		}
 
 		/**
 		 * Combine two sets of {@link HttpHeaders} into one.
-		 * 
+		 *
 		 * @param headersA
 		 * @param headersB
 		 * @return

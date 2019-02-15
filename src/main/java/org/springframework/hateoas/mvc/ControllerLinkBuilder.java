@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,12 @@ import lombok.experimental.Delegate;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
@@ -39,9 +36,6 @@ import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
-import org.springframework.http.MediaType;
-import org.springframework.plugin.core.OrderAwarePluginRegistry;
-import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,7 +50,7 @@ import org.springframework.web.util.UriTemplate;
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
- * 
+ *
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Greg Turnquist
@@ -73,20 +67,11 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
-	static {
-
-		List<AffordanceModelFactory> factories = SpringFactoriesLoader.loadFactories(AffordanceModelFactory.class,
-				ControllerLinkBuilder.class.getClassLoader());
-
-		PluginRegistry<? extends AffordanceModelFactory, MediaType> MODEL_FACTORIES = OrderAwarePluginRegistry
-				.of(factories);
-	}
-
 	private final TemplateVariables variables;
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	ControllerLinkBuilder(UriComponentsBuilder builder) {
@@ -115,7 +100,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
-	 * 
+	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
@@ -126,7 +111,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
 	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
-	 * 
+	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
 	 *          {@literal null}.
@@ -191,22 +176,22 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	/**
 	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
 	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
-	 * 
+	 *
 	 * <pre>
 	 * &#64;RequestMapping("/customers")
 	 * class CustomerController {
-	 * 
+	 *
 	 *   &#64;RequestMapping("/{id}/addresses")
-	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … }
 	 * }
-	 * 
+	 *
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
 	 * </pre>
-	 * 
+	 *
 	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
 	 * {@code addresses}. For more details on the method invocation constraints, see
 	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
-	 * 
+	 *
 	 * @param invocationValue
 	 * @return
 	 */
@@ -224,7 +209,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * </pre>
 	 *
 	 * This takes a link and adds an {@link Affordance} based on another Spring MVC handler method.
-	 * 
+	 *
 	 * @param invocationValue
 	 * @return
 	 */
@@ -240,7 +225,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	/**
 	 * Wrapper for {@link DummyInvocationUtils#methodOn(Class, Object...)} to be available in case you work with static
 	 * imports of {@link ControllerLinkBuilder}.
-	 * 
+	 *
 	 * @param controller must not be {@literal null}.
 	 * @param parameters parameters to extend template variables in the type level mapping.
 	 * @return
@@ -249,7 +234,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
@@ -258,7 +243,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return this;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
 	 */
@@ -269,14 +254,14 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Returns a {@link UriComponentsBuilder} to continue to build the already built URI in a more fine grained way.
-	 * 
+	 *
 	 * @return
 	 */
 	public UriComponentsBuilder toUriComponentsBuilder() {
 		return UriComponentsBuilder.fromUri(toUri());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.LinkBuilderSupport#toString()
 	 */
@@ -302,7 +287,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
 	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
 	 * back to relative URIs.
-	 * 
+	 *
 	 * @return
 	 */
 	public static UriComponentsBuilder getBuilder() {
@@ -324,7 +309,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Check if the current version of Spring Framework is 5.1 or higher.
-	 * 
+	 *
 	 * @return
 	 */
 	private static boolean isSpringAtLeast5_1() {
@@ -335,12 +320,12 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		int majorVersion = Integer.parseInt(parts[0]);
 		int minorVersion = Integer.parseInt(parts[1]);
 
-		return (majorVersion >= 5 && minorVersion >= 1) || (majorVersion > 5);
+		return majorVersion >= 5 && minorVersion >= 1 || majorVersion > 5;
 	}
 
 	/**
 	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
-	 * 
+	 *
 	 * @return
 	 */
 	@SuppressWarnings("null")
@@ -384,7 +369,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			setStrictEncoding(true);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.util.Map)
 		 */
@@ -393,7 +378,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 			return super.expandAndEncode(builder, uriVariables);
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.lang.Object[])
 		 */

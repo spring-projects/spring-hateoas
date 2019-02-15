@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.springframework.hateoas.mvc;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -44,8 +43,7 @@ public class SpringMvcAffordanceBuilderUnitTest {
 		AffordanceModelFactory low = new LowPriorityModelFactory();
 		AffordanceModelFactory high = new HighPriorityModelFactory();
 
-		PluginRegistry<AffordanceModelFactory, MediaType> registry = OrderAwarePluginRegistry
-				.of(Arrays.asList(low, high));
+		PluginRegistry<AffordanceModelFactory, MediaType> registry = OrderAwarePluginRegistry.of(low, high);
 
 		assertThat(registry.getPluginFor(MediaType.APPLICATION_JSON).get()).isEqualTo(high);
 	}
@@ -58,7 +56,8 @@ public class SpringMvcAffordanceBuilderUnitTest {
 		}
 
 		@Override
-		public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+		public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+				List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 			return null;
 		}
 
@@ -76,7 +75,8 @@ public class SpringMvcAffordanceBuilderUnitTest {
 		}
 
 		@Override
-		public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+		public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
+				List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
 			return null;
 		}
 

@@ -17,8 +17,6 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 import org.springframework.core.Ordered;
 import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
@@ -28,7 +26,7 @@ import org.springframework.plugin.core.PluginRegistry;
 
 /**
  * Unit tests for {@link LinkDiscoverers}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -45,7 +43,7 @@ public class LinkDiscoverersUnitTest {
 		LinkDiscoverer low = new LowPriorityLinkDiscoverer();
 		LinkDiscoverer high = new HighPriorityLinkDiscoverer();
 
-		PluginRegistry<LinkDiscoverer, MediaType> registry = OrderAwarePluginRegistry.of(Arrays.asList(low, high));
+		PluginRegistry<LinkDiscoverer, MediaType> registry = OrderAwarePluginRegistry.of(low, high);
 		assertThat(registry.getRequiredPluginFor(MediaType.APPLICATION_JSON)).isEqualTo(high);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@ package org.springframework.hateoas.core;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.Test;
 import org.springframework.hateoas.RelProvider;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
@@ -27,7 +24,7 @@ import org.springframework.plugin.core.PluginRegistry;
 
 /**
  * Unit tests for {@link DelegatingRelProvider}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class DelegatingRelProviderUnitTest {
@@ -35,8 +32,8 @@ public class DelegatingRelProviderUnitTest {
 	@Test
 	public void foo() {
 
-		List<RelProvider> providers = Arrays.asList(new AnnotationRelProvider(), new DefaultRelProvider());
-		PluginRegistry<RelProvider, Class<?>> registry = OrderAwarePluginRegistry.create(providers);
+		PluginRegistry<RelProvider, Class<?>> registry = OrderAwarePluginRegistry.of(new AnnotationRelProvider(),
+				new DefaultRelProvider());
 
 		RelProvider delegatingProvider = new DelegatingRelProvider(registry);
 
