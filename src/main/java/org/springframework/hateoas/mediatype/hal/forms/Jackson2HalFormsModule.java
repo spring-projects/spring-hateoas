@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.hateoas.mediatype.hal.LinkMixin;
 import org.springframework.hateoas.mediatype.hal.RepresentationModelMixin;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourceSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourceSupportSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.mvc.JacksonSerializers.MediaTypeDeserializer;
@@ -86,6 +87,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
 
+		addSerializer(new HalFormsResourceSupportSerializer());
 		addSerializer(new HalFormsResourceSerializer());
 	}
 

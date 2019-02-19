@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.Wither;
@@ -29,12 +30,15 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsLinksDeserializer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -54,10 +58,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Value
 @Wither
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-@JsonPropertyOrder({ "resource", "resources", "embedded", "links", "templates", "metadata" })
+@JsonPropertyOrder({ "attributes", "resource", "resources", "embedded", "links", "templates", "metadata" })
 public class HalFormsDocument<T> {
 
 	@Nullable //
+	@Getter(onMethod = @__(@JsonAnyGetter))
+	@JsonInclude(Include.NON_EMPTY) //
+	@Wither(AccessLevel.PRIVATE) //
+	private Map<String, Object> attributes;
+
 	@JsonUnwrapped //
 	@JsonInclude(Include.NON_NULL) //
 	private T resource;
@@ -90,7 +99,21 @@ public class HalFormsDocument<T> {
 	private Map<String, HalFormsTemplate> templates;
 
 	private HalFormsDocument() {
-		this(null, null, Collections.emptyMap(), null, Links.NONE, Collections.emptyMap());
+		this(null, null, null, Collections.emptyMap(), null, Links.NONE, Collections.emptyMap());
+	}
+
+	/**
+	 * Creates a new {@link HalFormsDocument} for the given resource support.
+	 *
+	 * @param resourceSupport can be {@literal null}
+	 * @return
+	 */
+	public static HalFormsDocument<?> forResourceSupport(RepresentationModel<?> resourceSupport) {
+
+		Map<String, Object> attributes = PropertyUtils.findProperties(resourceSupport);
+		attributes.remove("links");
+
+		return new HalFormsDocument<>().withAttributes(attributes);
 	}
 
 	/**
@@ -167,7 +190,7 @@ public class HalFormsDocument<T> {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links.and(link), templates);
+		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links.and(link), templates);
 	}
 
 	/**
@@ -185,7 +208,7 @@ public class HalFormsDocument<T> {
 		Map<String, HalFormsTemplate> templates = new HashMap<>(this.templates);
 		templates.put(name, template);
 
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links, templates);
 	}
 
 	/**
@@ -203,10 +226,6 @@ public class HalFormsDocument<T> {
 		Map<HalLinkRelation, Object> embedded = new HashMap<>(this.embedded);
 		embedded.put(key, value);
 
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
-	}
-
-	HalFormsDocument<T> withLinks(Links links) {
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links, templates);
 	}
 }

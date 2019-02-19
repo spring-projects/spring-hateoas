@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,64 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
  * @author Greg Turnquist
  */
 class HalFormsSerializers {
+
+	static class HalFormsResourceSupportSerializer extends ContainerSerializer<RepresentationModel<?>>
+			implements ContextualSerializer {
+
+		private final BeanProperty property;
+
+		HalFormsResourceSupportSerializer(@Nullable BeanProperty property) {
+
+			super(RepresentationModel.class, false);
+			this.property = property;
+		}
+
+		HalFormsResourceSupportSerializer() {
+			this(null);
+		}
+
+		@Override
+		public void serialize(RepresentationModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
+
+			HalFormsDocument<?> doc = HalFormsDocument.forResourceSupport(value) //
+					.withLinks(value.getLinks()) //
+					.withTemplates(findTemplates(value));
+
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		@Override
+		public boolean hasSingleElement(RepresentationModel<?> resource) {
+			return false;
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer typeSerializer) {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) {
+			return new HalFormsResourceSupportSerializer(property);
+		}
+	}
 
 	/**
 	 * Serializer for {@link CollectionModel}.
