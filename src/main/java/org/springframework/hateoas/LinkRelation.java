@@ -73,6 +73,6 @@ public interface LinkRelation {
 
 		Assert.notNull(relation, "LinkRelation must not be null!");
 
-		return this.value().equals(relation.value());
+		return this.value().equalsIgnoreCase(relation.value());
 	}
 }
