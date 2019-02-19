@@ -18,6 +18,7 @@ package org.springframework.hateoas.support;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Wither;
 
 import org.springframework.hateoas.ResourceSupport;
 
@@ -27,7 +28,14 @@ import org.springframework.hateoas.ResourceSupport;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
+@Wither
 public class EmployeeResource extends ResourceSupport {
 
 	private String name;
+
+	public EmployeeResource(EmployeeResource employeeResource) {
+		
+		this.name = employeeResource.getName();
+		add(employeeResource.getLinks());
+	}
 }

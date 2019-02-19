@@ -31,16 +31,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.EmbeddedWrappers;
 import org.springframework.hateoas.hal.CurieProvider;
@@ -48,7 +41,9 @@ import org.springframework.hateoas.hal.DefaultCurieProvider;
 import org.springframework.hateoas.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.hal.SimplePojo;
 import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
+import org.springframework.hateoas.support.EmployeeResource;
 import org.springframework.hateoas.support.MappingUtils;
+import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,6 +110,20 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		assertThat(
 				read(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass())), ResourceSupport.class))
 						.isEqualTo(expected);
+	}
+
+	@Test
+	public void rendersResourceSupportWithTemplates() throws Exception {
+
+		EmployeeResource resource = new EmployeeResource("Frodo Baggins");
+		Link selfLink = new Link("/employees/1");
+		selfLink = selfLink.andAffordance(new Affordance("foo", selfLink, HttpMethod.POST,
+				ResolvableType.forClass(EmployeeResource.class), Collections.emptyList(),
+				ResolvableType.forClass(EmployeeResource.class)));
+		resource.add(selfLink);
+
+		assertThat(write(resource))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("employee-resource-support.json", getClass())));
 	}
 
 	@Test

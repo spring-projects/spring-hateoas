@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -39,11 +40,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
+import org.springframework.hateoas.support.EmployeeResource;
 import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +68,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HalFormsWebMvcIntegrationTest {
+public class HalFormsWebMvcIntegration2Test {
 
 	@Autowired WebApplicationContext context;
 
@@ -83,7 +84,7 @@ public class HalFormsWebMvcIntegrationTest {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
-				.andExpect(jsonPath("$.name", is("Frodo Baggins"))).andExpect(jsonPath("$.role", is("ring bearer")))
+				.andExpect(jsonPath("$.name", is("Frodo Baggins")))
 
 				.andExpect(jsonPath("$._links.*", hasSize(2)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
@@ -93,27 +94,22 @@ public class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
 
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)));
 	}
 
 	@Test
 	public void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
+				.andDo(print())
 				.andExpect(status().isOk()) //
-				.andExpect(jsonPath("$._embedded.employees[0].name", is("Frodo Baggins")))
-				.andExpect(jsonPath("$._embedded.employees[0].role", is("ring bearer")))
-				.andExpect(jsonPath("$._embedded.employees[0]._links['self'].href", is("http://localhost/employees/0")))
-				.andExpect(jsonPath("$._embedded.employees[1].name", is("Bilbo Baggins")))
-				.andExpect(jsonPath("$._embedded.employees[1].role", is("burglar")))
-				.andExpect(jsonPath("$._embedded.employees[1]._links['self'].href", is("http://localhost/employees/1")))
+				.andExpect(jsonPath("$._embedded.employeeResources[0].name", is("Frodo Baggins")))
+				.andExpect(jsonPath("$._embedded.employeeResources[0]._links['self'].href", is("http://localhost/employees/0")))
+				.andExpect(jsonPath("$._embedded.employeeResources[1].name", is("Bilbo Baggins")))
+				.andExpect(jsonPath("$._embedded.employeeResources[1]._links['self'].href", is("http://localhost/employees/1")))
 
 				.andExpect(jsonPath("$._links.*", hasSize(1)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
@@ -141,18 +137,18 @@ public class HalFormsWebMvcIntegrationTest {
 	@RestController
 	static class EmployeeController {
 
-		private final static Map<Integer, Employee> EMPLOYEES = new TreeMap<>();
+		private final static Map<Integer, EmployeeResource> EMPLOYEES = new TreeMap<>();
 
 		static {
-			EMPLOYEES.put(0, new Employee("Frodo Baggins", "ring bearer"));
-			EMPLOYEES.put(1, new Employee("Bilbo Baggins", "burglar"));
+			EMPLOYEES.put(0, new EmployeeResource("Frodo Baggins"));
+			EMPLOYEES.put(1, new EmployeeResource("Bilbo Baggins"));
 		}
 
 		@GetMapping("/employees")
-		public Resources<Resource<Employee>> all() {
+		public Resources<EmployeeResource> all() {
 
 			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
+			List<EmployeeResource> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
@@ -168,7 +164,7 @@ public class HalFormsWebMvcIntegrationTest {
 		}
 
 		@GetMapping("/employees/{id}")
-		public Resource<Employee> findOne(@PathVariable Integer id) {
+		public EmployeeResource findOne(@PathVariable Integer id) {
 
 			// Start the affordance with the "self" link, i.e. this method.
 			Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
@@ -177,10 +173,12 @@ public class HalFormsWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id), //
-					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
-							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
-					employeesLink);
+			EmployeeResource resource = new EmployeeResource(EMPLOYEES.get(id));
+			resource.add(findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
+				.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))));
+			resource.add(employeesLink);
+
+			return resource;
 		}
 
 		@PostMapping("/employees")
@@ -188,7 +186,9 @@ public class HalFormsWebMvcIntegrationTest {
 
 			int newEmployeeId = EMPLOYEES.size();
 
-			EMPLOYEES.put(newEmployeeId, employee);
+			EmployeeResource resource = new EmployeeResource(employee.getName());
+
+			EMPLOYEES.put(newEmployeeId, resource);
 
 			try {
 				return ResponseEntity.created(toUri(newEmployeeId)).build();
@@ -198,9 +198,9 @@ public class HalFormsWebMvcIntegrationTest {
 		}
 
 		@PutMapping("/employees/{id}")
-		public ResponseEntity<?> updateEmployee(@RequestBody Resource<Employee> employee, @PathVariable Integer id) {
+		public ResponseEntity<?> updateEmployee(@RequestBody EmployeeResource employee, @PathVariable Integer id) {
 
-			EMPLOYEES.put(id, employee.getContent());
+			EMPLOYEES.put(id, employee);
 
 			try {
 				return ResponseEntity.noContent().location(toUri(id)).build();
@@ -210,16 +210,12 @@ public class HalFormsWebMvcIntegrationTest {
 		}
 
 		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Employee employee, @PathVariable Integer id) {
+		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EmployeeResource employee, @PathVariable Integer id) {
 
-			Employee newEmployee = EMPLOYEES.get(id);
+			EmployeeResource newEmployee = EMPLOYEES.get(id);
 
 			if (employee.getName() != null) {
 				newEmployee = newEmployee.withName(employee.getName());
-			}
-
-			if (employee.getRole() != null) {
-				newEmployee = newEmployee.withRole(employee.getRole());
 			}
 
 			EMPLOYEES.put(id, newEmployee);

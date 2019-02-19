@@ -16,6 +16,7 @@
 package org.springframework.hateoas.hal.forms;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Singular;
 import lombok.Value;
@@ -29,11 +30,14 @@ import java.util.Map;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.hal.HalLinkRelation;
 import org.springframework.hateoas.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.hal.forms.Jackson2HalFormsModule.HalFormsLinksDeserializer;
+import org.springframework.hateoas.support.PropertyUtils;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -53,8 +57,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Value
 @Wither
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-@JsonPropertyOrder({ "resource", "resources", "embedded", "links", "templates", "metadata" })
+@JsonPropertyOrder({ "attributes", "resource", "resources", "embedded", "links", "templates", "metadata" })
 public class HalFormsDocument<T> {
+
+	@Getter(onMethod = @__(@JsonAnyGetter))
+	@JsonInclude(Include.NON_EMPTY) //
+	@Wither(AccessLevel.PRIVATE) //
+	private Map<String, Object> attributes;
 
 	@JsonUnwrapped //
 	@JsonInclude(Include.NON_NULL) //
@@ -86,7 +95,21 @@ public class HalFormsDocument<T> {
 	private Map<String, HalFormsTemplate> templates;
 
 	private HalFormsDocument() {
-		this(null, null, Collections.emptyMap(), null, Links.NONE, Collections.emptyMap());
+		this(null, null, null, Collections.emptyMap(), null, Links.NONE, Collections.emptyMap());
+	}
+
+	/**
+	 * Creates a new {@link HalFormsDocument} for the given resource support.
+	 *
+	 * @param resourceSupport can be {@literal null}
+	 * @return
+	 */
+	public static HalFormsDocument<?> forResourceSupport(ResourceSupport resourceSupport) {
+
+		Map<String, Object> attributes = PropertyUtils.findProperties(resourceSupport);
+		attributes.remove("links");
+
+		return new HalFormsDocument<>().withAttributes(attributes);
 	}
 
 	/**
@@ -155,7 +178,7 @@ public class HalFormsDocument<T> {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links.and(link), templates);
+		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links.and(link), templates);
 	}
 
 	/**
@@ -173,7 +196,7 @@ public class HalFormsDocument<T> {
 		Map<String, HalFormsTemplate> templates = new HashMap<>(this.templates);
 		templates.put(name, template);
 
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links, templates);
 	}
 
 	/**
@@ -191,10 +214,6 @@ public class HalFormsDocument<T> {
 		Map<HalLinkRelation, Object> embedded = new HashMap<>(this.embedded);
 		embedded.put(key, value);
 
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
-	}
-
-	HalFormsDocument<T> withLinks(Links links) {
-		return new HalFormsDocument<>(resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links, templates);
 	}
 }

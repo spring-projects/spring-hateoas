@@ -50,6 +50,56 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
  */
 class HalFormsSerializers {
 
+	static class HalFormsResourceSupportSerializer extends ContainerSerializer<ResourceSupport> implements ContextualSerializer {
+
+		private final BeanProperty property;
+
+		HalFormsResourceSupportSerializer(BeanProperty property) {
+
+			super(ResourceSupport.class, false);
+			this.property = property;
+		}
+
+		HalFormsResourceSupportSerializer() {
+			this(null);
+		}
+
+		@Override
+		public void serialize(ResourceSupport value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+
+			HalFormsDocument<?> doc = HalFormsDocument.forResourceSupport(value) //
+					.withLinks(value.getLinks()) //
+					.withTemplates(findTemplates(value));
+			
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
+		}
+
+		@Override
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		@Override
+		public boolean hasSingleElement(ResourceSupport resource) {
+			return false;
+		}
+
+		@Override
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer typeSerializer) {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) throws JsonMappingException {
+			return new HalFormsResourceSupportSerializer(property);
+		}
+	}
+
 	/**
 	 * Serializer for {@link Resources}.
 	 */
@@ -187,7 +237,7 @@ class HalFormsSerializers {
 	 * @param resource
 	 * @return
 	 */
-	private static Map<String, HalFormsTemplate> findTemplates(ResourceSupport resource) {
+	static Map<String, HalFormsTemplate> findTemplates(ResourceSupport resource) {
 
 		if (!resource.hasLink(IanaLinkRelations.SELF)) {
 			return Collections.emptyMap();
