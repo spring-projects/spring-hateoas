@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerIns
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListDeserializer;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.mediatype.hal.LinkMixin;
-import org.springframework.hateoas.mediatype.hal.RepresentationModelMixin;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourceSerializer;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsCollectionModelDeserializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsCollectionModelSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsEntityModelSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsRepresentationModelSerializer;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.mvc.JacksonSerializers.MediaTypeDeserializer;
 import org.springframework.http.MediaType;
@@ -93,16 +93,19 @@ class Jackson2HalFormsModule extends SimpleModule {
 	@JsonSerialize(using = HalLinkListSerializer.class)
 	abstract class LinksMixin {}
 
-	@JsonSerialize(using = HalFormsResourceSerializer.class)
+	@JsonSerialize(using = HalFormsRepresentationModelSerializer.class)
+	abstract class RepresentationModelMixin extends org.springframework.hateoas.mediatype.hal.RepresentationModelMixin {}
+
+	@JsonSerialize(using = HalFormsEntityModelSerializer.class)
 	abstract class EntityModelMixin<T> extends EntityModel<T> {}
 
-	@JsonSerialize(using = HalFormsResourcesSerializer.class)
+	@JsonSerialize(using = HalFormsCollectionModelSerializer.class)
 	abstract class CollectionModelMixin<T> extends CollectionModel<T> {
 
 		@Override
 		@JsonProperty("_embedded")
 		@JsonInclude(Include.NON_EMPTY)
-		@JsonDeserialize(using = HalFormsResourcesDeserializer.class)
+		@JsonDeserialize(using = HalFormsCollectionModelDeserializer.class)
 		public abstract Collection<T> getContent();
 	}
 
@@ -166,8 +169,11 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
-			this.serializers.put(HalFormsResourceSerializer.class, new HalFormsResourceSerializer(accessor));
-			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(accessor, mapper));
+			this.serializers.put(HalFormsRepresentationModelSerializer.class,
+					new HalFormsRepresentationModelSerializer(accessor));
+			this.serializers.put(HalFormsEntityModelSerializer.class, new HalFormsEntityModelSerializer(accessor));
+			this.serializers.put(HalFormsCollectionModelSerializer.class,
+					new HalFormsCollectionModelSerializer(accessor, mapper));
 			this.serializers.put(HalLinkListSerializer.class,
 					new HalLinkListSerializer(curieProvider, mapper, accessor, configuration.getHalConfiguration()));
 		}
