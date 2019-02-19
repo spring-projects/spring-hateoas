@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,22 +51,81 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
  */
 class HalFormsSerializers {
 
+	static class HalFormsRepresentationModelSerializer extends ContainerSerializer<RepresentationModel<?>>
+			implements ContextualSerializer {
+
+		private final BeanProperty property;
+
+		HalFormsRepresentationModelSerializer(@Nullable BeanProperty property) {
+
+			super(RepresentationModel.class, false);
+			this.property = property;
+		}
+
+		HalFormsRepresentationModelSerializer() {
+			this(null);
+		}
+
+		@Override
+		public void serialize(RepresentationModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
+
+			HalFormsDocument<?> doc = HalFormsDocument.forRepresentationModel(value) //
+					.withLinks(value.getLinks()) //
+					.withTemplates(findTemplates(value));
+
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		@Override
+		public boolean hasSingleElement(RepresentationModel<?> resource) {
+			return false;
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer typeSerializer) {
+			return null;
+		}
+
+		@Override
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) {
+			return new HalFormsRepresentationModelSerializer(property);
+		}
+	}
+
 	/**
 	 * Serializer for {@link CollectionModel}.
 	 */
-	static class HalFormsResourceSerializer extends ContainerSerializer<EntityModel<?>> implements ContextualSerializer {
+	static class HalFormsEntityModelSerializer extends ContainerSerializer<EntityModel<?>>
+			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -7912243216469101379L;
 
 		private final BeanProperty property;
 
-		HalFormsResourceSerializer(@Nullable BeanProperty property) {
+		HalFormsEntityModelSerializer(@Nullable BeanProperty property) {
 
 			super(EntityModel.class, false);
 			this.property = property;
 		}
 
-		HalFormsResourceSerializer() {
+		HalFormsEntityModelSerializer() {
 			this(null);
 		}
 
@@ -134,14 +193,14 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourceSerializer(property);
+			return new HalFormsEntityModelSerializer(property);
 		}
 	}
 
 	/**
 	 * Serializer for {@link CollectionModel}
 	 */
-	static class HalFormsResourcesSerializer extends ContainerSerializer<CollectionModel<?>>
+	static class HalFormsCollectionModelSerializer extends ContainerSerializer<CollectionModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -3601146866067500734L;
@@ -149,7 +208,8 @@ class HalFormsSerializers {
 		private final BeanProperty property;
 		private final Jackson2HalModule.EmbeddedMapper embeddedMapper;
 
-		HalFormsResourcesSerializer(@Nullable BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsCollectionModelSerializer(@Nullable BeanProperty property,
+				Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 
 			super(CollectionModel.class, false);
 
@@ -157,7 +217,7 @@ class HalFormsSerializers {
 			this.embeddedMapper = embeddedMapper;
 		}
 
-		HalFormsResourcesSerializer(Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsCollectionModelSerializer(Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 			this(null, embeddedMapper);
 		}
 
@@ -241,7 +301,7 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourcesSerializer(property, embeddedMapper);
+			return new HalFormsCollectionModelSerializer(property, embeddedMapper);
 		}
 	}
 
