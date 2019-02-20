@@ -13,7 +13,7 @@
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2018</inceptionYear>
+	<inceptionYear>2012-2019</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
@@ -211,6 +211,7 @@
 				<maven.install.skip>true</maven.install.skip>
 				<skipTests>true</skipTests>
 				<project.root>${basedir}</project.root>
+				<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 			</properties>
 
 			<dependencies>
@@ -220,6 +221,13 @@
 					<version>1.9.13.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
+				</dependency>
+				<dependency>
+					<groupId>io.spring.docresources</groupId>
+					<artifactId>spring-doc-resources</artifactId>
+					<version>${docs.resources.version}</version>
+					<type>zip</type>
+					<optional>true</optional>
 				</dependency>
 			</dependencies>
 
@@ -241,6 +249,20 @@
 									<goal>unpack-dependencies</goal>
 								</goals>
 								<phase>generate-resources</phase>
+							</execution>
+							<execution>
+								<id>unpack-doc-resources</id>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<includeGroupIds>io.spring.docresources</includeGroupIds>
+									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+								</configuration>
 							</execution>
 						</executions>
 						<configuration>
@@ -271,6 +293,29 @@
 					</plugin>
 
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-asciidoc-resources</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/asciidoc</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
 						<version>1.5.6</version>
@@ -291,14 +336,18 @@
 								</goals>
 								<configuration>
 									<backend>html5</backend>
+									<sourceHighlighter>highlight.js</sourceHighlighter>
 									<outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
 									<sectids>false</sectids>
-									<sourceHighlighter>prettify</sourceHighlighter>
 									<attributes>
+										<docinfo>shared</docinfo>
 										<linkcss>true</linkcss>
 										<icons>font</icons>
 										<sectanchors>true</sectanchors>
+										<stylesdir>css/</stylesdir>
 										<stylesheet>spring.css</stylesheet>
+										<highlightjsdir>js/highlight</highlightjsdir>
+										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
 									</attributes>
 								</configuration>
 							</execution>
@@ -318,15 +367,14 @@
 						</executions>
 
 						<configuration>
-							<sourceDirectory>${project.root}/src/main/asciidoc</sourceDirectory>
-							<sourceDocumentName>index.adoc</sourceDocumentName>
+							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
 							<doctype>book</doctype>
 							<attributes>
 								<version>${project.version}</version>
 								<projectName>${project.name}</projectName>
 								<projectVersion>${project.version}</projectVersion>
 								<allow-uri-read>true</allow-uri-read>
-								<toclevels>3</toclevels>
+								<toclevels>4</toclevels>
 								<numbered>true</numbered>
 								<baseDir>${project.basedir}</baseDir>
 							</attributes>
@@ -344,12 +392,6 @@
 								<phase>generate-resources</phase>
 								<configuration>
 									<target>
-										<copy todir="${project.root}/target/site/reference/html">
-											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css" />
-											</fileset>
-											<flattenmapper />
-										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
 												<include name="**/*.png" />
@@ -371,7 +413,6 @@
 								<configuration>
 									<target>
 										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
-										<copy file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${project.artifactId}-reference.epub" failonerror="false" />
 									</target>
 								</configuration>
 								<goals>
