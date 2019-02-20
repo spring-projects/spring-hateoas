@@ -18,25 +18,26 @@ package org.springframework.hateoas.mvc
 
 import org.springframework.hateoas.Affordance
 import org.springframework.hateoas.Link
-import org.springframework.hateoas.mvc.ControllerLinkBuilder.afford
-import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
+import org.springframework.hateoas.mvc.WebMvcLinkBuilder.afford
+import org.springframework.hateoas.mvc.WebMvcLinkBuilder.methodOn
 
 /**
  * Create a new [Link] with additional [Affordance]s.
  *
  * @author Roland Kulcsár
+ * @author Greg Turnquist
  * @since 1.0
  */
-inline infix fun Link.andAffordances(setup: AffordanceBuilderDsl.() -> Unit): Link {
+inline infix fun Link.andAffordances(setup: WebMvcAffordanceBuilderDsl.() -> Unit): Link {
 
-    val builder = AffordanceBuilderDsl()
+    val builder = WebMvcAffordanceBuilderDsl()
     builder.setup()
 
     return andAffordances(builder.affordances)
 }
 
 /**
- * Extract a [Link] from the [ControllerLinkBuilder] and look up the related [Affordance]. Should
+ * Extract a [Link] from the [WebMvcLinkBuilder] and look up the related [Affordance]. Should
  * only be one.
  *
  * @author Roland Kulcsár
@@ -50,7 +51,7 @@ inline fun <reified C> afford(func: C.() -> Unit): Affordance = afford(methodOn(
  * @author Roland Kulcsár
  * @since 1.0
  */
-open class AffordanceBuilderDsl(val affordances: MutableList<Affordance> = mutableListOf()) {
+open class WebMvcAffordanceBuilderDsl(val affordances: MutableList<Affordance> = mutableListOf()) {
 
     inline fun <reified C> afford(func: C.() -> Any) {
         

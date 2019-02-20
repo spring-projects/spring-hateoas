@@ -19,19 +19,20 @@ package org.springframework.hateoas.mvc
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.LinkRelation
 import org.springframework.hateoas.ResourceSupport
-import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
-import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
+import org.springframework.hateoas.mvc.WebMvcLinkBuilder.linkTo
+import org.springframework.hateoas.mvc.WebMvcLinkBuilder.methodOn
 
 import kotlin.reflect.KClass
 
 /**
- * Create a [ControllerLinkBuilder] pointing to a [func] method.
+ * Create a [WebMvcLinkBuilder] pointing to a [func] method.
  *
  * @author Roland Kulcsár
  * @author Oliver Drotbohm
+ * @author Greg Turnquist
  * @since 1.0
  */
-inline fun <reified C> linkTo(func: C.() -> Unit): ControllerLinkBuilder = linkTo(methodOn(C::class.java).apply(func))
+inline fun <reified C> linkTo(func: C.() -> Unit): WebMvcLinkBuilder = linkTo(methodOn(C::class.java).apply(func))
 
 /**
  * Create a [Link] with the given [rel].
@@ -39,8 +40,8 @@ inline fun <reified C> linkTo(func: C.() -> Unit): ControllerLinkBuilder = linkT
  * @author Roland Kulcsár
  * @since 1.0
  */
-infix fun ControllerLinkBuilder.withRel(rel: LinkRelation): Link = withRel(rel)
-infix fun ControllerLinkBuilder.withRel(rel: String): Link = withRel(rel)
+infix fun WebMvcLinkBuilder.withRel(rel: LinkRelation): Link = withRel(rel)
+infix fun WebMvcLinkBuilder.withRel(rel: String): Link = withRel(rel)
 
 /**
  * Add [links] to the [R] resource.
@@ -48,9 +49,9 @@ infix fun ControllerLinkBuilder.withRel(rel: String): Link = withRel(rel)
  * @author Roland Kulcsár
  * @since 1.0
  */
-fun <C, R : ResourceSupport> R.add(controller: Class<C>, links: LinkBuilderDsl<C, R>.(R) -> Unit): R {
+fun <C, R : ResourceSupport> R.add(controller: Class<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
     
-    val builder = LinkBuilderDsl(controller, this)
+    val builder = WebMvcLinkBuilderDsl(controller, this)
     builder.links(this)
 
     return this
@@ -62,7 +63,7 @@ fun <C, R : ResourceSupport> R.add(controller: Class<C>, links: LinkBuilderDsl<C
  * @author Roland Kulcsár
  * @since 1.0
  */
-fun <C : Any, R : ResourceSupport> R.add(controller: KClass<C>, links: LinkBuilderDsl<C, R>.(R) -> Unit): R {
+fun <C : Any, R : ResourceSupport> R.add(controller: KClass<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
     return add(controller.java, links)
 }
 
@@ -72,24 +73,24 @@ fun <C : Any, R : ResourceSupport> R.add(controller: KClass<C>, links: LinkBuild
  * @author Roland Kulcsár
  * @since 1.0
  */
-open class LinkBuilderDsl<C, R : ResourceSupport>(val controller: Class<C>, val resource: R) {
+open class WebMvcLinkBuilderDsl<C, R : ResourceSupport>(val controller: Class<C>, val resource: R) {
 
     /**
-     * Create a [ControllerLinkBuilder] pointing to [func] method.
+     * Create a [WebMvcLinkBuilder] pointing to [func] method.
      */
-    fun <R> linkTo(func: C.() -> R): ControllerLinkBuilder = linkTo(methodOn(controller).run(func))
+    fun <R> linkTo(func: C.() -> R): WebMvcLinkBuilder = linkTo(methodOn(controller).run(func))
 
     /**
      * Add a link with the given [rel] to the [resource].
      */
-    infix fun ControllerLinkBuilder.withRel(rel: String): Link {
+    infix fun WebMvcLinkBuilder.withRel(rel: String): Link {
         return this withRel(LinkRelation.of(rel))
     }
 
     /**
      * Add a link with the given [rel] to the [resource].
      */
-    infix fun ControllerLinkBuilder.withRel(rel: LinkRelation): Link {
+    infix fun WebMvcLinkBuilder.withRel(rel: LinkRelation): Link {
 
         val link = withRel(rel)
         resource.add(link)

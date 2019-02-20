@@ -22,11 +22,12 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 /**
- * Unit tests for [LinkBuilderDsl] and [AffordanceBuilderDsl].
+ * Unit tests for [WebMvcLinkBuilderDsl] and [WebMvcAffordanceBuilderDsl].
  *
  * @author Roland Kulcsár
+ * @author Greg Turnquist
  */
-class LinkBuilderDslUnitTest : TestUtils() {
+class WebMvcLinkBuilderDslUnitTest : TestUtils() {
 
     private val REL_PRODUCTS = "products"
 
