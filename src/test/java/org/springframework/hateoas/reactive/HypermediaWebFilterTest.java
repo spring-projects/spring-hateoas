@@ -17,8 +17,7 @@ package org.springframework.hateoas.reactive;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
-import static org.springframework.hateoas.core.DummyInvocationUtils.*;
-import static org.springframework.hateoas.reactive.ReactiveLinkBuilder.*;
+import static org.springframework.hateoas.reactive.WebFluxLinkBuilder.*;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -89,9 +88,7 @@ public class HypermediaWebFilterTest {
 
 		@GetMapping
 		Mono<ResourceSupport> root() {
-
-			return linkTo(methodOn(TestController.class).root()).map(ReactiveLinkBuilder::withSelfRel)
-					.map(ResourceSupport::new);
+			return linkTo(methodOn(TestController.class).root()).withSelfRel().toMono().map(ResourceSupport::new);
 		}
 	}
 

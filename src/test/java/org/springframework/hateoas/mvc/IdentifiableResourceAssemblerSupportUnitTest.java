@@ -16,7 +16,7 @@
 package org.springframework.hateoas.mvc;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import java.util.Arrays;
 import java.util.List;
