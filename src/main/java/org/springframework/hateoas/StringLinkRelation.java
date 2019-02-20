@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -76,6 +77,19 @@ class StringLinkRelation implements LinkRelation, Serializable {
 		return value();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return relation.toLowerCase(Locale.US).hashCode();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object o) {
 
@@ -86,8 +100,9 @@ class StringLinkRelation implements LinkRelation, Serializable {
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		
+
 		StringLinkRelation that = (StringLinkRelation) o;
+
 		return this.relation.equalsIgnoreCase(that.relation);
 	}
 }

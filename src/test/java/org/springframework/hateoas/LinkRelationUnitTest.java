@@ -54,6 +54,7 @@ public class LinkRelationUnitTest {
 
 		assertThat(LinkRelation.of("self")).isEqualTo(LinkRelation.of("SELF"));
 		assertThat(LinkRelation.of("SeLf")).isEqualTo(IanaLinkRelations.SELF);
+
 		assertThat(LinkRelation.of("self").isSameAs(LinkRelation.of("SELF"))).isTrue();
 		assertThat(IanaLinkRelations.SELF.isSameAs(LinkRelation.of("seLF"))).isTrue();
 	}
