@@ -19,18 +19,19 @@ import lombok.experimental.UtilityClass;
 
 /**
  * Static class to find out whether a relation type is defined by the IANA.
- * 
+ *
  * @see http://www.iana.org/assignments/link-relations/link-relations.xhtml
  * @author Oliver Gierke
  * @author Roland Kulcsár
  * @author Greg Turnquist
  */
 @UtilityClass
+@Deprecated
 public class IanaRels {
 
 	/**
 	 * Returns whether the given relation type is defined by the IANA.
-	 * 
+	 *
 	 * @param rel the relation type to check
 	 * @return
 	 * @deprecated Migrate to {@link IanaLinkRelations#isIanaRel(String)}.

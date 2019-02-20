@@ -23,7 +23,7 @@ import org.springframework.hateoas.mvc.WebMvcLinkBuilder;
 /**
  * Extension of {@link LinkBuilderFactory} for implementations that also support creating {@link LinkBuilder}s by
  * pointing to a method.
- * 
+ *
  * @author Oliver Gierke
  */
 public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBuilderFactory<T> {
@@ -31,7 +31,7 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} and expanding this mapping
 	 * using the given parameters.
-	 * 
+	 *
 	 * @param method must not be {@literal null}.
 	 * @param parameters
 	 * @return
@@ -41,7 +41,7 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} assuming it was invoked on an
 	 * object of the given type.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @param parameters

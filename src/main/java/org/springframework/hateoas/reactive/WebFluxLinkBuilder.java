@@ -137,7 +137,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 
 		/**
 		 * Creates a new {@link WebFluxLink} for the {@link Link} with the {@link IanaLinkRelations#SELF}.
-		 * 
+		 *
 		 * @return
 		 */
 		public WebFluxLink withSelfRel() {

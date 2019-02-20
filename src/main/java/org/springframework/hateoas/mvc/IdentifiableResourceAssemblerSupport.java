@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
  * sure a self-link is always added.
- * 
+ *
  * @author Oliver Gierke
  */
 public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport>
@@ -37,7 +37,7 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 
 	/**
 	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
-	 * 
+	 *
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
@@ -49,7 +49,7 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 
 	/**
 	 * Creates a new resource and adds a self link to it consisting using the {@link Identifiable}'s id.
-	 * 
+	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
@@ -74,7 +74,7 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 
 	/**
 	 * Extracts the ids of the given values in case they're {@link Identifiable}s. Returns all other objects as they are.
-	 * 
+	 *
 	 * @param values must not be {@literal null}.
 	 * @return
 	 */
