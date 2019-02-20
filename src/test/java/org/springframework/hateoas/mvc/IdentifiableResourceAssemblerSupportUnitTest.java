@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Unit tests for {@link IdentifiableResourceAssemblerSupport}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */

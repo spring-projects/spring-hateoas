@@ -29,7 +29,7 @@ import org.springframework.stereotype.Controller;
 
 /**
  * Spring configuration to register a {@link PluginRegistry} for {@link EntityLinks}.
- * 
+ *
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
