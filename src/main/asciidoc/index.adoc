@@ -1,18 +1,15 @@
 = Spring HATEOAS - Reference Documentation
-Oliver Gierke, Greg Turnquist;
+Oliver Gierke; Greg Turnquist; Jay Bryant
 :revnumber: {version}
 :revdate: {localdate}
-:toc:
-:toc-placement!:
-
+:toc: left
+:hide-uri-scheme:
 
 This project provides some APIs to ease creating REST representations that follow the http://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 
-(C) 2012-2015 The original authors.
+(C) 2012-2019 The original authors.
 
 NOTE: Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
-
-toc::[]
 
 [[fundamentals]]
 == Fundmentals
