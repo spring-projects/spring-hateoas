@@ -18,7 +18,7 @@ package org.springframework.hateoas.mvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -56,8 +56,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Trosien
  * @author Greg Turnquist
  */
-@Deprecated
-public class ControllerLinkBuilderUnitTest extends TestUtils {
+public class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 	public @Rule ExpectedException exception = ExpectedException.none();
 

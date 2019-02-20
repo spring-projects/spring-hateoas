@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.support;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -58,21 +60,15 @@ public class WebMvcEmployeeController {
 	@GetMapping("/employees")
 	public Resources<Resource<Employee>> all() {
 
-		// Create a list of Resource<Employee>'s to return
-		List<Resource<Employee>> employees = new ArrayList<>();
-
-		// Fetch each Resource<Employee> using the controller's findOne method.
-		for (int i = 0; i < EMPLOYEES.size(); i++) {
-			employees.add(findOne(i));
-		}
-
 		// Generate an "Affordance" based on this method (the "self" link)
 		Link selfLink = linkTo(methodOn(WebMvcEmployeeController.class).all()).withSelfRel() //
 				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).newEmployee(null))) //
 				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
-		return new Resources<>(employees, selfLink);
+		return IntStream.range(0, EMPLOYEES.size()) //
+				.mapToObj(this::findOne) //
+				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> new Resources<>(it, selfLink)));
 	}
 
 	@GetMapping("/employees/search")

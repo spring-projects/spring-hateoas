@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
@@ -29,6 +30,7 @@ import org.springframework.hateoas.MethodLinkBuilderFactory;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MethodParameters;
 import org.springframework.hateoas.core.WebHandler;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
@@ -42,10 +44,8 @@ import org.springframework.hateoas.core.WebHandler;
  * @author Kevin Conaway
  * @author Andrew Naydyonock
  * @author Greg Turnquist
- * @deprecated use {@link WebMvcLinkBuilderFactory} instead.
  */
-@Deprecated
-public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
+public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvcLinkBuilder> {
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<>();
 
@@ -65,8 +65,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class)
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Class<?> controller) {
-		return ControllerLinkBuilder.linkTo(controller);
+	public WebMvcLinkBuilder linkTo(Class<?> controller) {
+		return WebMvcLinkBuilder.linkTo(controller);
 	}
 
 	/*
@@ -74,8 +74,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.lang.Object[])
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(controller, parameters);
+	public WebMvcLinkBuilder linkTo(Class<?> controller, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(controller, parameters);
 	}
 
 	/*
@@ -83,8 +83,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.util.Map)
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
-		return ControllerLinkBuilder.linkTo(controller, parameters);
+	public WebMvcLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
+		return WebMvcLinkBuilder.linkTo(controller, parameters);
 	}
 
 	/*
@@ -92,8 +92,8 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method, java.lang.Object[])
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(controller, method, parameters);
+	public WebMvcLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(controller, method, parameters);
 	}
 
 	/*
@@ -101,27 +101,27 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Object)
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Object invocationValue) {
+	public WebMvcLinkBuilder linkTo(Object invocationValue) {
 
-		return WebHandler.linkTo(invocationValue, mapping -> ControllerLinkBuilder.getBuilder().path(mapping),
-				ControllerLinkBuilder::new, (builder, invocation) -> {
+		Function<String, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory.getBuilder()
+				.path(mapping);
 
-					MethodParameters parameters = new MethodParameters(invocation.getMethod());
-					Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
+		return WebHandler.linkTo(invocationValue, builderFactory, WebMvcLinkBuilder::new, (builder, invocation) -> {
 
-					for (MethodParameter parameter : parameters.getParameters()) {
-						Object parameterValue = parameterValues.next();
+			MethodParameters parameters = new MethodParameters(invocation.getMethod());
+			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
 
-						for (UriComponentsContributor contributor : this.uriComponentsContributors) {
+			for (MethodParameter parameter : parameters.getParameters()) {
 
-							if (contributor.supportsParameter(parameter)) {
-								contributor.enhance(builder, parameter, parameterValue);
-							}
-						}
-					}
+				Object parameterValue = parameterValues.next();
 
-					return builder;
-				});
+				uriComponentsContributors.stream() //
+						.filter(it -> it.supportsParameter(parameter)) //
+						.forEach(it -> it.enhance(builder, parameter, parameterValue));
+			}
+
+			return builder;
+		});
 	}
 
 	/*
@@ -129,7 +129,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
 	 */
 	@Override
-	public ControllerLinkBuilder linkTo(Method method, Object... parameters) {
-		return ControllerLinkBuilder.linkTo(method, parameters);
+	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(method, parameters);
 	}
 }

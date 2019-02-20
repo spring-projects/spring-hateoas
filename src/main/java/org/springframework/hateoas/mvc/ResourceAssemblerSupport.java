@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import java.util.ArrayList;
 import java.util.List;

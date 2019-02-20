@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.core.ControllerEntityLinksFactoryBean;
 import org.springframework.hateoas.core.DelegatingEntityLinks;
-import org.springframework.hateoas.mvc.ControllerLinkBuilderFactory;
+import org.springframework.hateoas.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.stereotype.Controller;
@@ -54,7 +54,7 @@ class EntityLinksConfiguration {
 	}
 
 	@Bean
-	ControllerEntityLinksFactoryBean controllerEntityLinks(ControllerLinkBuilderFactory controllerLinkBuilderFactory) {
+	ControllerEntityLinksFactoryBean controllerEntityLinks(WebMvcLinkBuilderFactory controllerLinkBuilderFactory) {
 
 		ControllerEntityLinksFactoryBean factory = new ControllerEntityLinksFactoryBean();
 		factory.setAnnotation(Controller.class);
@@ -64,7 +64,7 @@ class EntityLinksConfiguration {
 	}
 
 	@Bean
-	ControllerLinkBuilderFactory controllerLinkBuilderFactoryBean() {
-		return new ControllerLinkBuilderFactory();
+	WebMvcLinkBuilderFactory webMvcLinkBuilderFactoryBean() {
+		return new WebMvcLinkBuilderFactory();
 	}
 }

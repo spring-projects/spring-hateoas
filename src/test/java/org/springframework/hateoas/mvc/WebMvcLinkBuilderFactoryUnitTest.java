@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.springframework.hateoas.mvc;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,17 +44,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Unit tests for {@link ControllerLinkBuilderFactory}.
+ * Unit tests for {@link WebMvcLinkBuilderFactory}.
  *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Ross Turner
  */
-@Deprecated
-public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
+public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 
-	ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+	WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 
 	@Test
 	public void createsLinkToControllerRoot() {
@@ -79,7 +78,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	@Test
 	public void appliesParameterValueIfContributorConfigured() {
 
-		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+		WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 		factory.setUriComponentsContributors(Collections.singletonList(new SampleUriComponentsContributor()));
 
 		SpecialType specialType = new SpecialType();
@@ -98,7 +97,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 		DateTime now = DateTime.now();
 
-		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
+		WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
 		assertThat(link.getHref()).endsWith("/sample/" + ISODateTimeFormat.date().print(now));
 	}

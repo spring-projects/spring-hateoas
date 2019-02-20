@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.support;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-import static org.springframework.hateoas.reactive.ReactiveLinkBuilder.linkTo;
+import static org.springframework.hateoas.reactive.WebFluxLinkBuilder.*;
 import static reactor.function.TupleUtils.*;
 
 import reactor.core.publisher.Flux;
@@ -27,10 +26,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.reactive.ReactiveLinkBuilder;
+import org.springframework.hateoas.reactive.WebFluxLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -42,7 +44,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * Sample controller using {@link WebFluxLinkBuilder} to create {@link Affordance}s.
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 @RestController
 public class WebFluxEmployeeController {
@@ -60,44 +65,61 @@ public class WebFluxEmployeeController {
 	@GetMapping("/employees")
 	public Mono<Resources<Resource<Employee>>> all() {
 
-		return Flux.fromIterable(EMPLOYEES.keySet()).flatMap(id -> findOne(id)).collectList().flatMap(
-				resources -> linkTo(methodOn(WebFluxEmployeeController.class).all()).map(ReactiveLinkBuilder::withSelfRel)
-						.map(link -> link.andAffordance(afford(methodOn(WebFluxEmployeeController.class).newEmployee(null)))
-								.andAffordance(afford(methodOn(WebFluxEmployeeController.class).search(null, null))))
+		Class<WebFluxEmployeeController> controller = WebFluxEmployeeController.class;
+
+		return Flux.fromIterable(EMPLOYEES.keySet()) //
+				.flatMap(id -> findOne(id)) //
+				.collectList() //
+				.flatMap(resources -> linkTo(methodOn(controller).all()).withSelfRel() //
+						.andAffordance(methodOn(controller).newEmployee(null)) //
+						.andAffordance(methodOn(controller).search(null, null)) //
+						.toMono() //
 						.map(selfLink -> new Resources<>(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
-	public Mono<Resources<Resource<Employee>>> search(@RequestParam(value = "name", required = false) String name,
-			@RequestParam(value = "role", required = false) String role) {
+	public Mono<Resources<Resource<Employee>>> search( //
+			@RequestParam Optional<String> name, //
+			@RequestParam Optional<String> role) {
 
-		return Flux.fromIterable(EMPLOYEES.keySet()).flatMap(id -> findOne(id)).filter(resource -> {
+		return Flux.fromIterable(EMPLOYEES.keySet()) //
+				.flatMap(id -> findOne(id)) //
+				.filter(resource -> {
 
-			boolean nameMatches = Optional.ofNullable(name).map(s -> resource.getContent().getName().contains(s))
-					.orElse(true);
+					boolean nameMatches = name //
+							.map(s -> resource.getContent().getName().contains(s)) //
+							.orElse(true);
 
-			boolean roleMatches = Optional.ofNullable(role).map(s -> resource.getContent().getRole().contains(s))
-					.orElse(true);
+					boolean roleMatches = name.map(s -> resource.getContent().getRole().contains(s)) //
+							.orElse(true);
 
-			return nameMatches && roleMatches;
-		}).collectList().flatMap(
-				resources -> linkTo(methodOn(WebFluxEmployeeController.class).all()).map(ReactiveLinkBuilder::withSelfRel)
-						.map(link -> link.andAffordance(afford(methodOn(WebFluxEmployeeController.class).newEmployee(null)))
-								.andAffordance(afford(methodOn(WebFluxEmployeeController.class).search(null, null))))
-						.map(selfLink -> new Resources<>(resources, selfLink)));
+					return nameMatches && roleMatches;
+				}).collectList().flatMap(resources -> {
+
+					Class<WebFluxEmployeeController> controller = WebFluxEmployeeController.class;
+
+					return linkTo(methodOn(controller).all()).withSelfRel() //
+							.andAffordance(methodOn(controller).newEmployee(null)) //
+							.andAffordance(methodOn(controller).search(null, null)) //
+							.toMono() //
+							.map(selfLink -> new Resources<>(resources, selfLink));
+				});
 	}
 
 	@GetMapping("/employees/{id}")
 	public Mono<Resource<Employee>> findOne(@PathVariable Integer id) {
 
-		return linkTo(methodOn(WebFluxEmployeeController.class).findOne(id)) //
-				.map(ReactiveLinkBuilder::withSelfRel) //
-				.zipWith(linkTo(methodOn(WebFluxEmployeeController.class).all()) //
-						.map(reactiveLinkBuilder -> reactiveLinkBuilder.withRel("employees")))
-				.map(function((selfLink, employeesLink) -> new Resource<>(EMPLOYEES.get(id),
-						selfLink.andAffordance(afford(methodOn(WebFluxEmployeeController.class).updateEmployee(null, id))) //
-								.andAffordance(afford(methodOn(WebFluxEmployeeController.class).partiallyUpdateEmployee(null, id))),
-						employeesLink)));
+		Mono<Link> selfLink = linkTo(methodOn(WebFluxEmployeeController.class).findOne(id)).withSelfRel() //
+				.andAffordance(methodOn(WebFluxEmployeeController.class).updateEmployee(null, id)) //
+				.andAffordance(methodOn(WebFluxEmployeeController.class).partiallyUpdateEmployee(null, id)) //
+				.toMono();
+
+		Mono<Link> employeesLink = linkTo(methodOn(WebFluxEmployeeController.class).all()).withRel("employees") //
+				.toMono();
+
+		return selfLink.zipWith(employeesLink) //
+				.map(function((left, right) -> Links.of(left, right))) //
+				.map(links -> new Resource<>(EMPLOYEES.get(id), links));
 	}
 
 	@PostMapping("/employees")

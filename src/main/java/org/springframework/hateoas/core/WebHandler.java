@@ -42,7 +42,6 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.LinkBuilder;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MultiValueMap;
@@ -57,13 +56,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
 
 /**
- * Utility for taking a method invocation and extracting a {@link ControllerLinkBuilder}.
+ * Utility for taking a method invocation and extracting a {@link LinkBuilder}.
  *
  * @author Greg Turnquist
  */
 public class WebHandler {
 
-	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR //
 			= new AnnotatedParametersParameterAccessor(new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR //
@@ -90,7 +90,7 @@ public class WebHandler {
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
 
 		UriComponentsBuilder builder = mappingToUriComponentsBuilder.apply(mapping);
-		UriTemplate template = new UriTemplate(mapping == null ? "/" : mapping);
+		UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
 		Map<String, Object> values = new HashMap<>();
 
 		Iterator<String> names = template.getVariableNames().iterator();

@@ -16,11 +16,11 @@
 package org.springframework.hateoas.mvc;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,16 +35,16 @@ public class DummyInvocationUtilsUnitTest extends TestUtils {
 	@Test
 	public void pathVariableWithDefaultParameter() {
 
-		Link link = ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someMethod(1L))
-				.withSelfRel();
+		Link link = linkTo(methodOn(SampleController.class).someMethod(1L)).withSelfRel();
+
 		assertThat(link.getHref()).isEqualTo("http://localhost/sample/1/foo");
 	}
 
 	@Test
 	public void pathVariableWithNameParameter() {
 
-		Link link = ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(SampleController.class).someOtherMethod(2L))
-				.withSelfRel();
+		Link link = linkTo(methodOn(SampleController.class).someOtherMethod(2L)).withSelfRel();
+
 		assertThat(link.getHref()).isEqualTo("http://localhost/sample/2/bar");
 	}
 

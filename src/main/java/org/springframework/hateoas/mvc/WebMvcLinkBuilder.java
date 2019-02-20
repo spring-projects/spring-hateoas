@@ -48,45 +48,43 @@ import org.springframework.web.util.UriTemplate;
  * @author Andrew Naydyonock
  * @author Oliver Trosien
  * @author Greg Turnquist
- * @deprecated use {@link WebMvcLinkBuilder} instead.
  */
-@Deprecated
-public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<ControllerLinkBuilder> {
+public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebMvcLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
 			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
-	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
+	private static final WebMvcLinkBuilderFactory FACTORY = new WebMvcLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
 	/**
-	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
+	 * Creates a new {@link WebMvcLinkBuilder} using the given {@link UriComponentsBuilder}.
 	 *
 	 * @param builder must not be {@literal null}.
 	 */
-	ControllerLinkBuilder(UriComponentsBuilder builder) {
+	WebMvcLinkBuilder(UriComponentsBuilder builder) {
 		this(builder, TemplateVariables.NONE, Collections.emptyList());
 	}
 
-	ControllerLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
+	WebMvcLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
 		super(builder, variables, affordances);
 	}
 
-	ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, List<Affordance> affordances) {
+	WebMvcLinkBuilder(UriComponents uriComponents, TemplateVariables variables, List<Affordance> affordances) {
 		super(uriComponents, variables, affordances);
 	}
 
 	/**
-	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
+	 * Creates a new {@link WebMvcLinkBuilder} with a base of the mapping annotated to the given controller class.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Class<?> controller) {
+	public static WebMvcLinkBuilder linkTo(Class<?> controller) {
 		return linkTo(controller, new Object[0]);
 	}
 
 	/**
-	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
+	 * Creates a new {@link WebMvcLinkBuilder} with a base of the mapping annotated to the given controller class. The
 	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
@@ -94,7 +92,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 *          {@literal null}.
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Class<?> controller, Object... parameters) {
+	public static WebMvcLinkBuilder linkTo(Class<?> controller, Object... parameters) {
 
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
@@ -104,11 +102,11 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
 	}
 
 	/**
-	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
+	 * Creates a new {@link WebMvcLinkBuilder} with a base of the mapping annotated to the given controller class.
 	 * Parameter map is used to fill up potentially available path variables in the class scope request mapping.
 	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
@@ -116,7 +114,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 *          {@literal null}.
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
+	public static WebMvcLinkBuilder linkTo(Class<?> controller, Map<String, ?> parameters) {
 
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
@@ -126,33 +124,34 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
 	}
 
 	/*
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
-	public static ControllerLinkBuilder linkTo(Method method, Object... parameters) {
+	public static WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
 		return linkTo(method.getDeclaringClass(), method, parameters);
 	}
 
 	/*
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
 	 */
-	public static ControllerLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
+	public static WebMvcLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
 
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		UriTemplate template = UriTemplateFactory.templateFor(DISCOVERER.getMapping(controller, method));
+		String mapping = DISCOVERER.getMapping(controller, method);
+		UriTemplate template = UriTemplateFactory.templateFor(mapping);
 		URI uri = template.expand(parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uri);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uri);
 	}
 
 	/**
-	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
-	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
+	 * Creates a {@link WebMvcLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result you
+	 * can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
 	 *
 	 * <pre>
 	 * &#64;RequestMapping("/customers")
@@ -172,13 +171,13 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 * @param invocationValue
 	 * @return
 	 */
-	public static ControllerLinkBuilder linkTo(Object invocationValue) {
+	public static WebMvcLinkBuilder linkTo(Object invocationValue) {
 		return FACTORY.linkTo(invocationValue);
 	}
 
 	/**
-	 * Extract a {@link Link} from the {@link ControllerLinkBuilder} and look up the related {@link Affordance}. Should
-	 * only be one.
+	 * Extract a {@link Link} from the {@link WebMvcLinkBuilder} and look up the related {@link Affordance}. Should only
+	 * be one.
 	 *
 	 * <pre>
 	 * Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel()
@@ -192,7 +191,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 */
 	public static Affordance afford(Object invocationValue) {
 
-		ControllerLinkBuilder linkBuilder = linkTo(invocationValue);
+		WebMvcLinkBuilder linkBuilder = linkTo(invocationValue);
 
 		Assert.isTrue(linkBuilder.getAffordances().size() == 1, "A base can only have one affordance, itself");
 
@@ -201,7 +200,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 
 	/**
 	 * Wrapper for {@link DummyInvocationUtils#methodOn(Class, Object...)} to be available in case you work with static
-	 * imports of {@link ControllerLinkBuilder}.
+	 * imports of {@link WebMvcLinkBuilder}.
 	 *
 	 * @param controller must not be {@literal null}.
 	 * @param parameters parameters to extend template variables in the type level mapping.
@@ -216,7 +215,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
 	@Override
-	protected ControllerLinkBuilder getThis() {
+	protected WebMvcLinkBuilder getThis() {
 		return this;
 	}
 
@@ -225,9 +224,9 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected WebMvcLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
 			TemplateVariables variables) {
-		return new ControllerLinkBuilder(builder, variables, affordances);
+		return new WebMvcLinkBuilder(builder, variables, affordances);
 	}
 
 	/**
@@ -237,16 +236,6 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 */
 	public UriComponentsBuilder toUriComponentsBuilder() {
 		return UriComponentsBuilder.fromUri(toUri());
-	}
-
-	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping. If no
-	 * {@link RequestContextHolder} exists (you're outside a Spring Web call), fall back to relative URIs.
-	 *
-	 * @return
-	 */
-	public static UriComponentsBuilder getBuilder() {
-		return UriComponentsBuilderFactory.getBuilder();
 	}
 
 	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
