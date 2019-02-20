@@ -15,31 +15,23 @@
  */
 package org.springframework.hateoas.mvc;
 
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
 import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -58,9 +50,8 @@ import org.springframework.web.util.UriTemplate;
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
-	private static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
-	private static final CachingAnnotationMappingDiscoverer DISCOVERER = new CachingAnnotationMappingDiscoverer(
-			new AnnotationMappingDiscoverer(RequestMapping.class));
+	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
@@ -164,7 +155,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		UriTemplate template = DISCOVERER.getMappingAsUriTemplate(controller, method);
+		UriTemplate template = UriTemplateFactory.templateFor(DISCOVERER.getMapping(controller, method));
 		URI uri = template.expand(parameters);
 
 		return new ControllerLinkBuilder(getBuilder()).slash(uri);
@@ -288,28 +279,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 * @return
 	 */
 	public static UriComponentsBuilder getBuilder() {
-
-		if (RequestContextHolder.getRequestAttributes() == null) {
-			return UriComponentsBuilder.fromPath("/");
-		}
-
-		return ServletUriComponentsBuilder.fromServletMapping(getCurrentRequest());
-	}
-
-	/**
-	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
-	 *
-	 * @return
-	 */
-	@SuppressWarnings("null")
-	private static HttpServletRequest getCurrentRequest() {
-
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
-		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
-		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
-		return servletRequest;
+		return UriComponentsBuilderFactory.getBuilder();
 	}
 
 	/**
@@ -321,19 +291,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	 */
 	private static Collection<Affordance> findAffordances(MethodInvocation invocation, UriComponents components) {
 		return SpringMvcAffordanceBuilder.create(invocation, DISCOVERER, components);
-	}
-
-	@RequiredArgsConstructor
-	private static class CachingAnnotationMappingDiscoverer implements MappingDiscoverer {
-
-		private final @Delegate AnnotationMappingDiscoverer delegate;
-		private final Map<String, UriTemplate> templates = new ConcurrentReferenceHashMap<>();
-
-		public UriTemplate getMappingAsUriTemplate(Class<?> type, Method method) {
-
-			String mapping = delegate.getMapping(type, method);
-			return templates.computeIfAbsent(mapping, UriTemplate::new);
-		}
 	}
 
 	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
