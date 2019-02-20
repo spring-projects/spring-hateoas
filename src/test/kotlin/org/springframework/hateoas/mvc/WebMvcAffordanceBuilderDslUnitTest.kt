@@ -23,11 +23,12 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 /**
- * Unit tests for [LinkBuilderDsl] and [AffordanceBuilderDsl].
+ * Unit tests for [WebMvcLinkBuilderDsl] and [WebMvcAffordanceBuilderDsl].
  *
  * @author Roland Kulcsár
+ * @author Greg Turnquist
  */
-class AffordanceBuilderDslUnitTest : TestUtils() {
+class WebMvcAffordanceBuilderDslUnitTest : TestUtils() {
 
     /**
      * @see #715
