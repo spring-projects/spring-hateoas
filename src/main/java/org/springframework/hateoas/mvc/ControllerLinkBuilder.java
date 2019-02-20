@@ -15,31 +15,18 @@
  */
 package org.springframework.hateoas.mvc;
 
-import static org.springframework.hateoas.mvc.ForwardedHeader.*;
-
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.context.ApplicationContext;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.core.LinkBuilderSupport;
-import org.springframework.hateoas.core.MappingDiscoverer;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -47,7 +34,7 @@ import org.springframework.web.util.UriTemplate;
 
 /**
  * Builder to ease building {@link Link} instances pointing to Spring MVC controllers.
- * 
+ *
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Greg Turnquist
@@ -58,18 +45,16 @@ import org.springframework.web.util.UriTemplate;
  */
 public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuilder> {
 
-	private static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
-	private static final CachingAnnotationMappingDiscoverer DISCOVERER = new CachingAnnotationMappingDiscoverer(
-			new AnnotationMappingDiscoverer(RequestMapping.class));
+	private static final CachingMappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final ControllerLinkBuilderFactory FACTORY = new ControllerLinkBuilderFactory();
-	private static final String CACHE_KEY = ControllerLinkBuilder.class.getName() + "#BUILDER_CACHE";
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
 	private final TemplateVariables variables;
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} using the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 */
 	ControllerLinkBuilder(UriComponentsBuilder builder) {
@@ -97,7 +82,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class.
-	 * 
+	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @return
 	 */
@@ -108,7 +93,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	/**
 	 * Creates a new {@link ControllerLinkBuilder} with a base of the mapping annotated to the given controller class. The
 	 * additional parameters are used to fill up potentially available path variables in the class scop request mapping.
-	 * 
+	 *
 	 * @param controller the class to discover the annotation on, must not be {@literal null}.
 	 * @param parameters additional parameters to bind to the URI template declared in the annotation, must not be
 	 *          {@literal null}.
@@ -124,7 +109,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new ControllerLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
 	}
 
 	/**
@@ -146,7 +131,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new ControllerLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
 	}
 
 	/*
@@ -164,31 +149,32 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		UriTemplate template = DISCOVERER.getMappingAsUriTemplate(controller, method);
+		String mapping = DISCOVERER.getMapping(controller, method);
+		UriTemplate template = UriTemplateFactory.templateFor(mapping);
 		URI uri = template.expand(parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uri);
+		return new ControllerLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uri);
 	}
 
 	/**
 	 * Creates a {@link ControllerLinkBuilder} pointing to a controller method. Hand in a dummy method invocation result
 	 * you can create via {@link #methodOn(Class, Object...)} or {@link DummyInvocationUtils#methodOn(Class, Object...)}.
-	 * 
+	 *
 	 * <pre>
 	 * &#64;RequestMapping("/customers")
 	 * class CustomerController {
-	 * 
+	 *
 	 *   &#64;RequestMapping("/{id}/addresses")
-	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … } 
+	 *   HttpEntity&lt;Addresses&gt; showAddresses(@PathVariable Long id) { … }
 	 * }
-	 * 
+	 *
 	 * Link link = linkTo(methodOn(CustomerController.class).showAddresses(2L)).withRel("addresses");
 	 * </pre>
-	 * 
+	 *
 	 * The resulting {@link Link} instance will point to {@code /customers/2/addresses} and have a rel of
 	 * {@code addresses}. For more details on the method invocation constraints, see
 	 * {@link DummyInvocationUtils#methodOn(Class, Object...)}.
-	 * 
+	 *
 	 * @param invocationValue
 	 * @return
 	 */
@@ -199,7 +185,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 	/**
 	 * Wrapper for {@link DummyInvocationUtils#methodOn(Class, Object...)} to be available in case you work with static
 	 * imports of {@link ControllerLinkBuilder}.
-	 * 
+	 *
 	 * @param controller must not be {@literal null}.
 	 * @param parameters parameters to extend template variables in the type level mapping.
 	 * @return
@@ -208,7 +194,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#getThis()
 	 */
@@ -217,7 +203,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 		return this;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.UriComponentsLinkBuilder#createNewInstance(org.springframework.web.util.UriComponentsBuilder)
 	 */
@@ -228,7 +214,7 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 	/**
 	 * Returns a {@link UriComponentsBuilder} to continue to build the already built URI in a more fine grained way.
-	 * 
+	 *
 	 * @return
 	 */
 	public UriComponentsBuilder toUriComponentsBuilder() {
@@ -254,107 +240,6 @@ public class ControllerLinkBuilder extends LinkBuilderSupport<ControllerLinkBuil
 
 		String[] parts = result.split("#");
 		return parts[0].concat(variables.toString()).concat("#").concat(parts[0]);
-	}
-
-	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
-	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
-	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
-	 * back to relative URIs.
-	 *
-	 * @return
-	 */
-	static UriComponentsBuilder getBuilder() {
-		if (RequestContextHolder.getRequestAttributes() == null) {
-			return UriComponentsBuilder.fromPath("/");
-		}
-
-		URI baseUri = getCachedBaseUri();
-		if (baseUri == null) {
-			UriComponentsBuilder builderFromRequest = createBuilderFromRequest();
-			cacheBaseUri(builderFromRequest.build().toUri());
-			return builderFromRequest;
-		} else {
-			return UriComponentsBuilder.fromUri(baseUri);
-		}
-	}
-
-	private static UriComponentsBuilder createBuilderFromRequest() {
-
-		HttpServletRequest request = getCurrentRequest();
-		ServletUriComponentsBuilder builder = ServletUriComponentsBuilder.fromServletMapping(request);
-
-		// Spring 5.1 can handle X-Forwarded-Ssl headers...
-		if (isSpringAtLeast5_1()) {
-			return builder;
-		} else {
-			return handleXForwardedSslHeader(request, builder);
-		}
-	}
-
-	/**
-	 * Check if the current version of Spring Framework is 5.1 or higher.
-	 * 
-	 * @return
-	 */
-	private static boolean isSpringAtLeast5_1() {
-
-		String versionOfSpringFramework = ApplicationContext.class.getPackage().getImplementationVersion();
-
-		String[] parts = versionOfSpringFramework.split("\\.");
-		int majorVersion = Integer.parseInt(parts[0]);
-		int minorVersion = Integer.parseInt(parts[1]);
-
-		return (majorVersion >= 5 && minorVersion >= 1) || (majorVersion > 5);
-	}
-
-	/**
-	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("null")
-	private static HttpServletRequest getCurrentRequest() {
-        RequestAttributes requestAttributes = getRequestAttributes();
-		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
-		return servletRequest;
-	}
-
-	private static RequestAttributes getRequestAttributes() {
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
-		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
-		return requestAttributes;
-	}
-
-	private static void cacheBaseUri(URI uri) {
-		getRequestAttributes().setAttribute(CACHE_KEY, uri, RequestAttributes.SCOPE_REQUEST);
-	}
-
-	private static URI getCachedBaseUri() {
-		return (URI) getRequestAttributes().getAttribute(CACHE_KEY, RequestAttributes.SCOPE_REQUEST);
-	}
-
-	@RequiredArgsConstructor
-	private static class CachingAnnotationMappingDiscoverer implements MappingDiscoverer {
-
-		private final @Delegate AnnotationMappingDiscoverer delegate;
-		private final Map<String, UriTemplate> templates = new ConcurrentReferenceHashMap<String, UriTemplate>();
-
-		public UriTemplate getMappingAsUriTemplate(Class<?> type, Method method) {
-
-			String mapping = delegate.getMapping(type, method);
-
-			UriTemplate template = templates.get(mapping);
-
-			if (template == null) {
-				template = new UriTemplate(mapping);
-				templates.put(mapping, template);
-			}
-
-			return template;
-		}
 	}
 
 	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
