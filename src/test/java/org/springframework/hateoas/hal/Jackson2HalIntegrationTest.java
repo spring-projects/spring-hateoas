@@ -50,7 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
- * 
+ *
  * @author Alexander Baetz
  * @author Oliver Gierke
  * @author Greg Turnquist
@@ -70,7 +70,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	static final String ANNOTATED_PAGED_RESOURCES = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]},\"_links\":{\"next\":{\"href\":\"foo\"},\"prev\":{\"href\":\"bar\"}},\"page\":{\"size\":2,\"totalElements\":4,\"totalPages\":2,\"number\":0}}";
 
-	static final Links PAGINATION_LINKS = Links.of(new Link("foo", IanaLinkRelations.NEXT.value()), new Link("bar", IanaLinkRelations.PREV.value()));
+	static final Links PAGINATION_LINKS = Links.of(new Link("foo", IanaLinkRelations.NEXT.value()),
+			new Link("bar", IanaLinkRelations.PREV.value()));
 
 	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}]}}";
 	static final String MULTIPLE_CURIES_DOCUMENT = "{\"_links\":{\"default:myrel\":{\"href\":\"foo\"},\"curies\":[{\"href\":\"bar\",\"name\":\"foo\"},{\"href\":\"foo\",\"name\":\"bar\"}]}}";
@@ -123,7 +124,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 	/**
 	 * HAL doesn't support "media" so it's removed from the "expected" link.
-	 * 
+	 *
 	 * @see #699
 	 */
 	@Test
@@ -131,10 +132,10 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		ResourceSupport expected = new ResourceSupport();
 		expected.add(new Link("localhost", "self") //
-			.withHreflang("en") //
-			.withTitle("the title") //
-			.withType("the type") //
-			.withDeprecation("/customers/deprecated"));
+				.withHreflang("en") //
+				.withTitle("the title") //
+				.withType("the type") //
+				.withDeprecation("/customers/deprecated"));
 
 		assertThat(read(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, ResourceSupport.class)).isEqualTo(expected);
 	}
@@ -352,8 +353,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void rendersCuriesCorrectly() throws Exception {
 
-		Resources<Object> resources = new Resources<>(Collections.emptySet(), new Link("foo"),
-			new Link("bar", "myrel"));
+		Resources<Object> resources = new Resources<>(Collections.emptySet(), new Link("foo"), new Link("bar", "myrel"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources)).isEqualTo(CURIED_DOCUMENT);
 	}
