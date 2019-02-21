@@ -22,10 +22,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.collectionjson.CollectionJsonConfigurer;
+import org.springframework.hateoas.hal.HalConfigurer;
+import org.springframework.hateoas.hal.forms.HalFormsConfigurer;
+import org.springframework.hateoas.uber.UberConfigurer;
 import org.springframework.http.MediaType;
 
 /**
@@ -63,32 +68,35 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
+		HAL(HalConfigurer.class, MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
 		 *
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
-		HAL_FORMS(MediaTypes.HAL_FORMS_JSON),
+		HAL_FORMS(HalFormsConfigurer.class, MediaTypes.HAL_FORMS_JSON),
 
 		/**
 		 * Collection+JSON
 		 *
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
-		COLLECTION_JSON(MediaTypes.COLLECTION_JSON),
+		COLLECTION_JSON(CollectionJsonConfigurer.class, MediaTypes.COLLECTION_JSON),
 
 		/**
 		 * UBER Hypermedia
 		 *
 		 * @see http://uberhypermedia.org/
 		 */
-		UBER(MediaTypes.UBER_JSON);
+		UBER(UberConfigurer.class, MediaTypes.UBER_JSON);
 
+		private final Class<?> configurer;
 		private final List<MediaType> mediaTypes;
 
-		HypermediaType(MediaType... mediaTypes) {
+		HypermediaType(Class<?> configurer, MediaType... mediaTypes) {
+
+			this.configurer = configurer;
 			this.mediaTypes = Arrays.asList(mediaTypes);
 		}
 
@@ -96,5 +104,11 @@ public @interface EnableHypermediaSupport {
 		public List<MediaType> getMediaTypes() {
 			return this.mediaTypes;
 		}
+
+		@Override
+		public Optional<Class<?>> configurer() {
+			return Optional.ofNullable(this.configurer);
+		}
+
 	}
 }

@@ -39,13 +39,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WebFluxHateoasConfiguration {
 
 	@Bean
-	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper, DelegatingRelProvider relProvider,
-			ObjectProvider<CurieProvider> curieProvider, ObjectProvider<HalConfiguration> halConfiguration,
-			ObjectProvider<HalFormsConfiguration> halFormsConfiguration, Collection<Hypermedia> hypermediaTypes) {
+	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
+											Collection<Hypermedia> hypermediaTypes) {
 
-		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), relProvider,
-				curieProvider.getIfAvailable(), halConfiguration.getIfAvailable(HalConfiguration::new),
-				halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new), hypermediaTypes);
+		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	@Bean
@@ -55,13 +52,9 @@ public class WebFluxHateoasConfiguration {
 
 	@Bean
 	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
-			DelegatingRelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
-			ObjectProvider<HalConfiguration> halConfiguration, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
 			Collection<Hypermedia> hypermediaTypes) {
 
-		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), relProvider,
-				curieProvider.getIfAvailable(), halConfiguration.getIfAvailable(HalConfiguration::new),
-				halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new), hypermediaTypes);
+		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	/**

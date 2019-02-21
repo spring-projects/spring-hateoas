@@ -38,13 +38,11 @@ public class WebMvcHateoasConfiguration {
 
 	@Bean
 	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(ObjectProvider<ObjectMapper> mapper,
-			DelegatingRelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
-			ObjectProvider<HalConfiguration> halConfiguration, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
+//			DelegatingRelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
+//			ObjectProvider<HalConfiguration> halConfiguration, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
 			Collection<Hypermedia> hypermediaTypes) {
 
-		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), relProvider,
-				curieProvider.getIfAvailable(), halConfiguration.getIfAvailable(HalConfiguration::new),
-				halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new), hypermediaTypes);
+		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	@Bean

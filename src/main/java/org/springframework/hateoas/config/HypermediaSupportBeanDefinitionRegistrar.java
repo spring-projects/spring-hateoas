@@ -22,22 +22,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
-import org.springframework.hateoas.uber.UberLinkDiscoverer;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -68,55 +61,15 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		 */
 		for (HypermediaType type : types) {
 
-			BeanDefinitionBuilder hypermediaTypeBeanDefinition = genericBeanDefinition(HypermediaType.class, () -> type);
-			registerSourcedBeanDefinition(hypermediaTypeBeanDefinition, metadata, registry);
+			type.configurer().ifPresent(clazz -> {
+
+				BeanDefinitionBuilder hypermediaTypeBeanDefinition = genericBeanDefinition(clazz);
+				registerSourcedBeanDefinition(hypermediaTypeBeanDefinition, metadata, registry);
+			});
 		}
 
-		/*
-		 * Only register JSONPath-based {@link LinkDiscoverer}s based on the registered {@link HypermediaType}s.
-		 */
-		if (JSONPATH_PRESENT) {
-
-			for (HypermediaType type : types) {
-
-				AbstractBeanDefinition linkDiscovererBeanDefinition = getLinkDiscovererBeanDefinition(type);
-				registerBeanDefinition(new BeanDefinitionHolder(linkDiscovererBeanDefinition,
-						BeanDefinitionReaderUtils.generateBeanName(linkDiscovererBeanDefinition, registry)), registry);
-			}
-		}
 	}
-
-	/**
-	 * Returns a {@link LinkDiscoverer} {@link BeanDefinition} suitable for the given {@link HypermediaType}.
-	 *
-	 * @param type
-	 * @return
-	 */
-	private AbstractBeanDefinition getLinkDiscovererBeanDefinition(HypermediaType type) {
-
-		AbstractBeanDefinition definition;
-
-		switch (type) {
-			case HAL:
-				definition = new RootBeanDefinition(HalLinkDiscoverer.class);
-				break;
-			case HAL_FORMS:
-				definition = new RootBeanDefinition(HalFormsLinkDiscoverer.class);
-				break;
-			case COLLECTION_JSON:
-				definition = new RootBeanDefinition(CollectionJsonLinkDiscoverer.class);
-				break;
-			case UBER:
-				definition = new RootBeanDefinition(UberLinkDiscoverer.class);
-				break;
-			default:
-				throw new IllegalStateException(String.format("Unsupported hypermedia type %s!", type));
-		}
-
-		definition.setSource(this);
-		return definition;
-	}
-
+	
 	private static String registerSourcedBeanDefinition(BeanDefinitionBuilder builder, AnnotationMetadata metadata,
 			BeanDefinitionRegistry registry) {
 
