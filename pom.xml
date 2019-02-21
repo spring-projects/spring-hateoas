@@ -285,7 +285,7 @@
 							<execution>
 								<id>aggregate-javadoc</id>
 								<goals>
-									<goal>aggregate</goal>
+									<goal>javadoc</goal>
 								</goals>
 								<phase>package</phase>
 							</execution>
@@ -318,7 +318,7 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.6</version>
+						<version>1.5.7.1</version>
 						<dependencies>
 							<dependency>
 								<groupId>org.asciidoctor</groupId>
@@ -694,7 +694,6 @@
 						<source>${source.level}</source>
 						<quiet>true</quiet>
 						<doclint>none</doclint>
-						<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
 						<links>
 							<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
 							<link>http://docs.oracle.com/javase/6/docs/api</link>
