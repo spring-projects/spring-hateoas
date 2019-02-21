@@ -475,6 +475,19 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		assertThat(deserialized).isEqualTo(original);
 	}
 
+	@Test // #811
+	public void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
+
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null,
+				new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
+
+		ResourceSupport resource = new ResourceSupport();
+		resource.add(new Link("/some-href", "foo"));
+
+		assertThat(mapper.writeValueAsString(resource)) //
+				.isEqualTo("{\"_links\":{\"foo\":[{\"href\":\"/some-href\"}]}}");
+	}
+
 	private static void verifyResolvedTitle(String resourceBundleKey) throws Exception {
 
 		LocaleContextHolder.setLocale(Locale.US);

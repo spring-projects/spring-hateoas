@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +182,7 @@ public class Jackson2HalModule extends SimpleModule {
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
 				ArrayList<Object> curies = new ArrayList<>();
-				curies.add(curieProvider.getCurieInformation(Links.of(links)));
+				curies.addAll(curieProvider.getCurieInformation(Links.of(links)));
 
 				sortedLinks.put(HalLinkRelation.CURIES, curies);
 			}
@@ -420,40 +419,24 @@ public class Jackson2HalModule extends SimpleModule {
 				return;
 			}
 
-			if (list.size() == 1 && this.halConfiguration.getRenderSingleLinks() == RenderSingleLinks.AS_SINGLE) {
-				serializeContents(list.iterator(), jgen, provider);
+			Object firstElement = list.get(0);
+
+			if (!HalLink.class.isInstance(firstElement)) {
+				serializeContents(list, jgen, provider);
 				return;
 			}
 
-			jgen.writeStartArray();
-			serializeContents(list.iterator(), jgen, provider);
-			jgen.writeEndArray();
-		}
+			HalLink halLink = HalLink.class.cast(firstElement);
 
-		private void serializeContents(Iterator<?> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
+			if (list.size() == 1
+					&& halConfiguration.getSingleLinkRenderModeFor(halLink.getLink().getRel()).equals(RenderSingleLinks.AS_SINGLE)) {
 
-			while (value.hasNext()) {
-				Object elem = value.next();
-				if (elem == null) {
-					provider.defaultSerializeNull(jgen);
-				} else {
-					getOrLookupSerializerFor(elem.getClass(), provider).serialize(elem, jgen, provider);
-				}
-			}
-		}
+				serializeContents(halLink, jgen, provider);
 
-		private JsonSerializer<Object> getOrLookupSerializerFor(Class<?> type, SerializerProvider provider)
-				throws JsonMappingException {
-
-			JsonSerializer<Object> serializer = serializers.get(type);
-
-			if (serializer == null) {
-				serializer = provider.findValueSerializer(type, property);
-				serializers.put(type, serializer);
+				return;
 			}
 
-			return serializer;
+			serializeContents(list, jgen, provider);
 		}
 
 		/*
@@ -503,6 +486,24 @@ public class Jackson2HalModule extends SimpleModule {
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
 			return new OptionalListJackson2Serializer(property, halConfiguration);
+		}
+
+		private void serializeContents(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+			getOrLookupSerializerFor(value, provider).serialize(value, jgen, provider);
+		}
+
+		private JsonSerializer<Object> getOrLookupSerializerFor(Object value, SerializerProvider provider)
+				throws JsonMappingException {
+
+			Class<? extends Object> type = value.getClass();
+			JsonSerializer<Object> serializer = serializers.get(type);
+
+			if (serializer == null) {
+				serializer = provider.findValueSerializer(type, property);
+				serializers.put(type, serializer);
+			}
+
+			return serializer;
 		}
 	}
 
