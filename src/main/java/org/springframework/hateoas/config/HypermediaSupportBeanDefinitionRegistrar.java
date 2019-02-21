@@ -27,10 +27,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -62,6 +64,9 @@ class HypermediaSupportBeanDefinitionRegistrar implements ImportBeanDefinitionRe
 		for (HypermediaType type : types) {
 
 			type.configurer().ifPresent(clazz -> {
+
+				Assert.isTrue(clazz.isAnnotationPresent(Configuration.class),
+						clazz + " must have Spring's @Configuration annotation!");
 
 				BeanDefinitionBuilder hypermediaTypeBeanDefinition = genericBeanDefinition(clazz);
 				registerSourcedBeanDefinition(hypermediaTypeBeanDefinition, metadata, registry);
