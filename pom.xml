@@ -712,7 +712,6 @@
 					<source>${source.level}</source>
 					<quiet>true</quiet>
 					<additionalparam>-Xdoclint:none</additionalparam>
-					<stylesheetfile>${basedir}/src/main/javadoc/spring-javadoc.css</stylesheetfile>
 					<links>
 						<link>http://static.springframework.org/spring/docs/4.1.x/javadoc-api</link>
 						<link>http://docs.oracle.com/javase/6/docs/api</link>
