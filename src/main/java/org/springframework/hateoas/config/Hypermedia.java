@@ -18,7 +18,6 @@ package org.springframework.hateoas.config;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.hateoas.hal.forms.HalFormsConfigurer;
 import org.springframework.http.MediaType;
 import org.springframework.util.MimeType;
 
@@ -51,6 +50,6 @@ public interface Hypermedia {
 	}
 
 	default Optional<Class<?>> configurer() {
-		return Optional.of(HalFormsConfigurer.class);
+		return Optional.empty();
 	}
 }
