@@ -21,43 +21,40 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.Hypermedia;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.Module;
 
 /**
+ * Spring configuration for Uber media type support.
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 @Configuration
-public class UberConfigurer {
-
-	@Bean
-	Hypermedia uberBean() {
-
-		return new Hypermedia() {
-			@Override
-			public List<MediaType> getMediaTypes() {
-				return HypermediaType.UBER.getMediaTypes();
-			}
-
-			@Override
-			public ObjectMapper createObjectMapper(ObjectMapper mapper) {
-
-				ObjectMapper mapper1 = mapper.copy();
-
-				mapper1.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-				mapper1.registerModule(new Jackson2UberModule());
-
-				return mapper1;
-			}
-		};
-	}
+class UberMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	@Bean
 	LinkDiscoverer linkDiscoverer() {
 		return new UberLinkDiscoverer();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getMediaTypes()
+	 */
+	@Override
+	public List<MediaType> getMediaTypes() {
+		return HypermediaType.UBER.getMediaTypes();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getJacksonModule()
+	 */
+	@Override
+	public Module getJacksonModule() {
+		return new Jackson2UberModule();
+	}
 }

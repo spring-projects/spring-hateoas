@@ -18,8 +18,9 @@ package org.springframework.hateoas.core;
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
 
 import java.util.Arrays;
 
@@ -37,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Unit tests for {@link ControllerEntityLinks}.
- * 
+ *
  * @author Oliver Gierke
  */
 @RunWith(MockitoJUnitRunner.class)

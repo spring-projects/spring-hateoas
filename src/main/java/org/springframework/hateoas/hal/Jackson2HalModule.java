@@ -428,8 +428,8 @@ public class Jackson2HalModule extends SimpleModule {
 
 			HalLink halLink = HalLink.class.cast(firstElement);
 
-			if (list.size() == 1
-					&& halConfiguration.getSingleLinkRenderModeFor(halLink.getLink().getRel()).equals(RenderSingleLinks.AS_SINGLE)) {
+			if (list.size() == 1 && halConfiguration.getSingleLinkRenderModeFor(halLink.getLink().getRel())
+					.equals(RenderSingleLinks.AS_SINGLE)) {
 
 				serializeContents(halLink, jgen, provider);
 
