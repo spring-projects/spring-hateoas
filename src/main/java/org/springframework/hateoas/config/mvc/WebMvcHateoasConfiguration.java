@@ -15,16 +15,25 @@
  */
 package org.springframework.hateoas.config.mvc;
 
-import java.util.Collection;
+import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.config.Hypermedia;
-import org.springframework.hateoas.core.DelegatingRelProvider;
-import org.springframework.hateoas.hal.CurieProvider;
-import org.springframework.hateoas.hal.HalConfiguration;
-import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.mvc.UriComponentsContributor;
+import org.springframework.hateoas.mvc.WebMvcLinkBuilderFactory;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,13 +43,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Greg Turnquist
  */
 @Configuration
-public class WebMvcHateoasConfiguration {
+class WebMvcHateoasConfiguration {
 
 	@Bean
 	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(ObjectProvider<ObjectMapper> mapper,
-//			DelegatingRelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
-//			ObjectProvider<HalConfiguration> halConfiguration, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
-			Collection<Hypermedia> hypermediaTypes) {
+			Collection<HypermediaMappingInformation> hypermediaTypes) {
 
 		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
@@ -48,5 +55,68 @@ public class WebMvcHateoasConfiguration {
 	@Bean
 	HypermediaRestTemplateBeanPostProcessor restTemplateBeanPostProcessor(HypermediaWebMvcConfigurer configurer) {
 		return new HypermediaRestTemplateBeanPostProcessor(configurer);
+	}
+
+	@Bean
+	WebMvcLinkBuilderFactory webMvcLinkBuilderFactory(ObjectProvider<UriComponentsContributor> contributors) {
+
+		WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
+		factory.setUriComponentsContributors(contributors.stream().collect(Collectors.toList()));
+
+		return factory;
+	}
+
+	/**
+	 * @author Oliver Gierke
+	 * @author Greg Turnquist
+	 */
+	@RequiredArgsConstructor
+	static class HypermediaWebMvcConfigurer implements WebMvcConfigurer {
+
+		private final ObjectMapper mapper;
+		private final Collection<HypermediaMappingInformation> hypermediaTypes;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer#extendMessageConverters(java.util.List)
+		 */
+		@Override
+		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+
+			this.hypermediaTypes.forEach(hypermedia -> {
+
+				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(ResourceSupport.class,
+						hypermedia.getMediaTypes(), hypermedia.configureObjectMapper(mapper.copy())));
+			});
+		}
+	}
+
+	/**
+	 * {@link BeanPostProcessor} to register hypermedia support with {@link RestTemplate} instances found in the
+	 * application context.
+	 *
+	 * @author Oliver Gierke
+	 * @author Greg Turnquist
+	 */
+	@RequiredArgsConstructor
+	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
+
+		private final HypermediaWebMvcConfigurer configurer;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
+		 */
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+
+			if (!RestTemplate.class.isInstance(bean)) {
+				return bean;
+			}
+
+			configurer.extendMessageConverters(((RestTemplate) bean).getMessageConverters());
+
+			return bean;
+		}
 	}
 }

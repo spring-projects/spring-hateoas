@@ -21,43 +21,40 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.Hypermedia;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.Module;
 
 /**
+ * Configuration setup for Collection/JSON.
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 @Configuration
-public class CollectionJsonConfigurer {
-
-	@Bean
-	Hypermedia collectionJsonBean() {
-
-		return new Hypermedia() {
-			@Override
-			public List<MediaType> getMediaTypes() {
-				return HypermediaType.COLLECTION_JSON.getMediaTypes();
-			}
-
-			@Override
-			public ObjectMapper createObjectMapper(ObjectMapper mapper) {
-
-				ObjectMapper mapper1 = mapper.copy();
-
-				mapper1.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-				mapper1.registerModule(new Jackson2CollectionJsonModule());
-
-				return mapper1;
-			}
-		};
-	}
+class CollectionJsonMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	@Bean
 	LinkDiscoverer linkDiscoverer() {
 		return new CollectionJsonLinkDiscoverer();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getMediaTypes()
+	 */
+	@Override
+	public List<MediaType> getMediaTypes() {
+		return HypermediaType.COLLECTION_JSON.getMediaTypes();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getJacksonModule()
+	 */
+	@Override
+	public Module getJacksonModule() {
+		return new Jackson2CollectionJsonModule();
+	}
 }

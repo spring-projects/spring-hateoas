@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -211,7 +209,7 @@ public class CollectionJsonSpecTest {
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 
 		Resource<Employee> resource = mapper.readValue(specBasedJson,
-			mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
+				mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
 
 		assertThat(resource.getContent()).isEqualTo(new Employee("W. Chandry", "developer"));
 		assertThat(resource.getLinks()).isEmpty();

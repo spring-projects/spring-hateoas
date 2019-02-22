@@ -15,12 +15,11 @@
  */
 package org.springframework.hateoas.config.mvc;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-import static org.springframework.hateoas.support.CustomHypermediaType.FRODO_MEDIATYPE;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.support.CustomHypermediaType.*;
 import static org.springframework.hateoas.support.MappingUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -65,12 +64,11 @@ public class CustomHypermediaWebMvcTest {
 	@Test
 	public void getUsingCustomMediaType() throws Exception {
 
-		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE))
-			.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString() + ";charset=UTF-8"))
-			.andDo(print())
-			.andReturn()
-			.getResponse()
-			.getContentAsString();
+		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString() + ";charset=UTF-8")) //
+				.andReturn() //
+				.getResponse() //
+				.getContentAsString();
 
 		assertThat(results).isEqualTo(read(new ClassPathResource("frodo.json", getClass())));
 	}
@@ -97,7 +95,7 @@ public class CustomHypermediaWebMvcTest {
 		@GetMapping("/employees/1")
 		public Resource<Employee> findOne() {
 			return new Resource<>(new Employee("Frodo Baggins", "ring bearer"),
-				linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel());
+					linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel());
 		}
 	}
 }

@@ -29,7 +29,7 @@ import org.springframework.hateoas.hal.HalConfiguration;
  */
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class HalFormsConfiguration {
+class HalFormsConfiguration {
 
 	private @Wither @Getter RenderSingleLinks renderSingleLinks = RenderSingleLinks.AS_SINGLE;
 
@@ -48,7 +48,7 @@ public class HalFormsConfiguration {
 
 	/**
 	 * Translate a {@link HalFormsConfiguration} into a {@link HalConfiguration}.
-	 * 
+	 *
 	 * @return
 	 */
 	public HalConfiguration toHalConfiguration() {

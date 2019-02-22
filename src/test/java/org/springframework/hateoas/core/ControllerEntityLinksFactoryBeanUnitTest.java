@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.hateoas.core.ControllerEntityLinksUnitTest.Person;
 import org.springframework.hateoas.core.ControllerEntityLinksUnitTest.SampleController;
-import org.springframework.hateoas.mvc.ControllerLinkBuilderFactory;
+import org.springframework.hateoas.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.stereotype.Controller;
 
 /**
  * Unit tests for {@link ControllerEntityLinksFactoryBean}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class ControllerEntityLinksFactoryBeanUnitTest {
@@ -55,7 +55,7 @@ public class ControllerEntityLinksFactoryBeanUnitTest {
 
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
 		builder.setAnnotation(Controller.class);
-		builder.setLinkBuilderFactory(new ControllerLinkBuilderFactory());
+		builder.setLinkBuilderFactory(new WebMvcLinkBuilderFactory());
 		builder.setApplicationContext(context);
 		builder.afterPropertiesSet();
 

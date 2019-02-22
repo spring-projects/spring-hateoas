@@ -18,7 +18,7 @@ package org.springframework.hateoas.support;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.hateoas.config.Hypermedia;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 /**
  * @author Greg Turnquist
  */
-public class CustomHypermediaType implements Hypermedia {
+public class CustomHypermediaType implements HypermediaMappingInformation {
 
 	public static final MediaType FRODO_MEDIATYPE = MediaType.parseMediaType("application/frodo+json");
 
@@ -41,16 +41,15 @@ public class CustomHypermediaType implements Hypermedia {
 	}
 
 	/**
-	 * Copy the incoming {@link ObjectMapper} and change it's output format along with disabling failure on
-	 * unknown properties.
+	 * Copy the incoming {@link ObjectMapper} and change it's output format along with disabling failure on unknown
+	 * properties.
 	 */
 	@Override
-	public ObjectMapper createObjectMapper(ObjectMapper mapper) {
+	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		ObjectMapper objectMapper = mapper.copy();
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-		return objectMapper;
+		return mapper;
 	}
 }

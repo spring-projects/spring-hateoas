@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -54,17 +55,12 @@ class EntityLinksConfiguration {
 	}
 
 	@Bean
-	ControllerEntityLinksFactoryBean controllerEntityLinks(WebMvcLinkBuilderFactory controllerLinkBuilderFactory) {
+	ControllerEntityLinksFactoryBean controllerEntityLinks(ObjectProvider<WebMvcLinkBuilderFactory> linkBuilderFactory) {
 
 		ControllerEntityLinksFactoryBean factory = new ControllerEntityLinksFactoryBean();
 		factory.setAnnotation(Controller.class);
-		factory.setLinkBuilderFactory(controllerLinkBuilderFactory);
+		factory.setLinkBuilderFactory(linkBuilderFactory.getIfAvailable(WebMvcLinkBuilderFactory::new));
 
 		return factory;
-	}
-
-	@Bean
-	WebMvcLinkBuilderFactory webMvcLinkBuilderFactoryBean() {
-		return new WebMvcLinkBuilderFactory();
 	}
 }

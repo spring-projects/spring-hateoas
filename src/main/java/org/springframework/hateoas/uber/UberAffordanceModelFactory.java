@@ -34,7 +34,7 @@ import org.springframework.http.MediaType;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public class UberAffordanceModelFactory implements AffordanceModelFactory {
+class UberAffordanceModelFactory implements AffordanceModelFactory {
 
 	private final @Getter MediaType mediaType = MediaTypes.UBER_JSON;
 
