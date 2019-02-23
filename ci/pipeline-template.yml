@@ -153,7 +153,7 @@ jobs:
         - "/**"
         properties:
           zip.deployed: false
-          zip.displayname: "Spring HATEOAS"
+          zip.displayname: "spring-hateoas"
           zip.name: "spring-hateoas"
           zip.type: "docs"
   on_failure:
@@ -244,7 +244,7 @@ jobs:
     trigger: true
   - put: spring-hateoas-status
     params:
-      commit: spring-hateoas-release
+      commit: spring-hateoas-github
       state: pending
   - task: build
     file: spring-hateoas-github/ci/build.yml
@@ -259,7 +259,7 @@ jobs:
         - "/**"
         properties:
           zip.deployed: false
-          zip.displayname: "Spring HATEOAS"
+          zip.displayname: "spring-hateoas"
           zip.name: "spring-hateoas"
           zip.type: "docs"
   on_failure:
