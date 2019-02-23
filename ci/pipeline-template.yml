@@ -42,7 +42,7 @@ resources:
     uri: https://repo.spring.io
     username: ((artifactory-username))
     password: ((artifactory-password))
-    build_name: spring-hateoas
+    build_name: spring-hateoas-0.25.x
 
 - name: spring-hateoas-pull-requests
   type: pull-request
@@ -153,8 +153,8 @@ jobs:
         - "/**"
         properties:
           zip.deployed: false
-          zip.displayname: "spring-hateoas"
-          zip.name: "spring-hateoas"
+          zip.displayname: "spring-hateoas-0.25.x"
+          zip.name: "spring-hateoas-0.25.x"
           zip.type: "docs"
   on_failure:
     aggregate:
@@ -259,8 +259,8 @@ jobs:
         - "/**"
         properties:
           zip.deployed: false
-          zip.displayname: "spring-hateoas"
-          zip.name: "spring-hateoas"
+          zip.displayname: "spring-hateoas-0.25.x"
+          zip.name: "spring-hateoas-0.25.x"
           zip.type: "docs"
   on_failure:
     aggregate:
