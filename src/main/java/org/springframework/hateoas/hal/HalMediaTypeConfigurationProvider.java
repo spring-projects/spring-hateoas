@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal.forms;
+package org.springframework.hateoas.hal;
 
 import java.util.Collection;
 
@@ -23,27 +23,27 @@ import org.springframework.hateoas.config.MediaTypeConfigurationProvider;
 import org.springframework.http.MediaType;
 
 /**
- * {@link MediaTypeConfigurationProvider} for HAL Forms.
+ * {@link MediaTypeConfigurationProvider} for HAL.
  *
  * @author Oliver Drotbohm
  */
-class HalFormsConfigurationProvider implements MediaTypeConfigurationProvider {
+class HalMediaTypeConfigurationProvider implements MediaTypeConfigurationProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.config.MediaTypeConfigurationProvider#getConfiguration()
+	 * @see org.springframework.hateoas.config.HyperMediaTypeProvider#getConfiguration()
 	 */
 	@Override
 	public Class<? extends HypermediaMappingInformation> getConfiguration() {
-		return HalFormsMediaTypeConfiguration.class;
+		return HalMediaTypeConfiguration.class;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.config.MediaTypeConfigurationProvider#supportsAny(java.util.Collection)
+	 * @see org.springframework.hateoas.config.HyperMediaTypeProvider#supportsAny(java.util.Collection)
 	 */
 	@Override
 	public boolean supportsAny(Collection<MediaType> mediaTypes) {
-		return mediaTypes.contains(MediaTypes.HAL_FORMS_JSON);
+		return mediaTypes.contains(MediaTypes.HAL_JSON);
 	}
 }

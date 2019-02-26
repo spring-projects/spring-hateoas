@@ -109,7 +109,7 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
-	@Test
+	@Test // #833
 	public void registersHalFormsLinkDiscoverers() {
 
 		withServletContext(HalFormsConfig.class, context -> {
@@ -119,6 +119,26 @@ public class EnableHypermediaSupportIntegrationTest {
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
 					.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
+			assertRelProvidersSetUp(context);
+		});
+	}
+
+	@Test // #833
+	public void registersHalAndHalFormsLinkDiscoverers() {
+
+		withServletContext(HalAndHalFormsConfig.class, context -> {
+
+			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+			assertThat(discoverers).isNotNull();
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
+					.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
+
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -691,6 +711,11 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.UBER)
 	static class DelegateUberHypermediaConfig {
+
+	}
+
+	@EnableHypermediaSupport(type = { HypermediaType.HAL, HypermediaType.HAL_FORMS })
+	static class HalAndHalFormsConfig {
 
 	}
 }
