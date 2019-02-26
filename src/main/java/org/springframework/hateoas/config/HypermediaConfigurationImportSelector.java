@@ -62,4 +62,8 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 				.map(Class::getName) //
 				.toArray(String[]::new);
 	}
+
+	public String[] selectImports(Collection<MediaType> mediaType) {
+		return new String[] {};
+	}
 }

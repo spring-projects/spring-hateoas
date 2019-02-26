@@ -26,9 +26,11 @@ import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.VndErrors.VndError;
-import org.springframework.hateoas.core.EvoInflectorRelProvider;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
+import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

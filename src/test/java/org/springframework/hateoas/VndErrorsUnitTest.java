@@ -18,7 +18,8 @@ package org.springframework.hateoas;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
-import org.springframework.hateoas.VndErrors.VndError;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
+import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 
 /**
  * Unit tests for {@link VndErrors}.

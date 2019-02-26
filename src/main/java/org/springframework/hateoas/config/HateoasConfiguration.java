@@ -21,13 +21,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.core.AnnotationRelProvider;
-import org.springframework.hateoas.core.DefaultRelProvider;
-import org.springframework.hateoas.core.DelegatingRelProvider;
-import org.springframework.hateoas.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.core.AnnotationRelProvider;
+import org.springframework.hateoas.server.core.DefaultRelProvider;
+import org.springframework.hateoas.server.core.DelegatingRelProvider;
+import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.config.EnablePluginRegistries;
@@ -48,7 +48,7 @@ class HateoasConfiguration {
 
 	/**
 	 * The {@link MessageSourceAccessor} to provide messages for {@link ResourceDescription}s being rendered.
-	 * 
+	 *
 	 * @return
 	 */
 	@Bean

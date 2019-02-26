@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.support;
 
-import static org.springframework.hateoas.reactive.WebFluxLinkBuilder.*;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static reactor.function.TupleUtils.*;
 
 import reactor.core.publisher.Flux;
@@ -32,7 +32,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.reactive.WebFluxLinkBuilder;
+import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;

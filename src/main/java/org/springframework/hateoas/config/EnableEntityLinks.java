@@ -23,8 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.core.DelegatingEntityLinks;
+import org.springframework.hateoas.server.LinkBuilder;
+import org.springframework.hateoas.server.core.DelegatingEntityLinks;
 
 /**
  * Enables the collection of {@link LinkBuilder} instances from the application context. All found ones will be exposed

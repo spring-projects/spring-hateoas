@@ -22,11 +22,11 @@ import static org.springframework.hateoas.support.ContextTester.*;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
-import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
-import org.springframework.hateoas.uber.UberLinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
+import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
+import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
 
 /**
  * Unit tests for {@link HypermediaConfigurationImportSelector}.

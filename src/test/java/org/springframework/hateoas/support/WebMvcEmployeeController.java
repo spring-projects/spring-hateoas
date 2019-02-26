@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.support;
 
-import static org.springframework.hateoas.mvc.WebMvcLinkBuilder.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;

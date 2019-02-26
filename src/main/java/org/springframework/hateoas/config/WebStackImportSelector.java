@@ -39,11 +39,11 @@ class WebStackImportSelector implements ImportSelector {
 		List<String> imports = new ArrayList<>();
 
 		if (WebStack.WEBMVC.isAvailable()) {
-			imports.add("org.springframework.hateoas.config.mvc.WebMvcHateoasConfiguration");
+			imports.add("org.springframework.hateoas.config.WebMvcHateoasConfiguration");
 		}
 
 		if (WebStack.WEBFLUX.isAvailable()) {
-			imports.add("org.springframework.hateoas.config.reactive.WebFluxHateoasConfiguration");
+			imports.add("org.springframework.hateoas.config.WebFluxHateoasConfiguration");
 		}
 
 		return imports.toArray(new String[imports.size()]);

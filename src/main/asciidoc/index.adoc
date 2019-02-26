@@ -11,6 +11,10 @@ This project provides some APIs to ease creating REST representations that follo
 
 NOTE: Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
 
+[[preface]]
+== Preface
+include::migrate-to-1.0.adoc[leveloffset=+2]
+
 [[fundamentals]]
 == Fundamentals
 
@@ -31,7 +35,7 @@ The following example shows some typical links and how you might test them:
 ----
 Link link = new Link("http://localhost:8080/something");
 assertThat(link.getHref(), is("http://localhost:8080/something"));
-assertThat(link.getRel(), is(IanaLinkRelation.SELF.value()));
+assertThat(link.getRel(), is(IanaLinkRelation.SELF));
 
 Link link = new Link("http://localhost:8080/something", "my-rel");
 assertThat(link.getHref(), is("http://localhost:8080/something"));

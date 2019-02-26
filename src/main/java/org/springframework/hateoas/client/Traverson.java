@@ -21,10 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,28 +30,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.client.Rels.Rel;
-import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
 /**
@@ -70,11 +61,21 @@ import com.jayway.jsonpath.JsonPath;
  */
 public class Traverson {
 
-	private static final LinkDiscoverers DEFAULT_LINK_DISCOVERERS;
+	private static final TraversonDefaults DEFAULTS;
 
 	static {
-		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.of(discoverer));
+
+		List<TraversonDefaults> ALL_DEFAULTS = SpringFactoriesLoader.loadFactories(TraversonDefaults.class,
+				Traverson.class.getClassLoader());
+
+		Assert.isTrue(ALL_DEFAULTS.size() == 1,
+				() -> String.format("Expected to find only one TraversonDefaults instance, but found: ", //
+						ALL_DEFAULTS.stream() //
+								.map(Object::getClass) //
+								.map(Class::getName) //
+								.collect(Collectors.joining(", "))));
+
+		DEFAULTS = ALL_DEFAULTS.get(0);
 	}
 
 	private final URI baseUri;
@@ -108,8 +109,8 @@ public class Traverson {
 
 		this.mediaTypes = mediaTypes;
 		this.baseUri = baseUri;
-		this.discoverers = DEFAULT_LINK_DISCOVERERS;
 
+		setLinkDiscoverers(DEFAULTS.getLinkDiscoverers(mediaTypes));
 		setRestOperations(createDefaultTemplate(this.mediaTypes));
 	}
 
@@ -120,69 +121,15 @@ public class Traverson {
 	 * @return
 	 */
 	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(MediaType... mediaTypes) {
-		return getDefaultMessageConverters(Arrays.asList(mediaTypes));
-	}
-
-	/**
-	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
-	 *
-	 * @param mediaTypes must not be {@literal null}.
-	 * @return
-	 */
-	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(List<MediaType> mediaTypes) {
-
-		Assert.notNull(mediaTypes, "Media types must not be null!");
-
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
-
-		List<MediaType> halFlavors = getHalJsonFlavors(mediaTypes);
-
-		if (!halFlavors.isEmpty()) {
-			converters.add(getHalConverter(halFlavors));
-		}
-
-		return converters;
-	}
-
-	/**
-	 * Returns all HAL JSON compatible media types from the given list.
-	 *
-	 * @param mediaTypes must not be {@literal null}.
-	 * @return
-	 */
-	private static List<MediaType> getHalJsonFlavors(Collection<MediaType> mediaTypes) {
-
-		return mediaTypes.stream() //
-				.filter(MediaTypes.HAL_JSON::isCompatibleWith) //
-				.collect(Collectors.toList());
+		return DEFAULTS.getHttpMessageConverters(Arrays.asList(mediaTypes));
 	}
 
 	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
 
 		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(getDefaultMessageConverters(mediaTypes));
+		template.setMessageConverters(DEFAULTS.getHttpMessageConverters(mediaTypes));
 
 		return template;
-	}
-
-	/**
-	 * Creates a new {@link HttpMessageConverter} to support HAL.
-	 *
-	 * @return
-	 */
-	private static final HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
-
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-
-		converter.setObjectMapper(mapper);
-		converter.setSupportedMediaTypes(halFlavours);
-
-		return converter;
 	}
 
 	/**
@@ -194,7 +141,10 @@ public class Traverson {
 	 */
 	public Traverson setRestOperations(RestOperations operations) {
 
-		this.operations = operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
+		this.operations = operations == null //
+				? createDefaultTemplate(this.mediaTypes) //
+				: operations;
+
 		return this;
 	}
 
@@ -207,8 +157,11 @@ public class Traverson {
 	 */
 	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
 
-		this.discoverers = this.discoverers == null ? DEFAULT_LINK_DISCOVERERS
-				: new LinkDiscoverers(OrderAwarePluginRegistry.of(discoverer));
+		List<? extends LinkDiscoverer> defaultedDiscoverers = discoverer == null //
+				? DEFAULTS.getLinkDiscoverers(mediaTypes) //
+				: discoverer;
+
+		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.of(defaultedDiscoverers));
 
 		return this;
 	}

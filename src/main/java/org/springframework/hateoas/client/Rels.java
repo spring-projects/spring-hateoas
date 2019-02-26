@@ -18,8 +18,6 @@ package org.springframework.hateoas.client;
 import java.util.Optional;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 

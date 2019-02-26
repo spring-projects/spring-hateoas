@@ -19,7 +19,9 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.core.Ordered;
-import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
+import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;

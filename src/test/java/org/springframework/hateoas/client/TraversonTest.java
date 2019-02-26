@@ -37,7 +37,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
-import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
@@ -74,7 +73,6 @@ public class TraversonTest {
 
 	@Before
 	public void setUp() {
-
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
 
 	}
@@ -274,7 +272,7 @@ public class TraversonTest {
 	@Test
 	public void returnsDefaultMessageConverters() {
 
-		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(Collections.emptyList());
+		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters();
 
 		assertThat(converters).hasSize(1);
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
