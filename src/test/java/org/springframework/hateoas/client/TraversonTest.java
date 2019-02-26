@@ -19,34 +19,27 @@ import static net.jadler.Jadler.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.hateoas.client.Hop.*;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
+import static org.springframework.hateoas.support.ContextTester.*;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
-import org.springframework.hateoas.core.JsonPathLinkDiscoverer;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -61,360 +54,376 @@ public class TraversonTest {
 	static URI baseUri;
 	static Server server;
 
-	Traverson traverson;
-
 	@BeforeClass
 	public static void setUpClass() {
+		setUp(MediaTypes.HAL_JSON);
+	}
 
-		server = new Server();
+	private static void setUp(MediaType mediaType) {
+
+		server = new Server(mediaType);
 		baseUri = URI.create(server.rootResource());
 
 		setUpActors();
 	}
 
-	@Before
-	public void setUp() {
-
-		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
-
-	}
-
 	@AfterClass
-	public static void tearDown() throws IOException {
+	public static void tearDown() {
 
 		if (server != null) {
 			server.close();
 		}
 	}
 
-	/**
-	 * @see #131
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullBaseUri() {
-		new Traverson(null, MediaTypes.HAL_JSON);
-	}
-
-	/**
-	 * @see #131
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsEmptyMediaTypes() {
-		new Traverson(baseUri);
-	}
-
-	/**
-	 * @see #131
-	 */
-	@Test
+	@Test // #131
 	public void sendsConfiguredMediaTypesInAcceptHeader() {
 
-		traverson.follow().toObject(String.class);
+		withContext(TestConfig.class, context -> {
 
-		verifyThatRequest() //
-				.havingPathEqualTo("/") //
-				.havingHeader("Accept", contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource().concat("/link"))) //
+					.accept(MediaTypes.HAL_JSON);
+
+			traverson.follow().as(String.class);
+
+			verifyThatRequest() //
+					.havingPathEqualTo("/") //
+					.havingHeader("Accept", contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
+		});
 	}
 
-	/**
-	 * @see #131
-	 */
-	@Test
+	@Test // #131
 	public void readsTraversalIntoJsonPathExpression() {
-		assertThat(traverson.follow("movies", "movie", "actor").<String> toObject("$.name")).isEqualTo("Keanu Reaves");
+
+		withContext(TestConfig.class, context -> {
+
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
+
+			assertThat(traverson.follow( //
+					"movies", //
+					"movie", //
+					"actor").<String> as("$.name")) //
+							.isEqualTo("Keanu Reaves");
+		});
 	}
 
-	/**
-	 * @see #131
-	 */
-	@Test
+	@Test // #131
 	public void readsJsonPathTraversalIntoJsonPathExpression() {
 
-		assertThat(traverson.follow(//
-				"$._links.movies.href", //
-				"$._links.movie.href", //
-				"$._links.actor.href").<String> toObject("$.name")) //
-						.isEqualTo("Keanu Reaves");
+		withContext(TestConfig.class, context -> {
+
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
+
+			assertThat(traverson.follow(//
+					"$._links.movies.href", //
+					"$._links.movie.href", //
+					"$._links.actor.href").<String> as("$.name")) //
+							.isEqualTo("Keanu Reaves");
+		});
 	}
 
-	/**
-	 * @see #131
-	 */
-	@Test
+	@Test // #131
 	public void readsTraversalIntoResourceInstance() {
 
-		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
-		Resource<Actor> result = traverson.follow("movies", "movie", "actor").toObject(typeReference);
+		withContext(TestConfig.class, context -> {
 
-		assertThat(result.getContent().name).isEqualTo("Keanu Reaves");
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
+
+			ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
+			Resource<Actor> result = traverson.follow("movies", "movie", "actor").as(typeReference);
+
+			assertThat(result.getContent().name).isEqualTo("Keanu Reaves");
+		});
 	}
 
-	/**
-	 * @see #187
-	 */
-	@Test
+	@Test // #187
 	public void sendsConfiguredHeadersForJsonPathExpression() {
 
-		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		withContext(TestConfig.class, context -> {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Link", expectedHeader);
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
 
-		assertThat(traverson.follow("movies", "movie", "actor") //
-				.withHeaders(headers).<String> toObject("$.name")).isEqualTo("Keanu Reaves");
+			String expectedHeader = "<http://www.example.com>;rel=\"home\"";
 
-		verifyThatRequest() //
-				.havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4") //
-				.havingHeader("Link", hasItem(expectedHeader));
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Link", expectedHeader);
+
+			assertThat(traverson.follow("movies", "movie", "actor") //
+					.withHeaders(headers).<String> as("$.name")).isEqualTo("Keanu Reaves");
+
+			verifyThatRequest() //
+					.havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4") //
+					.havingHeader("Link", hasItem(expectedHeader));
+		});
 	}
 
-	/**
-	 * @see #187
-	 */
-	@Test
+	@Test // #187
 	public void sendsConfiguredHeadersForToEntity() {
 
-		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		withContext(TestConfig.class, context -> {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Link", expectedHeader);
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
 
-		traverson.follow("movies", "movie", "actor").//
-				withHeaders(headers).toEntity(Actor.class);
+			String expectedHeader = "<http://www.example.com>;rel=\"home\"";
 
-		verifyThatRequest(). //
-				havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4"). //
-				havingHeader("Link", hasItem(expectedHeader));
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Link", expectedHeader);
+
+			traverson.follow("movies", "movie", "actor") //
+					.withHeaders(headers) //
+					.toEntity(Actor.class);
+
+			verifyThatRequest() //
+					.havingPathEqualTo("/actors/d95dbf62-f900-4dfa-9de8-0fc71e02ffa4") //
+					.havingHeader("Link", hasItem(expectedHeader));
+		});
 	}
 
-	/**
-	 * @see #201, #203
-	 */
-	@Test
-	public void allowsCustomizingRestTemplate() {
-
-		CountingInterceptor interceptor = new CountingInterceptor();
-
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setInterceptors(Arrays.asList(interceptor));
-
-		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
-		this.traverson.setRestOperations(restTemplate);
-
-		traverson.follow("movies", "movie", "actor").<String> toObject("$.name");
-		assertThat(interceptor.intercepted).isEqualTo(4);
-	}
-
-	/**
-	 * @see #185
-	 */
-	@Test
-	public void usesCustomLinkDiscoverer() {
-
-		this.traverson = new Traverson(URI.create(server.rootResource() + "/github"), MediaType.APPLICATION_JSON);
-		this.traverson.setLinkDiscoverers(Arrays.asList(new GitHubLinkDiscoverer()));
-
-		String value = this.traverson.follow("foo").toObject("$.key");
-		assertThat(value).isEqualTo("value");
-	}
-
-	/**
-	 * @see #212
-	 */
-	@Test
+	@Test // #212
 	public void shouldReturnLastLinkFound() {
 
-		Link result = traverson.follow("movies").asLink();
+		withContext(TestConfig.class, context -> {
 
-		assertThat(result.getHref()).endsWith("/movies");
-		assertThat(result.hasRel("movies")).isTrue();
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
+
+			Link result = traverson.follow("movies").asLink();
+
+			assertThat(result.getHref()).endsWith("/movies");
+			assertThat(result.hasRel("movies")).isTrue();
+		});
 	}
 
-	/**
-	 * @see #307
-	 */
-	@Test
+	@Test // #307
 	public void returnsTemplatedLinkIfRequested() {
 
-		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
-				.follow("self");
+		withContext(TestConfig.class, context -> {
 
-		Link link = follow.asTemplatedLink();
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource().concat("/link"))) //
+					.accept(MediaTypes.HAL_JSON);
 
-		assertThat(link.isTemplated()).isTrue();
-		assertThat(link.getVariableNames()).contains("template");
+			TraversalBuilder follow = traverson.follow("self");
 
-		link = follow.asLink();
+			Link link = follow.asTemplatedLink();
 
-		assertThat(link.isTemplated()).isFalse();
+			assertThat(link.isTemplated()).isTrue();
+			assertThat(link.getVariableNames()).contains("template");
+
+			link = follow.asLink();
+
+			assertThat(link.isTemplated()).isFalse();
+		});
 	}
 
-	/**
-	 * @see #258
-	 */
-	@Test
-	public void returnsDefaultMessageConvertersForHal() {
-
-		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON);
-
-		assertThat(converters).hasSize(2);
-		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
-		assertThat(converters.get(1)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
-
-		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON_UTF8);
-
-		assertThat(converters).hasSize(2);
-		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
-		assertThat(converters.get(1)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
-	}
-
-	/**
-	 * @see #258
-	 */
-	@Test
-	public void returnsDefaultMessageConverters() {
-
-		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(Collections.emptyList());
-
-		assertThat(converters).hasSize(1);
-		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
-	}
-
-	/**
-	 * @see #346
-	 */
-	@Test
+	@Test // #346
 	public void chainMultipleFollowOperations() {
 
-		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
-		Resource<Actor> result = traverson.follow("movies").follow("movie").follow("actor").toObject(typeReference);
+		withContext(TestConfig.class, context -> {
 
-		assertThat(result.getContent().name).isEqualTo("Keanu Reaves");
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
+
+			ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
+			Resource<Actor> result = traverson //
+					.follow("movies") //
+					.follow("movie") //
+					.follow("actor") //
+					.as(typeReference);
+
+			assertThat(result.getContent().name).isEqualTo("Keanu Reaves");
+		});
 	}
 
-	/**
-	 * @see #346
-	 */
-	@Test
+	@Test // #346
 	public void allowAlteringTheDetailsOfASingleHop() {
 
-		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		withContext(TestConfig.class, context -> {
 
-		// tag::hop-with-param[]
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource() + "/springagram")) //
+					.accept(MediaTypes.HAL_JSON);
 
-		Resource<Item> itemResource = traverson.//
-				follow(rel("items").withParameter("projection", "noImages")).//
-				follow("$._embedded.items[0]._links.self.href").//
-				toObject(resourceParameterizedTypeReference);
-		// end::hop-with-param[]
+			// tag::hop-with-param[]
+			ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
 
-		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(server.rootResource() + "/springagram/items/1");
+			Resource<Item> itemResource = traverson //
+					.follow(rel("items").withParameter("projection", "noImages")) //
+					.follow("$._embedded.items[0]._links.self.href") //
+					.as(resourceParameterizedTypeReference);
+			// end::hop-with-param[]
 
-		final Item item = itemResource.getContent();
-		assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
-		assertThat(item.description).isEqualTo("cat");
+			assertThat(itemResource.hasLink("self")).isTrue();
+			assertThat(itemResource.getRequiredLink("self").expand().getHref()) //
+					.isEqualTo(server.rootResource() + "/springagram/items/1");
+
+			final Item item = itemResource.getContent();
+			assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
+			assertThat(item.description).isEqualTo("cat");
+		});
 	}
 
-	/**
-	 * @see #346
-	 */
-	@Test
+	@Test // #346
 	public void allowAlteringTheDetailsOfASingleHopByMapOperations() {
 
-		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		withContext(TestConfig.class, context -> {
 
-		// tag::hop-put[]
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource() + "/springagram")) //
+					.accept(MediaTypes.HAL_JSON);
 
-		Map<String, Object> params = Collections.singletonMap("projection", "noImages");
+			// tag::hop-put[]
+			ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
 
-		Resource<Item> itemResource = traverson.//
-				follow(rel("items").withParameters(params)).//
-				follow("$._embedded.items[0]._links.self.href").//
-				toObject(resourceParameterizedTypeReference);
-		// end::hop-put[]
+			Map<String, Object> params = Collections.singletonMap("projection", "noImages");
 
-		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(server.rootResource() + "/springagram/items/1");
+			Resource<Item> itemResource = traverson //
+					.follow(rel("items").withParameters(params)) //
+					.follow("$._embedded.items[0]._links.self.href") //
+					.as(resourceParameterizedTypeReference);
+			// end::hop-put[]
 
-		final Item item = itemResource.getContent();
-		assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
-		assertThat(item.description).isEqualTo("cat");
+			assertThat(itemResource.hasLink("self")).isTrue();
+			assertThat(itemResource.getRequiredLink("self").expand().getHref()) //
+					.isEqualTo(server.rootResource() + "/springagram/items/1");
+
+			final Item item = itemResource.getContent();
+			assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
+			assertThat(item.description).isEqualTo("cat");
+		});
 	}
 
-	/**
-	 * @see #346
-	 */
-	@Test
+	@Test // #346
 	public void allowGlobalsToImpactSingleHops() {
 
-		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		withContext(TestConfig.class, context -> {
 
-		Map<String, Object> params = new HashMap<>();
-		params.put("projection", "thisShouldGetOverwrittenByLocalHop");
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource() + "/springagram")) //
+					.accept(MediaTypes.HAL_JSON);
 
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
-		Resource<Item> itemResource = traverson.follow(rel("items").withParameter("projection", "noImages"))
-				.follow("$._embedded.items[0]._links.self.href") // retrieve first Item in the collection
-				.withTemplateParameters(params).toObject(resourceParameterizedTypeReference);
+			Map<String, Object> params = new HashMap<>();
+			params.put("projection", "thisShouldGetOverwrittenByLocalHop");
 
-		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(server.rootResource() + "/springagram/items/1");
+			ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+			Resource<Item> itemResource = traverson //
+					.follow(rel("items").withParameter("projection", "noImages")) //
+					.follow("$._embedded.items[0]._links.self.href") // retrieve first Item in the collection
+					.withTemplateParameters(params) //
+					.as(resourceParameterizedTypeReference);
 
-		final Item item = itemResource.getContent();
-		assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
-		assertThat(item.description).isEqualTo("cat");
+			assertThat(itemResource.hasLink("self")).isTrue();
+			assertThat(itemResource.getRequiredLink("self").expand().getHref()) //
+					.isEqualTo(server.rootResource() + "/springagram/items/1");
+
+			final Item item = itemResource.getContent();
+			assertThat(item.image).isEqualTo(server.rootResource() + "/springagram/file/cat");
+			assertThat(item.description).isEqualTo("cat");
+		});
 	}
 
-	/**
-	 * @see #337
-	 */
-	@Test
+	@Test // #337
 	public void doesNotDoubleEncodeURI() {
 
-		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
+		withContext(TestConfig.class, context -> {
 
-		Resource<?> itemResource = traverson.//
-				follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))).//
-				toObject(Resource.class);
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource() + "/springagram")) //
+					.accept(MediaTypes.HAL_JSON);
 
-		assertThat(itemResource.hasLink("self")).isTrue();
-		assertThat(itemResource.getRequiredLink("self").expand().getHref())
-				.isEqualTo(server.rootResource() + "/springagram/items");
+			Resource<?> itemResource = traverson
+					.follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))) //
+					.as(Resource.class);
+
+			assertThat(itemResource.hasLink("self")).isTrue();
+			assertThat(itemResource.getRequiredLink("self").expand().getHref()) //
+					.isEqualTo(server.rootResource() + "/springagram/items");
+		});
 	}
 
 	@Test
 	public void customHeaders() {
 
-		String customHeaderName = "X-CustomHeader";
+		withContext(TestConfig.class, context -> {
 
-		traverson
-				.follow(rel("movies").header(customHeaderName, "alpha").header(HttpHeaders.LOCATION,
-						"http://localhost:8080/my/custom/location"))
-				.follow(rel("movie").header(customHeaderName, "bravo")).follow(rel("actor").header(customHeaderName, "charlie"))
-				.toObject("$.name");
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_JSON);
 
-		verifyThatRequest() //
-				.havingPathEqualTo("/") //
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
+			String customHeaderName = "X-CustomHeader";
 
-		verifyThatRequest().havingPathEqualTo("/movies") // aggregate root movies
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-				.havingHeader(customHeaderName, contains("alpha")) //
-				.havingHeader(HttpHeaders.LOCATION, contains("http://localhost:8080/my/custom/location")); //
+			traverson //
+					.follow( //
+							rel("movies") //
+									.header(customHeaderName, "alpha") //
+									.header(HttpHeaders.LOCATION, "http://localhost:8080/my/custom/location")) //
+					.follow( //
+							rel("movie") //
+									.header(customHeaderName, "bravo")) //
+					.follow( //
+							rel("actor") //
+									.header(customHeaderName, "charlie")) //
+					.as("$.name");
 
-		verifyThatRequest().havingPath(startsWith("/movies/")) // single movie
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-				.havingHeader(customHeaderName, contains("bravo")); //
+			verifyThatRequest() //
+					.havingPathEqualTo("/") //
+					.havingHeader(HttpHeaders.ACCEPT,
+							contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
 
-		verifyThatRequest().havingPath(startsWith("/actors/")) // single actor
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
-				.havingHeader(customHeaderName, contains("charlie")); //
+			verifyThatRequest() //
+					.havingPathEqualTo("/movies") // aggregate root movies
+					.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+					.havingHeader(customHeaderName, contains("alpha")) //
+					.havingHeader(HttpHeaders.LOCATION, contains("http://localhost:8080/my/custom/location")); //
+
+			verifyThatRequest() //
+					.havingPath(startsWith("/movies/")) // single movie
+					.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+					.havingHeader(customHeaderName, contains("bravo")); //
+
+			verifyThatRequest() //
+					.havingPath(startsWith("/actors/")) // single actor
+					.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+					.havingHeader(customHeaderName, contains("charlie")); //
+		});
+	}
+
+	@Test
+	public void handlesHalForms() {
+
+		// Reconfigure Jadler for HAL-FORMS (it's a bit fussy with static initialization)
+		server.close();
+		setUp(MediaTypes.HAL_FORMS_JSON);
+
+		withContext(TestConfig.class, context -> {
+
+			Traverson traverson = context.getBean(Traverson.class) //
+					.uri(URI.create(server.rootResource())) //
+					.accept(MediaTypes.HAL_FORMS_JSON);
+
+			assertThat(traverson.follow( //
+					"movies", //
+					"movie", //
+					"actor").<String> as("$.name")) //
+							.isEqualTo("Keanu Reaves");
+
+		});
+
+		// Reconfigure Jadler for HAL
+		server.close();
+		setUp(MediaTypes.HAL_JSON);
 	}
 
 	private static void setUpActors() {
@@ -430,22 +439,13 @@ public class TraversonTest {
 		server.finishMocking();
 	}
 
-	static class CountingInterceptor implements ClientHttpRequestInterceptor {
+	@Configuration
+	@EnableHypermediaSupport(type = { HAL, HAL_FORMS, UBER, COLLECTION_JSON })
+	static class TestConfig {
 
-		int intercepted;
-
-		@Override
-		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-				throws IOException {
-			this.intercepted++;
-			return execution.execute(request, body);
-		}
-	}
-
-	static class GitHubLinkDiscoverer extends JsonPathLinkDiscoverer {
-
-		public GitHubLinkDiscoverer() {
-			super("$.%s_url", MediaType.APPLICATION_JSON);
+		@Bean
+		RestTemplate restTemplate() {
+			return new RestTemplate();
 		}
 	}
 }

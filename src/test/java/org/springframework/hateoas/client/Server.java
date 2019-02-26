@@ -56,6 +56,10 @@ public class Server implements Closeable {
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<>();
 
 	public Server() {
+		this(MediaTypes.HAL_JSON);
+	}
+
+	public Server(MediaType defaultMediaType) {
 
 		this.relProvider = new EvoInflectorRelProvider();
 
@@ -64,7 +68,7 @@ public class Server implements Closeable {
 		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
 
 		initJadler() //
-				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //
+				.withDefaultResponseContentType(defaultMediaType.toString()) //
 				.withDefaultResponseEncoding(Charset.forName("UTF-8")) //
 				.withDefaultResponseStatus(200);
 
@@ -93,7 +97,7 @@ public class Server implements Closeable {
 				havingPathEqualTo("/link"). //
 				respond(). //
 				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
-				withContentType(MediaTypes.HAL_JSON.toString());
+				withContentType(defaultMediaType.toString());
 
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -131,27 +135,27 @@ public class Server implements Closeable {
 				havingPathEqualTo("/springagram"). //
 				respond(). //
 				withBody(springagramRootHalDocument). //
-				withContentType(MediaTypes.HAL_JSON.toString());
+				withContentType(defaultMediaType.toString());
 
 		onRequest(). //
 				havingPathEqualTo("/springagram/items"). //
 				havingQueryString(equalTo("projection=noImages")). //
 				respond(). //
 				withBody(springagramItemsHalDocument). //
-				withContentType(MediaTypes.HAL_JSON.toString());
+				withContentType(defaultMediaType.toString());
 
 		onRequest(). //
 				havingPathEqualTo("/springagram/items/1"). //
 				respond(). //
 				withBody(springagramItemHalDocument). //
-				withContentType(MediaTypes.HAL_JSON.toString());
+				withContentType(defaultMediaType.toString());
 
 		onRequest(). //
 				havingPathEqualTo("/springagram/items/1"). //
 				havingQueryString(equalTo("projection=noImages")). //
 				respond(). //
 				withBody(springagramItemWithoutImageHalDocument). //
-				withContentType(MediaTypes.HAL_JSON.toString());
+				withContentType(defaultMediaType.toString());
 
 		// For Traverson URI double encoding test
 
@@ -160,7 +164,7 @@ public class Server implements Closeable {
 				havingQueryString(equalTo("projection=no%20images")). //
 				respond(). //
 				withBody(springagramItemsHalDocument). //
-				withContentType(MediaTypes.HAL_JSON.toString());
+				withContentType(defaultMediaType.toString());
 
 	}
 

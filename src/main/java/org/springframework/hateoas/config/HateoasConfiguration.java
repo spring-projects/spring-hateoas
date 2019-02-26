@@ -16,6 +16,7 @@
 package org.springframework.hateoas.config;
 
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -24,6 +25,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.hateoas.LinkDiscoverer;
 import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.RelProvider;
+import org.springframework.hateoas.client.Traverson;
 import org.springframework.hateoas.core.AnnotationRelProvider;
 import org.springframework.hateoas.core.DefaultRelProvider;
 import org.springframework.hateoas.core.DelegatingRelProvider;
@@ -33,6 +35,8 @@ import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.config.EnablePluginRegistries;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Common HATEOAS specific configuration.
@@ -104,4 +108,10 @@ class HateoasConfiguration {
 	LinkDiscoverers linkDiscoverers(PluginRegistry<LinkDiscoverer, MediaType> discoverers) {
 		return new LinkDiscoverers(discoverers);
 	}
+
+	@Bean
+	Traverson traverson(ObjectProvider<RestOperations> restOperations, LinkDiscoverers discoverers) {
+		return new Traverson(restOperations.getIfAvailable(RestTemplate::new), discoverers);
+	}
+
 }
