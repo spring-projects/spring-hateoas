@@ -49,7 +49,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final MessageSourceAccessor messageSourceAccessor;
 
 	@Bean
-	LinkDiscoverer linkDiscoverer() {
+	LinkDiscoverer halFormsLinkDiscoverer() {
 		return new HalFormsLinkDiscoverer();
 	}
 
@@ -69,15 +69,13 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		ObjectMapper mapper1 = mapper.copy();
-
-		mapper1.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper1.registerModule(new Jackson2HalFormsModule());
-		mapper1.setHandlerInstantiator(
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.registerModule(new Jackson2HalFormsModule());
+		mapper.setHandlerInstantiator(
 				new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider, curieProvider.getIfAvailable(),
 						messageSourceAccessor, true, halFormsConfiguration.getIfAvailable(HalFormsConfiguration::new)));
 
-		return mapper1;
+		return mapper;
 	}
 
 }

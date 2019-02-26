@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.collectionjson;
+package org.springframework.hateoas.hal.forms;
 
 import java.util.Collection;
 
@@ -23,9 +23,11 @@ import org.springframework.hateoas.config.MediaTypeConfigurationProvider;
 import org.springframework.http.MediaType;
 
 /**
- * @author Oliver Gierke
+ * {@link MediaTypeConfigurationProvider} for HAL Forms.
+ *
+ * @author Oliver Drotbohm
  */
-class CollectionJsonConfigurationProvider implements MediaTypeConfigurationProvider {
+class HalFormsMediaTypeConfigurationProvider implements MediaTypeConfigurationProvider {
 
 	/*
 	 * (non-Javadoc)
@@ -33,7 +35,7 @@ class CollectionJsonConfigurationProvider implements MediaTypeConfigurationProvi
 	 */
 	@Override
 	public Class<? extends HypermediaMappingInformation> getConfiguration() {
-		return CollectionJsonMediaTypeConfiguration.class;
+		return HalFormsMediaTypeConfiguration.class;
 	}
 
 	/*
@@ -42,6 +44,6 @@ class CollectionJsonConfigurationProvider implements MediaTypeConfigurationProvi
 	 */
 	@Override
 	public boolean supportsAny(Collection<MediaType> mediaTypes) {
-		return mediaTypes.contains(MediaTypes.COLLECTION_JSON);
+		return mediaTypes.contains(MediaTypes.HAL_FORMS_JSON);
 	}
 }

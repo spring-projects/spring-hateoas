@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.Module;
 class UberMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	@Bean
-	LinkDiscoverer linkDiscoverer() {
+	LinkDiscoverer uberLinkDiscoverer() {
 		return new UberLinkDiscoverer();
 	}
 

@@ -131,6 +131,7 @@ class WebFluxHateoasConfiguration {
 				MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
 
 				ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
+				
 				customCodecs.encoder(new Jackson2JsonEncoder(objectMapper, mimeTypes));
 				customCodecs.decoder(new Jackson2JsonDecoder(objectMapper, mimeTypes));
 			});

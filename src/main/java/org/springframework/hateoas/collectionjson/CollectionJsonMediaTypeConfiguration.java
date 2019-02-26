@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.Module;
 class CollectionJsonMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	@Bean
-	LinkDiscoverer linkDiscoverer() {
+	LinkDiscoverer collectionJsonLinkDiscoverer() {
 		return new CollectionJsonLinkDiscoverer();
 	}
 

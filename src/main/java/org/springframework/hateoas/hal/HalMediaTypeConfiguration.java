@@ -48,7 +48,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final MessageSourceAccessor messageSourceAccessor;
 
 	@Bean
-	LinkDiscoverer linkDiscoverer() {
+	LinkDiscoverer halLinkDisocoverer() {
 		return new HalLinkDiscoverer();
 	}
 

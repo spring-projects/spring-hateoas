@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -56,6 +57,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -119,6 +121,26 @@ public class EnableHypermediaSupportIntegrationTest {
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
 					.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
+			assertRelProvidersSetUp(context);
+		});
+	}
+
+	@Test
+	public void registersHalAndHalFormsLinkDiscoverers() {
+
+		withServletContext(HalAndHalFormsConfig.class, context -> {
+
+			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+			assertThat(discoverers).isNotNull();
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
+				.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
+				.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
+				.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
+
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -691,6 +713,11 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Configuration
 	@EnableHypermediaSupport(type = HypermediaType.UBER)
 	static class DelegateUberHypermediaConfig {
+
+	}
+
+	@EnableHypermediaSupport(type = {HypermediaType.HAL, HypermediaType.HAL_FORMS})
+	static class HalAndHalFormsConfig {
 
 	}
 }
