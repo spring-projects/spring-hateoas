@@ -34,9 +34,9 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 * @see org.springframework.hateoas.EntityLinks#getLinkToSingleResource(org.springframework.hateoas.Identifiable)
 	 */
 	@Override
-	public Link linkToSingleResource(Identifiable<?> entity) {
+	public Link linkToItemResource(Identifiable<?> entity) {
 		Assert.notNull(entity, "Entity must not be null!");
-		return linkToSingleResource(entity.getClass(), entity.getId());
+		return linkToItemResource(entity.getClass(), entity.getId());
 	}
 
 	/* 
@@ -44,7 +44,7 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 * @see org.springframework.hateoas.EntityLinks#linkForSingleResource(java.lang.Class, java.lang.Object)
 	 */
 	@Override
-	public LinkBuilder linkForSingleResource(Class<?> type, Object id) {
+	public LinkBuilder linkForItemResource(Class<?> type, Object id) {
 		return linkFor(type).slash(id);
 	}
 
@@ -53,8 +53,8 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 * @see org.springframework.hateoas.EntityLinks#linkForSingleResource(org.springframework.hateoas.Identifiable)
 	 */
 	@Override
-	public LinkBuilder linkForSingleResource(Identifiable<?> entity) {
+	public LinkBuilder linkForItemResource(Identifiable<?> entity) {
 		Assert.notNull(entity, "Entity must not be null!");
-		return linkForSingleResource(entity.getClass(), entity.getId());
+		return linkForItemResource(entity.getClass(), entity.getId());
 	}
 }

@@ -26,12 +26,11 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.MappingUtils;
 
@@ -68,7 +67,7 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
 
-		ResourceSupport resource = mapper.readValue(specBasedJson, ResourceSupport.class);
+		RepresentationModel<?> resource = mapper.readValue(specBasedJson, RepresentationModel.class);
 
 		assertThat(resource.getLinks()).hasSize(1);
 		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(new Link("http://example.org/friends/"));
@@ -83,16 +82,16 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
 
-		Resources<Resource<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
+		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
 
 		assertThat(resources.getLinks()).hasSize(2);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(new Link("http://example.org/friends/"));
 		assertThat(resources.getRequiredLink("feed")).isEqualTo(new Link("http://example.org/friends/rss", "feed"));
 		assertThat(resources.getContent()).hasSize(3);
 
-		List<Resource<Friend>> friends = new ArrayList<>(resources.getContent());
+		List<EntityModel<Friend>> friends = new ArrayList<>(resources.getContent());
 
 		assertThat(friends.get(0).getContent().getEmail()).isEqualTo("jdoe@example.org");
 		assertThat(friends.get(0).getContent().getFullname()).isEqualTo("J. Doe");
@@ -129,8 +128,8 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part3.json", getClass()));
 
-		Resource<Friend> resource = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class));
+		EntityModel<Friend> resource = mapper.readValue(specBasedJson,
+				mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class));
 
 		assertThat(resource.getLinks()).hasSize(6);
 		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(new Link("http://example.org/friends/jdoe"));
@@ -155,9 +154,9 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part4.json", getClass()));
 
-		Resources<Resource<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
+		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
 
 		assertThat(resources.getContent()).hasSize(0);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
@@ -173,9 +172,9 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part5.json", getClass()));
 
-		Resources<Resource<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
+		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
 
 		assertThat(resources.getContent()).hasSize(0);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
@@ -191,9 +190,9 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part6.json", getClass()));
 
-		Resources<Resource<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
+		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
 
 		assertThat(resources.getContent()).hasSize(0);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
@@ -209,8 +208,8 @@ public class CollectionJsonSpecTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 
-		Resource<Employee> resource = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
+		EntityModel<Employee> resource = mapper.readValue(specBasedJson,
+				mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class));
 
 		assertThat(resource.getContent()).isEqualTo(new Employee("W. Chandry", "developer"));
 		assertThat(resource.getLinks()).isEmpty();

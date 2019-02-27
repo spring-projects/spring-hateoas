@@ -29,8 +29,8 @@ import java.util.stream.IntStream;
 
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -58,7 +58,7 @@ public class WebMvcEmployeeController {
 	}
 
 	@GetMapping("/employees")
-	public Resources<Resource<Employee>> all() {
+	public CollectionModel<EntityModel<Employee>> all() {
 
 		// Generate an "Affordance" based on this method (the "self" link)
 		Link selfLink = linkTo(methodOn(WebMvcEmployeeController.class).all()).withSelfRel() //
@@ -68,20 +68,20 @@ public class WebMvcEmployeeController {
 		// Return the collection of employee resources along with the composite affordance
 		return IntStream.range(0, EMPLOYEES.size()) //
 				.mapToObj(this::findOne) //
-				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> new Resources<>(it, selfLink)));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> new CollectionModel<>(it, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
-	public Resources<Resource<Employee>> search(@RequestParam(value = "name", required = false) String name,
+	public CollectionModel<EntityModel<Employee>> search(@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "role", required = false) String role) {
 
 		// Create a list of Resource<Employee>'s to return
-		List<Resource<Employee>> employees = new ArrayList<>();
+		List<EntityModel<Employee>> employees = new ArrayList<>();
 
 		// Fetch each Resource<Employee> using the controller's findOne method.
 		for (int i = 0; i < EMPLOYEES.size(); i++) {
 
-			Resource<Employee> employeeResource = findOne(i);
+			EntityModel<Employee> employeeResource = findOne(i);
 
 			boolean nameMatches = Optional.ofNullable(name) //
 					.map(s -> employeeResource.getContent().getName().contains(s)) //
@@ -103,11 +103,11 @@ public class WebMvcEmployeeController {
 				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
-		return new Resources<>(employees, selfLink);
+		return new CollectionModel<>(employees, selfLink);
 	}
 
 	@GetMapping("/employees/{id}")
-	public Resource<Employee> findOne(@PathVariable Integer id) {
+	public EntityModel<Employee> findOne(@PathVariable Integer id) {
 
 		// Start the affordance with the "self" link, i.e. this method.
 		Link findOneLink = linkTo(methodOn(WebMvcEmployeeController.class).findOne(id)).withSelfRel();
@@ -116,7 +116,7 @@ public class WebMvcEmployeeController {
 		Link employeesLink = linkTo(methodOn(WebMvcEmployeeController.class).all()).withRel("employees");
 
 		// Return the affordance + a link back to the entire collection resource.
-		return new Resource<>(EMPLOYEES.get(id), //
+		return new EntityModel<>(EMPLOYEES.get(id), //
 				findOneLink //
 						.andAffordance(afford(methodOn(WebMvcEmployeeController.class).updateEmployee(null, id))) // //
 						.andAffordance(afford(methodOn(WebMvcEmployeeController.class).partiallyUpdateEmployee(null, id))), //
@@ -124,7 +124,7 @@ public class WebMvcEmployeeController {
 	}
 
 	@PostMapping("/employees")
-	public ResponseEntity<?> newEmployee(@RequestBody Resource<Employee> employee) {
+	public ResponseEntity<?> newEmployee(@RequestBody EntityModel<Employee> employee) {
 
 		int newEmployeeId = EMPLOYEES.size();
 
@@ -136,7 +136,7 @@ public class WebMvcEmployeeController {
 	}
 
 	@PutMapping("/employees/{id}")
-	public ResponseEntity<?> updateEmployee(@RequestBody Resource<Employee> employee, @PathVariable Integer id) {
+	public ResponseEntity<?> updateEmployee(@RequestBody EntityModel<Employee> employee, @PathVariable Integer id) {
 
 		EMPLOYEES.put(id, employee.getContent());
 
@@ -148,7 +148,7 @@ public class WebMvcEmployeeController {
 	}
 
 	@PatchMapping("/employees/{id}")
-	public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Resource<Employee> employee, @PathVariable Integer id) {
+	public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EntityModel<Employee> employee, @PathVariable Integer id) {
 
 		Employee oldEmployee = EMPLOYEES.get(id);
 		Employee newEmployee = oldEmployee;

@@ -26,17 +26,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.Links.MergeMode;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -59,8 +59,8 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
- * Jackson 2 module implementation to render {@link Resources}, {@link Resource}, and {@link ResourceSupport} instances
- * in Collection+JSON compatible JSON.
+ * Jackson 2 module implementation to render {@link CollectionModel}, {@link EntityModel}, and
+ * {@link RepresentationModel} instances in Collection+JSON compatible JSON.
  *
  * @author Greg Turnquist
  * @author Oliver Drotbohm
@@ -73,10 +73,10 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		super("collection-json-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
-		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-		setMixInAnnotation(Resource.class, ResourceMixin.class);
-		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-		setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
+		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
+		setMixInAnnotation(EntityModel.class, EntityRepresentationModelMixin.class);
+		setMixInAnnotation(CollectionModel.class, CollectionRepresentationModelMixin.class);
+		setMixInAnnotation(PagedModel.class, PagedResourcesMixin.class);
 
 		addSerializer(new CollectionJsonPagedResourcesSerializer());
 		addSerializer(new CollectionJsonResourcesSerializer());
@@ -160,7 +160,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourceSupportSerializer extends ContainerSerializer<ResourceSupport>
+	static class CollectionJsonResourceSupportSerializer extends ContainerSerializer<RepresentationModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = 6127711241993352699L;
@@ -173,12 +173,13 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		CollectionJsonResourceSupportSerializer(BeanProperty property) {
 
-			super(ResourceSupport.class, false);
+			super(RepresentationModel.class, false);
 			this.property = property;
 		}
 
 		@Override
-		public void serialize(ResourceSupport value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(RepresentationModel<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException {
 
 			String href = value.getRequiredLink(IanaLinkRelations.SELF.value()).getHref();
 
@@ -220,7 +221,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean hasSingleElement(ResourceSupport value) {
+		public boolean hasSingleElement(RepresentationModel<?> value) {
 			return true;
 		}
 
@@ -230,7 +231,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourceSerializer extends ContainerSerializer<Resource<?>>
+	static class CollectionJsonResourceSerializer extends ContainerSerializer<EntityModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = 2212535956767860364L;
@@ -243,12 +244,12 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		CollectionJsonResourceSerializer(BeanProperty property) {
 
-			super(Resource.class, false);
+			super(EntityModel.class, false);
 			this.property = property;
 		}
 
 		@Override
-		public void serialize(Resource<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(EntityModel<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			String href = value.getRequiredLink(IanaLinkRelations.SELF).getHref();
 			Links withoutSelfLink = value.getLinks().without(IanaLinkRelations.SELF);
@@ -287,7 +288,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean hasSingleElement(Resource<?> value) {
+		public boolean hasSingleElement(EntityModel<?> value) {
 			return true;
 		}
 
@@ -297,12 +298,12 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourcesSerializer extends ContainerSerializer<Resources<?>> {
+	static class CollectionJsonResourcesSerializer extends ContainerSerializer<CollectionModel<?>> {
 
 		private static final long serialVersionUID = -278986431091914402L;
 
 		CollectionJsonResourcesSerializer() {
-			super(Resources.class, false);
+			super(CollectionModel.class, false);
 		}
 
 		/*
@@ -310,7 +311,8 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(Resources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(CollectionModel<?> value, JsonGenerator jgen, SerializerProvider provider)
+				throws IOException {
 
 			CollectionJson<Object> collectionJson = new CollectionJson<>() //
 					.withVersion("1.0") //
@@ -349,7 +351,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
 		 */
 		@Override
-		public boolean isEmpty(SerializerProvider provider, Resources<?> value) {
+		public boolean isEmpty(SerializerProvider provider, CollectionModel<?> value) {
 			return value.getContent().isEmpty();
 		}
 
@@ -358,7 +360,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
-		public boolean hasSingleElement(Resources<?> value) {
+		public boolean hasSingleElement(CollectionModel<?> value) {
 			return value.getContent().size() == 1;
 		}
 
@@ -372,7 +374,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonPagedResourcesSerializer extends ContainerSerializer<PagedResources<?>>
+	static class CollectionJsonPagedResourcesSerializer extends ContainerSerializer<PagedModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -6703190072925382402L;
@@ -385,12 +387,12 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		CollectionJsonPagedResourcesSerializer(BeanProperty property) {
 
-			super(Resources.class, false);
+			super(CollectionModel.class, false);
 			this.property = property;
 		}
 
 		@Override
-		public void serialize(PagedResources<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(PagedModel<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			CollectionJson<?> collectionJson = new CollectionJson<>() //
 					.withVersion("1.0") //
@@ -422,12 +424,12 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean isEmpty(PagedResources<?> value) {
+		public boolean isEmpty(PagedModel<?> value) {
 			return value.getContent().size() == 0;
 		}
 
 		@Override
-		public boolean hasSingleElement(PagedResources<?> value) {
+		public boolean hasSingleElement(PagedModel<?> value) {
 			return value.getContent().size() == 1;
 		}
 
@@ -476,7 +478,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourceSupportDeserializer extends ContainerDeserializerBase<ResourceSupport>
+	static class CollectionJsonResourceSupportDeserializer extends ContainerDeserializerBase<RepresentationModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 502737712634617739L;
@@ -484,7 +486,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		private final JavaType contentType;
 
 		CollectionJsonResourceSupportDeserializer() {
-			this(TypeFactory.defaultInstance().constructType(ResourceSupport.class));
+			this(TypeFactory.defaultInstance().constructType(RepresentationModel.class));
 		}
 
 		CollectionJsonResourceSupportDeserializer(JavaType contentType) {
@@ -516,7 +518,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public ResourceSupport deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+		public RepresentationModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			TypeFactory typeFactory = ctxt.getTypeFactory();
 
@@ -541,10 +543,9 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
-				ResourceSupport resource = (ResourceSupport) firstItem.toRawData(this.contentType);
-				resource.add(firstItem.getLinks().merge(merged));
+				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(this.contentType);
+				return resource.add(firstItem.getLinks().merge(merged));
 
-				return resource;
 			}
 
 			if (withOwnSelfLink.getTemplate() != null) {
@@ -552,19 +553,14 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 				Map<String, Object> properties = withOwnSelfLink.getTemplate().getData().stream()
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
-				ResourceSupport resourceSupport = (ResourceSupport) PropertyUtils
+				RepresentationModel<?> resourceSupport = (RepresentationModel<?>) PropertyUtils
 						.createObjectFromProperties(this.contentType.getRawClass(), properties);
 
-				resourceSupport.add(withOwnSelfLink.getLinks());
-
-				return resourceSupport;
+				return resourceSupport.add(withOwnSelfLink.getLinks());
 
 			} else {
 
-				ResourceSupport resource = new ResourceSupport();
-				resource.add(withOwnSelfLink.getLinks());
-
-				return resource;
+				return new RepresentationModel<>().add(withOwnSelfLink.getLinks());
 			}
 		}
 
@@ -580,7 +576,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<Resource<?>>
+	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<EntityModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = -5911687423054932523L;
@@ -608,7 +604,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
-		public Resource<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+		public EntityModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
@@ -626,7 +622,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 				Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
-				return new Resource<>(obj, links);
+				return new EntityModel<>(obj, links);
 			} else {
 
 				Links merged = items.stream() //
@@ -637,7 +633,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
-				return new Resource<>(firstItem.toRawData(rootType),
+				return new EntityModel<>(firstItem.toRawData(rootType),
 						merged.merge(MergeMode.REPLACE_BY_REL, firstItem.getLinks()));
 			}
 		}
@@ -655,8 +651,8 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static abstract class CollectionJsonDeserializerBase<T extends Resources<?>> extends ContainerDeserializerBase<T>
-			implements ContextualDeserializer {
+	static abstract class CollectionJsonDeserializerBase<T extends CollectionModel<?>>
+			extends ContainerDeserializerBase<T> implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 1007769482339850545L;
 
@@ -731,22 +727,22 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 				return finalizer.apply(Collections.emptyList(), links);
 			}
 
-			boolean isResource = contentType.hasGenericTypes() && contentType.containedType(0).hasRawClass(Resource.class);
+			boolean isResource = contentType.hasGenericTypes() && contentType.containedType(0).hasRawClass(EntityModel.class);
 
 			return collection.getItems().stream() //
 					.map(CollectionJsonItem::withOwnSelfLink) //
 					.<Object> map(it -> isResource //
-							? new Resource<>(it.toRawData(rootType), it.getLinks()) //
+							? new EntityModel<>(it.toRawData(rootType), it.getLinks()) //
 							: it.toRawData(rootType)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));
 		}
 	}
 
-	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<Resources<?>> {
+	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<CollectionModel<?>> {
 
 		private static final long serialVersionUID = 6406522912020578141L;
-		private static final BiFunction<List<Object>, Links, Resources<?>> FINISHER = Resources::new;
-		private static final Function<JavaType, CollectionJsonDeserializerBase<Resources<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
+		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::new;
+		private static final Function<JavaType, CollectionJsonDeserializerBase<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
 
 		CollectionJsonResourcesDeserializer() {
 			super(FINISHER, CONTEXTUAL_CREATOR);
@@ -757,12 +753,12 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedResources<?>> {
+	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedModel<?>> {
 
 		private static final long serialVersionUID = -7465448422501330790L;
-		private static final BiFunction<List<Object>, Links, PagedResources<?>> FINISHER = (content,
-				links) -> new PagedResources<>(content, null, links);
-		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedResources<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
+		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content,
+				links) -> new PagedModel<>(content, null, links);
+		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {
 			super(FINISHER, CONTEXTUAL_CREATOR);
@@ -773,15 +769,15 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(Resources<?> resources) {
+	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(CollectionModel<?> resources) {
 
 		return resources.getContent().stream().map(content -> {
 
-			if (!Resource.class.isInstance(content)) {
+			if (!EntityModel.class.isInstance(content)) {
 				return new CollectionJsonItem<>().withRawData(content);
 			}
 
-			Resource<?> resource = (Resource<?>) content;
+			EntityModel<?> resource = (EntityModel<?>) content;
 
 			return new CollectionJsonItem<>() //
 					.withHref(resource.getRequiredLink(IanaLinkRelations.SELF).getHref())
@@ -797,7 +793,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 	 * @param resource
 	 * @return
 	 */
-	private static List<CollectionJsonQuery> findQueries(ResourceSupport resource) {
+	private static List<CollectionJsonQuery> findQueries(RepresentationModel<?> resource) {
 
 		if (!resource.hasLink(IanaLinkRelations.SELF)) {
 			return Collections.emptyList();
@@ -823,7 +819,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 	 * @param resource
 	 * @return
 	 */
-	private static CollectionJsonTemplate findTemplate(ResourceSupport resource) {
+	private static CollectionJsonTemplate findTemplate(RepresentationModel<?> resource) {
 
 		if (!resource.hasLink(IanaLinkRelations.SELF)) {
 			return null;

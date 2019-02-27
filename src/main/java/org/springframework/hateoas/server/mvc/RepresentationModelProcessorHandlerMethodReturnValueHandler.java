@@ -22,10 +22,10 @@ import java.lang.reflect.Field;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.server.ResourceProcessor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -36,27 +36,27 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * {@link HandlerMethodReturnValueHandler} to post-process the objects returned from controller methods using the
- * configured {@link ResourceProcessor}s.
- * 
+ * configured {@link RepresentationModelProcessor}s.
+ *
  * @author Oliver Gierke
  * @since 0.20
  * @soundtrack Doppelkopf - Balance (Von Abseits)
  */
 @RequiredArgsConstructor
-public class ResourceProcessorHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class RepresentationModelProcessorHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	static final ResolvableType RESOURCE_TYPE = ResolvableType.forRawClass(Resource.class);
-	static final ResolvableType RESOURCES_TYPE = ResolvableType.forRawClass(Resources.class);
+	static final ResolvableType RESOURCE_TYPE = ResolvableType.forRawClass(EntityModel.class);
+	static final ResolvableType RESOURCES_TYPE = ResolvableType.forRawClass(CollectionModel.class);
 	private static final ResolvableType HTTP_ENTITY_TYPE = ResolvableType.forRawClass(HttpEntity.class);
 
-	static final Field CONTENT_FIELD = ReflectionUtils.findField(Resources.class, "content");
+	static final Field CONTENT_FIELD = ReflectionUtils.findField(CollectionModel.class, "content");
 
 	static {
 		ReflectionUtils.makeAccessible(CONTENT_FIELD);
 	}
 
 	private final @NonNull HandlerMethodReturnValueHandler delegate;
-	private final @NonNull ResourceProcessorInvoker invoker;
+	private final @NonNull RepresentationModelProcessorInvoker invoker;
 
 	private boolean rootLinksAsHeaders = false;
 
@@ -81,6 +81,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 	 * @see org.springframework.web.method.support.HandlerMethodReturnValueHandler#handleReturnValue(java.lang.Object, org.springframework.core.MethodParameter, org.springframework.web.method.support.ModelAndViewContainer, org.springframework.web.context.request.NativeWebRequest)
 	 */
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {
 
@@ -91,7 +92,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 		}
 
 		// No post-processable type found - proceed with delegate
-		if (!(value instanceof ResourceSupport)) {
+		if (!(value instanceof RepresentationModel)) {
 			delegate.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 			return;
 		}
@@ -111,7 +112,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 			targetType = returnValueType;
 		}
 
-		ResourceSupport result = invoker.invokeProcessorsFor((ResourceSupport) value, targetType);
+		RepresentationModel<?> result = invoker.invokeProcessorsFor((RepresentationModel) value, targetType);
 		delegate.handleReturnValue(rewrapResult(result, returnValue), returnType, mavContainer, webRequest);
 	}
 
@@ -119,18 +120,18 @@ public class ResourceProcessorHandlerMethodReturnValueHandler implements Handler
 	 * Re-wraps the result of the post-processing work into an {@link HttpEntity} or {@link ResponseEntity} if the
 	 * original value was one of those two types. Copies headers and status code from the original value but uses the new
 	 * body.
-	 * 
+	 *
 	 * @param newBody the post-processed value.
 	 * @param originalValue the original input value.
 	 * @return
 	 */
-	Object rewrapResult(ResourceSupport newBody, Object originalValue) {
+	Object rewrapResult(RepresentationModel<?> newBody, Object originalValue) {
 
 		if (!(originalValue instanceof HttpEntity)) {
 			return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(newBody) : newBody;
 		}
 
-		HttpEntity<ResourceSupport> entity = null;
+		HttpEntity<RepresentationModel<?>> entity = null;
 
 		if (originalValue instanceof ResponseEntity) {
 			ResponseEntity<?> source = (ResponseEntity<?>) originalValue;

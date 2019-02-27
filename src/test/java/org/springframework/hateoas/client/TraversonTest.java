@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -141,8 +141,8 @@ public class TraversonTest {
 	@Test
 	public void readsTraversalIntoResourceInstance() {
 
-		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
-		Resource<Actor> result = traverson.follow("movies", "movie", "actor").toObject(typeReference);
+		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new ParameterizedTypeReference<EntityModel<Actor>>() {};
+		EntityModel<Actor> result = traverson.follow("movies", "movie", "actor").toObject(typeReference);
 
 		assertThat(result.getContent().name).isEqualTo("Keanu Reaves");
 	}
@@ -284,8 +284,8 @@ public class TraversonTest {
 	@Test
 	public void chainMultipleFollowOperations() {
 
-		ParameterizedTypeReference<Resource<Actor>> typeReference = new ParameterizedTypeReference<Resource<Actor>>() {};
-		Resource<Actor> result = traverson.follow("movies").follow("movie").follow("actor").toObject(typeReference);
+		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new ParameterizedTypeReference<EntityModel<Actor>>() {};
+		EntityModel<Actor> result = traverson.follow("movies").follow("movie").follow("actor").toObject(typeReference);
 
 		assertThat(result.getContent().name).isEqualTo("Keanu Reaves");
 	}
@@ -299,9 +299,9 @@ public class TraversonTest {
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		// tag::hop-with-param[]
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+		ParameterizedTypeReference<EntityModel<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<EntityModel<Item>>() {};
 
-		Resource<Item> itemResource = traverson.//
+		EntityModel<Item> itemResource = traverson.//
 				follow(rel("items").withParameter("projection", "noImages")).//
 				follow("$._embedded.items[0]._links.self.href").//
 				toObject(resourceParameterizedTypeReference);
@@ -325,11 +325,11 @@ public class TraversonTest {
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
 		// tag::hop-put[]
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
+		ParameterizedTypeReference<EntityModel<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<EntityModel<Item>>() {};
 
 		Map<String, Object> params = Collections.singletonMap("projection", "noImages");
 
-		Resource<Item> itemResource = traverson.//
+		EntityModel<Item> itemResource = traverson.//
 				follow(rel("items").withParameters(params)).//
 				follow("$._embedded.items[0]._links.self.href").//
 				toObject(resourceParameterizedTypeReference);
@@ -355,8 +355,8 @@ public class TraversonTest {
 		Map<String, Object> params = new HashMap<>();
 		params.put("projection", "thisShouldGetOverwrittenByLocalHop");
 
-		ParameterizedTypeReference<Resource<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<Resource<Item>>() {};
-		Resource<Item> itemResource = traverson.follow(rel("items").withParameter("projection", "noImages"))
+		ParameterizedTypeReference<EntityModel<Item>> resourceParameterizedTypeReference = new ParameterizedTypeReference<EntityModel<Item>>() {};
+		EntityModel<Item> itemResource = traverson.follow(rel("items").withParameter("projection", "noImages"))
 				.follow("$._embedded.items[0]._links.self.href") // retrieve first Item in the collection
 				.withTemplateParameters(params).toObject(resourceParameterizedTypeReference);
 
@@ -377,9 +377,9 @@ public class TraversonTest {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
-		Resource<?> itemResource = traverson.//
+		EntityModel<?> itemResource = traverson.//
 				follow(rel("items").withParameters(Collections.singletonMap("projection", "no images"))).//
-				toObject(Resource.class);
+				toObject(EntityModel.class);
 
 		assertThat(itemResource.hasLink("self")).isTrue();
 		assertThat(itemResource.getRequiredLink("self").expand().getHref())
@@ -417,11 +417,11 @@ public class TraversonTest {
 
 	private static void setUpActors() {
 
-		Resource<Actor> actor = new Resource<>(new Actor("Keanu Reaves"));
+		EntityModel<Actor> actor = new EntityModel<>(new Actor("Keanu Reaves"));
 		String actorUri = server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		Resource<Movie> resource = new Resource<>(movie);
+		EntityModel<Movie> resource = new EntityModel<>(movie);
 		resource.add(new Link(actorUri, "actor"));
 
 		server.mockResourceFor(resource);

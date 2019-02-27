@@ -30,14 +30,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.client.Actor;
 import org.springframework.hateoas.client.Movie;
 import org.springframework.hateoas.client.Server;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.server.mvc.TypeReferences.ResourceType;
+import org.springframework.hateoas.server.mvc.TypeReferences.EntityModelType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -55,11 +55,11 @@ public class HypermediaWebClientBeanPostProcessorTest {
 
 		this.server = new Server();
 
-		Resource<Actor> actor = new Resource<>(new Actor("Keanu Reaves"));
+		EntityModel<Actor> actor = new EntityModel<>(new Actor("Keanu Reaves"));
 		String actorUri = this.server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		Resource<Movie> resource = new Resource<>(movie);
+		EntityModel<Movie> resource = new EntityModel<>(movie);
 		resource.add(new Link(actorUri, "actor"));
 
 		this.server.mockResourceFor(resource);
@@ -90,7 +90,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 					.get().uri(this.baseUri) //
 					.accept(MediaTypes.HAL_JSON) //
 					.retrieve() //
-					.bodyToMono(ResourceSupport.class) //
+					.bodyToMono(RepresentationModel.class) //
 					.as(StepVerifier::create) //
 					.expectNextMatches(root -> { //
 						assertThat(root.getLinks()).hasSize(2);
@@ -106,7 +106,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	@Test
 	public void shouldHandleNavigatingToAResourceObject() {
 
-		ParameterizedTypeReference<Resource<Actor>> typeReference = new ResourceType<Actor>() {};
+		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new EntityModelType<Actor>() {};
 
 		withContext(HalConfig.class, context -> {
 
@@ -115,19 +115,19 @@ public class HypermediaWebClientBeanPostProcessorTest {
 			webClient //
 					.get().uri(this.baseUri) //
 					.retrieve() //
-					.bodyToMono(ResourceSupport.class) //
+					.bodyToMono(RepresentationModel.class) //
 					.map(resourceSupport -> resourceSupport.getRequiredLink("actors")) //
 					.flatMap(link -> webClient //
 							.get().uri(link.expand().getHref()) //
 							.retrieve() //
-							.bodyToMono(ResourceSupport.class)) //
+							.bodyToMono(RepresentationModel.class)) //
 					.map(resourceSupport -> resourceSupport.getLinks().toList().get(0)) //
 					.flatMap(link -> webClient //
 							.get().uri(link.expand().getHref()) //
 							.retrieve() //
 							.bodyToMono(typeReference)) //
 					.as(StepVerifier::create) //
-					.expectNext(new Resource<>(new Actor("Keanu Reaves"))) //
+					.expectNext(new EntityModel<>(new Actor("Keanu Reaves"))) //
 					.verifyComplete();
 		});
 	}

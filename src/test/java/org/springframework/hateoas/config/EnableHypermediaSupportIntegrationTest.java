@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -493,7 +493,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(mapper).hasValueSatisfying(it -> {
 
-				ResourceSupport resourceSupport = new ResourceSupport();
+				RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 				resourceSupport.add(new Link("localhost").withSelfRel());
 
 				assertThatCode(() -> {
@@ -513,7 +513,7 @@ public class EnableHypermediaSupportIntegrationTest {
 						context, //
 						MediaTypes.HAL_JSON, //
 						mapper -> { //
-							ResourceSupport resourceSupport = new ResourceSupport(); //
+							RepresentationModel<?> resourceSupport = new RepresentationModel<>(); //
 							resourceSupport.add(new Link("localhost").withSelfRel()); //
 							assertThat(mapper.writeValueAsString(resourceSupport)) //
 									.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"); //

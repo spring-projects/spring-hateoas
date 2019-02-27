@@ -29,8 +29,8 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.RelProvider;
 import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
@@ -168,7 +168,7 @@ public class Server implements Closeable {
 		return "http://localhost:" + port();
 	}
 
-	public String mockResourceFor(Resource<?> resource) {
+	public String mockResourceFor(EntityModel<?> resource) {
 
 		Object content = resource.getContent();
 
@@ -188,13 +188,13 @@ public class Server implements Closeable {
 
 	public void finishMocking() {
 
-		Resources<String> resources = new Resources<>(Collections.emptyList());
+		CollectionModel<String> resources = new CollectionModel<>(Collections.emptyList());
 
 		for (Link link : baseResources.keySet()) {
 
 			resources.add(link);
 
-			Resources<String> nested = new Resources<>(Collections.emptyList());
+			CollectionModel<String> nested = new CollectionModel<>(Collections.emptyList());
 			nested.add(baseResources.get(link));
 
 			register(link.getHref(), nested);

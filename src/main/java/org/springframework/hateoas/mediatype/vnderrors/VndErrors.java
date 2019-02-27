@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -157,7 +157,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 *
 	 * @author Oliver Gierke
 	 */
-	public static class VndError extends ResourceSupport {
+	public static class VndError extends RepresentationModel<VndError> {
 
 		@JsonProperty private final String logref;
 		@JsonProperty private final String message;

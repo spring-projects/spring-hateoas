@@ -18,65 +18,68 @@ package org.springframework.hateoas.server;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.util.Assert;
 
 /**
- * A {@link ResourceAssembler} based purely on the domain type, using {@code Resource<T>} as the enclosing
- * "resource" type.
+ * A {@link RepresentationModelAssembler} based purely on the domain type, using {@code EntityRepresentationModel<T>} as
+ * the enclosing representation model type.
  *
  * @author Greg Turnquist
  * @since 1.0
  */
-public interface SimpleResourceAssembler<T> extends ResourceAssembler<T, Resource<T>> {
+public interface SimpleRepresentationModelAssembler<T>
+		extends RepresentationModelAssembler<T, EntityModel<T>> {
 
 	/**
-	 * Converts the given entity into a {@link Resource}.
+	 * Converts the given entity into a {@link EntityModel}.
 	 *
 	 * @param entity
 	 * @return
 	 */
-	default Resource<T> toResource(T entity) {
-		
-		Resource<T> resource = new Resource<>(entity);
+	default EntityModel<T> toModel(T entity) {
+
+		EntityModel<T> resource = new EntityModel<>(entity);
 		addLinks(resource);
 		return resource;
 	}
 
 	/**
-	 * Define links to add to every individual {@link Resource}.
+	 * Define links to add to every individual {@link EntityModel}.
 	 *
 	 * @param resource
 	 */
-	void addLinks(Resource<T> resource);
+	void addLinks(EntityModel<T> resource);
 
 	/**
 	 * Converts all given entities into resources and wraps the collection as a resource as well.
 	 *
-	 * @see #toResource(Object)
+	 * @see #toModel(Object)
 	 * @param entities must not be {@literal null}.
-	 * @return {@link Resources} containing {@link Resource} of {@code T}.
+	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}.
 	 */
 	@Override
-	default Resources<Resource<T>> toResources(Iterable<? extends T> entities) {
+	default CollectionModel<EntityModel<T>> toCollectionModel(
+			Iterable<? extends T> entities) {
 
 		Assert.notNull(entities, "entities must not be null!");
-		List<Resource<T>> resourceList = new ArrayList<>();
+		List<EntityModel<T>> resourceList = new ArrayList<>();
 
 		for (T entity : entities) {
-			resourceList.add(toResource(entity));
+			resourceList.add(toModel(entity));
 		}
 
-		Resources<Resource<T>> resources = new Resources<>(resourceList);
+		CollectionModel<EntityModel<T>> resources = new CollectionModel<>(
+				resourceList);
 		addLinks(resources);
 		return resources;
 	}
 
 	/**
-	 * Define links to add to the {@link Resources} collection.
+	 * Define links to add to the {@link CollectionModel} collection.
 	 *
 	 * @param resources
 	 */
-	void addLinks(Resources<Resource<T>> resources);
+	void addLinks(CollectionModel<EntityModel<T>> resources);
 }

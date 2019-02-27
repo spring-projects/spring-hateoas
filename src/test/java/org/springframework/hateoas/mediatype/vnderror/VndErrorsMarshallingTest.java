@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas;
+package org.springframework.hateoas.mediatype.vnderror;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;

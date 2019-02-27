@@ -26,7 +26,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.hateoas.server.mvc.UriComponentsContributor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
@@ -84,7 +84,7 @@ class WebMvcHateoasConfiguration {
 
 			this.hypermediaTypes.forEach(hypermedia -> {
 
-				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(ResourceSupport.class,
+				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(RepresentationModel.class,
 						hypermedia.getMediaTypes(), hypermedia.configureObjectMapper(mapper.copy())));
 			});
 		}

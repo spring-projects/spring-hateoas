@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 
 import org.junit.Test;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 
@@ -46,11 +46,11 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	public void canReadTypeIfAssignableToConfiguredType() {
 
 		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class);
+				RepresentationModel.class);
 
 		assertCanRead(converter, Object.class, false);
-		assertCanRead(converter, ResourceSupport.class, true);
-		assertCanRead(converter, Resource.class, true);
+		assertCanRead(converter, RepresentationModel.class, true);
+		assertCanRead(converter, EntityModel.class, true);
 	}
 
 	/**
@@ -60,11 +60,11 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	public void canWriteTypeIfAssignableToConfiguredType() {
 
 		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class);
+				RepresentationModel.class);
 
 		assertCanWrite(converter, Object.class, false);
-		assertCanWrite(converter, ResourceSupport.class, true);
-		assertCanWrite(converter, Resource.class, true);
+		assertCanWrite(converter, RepresentationModel.class, true);
+		assertCanWrite(converter, EntityModel.class, true);
 	}
 
 	private static void assertCanRead(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {

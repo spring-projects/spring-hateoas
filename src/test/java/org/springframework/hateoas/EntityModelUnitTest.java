@@ -22,24 +22,24 @@ import java.util.Collections;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link Resource}.
+ * Unit tests for {@link EntityModel}.
  * 
  * @author Oliver Gierke
  */
-public class ResourceUnitTest {
+public class EntityModelUnitTest {
 
 	@Test
 	public void equalsForSelfReference() {
 
-		Resource<String> resource = new Resource<>("foo");
+		EntityModel<String> resource = new EntityModel<>("foo");
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
 	public void equalsWithEqualContent() {
 
-		Resource<String> left = new Resource<>("foo");
-		Resource<String> right = new Resource<>("foo");
+		EntityModel<String> left = new EntityModel<>("foo");
+		EntityModel<String> right = new EntityModel<>("foo");
 
 		assertThat(left).isEqualTo(right);
 		assertThat(right).isEqualTo(left);
@@ -48,8 +48,8 @@ public class ResourceUnitTest {
 	@Test
 	public void notEqualForDifferentContent() {
 
-		Resource<String> left = new Resource<>("foo");
-		Resource<String> right = new Resource<>("bar");
+		EntityModel<String> left = new EntityModel<>("foo");
+		EntityModel<String> right = new EntityModel<>("bar");
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -58,8 +58,8 @@ public class ResourceUnitTest {
 	@Test
 	public void notEqualForDifferentLinks() {
 
-		Resource<String> left = new Resource<>("foo");
-		Resource<String> right = new Resource<>("foo");
+		EntityModel<String> left = new EntityModel<>("foo");
+		EntityModel<String> right = new EntityModel<>("foo");
 		right.add(new Link("localhost"));
 
 		assertThat(left).isNotEqualTo(right);
@@ -68,6 +68,6 @@ public class ResourceUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsCollectionContent() {
-		new Resource<Object>(Collections.emptyList());
+		new EntityModel<Object>(Collections.emptyList());
 	}
 }

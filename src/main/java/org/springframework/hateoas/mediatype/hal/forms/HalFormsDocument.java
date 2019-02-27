@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsLinksDeserializer;
@@ -71,7 +71,7 @@ public class HalFormsDocument<T> {
 
 	@JsonProperty("page") //
 	@JsonInclude(Include.NON_NULL) //
-	private PagedResources.PageMetadata pageMetadata;
+	private PagedModel.PageMetadata pageMetadata;
 
 	@Singular //
 	@JsonProperty("_links") //

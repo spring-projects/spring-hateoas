@@ -18,7 +18,7 @@ package org.springframework.hateoas.server.mvc
 
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.LinkRelation
-import org.springframework.hateoas.ResourceSupport
+import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 
@@ -49,7 +49,7 @@ infix fun WebMvcLinkBuilder.withRel(rel: String): Link = withRel(rel)
  * @author Roland Kulcsár
  * @since 1.0
  */
-fun <C, R : ResourceSupport> R.add(controller: Class<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
+fun <C, R : RepresentationModel<R>> R.add(controller: Class<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
     
     val builder = WebMvcLinkBuilderDsl(controller, this)
     builder.links(this)
@@ -63,7 +63,7 @@ fun <C, R : ResourceSupport> R.add(controller: Class<C>, links: WebMvcLinkBuilde
  * @author Roland Kulcsár
  * @since 1.0
  */
-fun <C : Any, R : ResourceSupport> R.add(controller: KClass<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
+fun <C : Any, R : RepresentationModel<R>> R.add(controller: KClass<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
     return add(controller.java, links)
 }
 
@@ -73,7 +73,7 @@ fun <C : Any, R : ResourceSupport> R.add(controller: KClass<C>, links: WebMvcLin
  * @author Roland Kulcsár
  * @since 1.0
  */
-open class WebMvcLinkBuilderDsl<C, R : ResourceSupport>(val controller: Class<C>, val resource: R) {
+open class WebMvcLinkBuilderDsl<C, R : RepresentationModel<R>>(val controller: Class<C>, val resource: R) {
 
     /**
      * Create a [WebMvcLinkBuilder] pointing to [func] method.

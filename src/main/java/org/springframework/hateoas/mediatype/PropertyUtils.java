@@ -35,7 +35,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.support.WebStack;
 import org.springframework.util.ReflectionUtils;
 
@@ -56,8 +56,8 @@ public class PropertyUtils {
 
 	public static Map<String, Object> findProperties(Object object) {
 
-		if (object.getClass().equals(Resource.class)) {
-			return findProperties(((Resource<?>) object).getContent());
+		if (object.getClass().equals(EntityModel.class)) {
+			return findProperties(((EntityModel<?>) object).getContent());
 		}
 
 		return getPropertyDescriptors(object.getClass())
@@ -83,7 +83,7 @@ public class PropertyUtils {
 			}
 		}
 
-		if (resolvableType.getRawClass().equals(Resource.class)) {
+		if (resolvableType.getRawClass().equals(EntityModel.class)) {
 			return findPropertyNames(resolvableType.resolveGeneric(0));
 		} else {
 			return findPropertyNames(resolvableType.getRawClass());

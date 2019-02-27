@@ -23,27 +23,27 @@ import java.util.Set;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link Resources}.
+ * Unit tests for {@link CollectionModel}.
  * 
  * @author Oliver Gierke
  */
-public class ResourcesUnitTest {
+public class CollectionModelUnitTest {
 
-	Set<Resource<String>> foo = Collections.singleton(new Resource<>("foo"));
-	Set<Resource<String>> bar = Collections.singleton(new Resource<>("bar"));
+	Set<EntityModel<String>> foo = Collections.singleton(new EntityModel<>("foo"));
+	Set<EntityModel<String>> bar = Collections.singleton(new EntityModel<>("bar"));
 
 	@Test
 	public void equalsForSelfReference() {
 
-		Resources<Resource<String>> resource = new Resources<>(foo);
+		CollectionModel<EntityModel<String>> resource = new CollectionModel<>(foo);
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
 	public void equalsWithEqualContent() {
 
-		Resources<Resource<String>> left = new Resources<>(foo);
-		Resources<Resource<String>> right = new Resources<>(foo);
+		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
+		CollectionModel<EntityModel<String>> right = new CollectionModel<>(foo);
 
 		assertThat(left).isEqualTo(right);
 		assertThat(right).isEqualTo(left);
@@ -52,8 +52,8 @@ public class ResourcesUnitTest {
 	@Test
 	public void notEqualForDifferentContent() {
 
-		Resources<Resource<String>> left = new Resources<>(foo);
-		Resources<Resource<String>> right = new Resources<>(bar);
+		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
+		CollectionModel<EntityModel<String>> right = new CollectionModel<>(bar);
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -62,8 +62,8 @@ public class ResourcesUnitTest {
 	@Test
 	public void notEqualForDifferentLinks() {
 
-		Resources<Resource<String>> left = new Resources<>(foo);
-		Resources<Resource<String>> right = new Resources<>(bar);
+		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
+		CollectionModel<EntityModel<String>> right = new CollectionModel<>(bar);
 		right.add(new Link("localhost"));
 
 		assertThat(left).isNotEqualTo(right);

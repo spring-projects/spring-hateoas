@@ -130,7 +130,7 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 	 * @see org.springframework.hateoas.EntityLinks#getLinkToSingleResource(java.lang.Class, java.lang.Object)
 	 */
 	@Override
-	public Link linkToSingleResource(Class<?> entity, Object id) {
+	public Link linkToItemResource(Class<?> entity, Object id) {
 		return linkFor(entity).slash(id).withSelfRel();
 	}
 

@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.HttpMethod;
@@ -51,9 +51,10 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 class HalFormsSerializers {
 
 	/**
-	 * Serializer for {@link Resources}.
+	 * Serializer for {@link CollectionModel}.
 	 */
-	static class HalFormsResourceSerializer extends ContainerSerializer<Resource<?>> implements ContextualSerializer {
+	static class HalFormsResourceSerializer extends ContainerSerializer<EntityModel<?>>
+			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -7912243216469101379L;
 
@@ -61,7 +62,7 @@ class HalFormsSerializers {
 
 		HalFormsResourceSerializer(BeanProperty property) {
 
-			super(Resource.class, false);
+			super(EntityModel.class, false);
 			this.property = property;
 		}
 
@@ -70,7 +71,8 @@ class HalFormsSerializers {
 		}
 
 		@Override
-		public void serialize(Resource<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 
 			HalFormsDocument<?> doc = HalFormsDocument.forResource(value.getContent()) //
 					.withLinks(value.getLinks()) //
@@ -90,7 +92,7 @@ class HalFormsSerializers {
 		}
 
 		@Override
-		public boolean hasSingleElement(Resource<?> resource) {
+		public boolean hasSingleElement(EntityModel<?> resource) {
 			return false;
 		}
 
@@ -107,9 +109,10 @@ class HalFormsSerializers {
 	}
 
 	/**
-	 * Serializer for {@link Resources}
+	 * Serializer for {@link CollectionModel}
 	 */
-	static class HalFormsResourcesSerializer extends ContainerSerializer<Resources<?>> implements ContextualSerializer {
+	static class HalFormsResourcesSerializer extends ContainerSerializer<CollectionModel<?>>
+			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -3601146866067500734L;
 
@@ -118,7 +121,7 @@ class HalFormsSerializers {
 
 		HalFormsResourcesSerializer(BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 
-			super(Resources.class, false);
+			super(CollectionModel.class, false);
 
 			this.property = property;
 			this.embeddedMapper = embeddedMapper;
@@ -129,17 +132,18 @@ class HalFormsSerializers {
 		}
 
 		@Override
-		public void serialize(Resources<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 
 			Map<HalLinkRelation, Object> embeddeds = embeddedMapper.map(value);
 
 			HalFormsDocument<?> doc;
 
-			if (value instanceof PagedResources) {
+			if (value instanceof PagedModel) {
 
 				doc = HalFormsDocument.empty() //
 						.withEmbedded(embeddeds) //
-						.withPageMetadata(((PagedResources<?>) value).getMetadata()) //
+						.withPageMetadata(((PagedModel<?>) value).getMetadata()) //
 						.withLinks(value.getLinks()) //
 						.withTemplates(findTemplates(value));
 
@@ -165,7 +169,7 @@ class HalFormsSerializers {
 		}
 
 		@Override
-		public boolean hasSingleElement(Resources<?> resources) {
+		public boolean hasSingleElement(CollectionModel<?> resources) {
 			return resources.getContent().size() == 1;
 		}
 
@@ -182,12 +186,12 @@ class HalFormsSerializers {
 	}
 
 	/**
-	 * Extract template details from a {@link ResourceSupport}'s {@link Affordance}s.
+	 * Extract template details from a {@link RepresentationModel}'s {@link Affordance}s.
 	 *
 	 * @param resource
 	 * @return
 	 */
-	private static Map<String, HalFormsTemplate> findTemplates(ResourceSupport resource) {
+	private static Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource) {
 
 		if (!resource.hasLink(IanaLinkRelations.SELF)) {
 			return Collections.emptyMap();
@@ -222,7 +226,7 @@ class HalFormsSerializers {
 	 * @param resource
 	 * @param model
 	 */
-	private static void validate(ResourceSupport resource, HalFormsAffordanceModel model) {
+	private static void validate(RepresentationModel<?> resource, HalFormsAffordanceModel model) {
 
 		String affordanceUri = model.getURI();
 		String selfLinkUri = resource.getRequiredLink(IanaLinkRelations.SELF.value()).expand().getHref();

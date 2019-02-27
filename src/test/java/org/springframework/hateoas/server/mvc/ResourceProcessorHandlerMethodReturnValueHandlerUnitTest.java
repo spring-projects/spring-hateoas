@@ -39,22 +39,22 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.PagedResources.PageMetadata;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.server.ResourceProcessor;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
-import org.springframework.hateoas.server.mvc.ResourceProcessorInvoker;
-import org.springframework.hateoas.server.mvc.ResourceProcessorInvoker.ResourcesProcessorWrapper;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.ResourcesProcessorWrapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 
 /**
- * Unit tests for {@link ResourceProcessorHandlerMethodReturnValueHandler}.
+ * Unit tests for {@link RepresentationModelProcessorHandlerMethodReturnValueHandler}.
  * 
  * @author Oliver Gierke
  * @author Jon Brisbin
@@ -62,29 +62,29 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
-	static final Resource<String> FOO = new Resource<>("foo");
-	static final Resources<Resource<String>> FOOS = new Resources<>(Collections.singletonList(FOO));
-	static final PagedResources<Resource<String>> FOO_PAGE = new PagedResources<>(
+	static final EntityModel<String> FOO = new EntityModel<>("foo");
+	static final CollectionModel<EntityModel<String>> FOOS = new CollectionModel<>(Collections.singletonList(FOO));
+	static final PagedModel<EntityModel<String>> FOO_PAGE = new PagedModel<>(
 		Collections.singleton(FOO), new PageMetadata(1, 0, 10));
 	static final StringResource FOO_RES = new StringResource("foo");
-	static final HttpEntity<Resource<String>> FOO_ENTITY = new HttpEntity<>(FOO);
-	static final ResponseEntity<Resource<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO,
+	static final HttpEntity<EntityModel<String>> FOO_ENTITY = new HttpEntity<>(FOO);
+	static final ResponseEntity<EntityModel<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO,
 		HttpStatus.OK);
 	static final HttpEntity<StringResource> FOO_RES_ENTITY = new HttpEntity<>(FOO_RES);
-	static final Resource<String> BAR = new Resource<>("bar");
-	static final Resources<Resource<String>> BARS = new Resources<>(Collections.singletonList(BAR));
+	static final EntityModel<String> BAR = new EntityModel<>("bar");
+	static final CollectionModel<EntityModel<String>> BARS = new CollectionModel<>(Collections.singletonList(BAR));
 	static final StringResource BAR_RES = new StringResource("bar");
-	static final HttpEntity<Resource<String>> BAR_ENTITY = new HttpEntity<>(BAR);
-	static final ResponseEntity<Resource<String>> BAR_RESP_ENTITY = new ResponseEntity<>(BAR,
+	static final HttpEntity<EntityModel<String>> BAR_ENTITY = new HttpEntity<>(BAR);
+	static final ResponseEntity<EntityModel<String>> BAR_RESP_ENTITY = new ResponseEntity<>(BAR,
 		HttpStatus.OK);
 	static final HttpEntity<StringResource> BAR_RES_ENTITY = new HttpEntity<>(BAR_RES);
-	static final Resource<Long> LONG_10 = new Resource<>(10L);
-	static final Resource<Long> LONG_20 = new Resource<>(20L);
+	static final EntityModel<Long> LONG_10 = new EntityModel<>(10L);
+	static final EntityModel<Long> LONG_20 = new EntityModel<>(20L);
 	static final LongResource LONG_10_RES = new LongResource(10L);
 	static final LongResource LONG_20_RES = new LongResource(20L);
-	static final HttpEntity<Resource<Long>> LONG_10_ENTITY = new HttpEntity<>(LONG_10);
+	static final HttpEntity<EntityModel<Long>> LONG_10_ENTITY = new HttpEntity<>(LONG_10);
 	static final HttpEntity<LongResource> LONG_10_RES_ENTITY = new HttpEntity<>(LONG_10_RES);
-	static final HttpEntity<Resource<Long>> LONG_20_ENTITY = new HttpEntity<>(LONG_20);
+	static final HttpEntity<EntityModel<Long>> LONG_20_ENTITY = new HttpEntity<>(LONG_20);
 	static final HttpEntity<LongResource> LONG_20_RES_ENTITY = new HttpEntity<>(LONG_20_RES);
 	static final Map<String, MethodParameter> METHOD_PARAMS = new HashMap<>();
 
@@ -93,7 +93,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	}
 
 	@Mock HandlerMethodReturnValueHandler delegate;
-	List<ResourceProcessor<?>> resourceProcessors;
+	List<RepresentationModelProcessor<?>> resourceProcessors;
 
 	@Before
 	public void setUp() {
@@ -254,11 +254,11 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	private void usesHeaderLinksResponseEntityIfConfigured(Function<Object, Object> mapper) throws Exception {
 
-		Resource<String> resource = new Resource<>("foo", new Link("href", "rel"));
+		EntityModel<String> resource = new EntityModel<>("foo", new Link("href", "rel"));
 		MethodParameter parameter = METHOD_PARAMS.get("resource");
 
-		ResourceProcessorHandlerMethodReturnValueHandler handler = new ResourceProcessorHandlerMethodReturnValueHandler(
-				delegate, new ResourceProcessorInvoker(resourceProcessors));
+		RepresentationModelProcessorHandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(
+				delegate, new RepresentationModelProcessorInvoker(resourceProcessors));
 		handler.setRootLinksAsHeaders(true);
 		handler.handleReturnValue(mapper.apply(resource), parameter, null, null);
 
@@ -284,7 +284,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	public void doesNotInvokeAProcessorForASpecializedType() throws Exception {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
-		Resources<Object> value = new Resources<>(
+		CollectionModel<Object> value = new CollectionModel<>(
 			Collections.singleton(wrappers.emptyCollectionOf(Object.class)));
 		ResourcesProcessorWrapper wrapper = new ResourcesProcessorWrapper(new SpecialResourcesProcessor());
 
@@ -302,9 +302,9 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		ProjectionProcessor processor = new ProjectionProcessor();
 		ProxyFactory factory = new ProxyFactory(processor);
 
-		resourceProcessors.add((ResourceProcessor<?>) factory.getProxy());
+		resourceProcessors.add((RepresentationModelProcessor<?>) factory.getProxy());
 
-		new ResourceProcessorHandlerMethodReturnValueHandler(delegate, new ResourceProcessorInvoker(resourceProcessors));
+		new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate, new RepresentationModelProcessorInvoker(resourceProcessors));
 	}
 
 	/**
@@ -326,8 +326,8 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 			throw new IllegalArgumentException("Invalid method!");
 		}
 
-		HandlerMethodReturnValueHandler handler = new ResourceProcessorHandlerMethodReturnValueHandler(delegate,
-				new ResourceProcessorInvoker(resourceProcessors));
+		HandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate,
+				new RepresentationModelProcessorInvoker(resourceProcessors));
 		handler.handleReturnValue(returnValue, methodParam, null, null);
 
 		verify(delegate, times(1)).handleReturnValue(expected, methodParam, null, null);
@@ -338,40 +338,40 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		final MethodParameter parameter = Mockito.mock(MethodParameter.class);
 		when(delegate.supportsReturnType(Mockito.any(MethodParameter.class))).thenReturn(value);
 
-		HandlerMethodReturnValueHandler handler = new ResourceProcessorHandlerMethodReturnValueHandler(delegate,
-				new ResourceProcessorInvoker(resourceProcessors));
+		HandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate,
+				new RepresentationModelProcessorInvoker(resourceProcessors));
 
 		assertThat(handler.supportsReturnType(parameter)).isEqualTo(value);
 	}
 
-	enum StringResourceProcessor implements ResourceProcessor<Resource<String>> {
+	enum StringResourceProcessor implements RepresentationModelProcessor<EntityModel<String>> {
 		INSTANCE;
 
 		@Override
-		public Resource<String> process(Resource<String> resource) {
+		public EntityModel<String> process(EntityModel<String> resource) {
 			return BAR;
 		}
 	}
 
-	enum LongResourceProcessor implements ResourceProcessor<Resource<Long>> {
+	enum LongResourceProcessor implements RepresentationModelProcessor<EntityModel<Long>> {
 		INSTANCE;
 
 		@Override
-		public Resource<Long> process(Resource<Long> resource) {
+		public EntityModel<Long> process(EntityModel<Long> resource) {
 			return LONG_20;
 		}
 	}
 
-	enum StringResourcesProcessor implements ResourceProcessor<Resources<Resource<String>>> {
+	enum StringResourcesProcessor implements RepresentationModelProcessor<CollectionModel<EntityModel<String>>> {
 		INSTANCE;
 
 		@Override
-		public Resources<Resource<String>> process(Resources<Resource<String>> resource) {
+		public CollectionModel<EntityModel<String>> process(CollectionModel<EntityModel<String>> resource) {
 			return BARS;
 		}
 	}
 
-	enum SpecializedStringResourceProcessor implements ResourceProcessor<StringResource> {
+	enum SpecializedStringResourceProcessor implements RepresentationModelProcessor<StringResource> {
 		INSTANCE;
 
 		@Override
@@ -380,7 +380,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		}
 	}
 
-	enum SpecializedLongResourceProcessor implements ResourceProcessor<LongResource> {
+	enum SpecializedLongResourceProcessor implements RepresentationModelProcessor<LongResource> {
 		INSTANCE;
 
 		@Override
@@ -391,52 +391,52 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	interface Controller {
 
-		Resources<Resource<String>> resources();
+		CollectionModel<EntityModel<String>> resources();
 
-		Resource<String> resource();
+		EntityModel<String> resource();
 
-		Resource<Long> longResource();
+		EntityModel<Long> longResource();
 
 		StringResource specializedResource();
 
 		Object object();
 
-		HttpEntity<Resource<?>> resourceEntity();
+		HttpEntity<EntityModel<?>> resourceEntity();
 
-		HttpEntity<Resources<?>> resourcesEntity();
+		HttpEntity<CollectionModel<?>> resourcesEntity();
 
 		HttpEntity<Object> objectEntity();
 
-		HttpEntity<Resource<String>> stringResourceEntity();
+		HttpEntity<EntityModel<String>> stringResourceEntity();
 
-		HttpEntity<Resource<? extends Number>> numberResourceEntity();
+		HttpEntity<EntityModel<? extends Number>> numberResourceEntity();
 
 		HttpEntity<StringResource> specializedStringResourceEntity();
 
 		HttpEntity<LongResource> specializedLongResourceEntity();
 
-		ResponseEntity<Resource<?>> resourceResponseEntity();
+		ResponseEntity<EntityModel<?>> resourceResponseEntity();
 
-		ResponseEntity<Resources<?>> resourcesResponseEntity();
+		ResponseEntity<CollectionModel<?>> resourcesResponseEntity();
 
-		Resources<Object> resourcesOfObject();
+		CollectionModel<Object> resourcesOfObject();
 
-		Resources<?> wildcardedResources();
+		CollectionModel<?> wildcardedResources();
 	}
 
-	static class StringResource extends Resource<String> {
+	static class StringResource extends EntityModel<String> {
 		public StringResource(String value) {
 			super(value);
 		}
 	}
 
-	static class LongResource extends Resource<Long> {
+	static class LongResource extends EntityModel<Long> {
 		public LongResource(Long value) {
 			super(value);
 		}
 	}
 
-	static class PagedStringResources extends PagedResources<Resource<String>> {}
+	static class PagedStringResources extends PagedModel<EntityModel<String>> {}
 
 	static class Sample {
 
@@ -446,24 +446,24 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	}
 
-	static class ProjectionProcessor implements ResourceProcessor<Resource<SampleProjection>> {
+	static class ProjectionProcessor implements RepresentationModelProcessor<EntityModel<SampleProjection>> {
 
 		boolean invoked = false;
 
 		@Override
-		public Resource<SampleProjection> process(Resource<SampleProjection> resource) {
+		public EntityModel<SampleProjection> process(EntityModel<SampleProjection> resource) {
 			this.invoked = true;
 			return resource;
 		}
 	}
 
-	static class SpecialResources extends Resources<Object> {
+	static class SpecialResources extends CollectionModel<Object> {
 		public SpecialResources() {
 			super(Collections.emptyList());
 		}
 	}
 
-	static class SpecialResourcesProcessor implements ResourceProcessor<SpecialResources> {
+	static class SpecialResourcesProcessor implements RepresentationModelProcessor<SpecialResources> {
 
 		boolean invoked = false;
 

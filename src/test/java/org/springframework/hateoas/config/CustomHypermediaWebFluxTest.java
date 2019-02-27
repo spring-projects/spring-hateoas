@@ -29,7 +29,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -92,11 +92,11 @@ public class CustomHypermediaWebFluxTest {
 	static class EmployeeController {
 
 		@GetMapping("/employees/1")
-		public Mono<Resource<Employee>> findOne() {
+		public Mono<EntityModel<Employee>> findOne() {
 
 			return linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel() //
 					.toMono() //
-					.map(link -> new Resource<>(new Employee("Frodo Baggins", "ring bearer"), link)); //
+					.map(link -> new EntityModel<>(new Employee("Frodo Baggins", "ring bearer"), link)); //
 		}
 	}
 }

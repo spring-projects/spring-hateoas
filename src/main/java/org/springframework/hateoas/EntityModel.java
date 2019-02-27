@@ -23,39 +23,39 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
- * A simple {@link Resource} wrapping a domain object and adding links to it.
- * 
+ * A simple {@link EntityModel} wrapping a domain object and adding links to it.
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class Resource<T> extends ResourceSupport {
+public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
 	private final T content;
 
 	/**
-	 * Creates an empty {@link Resource}.
+	 * Creates an empty {@link EntityModel}.
 	 */
-	protected Resource() {
+	protected EntityModel() {
 		this.content = null;
 	}
 
 	/**
-	 * Creates a new {@link Resource} with the given content and {@link Link}s (optional).
-	 * 
+	 * Creates a new {@link EntityModel} with the given content and {@link Link}s (optional).
+	 *
 	 * @param content must not be {@literal null}.
-	 * @param links the links to add to the {@link Resource}.
+	 * @param links the links to add to the {@link EntityModel}.
 	 */
-	public Resource(T content, Link... links) {
+	public EntityModel(T content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
 
 	/**
-	 * Creates a new {@link Resource} with the given content and {@link Link}s.
-	 * 
+	 * Creates a new {@link EntityModel} with the given content and {@link Link}s.
+	 *
 	 * @param content must not be {@literal null}.
-	 * @param links the links to add to the {@link Resource}.
+	 * @param links the links to add to the {@link EntityModel}.
 	 */
-	public Resource(T content, Iterable<Link> links) {
+	public EntityModel(T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
 		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
@@ -65,7 +65,7 @@ public class Resource<T> extends ResourceSupport {
 
 	/**
 	 * Returns the underlying entity.
-	 * 
+	 *
 	 * @return the content
 	 */
 	@JsonUnwrapped
@@ -73,7 +73,7 @@ public class Resource<T> extends ResourceSupport {
 		return content;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#toString()
 	 */
@@ -82,7 +82,7 @@ public class Resource<T> extends ResourceSupport {
 		return String.format("Resource { content: %s, %s }", getContent(), super.toString());
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
 	 */
@@ -97,13 +97,13 @@ public class Resource<T> extends ResourceSupport {
 			return false;
 		}
 
-		Resource<?> that = (Resource<?>) obj;
+		EntityModel<?> that = (EntityModel<?>) obj;
 
 		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
 		return contentEqual && super.equals(obj);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.ResourceSupport#hashCode()
 	 */

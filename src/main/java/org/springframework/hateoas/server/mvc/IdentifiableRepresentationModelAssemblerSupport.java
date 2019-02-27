@@ -20,28 +20,28 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import java.util.Arrays;
 
 import org.springframework.hateoas.Identifiable;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.server.ResourceAssembler;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.util.Assert;
 
 /**
- * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
- * sure a self-link is always added.
+ * Base class to implement {@link RepresentationModelAssembler}s. Will automate {@link RepresentationModel} instance
+ * creation and make sure a self-link is always added.
  *
  * @author Oliver Gierke
  */
-public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiable<?>, D extends ResourceSupport>
-		extends ResourceAssemblerSupport<T, D> {
+public abstract class IdentifiableRepresentationModelAssemblerSupport<T extends Identifiable<?>, D extends RepresentationModel<D>>
+		extends RepresentationModelAssemblerSupport<T, D> {
 
 	private final Class<?> controllerClass;
 
 	/**
-	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
+	 * Creates a new {@link RepresentationModelAssemblerSupport} using the given controller class and resource type.
 	 *
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
-	public IdentifiableResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
+	public IdentifiableRepresentationModelAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
 
 		super(controllerClass, resourceType);
 		this.controllerClass = controllerClass;
@@ -53,21 +53,21 @@ public abstract class IdentifiableResourceAssemblerSupport<T extends Identifiabl
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
-	protected D createResource(T entity) {
-		return createResource(entity, new Object[0]);
+	protected D createModel(T entity) {
+		return createModel(entity, new Object[0]);
 	}
 
-	protected D createResource(T entity, Object... parameters) {
-		return createResourceWithId(entity.getId(), entity, parameters);
+	protected D createModel(T entity, Object... parameters) {
+		return createModelWithId(entity.getId(), entity, parameters);
 	}
 
 	@Override
-	protected D createResourceWithId(Object id, T entity, Object... parameters) {
+	protected D createModelWithId(Object id, T entity, Object... parameters) {
 
 		Assert.notNull(entity, "Entity must not be null!");
 		Assert.notNull(id, "Id must not be null!");
 
-		D instance = instantiateResource(entity);
+		D instance = instantiateModel(entity);
 		instance.add(linkTo(controllerClass, unwrapIdentifyables(parameters)).slash(id).withSelfRel());
 		return instance;
 	}

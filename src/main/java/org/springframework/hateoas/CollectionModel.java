@@ -31,34 +31,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class Resources<T> extends ResourceSupport implements Iterable<T> {
+public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> implements Iterable<T> {
 
 	private final Collection<T> content;
 
 	/**
-	 * Creates an empty {@link Resources} instance.
+	 * Creates an empty {@link CollectionModel} instance.
 	 */
-	protected Resources() {
+	protected CollectionModel() {
 		this(new ArrayList<>());
 	}
 
 	/**
-	 * Creates a {@link Resources} instance with the given content and {@link Link}s (optional).
+	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s (optional).
 	 *
 	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link Resources}.
+	 * @param links the links to be added to the {@link CollectionModel}.
 	 */
-	public Resources(Iterable<T> content, Link... links) {
+	public CollectionModel(Iterable<T> content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
 
 	/**
-	 * Creates a {@link Resources} instance with the given content and {@link Link}s.
+	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s.
 	 *
 	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link Resources}.
+	 * @param links the links to be added to the {@link CollectionModel}.
 	 */
-	public Resources(Iterable<T> content, Iterable<Link> links) {
+	public CollectionModel(Iterable<T> content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
 
@@ -71,23 +71,24 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 	}
 
 	/**
-	 * Creates a new {@link Resources} instance by wrapping the given domain class instances into a {@link Resource}.
+	 * Creates a new {@link CollectionModel} instance by wrapping the given domain class instances into a
+	 * {@link EntityModel}.
 	 *
 	 * @param content must not be {@literal null}.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Resource<S>, S> Resources<T> wrap(Iterable<S> content) {
+	public static <T extends EntityModel<S>, S> CollectionModel<T> wrap(Iterable<S> content) {
 
 		Assert.notNull(content, "Content must not be null!");
 
 		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new Resource<>(element));
+			resources.add((T) new EntityModel<>(element));
 		}
 
-		return new Resources<>(resources);
+		return new CollectionModel<>(resources);
 	}
 
 	/**
@@ -133,7 +134,7 @@ public class Resources<T> extends ResourceSupport implements Iterable<T> {
 			return false;
 		}
 
-		Resources<?> that = (Resources<?>) obj;
+		CollectionModel<?> that = (CollectionModel<?>) obj;
 
 		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
 		return contentEqual && super.equals(obj);

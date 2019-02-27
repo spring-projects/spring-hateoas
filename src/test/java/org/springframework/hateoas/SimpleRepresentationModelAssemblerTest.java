@@ -23,12 +23,12 @@ import lombok.Data;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.springframework.hateoas.server.SimpleResourceAssembler;
+import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 
 /**
  * @author Greg Turnquist
  */
-public class SimpleResourceAssemblerTest {
+public class SimpleRepresentationModelAssemblerTest {
 
 	/**
 	 * @see #572
@@ -37,7 +37,7 @@ public class SimpleResourceAssemblerTest {
 	public void convertingToResourceShouldWork() {
 
 		TestResourceAssembler assembler = new TestResourceAssembler();
-		Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
+		EntityModel<Employee> resource = assembler.toModel(new Employee("Frodo"));
 
 		assertThat(resource.getContent().getName()).isEqualTo("Frodo");
 		assertThat(resource.getLinks()).isEmpty();
@@ -50,9 +50,10 @@ public class SimpleResourceAssemblerTest {
 	public void convertingToResourcesShouldWork() {
 
 		TestResourceAssembler assembler = new TestResourceAssembler();
-		Resources<Resource<Employee>> resources = assembler.toResources(Collections.singletonList(new Employee("Frodo")));
+		CollectionModel<EntityModel<Employee>> resources = assembler
+				.toCollectionModel(Collections.singletonList(new Employee("Frodo")));
 
-		assertThat(resources.getContent()).containsExactly(new Resource<>(new Employee("Frodo")));
+		assertThat(resources.getContent()).containsExactly(new EntityModel<>(new Employee("Frodo")));
 		assertThat(resources.getLinks()).isEmpty();
 	}
 
@@ -63,7 +64,7 @@ public class SimpleResourceAssemblerTest {
 	public void convertingToResourceWithCustomLinksShouldWork() {
 
 		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
-		Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
+		EntityModel<Employee> resource = assembler.toModel(new Employee("Frodo"));
 
 		assertThat(resource.getContent().getName()).isEqualTo("Frodo");
 		assertThat(resource.getLinks()).containsExactly(new Link("/employees").withRel("employees"));
@@ -76,34 +77,32 @@ public class SimpleResourceAssemblerTest {
 	public void convertingToResourcesWithCustomLinksShouldWork() {
 
 		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
-		Resources<Resource<Employee>> resources = assembler.toResources(Collections.singletonList(new Employee("Frodo")));
+		CollectionModel<EntityModel<Employee>> resources = assembler
+				.toCollectionModel(Collections.singletonList(new Employee("Frodo")));
 
-		assertThat(resources.getContent())
-				.containsExactly(new Resource<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
+		assertThat(resources.getContent()).containsExactly(
+				new EntityModel<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
 		assertThat(resources.getLinks()).isEmpty();
 	}
 
-	class TestResourceAssembler implements SimpleResourceAssembler<Employee> {
+	class TestResourceAssembler implements SimpleRepresentationModelAssembler<Employee> {
 
 		@Override
-		public void addLinks(Resource<Employee> resource) {
-		}
+		public void addLinks(EntityModel<Employee> resource) {}
 
 		@Override
-		public void addLinks(Resources<Resource<Employee>> resources) {
-		}
+		public void addLinks(CollectionModel<EntityModel<Employee>> resources) {}
 	}
 
-	class ResourceAssemblerWithCustomLink implements SimpleResourceAssembler<Employee> {
+	class ResourceAssemblerWithCustomLink implements SimpleRepresentationModelAssembler<Employee> {
 
 		@Override
-		public void addLinks(Resource<Employee> resource) {
+		public void addLinks(EntityModel<Employee> resource) {
 			resource.add(new Link("/employees").withRel("employees"));
 		}
 
 		@Override
-		public void addLinks(Resources<Resource<Employee>> resources) {
-		}
+		public void addLinks(CollectionModel<EntityModel<Employee>> resources) {}
 	}
 
 	@Data

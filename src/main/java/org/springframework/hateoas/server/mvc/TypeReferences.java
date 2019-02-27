@@ -26,7 +26,8 @@ import org.springframework.util.Assert;
 
 /**
  * Helper to easily create {@link ParameterizedTypeReference} instances to Spring HATEOAS resource types. They're
- * basically a shortcut over using a verbose {@code new ParameterizedTypeReference<Resources<DomainType>>()}.
+ * basically a shortcut over using a verbose
+ * {@code new ParameterizedTypeReference<CollectionRepresentationModel<DomainType>>()}.
  *
  * @author Oliver Gierke
  * @since 0.17
@@ -34,31 +35,31 @@ import org.springframework.util.Assert;
 public class TypeReferences {
 
 	/**
-	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.Resource} of some type.
+	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.EntityModel} of some type.
 	 *
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class ResourceType<T>
-			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.Resource<T>> {}
+	public static class EntityModelType<T>
+			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.EntityModel<T>> {}
 
 	/**
-	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.Resources} of some type.
+	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.CollectionModel} of some type.
 	 *
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class ResourcesType<T>
-			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.Resources<T>> {}
+	public static class CollectionModelType<T>
+			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.CollectionModel<T>> {}
 
 	/**
-	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.PagedResources} of some type.
+	 * A {@link ParameterizedTypeReference} to return a {@link org.springframework.hateoas.PagedModel} of some type.
 	 *
 	 * @author Oliver Gierke
 	 * @since 0.17
 	 */
-	public static class PagedResourcesType<T>
-			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedResources<T>> {}
+	public static class PagedModelType<T>
+			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedModel<T>> {}
 
 	/**
 	 * Special {@link ParameterizedTypeReference} to customize the generic type detection and eventually return a
@@ -144,7 +145,7 @@ public class TypeReferences {
 	}
 
 	/**
-	 * A sythetic {@link ParameterizedType}.
+	 * A synthetic {@link ParameterizedType}.
 	 *
 	 * @author Oliver Gierke
 	 * @since 0.17

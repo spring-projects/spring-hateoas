@@ -15,18 +15,17 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.server.RelProvider;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.server.RelProvider;
 import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -39,13 +38,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Drotbohm
  */
 @Configuration
-@RequiredArgsConstructor
 public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final RelProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
 	private final MessageSourceAccessor messageSourceAccessor;
+
+	/**
+	 * @param relProvider
+	 * @param curieProvider
+	 * @param halConfiguration
+	 * @param messageSourceAccessor
+	 */
+	public HalMediaTypeConfiguration(RelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
+			ObjectProvider<HalConfiguration> halConfiguration,
+			@Qualifier("linkRelationMessageSource") MessageSourceAccessor messageSourceAccessor) {
+
+		this.relProvider = relProvider;
+		this.curieProvider = curieProvider;
+		this.halConfiguration = halConfiguration;
+		this.messageSourceAccessor = messageSourceAccessor;
+	}
 
 	@Bean
 	LinkDiscoverer halLinkDisocoverer() {

@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 /**
- * Integration tests for {@link Resource}.
+ * Integration tests for {@link EntityModel}.
  * 
  * @author Oliver Gierke
  * @author Jon Brisbin
@@ -27,7 +27,7 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		Resource<Person> resource = new Resource<>(person);
+		EntityModel<Person> resource = new EntityModel<>(person);
 		resource.add(new Link("localhost"));
 
 		assertThat(write(resource)).isEqualTo(REFERENCE);
@@ -47,7 +47,7 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}
 
-	static class PersonResource extends Resource<Person> {
+	static class PersonResource extends EntityModel<Person> {
 
 		public PersonResource() {
 

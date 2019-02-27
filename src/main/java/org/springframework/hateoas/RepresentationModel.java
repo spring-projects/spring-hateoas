@@ -33,15 +33,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Johhny Lim
  * @author Greg Turnquist
  */
-public class ResourceSupport implements Identifiable<Link> {
+public class RepresentationModel<T extends RepresentationModel<? extends T>> implements Identifiable<Link> {
 
 	private final List<Link> links;
 
-	public ResourceSupport() {
+	public RepresentationModel() {
 		this.links = new ArrayList<>();
 	}
 
-	public ResourceSupport(Link initialLink) {
+	public RepresentationModel(Link initialLink) {
 
 		Assert.notNull(initialLink, "initialLink must not be null!");
 
@@ -49,7 +49,7 @@ public class ResourceSupport implements Identifiable<Link> {
 		this.links.add(initialLink);
 	}
 
-	public ResourceSupport(List<Link> initialLinks) {
+	public RepresentationModel(List<Link> initialLinks) {
 
 		Assert.notNull(initialLinks, "initialLinks must not be null!");
 
@@ -70,11 +70,14 @@ public class ResourceSupport implements Identifiable<Link> {
 	 *
 	 * @param link
 	 */
-	public void add(Link link) {
+	@SuppressWarnings("unchecked")
+	public T add(Link link) {
 
 		Assert.notNull(link, "Link must not be null!");
 
 		this.links.add(link);
+
+		return (T) this;
 	}
 
 	/**
@@ -82,11 +85,14 @@ public class ResourceSupport implements Identifiable<Link> {
 	 *
 	 * @param links
 	 */
-	public void add(Iterable<Link> links) {
+	@SuppressWarnings("unchecked")
+	public T add(Iterable<Link> links) {
 
 		Assert.notNull(links, "Given links must not be null!");
 
 		links.forEach(this::add);
+
+		return (T) this;
 	}
 
 	/**
@@ -94,11 +100,14 @@ public class ResourceSupport implements Identifiable<Link> {
 	 *
 	 * @param links must not be {@literal null}.
 	 */
-	public void add(Link... links) {
+	@SuppressWarnings("unchecked")
+	public T add(Link... links) {
 
 		Assert.notNull(links, "Given links must not be null!");
 
 		add(Arrays.asList(links));
+
+		return (T) this;
 	}
 
 	/**
@@ -137,58 +146,90 @@ public class ResourceSupport implements Identifiable<Link> {
 	/**
 	 * Removes all {@link Link}s added to the resource so far.
 	 */
-	public void removeLinks() {
+	@SuppressWarnings("unchecked")
+	public T removeLinks() {
+
 		this.links.clear();
+
+		return (T) this;
 	}
 
 	/**
-	 * Returns the link with the given rel.
+	 * Returns the link with the given relation.
 	 *
-	 * @param rel
-	 * @return the link with the given rel or {@link Optional#empty()} if none found.
+	 * @param relation must not be {@literal null} or empty.
+	 * @return the link with the given relation or {@link Optional#empty()} if none found.
 	 */
-	public Optional<Link> getLink(String rel) {
-		return getLink(LinkRelation.of(rel));
+	public Optional<Link> getLink(String relation) {
+		return getLink(LinkRelation.of(relation));
 	}
 
-	public Optional<Link> getLink(LinkRelation rel) {
+	/**
+	 * Returns the link with the given {@link LinkRelation}.
+	 *
+	 * @param relation
+	 * @return
+	 */
+	public Optional<Link> getLink(LinkRelation relation) {
 
 		return links.stream() //
-				.filter(it -> it.hasRel(rel)) //
+				.filter(it -> it.hasRel(relation)) //
 				.findFirst();
 	}
 
 	/**
-	 * Returns the link with the given rel.
+	 * Returns the link with the given relation.
 	 *
-	 * @param rel
-	 * @return the link with the given rel.
-	 * @throws IllegalArgumentException in case no link with the given rel can be found.
+	 * @param relation must not be {@literal null} or empty.
+	 * @return the link with the given relation.
+	 * @throws IllegalArgumentException in case no link with the given relation can be found.
 	 */
-	public Link getRequiredLink(String rel) {
+	public Link getRequiredLink(String relation) {
 
-		return getLink(rel) //
-				.orElseThrow(() -> new IllegalArgumentException(String.format("No link with rel %s found!", rel)));
-	}
-
-	public Link getRequiredLink(LinkRelation rel) {
-		return getRequiredLink(rel.value());
+		return getLink(relation) //
+				.orElseThrow(() -> new IllegalArgumentException(String.format("No link with rel %s found!", relation)));
 	}
 
 	/**
-	 * Returns all {@link Link}s with the given relation type.
+	 * Returns the link with the given relation.
 	 *
+	 * @param relation must not be {@literal null}.
+	 * @return the link with the given relation.
+	 * @throws IllegalArgumentException in case no link with the given relation can be found.
+	 */
+	public Link getRequiredLink(LinkRelation relation) {
+
+		Assert.notNull(relation, "Link relation must not be null!");
+
+		return getRequiredLink(relation.value());
+	}
+
+	/**
+	 * Returns all {@link Link}s with the given relation.
+	 *
+	 * @param relation must not be {@literal null}.
 	 * @return the links in a {@link List}
 	 */
-	public List<Link> getLinks(String rel) {
+	public List<Link> getLinks(String relation) {
+
+		Assert.hasText(relation, "Link relation must not be null or empty!");
 
 		return links.stream() //
-				.filter(link -> link.hasRel(rel)) //
+				.filter(link -> link.hasRel(relation)) //
 				.collect(Collectors.toList());
 	}
 
-	public List<Link> getLinks(LinkRelation rel) {
-		return getLinks(rel.value());
+	/**
+	 * Returns all {@link Link}s with the given relation.
+	 *
+	 * @param relation must not be {@literal null}.
+	 * @return the links in a {@link List}
+	 */
+	public List<Link> getLinks(LinkRelation relation) {
+
+		Assert.notNull(relation, "Link relation must not be null!");
+
+		return getLinks(relation.value());
 	}
 
 	/*
@@ -205,6 +246,7 @@ public class ResourceSupport implements Identifiable<Link> {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 
 		if (this == obj) {
@@ -215,9 +257,9 @@ public class ResourceSupport implements Identifiable<Link> {
 			return false;
 		}
 
-		ResourceSupport that = (ResourceSupport) obj;
+		T that = (T) obj;
 
-		return this.links.equals(that.links);
+		return getLinks().equals(that.getLinks());
 	}
 
 	/*

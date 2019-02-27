@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,30 +22,31 @@ import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.server.ResourceAssembler;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.util.Assert;
 
 /**
- * Base class to implement {@link ResourceAssembler}s. Will automate {@link ResourceSupport} instance creation and make
- * sure a self-link is always added.
+ * Base class to implement {@link RepresentationModelAssembler}s. Will automate {@link RepresentationModel} instance
+ * creation and make sure a self-link is always added.
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> implements ResourceAssembler<T, D> {
+public abstract class RepresentationModelAssemblerSupport<T, D extends RepresentationModel<D>>
+		implements RepresentationModelAssembler<T, D> {
 
 	private final Class<?> controllerClass;
 	private final Class<D> resourceType;
 
 	/**
-	 * Creates a new {@link ResourceAssemblerSupport} using the given controller class and resource type.
+	 * Creates a new {@link RepresentationModelAssemblerSupport} using the given controller class and resource type.
 	 *
 	 * @param controllerClass must not be {@literal null}.
 	 * @param resourceType must not be {@literal null}.
 	 */
-	public ResourceAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
+	public RepresentationModelAssemblerSupport(Class<?> controllerClass, Class<D> resourceType) {
 
 		Assert.notNull(controllerClass, "ControllerClass must not be null!");
 		Assert.notNull(resourceType, "ResourceType must not be null!");
@@ -56,10 +57,10 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceAssembler#toResources(java.lang.Iterable)
+	 * @see org.springframework.hateoas.server.RepresentationModelAssembler#toCollectionModel(java.lang.Iterable)
 	 */
 	@Override
-	public Resources<D> toResources(Iterable<? extends T> entities) {
+	public CollectionModel<D> toCollectionModel(Iterable<? extends T> entities) {
 		return this.map(entities).toResources();
 	}
 
@@ -74,16 +75,16 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 * @param id must not be {@literal null}.
 	 * @return
 	 */
-	protected D createResourceWithId(Object id, T entity) {
-		return createResourceWithId(id, entity, new Object[0]);
+	protected D createModelWithId(Object id, T entity) {
+		return createModelWithId(id, entity, new Object[0]);
 	}
 
-	protected D createResourceWithId(Object id, T entity, Object... parameters) {
+	protected D createModelWithId(Object id, T entity, Object... parameters) {
 
 		Assert.notNull(entity, "Entity must not be null!");
 		Assert.notNull(id, "Id must not be null!");
 
-		D instance = instantiateResource(entity);
+		D instance = instantiateModel(entity);
 		instance.add(linkTo(this.controllerClass, parameters).slash(id).withSelfRel());
 		return instance;
 	}
@@ -96,23 +97,23 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 	 * @param entity
 	 * @return
 	 */
-	protected D instantiateResource(T entity) {
+	protected D instantiateModel(T entity) {
 		return BeanUtils.instantiateClass(this.resourceType);
 	}
 
-	static class Builder<T, D extends ResourceSupport> {
+	static class Builder<T, D extends RepresentationModel<D>> {
 
 		private final Iterable<? extends T> entities;
-		private final ResourceAssemblerSupport<T, D> resourceAssembler;
+		private final RepresentationModelAssemblerSupport<T, D> resourceAssembler;
 
-		Builder(Iterable<? extends T> entities, ResourceAssemblerSupport<T, D> resourceAssembler) {
+		Builder(Iterable<? extends T> entities, RepresentationModelAssemblerSupport<T, D> resourceAssembler) {
 
 			this.entities = Objects.requireNonNull(entities, "entities must not null!");
 			this.resourceAssembler = resourceAssembler;
 		}
 
 		/**
-		 * Transform a list of {@code T}s into a list of {@link ResourceSupport}s.
+		 * Transform a list of {@code T}s into a list of {@link RepresentationModel}s.
 		 *
 		 * @see #toListOfResources() if you need this transformed list rendered as hypermedia
 		 * @return
@@ -122,20 +123,21 @@ public abstract class ResourceAssemblerSupport<T, D extends ResourceSupport> imp
 			List<D> result = new ArrayList<>();
 
 			for (T entity : this.entities) {
-				result.add(this.resourceAssembler.toResource(entity));
+				result.add(this.resourceAssembler.toModel(entity));
 			}
 
 			return result;
 		}
 
 		/**
-		 * Converts all given entities into resources and wraps the result in a {@link Resources} instance.
+		 * Converts all given entities into resources and wraps the result in a {@link CollectionModel}
+		 * instance.
 		 *
-		 * @see #toListOfResources() and {@link ResourceAssembler#toResource(Object)}
+		 * @see #toListOfResources() and {@link RepresentationModelAssembler#toModel(Object)}
 		 * @return
 		 */
-		public Resources<D> toResources() {
-			return new Resources<>(toListOfResources());
+		public CollectionModel<D> toResources() {
+			return new CollectionModel<>(toListOfResources());
 		}
 	}
 }

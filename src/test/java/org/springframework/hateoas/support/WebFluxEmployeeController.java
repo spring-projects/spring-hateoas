@@ -30,8 +30,8 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,7 +63,7 @@ public class WebFluxEmployeeController {
 	}
 
 	@GetMapping("/employees")
-	public Mono<Resources<Resource<Employee>>> all() {
+	public Mono<CollectionModel<EntityModel<Employee>>> all() {
 
 		Class<WebFluxEmployeeController> controller = WebFluxEmployeeController.class;
 
@@ -74,11 +74,11 @@ public class WebFluxEmployeeController {
 						.andAffordance(methodOn(controller).newEmployee(null)) //
 						.andAffordance(methodOn(controller).search(null, null)) //
 						.toMono() //
-						.map(selfLink -> new Resources<>(resources, selfLink)));
+						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
-	public Mono<Resources<Resource<Employee>>> search( //
+	public Mono<CollectionModel<EntityModel<Employee>>> search( //
 			@RequestParam Optional<String> name, //
 			@RequestParam Optional<String> role) {
 
@@ -102,12 +102,12 @@ public class WebFluxEmployeeController {
 							.andAffordance(methodOn(controller).newEmployee(null)) //
 							.andAffordance(methodOn(controller).search(null, null)) //
 							.toMono() //
-							.map(selfLink -> new Resources<>(resources, selfLink));
+							.map(selfLink -> new CollectionModel<>(resources, selfLink));
 				});
 	}
 
 	@GetMapping("/employees/{id}")
-	public Mono<Resource<Employee>> findOne(@PathVariable Integer id) {
+	public Mono<EntityModel<Employee>> findOne(@PathVariable Integer id) {
 
 		Mono<Link> selfLink = linkTo(methodOn(WebFluxEmployeeController.class).findOne(id)).withSelfRel() //
 				.andAffordance(methodOn(WebFluxEmployeeController.class).updateEmployee(null, id)) //
@@ -119,11 +119,11 @@ public class WebFluxEmployeeController {
 
 		return selfLink.zipWith(employeesLink) //
 				.map(function((left, right) -> Links.of(left, right))) //
-				.map(links -> new Resource<>(EMPLOYEES.get(id), links));
+				.map(links -> new EntityModel<>(EMPLOYEES.get(id), links));
 	}
 
 	@PostMapping("/employees")
-	public Mono<ResponseEntity<?>> newEmployee(@RequestBody Mono<Resource<Employee>> employee) {
+	public Mono<ResponseEntity<?>> newEmployee(@RequestBody Mono<EntityModel<Employee>> employee) {
 
 		return employee.flatMap(resource -> {
 
@@ -142,7 +142,7 @@ public class WebFluxEmployeeController {
 	}
 
 	@PutMapping("/employees/{id}")
-	public Mono<ResponseEntity<?>> updateEmployee(@RequestBody Mono<Resource<Employee>> employee,
+	public Mono<ResponseEntity<?>> updateEmployee(@RequestBody Mono<EntityModel<Employee>> employee,
 			@PathVariable Integer id) {
 
 		return employee.flatMap(resource -> {
@@ -161,7 +161,7 @@ public class WebFluxEmployeeController {
 
 	@PatchMapping("/employees/{id}")
 	public Mono<ResponseEntity<?>> partiallyUpdateEmployee( //
-			@RequestBody Mono<Resource<Employee>> employee, @PathVariable Integer id) {
+			@RequestBody Mono<EntityModel<Employee>> employee, @PathVariable Integer id) {
 
 		return employee.flatMap(resource -> {
 

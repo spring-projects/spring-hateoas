@@ -15,31 +15,29 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import java.util.Collection;
-
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * Custom mixin to to render collection content as {@literal _embedded}.
+ * Custom mixin to render {@link Link}s in HAL.
  *
  * @author Alexander Baetz
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@JsonPropertyOrder({ "content", "links" })
-abstract class ResourcesMixin<T> extends Resources<T> {
+public abstract class RepresentationModelMixin extends RepresentationModel<RepresentationModelMixin> {
 
 	@Override
-	@JsonProperty("_embedded")
+	@JsonProperty("_links")
 	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
-	@JsonDeserialize(using = Jackson2HalModule.HalResourcesDeserializer.class)
-	public abstract Collection<T> getContent();
+	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)
+	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
+	public abstract Links getLinks();
 }

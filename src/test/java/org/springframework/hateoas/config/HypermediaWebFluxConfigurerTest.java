@@ -31,18 +31,15 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.config.WebClientConfigurer;
-import org.springframework.hateoas.server.SimpleResourceAssembler;
-import org.springframework.hateoas.server.mvc.TypeReferences.ResourceType;
-import org.springframework.hateoas.server.mvc.TypeReferences.ResourcesType;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
+import org.springframework.hateoas.server.mvc.TypeReferences.CollectionModelType;
+import org.springframework.hateoas.server.mvc.TypeReferences.EntityModelType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -59,8 +56,8 @@ import org.springframework.web.reactive.config.EnableWebFlux;
  */
 public class HypermediaWebFluxConfigurerTest {
 
-	ParameterizedTypeReference<Resource<Employee>> resourceEmployeeType = new ResourceType<Employee>() {};
-	ParameterizedTypeReference<Resources<Resource<Employee>>> resourcesEmployeeType = new ResourcesType<Resource<Employee>>() {};
+	EntityModelType<Employee> resourceEmployeeType = new EntityModelType<Employee>() {};
+	CollectionModelType<EntityModel<Employee>> resourcesEmployeeType = new CollectionModelType<EntityModel<Employee>>() {};
 
 	WebTestClient testClient;
 
@@ -280,7 +277,7 @@ public class HypermediaWebFluxConfigurerTest {
 		this.testClient.get().uri("/reactive").accept(MediaTypes.HAL_JSON).exchange() //
 				.expectStatus().isOk() //
 				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
-				.returnResult(ResourceSupport.class).getResponseBody().as(StepVerifier::create)
+				.returnResult(RepresentationModel.class).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks()).containsExactlyInAnyOrder(new Link("/", IanaLinkRelations.SELF),
@@ -296,7 +293,7 @@ public class HypermediaWebFluxConfigurerTest {
 
 					assertThat(resources.getLinks()).containsExactlyInAnyOrder(new Link("/employees", IanaLinkRelations.SELF));
 
-					Resource<Employee> content = resources.getContent().iterator().next();
+					EntityModel<Employee> content = resources.getContent().iterator().next();
 
 					assertThat(content.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(content.getLinks()) //
@@ -328,7 +325,7 @@ public class HypermediaWebFluxConfigurerTest {
 		this.testClient.get().uri("/").accept(requestType).exchange() //
 				.expectStatus().isOk() //
 				.expectHeader().contentType(responseType) //
-				.returnResult(ResourceSupport.class).getResponseBody().as(StepVerifier::create)
+				.returnResult(RepresentationModel.class).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks()) //
@@ -350,10 +347,10 @@ public class HypermediaWebFluxConfigurerTest {
 
 					assertThat(resources.getLinks()).containsExactlyInAnyOrder(new Link("/employees", IanaLinkRelations.SELF));
 
-					Collection<Resource<Employee>> content = resources.getContent();
+					Collection<EntityModel<Employee>> content = resources.getContent();
 					assertThat(content).hasSize(1);
 
-					Resource<Employee> resource = content.iterator().next();
+					EntityModel<Employee> resource = content.iterator().next();
 
 					assertThat(resource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(resource.getLinks()) //
@@ -464,9 +461,9 @@ public class HypermediaWebFluxConfigurerTest {
 		}
 
 		@GetMapping
-		ResourceSupport root() {
+		RepresentationModel<?> root() {
 
-			ResourceSupport root = new ResourceSupport();
+			RepresentationModel<?> root = new RepresentationModel<>();
 
 			root.add(new Link("/").withSelfRel());
 			root.add(new Link("/employees").withRel("employees"));
@@ -475,57 +472,57 @@ public class HypermediaWebFluxConfigurerTest {
 		}
 
 		@GetMapping("/employees")
-		Resources<Resource<Employee>> employees() {
-			return this.assembler.toResources(this.employees);
+		CollectionModel<EntityModel<Employee>> employees() {
+			return this.assembler.toCollectionModel(this.employees);
 		}
 
 		@PostMapping("/employees")
-		Resource<Employee> newEmployee(@RequestBody Employee newEmployee) {
+		EntityModel<Employee> newEmployee(@RequestBody Employee newEmployee) {
 
 			this.employees.add(newEmployee);
 
-			return this.assembler.toResource(newEmployee);
+			return this.assembler.toModel(newEmployee);
 		}
 
 		@GetMapping("/employees/{id}")
-		Resource<Employee> employee(@PathVariable String id) {
-			return this.assembler.toResource(this.employees.get(0));
+		EntityModel<Employee> employee(@PathVariable String id) {
+			return this.assembler.toModel(this.employees.get(0));
 		}
 
 		@PutMapping("/employees/{id}")
-		Resource<Employee> updateEmployee(@RequestBody Employee newEmployee, @PathVariable String id) {
+		EntityModel<Employee> updateEmployee(@RequestBody Employee newEmployee, @PathVariable String id) {
 
 			this.employees.add(newEmployee);
 
-			return this.assembler.toResource(newEmployee);
+			return this.assembler.toModel(newEmployee);
 		}
 
 		@GetMapping("/reactive")
-		Mono<ResourceSupport> reactiveRoot() {
+		Mono<RepresentationModel<?>> reactiveRoot() {
 			return Mono.just(root());
 		}
 
 		@GetMapping("/reactive/employees")
-		Mono<Resources<Resource<Employee>>> reactiveEmployees() {
+		Mono<CollectionModel<EntityModel<Employee>>> reactiveEmployees() {
 
 			return findAll() //
 					.collectList() //
-					.map(assembler::toResources);
+					.map(assembler::toCollectionModel);
 		}
 
 		@PostMapping("/reactive/employees")
-		Mono<Resource<Employee>> createReactiveEmployee(@RequestBody Mono<Employee> newEmployee) {
+		Mono<EntityModel<Employee>> createReactiveEmployee(@RequestBody Mono<Employee> newEmployee) {
 
 			return newEmployee.map(employee -> {
 				employees.add(employee);
 				return employee;
-			}).map(assembler::toResource);
+			}).map(assembler::toModel);
 		}
 
 		@GetMapping("/reactive/employees/{id}")
-		Mono<Resource<Employee>> reactiveEmployee(@PathVariable String id) {
+		Mono<EntityModel<Employee>> reactiveEmployee(@PathVariable String id) {
 			return findById(0) //
-					.map(assembler::toResource);
+					.map(assembler::toModel);
 		}
 
 		Mono<Employee> findById(int id) {
@@ -537,17 +534,17 @@ public class HypermediaWebFluxConfigurerTest {
 		}
 	}
 
-	static class EmployeeResourceAssembler implements SimpleResourceAssembler<Employee> {
+	static class EmployeeResourceAssembler implements SimpleRepresentationModelAssembler<Employee> {
 
 		@Override
-		public void addLinks(Resource<Employee> resource) {
+		public void addLinks(EntityModel<Employee> resource) {
 
 			resource.add(new Link("/employees/1").withSelfRel());
 			resource.add(new Link("/employees").withRel("employees"));
 		}
 
 		@Override
-		public void addLinks(Resources<Resource<Employee>> resources) {
+		public void addLinks(CollectionModel<EntityModel<Employee>> resources) {
 			resources.add(new Link("/employees").withSelfRel());
 		}
 	}

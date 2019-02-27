@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.WebClientConfigurer;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -70,7 +70,7 @@ public class HypermediaWebFilterTest {
 				.exchange() //
 				.expectStatus().isOk() //
 				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
-				.returnResult(ResourceSupport.class) //
+				.returnResult(RepresentationModel.class) //
 				.getResponseBody() //
 				.as(StepVerifier::create) //
 				.expectNextMatches(resourceSupport -> {
@@ -87,8 +87,8 @@ public class HypermediaWebFilterTest {
 	static class TestController {
 
 		@GetMapping
-		Mono<ResourceSupport> root() {
-			return linkTo(methodOn(TestController.class).root()).withSelfRel().toMono().map(ResourceSupport::new);
+		Mono<RepresentationModel<?>> root() {
+			return linkTo(methodOn(TestController.class).root()).withSelfRel().toMono().map(RepresentationModel::new);
 		}
 	}
 

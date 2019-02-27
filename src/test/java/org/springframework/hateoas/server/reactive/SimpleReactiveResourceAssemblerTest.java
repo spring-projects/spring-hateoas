@@ -18,16 +18,15 @@ package org.springframework.hateoas.server.reactive;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Data;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.server.reactive.SimpleReactiveResourceAssembler;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -40,7 +39,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	ResourceAssemblerWithCustomLinkSimple resourceAssemblerWithCustomLink;
 
 	@Mock ServerWebExchange exchange;
-	
+
 	@Before
 	public void setUp() {
 
@@ -49,20 +48,18 @@ public class SimpleReactiveResourceAssemblerTest {
 	}
 
 	/**
-	 * @see  #728
+	 * @see #728
 	 */
 	@Test
 	public void convertingToResourceShouldWork() {
 
-		this.testResourceAssembler.toResource(new Employee("Frodo"), this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(resource -> {
+		this.testResourceAssembler.toModel(new Employee("Frodo"), this.exchange).as(StepVerifier::create)
+				.expectNextMatches(resource -> {
 
-				assertThat(resource.getContent().getName()).isEqualTo("Frodo");
-				assertThat(resource.getLinks()).isEmpty();
-				return true;
-			})
-			.verifyComplete();
+					assertThat(resource.getContent().getName()).isEqualTo("Frodo");
+					assertThat(resource.getLinks()).isEmpty();
+					return true;
+				}).verifyComplete();
 	}
 
 	/**
@@ -71,15 +68,14 @@ public class SimpleReactiveResourceAssemblerTest {
 	@Test
 	public void convertingToResourcesShouldWork() {
 
-		this.testResourceAssembler.toResources(Flux.just(new Employee("Frodo")), this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(resources -> {
+		this.testResourceAssembler.toCollectionModel(Flux.just(new Employee("Frodo")), this.exchange)
+				.as(StepVerifier::create).expectNextMatches(resources -> {
 
-				assertThat(resources.getContent()).containsExactly(new Resource<>(new Employee("Frodo")));
-				assertThat(resources.getLinks()).isEmpty();
+					assertThat(resources.getContent()).containsExactly(new EntityModel<>(new Employee("Frodo")));
+					assertThat(resources.getLinks()).isEmpty();
 
-				return true;
-			});
+					return true;
+				});
 	}
 
 	/**
@@ -88,16 +84,14 @@ public class SimpleReactiveResourceAssemblerTest {
 	@Test
 	public void convertingToResourceWithCustomLinksShouldWork() {
 
-		this.resourceAssemblerWithCustomLink.toResource(new Employee("Frodo"), this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(resource -> {
+		this.resourceAssemblerWithCustomLink.toModel(new Employee("Frodo"), this.exchange).as(StepVerifier::create)
+				.expectNextMatches(resource -> {
 
-				assertThat(resource.getContent().getName()).isEqualTo("Frodo");
-				assertThat(resource.getLinks()).containsExactly(new Link("/employees").withRel("employees"));
-				
-				return true;
-			})
-			.verifyComplete();
+					assertThat(resource.getContent().getName()).isEqualTo("Frodo");
+					assertThat(resource.getLinks()).containsExactly(new Link("/employees").withRel("employees"));
+
+					return true;
+				}).verifyComplete();
 	}
 
 	/**
@@ -106,40 +100,31 @@ public class SimpleReactiveResourceAssemblerTest {
 	@Test
 	public void convertingToResourcesWithCustomLinksShouldWork() {
 
-		this.resourceAssemblerWithCustomLink.toResources(Flux.just(new Employee("Frodo")), this.exchange)
-			.as(StepVerifier::create)
-			.expectNextMatches(resources -> {
+		this.resourceAssemblerWithCustomLink.toCollectionModel(Flux.just(new Employee("Frodo")), this.exchange)
+				.as(StepVerifier::create).expectNextMatches(resources -> {
 
-				assertThat(resources.getContent()).containsExactly(
-					new Resource<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
-				assertThat(resources.getLinks()).containsExactly(new Link("/", "root"));
+					assertThat(resources.getContent()).containsExactly(
+							new EntityModel<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
+					assertThat(resources.getLinks()).containsExactly(new Link("/", "root"));
 
-				return true;
-			})
-			.verifyComplete();
+					return true;
+				}).verifyComplete();
 	}
 
-	class TestResourceAssemblerSimple implements SimpleReactiveResourceAssembler<Employee> {
+	class TestResourceAssemblerSimple implements SimpleReactiveRepresentationModelAssembler<Employee> {}
+
+	class ResourceAssemblerWithCustomLinkSimple implements SimpleReactiveRepresentationModelAssembler<Employee> {
 
 		@Override
-		public void addLinks(Resource<Employee> resource, ServerWebExchange exchange) {
+		public EntityModel<Employee> addLinks(EntityModel<Employee> resource,
+				ServerWebExchange exchange) {
+			return resource.add(new Link("/employees").withRel("employees"));
 		}
 
 		@Override
-		public void addLinks(Resources<Resource<Employee>> resources, ServerWebExchange exchange) {
-		}
-	}
-
-	class ResourceAssemblerWithCustomLinkSimple implements SimpleReactiveResourceAssembler<Employee> {
-
-		@Override
-		public void addLinks(Resource<Employee> resource, ServerWebExchange exchange) {
-			resource.add(new Link("/employees").withRel("employees"));
-		}
-
-		@Override
-		public void addLinks(Resources<Resource<Employee>> resources, ServerWebExchange exchange) {
-			resources.add(new Link("/").withRel("root"));
+		public CollectionModel<EntityModel<Employee>> addLinks(
+				CollectionModel<EntityModel<Employee>> resources, ServerWebExchange exchange) {
+			return resources.add(new Link("/").withRel("root"));
 		}
 	}
 

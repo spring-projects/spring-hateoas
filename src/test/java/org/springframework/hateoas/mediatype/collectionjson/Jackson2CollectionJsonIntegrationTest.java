@@ -29,14 +29,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
 import org.springframework.hateoas.support.MappingUtils;
 
@@ -65,7 +64,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void rendersSingleLinkAsObject() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
+		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(write(resourceSupport))
@@ -75,18 +74,18 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializeSingleLink() throws Exception {
 
-		ResourceSupport expected = new ResourceSupport();
+		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
 
 		assertThat(
-				read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), ResourceSupport.class))
+				read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), RepresentationModel.class))
 						.isEqualTo(expected);
 	}
 
 	@Test
 	public void rendersMultipleLinkAsArray() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
+		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
 		resourceSupport.add(new Link("localhost2").withRel("orders"));
 
@@ -117,12 +116,12 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializeMultipleLinks() throws Exception {
 
-		ResourceSupport expected = new ResourceSupport();
+		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
 		expected.add(new Link("localhost2").withRel("orders"));
 
 		String read = MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass()));
-		ResourceSupport readResourceSupport = read(read, ResourceSupport.class);
+		RepresentationModel<?> readResourceSupport = read(read, RepresentationModel.class);
 
 		assertThat(readResourceSupport.getLinks()).containsAll(expected.getLinks());
 	}
@@ -134,7 +133,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		content.add("first");
 		content.add("second");
 
-		Resources<String> resources = new Resources<>(content);
+		CollectionModel<String> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources)).isEqualTo(MappingUtils.read(new ClassPathResource("resources.json", getClass())));
@@ -147,11 +146,12 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 		content.add("first");
 		content.add("second");
 
-		Resources<String> expected = new Resources<>(content);
+		CollectionModel<String> expected = new CollectionModel<>(content);
 		expected.add(new Link("localhost"));
 
-		Resources<String> result = mapper.readValue(MappingUtils.read(new ClassPathResource("resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resources.class, String.class));
+		CollectionModel<String> result = mapper.readValue(
+				MappingUtils.read(new ClassPathResource("resources.json", getClass())),
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class, String.class));
 
 		assertThat(result).isEqualTo(expected);
 	}
@@ -159,7 +159,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void renderResource() throws Exception {
 
-		Resource<String> data = new Resource<>("first", new Link("localhost"));
+		EntityModel<String> data = new EntityModel<>("first", new Link("localhost"));
 
 		assertThat(write(data)).isEqualTo(MappingUtils.read(new ClassPathResource("resource.json", getClass())));
 	}
@@ -167,11 +167,11 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializeResource() throws Exception {
 
-		Resource<?> expected = new Resource<>("first", new Link("localhost"));
+		EntityModel<?> expected = new EntityModel<>("first", new Link("localhost"));
 
 		String source = MappingUtils.read(new ClassPathResource("resource.json", getClass()));
-		Resource<String> actual = mapper.readValue(source,
-				mapper.getTypeFactory().constructParametricType(Resource.class, String.class));
+		EntityModel<String> actual = mapper.readValue(source,
+				mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class));
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -179,11 +179,12 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void renderComplexStructure() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<Resource<String>> resources = new Resources<>(data);
+		CollectionModel<EntityModel<String>> resources = new CollectionModel<>(
+				data);
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
@@ -194,18 +195,18 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializeResources() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<?> expected = new Resources<>(data);
+		CollectionModel<?> expected = new CollectionModel<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
-		Resources<Resource<String>> actual = mapper.readValue(
+		CollectionModel<EntityModel<String>> actual = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, String.class)));
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class)));
 
 		assertThat(actual).isEqualTo(expected);
 
@@ -214,11 +215,13 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void renderSimplePojos() throws Exception {
 
-		List<Resource<SimplePojo>> data = new ArrayList<>();
-		data.add(new Resource<>(new SimplePojo("text", 1), new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>(new SimplePojo("text2", 2), new Link("localhost")));
+		List<EntityModel<SimplePojo>> data = new ArrayList<>();
+		data.add(new EntityModel<>(new SimplePojo("text", 1), new Link("localhost"),
+				new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>(new SimplePojo("text2", 2), new Link("localhost")));
 
-		Resources<Resource<SimplePojo>> resources = new Resources<>(data);
+		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(
+				data);
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
@@ -236,28 +239,28 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	@Test
 	public void deserializesPagedResource() throws Exception {
 
-		PagedResources<Resource<SimplePojo>> result = mapper.readValue(
+		PagedModel<EntityModel<SimplePojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(PagedResources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, SimplePojo.class)));
+				mapper.getTypeFactory().constructParametricType(PagedModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimplePojo.class)));
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
 
-	private static Resources<Resource<SimplePojo>> setupAnnotatedPagedResources() {
+	private static CollectionModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
 
-		List<Resource<SimplePojo>> content = new ArrayList<>();
-		content.add(new Resource<>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new Resource<>(new SimplePojo("test2", 2), new Link("localhost")));
+		List<EntityModel<SimplePojo>> content = new ArrayList<>();
+		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(new EntityModel<>(new SimplePojo("test2", 2), new Link("localhost")));
 
-		return new PagedResources<>(content, null, PAGINATION_LINKS);
+		return new PagedModel<>(content, null, PAGINATION_LINKS);
 	}
 
 	@Data
 	@EqualsAndHashCode(callSuper = true)
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class ResourceWithAttributes extends ResourceSupport {
+	public static class ResourceWithAttributes extends RepresentationModel<ResourceWithAttributes> {
 
 		private String attribute;
 	}

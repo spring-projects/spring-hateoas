@@ -31,14 +31,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.mediatype.uber.Jackson2UberModule;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.support.MappingUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -69,7 +68,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void rendersSingleLinkAsObject() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
+		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
 		assertThat(write(resourceSupport))
@@ -82,11 +81,11 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeSingleLink() throws Exception {
 
-		ResourceSupport expected = new ResourceSupport();
+		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
 
 		assertThat(
-				read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), ResourceSupport.class))
+				read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), RepresentationModel.class))
 						.isEqualTo(expected);
 	}
 
@@ -96,7 +95,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void rendersMultipleLinkAsArray() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
+		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
 		resourceSupport.add(new Link("localhost2").withRel("orders"));
 
@@ -110,13 +109,12 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeMultipleLinks() throws Exception {
 
-		ResourceSupport expected = new ResourceSupport();
+		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
 		expected.add(new Link("localhost2").withRel("orders"));
 
-		assertThat(
-				read(MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass())), ResourceSupport.class))
-						.isEqualTo(expected);
+		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass())),
+				RepresentationModel.class)).isEqualTo(expected);
 	}
 
 	/**
@@ -129,7 +127,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		content.add("first");
 		content.add("second");
 
-		Resources<String> resources = new Resources<>(content);
+		CollectionModel<String> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources)).isEqualTo(MappingUtils.read(new ClassPathResource("resources.json", getClass())));
@@ -145,12 +143,13 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		content.add("first");
 		content.add("second");
 
-		Resources<String> expected = new Resources<>(content);
+		CollectionModel<String> expected = new CollectionModel<>(content);
 		expected.add(new Link("localhost"));
 
 		String resourcesJson = MappingUtils.read(new ClassPathResource("resources.json", getClass()));
-		JavaType resourcesType = mapper.getTypeFactory().constructParametricType(Resources.class, String.class);
-		Resources<String> result = mapper.readValue(resourcesJson, resourcesType);
+		JavaType resourcesType = mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+				String.class);
+		CollectionModel<String> result = mapper.readValue(resourcesJson, resourcesType);
 
 		assertThat(result).isEqualTo(expected);
 	}
@@ -161,19 +160,21 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeComplexResourcesSimply() throws IOException {
 
-		List<Resource<String>> content = new ArrayList<>();
-		content.add(new Resource<>("first"));
-		content.add(new Resource<>("second"));
+		List<EntityModel<String>> content = new ArrayList<>();
+		content.add(new EntityModel<>("first"));
+		content.add(new EntityModel<>("second"));
 
-		Resources<Resource<String>> expected = new Resources<>(content);
+		CollectionModel<EntityModel<String>> expected = new CollectionModel<>(
+				content);
 		expected.add(new Link("localhost"));
 
 		String resourcesJson = MappingUtils.read(new ClassPathResource("resources.json", getClass()));
 
-		JavaType resourcesType = mapper.getTypeFactory().constructParametricType(Resources.class,
-				mapper.getTypeFactory().constructParametricType(Resource.class, String.class));
+		JavaType resourcesType = mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+				mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class));
 
-		Resources<Resource<String>> result = mapper.readValue(resourcesJson, resourcesType);
+		CollectionModel<EntityModel<String>> result = mapper.readValue(resourcesJson,
+				resourcesType);
 
 		assertThat(result).isEqualTo(expected);
 	}
@@ -184,7 +185,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void renderSimpleResource() throws Exception {
 
-		Resource<String> data = new Resource<>("first", new Link("localhost"));
+		EntityModel<String> data = new EntityModel<>("first", new Link("localhost"));
 
 		assertThat(write(data)).isEqualTo(MappingUtils.read(new ClassPathResource("resource.json", getClass())));
 	}
@@ -195,7 +196,8 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void renderResourceWithCustomRel() throws Exception {
 
-		Resource<String> data2 = new Resource<>("second", new Link("localhost").withRel("custom"));
+		EntityModel<String> data2 = new EntityModel<>("second",
+				new Link("localhost").withRel("custom"));
 
 		assertThat(write(data2)).isEqualTo(MappingUtils.read(new ClassPathResource("resource2.json", getClass())));
 	}
@@ -206,8 +208,8 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void renderResourceWithMultipleLinks() throws Exception {
 
-		Resource<String> data3 = new Resource<>("third", new Link("localhost"), new Link("second").withRel("second"),
-				new Link("third").withRel("third"));
+		EntityModel<String> data3 = new EntityModel<>("third", new Link("localhost"),
+				new Link("second").withRel("second"), new Link("third").withRel("third"));
 
 		assertThat(write(data3)).isEqualTo(MappingUtils.read(new ClassPathResource("resource3.json", getClass())));
 	}
@@ -218,7 +220,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void renderResourceWithMultipleRels() throws Exception {
 
-		Resource<String> data4 = new Resource<>("third", new Link("localhost"),
+		EntityModel<String> data4 = new EntityModel<>("third", new Link("localhost"),
 				new Link("localhost").withRel("http://example.org/rels/todo"), new Link("second").withRel("second"),
 				new Link("third").withRel("third"));
 
@@ -231,32 +233,34 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeResource() throws IOException {
 
-		JavaType resourceStringType = mapper.getTypeFactory().constructParametricType(Resource.class, String.class);
+		JavaType resourceStringType = mapper.getTypeFactory().constructParametricType(EntityModel.class,
+				String.class);
 
-		Resource<?> expected = new Resource<>("first", new Link("localhost"));
-		Resource<String> actual = mapper.readValue(MappingUtils.read(new ClassPathResource("resource.json", getClass())),
-				resourceStringType);
+		EntityModel<?> expected = new EntityModel<>("first", new Link("localhost"));
+		EntityModel<String> actual = mapper
+				.readValue(MappingUtils.read(new ClassPathResource("resource.json", getClass())), resourceStringType);
 
 		assertThat(actual).isEqualTo(expected);
 
-		Resource<String> expected2 = new Resource<>("second", new Link("localhost").withRel("custom"));
-		Resource<String> actual2 = mapper.readValue(MappingUtils.read(new ClassPathResource("resource2.json", getClass())),
-				resourceStringType);
+		EntityModel<String> expected2 = new EntityModel<>("second",
+				new Link("localhost").withRel("custom"));
+		EntityModel<String> actual2 = mapper
+				.readValue(MappingUtils.read(new ClassPathResource("resource2.json", getClass())), resourceStringType);
 
 		assertThat(actual2).isEqualTo(expected2);
 
-		Resource<String> expected3 = new Resource<>("third", new Link("localhost"), new Link("second").withRel("second"),
-				new Link("third").withRel("third"));
-		Resource<String> actual3 = mapper.readValue(MappingUtils.read(new ClassPathResource("resource3.json", getClass())),
-				resourceStringType);
+		EntityModel<String> expected3 = new EntityModel<>("third", new Link("localhost"),
+				new Link("second").withRel("second"), new Link("third").withRel("third"));
+		EntityModel<String> actual3 = mapper
+				.readValue(MappingUtils.read(new ClassPathResource("resource3.json", getClass())), resourceStringType);
 
 		assertThat(actual3).isEqualTo(expected3);
 
-		Resource<String> expected4 = new Resource<>("third", new Link("localhost"),
+		EntityModel<String> expected4 = new EntityModel<>("third", new Link("localhost"),
 				new Link("localhost").withRel("http://example.org/rels/todo"), new Link("second").withRel("second"),
 				new Link("third").withRel("third"));
-		Resource<String> actual4 = mapper.readValue(MappingUtils.read(new ClassPathResource("resource4.json", getClass())),
-				resourceStringType);
+		EntityModel<String> actual4 = mapper
+				.readValue(MappingUtils.read(new ClassPathResource("resource4.json", getClass())), resourceStringType);
 
 		assertThat(actual4).isEqualTo(expected4);
 	}
@@ -267,11 +271,12 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void renderComplexStructure() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<Resource<String>> resources = new Resources<>(data);
+		CollectionModel<EntityModel<String>> resources = new CollectionModel<>(
+				data);
 		resources.add(new Link("localhost"));
 		resources.add(new Link("/page/2").withRel("next"));
 
@@ -285,18 +290,18 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeResources() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<?> expected = new Resources<>(data);
+		CollectionModel<?> expected = new CollectionModel<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
-		Resources<Resource<String>> actual = mapper.readValue(
+		CollectionModel<EntityModel<String>> actual = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, String.class)));
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class)));
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -307,18 +312,18 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeEmptyValue() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<?> expected = new Resources<>(data);
+		CollectionModel<?> expected = new CollectionModel<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
-		Resources<Resource<String>> actual = mapper.readValue(
+		CollectionModel<EntityModel<String>> actual = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("resources-with-resource-objects-and-empty-value.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, String.class)));
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class)));
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -329,11 +334,11 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void serializeEmptyResources() throws Exception {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<?> source = new Resources<>(data);
+		CollectionModel<?> source = new CollectionModel<>(data);
 		source.add(new Link("localhost"));
 		source.add(new Link("/page/2").withRel("next"));
 
@@ -347,11 +352,11 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializeEmptyResources() {
 
-		List<Resource<String>> data = new ArrayList<>();
-		data.add(new Resource<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new Resource<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		List<EntityModel<String>> data = new ArrayList<>();
+		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
+		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
 
-		Resources<?> expected = new Resources<>(data);
+		CollectionModel<?> expected = new CollectionModel<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
@@ -359,8 +364,8 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 				MappingUtils.read(new ClassPathResource("resources-with-empty-resource-objects.json", getClass())), //
 				mapper.getTypeFactory() //
 						.constructParametricType( //
-								Resources.class, //
-								mapper.getTypeFactory().constructParametricType(Resource.class, String.class) //
+								CollectionModel.class, //
+								mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class) //
 						) //
 		)).isInstanceOf(RuntimeException.class);
 	}
@@ -375,13 +380,13 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		data.add("first");
 		data.add("second");
 
-		Resources<?> expected = new Resources<>(data);
+		CollectionModel<?> expected = new CollectionModel<>(data);
 		expected.add(new Link("localhost"));
 		expected.add(new Link("/page/2").withRel("next"));
 
-		Resources<String> actual = mapper.readValue(
+		CollectionModel<String> actual = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resources.class, String.class));
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class, String.class));
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -393,7 +398,8 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	public void serializeWrappedSimplePojo() throws Exception {
 
 		Employee employee = new Employee("Frodo", "ring bearer");
-		Resource<Employee> expected = new Resource<>(employee, new Link("/employees/1").withSelfRel());
+		EntityModel<Employee> expected = new EntityModel<>(employee,
+				new Link("/employees/1").withSelfRel());
 
 		String actual = MappingUtils.read(new ClassPathResource("resource-with-simple-pojo.json", getClass()));
 
@@ -407,11 +413,12 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	public void deserializeWrappedSimplePojo() throws IOException {
 
 		Employee employee = new Employee("Frodo", "ring bearer");
-		Resource<Employee> expected = new Resource<>(employee, new Link("/employees/1").withSelfRel());
+		EntityModel<Employee> expected = new EntityModel<>(employee,
+				new Link("/employees/1").withSelfRel());
 
-		Resource<Employee> actual = mapper.readValue(
+		EntityModel<Employee> actual = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("resource-with-simple-pojo.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
+				mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class));
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -423,11 +430,12 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	public void deserializeWrappedEmptyPojo() throws IOException {
 
 		Employee employee = new Employee();
-		Resource<Employee> expected = new Resource<>(employee, new Link("/employees/1").withSelfRel());
+		EntityModel<Employee> expected = new EntityModel<>(employee,
+				new Link("/employees/1").withSelfRel());
 
-		Resource<Employee> actual = mapper.readValue(
+		EntityModel<Employee> actual = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("resource-with-empty-pojo.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class));
+				mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class));
 
 		assertThat(actual).isEqualTo(expected);
 	}
@@ -496,10 +504,10 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializesPagedResource() throws Exception {
 
-		PagedResources<Resource<Employee>> result = mapper.readValue(
+		PagedModel<EntityModel<Employee>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(PagedResources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class)));
+				mapper.getTypeFactory().constructParametricType(PagedModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class)));
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
@@ -510,10 +518,10 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void deserializesPagedResourceWithEmptyPageInformation() throws Exception {
 
-		PagedResources<Resource<Employee>> result = mapper.readValue(
+		PagedModel<EntityModel<Employee>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("paged-resources-empty-page.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(PagedResources.class,
-						mapper.getTypeFactory().constructParametricType(Resource.class, Employee.class)));
+				mapper.getTypeFactory().constructParametricType(PagedModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class)));
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources(0, 0));
 	}
@@ -524,7 +532,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@Test
 	public void handleTemplatedLinksOnDeserialization() throws IOException {
 
-		ResourceSupport original = new ResourceSupport();
+		RepresentationModel<?> original = new RepresentationModel<>();
 		original.add(new Link("/orders{?id}", "order"));
 
 		String serialized = mapper.writeValueAsString(original);
@@ -533,25 +541,28 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 
 		assertThat(serialized).isEqualTo(expected);
 
-		ResourceSupport deserialized = mapper.readValue(serialized, ResourceSupport.class);
+		RepresentationModel<?> deserialized = mapper.readValue(serialized, RepresentationModel.class);
 
 		assertThat(deserialized).isEqualTo(original);
 	}
 
-	private static Resources<Resource<Employee>> setupAnnotatedPagedResources() {
+	private static CollectionModel<EntityModel<Employee>> setupAnnotatedPagedResources() {
 
 		return setupAnnotatedPagedResources(2, 4);
 	}
 
 	@NotNull
-	private static Resources<Resource<Employee>> setupAnnotatedPagedResources(int size, int totalElements) {
+	private static CollectionModel<EntityModel<Employee>> setupAnnotatedPagedResources(
+			int size, int totalElements) {
 
-		List<Resource<Employee>> content = new ArrayList<>();
+		List<EntityModel<Employee>> content = new ArrayList<>();
 		Employee employee = new Employee("Frodo", "ring bearer");
-		Resource<Employee> employeeResource = new Resource<>(employee, new Link("/employees/1").withSelfRel());
+		EntityModel<Employee> employeeResource = new EntityModel<>(employee,
+				new Link("/employees/1").withSelfRel());
 		content.add(employeeResource);
 
-		return new PagedResources<>(content, new PagedResources.PageMetadata(size, 0, totalElements), PAGINATION_LINKS);
+		return new PagedModel<>(content, new PagedModel.PageMetadata(size, 0, totalElements),
+				PAGINATION_LINKS);
 	}
 
 	@Data
@@ -567,7 +578,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@EqualsAndHashCode(callSuper = true)
-	static class EmployeeResource extends ResourceSupport {
+	static class EmployeeResource extends RepresentationModel<EmployeeResource> {
 
 		private String name;
 		private String role;

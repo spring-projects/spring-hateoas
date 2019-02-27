@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsDocument;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsProperty;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsTemplate;
@@ -61,7 +61,7 @@ public class HalFormsMessageConverterUnitTest {
 		this.mapper.registerModule(new Jackson2HalFormsModule());
 
 		TypeConstrainedMappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				ResourceSupport.class);
+				RepresentationModel.class);
 		converter.setObjectMapper(mapper);
 
 		this.messageConverter = converter;

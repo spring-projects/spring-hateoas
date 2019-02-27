@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*
  *
  * @author Roland Kulcsár
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 class WebMvcLinkBuilderDslUnitTest : TestUtils() {
 
@@ -51,7 +52,7 @@ class WebMvcLinkBuilderDslUnitTest : TestUtils() {
     @Test
     fun `adds links to wrapped domain object`() {
 
-        val customer = Resource(Customer("15", "John Doe"))
+        val customer = EntityModel(Customer("15", "John Doe"))
 
         customer.add(CustomerController::class) {
             linkTo { findById(it.content.id) } withRel IanaLinkRelations.SELF
@@ -69,7 +70,7 @@ class WebMvcLinkBuilderDslUnitTest : TestUtils() {
     @Test
     fun `adds links to resourcesupport object`() {
 
-        val customer = CustomerResource("15", "John Doe")
+        val customer = CustomerModel("15", "John Doe")
 
         customer.add(CustomerController::class) {
             linkTo { findById(it.id) } withRel IanaLinkRelations.SELF
@@ -83,20 +84,20 @@ class WebMvcLinkBuilderDslUnitTest : TestUtils() {
 
     data class Customer(val id: String, val name: String)
     data class CustomerDTO(val name: String)
-    open class CustomerResource(val id: String, val name: String) : ResourceSupport()
-    open class ProductResource(val id: String) : ResourceSupport()
+    open class CustomerModel(val id: String, val name: String) : RepresentationModel<CustomerModel>()
+    open class ProductModel(val id: String) : RepresentationModel<ProductModel>()
 
     @RequestMapping("/customers")
     interface CustomerController {
 
         @GetMapping("/{id}")
-        fun findById(@PathVariable id: String): ResponseEntity<CustomerResource>
+        fun findById(@PathVariable id: String): ResponseEntity<CustomerModel>
 
         @GetMapping("/{id}/products")
-        fun findProductsById(@PathVariable id: String): PagedResources<ProductResource>
+        fun findProductsById(@PathVariable id: String): PagedModel<ProductModel>
 
         @PutMapping("/{id}")
-        fun update(@PathVariable id: String, @RequestBody customer: CustomerDTO): ResponseEntity<CustomerResource>
+        fun update(@PathVariable id: String, @RequestBody customer: CustomerDTO): ResponseEntity<CustomerModel>
 
         @DeleteMapping("/{id}")
         fun delete(@PathVariable id: String): ResponseEntity<Unit>

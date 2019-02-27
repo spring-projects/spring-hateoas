@@ -26,15 +26,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.PagedResources.PageMetadata;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -72,74 +72,75 @@ public class Jackson2UberModule extends SimpleModule {
 
 		super("uber-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
-		addSerializer(new UberPagedResourcesSerializer());
-		addSerializer(new UberResourcesSerializer());
-		addSerializer(new UberResourceSerializer());
-		addSerializer(new UberResourceSupportSerializer());
+		addSerializer(new UberPagedModelSerializer());
+		addSerializer(new UberCollectionModelSerializer());
+		addSerializer(new UberEntityModelSerializer());
+		addSerializer(new UberRepresentationModelSerializer());
 
-		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-		setMixInAnnotation(Resource.class, ResourceMixin.class);
-		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-		setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
+		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
+		setMixInAnnotation(EntityModel.class, EntityModelMixin.class);
+		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
+		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 	}
 
 	/**
-	 * Jackson 2 mixin to handle {@link ResourceSupport} for {@literal UBER+JSON}.
+	 * Jackson 2 mixin to handle {@link RepresentationModel} for {@literal UBER+JSON}.
 	 *
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@JsonDeserialize(using = UberResourceSupportDeserializer.class)
-	abstract class ResourceSupportMixin extends ResourceSupport {}
+	@JsonDeserialize(using = UberRepresentationModelDeserializer.class)
+	abstract class RepresentationModelMixin extends RepresentationModel<RepresentationModelMixin> {}
 
 	/**
-	 * Jackson 2 mixin to handle {@link Resource} for {@literal UBER+JSON}.
+	 * Jackson 2 mixin to handle {@link EntityModel} for {@literal UBER+JSON}.
 	 *
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@JsonDeserialize(using = UberResourceDeserializer.class)
-	abstract class ResourceMixin<T> extends Resource<T> {}
+	@JsonDeserialize(using = UberEntityModelDeserializer.class)
+	abstract class EntityModelMixin<T> extends EntityModel<T> {}
 
 	/**
-	 * Jackson 2 mixin to handle {@link Resources} for {@literal UBER+JSON}.
+	 * Jackson 2 mixin to handle {@link CollectionModel} for {@literal UBER+JSON}.
 	 *
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@JsonDeserialize(using = UberResourcesDeserializer.class)
-	abstract class ResourcesMixin<T> extends Resources<T> {}
+	@JsonDeserialize(using = UberCollectionModelDeserializer.class)
+	abstract class CollectionModelMixin<T> extends CollectionModel<T> {}
 
 	/**
-	 * Jackson 2 mixin to handle {@link PagedResources} for {@literal UBER+JSON}.
+	 * Jackson 2 mixin to handle {@link PagedModel} for {@literal UBER+JSON}.
 	 *
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@JsonDeserialize(using = UberPagedResourcesDeserializer.class)
-	abstract class PagedResourcesMixin<T> extends PagedResources<T> {}
+	@JsonDeserialize(using = UberPagedModelDeserializer.class)
+	abstract class PagedModelMixin<T> extends PagedModel<T> {}
 
 	/**
-	 * Custom {@link JsonSerializer} to render {@link ResourceSupport} into {@literal UBER+JSON}.
+	 * Custom {@link JsonSerializer} to render {@link RepresentationModel} into {@literal UBER+JSON}.
 	 */
-	static class UberResourceSupportSerializer extends ContainerSerializer<ResourceSupport>
+	static class UberRepresentationModelSerializer extends ContainerSerializer<RepresentationModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -572866287910993300L;
 		private final BeanProperty property;
 
-		UberResourceSupportSerializer(BeanProperty property) {
+		UberRepresentationModelSerializer(BeanProperty property) {
 
-			super(ResourceSupport.class, false);
+			super(RepresentationModel.class, false);
 			this.property = property;
 		}
 
-		UberResourceSupportSerializer() {
+		UberRepresentationModelSerializer() {
 			this(null);
 		}
 
 		@Override
-		public void serialize(ResourceSupport value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(RepresentationModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 
 			UberDocument doc = new UberDocument() //
 					.withUber(new Uber() //
@@ -162,7 +163,7 @@ public class Jackson2UberModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean hasSingleElement(ResourceSupport value) {
+		public boolean hasSingleElement(RepresentationModel<?> value) {
 			return false;
 		}
 
@@ -174,31 +175,33 @@ public class Jackson2UberModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new UberResourceSupportSerializer(property);
+			return new UberRepresentationModelSerializer(property);
 		}
 	}
 
 	/**
-	 * Custom {@link JsonSerializer} to render {@link Resource} into {@literal UBER+JSON}.
+	 * Custom {@link JsonSerializer} to render {@link EntityModel} into {@literal UBER+JSON}.
 	 */
-	static class UberResourceSerializer extends ContainerSerializer<Resource<?>> implements ContextualSerializer {
+	static class UberEntityModelSerializer extends ContainerSerializer<EntityModel<?>>
+			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -5538560800604582741L;
 
 		private final BeanProperty property;
 
-		UberResourceSerializer(BeanProperty property) {
+		UberEntityModelSerializer(BeanProperty property) {
 
-			super(Resource.class, false);
+			super(EntityModel.class, false);
 			this.property = property;
 		}
 
-		UberResourceSerializer() {
+		UberEntityModelSerializer() {
 			this(null);
 		}
 
 		@Override
-		public void serialize(Resource<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 
 			UberDocument doc = new UberDocument().withUber(new Uber() //
 					.withVersion("1.0") //
@@ -220,7 +223,7 @@ public class Jackson2UberModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean hasSingleElement(Resource<?> value) {
+		public boolean hasSingleElement(EntityModel<?> value) {
 			return false;
 		}
 
@@ -232,26 +235,27 @@ public class Jackson2UberModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new UberResourceSerializer(property);
+			return new UberEntityModelSerializer(property);
 		}
 	}
 
 	/**
-	 * Custom {@link JsonSerializer} to render {@link Resources} into {@literal UBER+JSON}.
+	 * Custom {@link JsonSerializer} to render {@link CollectionModel} into {@literal UBER+JSON}.
 	 */
-	static class UberResourcesSerializer extends ContainerSerializer<Resources<?>> implements ContextualSerializer {
+	static class UberCollectionModelSerializer extends ContainerSerializer<CollectionModel<?>>
+			implements ContextualSerializer {
 
 		private static final long serialVersionUID = 3422019794262694127L;
 
 		private BeanProperty property;
 
-		UberResourcesSerializer(BeanProperty property) {
+		UberCollectionModelSerializer(BeanProperty property) {
 
-			super(Resources.class, false);
+			super(CollectionModel.class, false);
 			this.property = property;
 		}
 
-		UberResourcesSerializer() {
+		UberCollectionModelSerializer() {
 			this(null);
 		}
 
@@ -260,7 +264,8 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(Resources<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 
 			UberDocument doc = new UberDocument() //
 					.withUber(new Uber() //
@@ -283,7 +288,7 @@ public class Jackson2UberModule extends SimpleModule {
 		}
 
 		@Override
-		public boolean hasSingleElement(Resources<?> value) {
+		public boolean hasSingleElement(CollectionModel<?> value) {
 			return value.getContent().size() == 1;
 		}
 
@@ -295,27 +300,27 @@ public class Jackson2UberModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new UberResourcesSerializer(property);
+			return new UberCollectionModelSerializer(property);
 		}
 	}
 
 	/**
-	 * Custom {@link JsonSerializer} to render {@link PagedResources} into {@literal UBER+JSON}.
+	 * Custom {@link JsonSerializer} to render {@link PagedModel} into {@literal UBER+JSON}.
 	 */
-	static class UberPagedResourcesSerializer extends ContainerSerializer<PagedResources<?>>
+	static class UberPagedModelSerializer extends ContainerSerializer<PagedModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -7892297813593085984L;
 
 		private BeanProperty property;
 
-		UberPagedResourcesSerializer(BeanProperty property) {
+		UberPagedModelSerializer(BeanProperty property) {
 
-			super(PagedResources.class, false);
+			super(PagedModel.class, false);
 			this.property = property;
 		}
 
-		UberPagedResourcesSerializer() {
+		UberPagedModelSerializer() {
 			this(null);
 		}
 
@@ -324,7 +329,8 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(PagedResources<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(PagedModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
 
 			UberDocument doc = new UberDocument() //
 					.withUber(new Uber() //
@@ -359,7 +365,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
-		public boolean hasSingleElement(PagedResources<?> value) {
+		public boolean hasSingleElement(PagedModel<?> value) {
 			return value.getContent().size() == 1;
 		}
 
@@ -379,24 +385,24 @@ public class Jackson2UberModule extends SimpleModule {
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new UberPagedResourcesSerializer(property);
+			return new UberPagedModelSerializer(property);
 		}
 	}
 
 	/**
-	 * Custom {@link StdDeserializer} to deserialize {@link ResourceSupport}.
+	 * Custom {@link StdDeserializer} to deserialize {@link RepresentationModel}.
 	 */
-	static class UberResourceSupportDeserializer extends ContainerDeserializerBase<ResourceSupport>
+	static class UberRepresentationModelDeserializer extends ContainerDeserializerBase<RepresentationModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = -8738539821441549016L;
 		private final JavaType contentType;
 
-		UberResourceSupportDeserializer() {
-			this(TypeFactory.defaultInstance().constructType(ResourceSupport.class));
+		UberRepresentationModelDeserializer() {
+			this(TypeFactory.defaultInstance().constructType(RepresentationModel.class));
 		}
 
-		private UberResourceSupportDeserializer(JavaType contentType) {
+		private UberRepresentationModelDeserializer(JavaType contentType) {
 
 			super(contentType);
 			this.contentType = contentType;
@@ -407,26 +413,22 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public ResourceSupport deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+		public RepresentationModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
 			Links links = doc.getUber().getLinks();
 
-			return doc.getUber().getData().stream() //
+			RepresentationModel<?> result = doc.getUber().getData().stream() //
 					.filter(uberData -> !StringUtils.isEmpty(uberData.getName())) //
 					.findFirst() //
 					.map(uberData -> convertToResourceSupport(uberData, links)) //
-					.orElseGet(() -> {
+					.orElse(null);
 
-						ResourceSupport resourceSupport = new ResourceSupport();
-						resourceSupport.add(links);
-
-						return resourceSupport;
-					});
+			return result == null ? new RepresentationModel<>().add(links) : result;
 		}
 
 		@NotNull
-		private ResourceSupport convertToResourceSupport(UberData uberData, Links links) {
+		private RepresentationModel<?> convertToResourceSupport(UberData uberData, Links links) {
 
 			List<UberData> data = uberData.getData();
 			Map<String, Object> properties;
@@ -437,12 +439,11 @@ public class Jackson2UberModule extends SimpleModule {
 				properties = data.stream() //
 						.collect(Collectors.toMap(UberData::getName, UberData::getValue));
 			}
-			ResourceSupport resourceSupport = (ResourceSupport) PropertyUtils
+
+			RepresentationModel<?> resourceSupport = (RepresentationModel<?>) PropertyUtils
 					.createObjectFromProperties(this.getContentType().getRawClass(), properties);
 
-			resourceSupport.add(links);
-
-			return resourceSupport;
+			return resourceSupport.add(links);
 		}
 
 		/*
@@ -464,9 +465,9 @@ public class Jackson2UberModule extends SimpleModule {
 
 			if (property != null) {
 				JavaType vc = property.getType().getContentType();
-				return new UberResourceSupportDeserializer(vc);
+				return new UberRepresentationModelDeserializer(vc);
 			} else {
-				return new UberResourceSupportDeserializer(ctxt.getContextualType());
+				return new UberRepresentationModelDeserializer(ctxt.getContextualType());
 			}
 		}
 
@@ -480,27 +481,27 @@ public class Jackson2UberModule extends SimpleModule {
 	}
 
 	/**
-	 * Custom {@link StdDeserializer} to deserialize {@link Resource}.
+	 * Custom {@link StdDeserializer} to deserialize {@link EntityModel}.
 	 */
-	static class UberResourceDeserializer extends ContainerDeserializerBase<Resource<?>>
+	static class UberEntityModelDeserializer extends ContainerDeserializerBase<EntityModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 1776321413269082414L;
 
 		private final JavaType contentType;
 
-		UberResourceDeserializer() {
+		UberEntityModelDeserializer() {
 			this(TypeFactory.defaultInstance().constructSimpleType(UberDocument.class, new JavaType[0]));
 		}
 
-		private UberResourceDeserializer(JavaType contentType) {
+		private UberEntityModelDeserializer(JavaType contentType) {
 
 			super(contentType);
 			this.contentType = contentType;
 		}
 
 		@Override
-		public Resource<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+		public EntityModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
 			Links links = doc.getUber().getLinks();
@@ -514,13 +515,13 @@ public class Jackson2UberModule extends SimpleModule {
 		}
 
 		@NotNull
-		private Resource<Object> convertToResource(UberData uberData, Links links) {
+		private EntityModel<Object> convertToResource(UberData uberData, Links links) {
 
 			// Primitive type
 			List<UberData> data = uberData.getData();
 			if (isPrimitiveType(data)) {
 				Object scalarValue = data.get(0).getValue();
-				return new Resource<>(scalarValue, links);
+				return new EntityModel<>(scalarValue, links);
 			}
 
 			Map<String, Object> properties;
@@ -534,7 +535,7 @@ public class Jackson2UberModule extends SimpleModule {
 
 			Object value = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
-			return new Resource<>(value, links);
+			return new EntityModel<>(value, links);
 		}
 
 		/*
@@ -556,9 +557,9 @@ public class Jackson2UberModule extends SimpleModule {
 
 			if (property != null) {
 				JavaType vc = property.getType().getContentType();
-				return new UberResourceDeserializer(vc);
+				return new UberEntityModelDeserializer(vc);
 			} else {
-				return new UberResourceDeserializer(ctxt.getContextualType());
+				return new UberEntityModelDeserializer(ctxt.getContextualType());
 			}
 		}
 
@@ -572,22 +573,22 @@ public class Jackson2UberModule extends SimpleModule {
 	}
 
 	/**
-	 * Custom {@link StdDeserializer} to deserialize {@link Resources}.
+	 * Custom {@link StdDeserializer} to deserialize {@link CollectionModel}.
 	 */
-	static class UberResourcesDeserializer extends ContainerDeserializerBase<Resources<?>>
+	static class UberCollectionModelDeserializer extends ContainerDeserializerBase<CollectionModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 8722467561709171145L;
 
 		private final JavaType contentType;
 
-		UberResourcesDeserializer(JavaType contentType) {
+		UberCollectionModelDeserializer(JavaType contentType) {
 
 			super(contentType);
 			this.contentType = contentType;
 		}
 
-		UberResourcesDeserializer() {
+		UberCollectionModelDeserializer() {
 			this(TypeFactory.defaultInstance().constructSimpleType(UberDocument.class, new JavaType[0]));
 		}
 
@@ -596,7 +597,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public Resources<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+		public CollectionModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 
@@ -619,9 +620,9 @@ public class Jackson2UberModule extends SimpleModule {
 
 			if (property != null) {
 				JavaType vc = property.getType().getContentType();
-				return new UberResourcesDeserializer(vc);
+				return new UberCollectionModelDeserializer(vc);
 			} else {
-				return new UberResourcesDeserializer(ctxt.getContextualType());
+				return new UberCollectionModelDeserializer(ctxt.getContextualType());
 			}
 		}
 
@@ -635,22 +636,22 @@ public class Jackson2UberModule extends SimpleModule {
 	}
 
 	/**
-	 * Custom {@link StdDeserializer} to deserialize {@link PagedResources}.
+	 * Custom {@link StdDeserializer} to deserialize {@link PagedModel}.
 	 */
-	static class UberPagedResourcesDeserializer extends ContainerDeserializerBase<PagedResources<?>>
+	static class UberPagedModelDeserializer extends ContainerDeserializerBase<PagedModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 4123359694609188745L;
 
 		private JavaType contentType;
 
-		UberPagedResourcesDeserializer(JavaType contentType) {
+		UberPagedModelDeserializer(JavaType contentType) {
 
 			super(contentType);
 			this.contentType = contentType;
 		}
 
-		UberPagedResourcesDeserializer() {
+		UberPagedModelDeserializer() {
 			this(TypeFactory.defaultInstance().constructSimpleType(UberDocument.class, new JavaType[0]));
 		}
 
@@ -659,16 +660,16 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		public PagedResources<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+		public PagedModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
 
-			Resources<?> resources = extractResources(doc, rootType, this.contentType);
+			CollectionModel<?> resources = extractResources(doc, rootType, this.contentType);
 			PageMetadata pageMetadata = extractPagingMetadata(doc);
 
-			return new PagedResources<>(resources.getContent(), pageMetadata, resources.getLinks());
+			return new PagedModel<>(resources.getContent(), pageMetadata, resources.getLinks());
 		}
 
 		/**
@@ -685,9 +686,9 @@ public class Jackson2UberModule extends SimpleModule {
 
 			if (property != null) {
 				JavaType vc = property.getType().getContentType();
-				return new UberPagedResourcesDeserializer(vc);
+				return new UberPagedModelDeserializer(vc);
 			} else {
-				return new UberPagedResourcesDeserializer(ctxt.getContextualType());
+				return new UberPagedModelDeserializer(ctxt.getContextualType());
 			}
 		}
 
@@ -701,14 +702,15 @@ public class Jackson2UberModule extends SimpleModule {
 	}
 
 	/**
-	 * Convert an {@link UberDocument} into a {@link Resources}.
+	 * Convert an {@link UberDocument} into a {@link CollectionModel}.
 	 *
 	 * @param doc
 	 * @param rootType
 	 * @param contentType
 	 * @return
 	 */
-	private static Resources<?> extractResources(UberDocument doc, JavaType rootType, JavaType contentType) {
+	private static CollectionModel<?> extractResources(UberDocument doc, JavaType rootType,
+			JavaType contentType) {
 
 		List<Object> content = new ArrayList<>();
 
@@ -721,7 +723,7 @@ public class Jackson2UberModule extends SimpleModule {
 			if (uberData.getLinks().isEmpty()) {
 
 				List<Link> resourceLinks = new ArrayList<>();
-				Resource<?> resource = null;
+				EntityModel<?> resource = null;
 
 				List<UberData> data = uberData.getData();
 				if (data == null) {
@@ -739,7 +741,7 @@ public class Jackson2UberModule extends SimpleModule {
 						if (isPrimitiveType(itemData)) {
 
 							Object scalarValue = itemData.get(0).getValue();
-							resource = new Resource<>(scalarValue, uberData.getLinks());
+							resource = new EntityModel<>(scalarValue, uberData.getLinks());
 						} else {
 
 							Map<String, Object> properties;
@@ -751,7 +753,7 @@ public class Jackson2UberModule extends SimpleModule {
 							}
 
 							Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
-							resource = new Resource<>(obj, uberData.getLinks());
+							resource = new EntityModel<>(obj, uberData.getLinks());
 						}
 					}
 				}
@@ -770,16 +772,16 @@ public class Jackson2UberModule extends SimpleModule {
 			/*
 			 * Either return a Resources<Resource<T>>...
 			 */
-			return new Resources<>(content, doc.getUber().getLinks());
+			return new CollectionModel<>(content, doc.getUber().getLinks());
 		} else {
 			/*
 			 * ...or return a Resources<T>
 			 */
 
-			List<Object> resourceLessContent = content.stream().map(item -> (Resource<?>) item).map(Resource::getContent)
-					.collect(Collectors.toList());
+			List<Object> resourceLessContent = content.stream().map(item -> (EntityModel<?>) item)
+					.map(EntityModel::getContent).collect(Collectors.toList());
 
-			return new Resources<>(resourceLessContent, doc.getUber().getLinks());
+			return new CollectionModel<>(resourceLessContent, doc.getUber().getLinks());
 		}
 	}
 

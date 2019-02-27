@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RelProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
@@ -63,7 +63,7 @@ class HalEmbeddedBuilder {
 
 	/**
 	 * Adds the given value to the embeddeds. Will skip doing so if the value is {@literal null} or the content of a
-	 * {@link Resource} is {@literal null}.
+	 * {@link EntityModel} is {@literal null}.
 	 *
 	 * @param source can be {@literal null}.
 	 */

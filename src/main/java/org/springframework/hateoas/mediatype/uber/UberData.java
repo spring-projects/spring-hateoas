@@ -31,14 +31,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
@@ -146,16 +146,16 @@ class UberData {
 	/**
 	 * Set of all Spring HATEOAS resource types.
 	 */
-	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(
-			Arrays.asList(ResourceSupport.class, Resource.class, Resources.class, PagedResources.class));
+	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(Arrays.asList(RepresentationModel.class,
+			EntityModel.class, CollectionModel.class, PagedModel.class));
 
 	/**
-	 * Convert a {@link ResourceSupport} into a list of {@link UberData}s, containing links and content.
+	 * Convert a {@link RepresentationModel} into a list of {@link UberData}s, containing links and content.
 	 *
 	 * @param resource
 	 * @return
 	 */
-	static List<UberData> extractLinksAndContent(ResourceSupport resource) {
+	static List<UberData> extractLinksAndContent(RepresentationModel<?> resource) {
 
 		List<UberData> data = extractLinks(resource);
 
@@ -165,12 +165,12 @@ class UberData {
 	}
 
 	/**
-	 * Convert a {@link Resource} into a list of {@link UberData}s, containing links and content.
+	 * Convert a {@link EntityModel} into a list of {@link UberData}s, containing links and content.
 	 *
 	 * @param resource
 	 * @return
 	 */
-	static List<UberData> extractLinksAndContent(Resource<?> resource) {
+	static List<UberData> extractLinksAndContent(EntityModel<?> resource) {
 
 		List<UberData> data = extractLinks(resource);
 
@@ -180,12 +180,13 @@ class UberData {
 	}
 
 	/**
-	 * Convert {@link Resources} into a list of {@link UberData}, with each item nested in a sub-UberData.
+	 * Convert {@link CollectionModel} into a list of {@link UberData}, with each item nested in a
+	 * sub-UberData.
 	 *
 	 * @param resources
 	 * @return
 	 */
-	static List<UberData> extractLinksAndContent(Resources<?> resources) {
+	static List<UberData> extractLinksAndContent(CollectionModel<?> resources) {
 
 		List<UberData> data = extractLinks(resources);
 
@@ -195,9 +196,9 @@ class UberData {
 		return data;
 	}
 
-	static List<UberData> extractLinksAndContent(PagedResources<?> resources) {
+	static List<UberData> extractLinksAndContent(PagedModel<?> resources) {
 
-		List<UberData> collectionOfResources = extractLinksAndContent((Resources<?>) resources);
+		List<UberData> collectionOfResources = extractLinksAndContent((CollectionModel<?>) resources);
 
 		if (resources.getMetadata() != null) {
 
@@ -227,12 +228,12 @@ class UberData {
 	}
 
 	/**
-	 * Extract all the direct {@link Link}s and {@link Affordance}-based links from a {@link ResourceSupport}.
+	 * Extract all the direct {@link Link}s and {@link Affordance}-based links from a {@link RepresentationModel}.
 	 *
 	 * @param resource
 	 * @return
 	 */
-	private static List<UberData> extractLinks(ResourceSupport resource) {
+	private static List<UberData> extractLinks(RepresentationModel<?> resource) {
 
 		List<UberData> data = new ArrayList<>();
 
@@ -268,15 +269,15 @@ class UberData {
 	 */
 	private static List<UberData> doExtractLinksAndContent(Object item) {
 
-		if (item instanceof Resource) {
-			return extractLinksAndContent((Resource<?>) item);
+		if (item instanceof EntityModel) {
+			return extractLinksAndContent((EntityModel<?>) item);
 		}
 
-		if (item instanceof ResourceSupport) {
-			return extractLinksAndContent((ResourceSupport) item);
+		if (item instanceof RepresentationModel) {
+			return extractLinksAndContent((RepresentationModel<?>) item);
 		}
 
-		return extractLinksAndContent(new Resource<>(item));
+		return extractLinksAndContent(new EntityModel<>(item));
 	}
 
 	/**
@@ -371,7 +372,7 @@ class UberData {
 	}
 
 	/**
-	 * Transform the payload of a {@link Resource} into {@link UberData}.
+	 * Transform the payload of a {@link EntityModel} into {@link UberData}.
 	 *
 	 * @param obj
 	 * @return

@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import static org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.*;
 
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.CollectionModel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  *
  * @author Greg Turnquist
  */
-@JsonDeserialize(using = CollectionJsonResourceDeserializer.class)
-abstract class ResourceMixin<T> extends Resource<T> {
+@JsonDeserialize(using = CollectionJsonResourcesDeserializer.class)
+abstract class CollectionRepresentationModelMixin<T> extends CollectionModel<T> {
 
 }

@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -94,8 +94,8 @@ public class CustomHypermediaWebMvcTest {
 	static class EmployeeController {
 
 		@GetMapping("/employees/1")
-		public Resource<Employee> findOne() {
-			return new Resource<>(new Employee("Frodo Baggins", "ring bearer"),
+		public EntityModel<Employee> findOne() {
+			return new EntityModel<>(new Employee("Frodo Baggins", "ring bearer"),
 					linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel());
 		}
 	}

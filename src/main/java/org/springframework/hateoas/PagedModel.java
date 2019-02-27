@@ -31,39 +31,41 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class PagedResources<T> extends Resources<T> {
+public class PagedModel<T> extends CollectionModel<T> {
 
-	public static PagedResources<?> NO_PAGE = new PagedResources<>();
+	public static PagedModel<?> NO_PAGE = new PagedModel<>();
 
 	private PageMetadata metadata;
 
 	/**
 	 * Default constructor to allow instantiation by reflection.
 	 */
-	protected PagedResources() {
+	protected PagedModel() {
 		this(new ArrayList<>(), null);
 	}
 
 	/**
-	 * Creates a new {@link PagedResources} from the given content, {@link PageMetadata} and {@link Link}s (optional).
+	 * Creates a new {@link PagedModel} from the given content, {@link PageMetadata} and {@link Link}s (optional).
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
 	 */
-	public PagedResources(Collection<T> content, PageMetadata metadata, Link... links) {
+	public PagedModel(Collection<T> content, PageMetadata metadata, Link... links) {
 		this(content, metadata, Arrays.asList(links));
 	}
 
 	/**
-	 * Creates a new {@link PagedResources} from the given content {@link PageMetadata} and {@link Link}s.
+	 * Creates a new {@link PagedModel} from the given content {@link PageMetadata} and {@link Link}s.
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
 	 */
-	public PagedResources(Collection<T> content, PageMetadata metadata, Iterable<Link> links) {
+	public PagedModel(Collection<T> content, PageMetadata metadata, Iterable<Link> links) {
+
 		super(content, links);
+
 		this.metadata = metadata;
 	}
 
@@ -78,23 +80,23 @@ public class PagedResources<T> extends Resources<T> {
 	}
 
 	/**
-	 * Factory method to easily create a {@link PagedResources} instance from a set of entities and pagination metadata.
+	 * Factory method to easily create a {@link PagedModel} instance from a set of entities and pagination metadata.
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Resource<S>, S> PagedResources<T> wrap(Iterable<S> content, PageMetadata metadata) {
+	public static <T extends EntityModel<S>, S> PagedModel<T> wrap(Iterable<S> content, PageMetadata metadata) {
 
 		Assert.notNull(content, "Content must not be null!");
 		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new Resource<>(element));
+			resources.add((T) new EntityModel<>(element));
 		}
 
-		return new PagedResources<>(resources, metadata);
+		return new PagedModel<>(resources, metadata);
 	}
 
 	/**
@@ -141,7 +143,7 @@ public class PagedResources<T> extends Resources<T> {
 			return false;
 		}
 
-		PagedResources<?> that = (PagedResources<?>) obj;
+		PagedModel<?> that = (PagedModel<?>) obj;
 		boolean metadataEquals = this.metadata == null ? that.metadata == null : this.metadata.equals(that.metadata);
 
 		return metadataEquals && super.equals(obj);

@@ -34,8 +34,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.HttpHeaders;
@@ -105,10 +105,10 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 		}
 
 		@GetMapping("/employees")
-		public Resources<Resource<Employee>> all() {
+		public CollectionModel<EntityModel<Employee>> all() {
 
 			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
+			List<EntityModel<Employee>> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
@@ -119,11 +119,11 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel();
 
 			// Return the collection of employee resources along with the composite affordance
-			return new Resources<>(employees, selfLink);
+			return new CollectionModel<>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
-		public Resource<Employee> findOne(@PathVariable Integer id) {
+		public EntityModel<Employee> findOne(@PathVariable Integer id) {
 
 			// Start the affordance with the "self" link, i.e. this method.
 			Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
@@ -132,7 +132,7 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id), findOneLink, employeesLink);
+			return new EntityModel<>(EMPLOYEES.get(id), findOneLink, employeesLink);
 		}
 	}
 

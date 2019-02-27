@@ -22,16 +22,16 @@ import java.util.Arrays;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link ResourceSupport}.
- * 
+ * Unit tests for {@link RepresentationModel}.
+ *
  * @author Oliver Gierke
  */
-public class ResourceSupportUnitTest {
+public class RepresentationModelUnitTest {
 
 	@Test
 	public void setsUpWithEmptyLinkList() {
 
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		assertThat(support.hasLinks()).isFalse();
 		assertThat(support.hasLink(IanaLinkRelations.SELF.value())).isFalse();
 		assertThat(support.getLinks().isEmpty()).isTrue();
@@ -42,7 +42,7 @@ public class ResourceSupportUnitTest {
 	public void addsLinkCorrectly() {
 
 		Link link = new Link("foo", IanaLinkRelations.NEXT.value());
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(link);
 
 		assertThat(support.getId()).isEmpty();
@@ -57,7 +57,7 @@ public class ResourceSupportUnitTest {
 
 		Link link = new Link("/customers/1", "customers");
 		Link link2 = new Link("/orders/1/customer", "customers");
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(link, link2);
 
 		assertThat(support.getLinks("customers")).hasSize(2);
@@ -72,7 +72,7 @@ public class ResourceSupportUnitTest {
 		Link first = new Link("foo", IanaLinkRelations.PREV.value());
 		Link second = new Link("bar", IanaLinkRelations.NEXT.value());
 
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(Arrays.asList(first, second));
 
 		assertThat(support.getId()).isEmpty();
@@ -87,7 +87,7 @@ public class ResourceSupportUnitTest {
 	public void selfLinkBecomesId() {
 
 		Link link = new Link("foo");
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(link);
 
 		assertThat(support.getId()).hasValue(link);
@@ -96,21 +96,21 @@ public class ResourceSupportUnitTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsNullLinkBeingAdded() {
 
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add((Link) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsNullLinksBeingAdded() {
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add((Iterable<Link>) null);
 	}
 
 	@Test
 	public void sameLinkListMeansSameResource() {
 
-		ResourceSupport first = new ResourceSupport();
-		ResourceSupport second = new ResourceSupport();
+		RepresentationModel<?> first = new RepresentationModel<>();
+		RepresentationModel<?> second = new RepresentationModel<>();
 
 		TestUtils.assertEqualAndSameHashCode(first, second);
 
@@ -124,18 +124,19 @@ public class ResourceSupportUnitTest {
 	@Test
 	public void differentLinkListsNotEqual() {
 
-		ResourceSupport first = new ResourceSupport();
-		ResourceSupport second = new ResourceSupport();
+		RepresentationModel<?> first = new RepresentationModel<>();
+		RepresentationModel<?> second = new RepresentationModel<>();
 		second.add(new Link("foo"));
 
 		TestUtils.assertNotEqualAndDifferentHashCode(first, second);
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void subclassNotEquals() {
 
-		ResourceSupport left = new ResourceSupport();
-		ResourceSupport right = new ResourceSupport() {
+		RepresentationModel<?> left = new RepresentationModel<>();
+		RepresentationModel<?> right = new RepresentationModel() {
 
 			@Override
 			public int hashCode() {
@@ -157,7 +158,7 @@ public class ResourceSupportUnitTest {
 	@Test
 	public void doesNotEqualNull() {
 
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		assertThat(support.equals(null)).isFalse();
 	}
 
@@ -167,7 +168,7 @@ public class ResourceSupportUnitTest {
 	@Test
 	public void addsLinksViaVarargs() {
 
-		ResourceSupport support = new ResourceSupport();
+		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(new Link("/self", "self"), new Link("/another", "another"));
 
 		assertThat(support.hasLink("self")).isTrue();

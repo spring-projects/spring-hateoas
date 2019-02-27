@@ -60,17 +60,17 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 *         {@literal null}.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
 	 */
-	LinkBuilder linkForSingleResource(Class<?> type, Object id);
+	LinkBuilder linkForItemResource(Class<?> type, Object id);
 
 	/**
 	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity.
 	 * 
-	 * @see #linkForSingleResource(Class, Object)
+	 * @see #linkForItemResource(Class, Object)
 	 * @param entity the entity type to point to, must not be {@literal null}.
 	 * @return the {@link LinkBuilder} pointing the given entity. Will never be {@literal null}.
 	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
 	 */
-	LinkBuilder linkForSingleResource(Identifiable<?> entity);
+	LinkBuilder linkForItemResource(Identifiable<?> entity);
 
 	/**
 	 * Creates a {@link Link} pointing to the collection resource of the given type. The relation type of the link will be
@@ -93,7 +93,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 *         {@literal null}.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
 	 */
-	Link linkToSingleResource(Class<?> type, Object id);
+	Link linkToItemResource(Class<?> type, Object id);
 
 	/**
 	 * Creates a {@link Link} pointing to single resource backing the given entity. The relation type of the link will be
@@ -103,5 +103,5 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * @return the {@link Link} pointing to the resource exposed for the given entity. Will never be {@literal null}.
 	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
 	 */
-	Link linkToSingleResource(Identifiable<?> entity);
+	Link linkToItemResource(Identifiable<?> entity);
 }

@@ -40,8 +40,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -194,10 +194,10 @@ public class CollectionJsonWebMvcIntegrationTest {
 		private static Map<Integer, Employee> EMPLOYEES = new HashMap<>();
 
 		@GetMapping("/employees")
-		public Resources<Resource<Employee>> all() {
+		public CollectionModel<EntityModel<Employee>> all() {
 
 			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
+			List<EntityModel<Employee>> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
@@ -210,19 +210,19 @@ public class CollectionJsonWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new Resources<>(employees, selfLink);
+			return new CollectionModel<>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/search")
-		public Resources<Resource<Employee>> search(@RequestParam(value = "name", required = false) String name,
+		public CollectionModel<EntityModel<Employee>> search(@RequestParam(value = "name", required = false) String name,
 				@RequestParam(value = "role", required = false) String role) {
 
 			// Create a list of Resource<Employee>'s to return
-			List<Resource<Employee>> employees = new ArrayList<>();
+			List<EntityModel<Employee>> employees = new ArrayList<>();
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
-				Resource<Employee> employeeResource = findOne(i);
+				EntityModel<Employee> employeeResource = findOne(i);
 
 				boolean nameMatches = Optional.ofNullable(name).map(s -> employeeResource.getContent().getName().contains(s))
 						.orElse(true);
@@ -241,11 +241,11 @@ public class CollectionJsonWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new Resources<>(employees, selfLink);
+			return new CollectionModel<>(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
-		public Resource<Employee> findOne(@PathVariable Integer id) {
+		public EntityModel<Employee> findOne(@PathVariable Integer id) {
 
 			// Start the affordance with the "self" link, i.e. this method.
 			Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
@@ -254,14 +254,14 @@ public class CollectionJsonWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new Resource<>(EMPLOYEES.get(id),
+			return new EntityModel<>(EMPLOYEES.get(id),
 					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
 							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
 					employeesLink);
 		}
 
 		@PostMapping("/employees")
-		public ResponseEntity<?> newEmployee(@RequestBody Resource<Employee> employee) {
+		public ResponseEntity<?> newEmployee(@RequestBody EntityModel<Employee> employee) {
 
 			int newEmployeeId = EMPLOYEES.size();
 
@@ -279,7 +279,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 		}
 
 		@PutMapping("/employees/{id}")
-		public ResponseEntity<?> updateEmployee(@RequestBody Resource<Employee> employee, @PathVariable Integer id) {
+		public ResponseEntity<?> updateEmployee(@RequestBody EntityModel<Employee> employee, @PathVariable Integer id) {
 
 			EMPLOYEES.put(id, employee.getContent());
 
@@ -296,7 +296,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 		}
 
 		@PatchMapping("/employees/{id}")
-		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody Resource<Employee> employee,
+		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EntityModel<Employee> employee,
 				@PathVariable Integer id) {
 
 			Employee oldEmployee = EMPLOYEES.get(id);

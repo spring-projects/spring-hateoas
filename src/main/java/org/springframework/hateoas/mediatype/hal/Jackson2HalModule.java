@@ -29,12 +29,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.server.RelProvider;
 import org.springframework.util.Assert;
@@ -65,7 +65,8 @@ import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
- * Jackson 2 module implementation to render {@link Link} and {@link ResourceSupport} instances in HAL compatible JSON.
+ * Jackson 2 module implementation to render {@link Link} and {@link RepresentationModel} instances in HAL compatible
+ * JSON.
  *
  * @author Alexander Baetz
  * @author Oliver Gierke
@@ -81,8 +82,8 @@ public class Jackson2HalModule extends SimpleModule {
 		super("json-hal-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
-		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-		setMixInAnnotation(Resources.class, ResourcesMixin.class);
+		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
+		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
 	}
 
 	/**
@@ -154,8 +155,8 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Object currentValue = jgen.getCurrentValue();
 
-			if (currentValue instanceof Resources) {
-				if (mapper.hasCuriedEmbed((Resources<?>) currentValue)) {
+			if (currentValue instanceof CollectionModel) {
+				if (mapper.hasCuriedEmbed((CollectionModel<?>) currentValue)) {
 					curiedLinkPresent = true;
 				}
 			}
@@ -287,7 +288,8 @@ public class Jackson2HalModule extends SimpleModule {
 	}
 
 	/**
-	 * Custom {@link JsonSerializer} to render {@link Resource}-Lists in HAL compatible JSON. Renders the list as a Map.
+	 * Custom {@link JsonSerializer} to render {@link EntityModel}-Lists in HAL compatible JSON. Renders the
+	 * list as a Map.
 	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
@@ -325,10 +327,10 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Object currentValue = jgen.getCurrentValue();
 
-			if (currentValue instanceof ResourceSupport) {
+			if (currentValue instanceof RepresentationModel) {
 
 				if (embeddedMapper.hasCuriedEmbed(value)) {
-					((ResourceSupport) currentValue).add(CURIES_REQUIRED_DUE_TO_EMBEDS);
+					((RepresentationModel<?>) currentValue).add(CURIES_REQUIRED_DUE_TO_EMBEDS);
 				}
 			}
 

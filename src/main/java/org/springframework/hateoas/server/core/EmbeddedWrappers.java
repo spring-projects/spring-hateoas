@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.util.Assert;
 
 /**
@@ -142,7 +142,7 @@ public class EmbeddedWrappers {
 				return null;
 			}
 
-			peek = peek instanceof Resource ? ((Resource<Object>) peek).getContent() : peek;
+			peek = peek instanceof EntityModel ? ((EntityModel<Object>) peek).getContent() : peek;
 
 			return AopUtils.getTargetClass(peek);
 		}

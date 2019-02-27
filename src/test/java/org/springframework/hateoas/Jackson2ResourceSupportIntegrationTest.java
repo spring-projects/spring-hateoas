@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.Test;
 
 /**
- * Integration tests for {@link org.springframework.hateoas.ResourceSupport}.
- * 
+ * Integration tests for {@link org.springframework.hateoas.RepresentationModel}.
+ *
  * @author Oliver Gierke
  */
 public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
@@ -34,7 +34,7 @@ public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Mars
 	@Test
 	public void doesNotRenderId() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
+		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
 
 		assertThat(write(resourceSupport)).isEqualTo(REFERENCE);
@@ -46,7 +46,7 @@ public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Mars
 	@Test
 	public void readResourceSupportCorrectly() throws Exception {
 
-		ResourceSupport result = read(REFERENCE, ResourceSupport.class);
+		RepresentationModel<?> result = read(REFERENCE, RepresentationModel.class);
 
 		assertThat(result.getLinks()).hasSize(1);
 		assertThat(result.getLinks()).contains(new Link("localhost"));

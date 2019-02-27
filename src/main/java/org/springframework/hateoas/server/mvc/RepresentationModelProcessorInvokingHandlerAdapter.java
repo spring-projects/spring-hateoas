@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.hateoas.server.ResourceProcessor;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 /**
  * Special {@link RequestMappingHandlerAdapter} that tweaks the {@link HandlerMethodReturnValueHandlerComposite} to be
- * proxied by a {@link ResourceProcessorHandlerMethodReturnValueHandler} which will invoke the {@link ResourceProcessor}
+ * proxied by a {@link RepresentationModelProcessorHandlerMethodReturnValueHandler} which will invoke the {@link RepresentationModelProcessor}
  * s found in the application context and eventually delegate to the originally configured
  * {@link HandlerMethodReturnValueHandler}.
  * <p/>
@@ -43,12 +43,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * @soundtrack Dopplekopf - Regen für immer (Von Abseits)
  */
 @RequiredArgsConstructor
-public class ResourceProcessorInvokingHandlerAdapter extends RequestMappingHandlerAdapter {
+public class RepresentationModelProcessorInvokingHandlerAdapter extends RequestMappingHandlerAdapter {
 
 	private static final Method RETURN_VALUE_HANDLER_METHOD = ReflectionUtils
-			.findMethod(ResourceProcessorInvokingHandlerAdapter.class, "getReturnValueHandlers");
+			.findMethod(RepresentationModelProcessorInvokingHandlerAdapter.class, "getReturnValueHandlers");
 
-	private @NonNull final ResourceProcessorInvoker invoker;
+	private @NonNull final RepresentationModelProcessorInvoker invoker;
 
 	/*
 	 * (non-Javadoc)
@@ -64,7 +64,7 @@ public class ResourceProcessorInvokingHandlerAdapter extends RequestMappingHandl
 
 		// Set up ResourceProcessingHandlerMethodResolver to delegate to originally configured ones
 		List<HandlerMethodReturnValueHandler> newHandlers = new ArrayList<>();
-		newHandlers.add(new ResourceProcessorHandlerMethodReturnValueHandler(oldHandlers, invoker));
+		newHandlers.add(new RepresentationModelProcessorHandlerMethodReturnValueHandler(oldHandlers, invoker));
 
 		// Configure the new handler to be used
 		this.setReturnValueHandlers(newHandlers);

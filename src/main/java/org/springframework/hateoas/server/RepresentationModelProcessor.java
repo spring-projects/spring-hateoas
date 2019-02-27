@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,23 @@
  */
 package org.springframework.hateoas.server;
 
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
- * SPI interface to allow components to process the {@link ResourceSupport} instances returned from Spring MVC
+ * SPI interface to allow components to process the {@link RepresentationModel} instances returned from Spring MVC
  * controllers.
- * 
- * @see Resource
- * @see Resources
+ *
+ * @see EntityModel
+ * @see CollectionModel
  * @author Oliver Gierke
  */
-public interface ResourceProcessor<T extends ResourceSupport> {
+public interface RepresentationModelProcessor<T extends RepresentationModel<?>> {
 
 	/**
-	 * Processes the given resource, add links, alter the domain data etc.
-	 * 
+	 * Processes the given representation model, add links, alter the domain data etc.
+	 *
 	 * @param resource
 	 * @return the processed resource
 	 */

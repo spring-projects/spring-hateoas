@@ -22,18 +22,18 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.LinkMixin;
-import org.springframework.hateoas.mediatype.hal.ResourceSupportMixin;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListDeserializer;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
+import org.springframework.hateoas.mediatype.hal.LinkMixin;
+import org.springframework.hateoas.mediatype.hal.RepresentationModelMixin;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourceSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
@@ -80,19 +80,16 @@ class Jackson2HalFormsModule extends SimpleModule {
 		super("hal-forms-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
-		setMixInAnnotation(ResourceSupport.class, ResourceSupportMixin.class);
-		setMixInAnnotation(Resources.class, ResourcesMixin.class);
-		setMixInAnnotation(PagedResources.class, PagedResourcesMixin.class);
+		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
+		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
+		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
 
 		addSerializer(new HalFormsResourceSerializer());
 	}
 
-	@JsonSerialize(using = HalFormsResourceSerializer.class)
-	interface ResourceMixin {}
-
 	@JsonSerialize(using = HalFormsResourcesSerializer.class)
-	abstract class ResourcesMixin<T> extends Resources<T> {
+	abstract class CollectionModelMixin<T> extends CollectionModel<T> {
 
 		@Override
 		@JsonProperty("_embedded")
@@ -101,7 +98,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 		public abstract Collection<T> getContent();
 	}
 
-	abstract class PagedResourcesMixin<T> extends PagedResources<T> {
+	abstract class PagedModelMixin<T> extends PagedModel<T> {
 
 		@Override
 		@JsonProperty("page")

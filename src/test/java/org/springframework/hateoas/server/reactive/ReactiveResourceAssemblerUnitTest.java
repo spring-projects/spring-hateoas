@@ -30,10 +30,9 @@ import java.util.Collection;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.server.reactive.ReactiveResourceAssembler;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -64,7 +63,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	@Test
 	public void simpleConversionShouldWork() {
 
-		this.assembler.toResource(this.employee, this.exchange).as(StepVerifier::create)
+		this.assembler.toModel(this.employee, this.exchange).as(StepVerifier::create)
 				.expectNextMatches(employeeResource -> {
 
 					assertThat(employeeResource.getEmployee()).isEqualTo(new Employee("Frodo Baggins"));
@@ -81,7 +80,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	@Test
 	public void defaultResourcesConversionShouldWork() {
 
-		this.assembler.toResources(Flux.just(this.employee), this.exchange).as(StepVerifier::create)
+		this.assembler.toCollectionModel(Flux.just(this.employee), this.exchange).as(StepVerifier::create)
 				.expectNextMatches(employeeResources -> {
 
 					Collection<EmployeeResource> content = employeeResources.getContent();
@@ -103,7 +102,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	@Test
 	public void customResourcesShouldWork() {
 
-		this.assemblerWithCustomResources.toResources(Flux.just(this.employee), this.exchange) //
+		this.assemblerWithCustomResources.toCollectionModel(Flux.just(this.employee), this.exchange) //
 				.as(StepVerifier::create) //
 				.expectNextMatches(employeeResources -> {
 
@@ -119,10 +118,10 @@ public class ReactiveResourceAssemblerUnitTest {
 				}).verifyComplete();
 	}
 
-	class TestAssembler implements ReactiveResourceAssembler<Employee, EmployeeResource> {
+	class TestAssembler implements ReactiveRepresentationModelAssembler<Employee, EmployeeResource> {
 
 		@Override
-		public Mono<EmployeeResource> toResource(Employee entity, ServerWebExchange exchange) {
+		public Mono<EmployeeResource> toModel(Employee entity, ServerWebExchange exchange) {
 
 			EmployeeResource employeeResource = new EmployeeResource(entity);
 			employeeResource.add(new Link("/employees", "employees"));
@@ -134,12 +133,13 @@ public class ReactiveResourceAssemblerUnitTest {
 	class TestAssemblerWithCustomResources extends TestAssembler {
 
 		@Override
-		public Mono<Resources<EmployeeResource>> toResources(Flux<? extends Employee> entities,
+		public Mono<CollectionModel<EmployeeResource>> toCollectionModel(Flux<? extends Employee> entities,
 				ServerWebExchange exchange) {
 
-			return entities.flatMap(entity -> toResource(entity, exchange)).collectList().map(listOfResources -> {
+			return entities.flatMap(entity -> toModel(entity, exchange)).collectList().map(listOfResources -> {
 
-				Resources<EmployeeResource> employeeResources = new Resources<>(listOfResources);
+				CollectionModel<EmployeeResource> employeeResources = new CollectionModel<>(
+						listOfResources);
 
 				employeeResources.add(new Link("/employees").withSelfRel());
 				employeeResources.add(new Link("/", "root"));
@@ -158,7 +158,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	@Data
 	@EqualsAndHashCode(callSuper = true)
 	@AllArgsConstructor
-	class EmployeeResource extends ResourceSupport {
+	class EmployeeResource extends RepresentationModel<EmployeeResource> {
 		private Employee employee;
 	}
 }

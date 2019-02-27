@@ -19,7 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * @author Greg Turnquist
@@ -27,7 +27,7 @@ import org.springframework.hateoas.ResourceSupport;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-public class EmployeeResource extends ResourceSupport {
+public class EmployeeResource extends RepresentationModel<EmployeeResource> {
 
 	private String name;
 }

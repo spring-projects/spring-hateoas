@@ -23,12 +23,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 /**
- * Integration tests for {@link Resource}.
+ * Integration tests for {@link EntityModel}.
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+public class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 
@@ -39,7 +39,7 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		Resource<Person> resource = new Resource<>(person);
+		EntityModel<Person> resource = new EntityModel<>(person);
 		resource.add(new Link("localhost"));
 
 		assertThat(write(resource)).isEqualTo(REFERENCE);
@@ -51,7 +51,7 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 	@Test
 	public void readsResourceSupportCorrectly() throws Exception {
 
-		PersonResource result = read(REFERENCE, PersonResource.class);
+		PersonModel result = read(REFERENCE, PersonModel.class);
 
 		assertThat(result.getLinks()).hasSize(1);
 		assertThat(result.getLinks()).contains(new Link("localhost"));
@@ -59,13 +59,13 @@ public class ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrat
 		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}
 
-	static class PersonResource extends Resource<Person> {
+	static class PersonModel extends EntityModel<Person> {
 
-		public PersonResource(Person person) {
+		public PersonModel(Person person) {
 			super(person);
 		}
 
-		protected PersonResource() {}
+		protected PersonModel() {}
 	}
 
 	@JsonAutoDetect(fieldVisibility = Visibility.ANY)

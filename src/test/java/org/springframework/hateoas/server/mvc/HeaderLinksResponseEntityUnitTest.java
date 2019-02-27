@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -37,13 +37,13 @@ public class HeaderLinksResponseEntityUnitTest {
 	static final Object CONTENT = new Object();
 	static final Link LINK = new Link("href", "rel");
 
-	Resource<Object> resource = new Resource<>(CONTENT, LINK);
-	ResponseEntity<Resource<Object>> entity = new ResponseEntity<>(resource, HttpStatus.OK);
+	EntityModel<Object> resource = new EntityModel<>(CONTENT, LINK);
+	ResponseEntity<EntityModel<Object>> entity = new ResponseEntity<>(resource, HttpStatus.OK);
 
 	@Test
 	public void movesRootResourceLinksToHeader() {
 
-		HttpEntity<Resource<Object>> wrapper = HeaderLinksResponseEntity.wrap(entity);
+		HttpEntity<EntityModel<Object>> wrapper = HeaderLinksResponseEntity.wrap(entity);
 
 		// No links in resource anymore
 		assertThat(wrapper.getBody().getLinks()).isEmpty();
@@ -59,8 +59,8 @@ public class HeaderLinksResponseEntityUnitTest {
 	@Test
 	public void defaultStatusCodeToOkForHttpEntities() {
 
-		HttpEntity<Resource<Object>> entity = new HttpEntity<>(resource);
-		ResponseEntity<Resource<Object>> wrappedEntity = HeaderLinksResponseEntity.wrap(entity);
+		HttpEntity<EntityModel<Object>> entity = new HttpEntity<>(resource);
+		ResponseEntity<EntityModel<Object>> wrappedEntity = HeaderLinksResponseEntity.wrap(entity);
 
 		assertThat(wrappedEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}

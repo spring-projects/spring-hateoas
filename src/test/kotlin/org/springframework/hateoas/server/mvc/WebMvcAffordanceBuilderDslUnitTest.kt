@@ -76,20 +76,20 @@ class WebMvcAffordanceBuilderDslUnitTest : TestUtils() {
     }
 
     data class CustomerDTO(val name: String)
-    open class CustomerResource(val id: String, val name: String) : ResourceSupport()
-    open class ProductResource(val id: String) : ResourceSupport()
+    open class CustomerModel(val id: String, val name: String) : RepresentationModel<CustomerModel>()
+    open class ProductModel(val id: String) : RepresentationModel<ProductModel>()
 
     @RequestMapping("/customers")
     interface CustomerController {
 
         @GetMapping("/{id}")
-        fun findById(@PathVariable id: String): ResponseEntity<CustomerResource>
+        fun findById(@PathVariable id: String): ResponseEntity<CustomerModel>
 
         @GetMapping("/{id}/products")
-        fun findProductsById(@PathVariable id: String): PagedResources<ProductResource>
+        fun findProductsById(@PathVariable id: String): PagedModel<ProductModel>
 
         @PutMapping("/{id}")
-        fun update(@PathVariable id: String, @RequestBody customer: CustomerDTO): ResponseEntity<CustomerResource>
+        fun update(@PathVariable id: String, @RequestBody customer: CustomerDTO): ResponseEntity<CustomerModel>
 
         @DeleteMapping("/{id}")
         fun delete(@PathVariable id: String): ResponseEntity<Unit>

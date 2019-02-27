@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.core.ResolvableType;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.util.ReflectionUtils;
@@ -60,7 +60,7 @@ public class PropertyUtilsTest {
 	public void simpleObjectWrappedAsResource() {
 
 		Employee employee = new Employee("Frodo Baggins", "ring bearer");
-		Resource<Employee> employeeResource = new Resource<>(employee);
+		EntityModel<Employee> employeeResource = new EntityModel<>(employee);
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employeeResource);
 
@@ -73,7 +73,7 @@ public class PropertyUtilsTest {
 	@Test
 	public void resourceWrappedSpringMvcParameter() {
 
-		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", Resource.class);
+		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", EntityModel.class);
 		MethodParameters parameters = new MethodParameters(method);
 
 		ResolvableType resolvableType = parameters.getParametersWith(RequestBody.class).stream()
@@ -161,7 +161,7 @@ public class PropertyUtilsTest {
 	static class TestController {
 		
 		@GetMapping("/")
-		public Employee newEmployee(@RequestBody Resource<Employee> employee) {
+		public Employee newEmployee(@RequestBody EntityModel<Employee> employee) {
 			return employee.getContent();
 		}
 	}

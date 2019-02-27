@@ -18,10 +18,10 @@ package org.springframework.hateoas.server.core;
 import java.util.Optional;
 
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 
 /**
- * A wrapper to handle values to be embedded into a {@link Resource}.
+ * A wrapper to handle values to be embedded into a {@link EntityModel}.
  *
  * @author Oliver Gierke
  */

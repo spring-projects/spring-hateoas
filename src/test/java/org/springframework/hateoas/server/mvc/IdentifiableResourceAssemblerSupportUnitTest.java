@@ -24,18 +24,17 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.LinkBuilder;
-import org.springframework.hateoas.server.mvc.IdentifiableResourceAssemblerSupport;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Unit tests for {@link IdentifiableResourceAssemblerSupport}.
+ * Unit tests for {@link IdentifiableRepresentationModelAssemblerSupport}.
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
@@ -57,7 +56,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	@Test
 	public void createsInstanceWithSelfLinkToController() {
 
-		PersonResource resource = assembler.createResource(person);
+		PersonResource resource = assembler.createModel(person);
 		Link link = resource.getRequiredLink(IanaLinkRelations.SELF.value());
 
 		assertThat(link).isNotNull();
@@ -67,7 +66,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	@Test
 	public void usesAlternateIdIfGivenExplicitly() {
 
-		PersonResource resource = assembler.createResourceWithId(person.alternateId, person);
+		PersonResource resource = assembler.createModelWithId(person.alternateId, person);
 		Optional<Link> selfLink = resource.getId();
 
 		assertThat(selfLink.map(Link::getHref)) //
@@ -77,7 +76,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 	@Test
 	public void unwrapsIdentifyablesForParameters() {
 
-		PersonResource resource = new PersonResourceAssembler(ParameterizedController.class).createResource(person, person,
+		PersonResource resource = new PersonResourceAssembler(ParameterizedController.class).createModel(person, person,
 				"bar");
 		Optional<Link> selfLink = resource.getId();
 
@@ -121,7 +120,7 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		Person second = new Person();
 		second.id = 2L;
 
-		Resources<PersonResource> result = assembler.map(Arrays.asList(first, second)).toResources();
+		CollectionModel<PersonResource> result = assembler.map(Arrays.asList(first, second)).toResources();
 
 		LinkBuilder builder = linkTo(PersonController.class);
 
@@ -156,11 +155,11 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		}
 	}
 
-	static class PersonResource extends ResourceSupport {
+	static class PersonResource extends RepresentationModel<PersonResource> {
 
 	}
 
-	class PersonResourceAssembler extends IdentifiableResourceAssemblerSupport<Person, PersonResource> {
+	class PersonResourceAssembler extends IdentifiableRepresentationModelAssemblerSupport<Person, PersonResource> {
 
 		PersonResourceAssembler() {
 			this(PersonController.class);
@@ -171,8 +170,8 @@ public class IdentifiableResourceAssemblerSupportUnitTest extends TestUtils {
 		}
 
 		@Override
-		public PersonResource toResource(Person entity) {
-			return createResource(entity);
+		public PersonResource toModel(Person entity) {
+			return createModel(entity);
 		}
 	}
 }

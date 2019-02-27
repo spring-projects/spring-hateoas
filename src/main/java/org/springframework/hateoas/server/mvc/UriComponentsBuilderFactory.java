@@ -35,7 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 class UriComponentsBuilderFactory {
 
 	static final String REQUEST_ATTRIBUTES_MISSING = "Could not find current request via RequestContextHolder. Is this being called from a Spring MVC handler?";
-	private static final String CACHE_KEY = ControllerLinkBuilder.class.getName() + "#BUILDER_CACHE";
+	private static final String CACHE_KEY = UriComponentsBuilderFactory.class.getName() + "#BUILDER_CACHE";
 
 	/**
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the

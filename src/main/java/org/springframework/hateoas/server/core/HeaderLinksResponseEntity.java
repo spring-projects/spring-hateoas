@@ -17,8 +17,8 @@ package org.springframework.hateoas.server.core;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.server.ResourceProcessor;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,15 +26,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 
 /**
- * Special {@link ResponseEntity} that exposes {@link Link} instances in the contained {@link ResourceSupport} as link
- * headers instead of in the body. Note, that this class is not intended to be used directly from user code but by
+ * Special {@link ResponseEntity} that exposes {@link Link} instances in the contained {@link RepresentationModel} as
+ * link headers instead of in the body. Note, that this class is not intended to be used directly from user code but by
  * support code that will transparently invoke the header exposure. If you use this class from a controller directly,
- * the {@link Link}s will not be present in the {@link ResourceSupport} instance anymore when {@link ResourceProcessor}s
- * kick in.
+ * the {@link Link}s will not be present in the {@link RepresentationModel} instance anymore when
+ * {@link RepresentationModelProcessor}s kick in.
  *
  * @author Oliver Gierke
  */
-public class HeaderLinksResponseEntity<T extends ResourceSupport> extends ResponseEntity<T> {
+public class HeaderLinksResponseEntity<T extends RepresentationModel<?>> extends ResponseEntity<T> {
 
 	/**
 	 * Creates a new {@link HeaderLinksResponseEntity} from the given {@link ResponseEntity}.
@@ -64,7 +64,7 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
-	public static <S extends ResourceSupport> HeaderLinksResponseEntity<S> wrap(HttpEntity<S> entity) {
+	public static <S extends RepresentationModel<?>> HeaderLinksResponseEntity<S> wrap(HttpEntity<S> entity) {
 
 		Assert.notNull(entity, "Given HttpEntity must not be null!");
 
@@ -76,13 +76,13 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	}
 
 	/**
-	 * Wraps the given {@link ResourceSupport} into a {@link HeaderLinksResponseEntity}. Will default the status code to
-	 * {@link HttpStatus#OK}.
+	 * Wraps the given {@link RepresentationModel} into a {@link HeaderLinksResponseEntity}. Will default the status code
+	 * to {@link HttpStatus#OK}.
 	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
-	public static <S extends ResourceSupport> HeaderLinksResponseEntity<S> wrap(S entity) {
+	public static <S extends RepresentationModel<?>> HeaderLinksResponseEntity<S> wrap(S entity) {
 
 		Assert.notNull(entity, "ResourceSupport must not be null!");
 
@@ -90,13 +90,13 @@ public class HeaderLinksResponseEntity<T extends ResourceSupport> extends Respon
 	}
 
 	/**
-	 * Returns the {@link Link}s contained in the {@link ResourceSupport} of the given {@link ResponseEntity} as
+	 * Returns the {@link Link}s contained in the {@link RepresentationModel} of the given {@link ResponseEntity} as
 	 * {@link HttpHeaders}.
 	 *
 	 * @param entity must not be {@literal null}.
 	 * @return
 	 */
-	private static <T extends ResourceSupport> HttpHeaders getHeadersWithLinks(ResponseEntity<T> entity) {
+	private static <T extends RepresentationModel<?>> HttpHeaders getHeadersWithLinks(ResponseEntity<T> entity) {
 
 		Links links = entity.getBody().getLinks();
 

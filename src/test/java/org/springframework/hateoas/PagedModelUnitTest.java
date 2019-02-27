@@ -21,22 +21,22 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.hateoas.PagedResources.PageMetadata;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 
 /**
- * Unit tests for {@link PagedResources}.
+ * Unit tests for {@link PagedModel}.
  * 
  * @author Oliver Gierke
  */
-public class PagedResourcesUnitTest {
+public class PagedModelUnitTest {
 
-	static final PageMetadata metadata = new PagedResources.PageMetadata(10, 1, 200);
+	static final PageMetadata metadata = new PagedModel.PageMetadata(10, 1, 200);
 
-	PagedResources<Object> resources;
+	PagedModel<Object> resources;
 
 	@Before
 	public void setUp() {
-		resources = new PagedResources<>(Collections.emptyList(), metadata);
+		resources = new PagedModel<>(Collections.emptyList(), metadata);
 	}
 
 	@Test

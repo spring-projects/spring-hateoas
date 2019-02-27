@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,35 +20,29 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.Test;
 
 /**
- * Integration tests for {@link ResourceSupport}.
- * 
+ * Integration tests for {@link RepresentationModel}.
+ *
  * @author Oliver Gierke
  */
-public class ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+public class RepresentationModelIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 
-	/**
-	 * @see #7
-	 */
-	@Test
+	@Test // #7
 	public void doesNotRenderId() throws Exception {
 
-		ResourceSupport resourceSupport = new ResourceSupport();
-		resourceSupport.add(new Link("localhost"));
+		RepresentationModel<?> model = new RepresentationModel<>();
+		model.add(new Link("localhost"));
 
-		assertThat(write(resourceSupport)).isEqualTo(REFERENCE);
+		assertThat(write(model)).isEqualTo(REFERENCE);
 	}
 
-	/**
-	 * @see #14
-	 */
-	@Test
+	@Test // #14
 	public void readResourceSupportCorrectly() throws Exception {
 
-		ResourceSupport result = read(REFERENCE, ResourceSupport.class);
+		RepresentationModel<?> model = read(REFERENCE, RepresentationModel.class);
 
-		assertThat(result.getLinks()).hasSize(1);
-		assertThat(result.getLinks()).contains(new Link("localhost"));
+		assertThat(model.getLinks()).hasSize(1);
+		assertThat(model.getLinks()).contains(new Link("localhost"));
 	}
 }

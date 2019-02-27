@@ -17,16 +17,16 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import static org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.*;
 
-import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.PagedModel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
- * Jackson 2 mixin to handle {@link PagedResources}.
+ * Jackson 2 mixin to handle {@link PagedModel}.
  *
  * @author Greg Turnquist
  */
 @JsonDeserialize(using = CollectionJsonPagedResourcesDeserializer.class)
-abstract class PagedResourcesMixin<T> extends PagedResources<T> {
+abstract class PagedResourcesMixin<T> extends PagedModel<T> {
 
 }

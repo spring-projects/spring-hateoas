@@ -20,12 +20,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 
 /**
- * Annotation to configure the relation to be used when embedding objects in HAL representations of {@link Resource}s
- * and {@link Resources}.
+ * Annotation to configure the relation to be used when embedding objects in HAL representations of {@link EntityModel}s
+ * and {@link CollectionModel}.
  * 
  * @author Alexander Baetz
  * @author Oliver Gierke
