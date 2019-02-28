@@ -54,7 +54,8 @@ class WebFluxHateoasConfiguration {
 	}
 
 	@Bean
-	HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(WebClientConfigurer configurer) {
+	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(
+			ObjectProvider<WebClientConfigurer> configurer) {
 		return new HypermediaWebClientBeanPostProcessor(configurer);
 	}
 
@@ -85,7 +86,7 @@ class WebFluxHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
 
-		private final WebClientConfigurer configurer;
+		private final ObjectProvider<WebClientConfigurer> configurer;
 
 		/*
 		 * (non-Javadoc)
@@ -95,7 +96,7 @@ class WebFluxHateoasConfiguration {
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
 			if (bean instanceof WebClient) {
-				return this.configurer.registerHypermediaTypes((WebClient) bean);
+				return this.configurer.getObject().registerHypermediaTypes((WebClient) bean);
 			}
 
 			return bean;

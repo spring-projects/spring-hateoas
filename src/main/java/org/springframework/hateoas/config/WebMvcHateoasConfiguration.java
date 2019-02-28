@@ -52,7 +52,8 @@ class WebMvcHateoasConfiguration {
 	}
 
 	@Bean
-	HypermediaRestTemplateBeanPostProcessor restTemplateBeanPostProcessor(HypermediaWebMvcConfigurer configurer) {
+	static HypermediaRestTemplateBeanPostProcessor restTemplateBeanPostProcessor(
+			ObjectProvider<HypermediaWebMvcConfigurer> configurer) {
 		return new HypermediaRestTemplateBeanPostProcessor(configurer);
 	}
 
@@ -100,7 +101,7 @@ class WebMvcHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-		private final HypermediaWebMvcConfigurer configurer;
+		private final ObjectProvider<HypermediaWebMvcConfigurer> configurer;
 
 		/*
 		 * (non-Javadoc)
@@ -113,7 +114,7 @@ class WebMvcHateoasConfiguration {
 				return bean;
 			}
 
-			configurer.extendMessageConverters(((RestTemplate) bean).getMessageConverters());
+			configurer.getObject().extendMessageConverters(((RestTemplate) bean).getMessageConverters());
 
 			return bean;
 		}
