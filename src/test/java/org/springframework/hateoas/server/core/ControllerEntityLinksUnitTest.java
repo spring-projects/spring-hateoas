@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import lombok.Value;
+
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -33,6 +35,8 @@ import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.LinkBuilderFactory;
+import org.springframework.hateoas.server.TypedEntityLinks;
+import org.springframework.hateoas.server.TypedEntityLinks.ExtendedTypedEntityLinks;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -109,6 +113,42 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 				.withMessageContaining(ExposesResourceFor.class.getName());
 	}
 
+	@Test // #843
+	public void returnsItemResourceLinkForExtractorFunction() {
+
+		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
+
+		ControllerEntityLinks entityLinks = new ControllerEntityLinks(singleton(SampleController.class),
+				linkBuilderFactory);
+
+		assertThat(entityLinks.linkToItemResource(new Person(42L), Person::getId).getHref()).endsWith("/person/42");
+	}
+
+	@Test // #843
+	public void returnsTypeEntityLinks() {
+
+		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
+
+		TypedEntityLinks<Person> entityLinks = new ControllerEntityLinks(singleton(SampleController.class),
+				linkBuilderFactory).forType(Person::getId);
+
+		Person person = new Person(42L);
+
+		assertThat(entityLinks.linkForItemResource(person).withSelfRel().getHref()).endsWith("/person/42");
+		assertThat(entityLinks.linkToItemResource(person).getHref()).endsWith("/person/42");
+	}
+
+	@Test // #843
+	public void returnsExtendedTypedEntityLinks() {
+
+		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
+
+		ExtendedTypedEntityLinks<Person> entityLinks = new ControllerEntityLinks(singleton(SampleController.class),
+				linkBuilderFactory).forType(Person.class, Person::getId);
+
+		assertThat(entityLinks.linkToCollectionResource().getHref()).endsWith("/person");
+	}
+
 	@Controller
 	@ExposesResourceFor(Person.class)
 	@RequestMapping("/person")
@@ -121,7 +161,10 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 
 	static class InvalidController {}
 
-	static class Person {}
+	@Value
+	static class Person {
+		Long id;
+	}
 
 	static class Order {}
 }
