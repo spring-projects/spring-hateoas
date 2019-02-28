@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.server.mvc;
+package org.springframework.hateoas.server.core;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.MockRestServiceServer.*;
@@ -35,8 +35,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.server.mvc.TypeReferences.CollectionModelType;
-import org.springframework.hateoas.server.mvc.TypeReferences.EntityModelType;
+import org.springframework.hateoas.server.core.TypeReferences;
+import org.springframework.hateoas.server.core.TypeReferences.CollectionModelType;
+import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;

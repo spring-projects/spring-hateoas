@@ -37,7 +37,7 @@ import org.springframework.hateoas.client.Movie;
 import org.springframework.hateoas.client.Server;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.server.mvc.TypeReferences.EntityModelType;
+import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
