@@ -18,7 +18,6 @@ package org.springframework.hateoas.server;
 import java.net.URI;
 
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 
@@ -30,22 +29,12 @@ import org.springframework.hateoas.LinkRelation;
 public interface LinkBuilder {
 
 	/**
-	 * Adds the given object's {@link String} representation as sub-resource to the current URI. Will unwrap
-	 * {@link Identifiable}s to their id value (see {@link Identifiable#getId()}).
+	 * Adds the given object's {@link String} representation as sub-resource to the current URI.
 	 *
 	 * @param object
 	 * @return
 	 */
 	LinkBuilder slash(Object object);
-
-	/**
-	 * Adds the given {@link Identifiable}'s id as sub-resource. Will simply return the {@link LinkBuilder} as is if the
-	 * given entity is {@literal null}.
-	 *
-	 * @param identifiable
-	 * @return
-	 */
-	LinkBuilder slash(Identifiable<?> identifiable);
 
 	/**
 	 * Creates a URI of the link built by the current builder instance.

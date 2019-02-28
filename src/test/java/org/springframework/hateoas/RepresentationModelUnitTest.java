@@ -32,6 +32,7 @@ public class RepresentationModelUnitTest {
 	public void setsUpWithEmptyLinkList() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
+
 		assertThat(support.hasLinks()).isFalse();
 		assertThat(support.hasLink(IanaLinkRelations.SELF.value())).isFalse();
 		assertThat(support.getLinks().isEmpty()).isTrue();
@@ -45,7 +46,6 @@ public class RepresentationModelUnitTest {
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(link);
 
-		assertThat(support.getId()).isEmpty();
 		assertThat(support.hasLinks()).isTrue();
 		assertThat(support.hasLink(link.getRel())).isTrue();
 		assertThat(support.getLink(link.getRel())).hasValue(link);
@@ -75,22 +75,11 @@ public class RepresentationModelUnitTest {
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(Arrays.asList(first, second));
 
-		assertThat(support.getId()).isEmpty();
 		assertThat(support.hasLinks()).isTrue();
 		assertThat(support.getLinks()).contains(first, second);
 		assertThat(support.getLinks()).hasSize(2);
 		assertThat(support.getLinks(IanaLinkRelations.PREV.value())).contains(first);
 		assertThat(support.getLinks(IanaLinkRelations.NEXT.value())).contains(second);
-	}
-
-	@Test
-	public void selfLinkBecomesId() {
-
-		Link link = new Link("foo");
-		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add(link);
-
-		assertThat(support.getId()).hasValue(link);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

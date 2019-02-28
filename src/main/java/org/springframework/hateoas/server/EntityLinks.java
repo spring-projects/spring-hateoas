@@ -18,7 +18,6 @@ package org.springframework.hateoas.server;
 import java.util.function.Function;
 
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.TypedEntityLinks.ExtendedTypedEntityLinks;
 import org.springframework.plugin.core.Plugin;
@@ -59,7 +58,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * Implementations will know about the URI structure being used to expose item-resource URIs.
 	 *
 	 * @param type the entity type to point to, must not be {@literal null}.
-	 * @param id the id of the object of the handed type, {@link Identifiable}s will be unwrapped.
+	 * @param id the id of the object of the handed type, must not be {@literal null}.
 	 * @return the {@link LinkBuilder} pointing to the item resource identified by the given type and id. Will never be
 	 *         {@literal null}.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
@@ -83,16 +82,6 @@ public interface EntityLinks extends Plugin<Class<?>> {
 
 		return linkForItemResource(entity.getClass(), identifierExtractor.apply(entity));
 	}
-
-	/**
-	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity.
-	 *
-	 * @see #linkForItemResource(Class, Object)
-	 * @param entity the entity type to point to, must not be {@literal null}.
-	 * @return the {@link LinkBuilder} pointing the given entity. Will never be {@literal null}.
-	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
-	 */
-	LinkBuilder linkForItemResource(Identifiable<?> entity);
 
 	/**
 	 * Creates a {@link Link} pointing to the collection resource of the given type. The relation type of the link will be
@@ -130,16 +119,6 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	default <T> Link linkToItemResource(T entity, Function<T, Object> identifierExtractor) {
 		return linkToItemResource(entity.getClass(), identifierExtractor.apply(entity));
 	}
-
-	/**
-	 * Creates a {@link Link} pointing to item resource backing the given entity. The relation type of the link will be
-	 * determined by the implementation class and should be defaulted to {@link IanaLinkRelations#SELF}.
-	 *
-	 * @param entity the entity type to point to, must not be {@literal null}.
-	 * @return the {@link Link} pointing to the resource exposed for the given entity. Will never be {@literal null}.
-	 * @throws IllegalArgumentException in case the type of the given entity is unknown the entity links infrastructure.
-	 */
-	Link linkToItemResource(Identifiable<?> entity);
 
 	/**
 	 * Creates a {@link TypedEntityLinks} instance using the given identifier extractor function.

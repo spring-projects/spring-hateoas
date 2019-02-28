@@ -28,9 +28,7 @@ import java.util.Optional;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
@@ -118,17 +116,6 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(UnmappedController.class).withSelfRel();
 		assertThat(link.getHref()).isEqualTo("http://localhost");
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void usesIdOfIdentifyableForPathSegment() {
-
-		Identifiable<Long> identifyable = Mockito.mock(Identifiable.class);
-		Mockito.when(identifyable.getId()).thenReturn(Optional.of(10L));
-
-		Link link = linkTo(PersonControllerImpl.class).slash(identifyable).withSelfRel();
-		assertThat(link.getHref()).endsWith("/people/10");
 	}
 
 	@Test
@@ -624,14 +611,8 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
 
-	static class Person implements Identifiable<Long> {
-
+	static class Person {
 		Long id;
-
-		@Override
-		public Optional<Long> getId() {
-			return Optional.ofNullable(id);
-		}
 	}
 
 	@RequestMapping("/people")

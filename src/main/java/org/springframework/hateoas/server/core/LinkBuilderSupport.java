@@ -29,7 +29,6 @@ import java.util.function.Function;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkBuilder;
@@ -93,10 +92,6 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 			return getThis();
 		}
 
-		if (object instanceof Identifiable) {
-			return slash((Identifiable<?>) object);
-		}
-
 		String path = object.toString();
 
 		if (path.endsWith("#")) {
@@ -128,19 +123,6 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 			return createNewInstance(builder.query(components.getQuery()), affordances);
 		});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.LinkBuilder#slash(org.springframework.hateoas.Identifiable)
-	 */
-	public T slash(Identifiable<?> identifyable) {
-
-		if (identifyable == null) {
-			return getThis();
-		}
-
-		return slash(identifyable.getId());
 	}
 
 	/*

@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -33,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Johhny Lim
  * @author Greg Turnquist
  */
-public class RepresentationModel<T extends RepresentationModel<? extends T>> implements Identifiable<Link> {
+public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 
 	private final List<Link> links;
 
@@ -55,14 +54,6 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> imp
 
 		this.links = new ArrayList<>();
 		this.links.addAll(initialLinks);
-	}
-
-	/**
-	 * Returns the {@link Link} with a rel of {@link IanaLinkRelations#SELF}.
-	 */
-	@JsonIgnore
-	public Optional<Link> getId() {
-		return getLink(IanaLinkRelations.SELF);
 	}
 
 	/**
