@@ -24,16 +24,16 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
-import org.springframework.hateoas.server.core.AbstractLinkDiscovererUnitTest;
 
 /**
  * Unit tests for {@link HalFormsLinkDiscoverer}.
  *
  * @author Greg Turnquist
  */
-public class HalFormsLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
+public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalFormsLinkDiscoverer();
 

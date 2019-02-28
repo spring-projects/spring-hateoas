@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.server.core;
+package org.springframework.hateoas.client;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.client.LinkDiscoverer;
 
 /**
  * Base class for unit tests for {@link LinkDiscoverer} implementations.
  *
  * @author Oliver Gierke
  */
-public abstract class AbstractLinkDiscovererUnitTest {
+public abstract class LinkDiscovererUnitTest {
 
 	@Test
 	public void findsSingleLink() {
@@ -77,6 +79,27 @@ public abstract class AbstractLinkDiscovererUnitTest {
 
 		assertThat(getDiscoverer().findLinksWithRel("something", getInputStringWithoutLinkContainer())).isEmpty();
 		assertThat(getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer())).isEmpty();
+	}
+
+	@Test // #840
+	public void throwsExceptionForRequiredLinkNotFoundInString() {
+
+		LinkDiscoverer discoverer = getDiscoverer();
+
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> discoverer.findRequiredLinkWithRel(LinkRelation.of("something-obscure"), getInputString()));
+	}
+
+	@Test // #840
+	public void throwsExceptionForRequiredLinkNotFoundInInputStream() throws IOException {
+
+		LinkDiscoverer discoverer = getDiscoverer();
+
+		try (InputStream stream = new ByteArrayInputStream(getInputString().getBytes(StandardCharsets.UTF_8))) {
+
+			assertThatExceptionOfType(IllegalArgumentException.class) //
+					.isThrownBy(() -> discoverer.findRequiredLinkWithRel(LinkRelation.of("something-obscure"), stream));
+		}
 	}
 
 	/**

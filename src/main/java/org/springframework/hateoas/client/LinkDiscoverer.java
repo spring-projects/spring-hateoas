@@ -32,75 +32,111 @@ import org.springframework.plugin.core.Plugin;
 public interface LinkDiscoverer extends Plugin<MediaType> {
 
 	/**
+	 * Finds a single link with the given {@link LinkRelation} in the given {@link String} representation.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @param representation must not be {@literal null}.
+	 * @return the first link with the given relation type found, or {@link Optional#empty()} if none was found.
+	 */
+	Optional<Link> findLinkWithRel(LinkRelation rel, String representation);
+
+	/**
 	 * Finds a single link with the given relation type in the given {@link String} representation.
 	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @param representation must not be {@literal null}.
-	 * @return the first link with the given relation type found, or {@literal null} if none was found.
+	 * @return the first {@link Link} with the given link relation found, or {@link Optional#empty()} if none was found.
 	 */
 	default Optional<Link> findLinkWithRel(String rel, String representation) {
 		return findLinkWithRel(LinkRelation.of(rel), representation);
 	}
 
-	Optional<Link> findLinkWithRel(LinkRelation rel, String representation);
-
 	/**
-	 * Finds a single link with the given relation type in the given {@link InputStream} representation.
+	 * Finds a single link with the given relation in the given {@link String} representation.
 	 *
-	 * @param rel must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null}.
 	 * @param representation must not be {@literal null}.
-	 * @return the first link with the given relation type found, or {@literal null} if none was found.
+	 * @return the first link with the given relation type found.
+	 * @throws IllegalArgumentException if no {@link Link} for the given {@link LinkRelation} can be found.
 	 */
-	default Optional<Link> findLinkWithRel(String rel, InputStream representation) {
-		return findLinkWithRel(LinkRelation.of(rel), representation);
+	default Link findRequiredLinkWithRel(LinkRelation relation, String representation) {
+
+		return findLinkWithRel(relation, representation).orElseThrow(
+				() -> new IllegalArgumentException(String.format("Did not find link with relation '%s'!", relation.value())));
 	}
 
 	/**
 	 * Finds a single link with the given {@link LinkRelation} in the given {@link InputStream} representation.
 	 *
-	 * @param rel must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
 	 * @param representation must not be {@literal null}.
-	 * @return the first link with the given relation type found, or {@literal null} if none was found.
+	 * @return the first {@link Link} with the given {@link LinkRelation} found, or {@link Optional#empty()} if none was
+	 *         found.
 	 */
-	Optional<Link> findLinkWithRel(LinkRelation rel, InputStream representation);
+	Optional<Link> findLinkWithRel(LinkRelation relation, InputStream representation);
+
+	/**
+	 * Finds a single link with the given relation type in the given {@link InputStream} representation.
+	 *
+	 * @param relation must not be {@literal null} or empty.
+	 * @param representation must not be {@literal null}.
+	 * @return the first link with the given relation type found, or {@link Optional#empty()} if none was found.
+	 */
+	default Optional<Link> findLinkWithRel(String relation, InputStream representation) {
+		return findLinkWithRel(LinkRelation.of(relation), representation);
+	}
+
+	/**
+	 * Finds a single link with the given relation type in the given {@link InputStream} representation.
+	 *
+	 * @param relation must not be {@literal null} or empty.
+	 * @param representation must not be {@literal null}.
+	 * @return the first link with the given relation type found.
+	 * @throws IllegalArgumentException if no {@link Link} for the given {@link LinkRelation} can be found.
+	 */
+	default Link findRequiredLinkWithRel(LinkRelation relation, InputStream representation) {
+
+		return findLinkWithRel(relation, representation).orElseThrow(
+				() -> new IllegalArgumentException(String.format("Did not find link with relation '%s'!", relation.value())));
+	}
 
 	/**
 	 * Returns all links with the given link relation found in the given {@link String} representation.
 	 *
-	 * @param rel must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null} or empty.
 	 * @param representation must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	default Links findLinksWithRel(String rel, String representation) {
-		return findLinksWithRel(LinkRelation.of(rel), representation);
+	default Links findLinksWithRel(String relation, String representation) {
+		return findLinksWithRel(LinkRelation.of(relation), representation);
 	}
 
 	/**
 	 * Returns all links with the given {@link LinkRelation} found in the given {@link String} representation.
 	 *
-	 * @param rel must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
 	 * @param representation must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	Links findLinksWithRel(LinkRelation rel, String representation);
+	Links findLinksWithRel(LinkRelation relation, String representation);
 
 	/**
 	 * Returns all links with the given link relation found in the given {@link InputStream} representation.
 	 *
-	 * @param rel must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null} or empty.
 	 * @param representation must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	default Links findLinksWithRel(String rel, InputStream representation) {
-		return findLinksWithRel(LinkRelation.of(rel), representation);
+	default Links findLinksWithRel(String relation, InputStream representation) {
+		return findLinksWithRel(LinkRelation.of(relation), representation);
 	}
 
 	/**
 	 * Returns all links with the given {@link LinkRelation} found in the given {@link InputStream} representation.
 	 *
-	 * @param rel must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
 	 * @param representation must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	Links findLinksWithRel(LinkRelation rel, InputStream representation);
+	Links findLinksWithRel(LinkRelation relation, InputStream representation);
 }

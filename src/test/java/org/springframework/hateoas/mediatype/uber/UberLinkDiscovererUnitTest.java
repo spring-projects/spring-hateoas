@@ -23,17 +23,17 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
-import org.springframework.hateoas.server.core.AbstractLinkDiscovererUnitTest;
 
 /**
  * Unit tests for {@link HalLinkDiscoverer}.
  *
  * @author Oliver Gierke
  */
-public class UberLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
+public class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new UberLinkDiscoverer();
 	String sample;

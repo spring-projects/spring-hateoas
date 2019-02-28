@@ -24,9 +24,9 @@ import java.util.Optional;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.alps.AlpsLinkDiscoverer;
-import org.springframework.hateoas.server.core.AbstractLinkDiscovererUnitTest;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.util.StreamUtils;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-public class AlpsLinkDiscoverUnitTest extends AbstractLinkDiscovererUnitTest {
+public class AlpsLinkDiscoverUnitTest extends LinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new AlpsLinkDiscoverer();
 

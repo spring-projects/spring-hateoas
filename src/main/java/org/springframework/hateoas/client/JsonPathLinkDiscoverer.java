@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
 
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * {@link LinkDiscoverer} that uses {@link JsonPath} to find links inside a representation.
@@ -108,10 +109,14 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 		Assert.notNull(relation, "LinkRelation must not be null!");
 
 		try {
+
 			Object parseResult = getExpression(relation).read(representation);
 			return createLinksFrom(parseResult, relation);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+
+		} catch (IOException o_O) {
+			throw new RuntimeException(o_O);
+		} catch (PathNotFoundException o_O) {
+			return Links.NONE;
 		}
 	}
 

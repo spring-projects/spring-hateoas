@@ -78,7 +78,8 @@ public class UberLinkDiscoverer implements LinkDiscoverer {
 	@Override
 	public Links findLinksWithRel(LinkRelation rel, String representation) {
 
-		return getLinks(representation).stream().filter(it -> it.hasRel(rel)) //
+		return getLinks(representation).stream() //
+				.filter(it -> it.hasRel(rel)) //
 				.collect(Links.collector());
 	}
 
