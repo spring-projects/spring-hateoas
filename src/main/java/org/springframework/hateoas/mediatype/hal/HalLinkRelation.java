@@ -106,6 +106,16 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	}
 
 	/**
+	 * Creates a new {@link HalLinkRelationBuilder} for the given curie.
+	 *
+	 * @param curie must not be {@literal null} or empty.
+	 * @return will never be {@literal null}.
+	 */
+	public static HalLinkRelationBuilder curieBuilder(String curie) {
+		return relation -> new HalLinkRelation(curie, relation);
+	}
+
+	/**
 	 * Creates a new {@link HalLinkRelation} curied to the given value.
 	 *
 	 * @param curie must not be {@literal null} or empty.
@@ -160,6 +170,22 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 		return Stream.of(value(), localPart) //
 				.map(it -> String.format(RELATION_MESSAGE_TEMPLATE, it)) //
 				.toArray(String[]::new);
+	}
+
+	/**
+	 * Simple builder interface to easily create multiple {@link HalLinkRelation}s for a single curie.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	public interface HalLinkRelationBuilder {
+
+		/**
+		 * Creates a new {@link HalLinkRelation} based on the current curie settings.
+		 *
+		 * @param relation must not be {@literal null} or empty.
+		 * @return will never be {@literal null}.
+		 */
+		HalLinkRelation relation(String relation);
 	}
 
 	/*
