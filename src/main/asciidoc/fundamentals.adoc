@@ -172,7 +172,7 @@ If you returned such an instance from a Spring MVC or WebFlux controller and the
     "self" : {
       "href" : "http://myhost/people/42"
     }
-  }
+  },
   "firstname" : "Dave",
   "lastname" : "Matthews"
 }
