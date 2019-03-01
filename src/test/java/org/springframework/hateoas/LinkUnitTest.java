@@ -20,6 +20,7 @@ import static org.assertj.core.api.SoftAssertions.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.URI;
 import java.util.Collections;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -433,6 +434,21 @@ public class LinkUnitTest {
 				.hasSize(0);
 		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve())
 				.isEqualTo(Employee.class);
+	}
+
+	@Test
+	public void createsUriForSimpleLink() {
+		assertThat(new Link("/something").toUri()).isEqualTo(URI.create("/something"));
+	}
+
+	@Test
+	public void createsUriForTemplateWithOptionalParameters() {
+		assertThat(new Link("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
+	}
+
+	@Test
+	public void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Link("/{segment}/path").toUri());
 	}
 
 }

@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.experimental.Wither;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -389,6 +390,23 @@ public class Link implements Serializable {
 		}
 
 		return this.template;
+	}
+
+	/**
+	 * Returns the current href as URI after expanding the links without any arguments, i.e. all optional URI
+	 * {@link TemplateVariable}s will be dropped. If the href contains mandatory {@link TemplateVariable}s, the URI
+	 * creation will fail with an {@link IllegalStateException}.
+	 *
+	 * @return will never be {@literal null}.
+	 * @throws IllegalStateException in case the href contains mandatory URI {@link TemplateVariable}s.
+	 */
+	public URI toUri() {
+
+		try {
+			return URI.create(expand().getHref());
+		} catch (IllegalArgumentException o_O) {
+			throw new IllegalStateException(o_O);
+		}
 	}
 
 	/*

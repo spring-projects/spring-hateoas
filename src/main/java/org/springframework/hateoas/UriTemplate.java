@@ -94,25 +94,28 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * Creates a new {@link UriTemplate} from the given base URI and {@link TemplateVariables}.
 	 *
 	 * @param baseUri must not be {@literal null} or empty.
-	 * @param variables defaults to {@link TemplateVariables#NONE}.
+	 * @param variables must not be {@literal null}.
 	 */
 	public UriTemplate(String baseUri, TemplateVariables variables) {
 
 		Assert.hasText(baseUri, "Base URI must not be null or empty!");
+		Assert.notNull(variables, "Template variables must not be null!");
 
 		this.baseUri = baseUri;
-		this.variables = variables == null ? TemplateVariables.NONE : variables;
+		this.variables = variables;
 	}
 
 	/**
 	 * Creates a new {@link UriTemplate} with the current {@link TemplateVariable}s augmented with the given ones.
 	 *
-	 * @param variables can be {@literal null}.
+	 * @param variables must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
 	public UriTemplate with(TemplateVariables variables) {
 
-		if (variables == null) {
+		Assert.notNull(variables, "TemplateVariables must not be null!");
+
+		if (variables.equals(TemplateVariables.NONE)) {
 			return this;
 		}
 
@@ -139,6 +142,19 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
+	 * Creates a new {@link UriTemplate} with the given {@link TemplateVariable} added.
+	 *
+	 * @param variable must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public UriTemplate with(TemplateVariable variable) {
+
+		Assert.notNull(variable, "Template variable must not be null!");
+
+		return with(new TemplateVariables(variable));
+	}
+
+	/**
 	 * Creates a new {@link UriTemplate} with a {@link TemplateVariable} with the given name and type added.
 	 *
 	 * @param variableName must not be {@literal null} or empty.
@@ -157,11 +173,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public static boolean isTemplate(String candidate) {
 
-		if (!StringUtils.hasText(candidate)) {
-			return false;
-		}
-
-		return VARIABLE_REGEX.matcher(candidate).find();
+		return StringUtils.hasText(candidate) //
+				? VARIABLE_REGEX.matcher(candidate).find()
+				: false;
 	}
 
 	/**
@@ -170,7 +184,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @return
 	 */
 	public List<TemplateVariable> getVariables() {
-		return this.variables.asList();
+		return variables.asList();
 	}
 
 	/**
@@ -241,7 +255,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	@Override
 	public Iterator<TemplateVariable> iterator() {
-		return this.variables.iterator();
+		return variables.iterator();
 	}
 
 	/*

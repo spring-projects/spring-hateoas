@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -762,27 +763,29 @@ public class IanaLinkRelations {
 	}
 
 	/**
-	 * Is this relation an IANA standard? Per RFC8288, parsing of link relations is case insensitive.
+	 * Is this relation an IANA standard? Per RFC 8288, parsing of link relations is case insensitive.
 	 *
-	 * @param rel
+	 * @param relation must not be {@literal null}.
 	 * @return boolean
 	 */
-	public static boolean isIanaRel(String rel) {
+	public static boolean isIanaRel(String relation) {
 
-		return rel != null && LINK_RELATIONS.stream() //
-				.anyMatch(it -> it.value().equalsIgnoreCase(rel));
+		Assert.notNull(relation, "Link relation must not be null!");
+
+		return LINK_RELATIONS.stream() //
+				.anyMatch(it -> it.value().equalsIgnoreCase(relation));
 	}
 
 	/**
-	 * Is this relation an IANA standard? Per RFC8288, parsing of link relations is case insensitive.
+	 * Is this relation an IANA standard? Per RFC 8288, parsing of link relations is case insensitive.
 	 *
-	 * @param rel
+	 * @param relation must not be {@literal null}.
 	 * @return
 	 */
-	public static boolean isIanaRel(LinkRelation rel) {
+	public static boolean isIanaRel(LinkRelation relation) {
 
-		return rel != null && LINK_RELATIONS.stream() //
-				.anyMatch(it -> it.value().equalsIgnoreCase(rel.value()));
+		return LINK_RELATIONS.stream() //
+				.anyMatch(it -> it.value().equalsIgnoreCase(relation.value()));
 
 	}
 
@@ -790,14 +793,14 @@ public class IanaLinkRelations {
 	 * Convert a string-based link relation to a {@link IanaLinkRelations}. Per RFC8288, parsing of link relations is case
 	 * insensitive.
 	 *
-	 * @param rel as a string
-	 * @return rel as a {@link IanaLinkRelations}
+	 * @param relation as a string
+	 * @return the link relation as a {@link LinkRelation}
 	 */
-	public static LinkRelation parse(String rel) {
+	public static LinkRelation parse(String relation) {
 
 		return LINK_RELATIONS.stream() //
-				.filter(it -> it.value().equalsIgnoreCase(rel)) //
+				.filter(it -> it.value().equalsIgnoreCase(relation)) //
 				.findFirst() //
-				.orElseThrow(() -> new IllegalArgumentException(rel + " is not a valid IANA link relation!"));
+				.orElseThrow(() -> new IllegalArgumentException(relation + " is not a valid IANA link relation!"));
 	}
 }
