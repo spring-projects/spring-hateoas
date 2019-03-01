@@ -119,6 +119,7 @@ It's basically a container for a collection of ``Link``s and has convenient meth
 The models can later be rendered into various media type formats that will define how the hypermedia elements look in the representation.
 For more information on this, have a look at <<mediatypes>>
 
+////
 .The `RepresentationModel` class hierarchy
 ====
 [plantuml, diagram-classes, svg]
@@ -133,6 +134,7 @@ CollectionModel -|> RepresentationModel
 PagedModel -|> CollectionModel
 ----
 ====
+////
 
 The default way to work with a `RepresentationModel` is to create a subclass of it to contain all the properties the representation is supposed to contain, create instances of that class, populate the properties and enrich it with links.
 
