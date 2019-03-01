@@ -40,8 +40,8 @@ public class IanaLinkRelationUnitTest {
 	@Test
 	public void testingForOfficialIanaLinkRelation() {
 
-		assertThat(IanaLinkRelations.isIanaRel((String) null)).isFalse();
-		assertThat(IanaLinkRelations.isIanaRel((LinkRelation) null)).isFalse();
+		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.isIanaRel((String) null));
+		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.isIanaRel((LinkRelation) null));
 		assertThat(IanaLinkRelations.isIanaRel("")).isFalse();
 		assertThat(IanaLinkRelations.isIanaRel("foo-bar")).isFalse();
 

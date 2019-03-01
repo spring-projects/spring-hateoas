@@ -784,6 +784,8 @@ public class IanaLinkRelations {
 	 */
 	public static boolean isIanaRel(LinkRelation relation) {
 
+		Assert.notNull(relation, "Link relation must not be null!");
+
 		return LINK_RELATIONS.stream() //
 				.anyMatch(it -> it.value().equalsIgnoreCase(relation.value()));
 
