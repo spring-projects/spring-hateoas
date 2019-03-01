@@ -1,0 +1,91 @@
+[[client]]
+= Client-side Support
+
+This section describes Spring HATEOAS's support for clients.
+
+[[client.traverson]]
+== Traverson
+
+Spring HATEOAS provides an API for client-side service traversal. It is inspired by the https://blog.codecentric.de/en/2013/11/traverson/[Traverson JavaScript library].
+The following example shows how to use it:
+
+====
+[source, java]
+----
+Map<String, Object> parameters = new HashMap<>();
+parameters.put("user", 27);
+
+Traverson traverson = new Traverson(new URI("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
+String name = traverson.follow("movies", "movie", "actor").
+  withTemplateParameters(parameters).
+  toObject("$.name");
+----
+====
+
+You can set up a `Traverson` instance by pointing it to a REST server and configuring the media types you want to set as `Accept` headers. You can then define the relation names you want to discover and follow. Relation names can either be simple names or JSONPath expressions (starting with an `$`).
+
+The sample then hands a parameter map into the execution. The parameters are used to expand URIs (which are templated) found during the traversal. The traversal is concluded by accessing the representation of the final traversal. In the preceding example, we evaluate a JSONPath expression to access the actor's name.
+
+The preceding example is the simplest version of traversal, where the `rel` values are strings and, at each hop, the same template parameters are applied.
+
+There are more options to customize template parameters at each level.
+The following example shows these options.
+
+[source,java,indent=0]
+----
+include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
+----
+
+The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI template variables.
+
+NOTE: `.withParameter()` returns a new `Hop` object that is chainable. You can string together as many `.withParameter` as you like. The result is a single `Hop` definition.
+The following example shows one way to do so:
+
+====
+[source,java,indent=0]
+----
+include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
+----
+====
+
+You can also load an entire `Map` of parameters by using `.withParameters(Map)`.
+
+NOTE: `follow()` is chainable, meaning you can string together multiple hops, as shown in the preceding examples. You can either put multiple string-based `rel` values (`follow("items", "item")`) or a single hop with specific parameters.
+
+=== `EntityModel<T>` vs. `CollectionModel<T>`
+
+The examples shown so far demonstrate how to sidestep Java's type erasure and convert a single JSON-formatted resource into a `EntityModel<Item>` object. However, what if you get a collection like an `\_embedded` HAL collection?
+You can do so with only one slight tweak, as the following example shows:
+
+====
+[source,java]
+----
+CollectionModelType<Item> collectionModelType =
+        TypeReferences.CollectionModelType<Item>() {};
+
+CollectionModel<Item> itemResource = traverson.//
+        follow(rel("items")).//
+        toObject(collectionModelType);
+----
+====
+
+Instead of fetching a single resource, this one deserializes a collection into `CollectionModel`.
+
+[[client.link-discoverer]]
+== Using `LinkDiscoverer` Instances
+
+When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in it. Spring HATEOAS provides https://code.google.com/p/json-path[JSONPath]-based implementations of the `LinkDiscoverer` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport`, we automatically expose an instance supporting the configured hypermedia type as a Spring bean.
+
+Alternatively, you can setup and use an instance as follows:
+
+====
+[source, java]
+----
+String content = "{'_links' :  { 'foo' : { 'href' : '/foo/bar' }}}";
+LinkDiscoverer discoverer = new HalLinkDiscoverer();
+Link link = discoverer.findLinkWithRel("foo", content);
+
+assertThat(link.getRel(), is("foo"));
+assertThat(link.getHref(), is("/foo/bar"));
+----
+====

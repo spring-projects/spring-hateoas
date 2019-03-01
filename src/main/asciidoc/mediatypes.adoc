@@ -1,0 +1,59 @@
+[[mediatypes]]
+= Media types
+
+[[mediatypes.hal]]
+== HAL – Hypertext Application Language
+
+[[mediatypes.hal.curie-provider]]
+=== [[spis.curie-provider]] Using the `CurieProvider` API
+
+The http://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the http://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension `rel` URIs can be used by applications that do not wish to register a relation type. Each one is a URI that uniquely identifies the relation type. The `rel` URI can be serialized as a compact URI or http://www.w3.org/TR/curie[Curie]. For example, a curie of `ex:persons` stands for the link relation type `http://example.com/rels/persons` if `ex` is defined as `http://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
+
+The `rel` values created by the default `RelProvider` are extension relation types and, as a result, must be URIs, which can cause a lot of overhead. The `CurieProvider` API takes care of that: It lets you define a base URI as a URI template and a prefix that stands for that base URI. If a `CurieProvider` is present, the `RelProvider` prepends all `rel` values with the curie prefix. Furthermore a `curies` link is automatically added to the HAL resource.
+
+The following configuration defines a default curie provider:
+
+====
+[source, java]
+----
+@Configuration
+@EnableWebMvc
+@EnableHypermediaSupport(type= {HypermediaType.HAL})
+public class Config {
+
+  @Bean
+  public CurieProvider curieProvider() {
+    return new DefaultCurieProvider("ex", new UriTemplate("http://www.example.com/rels/{rel}"));
+  }
+}
+----
+====
+
+Note that now the `ex:` prefix automatically appears before all rel values that are not registered with IANA, as in `ex:orders`. Clients can use the `curies` link to resolve a curie to its full form.
+The following example shows how to do so:
+
+====
+[source, json]
+----
+{
+  _"links" : {
+    "self" : { href: "http://myhost/person/1" },
+    "curies" : {
+         "name" : "ex",
+         "href" : "http://example.com/rels/{rel}",
+         "templated" : true
+    },
+    "ex:orders" : { href : "http://myhost/person/1/orders" }
+  },
+  "firstname" : "Dave",
+  "lastname" : "Matthews"
+}
+----
+====
+
+Since the purpose of the `CurieProvider` API is to allow for automatic curie creation, you can define only one `CurieProvider` bean per application scope.
+
+[[mediatypes.custom]]
+== Registering a custom media type
+
+TODO

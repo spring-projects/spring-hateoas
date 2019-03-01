@@ -297,6 +297,11 @@
 								<artifactId>asciidoctorj-pdf</artifactId>
 								<version>1.5.0-alpha.16</version>
 							</dependency>
+							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj-diagram</artifactId>
+								<version>1.5.10</version>
+							</dependency>
 						</dependencies>
 						<executions>
 
@@ -321,6 +326,9 @@
 										<highlightjsdir>js/highlight</highlightjsdir>
 										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
 									</attributes>
+									<requires>
+										<require>asciidoctor-diagram</require>
+									</requires>
 								</configuration>
 							</execution>
 
@@ -658,7 +666,7 @@
 			<artifactId>reactor-extra</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!--  Needs to be after Jadler to make sure it sees the Servlet 3.0 dependency pulled in for testing -->
 
 		<dependency>

@@ -1,0 +1,209 @@
+[[fundamentals]]
+= Fundamentals
+
+This section covers the basics of Spring HATEOAS and its fundamental domain abstractions.
+
+[[fundamentals.links]]
+== Links
+
+The fundamental idea of hypermedia is to enrich the representation of a resource with hypermedia elements.
+The simplest form of that are links.
+They indicate a client that it can navigate to a certain resource.
+The semantics of a related resource are defined in a so called link relation.
+You might have seen this in the header of an HTML file already:
+
+.A link in an HTML document
+====
+[source, html]
+----
+<link href="theme.css" rel="stylesheet" type="text/css" />
+----
+====
+
+As you can see the link points to a resource `theme.css` and indicates that it is a style sheet.
+Links often carry additional information, like the media type that the resource pointed to will return.
+However, the fundamental building blocks of a link are its reference and relation.
+
+Spring HATEOAS let's you work with links through its immutable `Link` value type.
+Its constructor take both an hypertext reference and a link relation, the latter being defaulted to the IANA link relation `self`.
+Read more on the latter in <<fundamentals.link-relations>>.
+
+.Using links
+====
+[source, java]
+----
+Link link = new Link("/something");
+assertThat(link.getHref()).isEqualTo("/something");
+assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF);
+
+Link link = new Link("/something", "my-rel");
+assertThat(link.getHref()).isEqualTo("/something");
+assertThat(link.getRel()).isEqualTo(LinkRelation.of"my-rel");
+----
+====
+
+`Link` exposes other attributes as defined in https://tools.ietf.org/html/rfc5988[RFC-5988].
+You can set them by calling the corresponding wither method on a `Link` instance.
+
+Find more information on how to create links pointing to Spring MVC and Spring WebFlux controllers in <<server.link-builder>>.
+
+[[fundamentals.uri-templates]]
+== URI templates
+
+For a Spring HATEOAS `Link`, the hypertext reference can not only be a URI, but also a URI template according to https://tools.ietf.org/html/rfc6570[RFC-6570].
+A URI template contains so called template variables and allows expansion of these parameters.
+This allows clients to turn parameterized templates into URIs without having to know about the structure of the final URI, it only needs to know about the names or the variables.
+
+.Using links with templated URIs
+====
+[source, java]
+----
+Link link = new Link("/{segment}/something{?parameter}");
+assertThat(link.isTemplated()).isTrue();                                 <1>
+assertThat(link.getVariableNames()).containsAll("segment", "parameter"); <2>
+
+Map<String, Object> values = new HashMap<>();
+values.put("segment", "path");
+values.put("parameter", 42);
+
+assertThat(link.expand(values).getHref())                                <3>
+  .isEqualTo("/path/something?parameter=42");
+----
+<1> The `Link` instance indicates that is templated, i.e. it contains a URI template.
+<2> It exposes the parameters contained in the template.
+<3> It allows expansion of the parameters.
+====
+
+URI templates can be constructed manually and template variables added later on.
+
+.Working with URI templates
+====
+[source, java]
+----
+UriTemplate template = new UriTemplate("/{segment}/something")
+  .with(new TemplateVariable("parameter", VariableType.REQUEST_PARAM);
+
+assertThat(template.toString()).isEqualTo("/{segment}/something{?parameter}");
+----
+====
+
+[[fundamentals.link-relations]]
+== Link relations
+
+To indicate the relationship of target resource to the current one so called link relations are used.
+Spring HATEOAS provides a `LinkRelation` type to easily create `String`-based instances of it.
+
+
+[[fundamentals.link-relations.iana]]
+=== IANA link relations
+
+The Internet Assigned Numbers Authority contains a set of https://www.iana.org/assignments/link-relations/link-relations.xhtml[predefined link relations].
+They can be referred to via `IanaLinkRelations`.
+
+.Using IANA link relations
+====
+[source, java]
+----
+Link link = new Link("/some-resource"), IanaLinkRelations.NEXT);
+
+assertThat(link.getRel()).isEqualTo(LinkRelation.of("next"));
+assertThat(IanaLinkRelation.isIanaRel(link.getRel())).isTrue();
+----
+====
+
+[[fundamentals.representation-models]]
+== [[fundamentals.resources]] Representation models
+
+To easily create hypermedia enriched representations, Spring HATEOAS provides a set of classes with `RepresentationModel` at their root.
+It's basically a container for a collection of ``Link``s and has convenient methods to add those to the model.
+The models can later be rendered into various media type formats that will define how the hypermedia elements look in the representation.
+For more information on this, have a look at <<mediatypes>>
+
+.The `RepresentationModel` class hierarchy
+====
+[plantuml, diagram-classes, svg]
+----
+class RepresentationModel
+class EntityModel
+class CollectionModel 
+class PagedModel
+
+EntityModel -|> RepresentationModel
+CollectionModel -|> RepresentationModel
+PagedModel -|> CollectionModel
+----
+====
+
+The default way to work with a `RepresentationModel` is to create a subclass of it to contain all the properties the representation is supposed to contain, create instances of that class, populate the properties and enrich it with links.
+
+.A sample representation model type
+====
+[source, java]
+----
+class PersonModel extends RepresentationModel<PersonModel> {
+
+  String firstname, lastname;
+}
+----
+====
+
+The generic self-typing is necessary to let `RepresentationModel.add(…)` return instances of itself.
+The model type can now be used like this:
+
+.Using the person representation model
+====
+[source, java]
+----
+PersonModel model = new PersonModel();
+model.firstname = "Dave";
+model.lastname = "Matthews";
+model.add(new Link("http://myhost/people/42"));
+----
+====
+
+If you returned such an instance from a Spring MVC or WebFlux controller and the client sent an `Accept` header set to `application/hal+json`, the response would look as follows:
+
+.The HAL representation generated for the person representation model
+====
+[source, json]
+----
+{
+  "_links" : {
+    "self" : {
+      "href" : "http://myhost/people/42"
+    }
+  }
+  "firstname" : "Dave",
+  "lastname" : "Matthews"
+}
+----
+====
+
+[[fundamentals.entity-model]]
+=== Item resource representation model
+
+For a resource that's backed by a singular object or concept, a convenience `EntityModel` type exists.
+Instead of creating a custom model type for each concept, you can just reuse an already existing type and wrap instances of it into the `EntityModel`.
+
+.Using `EntityModel` to wrap existing objects
+====
+[source, java]
+----
+Person person = new Person("Dave", "Matthews");
+EntityModel<Person> model = new EntityModel<>(person);
+----
+====
+
+=== Collection resource representation model
+
+For resources that a conceptually collections, a `CollectionModel` is available.
+Its elements can either be simple objects or `RepresentationModel` instances in turn.
+
+.Using `EntityModel` to wrap existing objects
+====
+[source, java]
+----
+Collection<Person> people = Collections.singleton(new Person("Dave", "Matthews"));
+CollectionModel<Person> model = new CollectionModel<>(people);
+----
+====
