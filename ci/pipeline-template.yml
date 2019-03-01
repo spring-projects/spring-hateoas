@@ -4,7 +4,7 @@ resource_types:
   type: docker-image
   source:
     repository: springio/artifactory-resource
-    tag:        0.0.6
+    tag:        latest
 
 - name: github-status
   type: docker-image
@@ -47,6 +47,8 @@ resources:
   source:
     uri: https://github.com/spring-projects/spring-hateoas.git
     branch: ((branch))
+    ignore_paths:
+    - ci/Dockerfile
 
 - name: spring-hateoas-artifactory
   type: artifactory-resource
@@ -80,7 +82,23 @@ resources:
   type: slack-notification
   source:
     url: ((slack))
-    
+
+- name: 8-jdk-with-graphviz-docker-image-github
+  type: git
+  source:
+    uri: https://github.com/spring-projects/spring-hateoas.git
+    branch: master
+    paths:
+    - ci/Dockerfile
+
+- name: 8-jdk-with-graphviz:latest
+  type: docker-image
+  source:
+    repository: springci/spring-hateoas-8-jdk-with-graphviz
+    email:      ((docker-email))
+    username:   ((docker-username))
+    password:   ((docker-password))
+
 groups:
 - name: spring-hateoas
   jobs:
@@ -102,6 +120,9 @@ groups:
   - release-to-artifactory
 #  - promote-to-bintray
 #  - sync-to-maven-central
+- name: docker
+  jobs:
+  - 8-jdk-with-graphviz:latest
 
 jobs:
 - name: Test - JDK 8
@@ -244,6 +265,8 @@ jobs:
       Test - JDK 13 and Spring 5.1 (snapshots),
       Test - JDK 13 and Spring 5.2 (snapshots)
     ]
+  - get: 8-jdk-with-graphviz:latest
+    trigger: true
   - put: spring-hateoas-status
     params:
       commit: spring-hateoas-github
@@ -368,6 +391,18 @@ jobs:
             text: "Pull request has succeeded!"
             title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
             title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: 8-jdk-with-graphviz:latest
+  public: true
+  plan:
+  - aggregate:
+    - get: 8-jdk-with-graphviz-docker-image-github
+      trigger: true
+    - get: openjdk:8-jdk
+      trigger: true
+  - put: 8-jdk-with-graphviz:latest
+    params:
+      build: 8-jdk-with-graphviz-docker-image-github/ci
 
 - name: release-to-artifactory
   serial: true
