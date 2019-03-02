@@ -1,6 +1,3 @@
-:code: ../../..
-
-
 [[fundamentals]]
 = Fundamentals
 
@@ -229,7 +226,7 @@ The following code shows how to take a *self* link and associate two more afford
 ====
 [source,java,indent=0]
 ----
-include::{code}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=get]
+include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=get]
 ----
 <1> Create the *self* link.
 <2> Associate the `updateEmployee` method with the `self` link.
@@ -244,7 +241,7 @@ Imagine that the related methods *afforded* above looking like this:
 ====
 [source,java,indent=0]
 ----
-include::{code}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=put]
+include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=put]
 ----
 ====
 
@@ -252,7 +249,7 @@ include::{code}/src/docs/java/org/springframework/hateoas/EmployeeController.jav
 ====
 [source,java,indent=0]
 ----
-include::{code}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=patch]
+include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=patch]
 ----
 ====
 

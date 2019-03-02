@@ -317,6 +317,7 @@
 									<outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
 									<sectids>false</sectids>
 									<attributes>
+										<code-dir>${basedir}</code-dir>
 										<docinfo>shared</docinfo>
 										<linkcss>true</linkcss>
 										<icons>font</icons>
@@ -341,6 +342,9 @@
 								<configuration>
 									<backend>pdf</backend>
 									<sourceHighlighter>coderay</sourceHighlighter>
+									<attributes>
+										<code-dir>${basedir}</code-dir>
+									</attributes>
 								</configuration>
 							</execution>
 
