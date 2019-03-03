@@ -621,7 +621,7 @@ jobs:
       spring-hateoas-examples-test-jdk13-spring51-snapshots,
       spring-hateoas-examples-test-jdk13-spring52-snapshots
     ]
-  - get: 8-jdk-with-graphviz:latest
+  - get: openjdk:8-jdk
     trigger: true
   - put: spring-hateoas-examples-status
     params:
