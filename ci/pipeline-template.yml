@@ -192,8 +192,10 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:8-jdk
     trigger: true
+    passed: [ Test - JDK 8 ]
   - task: test
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "spring51-next" }
@@ -205,8 +207,10 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:8-jdk
     trigger: true
+    passed: [ Test - JDK 8 ]
   - task: test
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "spring52-next" }
@@ -218,6 +222,7 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -232,6 +237,7 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -246,6 +252,7 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -260,6 +267,7 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
@@ -274,6 +282,7 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
@@ -288,6 +297,7 @@ jobs:
   plan:
   - get: spring-hateoas-github
     trigger: true
+    passed: [ Test - JDK 8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
