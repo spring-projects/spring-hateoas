@@ -390,37 +390,37 @@ jobs:
   - aggregate:
     - task: test (JDK 8)
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "non-existent" }
+      params: { PROFILE: "ci" }
     - task: test (JDK 8 and Spring 5.1 snapshots)
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "spring51-next" }
+      params: { PROFILE: "ci,spring51-next" }
     - task: test (JDK 8 and Spring 5.2 snapshots)
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "spring52-next" }
+      params: { PROFILE: "ci,spring52-next" }
     - task: test (JDK 11)
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "non-existent" }
+      params: { PROFILE: "ci" }
     - task: test (JDK 11 and Spring 5.1 snapshots)
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "spring51-next" }
+      params: { PROFILE: "ci,spring51-next" }
     - task: test (JDK 11 and Spring 5.2 snapshots)
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "spring52-next" }
+      params: { PROFILE: "ci,spring52-next" }
     - task: test (JDK 13)
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "non-existent" }
+      params: { PROFILE: "ci" }
     - task: test (JDK 13 and Spring 5.1 snapshots)
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "spring51-next" }
+      params: { PROFILE: "ci,spring51-next" }
     - task: test (JDK 13 and Spring 5.2 snapshots)
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
-      params: { PROFILE: "spring52-next" }
+      params: { PROFILE: "ci,spring52-next" }
   on_failure:
     aggregate:
     - put: spring-hateoas-pull-requests
