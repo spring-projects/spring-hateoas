@@ -8,4 +8,4 @@ rm -rf $HOME/.m2/repository/org/springframework/hateoas 2> /dev/null || :
 
 cd spring-hateoas-github
 
-./mvnw clean dependency:list test -P${PROFILE} -Dsort
+./mvnw clean dependency:list test -Pci -Dsort

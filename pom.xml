@@ -69,6 +69,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>1.8</source.level>
+		<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.7.9</jacoco>
@@ -124,9 +125,9 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
 						<executions>
 							<execution>
+								<id>create-javadoc-jar</id>
 								<goals>
 									<goal>jar</goal>
 								</goals>
@@ -182,18 +183,9 @@
 				<shared.resources>${project.build.directory}/shared-resources</shared.resources>
 				<maven.install.skip>true</maven.install.skip>
 				<skipTests>true</skipTests>
-				<project.root>${basedir}</project.root>
-				<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 			</properties>
 
 			<dependencies>
-				<dependency>
-					<groupId>org.springframework.data.build</groupId>
-					<artifactId>spring-data-build-resources</artifactId>
-					<version>2.0.0.RELEASE</version>
-					<scope>provided</scope>
-					<type>zip</type>
-				</dependency>
 				<dependency>
 					<groupId>io.spring.docresources</groupId>
 					<artifactId>spring-doc-resources</artifactId>
@@ -216,52 +208,22 @@
 						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>unpack-shared-resources</id>
-								<goals>
-									<goal>unpack-dependencies</goal>
-								</goals>
-								<phase>generate-resources</phase>
-							</execution>
-							<execution>
 								<id>unpack-doc-resources</id>
 								<goals>
 									<goal>unpack-dependencies</goal>
 								</goals>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
 								<configuration>
 									<includeGroupIds>io.spring.docresources</includeGroupIds>
 									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
-									<includeTypes>zip</includeTypes>
-									<excludeTransitive>true</excludeTransitive>
 									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>
 						<configuration>
-							<includeGroupIds>org.springframework.data</includeGroupIds>
-							<includeArtifactIds>spring-data-build-resources</includeArtifactIds>
 							<includeTypes>zip</includeTypes>
 							<excludeTransitive>true</excludeTransitive>
-							<outputDirectory>${shared.resources}</outputDirectory>
 						</configuration>
-					</plugin>
-
-					<!--
-						Configures JavaDoc generation.
-					-->
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>aggregate-javadoc</id>
-								<goals>
-									<goal>javadoc</goal>
-								</goals>
-								<phase>package</phase>
-							</execution>
-						</executions>
 					</plugin>
 
 					<plugin>
@@ -270,7 +232,7 @@
 						<executions>
 							<execution>
 								<id>copy-asciidoc-resources</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>copy-resources</goal>
 								</goals>
@@ -307,7 +269,7 @@
 
 							<execution>
 								<id>html</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>process-asciidoc</goal>
 								</goals>
@@ -335,7 +297,7 @@
 
 							<execution>
 								<id>pdf</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>process-asciidoc</goal>
 								</goals>
@@ -367,6 +329,24 @@
 
 					</plugin>
 
+					<!--
+						Configures JavaDoc generation.
+					-->
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>javadoc</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>javadoc</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
 					<plugin>
 						<artifactId>maven-antrun-plugin</artifactId>
 						<version>1.8</version>
@@ -374,10 +354,13 @@
 
 							<execution>
 								<id>copy-documentation-resources</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
 								<configuration>
 									<target>
-										<copy todir="${project.root}/target/site/reference/html/images">
+										<copy todir="${basedir}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
 												<include name="**/*.png" />
 												<include name="**/*.gif" />
@@ -387,17 +370,14 @@
 										</copy>
 									</target>
 								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
 							</execution>
 
 							<execution>
 								<id>rename-reference-docs</id>
-								<phase>process-resources</phase>
+								<phase>prepare-package</phase>
 								<configuration>
 									<target>
-										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
+										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${basedir}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
 									</target>
 								</configuration>
 								<goals>
@@ -434,6 +414,7 @@
 								<goals>
 									<goal>attach-artifact</goal>
 								</goals>
+								<phase>package</phase>
 								<configuration>
 									<artifacts>
 										<artifact>
@@ -441,28 +422,6 @@
 											<type>zip</type>
 										</artifact>
 									</artifacts>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.1.0</version>
-						<executions>
-							<execution>
-								<id>static</id>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<phase>package</phase>
-								<configuration>
-									<descriptors>
-										<descriptor>${shared.resources}/assemblies/static-resources.xml</descriptor>
-									</descriptors>
-									<finalName>static-resources</finalName>
-									<appendAssemblyId>false</appendAssemblyId>
 								</configuration>
 							</execution>
 						</executions>
@@ -700,6 +659,27 @@
 			</extension>
 		</extensions>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.4</version>
+					<configuration>
+						<breakiterator>true</breakiterator>
+						<header>${project.name}</header>
+						<source>${source.level}</source>
+						<quiet>true</quiet>
+						<additionalparam>-Xdoclint:none</additionalparam>
+						<links>
+							<link>http://static.springframework.org/spring/docs/5.1.x/javadoc-api</link>
+							<link>http://docs.oracle.com/javase/8/docs/api</link>
+						</links>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -762,31 +742,6 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
-				<configuration>
-					<breakiterator>true</breakiterator>
-					<header>${project.name}</header>
-					<source>${source.level}</source>
-					<quiet>true</quiet>
-					<additionalparam>-Xdoclint:none</additionalparam>
-					<links>
-						<link>http://static.springframework.org/spring/docs/4.1.x/javadoc-api</link>
-						<link>http://docs.oracle.com/javase/6/docs/api</link>
-					</links>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.19.1</version>
 				<configuration>
@@ -826,12 +781,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
 			</plugin>
 
 			<plugin>
