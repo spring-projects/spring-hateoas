@@ -352,6 +352,7 @@
 
 						<configuration>
 							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
+							<sourceDocumentName>index.adoc</sourceDocumentName>
 							<doctype>book</doctype>
 							<attributes>
 								<version>${project.version}</version>
