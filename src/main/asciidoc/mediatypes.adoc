@@ -1,8 +1,95 @@
 [[mediatypes]]
 = Media types
+:code-dir: ../../../src/docs/java/org/springframework/hateoas
+:resource-dir: ../../../src/docs/resources/org/springframework/hateoas
 
 [[mediatypes.hal]]
 == HAL – Hypertext Application Language
+
+https://tools.ietf.org/html/draft-kelly-json-hal-08[JSON Hypertext Application Language] or HAL is one of the simplest
+and most widely adopted hypermedia media types adopted when not discussing specific web stacks.
+
+It was the first spec-based media type adopted by Spring HATEAOS.
+
+[[mediatypes.hal.configuration]]
+=== Configuring link rendering
+
+In HAL, the `_links` entry is a JSON object. The property names are <<fundamentals.link-relations,link relations>> and
+each value is either https://tools.ietf.org/html/draft-kelly-json-hal-07#section-4.1.1[a link object or an array of link objects].
+
+For a given link relation that has two or more links, the spec is clear on representation:
+
+.HAL document with two links associated with one relation
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/mediatype/hal/hal-multiple-entry-link-relation.json[]
+----
+====
+
+But if there is only one link for a given relation, the spec is ambiguous. You could render that as either a single object
+or as 1-item array.
+
+By default, Spring HATEOAS uses the most terse approach and renders a single-link relation like this:
+
+.HAL document with single link rendered as an object
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/mediatype/hal/hal-single-entry-link-relation-object.json[]
+----
+====
+
+Some users prefer to not switch between arrays and objects when consuming HAL. They would prefer this type of rendering:
+
+.HAL with single link rendered as an array
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/mediatype/hal/hal-single-entry-link-relation-array.json[]
+----
+====
+
+If you wish to customize this policy, all you have to do is inject a `HalConfiguration` bean into your application configuration.
+There are multiple choices.
+
+.Global HAL single-link rendering policy
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{code-dir}/SampleAppConfiguration.java[tag=1]
+----
+<1> Override Spring HATEOAS's default by rendering ALL single-link relations as arrays.
+====
+
+If you prefer to only override some particular link relations, you can create a `HalConfiguration`
+bean like this:
+
+.Link relation-based HAL single-link rendering policy
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{code-dir}/SampleAppConfiguration.java[tag=2]
+----
+<1> Always render `item` link relations as an array.
+<2> Render `prev` link relations as an object when there is only one link.
+====
+
+If neither of these match your needs, you can use an Ant-style path patterns:
+
+.Pattern-based HAL single-link rendering policy
+====
+[source,java,indent=0,tabsize=2]
+----
+include::{code-dir}/SampleAppConfiguration.java[tag=3]
+----
+<1> Render all link relations that start with `http` as an array.
+
+NOTE: The pattern-based approach uses Spring's `AntPathMatcher`.
+====
+
+All of these `HalConfiguration` withers can be combined to form one comprehensive policy. Be sure to test your API
+extensively to avoid surprises.
 
 [[mediatypes.hal.curie-provider]]
 === [[spis.curie-provider]] Using the `CurieProvider` API
@@ -33,25 +120,150 @@ Note that now the `ex:` prefix automatically appears before all rel values that 
 The following example shows how to do so:
 
 ====
-[source, json]
+[source, json, tabsize=2]
 ----
-{
-  _"links" : {
-    "self" : { href: "http://myhost/person/1" },
-    "curies" : {
-         "name" : "ex",
-         "href" : "http://example.com/rels/{rel}",
-         "templated" : true
-    },
-    "ex:orders" : { href : "http://myhost/person/1/orders" }
-  },
-  "firstname" : "Dave",
-  "lastname" : "Matthews"
-}
+include::{resource-dir}/docs/mediatype/hal/hal-with-curies.json[]
 ----
 ====
 
 Since the purpose of the `CurieProvider` API is to allow for automatic curie creation, you can define only one `CurieProvider` bean per application scope.
+
+[[mediatypes.hal-forms]]
+== HAL-FORMS
+
+https://rwcbook.github.io/hal-forms/[HAL-FORMS] is designed to add runtime FORM support to the <<mediatypes.hal,HAL media type>>.
+
+[quote, Mike Amundsen, HAL-FORMS spec]
+____
+HAL-FORMS "looks like HAL." However, it is important to keep in mind that HAL-FORMS is not the same as HAL — the two
+should not be thought of as interchangeable in any way.
+____
+
+To enable this media type, put the following configuration in your code:
+
+.HAL-FORMS enabled application
+====
+[source, java, tabsize=2]
+----
+include::{code-dir}/HalFormsApplication.java[tag=code]
+----
+====
+
+Anytime a client supplies an `Accept` header with `application/prs.hal-forms+json`, you can expect something like this:
+
+.HAL-FORMS sample document
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample.json[]
+----
+====
+
+Checkout the https://rwcbook.github.io/hal-forms/[HAL-FORMS spec] to understand the details of the *_templates* attribute.
+Read about the <<fundamentals.affordances,Affordances API>> to augment your controllers with this extra metadata.
+
+As for single-item (`EntityModel`) and aggregate root collections (`CollectionModel`), Spring HATEOAS renders them
+identically to <<mediatypes.hal,HAL documents>>.
+
+[[mediatypes.collection-json]]
+== Collection+JSON
+
+http://amundsen.com/media-types/collection/format/[Collection+JSON] is a JSON spec registered with IANA-approved media type `application/vnd.collection+json`.
+
+[quote, Mike Amundsen, Collection+JSON spec]
+____
+http://amundsen.com/media-types/collection/[Collection+JSON] is a JSON-based read/write hypermedia-type designed to support
+management and querying of simple collections.
+____
+
+Collection+JSON provides a uniform way to represent both single item resources as well as collections.
+
+To enable this media type, put the following configuration in your code:
+
+.Collection+JSON enabled application
+====
+[source, java, tabsize=2]
+----
+include::{code-dir}/CollectionJsonApplication.java[tag=code]
+----
+====
+
+This configuration will make your application respond to requests that have an `Accept` header of `application/vnd.collection+json`
+as shown below.
+
+The following example from the spec shows a single item:
+
+.Collection+JSON single item example
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/mediatype/collectionjson/spec-part3.json[]
+----
+<1> The `self` link is stored in the document's `href` attribute.
+<2> The document's top `links` section contains collection-level links (minus the `self` link).
+<3> The `items` section contains a collection of data. Since this is a single-item document, it only has one entry.
+<4> The `data` section contains actual content. It's made up of properties.
+<5> The item's individual `links`.
+====
+
+[IMPORTANT]
+====
+The previous fragment was lifted from the spec. When Spring HATEOAS renders an `EntityModel`, it will:
+
+* Put the `self` link into both the document's `href` attribute and the item-level `href` attribute.
+* Put the rest of the model's links into both the top-level `links` as well as the item-level `links`.
+* Extract the properties from the `EntityModel` and turn them into 
+====
+
+When rendering a collection of resources, the document is almost the same, except there will be multiple entries inside
+the `items` JSON array, one for each entry.
+
+Spring HATEOAS more specifically will:
+
+* Put the entire collection's `self` link into the top-level `href` attribute.
+* The `CollectionModel` links (minus `self`) will be put into the top-level `links`.
+* Each item-level `href` will contain the corresponding `self` link for each entry from the `CollectionModel.content` collection.
+* Each item-level `links` will contain all other links for each entry from `CollectionModel.content`.
+
+
+[[mediatypes.uber]]
+== UBER - Uniform Basis for Exchanging Representations
+
+http://uberhypermedia.org/[UBER] is an experimental JSON spec
+
+NOTE: *UBER media type* is not associated in any way with Uber Technologies Inc., the ride sharing company.
+
+[quote, Mike Amundsen, UBER spec]
+____
+The UBER document format is a minimal read/write hypermedia type designed to support simple state transfers and ad-hoc
+hypermedia-based transitions.
+____
+
+UBER provides a uniform way to represent both single item resources as well as collections.
+
+To enable this media type, put the following configuration in your code:
+
+.UBER+JSON enabled application
+====
+[source, java, tabsize=2]
+----
+include::{code-dir}/UberApplication.java[tag=code]
+----
+====
+
+This configuration will make your application respond to requests using the `Accept` header `application/vnd.amundsen-uber+json`
+as show below:
+
+.UBER sample document
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/mediatype/uber/uber-sample.json[]
+----
+====
+
+This media type is still under development as is the spec itself. Feel free to
+https://github.com/spring-projects/spring-hateoas/issues[open a ticket] if you run into issues using it.
 
 [[mediatypes.custom]]
 == Registering a custom media type

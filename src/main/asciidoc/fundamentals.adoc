@@ -52,7 +52,7 @@ This allows clients to turn parameterized templates into URIs without having to 
 
 .Using links with templated URIs
 ====
-[source, java, indent=0]
+[source, java, indent=0, tabsize=2]
 ----
 include::{code-dir}/FundamentalsTest.java[tags=templatedLinks]
 ----
@@ -211,7 +211,7 @@ The following code shows how to take a *self* link and associate two more afford
 
 .Connecting affordances to `GET /employees/{id}`
 ====
-[source,java,indent=0]
+[source, java, indent=0, tabsize=2]
 ----
 include::{code-dir}/EmployeeController.java[tag=get]
 ----
@@ -226,7 +226,7 @@ Imagine that the related methods *afforded* above looking like this:
 
 .`updateEmpoyee` method that responds to `PUT /employees/{id}`
 ====
-[source,java,indent=0]
+[source, java, indent=0, tabsize=2]
 ----
 include::{code-dir}/EmployeeController.java[tag=put]
 ----
@@ -234,7 +234,7 @@ include::{code-dir}/EmployeeController.java[tag=put]
 
 .`partiallyUpdateEmployee` method that responds to `PATCH /employees/{id}`
 ====
-[source,java,indent=0]
+[source, java, indent=0, tabsize=2]
 ----
 include::{code-dir}/EmployeeController.java[tag=patch]
 ----
@@ -271,50 +271,9 @@ The same resource above will render the following HAL-FORMS document:
 
 .HAL-FORMS document with affordances
 ====
-[source,json]
+[source, json, tabsize=2]
 ----
-{
-  "firstName" : "Frodo",
-  "lastName" : "Baggins",
-  "role" : "ring bearer",
-  "_links" : {
-    "self" : {
-      "href" : "http://localhost:8080/employees/1"
-    }
-  },
-  "_templates" : { // <1>
-    "default" : {
-      "title" : null,
-      "method" : "put", // <2>
-      "contentType" : "",
-      "properties" : [ {  // <3>
-        "name" : "firstName",
-        "required" : true // <4>
-      }, {
-        "name" : "lastName",
-        "required" : true
-      }, {
-        "name" : "role",
-        "required" : true
-      } ]
-    },
-    "partiallyUpdateEmployee" : { // <5>
-      "title" : null,
-      "method" : "patch", // <6>
-      "contentType" : "",
-      "properties" : [ {
-        "name" : "firstName",
-        "required" : false // <7>
-      }, {
-        "name" : "lastName",
-        "required" : false
-      }, {
-        "name" : "role",
-        "required" : false
-      } ]
-    }
-  }
-}
+include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample-with-notes.json[]
 ----
 <1> The `_templates` attribute provided by HAL-FORMS with affordance-based information.
 <2> The `updateEmployee` method's `@PutMapping` annotation is translated to `put`.
@@ -330,7 +289,7 @@ attributes), includes enough extra details for full interaction with the resourc
 
 In fact, this type of document makes it easy to write custom client-side code to generate an HTML form:
 
-[source,html]
+[source, html, tabsize=2]
 ----
 <form method="put" action="http://localhost:8080/employees/1">
 	<input type="text" id="firstName" name="firstName"/>

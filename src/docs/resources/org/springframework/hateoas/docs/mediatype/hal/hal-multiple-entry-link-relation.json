@@ -1,0 +1,9 @@
+{
+  "_links": {
+    "item": [
+      { "href": "http://myhost/cart/42" },
+      { "href": "http://myhost/inventory/12" }
+    ]
+  },
+  "customer": "Dave Matthews"
+}

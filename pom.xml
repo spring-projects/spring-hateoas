@@ -280,6 +280,7 @@
 									<sectids>false</sectids>
 									<attributes>
 										<code-dir>${basedir}/src/docs/java/org/springframework/hateoas</code-dir>
+										<resource-dir>${basedir}/src/docs/resources/org/springframework/hateoas</resource-dir>
 										<docinfo>shared</docinfo>
 										<linkcss>true</linkcss>
 										<icons>font</icons>
@@ -696,6 +697,18 @@
 							<sources>
 								<source>src/docs/java</source>
 							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-docs-resources</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>src/docs/resources</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>

@@ -1,0 +1,42 @@
+{
+  "firstName" : "Frodo",
+  "lastName" : "Baggins",
+  "role" : "ring bearer",
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost:8080/employees/1"
+    }
+  },
+  "_templates" : {
+    "default" : {
+      "title" : null,
+      "method" : "put",
+      "contentType" : "",
+      "properties" : [ {
+        "name" : "firstName",
+        "required" : true
+      }, {
+        "name" : "lastName",
+        "required" : true
+      }, {
+        "name" : "role",
+        "required" : true
+      } ]
+    },
+    "partiallyUpdateEmployee" : {
+      "title" : null,
+      "method" : "patch",
+      "contentType" : "",
+      "properties" : [ {
+        "name" : "firstName",
+        "required" : false
+      }, {
+        "name" : "lastName",
+        "required" : false
+      }, {
+        "name" : "role",
+        "required" : false
+      } ]
+    }
+  }
+}
