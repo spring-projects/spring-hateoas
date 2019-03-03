@@ -78,6 +78,40 @@ resources:
     repository:   spring-projects/spring-hateoas
     branch: ((branch))
 
+- name: spring-hateoas-examples-github
+  type: git
+  source:
+    uri: https://github.com/spring-projects/spring-hateoas-examples.git
+    branch: ((branch))
+
+- name: spring-hateoas-examples-artifactory
+  type: artifactory-resource
+  source:
+    uri: https://repo.spring.io
+    username: ((artifactory-username))
+    password: ((artifactory-password))
+    build_name: spring-hateoas-examples
+
+- name: spring-hateoas-examples-pull-requests
+  type: pull-request
+  source:
+    access_token: ((github-access-token))
+    repo: spring-projects/spring-hateoas-examples
+    base: ((branch))
+
+- name: spring-hateoas-examples-release
+  type: git
+  source:
+    uri: https://github.com/spring-projects/spring-hateoas-examples.git
+    branch: ((release-branch))
+
+- name: spring-hateoas-examples-status
+  type: github-status
+  source:
+    access_token: ((github-access-token))
+    repository:   spring-projects/spring-hateoas-examples
+    branch: ((branch))
+
 - name: slack
   type: slack-notification
   source:
@@ -112,14 +146,28 @@ groups:
   - Test - JDK 13 and Spring 5.1 (snapshots)
   - Test - JDK 13 and Spring 5.2 (snapshots)
   - Build
+- name: spring-hateoas-examples
+  jobs:
+  - spring-hateoas-examples-test-jdk8
+  - spring-hateoas-examples-test-jdk8-spring51-snapshots
+  - spring-hateoas-examples-test-jdk8-spring52-snapshots
+  - spring-hateoas-examples-test-jdk11
+  - spring-hateoas-examples-test-jdk11-spring51-snapshots
+  - spring-hateoas-examples-test-jdk11-spring52-snapshots
+  - spring-hateoas-examples-test-jdk13
+  - spring-hateoas-examples-test-jdk13-spring51-snapshots
+  - spring-hateoas-examples-test-jdk13-spring52-snapshots
+  - spring-hateoas-examples-build
 - name: pull-requests
   jobs:
   - spring-hateoas-pull-requests
+  - spring-hateoas-examples-pull-requests
 - name: release
   jobs:
   - release-to-artifactory
 #  - promote-to-bintray
 #  - sync-to-maven-central
+  - release-examples-to-artifactory
 - name: docker
   jobs:
   - 8-jdk-with-graphviz:latest
@@ -392,6 +440,304 @@ jobs:
             title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
             title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
+- name: spring-hateoas-examples-test-jdk8
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "non-existent" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk8-spring51-snapshots
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk8-spring52-snapshots
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "spring52-next" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk11
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:11-jdk
+    trigger: true
+  - task: test
+    image: openjdk:11-jdk
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "non-existant" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk11-spring51-snapshots
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:11-jdk
+    trigger: true
+  - task: test
+    image: openjdk:11-jdk
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk11-spring52-snapshots
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:11-jdk
+    trigger: true
+  - task: test
+    image: openjdk:11-jdk
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "spring52-next" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk13
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:13-jdk
+    trigger: true
+  - task: test
+    image: openjdk:13-jdk
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "non-existant" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk13-spring51-snapshots
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:13-jdk
+    trigger: true
+  - task: test
+    image: openjdk:13-jdk
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "spring51-next" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-test-jdk13-spring52-snapshots
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+  - get: spring-hateoas-artifactory
+    trigger: true
+  - get: openjdk:13-jdk
+    trigger: true
+  - task: test
+    image: openjdk:13-jdk
+    file: spring-hateoas-examples-github/ci/test.yml
+    params: { PROFILE: "spring52-next" }
+  <<: *slack-test-failure
+
+- name: spring-hateoas-examples-build
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    trigger: true
+    passed: [
+      spring-hateoas-examples-test-jdk8,
+      spring-hateoas-examples-test-jdk8-spring51-snapshots,
+      spring-hateoas-examples-test-jdk8-spring52-snapshots,
+      spring-hateoas-examples-test-jdk11,
+      spring-hateoas-examples-test-jdk11-spring51-snapshots,
+      spring-hateoas-examples-test-jdk11-spring52-snapshots,
+      spring-hateoas-examples-test-jdk13,
+      spring-hateoas-examples-test-jdk13-spring51-snapshots,
+      spring-hateoas-examples-test-jdk13-spring52-snapshots
+    ]
+  - get: spring-hateoas-artifactory
+    trigger: true
+    passed: [
+      spring-hateoas-examples-test-jdk8,
+      spring-hateoas-examples-test-jdk8-spring51-snapshots,
+      spring-hateoas-examples-test-jdk8-spring52-snapshots,
+      spring-hateoas-examples-test-jdk11,
+      spring-hateoas-examples-test-jdk11-spring51-snapshots,
+      spring-hateoas-examples-test-jdk11-spring52-snapshots,
+      spring-hateoas-examples-test-jdk13,
+      spring-hateoas-examples-test-jdk13-spring51-snapshots,
+      spring-hateoas-examples-test-jdk13-spring52-snapshots
+    ]
+  - get: 8-jdk-with-graphviz:latest
+    trigger: true
+  - put: spring-hateoas-examples-status
+    params:
+      commit: spring-hateoas-examples-github
+      state: pending
+  - task: build
+    file: spring-hateoas-examples-github/ci/build.yml
+  - put: spring-hateoas-examples-artifactory
+    params:
+      build_number:   ${BUILD_NAME}
+      build_uri:      ${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}
+      repo:           libs-snapshot-local
+      folder:         spring-hateoas-examples-artifactory
+      artifact_set:
+      - include:
+        - "/**"
+        properties:
+          zip.deployed: false
+          zip.displayname: "spring-hateoas-examples"
+          zip.name: "spring-hateoas-examples"
+          zip.type: "docs"
+  on_failure:
+    aggregate:
+    - put: spring-hateoas-examples-status
+      params:
+        commit: spring-hateoas-examples-github
+        state: failure
+    - put: slack
+      params:
+        attachments:
+          - color: danger
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+            text: "Build has failed"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_success:
+    aggregate:
+    - put: spring-hateoas-examples-status
+      params:
+        commit: spring-hateoas-examples-github
+        state: success
+    - put: slack
+      params:
+        attachments:
+          - color: good
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <SUCCESS>"
+            text: "Build has succeeded!"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
+- name: spring-hateoas-examples-pull-requests
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    resource: spring-hateoas-examples-pull-requests
+    trigger: true
+    version: every
+  - get: openjdk:11-jdk
+  - get: openjdk:13-jdk
+  - put: spring-hateoas-examples-pull-requests
+    params:
+      path: spring-hateoas-examples-github
+      status: pending
+  - aggregate:
+    - task: test (JDK 8)
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "non-existent" }
+    - task: test (JDK 8 and Spring 5.1 snapshots)
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+    - task: test (JDK 8 and Spring 5.2 snapshots)
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "spring52-next" }
+    - task: test (JDK 11)
+      image: openjdk:11-jdk
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "non-existent" }
+    - task: test (JDK 11 and Spring 5.1 snapshots)
+      image: openjdk:11-jdk
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+    - task: test (JDK 11 and Spring 5.2 snapshots)
+      image: openjdk:11-jdk
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "spring52-next" }
+    - task: test (JDK 13)
+      image: openjdk:13-jdk
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "non-existent" }
+    - task: test (JDK 13 and Spring 5.1 snapshots)
+      image: openjdk:13-jdk
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "spring51-next" }
+    - task: test (JDK 13 and Spring 5.2 snapshots)
+      image: openjdk:13-jdk
+      file: spring-hateoas-examples-github/ci/test.yml
+      params: { PROFILE: "spring52-next" }
+  on_failure:
+    aggregate:
+    - put: spring-hateoas-examples-pull-requests
+      params:
+        path: spring-hateoas-examples-github
+        status: failure
+    - put: slack
+      params:
+        attachments:
+          - color: danger
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+            text: "Pull request has failed"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_success:
+    aggregate:
+    - put: spring-hateoas-examples-pull-requests
+      params:
+        path: spring-hateoas-examples-github
+        status: success
+    - put: slack
+      params:
+        attachments:
+          - color: good
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <SUCCESS>"
+            text: "Pull request has succeeded!"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
 - name: 8-jdk-with-graphviz:latest
   public: true
   plan:
@@ -552,6 +898,63 @@ jobs:
 #            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
 #            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 #
+
+- name: release-examples-to-artifactory
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-examples-github
+    resource: spring-hateoas-examples-release
+    trigger: true
+  - put: spring-hateoas-examples-status
+    params:
+      commit: spring-hateoas-examples-github
+      state: pending
+  - task: build
+    file: spring-hateoas-examples-github/ci/build.yml
+  - put: spring-hateoas-examples-artifactory
+    params:
+      build_number:   ${BUILD_NAME}
+      build_uri:      ${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}
+      repo:           libs-milestone-local
+      folder:         spring-hateoas-examples-artifactory
+      artifact_set:
+      - include:
+        - "/**"
+        properties:
+          zip.deployed: false
+          zip.displayname: "spring-hateoas-examples"
+          zip.name: "spring-hateoas-examples"
+          zip.type: "docs"
+  on_failure:
+    aggregate:
+    - put: spring-hateoas-examples-status
+      params:
+        commit: spring-hateoas-examples-github
+        state: failure
+    - put: slack
+      params:
+        attachments:
+          - color: danger
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+            text: "Releasing to artifactory has failed"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+  on_success:
+    aggregate:
+    - put: spring-hateoas-examples-status
+      params:
+        commit: spring-hateoas-examples-github
+        state: success
+    - put: slack
+      params:
+        attachments:
+          - color: good
+            fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <SUCCESS>"
+            text: "Releasing to artifactory has succeeded!"
+            title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+            title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+
 slack-test-success: &slack-test-success
   on_success:
     put: slack
