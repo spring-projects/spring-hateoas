@@ -685,7 +685,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.10</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>add-docs-source</id>
@@ -707,7 +707,9 @@
 						</goals>
 						<configuration>
 							<resources>
-								<resource>src/docs/resources</resource>
+								<resource>
+									<directory>src/docs/resources</directory>
+								</resource>
 							</resources>
 						</configuration>
 					</execution>
