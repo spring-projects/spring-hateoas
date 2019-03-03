@@ -313,7 +313,6 @@ jobs:
   - get: spring-hateoas-github
     trigger: true
     passed: [
-      Test - JDK 8,
       Test - JDK 8 and Spring 5.1 (snapshots),
       Test - JDK 8 and Spring 5.2 (snapshots),
       Test - JDK 11,
@@ -471,10 +470,13 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:8-jdk
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - task: test
     file: spring-hateoas-examples-github/ci/test.yml
     params: { PROFILE: "spring51-next" }
@@ -486,10 +488,13 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:8-jdk
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - task: test
     file: spring-hateoas-examples-github/ci/test.yml
     params: { PROFILE: "spring52-next" }
@@ -501,8 +506,10 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -517,8 +524,10 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -533,8 +542,10 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -549,8 +560,10 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
@@ -565,8 +578,10 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
@@ -581,8 +596,10 @@ jobs:
   plan:
   - get: spring-hateoas-examples-github
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: spring-hateoas-artifactory
     trigger: true
+    passed: [ spring-hateoas-examples-test-jdk8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
@@ -598,7 +615,6 @@ jobs:
   - get: spring-hateoas-examples-github
     trigger: true
     passed: [
-      spring-hateoas-examples-test-jdk8,
       spring-hateoas-examples-test-jdk8-spring51-snapshots,
       spring-hateoas-examples-test-jdk8-spring52-snapshots,
       spring-hateoas-examples-test-jdk11,
@@ -611,7 +627,6 @@ jobs:
   - get: spring-hateoas-artifactory
     trigger: true
     passed: [
-      spring-hateoas-examples-test-jdk8,
       spring-hateoas-examples-test-jdk8-spring51-snapshots,
       spring-hateoas-examples-test-jdk8-spring52-snapshots,
       spring-hateoas-examples-test-jdk11,
