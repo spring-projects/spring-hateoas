@@ -2,6 +2,7 @@
 = Media types
 :code-dir: ../../../src/docs/java/org/springframework/hateoas
 :resource-dir: ../../../src/docs/resources/org/springframework/hateoas
+:linkattrs:
 
 [[mediatypes.hal]]
 == HAL – Hypertext Application Language
@@ -131,7 +132,7 @@ Since the purpose of the `CurieProvider` API is to allow for automatic curie cre
 [[mediatypes.hal-forms]]
 == HAL-FORMS
 
-https://rwcbook.github.io/hal-forms/[HAL-FORMS] is designed to add runtime FORM support to the <<mediatypes.hal,HAL media type>>.
+https://rwcbook.github.io/hal-forms/[HAL-FORMS, window="_blank"] is designed to add runtime FORM support to the <<mediatypes.hal,HAL media type>>.
 
 [quote, Mike Amundsen, HAL-FORMS spec]
 ____
@@ -168,11 +169,11 @@ identically to <<mediatypes.hal,HAL documents>>.
 [[mediatypes.collection-json]]
 == Collection+JSON
 
-http://amundsen.com/media-types/collection/format/[Collection+JSON] is a JSON spec registered with IANA-approved media type `application/vnd.collection+json`.
+http://amundsen.com/media-types/collection/format/[Collection+JSON, window="_blank"] is a JSON spec registered with IANA-approved media type `application/vnd.collection+json`.
 
 [quote, Mike Amundsen, Collection+JSON spec]
 ____
-http://amundsen.com/media-types/collection/[Collection+JSON] is a JSON-based read/write hypermedia-type designed to support
+http://amundsen.com/media-types/collection/[Collection+JSON, window="_blank"] is a JSON-based read/write hypermedia-type designed to support
 management and querying of simple collections.
 ____
 
@@ -229,9 +230,7 @@ Spring HATEOAS more specifically will:
 [[mediatypes.uber]]
 == UBER - Uniform Basis for Exchanging Representations
 
-http://uberhypermedia.org/[UBER] is an experimental JSON spec
-
-NOTE: *UBER media type* is not associated in any way with Uber Technologies Inc., the ride sharing company.
+http://uberhypermedia.org/[UBER, window="_blank"] is an experimental JSON spec
 
 [quote, Mike Amundsen, UBER spec]
 ____
@@ -263,7 +262,9 @@ include::{resource-dir}/docs/mediatype/uber/uber-sample.json[]
 ====
 
 This media type is still under development as is the spec itself. Feel free to
-https://github.com/spring-projects/spring-hateoas/issues[open a ticket] if you run into issues using it.
+https://github.com/spring-projects/spring-hateoas/issues[open a ticket, window="_blank"] if you run into issues using it.
+
+NOTE: *UBER media type* is not associated in any way with *Uber Technologies Inc.*, the ride sharing company.
 
 [[mediatypes.custom]]
 == Registering a custom media type

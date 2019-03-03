@@ -1,6 +1,7 @@
 [[fundamentals]]
 = Fundamentals
 :code-dir: ../../../src/docs/java/org/springframework/hateoas
+:resource-dir: ../../../src/docs/resources/org/springframework/hateoas
 
 This section covers the basics of Spring HATEOAS and its fundamental domain abstractions.
 
@@ -284,8 +285,7 @@ include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample-with-notes.jso
 <7> For `PATCH`, attributes are _not_ `required`.
 ====
 
-This rich document, consumable by any HAL-FORMS aware client (as well as a HAL client configured to ignore unknown
-attributes), includes enough extra details for full interaction with the resource.
+This rich document, consumable by any HAL-FORMS aware client includes enough extra details for full interaction with the resource.
 
 In fact, this type of document makes it easy to write custom client-side code to generate an HTML form:
 

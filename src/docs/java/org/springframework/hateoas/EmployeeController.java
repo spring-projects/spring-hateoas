@@ -117,10 +117,8 @@ public class EmployeeController {
 		// Return the affordance + a link back to the entire collection resource.
 		return new EntityModel<>(EMPLOYEES.get(id), //
 				findOneLink //
-						.andAffordance( //
-								afford(methodOn(controllerClass).updateEmployee(null, id))) // <2>
-						.andAffordance( //
-								afford(methodOn(controllerClass).partiallyUpdateEmployee(null, id)))); // <3>
+						.andAffordance(afford(methodOn(controllerClass).updateEmployee(null, id))) // <2>
+						.andAffordance(afford(methodOn(controllerClass).partiallyUpdateEmployee(null, id)))); // <3>
 	}
 	// end::get[]
 
