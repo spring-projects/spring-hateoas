@@ -1,5 +1,6 @@
 [[fundamentals]]
 = Fundamentals
+:code-dir: ../../../src/docs/java/org/springframework/hateoas
 
 This section covers the basics of Spring HATEOAS and its fundamental domain abstractions.
 
@@ -28,17 +29,12 @@ Spring HATEOAS let's you work with links through its immutable `Link` value type
 Its constructor take both an hypertext reference and a link relation, the latter being defaulted to the IANA link relation `self`.
 Read more on the latter in <<fundamentals.link-relations>>.
 
+
 .Using links
 ====
-[source, java]
+[source, java, indent=0, tabsize=2]
 ----
-Link link = new Link("/something");
-assertThat(link.getHref()).isEqualTo("/something");
-assertThat(link.getRel()).isEqualTo(IanaLinkRelation.SELF);
-
-Link link = new Link("/something", "my-rel");
-assertThat(link.getHref()).isEqualTo("/something");
-assertThat(link.getRel()).isEqualTo(LinkRelation.of"my-rel");
+include::{code-dir}/FundamentalsTest.java[tags=links]
 ----
 ====
 
@@ -56,18 +52,9 @@ This allows clients to turn parameterized templates into URIs without having to 
 
 .Using links with templated URIs
 ====
-[source, java]
+[source, java, indent=0]
 ----
-Link link = new Link("/{segment}/something{?parameter}");
-assertThat(link.isTemplated()).isTrue();                                 <1>
-assertThat(link.getVariableNames()).containsAll("segment", "parameter"); <2>
-
-Map<String, Object> values = new HashMap<>();
-values.put("segment", "path");
-values.put("parameter", 42);
-
-assertThat(link.expand(values).getHref())                                <3>
-  .isEqualTo("/path/something?parameter=42");
+include::{code-dir}/FundamentalsTest.java[tags=templatedLinks]
 ----
 <1> The `Link` instance indicates that is templated, i.e. it contains a URI template.
 <2> It exposes the parameters contained in the template.
@@ -226,7 +213,7 @@ The following code shows how to take a *self* link and associate two more afford
 ====
 [source,java,indent=0]
 ----
-include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=get]
+include::{code-dir}/EmployeeController.java[tag=get]
 ----
 <1> Create the *self* link.
 <2> Associate the `updateEmployee` method with the `self` link.
@@ -241,7 +228,7 @@ Imagine that the related methods *afforded* above looking like this:
 ====
 [source,java,indent=0]
 ----
-include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=put]
+include::{code-dir}/EmployeeController.java[tag=put]
 ----
 ====
 
@@ -249,7 +236,7 @@ include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController
 ====
 [source,java,indent=0]
 ----
-include::{code-dir}/src/docs/java/org/springframework/hateoas/EmployeeController.java[tag=patch]
+include::{code-dir}/EmployeeController.java[tag=patch]
 ----
 ====
 
