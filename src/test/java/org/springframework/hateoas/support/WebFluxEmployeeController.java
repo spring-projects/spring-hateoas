@@ -82,7 +82,7 @@ public class WebFluxEmployeeController {
 			@RequestParam Optional<String> name, //
 			@RequestParam Optional<String> role) {
 
-		Class<WebFluxEmployeeController> controller = WebFluxEmployeeController.class;
+		WebFluxEmployeeController controller = methodOn(WebFluxEmployeeController.class);
 
 		return Flux.fromIterable(EMPLOYEES.keySet()) //
 				.flatMap(id -> findOne(id)) //
@@ -96,11 +96,13 @@ public class WebFluxEmployeeController {
 							.orElse(true);
 
 					return nameMatches && roleMatches;
-				}).collectList().flatMap(resources -> linkTo(methodOn(controller).all()).withSelfRel() //
-						.andAffordance(methodOn(controller).newEmployee(null)) //
-						.andAffordance(methodOn(controller).search(null, null)) //
-						.toMono() //
-						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
+				}).collectList().flatMap(resources -> {
+					return linkTo(controller.all()).withSelfRel() //
+							.andAffordance(controller.newEmployee(null)) //
+							.andAffordance(controller.search(null, null)) //
+							.toMono() //
+							.map(selfLink -> new CollectionModel<>(resources, selfLink));
+				});
 	}
 
 	@GetMapping("/employees/{id}")
@@ -118,7 +120,9 @@ public class WebFluxEmployeeController {
 
 		return selfLink.zipWith(employeesLink) //
 				.map(function((left, right) -> Links.of(left, right))) //
-				.map(links -> new EntityModel<>(EMPLOYEES.get(id), links));
+				.map(links -> {
+					return new EntityModel<>(EMPLOYEES.get(id), links);
+				});
 	}
 
 	@PostMapping("/employees")

@@ -103,25 +103,24 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	@Override
 	public ControllerLinkBuilder linkTo(Object invocationValue) {
 
-		return WebHandler.linkTo(invocationValue, mapping -> ControllerLinkBuilder.getBuilder().path(mapping),
-				ControllerLinkBuilder::new, (builder, invocation) -> {
+		return WebHandler.linkTo(invocationValue, ControllerLinkBuilder::new, (builder, invocation) -> {
 
-					MethodParameters parameters = new MethodParameters(invocation.getMethod());
-					Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
+			MethodParameters parameters = new MethodParameters(invocation.getMethod());
+			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
 
-					for (MethodParameter parameter : parameters.getParameters()) {
-						Object parameterValue = parameterValues.next();
+			for (MethodParameter parameter : parameters.getParameters()) {
+				Object parameterValue = parameterValues.next();
 
-						for (UriComponentsContributor contributor : this.uriComponentsContributors) {
+				for (UriComponentsContributor contributor : this.uriComponentsContributors) {
 
-							if (contributor.supportsParameter(parameter)) {
-								contributor.enhance(builder, parameter, parameterValue);
-							}
-						}
+					if (contributor.supportsParameter(parameter)) {
+						contributor.enhance(builder, parameter, parameterValue);
 					}
+				}
+			}
 
-					return builder;
-				});
+			return builder;
+		}).apply(mapping -> ControllerLinkBuilder.getBuilder().path(mapping));
 	}
 
 	/*

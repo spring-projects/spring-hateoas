@@ -73,13 +73,13 @@ public class WebHandler {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
 	}
 
-	public static <T extends LinkBuilder> T linkTo(Object invocationValue,
-			Function<String, UriComponentsBuilder> mappingToUriComponentsBuilder, LinkBuilderCreator<T> creator) {
-		return linkTo(invocationValue, mappingToUriComponentsBuilder, creator, null);
+	public static <T extends LinkBuilder> Function<Function<String, UriComponentsBuilder>, T> linkTo(
+			Object invocationValue, LinkBuilderCreator<T> creator) {
+		return linkTo(invocationValue, creator, null);
 	}
 
-	public static <T extends LinkBuilder> T linkTo(Object invocationValue,
-			Function<String, UriComponentsBuilder> mappingToUriComponentsBuilder, LinkBuilderCreator<T> creator,
+	public static <T extends LinkBuilder> Function<Function<String, UriComponentsBuilder>, T> linkTo(
+			Object invocationValue, LinkBuilderCreator<T> creator,
 			BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
@@ -87,64 +87,66 @@ public class WebHandler {
 		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
 		MethodInvocation invocation = invocations.getLastInvocation();
 
-		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
+		return mappingToUriComponentsBuilder -> {
+			String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
 
-		UriComponentsBuilder builder = mappingToUriComponentsBuilder.apply(mapping);
-		UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
-		Map<String, Object> values = new HashMap<>();
+			UriComponentsBuilder builder = mappingToUriComponentsBuilder.apply(mapping);
+			UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
+			Map<String, Object> values = new HashMap<>();
 
-		Iterator<String> names = template.getVariableNames().iterator();
-		Iterator<Object> classMappingParameters = invocations.getObjectParameters();
+			Iterator<String> names = template.getVariableNames().iterator();
+			Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 
-		while (classMappingParameters.hasNext()) {
-			values.put(names.next(), encodePath(classMappingParameters.next()));
-		}
+			while (classMappingParameters.hasNext()) {
+				values.put(names.next(), encodePath(classMappingParameters.next()));
+			}
 
-		for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR
-				.getBoundParameters(invocation)) {
-			values.put(parameter.getVariableName(), encodePath(parameter.asString()));
-		}
+			for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR
+					.getBoundParameters(invocation)) {
+				values.put(parameter.getVariableName(), encodePath(parameter.asString()));
+			}
 
-		List<String> optionalEmptyParameters = new ArrayList<>();
+			List<String> optionalEmptyParameters = new ArrayList<>();
 
-		for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR
-				.getBoundParameters(invocation)) {
+			for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR
+					.getBoundParameters(invocation)) {
 
-			bindRequestParameters(builder, parameter);
+				bindRequestParameters(builder, parameter);
 
-			if (SKIP_VALUE.equals(parameter.getValue())) {
+				if (SKIP_VALUE.equals(parameter.getValue())) {
 
-				values.put(parameter.getVariableName(), SKIP_VALUE);
+					values.put(parameter.getVariableName(), SKIP_VALUE);
 
-				if (!parameter.isRequired()) {
-					optionalEmptyParameters.add(parameter.getVariableName());
+					if (!parameter.isRequired()) {
+						optionalEmptyParameters.add(parameter.getVariableName());
+					}
 				}
 			}
-		}
 
-		for (String variable : template.getVariableNames()) {
-			if (!values.containsKey(variable)) {
-				values.put(variable, SKIP_VALUE);
+			for (String variable : template.getVariableNames()) {
+				if (!values.containsKey(variable)) {
+					values.put(variable, SKIP_VALUE);
+				}
 			}
-		}
 
-		UriComponents components = additionalUriHandler == null //
-				? builder.buildAndExpand(values)
-				: additionalUriHandler.apply(builder, invocation).buildAndExpand(values);
+			UriComponents components = additionalUriHandler == null //
+					? builder.buildAndExpand(values)
+					: additionalUriHandler.apply(builder, invocation).buildAndExpand(values);
 
-		TemplateVariables variables = NONE;
+			TemplateVariables variables = NONE;
 
-		for (String parameter : optionalEmptyParameters) {
+			for (String parameter : optionalEmptyParameters) {
 
-			boolean previousRequestParameter = components.getQueryParams().isEmpty() && variables.equals(NONE);
-			TemplateVariable variable = new TemplateVariable(parameter,
-					previousRequestParameter ? REQUEST_PARAM : REQUEST_PARAM_CONTINUED);
-			variables = variables.concat(variable);
-		}
+				boolean previousRequestParameter = components.getQueryParams().isEmpty() && variables.equals(NONE);
+				TemplateVariable variable = new TemplateVariable(parameter,
+						previousRequestParameter ? REQUEST_PARAM : REQUEST_PARAM_CONTINUED);
+				variables = variables.concat(variable);
+			}
 
-		List<Affordance> affordances = SpringAffordanceBuilder.create(invocation, DISCOVERER, components);
+			List<Affordance> affordances = SpringAffordanceBuilder.create(invocation, DISCOVERER, components);
 
-		return creator.createBuilder(components, variables, affordances);
+			return creator.createBuilder(components, variables, affordances);
+		};
 	}
 
 	/**

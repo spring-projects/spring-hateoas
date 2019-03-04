@@ -38,19 +38,18 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods to capture dummy method invocations.
- * 
+ *
  * @author Oliver Gierke
  */
 public class DummyInvocationUtils {
 
 	private static final ObjenesisStd OBJENESIS = new ObjenesisStd();
-	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<>(16,
-			ReferenceType.WEAK);
+	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<>(16, ReferenceType.WEAK);
 
 	/**
 	 * Method interceptor that records the last method invocation and creates a proxy for the return value that exposes
 	 * the method invocation.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	private static class InvocationRecordingMethodInterceptor
@@ -71,7 +70,7 @@ public class DummyInvocationUtils {
 		/**
 		 * Creates a new {@link InvocationRecordingMethodInterceptor} carrying the given parameters forward that might be
 		 * needed to populate the class level mapping.
-		 * 
+		 *
 		 * @param targetType must not be {@literal null}.
 		 * @param parameters must not be {@literal null}.
 		 */
@@ -95,7 +94,7 @@ public class DummyInvocationUtils {
 				return getLastInvocation();
 			} else if (GET_OBJECT_PARAMETERS.equals(method)) {
 				return getObjectParameters();
-			} else if (Object.class.equals(method.getDeclaringClass())) {
+			} else if (ReflectionUtils.isObjectMethod(method)) {
 				return ReflectionUtils.invokeMethod(method, obj, args);
 			}
 
@@ -105,7 +104,7 @@ public class DummyInvocationUtils {
 			return returnType.cast(getProxyWithInterceptor(returnType, this, obj.getClass().getClassLoader()));
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 		 */
@@ -123,7 +122,7 @@ public class DummyInvocationUtils {
 			return invocation;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware#getObjectParameters()
 		 */
@@ -138,9 +137,10 @@ public class DummyInvocationUtils {
 	 * equips it with an {@link InvocationRecordingMethodInterceptor}. The interceptor records the last invocation and
 	 * returns a proxy of the return type that also implements {@link LastInvocationAware} so that the last method
 	 * invocation can be inspected. Parameters passed to the subsequent method invocation are generally neglected except
-	 * the ones that might be mapped into the URI translation eventually, e.g. {@link org.springframework.web.bind.annotation.PathVariable} in the case of Spring
-	 * MVC. Note, that the return types of the methods have to be capable to be proxied.
-	 * 
+	 * the ones that might be mapped into the URI translation eventually, e.g.
+	 * {@link org.springframework.web.bind.annotation.PathVariable} in the case of Spring MVC. Note, that the return types
+	 * of the methods have to be capable to be proxied.
+	 *
 	 * @param type must not be {@literal null}.
 	 * @param parameters parameters to extend template variables in the type level mapping.
 	 * @return
@@ -174,7 +174,7 @@ public class DummyInvocationUtils {
 
 	/**
 	 * Returns the already created proxy class for the given source type or creates a new one.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @param classLoader must not be {@literal null}.
 	 * @return

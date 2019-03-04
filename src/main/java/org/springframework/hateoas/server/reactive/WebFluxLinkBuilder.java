@@ -76,7 +76,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 * @param exchange must not be {@literal null}.
 	 */
 	public static WebFluxBuilder linkTo(Object invocation, ServerWebExchange exchange) {
-		return new WebFluxBuilder(linkToInternal(invocation, exchange));
+		return new WebFluxBuilder(linkToInternal(invocation, Mono.just(getBuilder(exchange))));
 	}
 
 	/**
@@ -180,7 +180,9 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 
 			Assert.notNull(invocation, "Invocation must not be null!");
 
-			return new WebFluxLink(link.flatMap(it -> linkToInternal(invocation) //
+			Mono<WebFluxLinkBuilder> builder = linkToInternal(invocation);
+
+			return new WebFluxLink(link.flatMap(it -> builder //
 					.flatMapIterable(WebFluxLinkBuilder::getAffordances) //
 					.singleOrEmpty() //
 					.map(it::andAffordance)));
@@ -237,14 +239,20 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation) {
 
-		return Mono.subscriberContext() //
-				.flatMap(context -> linkToInternal(invocation, context.getOrDefault(SERVER_WEB_EXCHANGE, null)));
+		return linkToInternal(invocation,
+				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(SERVER_WEB_EXCHANGE, null))));
 	}
 
-	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, ServerWebExchange exchange) {
+	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> exchange) {
 
-		return Mono.just(WebHandler.linkTo(invocation, //
-				path -> getBuilder(exchange).replacePath(path == null ? "/" : path), //
-				WebFluxLinkBuilder::new));
+		Function<Function<String, UriComponentsBuilder>, WebFluxLinkBuilder> linkTo = //
+				WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
+
+		return exchange.map(WebFluxLinkBuilder::getBuilderCreator) //
+				.map(linkTo::apply);
+	}
+
+	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder exchange) {
+		return path -> exchange.replacePath(path == null ? "/" : path);
 	}
 }

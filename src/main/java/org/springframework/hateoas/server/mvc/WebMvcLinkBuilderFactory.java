@@ -106,7 +106,7 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 		Function<String, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory.getBuilder()
 				.path(mapping);
 
-		return WebHandler.linkTo(invocationValue, builderFactory, WebMvcLinkBuilder::new, (builder, invocation) -> {
+		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new, (builder, invocation) -> {
 
 			MethodParameters parameters = new MethodParameters(invocation.getMethod());
 			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
@@ -121,7 +121,8 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 			}
 
 			return builder;
-		});
+
+		}).apply(builderFactory);
 	}
 
 	/*
