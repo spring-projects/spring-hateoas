@@ -15,22 +15,21 @@
  */
 package org.springframework.hateoas.support;
 
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
 import net.minidev.json.JSONArray;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.http.HttpEntity;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.jayway.jsonpath.JsonPath;
 
 /**
  * Little helper to build a changelog from the tickets of a particular milestone.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -41,9 +40,18 @@ class ChangelogCreator {
 
 	public static void main(String... args) {
 
-		RestTemplate template = new RestTemplate();
+		/*
+		 * If you run into github rate limiting issues, you can always use a Github Personal Token by adding
+		 * {@code .header(HttpHeaders.AUTHORIZATION, "token your-github-token")} to the webClient call.
+		 */
 
-		HttpEntity<String> response = template.getForEntity(URI_TEMPLATE, String.class, MILESTONE_ID);
+		WebClient webClient = WebClient.create();
+
+		HttpEntity<String> response = webClient //
+				.get().uri(URI_TEMPLATE, MILESTONE_ID) //
+				.exchange() //
+				.flatMap(clientResponse -> clientResponse.toEntity(String.class)) //
+				.block(Duration.ofSeconds(10));
 
 		boolean keepChecking = true;
 		boolean printHeader = true;
@@ -53,16 +61,15 @@ class ChangelogCreator {
 			readPage(response.getBody(), printHeader);
 			printHeader = false;
 
-			String linkHeader = response.getHeaders().get("Link").get(0);
-
-			Links links = Arrays.stream(linkHeader.split(", ")) //
-					.map(Link::valueOf) //
-					.collect(Collectors.collectingAndThen(Collectors.toList(), Links::of));
+			Links links = Links.parse(response.getHeaders().get(HttpHeaders.LINK).get(0));
 
 			if (links.getLink(IanaLinkRelations.NEXT).isPresent()) {
 
-				response = template.getForEntity(links.getRequiredLink(IanaLinkRelations.NEXT).expand().getHref(),
-						String.class);
+				response = webClient //
+						.get().uri(links.getRequiredLink(IanaLinkRelations.NEXT).expand().getHref()) //
+						.exchange() //
+						.flatMap(clientResponse -> clientResponse.toEntity(String.class)) //
+						.block(Duration.ofSeconds(10));
 
 			} else {
 				keepChecking = false;
