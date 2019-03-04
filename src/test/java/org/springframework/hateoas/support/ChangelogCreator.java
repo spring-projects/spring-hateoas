@@ -15,9 +15,15 @@
  */
 package org.springframework.hateoas.support;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 import net.minidev.json.JSONArray;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
@@ -26,24 +32,55 @@ import com.jayway.jsonpath.JsonPath;
  * Little helper to build a changelog from the tickets of a particular milestone.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 23;
+	private static final int MILESTONE_ID = 25;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {
 
 		RestTemplate template = new RestTemplate();
-		String response = template.getForObject(URI_TEMPLATE, String.class, MILESTONE_ID);
+
+		HttpEntity<String> response = template.getForEntity(URI_TEMPLATE, String.class, MILESTONE_ID);
+
+		boolean keepChecking = true;
+		boolean printHeader = true;
+
+		while (keepChecking) {
+
+			readPage(response.getBody(), printHeader);
+			printHeader = false;
+
+			String linkHeader = response.getHeaders().get("Link").get(0);
+
+			Links links = Arrays.stream(linkHeader.split(", ")) //
+					.map(Link::valueOf) //
+					.collect(Collectors.collectingAndThen(Collectors.toList(), Links::of));
+
+			if (links.getLink(IanaLinkRelations.NEXT).isPresent()) {
+
+				response = template.getForEntity(links.getRequiredLink(IanaLinkRelations.NEXT).expand().getHref(),
+						String.class);
+
+			} else {
+				keepChecking = false;
+			}
+		}
+	}
+
+	private static void readPage(String content, boolean header) {
 
 		JsonPath titlePath = JsonPath.compile("$[*].title");
 		JsonPath idPath = JsonPath.compile("$[*].number");
 
-		JSONArray titles = titlePath.read(response);
-		Iterator<Object> ids = ((JSONArray) idPath.read(response)).iterator();
+		JSONArray titles = titlePath.read(content);
+		Iterator<Object> ids = ((JSONArray) idPath.read(content)).iterator();
 
-		System.out.println("Milestone - " + JsonPath.read(response, "$[1].milestone.title"));
+		if (header) {
+			System.out.println("Milestone - " + JsonPath.read(content, "$[1].milestone.title"));
+		}
 
 		for (Object title : titles) {
 
