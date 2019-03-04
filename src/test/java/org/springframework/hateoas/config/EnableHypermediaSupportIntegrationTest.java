@@ -43,9 +43,9 @@ import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
 import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
 import org.springframework.hateoas.server.EntityLinks;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingEntityLinks;
-import org.springframework.hateoas.server.core.DelegatingRelProvider;
+import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -530,8 +530,8 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	private static void assertRelProvidersSetUp(ApplicationContext context) {
 
-		assertThat(context.getBeansOfType(RelProvider.class).values()) //
-				.anySatisfy(it -> assertThat(it).isInstanceOf(DelegatingRelProvider.class));
+		assertThat(context.getBeansOfType(LinkRelationProvider.class).values()) //
+				.anySatisfy(it -> assertThat(it).isInstanceOf(DelegatingLinkRelationProvider.class));
 	}
 
 	private static void assertHalSetupForConfigClass(Class<?> configClass) {

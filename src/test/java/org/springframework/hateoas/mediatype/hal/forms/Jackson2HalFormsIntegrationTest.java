@@ -46,7 +46,7 @@ import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
 import org.springframework.hateoas.mediatype.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
-import org.springframework.hateoas.server.core.AnnotationRelProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.support.MappingUtils;
 
@@ -69,7 +69,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				new AnnotationRelProvider(), null, null, true, new HalFormsConfiguration()));
+				new AnnotationLinkRelationProvider(), null, null, true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -443,7 +443,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalFormsModule());
-		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationRelProvider(), provider,
+		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
 				messageSource == null ? null : new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);

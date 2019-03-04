@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ package org.springframework.hateoas.server.core;
 
 import org.atteo.evo.inflector.English;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 
 /**
- * {@link RelProvider} implementation using the Evo Inflector implementation of an algorithmic approach to English
- * plurals.
+ * {@link LinkRelationProvider} implementation using the Evo Inflector implementation of an algorithmic approach to
+ * English plurals.
  *
  * @see http://www.csse.monash.edu.au/~damian/papers/HTML/Plurals.html
  * @author Oliver Gierke
  */
-public class EvoInflectorRelProvider extends DefaultRelProvider {
+public class EvoInflectorLinkRelationProvider extends DefaultLinkRelationProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.DefaultRelProvider#getCollectionResourceRelFor(java.lang.Class)
+	 * @see org.springframework.hateoas.server.core.DefaultLinkRelationProvider#getCollectionResourceRelFor(java.lang.Class)
 	 */
 	@Override
 	public LinkRelation getCollectionResourceRelFor(Class<?> type) {

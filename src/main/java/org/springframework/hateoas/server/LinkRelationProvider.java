@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.plugin.core.Plugin;
 
 /**
- * API to provide relation types for collections and items of the given type.
+ * API to provide {@link LinkRelation}s for collections and items of the given type.
  *
  * @author Oliver Gierke
  */
-public interface RelProvider extends Plugin<Class<?>> {
+public interface LinkRelationProvider extends Plugin<Class<?>> {
 
 	/**
 	 * Returns the relation type to be used to point to an item resource of the given type.

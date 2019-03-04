@@ -30,8 +30,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
-import org.springframework.hateoas.server.RelProvider;
-import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -46,7 +46,7 @@ public class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson2Mapper;
 
-	RelProvider relProvider = new EvoInflectorRelProvider();
+	LinkRelationProvider relProvider = new EvoInflectorLinkRelationProvider();
 
 	VndErrors errors;
 	String jsonReference;

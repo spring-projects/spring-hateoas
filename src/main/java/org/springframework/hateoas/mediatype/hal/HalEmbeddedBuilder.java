@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.util.Assert;
@@ -42,17 +42,17 @@ class HalEmbeddedBuilder {
 	private static final String INVALID_EMBEDDED_WRAPPER = "Embedded wrapper %s returned null for both the static rel and the rel target type! Make sure one of the two returns a non-null value!";
 
 	private final Map<HalLinkRelation, Object> embeddeds = new HashMap<>();
-	private final RelProvider provider;
+	private final LinkRelationProvider provider;
 	private final CurieProvider curieProvider;
 	private final EmbeddedWrappers wrappers;
 
 	/**
-	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link RelProvider} and prefer collection rels flag.
+	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels flag.
 	 *
 	 * @param provider can be {@literal null}.
 	 * @param preferCollectionRels whether to prefer to ask the provider for collection rels.
 	 */
-	public HalEmbeddedBuilder(RelProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
+	public HalEmbeddedBuilder(LinkRelationProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
 		Assert.notNull(provider, "Relprovider must not be null!");
 

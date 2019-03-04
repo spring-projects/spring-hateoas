@@ -43,7 +43,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
-import org.springframework.hateoas.server.core.AnnotationRelProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,7 +90,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(new AnnotationRelProvider(), null, null, new HalConfiguration()));
+				new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), null, null, new HalConfiguration()));
 	}
 
 	/**
@@ -456,7 +456,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test
 	public void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null,
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), null, null,
 				new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
@@ -488,7 +488,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	@Test // #811
 	public void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), null, null,
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), null, null,
 				new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
@@ -550,7 +550,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationRelProvider(), provider,
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
 				messageSource == null ? null : new MessageSourceAccessor(messageSource)));
 
 		return mapper;

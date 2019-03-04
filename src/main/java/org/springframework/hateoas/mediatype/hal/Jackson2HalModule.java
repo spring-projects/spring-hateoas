@@ -36,7 +36,7 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -664,13 +664,13 @@ public class Jackson2HalModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 		private final AutowireCapableBeanFactory delegate;
 
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
+		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider,
 				MessageSourceAccessor messageSourceAccessor) {
 			this(provider, curieProvider, messageSourceAccessor, new HalConfiguration());
 		}
 
 		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider} and
 		 * {@link MessageSourceAccessor}. Registers a prepared {@link HalResourcesSerializer} and
 		 * {@link HalLinkListSerializer} falling back to instantiation expecting a default constructor.
 		 *
@@ -678,13 +678,13 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param curieProvider can be {@literal null}.
 		 * @param messageSourceAccessor can be {@literal null}.
 		 */
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider,
+		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider,
 				MessageSourceAccessor messageSourceAccessor, HalConfiguration halConfiguration) {
 			this(provider, curieProvider, messageSourceAccessor, true, halConfiguration);
 		}
 
 		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link RelProvider}, {@link CurieProvider} and
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider} and
 		 * {@link MessageSourceAccessor} and whether to enforce embedded collections. Registers a prepared
 		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation expecting a
 		 * default constructor.
@@ -694,12 +694,12 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param accessor can be {@literal null}.
 		 * @param enforceEmbeddedCollections
 		 */
-		public HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
+		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
 				boolean enforceEmbeddedCollections, HalConfiguration halConfiguration) {
 			this(provider, curieProvider, accessor, enforceEmbeddedCollections, null, halConfiguration);
 		}
 
-		private HalHandlerInstantiator(RelProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
+		private HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
 				boolean enforceEmbeddedCollections, AutowireCapableBeanFactory delegate, HalConfiguration halConfiguration) {
 
 			Assert.notNull(provider, "RelProvider must not be null!");
@@ -830,19 +830,19 @@ public class Jackson2HalModule extends SimpleModule {
 	 */
 	public static class EmbeddedMapper {
 
-		private RelProvider relProvider;
+		private LinkRelationProvider relProvider;
 		private CurieProvider curieProvider;
 		private boolean preferCollectionRels;
 
 		/**
-		 * Creates a new {@link EmbeddedMapper} for the given {@link RelProvider}, {@link CurieProvider} and flag whether to
+		 * Creates a new {@link EmbeddedMapper} for the given {@link LinkRelationProvider}, {@link CurieProvider} and flag whether to
 		 * prefer collection relations.
 		 *
 		 * @param relProvider must not be {@literal null}.
 		 * @param curieProvider can be {@literal null}.
 		 * @param preferCollectionRels
 		 */
-		public EmbeddedMapper(RelProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
+		public EmbeddedMapper(LinkRelationProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
 			Assert.notNull(relProvider, "RelProvider must not be null!");
 

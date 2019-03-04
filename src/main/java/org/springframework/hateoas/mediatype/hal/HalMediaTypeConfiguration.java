@@ -25,7 +25,7 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
-	private final RelProvider relProvider;
+	private final LinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
 	private final MessageSourceAccessor messageSourceAccessor;
@@ -51,7 +51,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	 * @param halConfiguration
 	 * @param messageSourceAccessor
 	 */
-	public HalMediaTypeConfiguration(RelProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
+	public HalMediaTypeConfiguration(LinkRelationProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
 			ObjectProvider<HalConfiguration> halConfiguration,
 			@Qualifier("linkRelationMessageSource") MessageSourceAccessor messageSourceAccessor) {
 

@@ -19,16 +19,16 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.RelProvider;
-import org.springframework.hateoas.server.core.AnnotationRelProvider;
-import org.springframework.hateoas.server.core.DefaultRelProvider;
-import org.springframework.hateoas.server.core.DelegatingRelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
+import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
+import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
 
 /**
- * Unit tests for {@link DelegatingRelProvider}.
+ * Unit tests for {@link DelegatingLinkRelationProvider}.
  *
  * @author Oliver Gierke
  */
@@ -37,10 +37,10 @@ public class DelegatingRelProviderUnitTest {
 	@Test
 	public void foo() {
 
-		PluginRegistry<RelProvider, Class<?>> registry = OrderAwarePluginRegistry.of(new AnnotationRelProvider(),
-				new DefaultRelProvider());
+		PluginRegistry<LinkRelationProvider, Class<?>> registry = OrderAwarePluginRegistry.of(new AnnotationLinkRelationProvider(),
+				new DefaultLinkRelationProvider());
 
-		RelProvider delegatingProvider = new DelegatingRelProvider(registry);
+		LinkRelationProvider delegatingProvider = new DelegatingLinkRelationProvider(registry);
 
 		assertThat(delegatingProvider.supports(Sample.class)).isTrue();
 		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class)).isEqualTo(LinkRelation.of("foo"));

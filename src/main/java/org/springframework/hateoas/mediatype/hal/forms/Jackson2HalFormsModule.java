@@ -37,7 +37,7 @@ import org.springframework.hateoas.mediatype.hal.RepresentationModelMixin;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourceSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.mvc.JacksonSerializers.MediaTypeDeserializer;
 import org.springframework.http.MediaType;
 
@@ -148,21 +148,20 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
-		public HalFormsHandlerInstantiator(RelProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
+		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
+				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
 				HalFormsConfiguration halFormsConfiguration) {
 
-			super(resolver, curieProvider, messageSource, enforceEmbeddedCollections,
-					halFormsConfiguration.toHalConfiguration());
+			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, halFormsConfiguration.toHalConfiguration());
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(mapper));
 			this.serializers.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, messageSource, halFormsConfiguration.toHalConfiguration()));
+					new HalLinkListSerializer(curieProvider, mapper, accessor, halFormsConfiguration.toHalConfiguration()));
 		}
 
-		public HalFormsHandlerInstantiator(RelProvider relProvider, CurieProvider curieProvider,
+		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,
 				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
 				AutowireCapableBeanFactory beanFactory) {
 			this(relProvider, curieProvider, messageSource, enforceEmbeddedCollections,

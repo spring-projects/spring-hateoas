@@ -23,11 +23,11 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
-import org.springframework.hateoas.server.RelProvider;
-import org.springframework.hateoas.server.core.AnnotationRelProvider;
-import org.springframework.hateoas.server.core.DefaultRelProvider;
-import org.springframework.hateoas.server.core.DelegatingRelProvider;
-import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
+import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
+import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.config.EnablePluginRegistries;
@@ -69,31 +69,31 @@ class HateoasConfiguration {
 	// RelProvider
 
 	@Bean
-	RelProvider defaultRelProvider() {
+	LinkRelationProvider defaultRelProvider() {
 
 		return ClassUtils.isPresent("org.atteo.evo.inflector.English", null) //
-				? new EvoInflectorRelProvider()
-				: new DefaultRelProvider();
+				? new EvoInflectorLinkRelationProvider()
+				: new DefaultLinkRelationProvider();
 	}
 
 	@Bean
-	AnnotationRelProvider annotationRelProvider() {
-		return new AnnotationRelProvider();
+	AnnotationLinkRelationProvider annotationRelProvider() {
+		return new AnnotationLinkRelationProvider();
 	}
 
 	@Primary
 	@Bean
-	DelegatingRelProvider _relProvider(PluginRegistry<RelProvider, Class<?>> relProviderPluginRegistry) {
-		return new DelegatingRelProvider(relProviderPluginRegistry);
+	DelegatingLinkRelationProvider _relProvider(PluginRegistry<LinkRelationProvider, Class<?>> relProviderPluginRegistry) {
+		return new DelegatingLinkRelationProvider(relProviderPluginRegistry);
 	}
 
 	@Bean
-	PluginRegistryFactoryBean<RelProvider, Class<?>> relProviderPluginRegistry() {
+	PluginRegistryFactoryBean<LinkRelationProvider, Class<?>> relProviderPluginRegistry() {
 
-		PluginRegistryFactoryBean<RelProvider, Class<?>> factory = new PluginRegistryFactoryBean<>();
+		PluginRegistryFactoryBean<LinkRelationProvider, Class<?>> factory = new PluginRegistryFactoryBean<>();
 
-		factory.setType(RelProvider.class);
-		factory.setExclusions(new Class[] { DelegatingRelProvider.class });
+		factory.setType(LinkRelationProvider.class);
+		factory.setExclusions(new Class[] { DelegatingLinkRelationProvider.class });
 
 		return factory;
 	}

@@ -21,20 +21,20 @@ import java.util.Map;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 
 /**
  * @author Oliver Gierke
  * @author Alexander Baetz
  * @author Greg Turnquist
  */
-public class AnnotationRelProvider implements RelProvider, Ordered {
+public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ordered {
 
 	private final Map<Class<?>, Relation> annotationCache = new HashMap<>();
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
+	 * @see org.springframework.hateoas.server.LinkRelationProvider#getCollectionResourceRelFor(java.lang.Class)
 	 */
 	@Override
 	public LinkRelation getCollectionResourceRelFor(Class<?> type) {
@@ -50,7 +50,7 @@ public class AnnotationRelProvider implements RelProvider, Ordered {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Object)
+	 * @see org.springframework.hateoas.server.LinkRelationProvider#getItemResourceRelFor(java.lang.Class)
 	 */
 	@Override
 	public LinkRelation getItemResourceRelFor(Class<?> type) {

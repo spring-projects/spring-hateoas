@@ -45,7 +45,7 @@ s/hateoas\.LinkBuilder/hateoas.server.LinkBuilder/g;\
 s/hateoas\.LinkDiscoverer/hateoas.client.LinkDiscoverer/g;\
 s/hateoas\.LinkDiscoverers/hateoas.client.LinkDiscoverers/g;\
 s/hateoas\.MethodLinkBuilderFactory/hateoas.server.MethodLinkBuilderFactory/g;\
-s/hateoas\.RelProvider/hateoas.server.RelProvider/g;\
+s/hateoas\.RelProvider/hateoas.server.LinkRelationProvider/g;\
 s/hateoas\.ResourceAssembler/hateoas.server.ResourceAssembler/g;\
 s/hateoas\.ResourceProcessor/hateoas.server.ResourceProcessor/g;\
 s/hateoas\.VndErrors/hateoas.mediatype.vnderror.VndErrors/g;\
@@ -56,9 +56,9 @@ s/hateoas\.alps/hateoas.mediatype.alps/g;\
 s/hateoas\.core\.AbstractEntityLinks/hateoas.server.core.AbstractEntityLinks/g;\
 s/hateoas\.core\.AnnotationAttribute/hateoas.server.core.AnnotationAttribute/g;\
 s/hateoas\.core\.AnnotationMappingDiscoverer/hateoas.server.core.AnnotationMappingDiscoverer/g;\
-s/hateoas\.core\.DefaultRelProvider/hateoas.server.core.DefaultRelProvider/g;\
+s/hateoas\.core\.DefaultRelProvider/hateoas.server.core.DefaultLinkRelationProvider/g;\
 s/hateoas\.core\.EmbeddedWrapper/hateoas.server.core.EmbeddedWrapper/g;\
-s/hateoas\.core\.EvoInflectorRelProvider/hateoas.server.core.EvoInflectorRelProvider/g;\
+s/hateoas\.core\.EvoInflectorRelProvider/hateoas.server.core.EvoInflectorLinkRelationProvider/g;\
 s/hateoas\.core\.JsonPathLinkDiscoverer/hateoas.client.JsonPathLinkDiscoverer/g;\
 s/hateoas\.core\.LinkBuilderSupport/hateoas.server.core.LinkBuilderSupport/g;\
 s/hateoas\.core\.MethodParameters/hateoas.server.core.MethodParameters/g;\
@@ -86,10 +86,11 @@ s/IdentifiableResourceAssemblerSupport/IdentifiableRepresentationModelAssemblerS
 s/toResource(/toModel(/g;\
 s/toResources(/toCollectionModel(/g;\
 \
-s/\([^a-z]\)ResourceSupport\([ ><,#();\.]\)/\1RepresentationModel\2/g;\
-s/\([^a-z]\)PagedResources\([ ><,#();\.]\)/\1PagedModel\2/g;\
-s/\([^a-z]\)Resources\([ ><,#();\.]\)/\1CollectionModel\2/g;\
-s/\([^a-z]\)Resource\([ ><,#();\.]\)/\1EntityModel\2/g;\
+s/\([^a-z]\)ResourceSupport\([ ><,#();:\.]\)/\1RepresentationModel\2/g;\
+s/\([^a-z]\)PagedResources\([ ><,#();:\.]\)/\1PagedModel\2/g;\
+s/\([^a-z]\)Resources\([ ><,#();:\.]\)/\1CollectionModel\2/g;\
+s/\([^a-z]\)Resource\([ ><,#();:\.]\)/\1EntityModel\2/g;\
+s/\([^a-z]\)RelProvider\([ ><,#();:\.]\)/\1LinkRelationProvider\2/g;\
 \
 s/linkForSingleResource/linkForItemResource/g;\
 s/linkToSingleResource/linkToItemResource/g;\

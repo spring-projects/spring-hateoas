@@ -19,17 +19,17 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.RelProvider;
-import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 
 /**
- * Unit tests for {@link EvoInflectorRelProvider}.
+ * Unit tests for {@link EvoInflectorLinkRelationProvider}.
  *
  * @author Oliver Gierke
  */
 public class EvoInflectorRelProviderUnitTest {
 
-	RelProvider provider = new EvoInflectorRelProvider();
+	LinkRelationProvider provider = new EvoInflectorLinkRelationProvider();
 
 	@Test
 	public void buildsCollectionRelCorrectly() {

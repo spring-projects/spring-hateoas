@@ -22,7 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 
 /**
  * Integration tests for using {@link EnableHypermediaSupport} from within XML documents.
@@ -39,7 +39,7 @@ public class XmlConfigurationIntegrationTest {
 
 		ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("application-context.xml", getClass());
 
-		assertThat(context.getBean(RelProvider.class)).isNotNull();
+		assertThat(context.getBean(LinkRelationProvider.class)).isNotNull();
 
 		context.close();
 	}

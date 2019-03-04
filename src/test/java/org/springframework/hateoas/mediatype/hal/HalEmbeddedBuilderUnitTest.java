@@ -30,10 +30,10 @@ import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
 import org.springframework.hateoas.mediatype.hal.HalEmbeddedBuilder;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
-import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 
 /**
  * Unit tests for {@link HalEmbeddedBuilder}.
@@ -43,12 +43,12 @@ import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
  */
 public class HalEmbeddedBuilderUnitTest {
 
-	RelProvider provider;
+	LinkRelationProvider provider;
 	CurieProvider curieProvider;
 
 	@Before
 	public void setUp() {
-		provider = new EvoInflectorRelProvider();
+		provider = new EvoInflectorLinkRelationProvider();
 		curieProvider = new DefaultCurieProvider("curie", new UriTemplate("http://localhost/{rel}"));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,25 @@ package org.springframework.hateoas.server.mvc;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.ExposesResourceFor;
-import org.springframework.hateoas.server.RelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 
 /**
  * @author Oliver Gierke
  */
-public class ControllerRelProvider implements RelProvider {
+public class ControllerLinkRelationProvider implements LinkRelationProvider {
 
 	private final Class<?> controllerType;
 	private final Class<?> entityType;
-	private final PluginRegistry<RelProvider, Class<?>> providers;
+	private final PluginRegistry<LinkRelationProvider, Class<?>> providers;
 
-	public ControllerRelProvider(Class<?> controller, PluginRegistry<RelProvider, Class<?>> providers) {
+	public ControllerLinkRelationProvider(Class<?> controller, PluginRegistry<LinkRelationProvider, Class<?>> providers) {
 
 		Assert.notNull(controller, "Controller must not be null!");
 
 		ExposesResourceFor annotation = AnnotationUtils.findAnnotation(controller, ExposesResourceFor.class);
+
 		Assert.notNull(annotation, "Controller must be annotated with ExposesResourceFor!");
 
 		this.controllerType = controller;
@@ -45,20 +46,20 @@ public class ControllerRelProvider implements RelProvider {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.RelProvider#getRelForCollectionResource(java.lang.Class)
-	 */
-	@Override
-	public LinkRelation getCollectionResourceRelFor(Class<?> resource) {
-		return providers.getRequiredPluginFor(entityType).getCollectionResourceRelFor(resource);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.RelProvider#getRelForSingleResource(java.lang.Class)
+	 * @see org.springframework.hateoas.server.LinkRelationProvider#getItemResourceRelFor(java.lang.Class)
 	 */
 	@Override
 	public LinkRelation getItemResourceRelFor(Class<?> resource) {
 		return providers.getRequiredPluginFor(entityType).getItemResourceRelFor(resource);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.LinkRelationProvider#getCollectionResourceRelFor(java.lang.Class)
+	 */
+	@Override
+	public LinkRelation getCollectionResourceRelFor(Class<?> resource) {
+		return providers.getRequiredPluginFor(entityType).getCollectionResourceRelFor(resource);
 	}
 
 	/*

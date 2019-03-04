@@ -32,8 +32,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
-import org.springframework.hateoas.server.RelProvider;
-import org.springframework.hateoas.server.core.EvoInflectorRelProvider;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -51,13 +51,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Server implements Closeable {
 
 	private final ObjectMapper mapper;
-	private final RelProvider relProvider;
+	private final LinkRelationProvider relProvider;
 
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<>();
 
 	public Server() {
 
-		this.relProvider = new EvoInflectorRelProvider();
+		this.relProvider = new EvoInflectorLinkRelationProvider();
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
