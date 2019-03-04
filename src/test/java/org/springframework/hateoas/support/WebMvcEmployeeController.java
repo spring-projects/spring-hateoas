@@ -27,10 +27,10 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -61,9 +61,11 @@ public class WebMvcEmployeeController {
 	public CollectionModel<EntityModel<Employee>> all() {
 
 		// Generate an "Affordance" based on this method (the "self" link)
-		Link selfLink = linkTo(methodOn(WebMvcEmployeeController.class).all()).withSelfRel() //
-				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).newEmployee(null))) //
-				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).search(null, null)));
+		WebMvcEmployeeController controller = methodOn(WebMvcEmployeeController.class);
+
+		Link selfLink = linkTo(controller.all()).withSelfRel() //
+				.andAffordance(afford(controller.newEmployee(null))) //
+				.andAffordance(afford(controller.search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
 		return IntStream.range(0, EMPLOYEES.size()) //
@@ -97,10 +99,12 @@ public class WebMvcEmployeeController {
 		}
 
 		// Generate an "Affordance" based on this method (the "self" link)
-		Link selfLink = linkTo(methodOn(WebMvcEmployeeController.class).all()) //
+		WebMvcEmployeeController controller = methodOn(WebMvcEmployeeController.class);
+
+		Link selfLink = linkTo(controller.all()) //
 				.withSelfRel() //
-				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).newEmployee(null))) //
-				.andAffordance(afford(methodOn(WebMvcEmployeeController.class).search(null, null)));
+				.andAffordance(afford(controller.newEmployee(null))) //
+				.andAffordance(afford(controller.search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
 		return new CollectionModel<>(employees, selfLink);
@@ -110,16 +114,18 @@ public class WebMvcEmployeeController {
 	public EntityModel<Employee> findOne(@PathVariable Integer id) {
 
 		// Start the affordance with the "self" link, i.e. this method.
-		Link findOneLink = linkTo(methodOn(WebMvcEmployeeController.class).findOne(id)).withSelfRel();
+		WebMvcEmployeeController controller = methodOn(WebMvcEmployeeController.class);
+
+		Link findOneLink = linkTo(controller.findOne(id)).withSelfRel();
 
 		// Define final link as means to find entire collection.
-		Link employeesLink = linkTo(methodOn(WebMvcEmployeeController.class).all()).withRel("employees");
+		Link employeesLink = linkTo(controller.all()).withRel("employees");
 
 		// Return the affordance + a link back to the entire collection resource.
 		return new EntityModel<>(EMPLOYEES.get(id), //
 				findOneLink //
-						.andAffordance(afford(methodOn(WebMvcEmployeeController.class).updateEmployee(null, id))) // //
-						.andAffordance(afford(methodOn(WebMvcEmployeeController.class).partiallyUpdateEmployee(null, id))), //
+						.andAffordance(afford(controller.updateEmployee(null, id))) // //
+						.andAffordance(afford(controller.partiallyUpdateEmployee(null, id))), //
 				employeesLink);
 	}
 
@@ -148,7 +154,8 @@ public class WebMvcEmployeeController {
 	}
 
 	@PatchMapping("/employees/{id}")
-	public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EntityModel<Employee> employee, @PathVariable Integer id) {
+	public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EntityModel<Employee> employee,
+			@PathVariable Integer id) {
 
 		Employee oldEmployee = EMPLOYEES.get(id);
 		Employee newEmployee = oldEmployee;
