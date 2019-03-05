@@ -26,10 +26,7 @@ import java.util.Map;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
-import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.Factory;
-import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -52,8 +49,7 @@ public class DummyInvocationUtils {
 	 *
 	 * @author Oliver Gierke
 	 */
-	private static class InvocationRecordingMethodInterceptor
-			implements MethodInterceptor, LastInvocationAware, org.springframework.cglib.proxy.MethodInterceptor {
+	private static class InvocationRecordingMethodInterceptor implements MethodInterceptor, LastInvocationAware {
 
 		private static final Method GET_INVOCATIONS;
 		private static final Method GET_OBJECT_PARAMETERS;
@@ -85,32 +81,27 @@ public class DummyInvocationUtils {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.cglib.proxy.MethodInterceptor#intercept(java.lang.Object, java.lang.reflect.Method, java.lang.Object[], org.springframework.cglib.proxy.MethodProxy)
+		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 		 */
 		@Override
-		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) {
+		public Object invoke(org.aopalliance.intercept.MethodInvocation invocation) {
+
+			Method method = invocation.getMethod();
 
 			if (GET_INVOCATIONS.equals(method)) {
 				return getLastInvocation();
 			} else if (GET_OBJECT_PARAMETERS.equals(method)) {
 				return getObjectParameters();
 			} else if (ReflectionUtils.isObjectMethod(method)) {
-				return ReflectionUtils.invokeMethod(method, obj, args);
+				return ReflectionUtils.invokeMethod(method, invocation.getThis(), invocation.getArguments());
 			}
 
-			this.invocation = new SimpleMethodInvocation(targetType, method, args);
+			this.invocation = new SimpleMethodInvocation(targetType, method, invocation.getArguments());
 
 			Class<?> returnType = method.getReturnType();
-			return returnType.cast(getProxyWithInterceptor(returnType, this, obj.getClass().getClassLoader()));
-		}
+			ClassLoader classLoader = method.getDeclaringClass().getClassLoader();
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
-		 */
-		@Override
-		public Object invoke(org.aopalliance.intercept.MethodInvocation invocation) {
-			return intercept(invocation.getThis(), invocation.getMethod(), invocation.getArguments(), null);
+			return returnType.cast(getProxyWithInterceptor(returnType, this, classLoader));
 		}
 
 		/*
@@ -157,19 +148,18 @@ public class DummyInvocationUtils {
 	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
 			ClassLoader classLoader) {
 
+		ProxyFactory factory = new ProxyFactory();
+		factory.addAdvice(interceptor);
+		factory.addInterface(LastInvocationAware.class);
+
 		if (type.isInterface()) {
-
-			ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
 			factory.addInterface(type);
-			factory.addInterface(LastInvocationAware.class);
-			factory.addAdvice(interceptor);
-
-			return (T) factory.getProxy();
+		} else {
+			factory.setTargetClass(type);
+			factory.setProxyTargetClass(true);
 		}
 
-		Factory factory = (Factory) OBJENESIS.newInstance(getOrCreateEnhancedClass(type, classLoader));
-		factory.setCallbacks(new Callback[] { interceptor });
-		return (T) factory;
+		return (T) factory.getProxy(classLoader);
 	}
 
 	/**
