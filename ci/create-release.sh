@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-TICKET=$1
+ISSUE=$1
 RELEASE=$2
 SNAPSHOT=$3
 
