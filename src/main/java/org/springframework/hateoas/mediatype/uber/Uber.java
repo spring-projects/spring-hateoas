@@ -22,6 +22,7 @@ import lombok.experimental.Wither;
 import java.util.List;
 
 import org.springframework.hateoas.Links;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,8 +46,8 @@ class Uber {
 	private UberError error;
 
 	@JsonCreator
-	Uber(@JsonProperty("version") String version, @JsonProperty("data") List<UberData> data,
-			@JsonProperty("error") UberError error) {
+	Uber(@JsonProperty("version") String version, @JsonProperty("data") @Nullable List<UberData> data,
+			@JsonProperty("error") @Nullable UberError error) {
 
 		this.version = version;
 		this.data = data;
@@ -64,6 +65,10 @@ class Uber {
 	 */
 	@JsonIgnore
 	Links getLinks() {
+
+		if (data == null) {
+			return Links.NONE;
+		}
 
 		return data.stream() //
 				.flatMap(uberData -> uberData.getLinks().stream()) //

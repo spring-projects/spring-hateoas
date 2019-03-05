@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.support.WebStack;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,7 +56,11 @@ public class PropertyUtils {
 		FIELDS_TO_IGNORE.add("links");
 	}
 
-	public static Map<String, Object> findProperties(Object object) {
+	public static Map<String, Object> findProperties(@Nullable Object object) {
+
+		if (object == null) {
+			return Collections.emptyMap();
+		}
 
 		if (object.getClass().equals(EntityModel.class)) {
 			return findProperties(((EntityModel<?>) object).getContent());
@@ -83,8 +89,18 @@ public class PropertyUtils {
 			}
 		}
 
+		if (resolvableType.getRawClass() == null) {
+			return Collections.emptyList();
+		}
+		
 		if (resolvableType.getRawClass().equals(EntityModel.class)) {
-			return findPropertyNames(resolvableType.resolveGeneric(0));
+			Class<?> genericEntityModelParameter = resolvableType.resolveGeneric(0);
+
+			if (genericEntityModelParameter == null) {
+				return Collections.emptyList();
+			}
+			
+			return findPropertyNames(genericEntityModelParameter);
 		} else {
 			return findPropertyNames(resolvableType.getRawClass());
 		}
@@ -143,6 +159,10 @@ public class PropertyUtils {
 
 		Field descriptorField = ReflectionUtils.findField(clazz, descriptor.getName());
 
+		if (descriptorField == null) {
+			return false;
+		}
+
 		return toBeIgnoredByJackson(AnnotationUtils.getAnnotations(descriptorField));
 	}
 
@@ -162,7 +182,7 @@ public class PropertyUtils {
 	 * @param annotations
 	 * @return
 	 */
-	private static boolean toBeIgnoredByJackson(Annotation[] annotations) {
+	private static boolean toBeIgnoredByJackson(@Nullable Annotation[] annotations) {
 
 		if (annotations != null) {
 			for (Annotation annotation : annotations) {
@@ -184,12 +204,16 @@ public class PropertyUtils {
 	 */
 	private static boolean toBeIgnoredByJackson(Class<?> clazz, String field) {
 
-		for (Annotation annotation : AnnotationUtils.getAnnotations(clazz)) {
-			if (annotation.annotationType().equals(JsonIgnoreProperties.class)) {
-				String[] namesOfPropertiesToIgnore = (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value");
-				for (String propertyToIgnore : namesOfPropertiesToIgnore) {
-					if (propertyToIgnore.equalsIgnoreCase(field)) {
-						return true;
+		Annotation[] annotations = AnnotationUtils.getAnnotations(clazz);
+
+		if (annotations != null) {
+			for (Annotation annotation : annotations) {
+				if (annotation.annotationType().equals(JsonIgnoreProperties.class)) {
+					String[] namesOfPropertiesToIgnore = (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value");
+					for (String propertyToIgnore : namesOfPropertiesToIgnore) {
+						if (propertyToIgnore.equalsIgnoreCase(field)) {
+							return true;
+						}
 					}
 				}
 			}

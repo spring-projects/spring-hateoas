@@ -22,11 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -47,7 +48,8 @@ class HalEmbeddedBuilder {
 	private final EmbeddedWrappers wrappers;
 
 	/**
-	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels flag.
+	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels
+	 * flag.
 	 *
 	 * @param provider can be {@literal null}.
 	 * @param preferCollectionRels whether to prefer to ask the provider for collection rels.
@@ -99,7 +101,7 @@ class HalEmbeddedBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Collection<Object> asCollection(Object source) {
+	private Collection<Object> asCollection(@Nullable Object source) {
 
 		return source instanceof Collection //
 				? (Collection<Object>) source //

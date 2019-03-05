@@ -17,8 +17,9 @@ package org.springframework.hateoas.server.core;
 
 import java.util.Optional;
 
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.lang.Nullable;
 
 /**
  * A wrapper to handle values to be embedded into a {@link EntityModel}.
@@ -66,5 +67,6 @@ public interface EmbeddedWrapper {
 	 *
 	 * @return
 	 */
+	@Nullable
 	Class<?> getRelTargetType();
 }

@@ -17,6 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ResolvableType;
@@ -69,6 +70,7 @@ public class SpringAffordanceBuilder {
 			List<QueryParameter> queryMethodParameters = invocationMethodParameters.getParametersWith(RequestParam.class)
 					.stream() //
 					.map(methodParameter -> methodParameter.getParameterAnnotation(RequestParam.class)) //
+					.filter(Objects::nonNull) //
 					.map(requestParam -> new QueryParameter(requestParam.name(), requestParam.value(), requestParam.required())) //
 					.collect(Collectors.toList());
 

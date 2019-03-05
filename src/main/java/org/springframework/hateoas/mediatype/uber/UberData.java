@@ -41,6 +41,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -76,12 +77,13 @@ class UberData {
 	private List<UberData> data;
 
 	@JsonCreator
-	UberData(@JsonProperty("id") String id, @JsonProperty("name") String name, @JsonProperty("label") String label,
-			@JsonProperty("rel") List<LinkRelation> rel, @JsonProperty("url") String url,
-			@JsonProperty("action") UberAction action, @JsonProperty("transclude") boolean transclude,
-			@JsonProperty("model") String model, @JsonProperty("sending") List<String> sending,
-			@JsonProperty("accepting") List<String> accepting, @JsonProperty("value") Object value,
-			@JsonProperty("data") List<UberData> data) {
+	UberData(@JsonProperty("id") @Nullable String id, @JsonProperty("name") @Nullable String name,
+			@JsonProperty("label") @Nullable String label, @JsonProperty("rel") @Nullable List<LinkRelation> rel,
+			@JsonProperty("url") @Nullable String url, @JsonProperty("action") UberAction action,
+			@JsonProperty("transclude") boolean transclude, @JsonProperty("model") @Nullable String model,
+			@JsonProperty("sending") @Nullable List<String> sending,
+			@JsonProperty("accepting") @Nullable List<String> accepting, @JsonProperty("value") @Nullable Object value,
+			@JsonProperty("data") @Nullable List<UberData> data) {
 
 		this.id = id;
 		this.name = name;
@@ -104,6 +106,7 @@ class UberData {
 	/**
 	 * Don't render if it's {@link UberAction#READ}.
 	 */
+	@Nullable
 	public UberAction getAction() {
 		return action == UberAction.READ ? null : action;
 	}
@@ -111,6 +114,7 @@ class UberData {
 	/*
 	 * Use a {@link Boolean} to support returning {@literal null}, and if it is {@literal null}, don't render.
 	 */
+	@Nullable
 	public Boolean isTemplated() {
 
 		return Optional.ofNullable(this.url) //
@@ -121,8 +125,9 @@ class UberData {
 	/*
 	 * Use a {@link Boolean} to support returning {@literal null}, and if it is {@literal null}, don't render.
 	 */
+	@Nullable
 	public Boolean isTransclude() {
-		return this.transclude ? this.transclude : null;
+		return this.transclude ? true : null;
 	}
 
 	/**
@@ -130,6 +135,10 @@ class UberData {
 	 */
 	@JsonIgnore
 	public List<Link> getLinks() {
+
+		if (this.url == null) {
+			return Links.NONE.toList();
+		}
 
 		return Optional.ofNullable(this.rel) //
 				.map(rels -> rels.stream() //
@@ -146,8 +155,8 @@ class UberData {
 	/**
 	 * Set of all Spring HATEOAS resource types.
 	 */
-	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(Arrays.asList(RepresentationModel.class,
-			EntityModel.class, CollectionModel.class, PagedModel.class));
+	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(
+			Arrays.asList(RepresentationModel.class, EntityModel.class, CollectionModel.class, PagedModel.class));
 
 	/**
 	 * Convert a {@link RepresentationModel} into a list of {@link UberData}s, containing links and content.
@@ -180,8 +189,7 @@ class UberData {
 	}
 
 	/**
-	 * Convert {@link CollectionModel} into a list of {@link UberData}, with each item nested in a
-	 * sub-UberData.
+	 * Convert {@link CollectionModel} into a list of {@link UberData}, with each item nested in a sub-UberData.
 	 *
 	 * @param resources
 	 * @return
@@ -255,9 +263,9 @@ class UberData {
 	 * @param content
 	 * @return
 	 */
-	private static Optional<UberData> extractContent(Object content) {
+	private static Optional<UberData> extractContent(@Nullable Object content) {
 
-		return Optional.of(content) //
+		return Optional.ofNullable(content) //
 				.filter(it -> !RESOURCE_TYPES.contains(content.getClass())) //
 				.map(it -> new UberData() //
 						.withName(StringUtils.uncapitalize(it.getClass().getSimpleName())) //

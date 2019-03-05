@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -51,7 +52,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @param metadata
 	 * @param links
 	 */
-	public PagedModel(Collection<T> content, PageMetadata metadata, Link... links) {
+	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Link... links) {
 		this(content, metadata, Arrays.asList(links));
 	}
 
@@ -62,7 +63,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @param metadata
 	 * @param links
 	 */
-	public PagedModel(Collection<T> content, PageMetadata metadata, Iterable<Link> links) {
+	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
 
 		super(content, links);
 
@@ -75,6 +76,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @return the metadata
 	 */
 	@JsonProperty("page")
+	@Nullable
 	public PageMetadata getMetadata() {
 		return metadata;
 	}

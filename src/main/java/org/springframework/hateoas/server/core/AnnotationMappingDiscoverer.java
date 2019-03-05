@@ -22,10 +22,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -59,7 +61,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 * @param annotation must not be {@literal null}.
 	 * @param mappingAttributeName if {@literal null}, it defaults to {@code value}.
 	 */
-	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation, String mappingAttributeName) {
+	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation, @Nullable String mappingAttributeName) {
 
 		Assert.notNull(annotation, "Annotation must not be null!");
 
@@ -72,6 +74,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
 	 */
 	@Override
+	@Nullable
 	public String getMapping(Class<?> type) {
 
 		Assert.notNull(type, "Type must not be null!");
@@ -86,6 +89,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
 	 */
 	@Override
+	@Nullable
 	public String getMapping(Method method) {
 
 		Assert.notNull(method, "Method must not be null!");
@@ -97,6 +101,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
 	 */
 	@Override
+	@Nullable
 	public String getMapping(Class<?> type, Method method) {
 
 		Assert.notNull(type, "Type must not be null!");
@@ -105,7 +110,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		String[] mapping = getMappingFrom(findMergedAnnotation(method, annotationType));
 		String typeMapping = getMapping(type);
 
-		if (mapping == null || mapping.length == 0) {
+		if (mapping.length == 0) {
 			return typeMapping;
 		}
 
@@ -131,6 +136,10 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 		RequestMethod[] requestMethods = (RequestMethod[]) value;
 
+		if (requestMethods == null) {
+			return Collections.emptyList();
+		}
+
 		List<HttpMethod> requestMethodNames = new ArrayList<>();
 
 		for (RequestMethod requestMethod : requestMethods) {
@@ -140,7 +149,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return requestMethodNames;
 	}
 
-	private String[] getMappingFrom(Annotation annotation) {
+	private String[] getMappingFrom(@Nullable Annotation annotation) {
 
 		if (annotation == null) {
 			return new String[0];

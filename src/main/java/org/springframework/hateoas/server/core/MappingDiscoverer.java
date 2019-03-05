@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface to discover a URI mapping and related {@link org.springframework.hateoas.Affordance}s for either a
@@ -35,6 +36,7 @@ public interface MappingDiscoverer {
 	 * @param type must not be {@literal null}.
 	 * @return the type-level mapping or {@literal null} in case none is present.
 	 */
+	@Nullable
 	String getMapping(Class<?> type);
 
 	/**
@@ -53,6 +55,7 @@ public interface MappingDiscoverer {
 	 * @param method must not be {@literal null}.
 	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
 	 */
+	@Nullable
 	String getMapping(Class<?> type, Method method);
 
 	/**

@@ -52,7 +52,9 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 	static final Field CONTENT_FIELD = ReflectionUtils.findField(CollectionModel.class, "content");
 
 	static {
-		ReflectionUtils.makeAccessible(CONTENT_FIELD);
+		if (CONTENT_FIELD != null) {
+			ReflectionUtils.makeAccessible(CONTENT_FIELD);
+		}
 	}
 
 	private final @NonNull HandlerMethodReturnValueHandler delegate;

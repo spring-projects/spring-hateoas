@@ -17,6 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import lombok.experimental.UtilityClass;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriUtils;
 
@@ -39,7 +40,7 @@ class EncodingUtils {
 	 * @param source must not be {@literal null}.
 	 * @return
 	 */
-	public static String encodePath(Object source) {
+	public static String encodePath(@Nullable Object source) {
 
 		Assert.notNull(source, "Path value must not be null!");
 
@@ -56,7 +57,7 @@ class EncodingUtils {
 	 * @param source must not be {@literal null}.
 	 * @return
 	 */
-	public static String encodeParameter(Object source) {
+	public static String encodeParameter(@Nullable Object source) {
 
 		Assert.notNull(source, "Request parameter value must not be null!");
 

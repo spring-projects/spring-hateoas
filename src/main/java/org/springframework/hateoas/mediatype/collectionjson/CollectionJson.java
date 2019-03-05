@@ -26,6 +26,7 @@ import java.util.List;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.Links.MergeMode;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -52,12 +53,12 @@ class CollectionJson<T> {
 
 	@JsonCreator
 	CollectionJson(@JsonProperty("version") String version, //
-			@JsonProperty("href") String href, //
-			@JsonProperty("links") Links links, //
-			@JsonProperty("items") List<CollectionJsonItem<T>> items, //
-			@JsonProperty("queries") List<CollectionJsonQuery> queries, //
-			@JsonProperty("template") CollectionJsonTemplate template, //
-			@JsonProperty("error") CollectionJsonError error) {
+				   @JsonProperty("href") @Nullable String href, //
+				   @JsonProperty("links") @Nullable Links links, //
+				   @JsonProperty("items") @Nullable List<CollectionJsonItem<T>> items, //
+				   @JsonProperty("queries") @Nullable List<CollectionJsonQuery> queries, //
+				   @JsonProperty("template") @Nullable CollectionJsonTemplate template, //
+				   @JsonProperty("error") @Nullable CollectionJsonError error) {
 
 		this.version = version;
 		this.href = href;

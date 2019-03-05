@@ -27,6 +27,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -58,7 +59,7 @@ public class MethodParameters {
 	 * @param method must not be {@literal null}.
 	 * @param namingAnnotation can be {@literal null}.
 	 */
-	public MethodParameters(Method method, AnnotationAttribute namingAnnotation) {
+	public MethodParameters(Method method, @Nullable AnnotationAttribute namingAnnotation) {
 
 		Assert.notNull(method, "Method must not be null!");
 
@@ -145,7 +146,7 @@ public class MethodParameters {
 		 * @param parameterIndex
 		 * @param attribute can be {@literal null}
 		 */
-		public AnnotationNamingMethodParameter(Method method, int parameterIndex, AnnotationAttribute attribute) {
+		public AnnotationNamingMethodParameter(Method method, int parameterIndex, @Nullable AnnotationAttribute attribute) {
 
 			super(method, parameterIndex);
 			this.attribute = attribute;

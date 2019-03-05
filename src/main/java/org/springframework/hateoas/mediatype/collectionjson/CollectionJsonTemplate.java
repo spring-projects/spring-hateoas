@@ -20,6 +20,8 @@ import lombok.experimental.Wither;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -33,7 +35,7 @@ class CollectionJsonTemplate {
 	private List<CollectionJsonData> data;
 
 	@JsonCreator
-	CollectionJsonTemplate(@JsonProperty("data") List<CollectionJsonData> data) {
+	CollectionJsonTemplate(@JsonProperty("data") @Nullable List<CollectionJsonData> data) {
 		this.data = data;
 	}
 

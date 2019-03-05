@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import org.springframework.hateoas.mediatype.uber.Jackson2UberModule.UberActionDeserializer;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -100,6 +101,7 @@ enum UberAction {
 	 * @param method to map
 	 * @return action, or null for GET
 	 */
+	@Nullable
 	static UberAction forRequestMethod(HttpMethod method) {
 		return HttpMethod.GET == method ? null : fromMethod(method);
 	}

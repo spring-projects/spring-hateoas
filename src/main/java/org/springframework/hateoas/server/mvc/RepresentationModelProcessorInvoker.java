@@ -28,6 +28,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -61,12 +62,14 @@ public class RepresentationModelProcessorInvoker {
 			ResolvableType processorType = ResolvableType.forClass(RepresentationModelProcessor.class, processor.getClass());
 			Class<?> rawType = processorType.getGeneric(0).resolve();
 
-			if (EntityModel.class.isAssignableFrom(rawType)) {
-				this.processors.add(new ResourceProcessorWrapper(processor));
-			} else if (CollectionModel.class.isAssignableFrom(rawType)) {
-				this.processors.add(new ResourcesProcessorWrapper(processor));
-			} else {
-				this.processors.add(new DefaultProcessorWrapper(processor));
+			if (rawType != null) {
+				if (EntityModel.class.isAssignableFrom(rawType)) {
+					this.processors.add(new ResourceProcessorWrapper(processor));
+				} else if (CollectionModel.class.isAssignableFrom(rawType)) {
+					this.processors.add(new ResourcesProcessorWrapper(processor));
+				} else {
+					this.processors.add(new DefaultProcessorWrapper(processor));
+				}
 			}
 		}
 
@@ -104,8 +107,8 @@ public class RepresentationModelProcessorInvoker {
 		if (RepresentationModelProcessorHandlerMethodReturnValueHandler.RESOURCES_TYPE.isAssignableFrom(referenceType)) {
 
 			CollectionModel<?> resources = (CollectionModel<?>) value;
-			ResolvableType elementTargetType = ResolvableType
-					.forClass(CollectionModel.class, referenceType.getRawClass()).getGeneric(0);
+			ResolvableType elementTargetType = ResolvableType.forClass(CollectionModel.class, referenceType.getRawClass())
+					.getGeneric(0);
 			List<Object> result = new ArrayList<>(resources.getContent().size());
 
 			for (Object element : resources) {
@@ -119,8 +122,10 @@ public class RepresentationModelProcessorInvoker {
 				result.add(invokeProcessorsFor(element, elementTargetType));
 			}
 
-			ReflectionUtils.setField(RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD, resources,
-					result);
+			if (RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD != null) {
+				ReflectionUtils.setField(RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD, resources,
+						result);
+			}
 		}
 
 		return (T) invokeProcessorsFor(Object.class.cast(value), referenceType);
@@ -147,11 +152,18 @@ public class RepresentationModelProcessorInvoker {
 		return currentValue;
 	}
 
-	private static boolean isRawTypeAssignable(ResolvableType left, Class<?> right) {
+	private static boolean isRawTypeAssignable(@Nullable ResolvableType left, @Nullable Class<?> right) {
+
+		Assert.notNull(right, "right cannot be null!");
+
 		return getRawType(left).isAssignableFrom(right);
 	}
 
-	private static Class<?> getRawType(ResolvableType type) {
+	private static Class<?> getRawType(@Nullable ResolvableType type) {
+
+		if (type == null) {
+			return Object.class;
+		}
 
 		Class<?> rawType = type.getRawClass();
 		return rawType == null ? Object.class : rawType;
@@ -247,8 +259,8 @@ public class RepresentationModelProcessorInvoker {
 	}
 
 	/**
-	 * {@link ProcessorWrapper} to deal with {@link RepresentationModelProcessor}s for {@link EntityModel}s.
-	 * Will fall back to peeking into the {@link EntityModel}'s content for type resolution.
+	 * {@link ProcessorWrapper} to deal with {@link RepresentationModelProcessor}s for {@link EntityModel}s. Will fall
+	 * back to peeking into the {@link EntityModel}'s content for type resolution.
 	 *
 	 * @author Oliver Gierke
 	 */
@@ -278,15 +290,14 @@ public class RepresentationModelProcessorInvoker {
 		}
 
 		/**
-		 * Returns whether the given {@link EntityModel} matches the given target {@link ResolvableType}. We
-		 * inspect the {@link EntityModel}'s value to determine the match.
+		 * Returns whether the given {@link EntityModel} matches the given target {@link ResolvableType}. We inspect the
+		 * {@link EntityModel}'s value to determine the match.
 		 *
 		 * @param resource
 		 * @param target must not be {@literal null}.
-		 * @return whether the given {@link EntityModel} can be assigned to the given target
-		 *         {@link ResolvableType}
+		 * @return whether the given {@link EntityModel} can be assigned to the given target {@link ResolvableType}
 		 */
-		private static boolean isValueTypeMatch(EntityModel<?> resource, ResolvableType target) {
+		private static boolean isValueTypeMatch(@Nullable EntityModel<?> resource, @Nullable ResolvableType target) {
 
 			if (resource == null || !isRawTypeAssignable(target, resource.getClass())) {
 				return false;
@@ -302,7 +313,12 @@ public class RepresentationModelProcessorInvoker {
 			return type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass()));
 		}
 
-		private static ResolvableType findGenericType(ResolvableType source, Class<?> type) {
+		@Nullable
+		private static ResolvableType findGenericType(@Nullable ResolvableType source, Class<?> type) {
+
+			if (source == null) {
+				return null;
+			}
 
 			Class<?> rawType = getRawType(source);
 
@@ -319,8 +335,8 @@ public class RepresentationModelProcessorInvoker {
 	}
 
 	/**
-	 * {@link ProcessorWrapper} for {@link RepresentationModelProcessor}s targeting {@link CollectionModel}.
-	 * Will peek into the content of the {@link CollectionModel} for type matching decisions if needed.
+	 * {@link ProcessorWrapper} for {@link RepresentationModelProcessor}s targeting {@link CollectionModel}. Will peek
+	 * into the content of the {@link CollectionModel} for type matching decisions if needed.
 	 *
 	 * @author Oliver Gierke
 	 */
@@ -350,15 +366,14 @@ public class RepresentationModelProcessorInvoker {
 		}
 
 		/**
-		 * Returns whether the given {@link CollectionModel} instance matches the given
-		 * {@link ResolvableType}. We predict this by inspecting the first element of the content of the
-		 * {@link CollectionModel}.
+		 * Returns whether the given {@link CollectionModel} instance matches the given {@link ResolvableType}. We predict
+		 * this by inspecting the first element of the content of the {@link CollectionModel}.
 		 *
 		 * @param resources the {@link CollectionModel} to inspect.
 		 * @param target that target {@link ResolvableType}.
 		 * @return
 		 */
-		static boolean isValueTypeMatch(CollectionModel<?> resources, ResolvableType target) {
+		static boolean isValueTypeMatch(@Nullable CollectionModel<?> resources, ResolvableType target) {
 
 			if (resources == null) {
 				return false;
@@ -372,8 +387,7 @@ public class RepresentationModelProcessorInvoker {
 
 			ResolvableType superType = null;
 
-			for (Class<?> resourcesType : Arrays.<Class<?>> asList(resources.getClass(),
-					CollectionModel.class)) {
+			for (Class<?> resourcesType : Arrays.<Class<?>> asList(resources.getClass(), CollectionModel.class)) {
 
 				superType = getSuperType(target, resourcesType);
 
@@ -407,18 +421,18 @@ public class RepresentationModelProcessorInvoker {
 		 */
 		private static ResolvableType getSuperType(ResolvableType source, Class<?> superType) {
 
-			if (source.getRawClass().equals(superType)) {
+			if (source.getRawClass() != null && source.getRawClass().equals(superType)) {
 				return source;
 			}
 
 			ResolvableType candidate = source.getSuperType();
 
-			if (superType.isAssignableFrom(candidate.getRawClass())) {
+			if (candidate.getRawClass() != null && superType.isAssignableFrom(candidate.getRawClass())) {
 				return candidate;
 			}
 
 			for (ResolvableType interfaces : source.getInterfaces()) {
-				if (superType.isAssignableFrom(interfaces.getRawClass())) {
+				if (interfaces.getRawClass() != null && superType.isAssignableFrom(interfaces.getRawClass())) {
 					return interfaces;
 				}
 			}

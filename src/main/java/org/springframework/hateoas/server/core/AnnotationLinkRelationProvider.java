@@ -22,6 +22,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Oliver Gierke
@@ -37,6 +38,7 @@ public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ord
 	 * @see org.springframework.hateoas.server.LinkRelationProvider#getCollectionResourceRelFor(java.lang.Class)
 	 */
 	@Override
+	@Nullable
 	public LinkRelation getCollectionResourceRelFor(Class<?> type) {
 
 		Relation annotation = lookupAnnotation(type);
@@ -53,6 +55,7 @@ public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ord
 	 * @see org.springframework.hateoas.server.LinkRelationProvider#getItemResourceRelFor(java.lang.Class)
 	 */
 	@Override
+	@Nullable
 	public LinkRelation getItemResourceRelFor(Class<?> type) {
 
 		Relation annotation = lookupAnnotation(type);
@@ -82,6 +85,7 @@ public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ord
 		return lookupAnnotation(delimiter) != null;
 	}
 
+	@Nullable
 	private Relation lookupAnnotation(Class<?> type) {
 		return annotationCache.computeIfAbsent(type, key -> AnnotationUtils.getAnnotation(key, Relation.class));
 	}

@@ -17,6 +17,7 @@ package org.springframework.hateoas.config;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -43,9 +44,10 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 
 		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
 
-		Collection<MediaType> types = Arrays.stream((HypermediaType[]) attributes.get("type")) //
-				.flatMap(it -> it.getMediaTypes().stream()) //
-				.collect(Collectors.toList());
+		Collection<MediaType> types = attributes == null ? Collections.emptyList()
+				: Arrays.stream((HypermediaType[]) attributes.get("type")) //
+						.flatMap(it -> it.getMediaTypes().stream()) //
+						.collect(Collectors.toList());
 
 		Collection<MediaTypeConfigurationProvider> configurationProviders = SpringFactoriesLoader.loadFactories(
 				MediaTypeConfigurationProvider.class, HypermediaConfigurationImportSelector.class.getClassLoader());

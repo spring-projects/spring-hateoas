@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -285,7 +286,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @param variable must not be {@literal null}.
 	 * @param value can be {@literal null}.
 	 */
-	private static void appendToBuilder(UriComponentsBuilder builder, TemplateVariable variable, Object value) {
+	private static void appendToBuilder(UriComponentsBuilder builder, TemplateVariable variable, @Nullable Object value) {
 
 		if (value == null) {
 

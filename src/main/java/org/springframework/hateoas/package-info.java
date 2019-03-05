@@ -21,4 +21,7 @@
  * @author Jens Schauder
  * @author Greg Turnquist
  */
+@NonNullApi
 package org.springframework.hateoas;
+
+import org.springframework.lang.NonNullApi;

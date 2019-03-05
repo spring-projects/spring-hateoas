@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
  * Unit tests for {@link Link}.
@@ -449,6 +450,19 @@ public class LinkUnitTest {
 	@Test
 	public void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
 		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Link("/{segment}/path").toUri());
+	}
+
+	@Test
+	public void foo() {
+		String foo = getIt();
+
+		if (foo == null) {
+			System.out.println("Yo");
+		}
+	}
+
+	private String getIt() {
+		return null;
 	}
 
 }

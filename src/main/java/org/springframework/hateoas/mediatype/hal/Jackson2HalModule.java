@@ -37,6 +37,7 @@ import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -114,13 +115,13 @@ public class Jackson2HalModule extends SimpleModule {
 		private final MessageSourceAccessor accessor;
 		private final HalConfiguration halConfiguration;
 
-		public HalLinkListSerializer(CurieProvider curieProvider, EmbeddedMapper mapper, MessageSourceAccessor accessor,
-				HalConfiguration halConfiguration) {
+		public HalLinkListSerializer(@Nullable CurieProvider curieProvider, EmbeddedMapper mapper,
+				@Nullable MessageSourceAccessor accessor, HalConfiguration halConfiguration) {
 			this(null, curieProvider, mapper, accessor, halConfiguration);
 		}
 
-		public HalLinkListSerializer(BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageSourceAccessor accessor, HalConfiguration halConfiguration) {
+		public HalLinkListSerializer(@Nullable BeanProperty property, @Nullable CurieProvider curieProvider,
+				@Nullable EmbeddedMapper mapper, @Nullable MessageSourceAccessor accessor, HalConfiguration halConfiguration) {
 
 			super(TypeFactory.defaultInstance().constructType(Links.class));
 
@@ -220,6 +221,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param relation must not be {@literal null} or empty.
 		 * @return
 		 */
+		@Nullable
 		private String getTitle(HalLinkRelation relation) {
 
 			Assert.notNull(relation, "Local relation must not be null or empty!");
@@ -246,6 +248,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -255,6 +258,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
 		 */
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -282,14 +286,15 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
 	/**
-	 * Custom {@link JsonSerializer} to render {@link EntityModel}-Lists in HAL compatible JSON. Renders the
-	 * list as a Map.
+	 * Custom {@link JsonSerializer} to render {@link EntityModel}-Lists in HAL compatible JSON. Renders the list as a
+	 * Map.
 	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
@@ -306,7 +311,7 @@ public class Jackson2HalModule extends SimpleModule {
 			this(null, embeddedMapper);
 		}
 
-		public HalResourcesSerializer(BeanProperty property, EmbeddedMapper embeddedMapper) {
+		public HalResourcesSerializer(@Nullable BeanProperty property, EmbeddedMapper embeddedMapper) {
 
 			super(TypeFactory.defaultInstance().constructType(Collection.class));
 
@@ -344,11 +349,13 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -364,6 +371,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -446,6 +454,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
 		 */
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -455,6 +464,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -522,6 +532,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -531,6 +542,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -588,7 +600,7 @@ public class Jackson2HalModule extends SimpleModule {
 			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, vc), vc);
 		}
 
-		private HalResourcesDeserializer(JavaType type, JavaType contentType) {
+		private HalResourcesDeserializer(JavaType type, @Nullable JavaType contentType) {
 
 			super(type);
 			this.contentType = contentType;
@@ -599,6 +611,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -608,6 +621,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -670,22 +684,22 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider} and
-		 * {@link MessageSourceAccessor}. Registers a prepared {@link HalResourcesSerializer} and
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
+		 * and {@link MessageSourceAccessor}. Registers a prepared {@link HalResourcesSerializer} and
 		 * {@link HalLinkListSerializer} falling back to instantiation expecting a default constructor.
 		 *
 		 * @param provider must not be {@literal null}.
 		 * @param curieProvider can be {@literal null}.
 		 * @param messageSourceAccessor can be {@literal null}.
 		 */
-		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider,
+		public HalHandlerInstantiator(LinkRelationProvider provider, @Nullable CurieProvider curieProvider,
 				MessageSourceAccessor messageSourceAccessor, HalConfiguration halConfiguration) {
 			this(provider, curieProvider, messageSourceAccessor, true, halConfiguration);
 		}
 
 		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider} and
-		 * {@link MessageSourceAccessor} and whether to enforce embedded collections. Registers a prepared
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
+		 * and {@link MessageSourceAccessor} and whether to enforce embedded collections. Registers a prepared
 		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation expecting a
 		 * default constructor.
 		 *
@@ -694,13 +708,15 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param accessor can be {@literal null}.
 		 * @param enforceEmbeddedCollections
 		 */
-		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
-				boolean enforceEmbeddedCollections, HalConfiguration halConfiguration) {
+		public HalHandlerInstantiator(@Nullable LinkRelationProvider provider, @Nullable CurieProvider curieProvider,
+				@Nullable MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
+				HalConfiguration halConfiguration) {
 			this(provider, curieProvider, accessor, enforceEmbeddedCollections, null, halConfiguration);
 		}
 
-		private HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageSourceAccessor accessor,
-				boolean enforceEmbeddedCollections, AutowireCapableBeanFactory delegate, HalConfiguration halConfiguration) {
+		private HalHandlerInstantiator(@Nullable LinkRelationProvider provider, @Nullable CurieProvider curieProvider,
+				@Nullable MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
+				@Nullable AutowireCapableBeanFactory delegate, HalConfiguration halConfiguration) {
 
 			Assert.notNull(provider, "RelProvider must not be null!");
 
@@ -835,14 +851,15 @@ public class Jackson2HalModule extends SimpleModule {
 		private boolean preferCollectionRels;
 
 		/**
-		 * Creates a new {@link EmbeddedMapper} for the given {@link LinkRelationProvider}, {@link CurieProvider} and flag whether to
-		 * prefer collection relations.
+		 * Creates a new {@link EmbeddedMapper} for the given {@link LinkRelationProvider}, {@link CurieProvider} and flag
+		 * whether to prefer collection relations.
 		 *
 		 * @param relProvider must not be {@literal null}.
 		 * @param curieProvider can be {@literal null}.
 		 * @param preferCollectionRels
 		 */
-		public EmbeddedMapper(LinkRelationProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
+		public EmbeddedMapper(LinkRelationProvider relProvider, @Nullable CurieProvider curieProvider,
+				boolean preferCollectionRels) {
 
 			Assert.notNull(relProvider, "RelProvider must not be null!");
 
@@ -888,7 +905,8 @@ public class Jackson2HalModule extends SimpleModule {
 		private final Link link;
 		private final String title;
 
-		public HalLink(Link link, String title) {
+		public HalLink(Link link, @Nullable String title) {
+
 			this.link = link;
 			this.title = title;
 		}
@@ -899,6 +917,7 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		@JsonInclude(Include.NON_NULL)
+		@Nullable
 		public String getTitle() {
 			return title;
 		}

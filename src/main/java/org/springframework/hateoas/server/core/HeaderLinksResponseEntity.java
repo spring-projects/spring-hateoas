@@ -44,7 +44,9 @@ public class HeaderLinksResponseEntity<T extends RepresentationModel<?>> extends
 	private HeaderLinksResponseEntity(ResponseEntity<T> entity) {
 
 		super(entity.getBody(), getHeadersWithLinks(entity), entity.getStatusCode());
-		entity.getBody().removeLinks();
+		if (entity.getBody() != null) {
+			entity.getBody().removeLinks();
+		}
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class HeaderLinksResponseEntity<T extends RepresentationModel<?>> extends
 	 */
 	private static <T extends RepresentationModel<?>> HttpHeaders getHeadersWithLinks(ResponseEntity<T> entity) {
 
-		Links links = entity.getBody().getLinks();
+		Links links = entity.getBody() != null ? entity.getBody().getLinks() : Links.NONE;
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.putAll(entity.getHeaders());

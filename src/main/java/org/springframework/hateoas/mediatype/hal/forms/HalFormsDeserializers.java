@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -91,6 +92,7 @@ class HalFormsDeserializers {
 		}
 
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -120,6 +122,7 @@ class HalFormsDeserializers {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -129,6 +132,7 @@ class HalFormsDeserializers {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}

@@ -20,6 +20,7 @@ import java.lang.reflect.AnnotatedElement;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -47,7 +48,7 @@ public class AnnotationAttribute {
 	 * @param annotationType must not be {@literal null}.
 	 * @param attributeName can be {@literal null}, defaults to {@code value}.
 	 */
-	public AnnotationAttribute(Class<? extends Annotation> annotationType, String attributeName) {
+	public AnnotationAttribute(Class<? extends Annotation> annotationType, @Nullable String attributeName) {
 
 		Assert.notNull(annotationType, "AnnotationType must not be null!");
 
@@ -70,6 +71,7 @@ public class AnnotationAttribute {
 	 * @param parameter must not be {@literal null}.
 	 * @return
 	 */
+	@Nullable
 	public String getValueFrom(MethodParameter parameter) {
 
 		Assert.notNull(parameter, "MethodParameter must not be null!");
@@ -83,6 +85,7 @@ public class AnnotationAttribute {
 	 * @param annotatedElement must not be {@literal null}.
 	 * @return
 	 */
+	@Nullable
 	public String getValueFrom(AnnotatedElement annotatedElement) {
 
 		Assert.notNull(annotatedElement, "Annotated element must not be null!");
@@ -96,6 +99,7 @@ public class AnnotationAttribute {
 	 * @param annotation must not be {@literal null}.
 	 * @return
 	 */
+	@Nullable
 	public String getValueFrom(Annotation annotation) {
 
 		Assert.notNull(annotation, "Annotation must not be null!");

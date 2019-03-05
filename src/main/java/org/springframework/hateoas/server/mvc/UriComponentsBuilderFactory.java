@@ -17,8 +17,7 @@ package org.springframework.hateoas.server.mvc;
 
 import java.net.URI;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -39,9 +38,8 @@ class UriComponentsBuilderFactory {
 
 	/**
 	 * Returns a {@link UriComponentsBuilder} obtained from the current servlet mapping with scheme tweaked in case the
-	 * request contains an {@code X-Forwarded-Ssl} header, which is not (yet) supported by the underlying
-	 * {@link UriComponentsBuilder}. If no {@link RequestContextHolder} exists (you're outside a Spring Web call), fall
-	 * back to relative URIs.
+	 * request contains an {@code X-Forwarded-Ssl} header. If no {@link RequestContextHolder} exists (you're outside a
+	 * Spring Web call), fall back to relative URIs.
 	 *
 	 * @return
 	 */
@@ -55,22 +53,7 @@ class UriComponentsBuilderFactory {
 
 		return baseUri != null //
 				? UriComponentsBuilder.fromUri(baseUri) //
-				: cacheBaseUri(ServletUriComponentsBuilder.fromServletMapping(getCurrentRequest()));
-	}
-
-	/**
-	 * Copy of {@link ServletUriComponentsBuilder#getCurrentRequest()} until SPR-10110 gets fixed.
-	 *
-	 * @return
-	 */
-	private static HttpServletRequest getCurrentRequest() {
-
-		RequestAttributes requestAttributes = getRequestAttributes();
-		HttpServletRequest servletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-
-		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
-
-		return servletRequest;
+				: cacheBaseUri(ServletUriComponentsBuilder.fromCurrentServletMapping());
 	}
 
 	private static RequestAttributes getRequestAttributes() {
@@ -92,6 +75,7 @@ class UriComponentsBuilderFactory {
 		return builder;
 	}
 
+	@Nullable
 	private static URI getCachedBaseUri() {
 		return (URI) getRequestAttributes().getAttribute(CACHE_KEY, RequestAttributes.SCOPE_REQUEST);
 	}

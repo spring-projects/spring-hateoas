@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -238,8 +239,14 @@ public class Link implements Serializable {
 	 */
 	public Link andAffordance(HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters,
 			ResolvableType outputType) {
-		return andAffordance(httpMethod.toString().toLowerCase() + inputType.resolve().getSimpleName(), httpMethod,
-				inputType, queryMethodParameters, outputType);
+
+		String name = httpMethod.toString().toLowerCase();
+
+		if (inputType.resolve() != null) {
+			name += inputType.resolve().getSimpleName();
+		}
+
+		return andAffordance(name, httpMethod, inputType, queryMethodParameters, outputType);
 	}
 
 	/**
@@ -458,6 +465,7 @@ public class Link implements Serializable {
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
 	 * @return
 	 */
+	@Nullable
 	public static Link valueOf(String element) {
 
 		if (!StringUtils.hasText(element)) {

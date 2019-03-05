@@ -17,6 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.util.UriTemplate;
@@ -37,7 +38,7 @@ public class UriTemplateFactory {
 	 * @param mapping must not be {@literal null} or empty.
 	 * @return
 	 */
-	public static UriTemplate templateFor(String mapping) {
+	public static UriTemplate templateFor(@Nullable String mapping) {
 
 		Assert.hasText(mapping, "Mapping must not be null or empty!");
 

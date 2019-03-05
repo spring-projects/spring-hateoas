@@ -18,6 +18,8 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import org.springframework.lang.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -42,9 +44,9 @@ class CollectionJsonData {
 	private String prompt;
 
 	@JsonCreator
-	CollectionJsonData(@JsonProperty("name") String name, @JsonProperty("value") Object value,
-					   @JsonProperty("prompt") String prompt) {
-		
+	CollectionJsonData(@JsonProperty("name") @Nullable String name, @JsonProperty("value") @Nullable Object value,
+			@JsonProperty("prompt") @Nullable String prompt) {
+
 		this.name = name;
 		this.value = value;
 		this.prompt = prompt;

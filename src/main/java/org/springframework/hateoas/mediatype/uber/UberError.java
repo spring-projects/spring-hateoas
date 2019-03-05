@@ -21,6 +21,8 @@ import lombok.experimental.Wither;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -37,7 +39,7 @@ class UberError {
 	private List<UberData> data;
 
 	@JsonCreator
-	UberError(@JsonProperty("data") List<UberData> data) {
+	UberError(@JsonProperty("data") @Nullable List<UberData> data) {
 		this.data = data;
 	}
 

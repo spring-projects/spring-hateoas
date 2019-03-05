@@ -18,6 +18,7 @@ package org.springframework.hateoas;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -55,7 +56,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 * @param content must not be {@literal null}.
 	 * @param links the links to add to the {@link EntityModel}.
 	 */
-	public EntityModel(T content, Iterable<Link> links) {
+	public EntityModel(@Nullable T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
 		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
@@ -69,6 +70,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 * @return the content
 	 */
 	@JsonUnwrapped
+	@Nullable
 	public T getContent() {
 		return content;
 	}

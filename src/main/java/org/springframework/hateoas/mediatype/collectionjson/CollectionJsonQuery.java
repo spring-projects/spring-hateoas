@@ -22,6 +22,8 @@ import lombok.experimental.Wither;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,21 +35,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Wither
 class CollectionJsonQuery {
 
-	@JsonInclude(Include.NON_NULL)
-	private String rel;
+	@JsonInclude(Include.NON_NULL) private String rel;
 
-	@JsonInclude(Include.NON_NULL)
-	private String href;
-	
-	@JsonInclude(Include.NON_NULL)
-	private String prompt;
+	@JsonInclude(Include.NON_NULL) private String href;
 
-	@JsonInclude(Include.NON_EMPTY)
-	private List<CollectionJsonData> data;
+	@JsonInclude(Include.NON_NULL) private String prompt;
+
+	@JsonInclude(Include.NON_EMPTY) private List<CollectionJsonData> data;
 
 	@JsonCreator
-	CollectionJsonQuery(@JsonProperty("rel") String rel, @JsonProperty("href") String href,
-						@JsonProperty("prompt") String prompt, @JsonProperty("data") List<CollectionJsonData> data) {
+	CollectionJsonQuery(@JsonProperty("rel") @Nullable String rel, @JsonProperty("href") @Nullable String href,
+			@JsonProperty("prompt") @Nullable String prompt, @JsonProperty("data") @Nullable List<CollectionJsonData> data) {
 
 		this.rel = rel;
 		this.href = href;

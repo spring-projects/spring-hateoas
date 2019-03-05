@@ -42,6 +42,7 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MultiValueMap;
@@ -80,7 +81,7 @@ public class WebHandler {
 
 	public static <T extends LinkBuilder> Function<Function<String, UriComponentsBuilder>, T> linkTo(
 			Object invocationValue, LinkBuilderCreator<T> creator,
-			BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler) {
+			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 
@@ -184,17 +185,23 @@ public class WebHandler {
 		} else if (value instanceof Collection) {
 
 			for (Object element : (Collection<?>) value) {
-				builder.queryParam(key, encodeParameter(element));
+				if (key != null) {
+					builder.queryParam(key, encodeParameter(element));
+				}
 			}
 
 		} else if (SKIP_VALUE.equals(value)) {
 
 			if (parameter.isRequired()) {
-				builder.queryParam(key, String.format("{%s}", parameter.getVariableName()));
+				if (key != null) {
+					builder.queryParam(key, String.format("{%s}", parameter.getVariableName()));
+				}
 			}
 
 		} else {
-			builder.queryParam(key, encodeParameter(parameter.asString()));
+			if (key != null) {
+				builder.queryParam(key, encodeParameter(parameter.asString()));
+			}
 		}
 	}
 
@@ -233,7 +240,7 @@ public class WebHandler {
 						return false;
 					}
 
-					return annotation.required() //
+					return annotation != null && annotation.required() //
 							&& annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
 				}
 			};
@@ -244,6 +251,7 @@ public class WebHandler {
 		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#verifyParameterValue(org.springframework.core.MethodParameter, java.lang.Object)
 		 */
 		@Override
+		@Nullable
 		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
@@ -254,7 +262,7 @@ public class WebHandler {
 				return value;
 			}
 
-			if (!annotation.required() || parameter.isOptional()) {
+			if (!(annotation != null && annotation.required()) || parameter.isOptional()) {
 				return SKIP_VALUE;
 			}
 
@@ -325,6 +333,7 @@ public class WebHandler {
 		 * @param value could be {@literal null}.
 		 * @return the verified value.
 		 */
+		@Nullable
 		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
 			return value;
 		}
@@ -377,6 +386,7 @@ public class WebHandler {
 			 *
 			 * @return
 			 */
+			@Nullable
 			public String getVariableName() {
 
 				if (attribute == null) {
@@ -384,7 +394,7 @@ public class WebHandler {
 				}
 
 				Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
-				String annotationAttributeValue = attribute.getValueFrom(annotation);
+				String annotationAttributeValue = annotation != null ? attribute.getValueFrom(annotation) : "";
 
 				return StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter.getParameterName();
 			}
@@ -403,6 +413,7 @@ public class WebHandler {
 			 *
 			 * @return
 			 */
+			@Nullable
 			public String asString() {
 
 				return value == null //

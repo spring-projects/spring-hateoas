@@ -19,6 +19,8 @@ import lombok.AccessLevel;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import org.springframework.lang.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -34,8 +36,8 @@ class CollectionJsonError {
 	private String message;
 
 	@JsonCreator
-	CollectionJsonError(@JsonProperty("title") String title, @JsonProperty("code") String code,
-						@JsonProperty("message") String message) {
+	CollectionJsonError(@JsonProperty("title") @Nullable String title, @JsonProperty("code") @Nullable String code,
+						@JsonProperty("message") @Nullable String message) {
 
 		this.title = title;
 		this.code = code;

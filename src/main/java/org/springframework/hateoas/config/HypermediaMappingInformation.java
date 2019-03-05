@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;
@@ -63,6 +64,7 @@ public interface HypermediaMappingInformation {
 	 * @return
 	 * @see #configureObjectMapper(ObjectMapper)
 	 */
+	@Nullable
 	default Module getJacksonModule() {
 		return null;
 	}

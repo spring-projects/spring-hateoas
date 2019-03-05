@@ -27,6 +27,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.lang.Nullable;
 import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -84,6 +85,7 @@ public class DummyInvocationUtils {
 		 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 		 */
 		@Override
+		@Nullable
 		public Object invoke(org.aopalliance.intercept.MethodInvocation invocation) {
 
 			Method method = invocation.getMethod();

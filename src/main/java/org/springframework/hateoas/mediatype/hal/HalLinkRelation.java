@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -53,7 +54,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	 * @param relation must not be {@literal null}.
 	 * @return
 	 */
-	public static HalLinkRelation of(LinkRelation relation) {
+	public static HalLinkRelation of(@Nullable LinkRelation relation) {
 
 		Assert.notNull(relation, "LinkRelation must not be null!");
 

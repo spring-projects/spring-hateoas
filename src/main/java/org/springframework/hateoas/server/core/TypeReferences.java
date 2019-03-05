@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -186,6 +187,7 @@ public class TypeReferences {
 		 * @see java.lang.reflect.ParameterizedType#getOwnerType()
 		 */
 		@Override
+		@Nullable
 		public Type getOwnerType() {
 			return null;
 		}

@@ -40,6 +40,7 @@ import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFo
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.mvc.JacksonSerializers.MediaTypeDeserializer;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -127,6 +128,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return delegate.getContentDeserializer();
 		}
@@ -148,7 +150,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
-		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
+		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, @Nullable CurieProvider curieProvider,
 				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
 				HalFormsConfiguration halFormsConfiguration) {
 
@@ -168,6 +170,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 					beanFactory.getBean(HalFormsConfiguration.class));
 		}
 
+		@Nullable
 		private Object findInstance(Class<?> type) {
 			return this.serializers.get(type);
 		}

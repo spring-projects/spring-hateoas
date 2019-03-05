@@ -32,6 +32,7 @@ import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link AffordanceModel} for {@literal UBER+JSON}.
@@ -89,6 +90,7 @@ class UberAffordanceModel extends AffordanceModel {
 		}
 	}
 
+	@Nullable
 	UberAction getAction() {
 		return UberAction.forRequestMethod(getHttpMethod());
 	}

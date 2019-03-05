@@ -30,6 +30,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.Links.MergeMode;
 import org.springframework.hateoas.mediatype.PropertyUtils;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,9 +55,9 @@ class CollectionJsonItem<T> {
 	private @Getter(onMethod = @__({ @JsonIgnore }), value = AccessLevel.PRIVATE) T rawData;
 
 	@JsonCreator
-	CollectionJsonItem(@JsonProperty("href") String href, //
-			@JsonProperty("data") List<CollectionJsonData> data, //
-			@JsonProperty("links") Links links) {
+	CollectionJsonItem(@JsonProperty("href") @Nullable String href, //
+			@JsonProperty("data") @Nullable List<CollectionJsonData> data, //
+			@JsonProperty("links") @Nullable Links links) {
 
 		this.href = href;
 		this.data = data;
@@ -84,7 +85,7 @@ class CollectionJsonItem<T> {
 			return this.data;
 		}
 
-		if (PRIMITIVE_TYPES.contains(this.rawData.getClass())) {
+		if (this.rawData != null && PRIMITIVE_TYPES.contains(this.rawData.getClass())) {
 			return Collections.singletonList(new CollectionJsonData().withValue(this.rawData));
 		}
 
@@ -99,7 +100,12 @@ class CollectionJsonItem<T> {
 	 * @param javaType - type of the object to create
 	 * @return
 	 */
+	@Nullable
 	public Object toRawData(JavaType javaType) {
+
+		if (this.data == null) {
+			return null;
+		}
 
 		if (PRIMITIVE_TYPES.contains(javaType.getRawClass())) {
 			return this.data.get(0).getValue();

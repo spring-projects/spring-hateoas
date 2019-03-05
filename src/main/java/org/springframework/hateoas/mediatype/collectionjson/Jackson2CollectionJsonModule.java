@@ -38,6 +38,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -137,6 +138,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
 		 */
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -155,6 +157,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -171,7 +174,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 			this(null);
 		}
 
-		CollectionJsonResourceSupportSerializer(BeanProperty property) {
+		CollectionJsonResourceSupportSerializer(@Nullable BeanProperty property) {
 
 			super(RepresentationModel.class, false);
 			this.property = property;
@@ -211,11 +214,13 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -226,6 +231,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -242,7 +248,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 			this(null);
 		}
 
-		CollectionJsonResourceSerializer(BeanProperty property) {
+		CollectionJsonResourceSerializer(@Nullable BeanProperty property) {
 
 			super(EntityModel.class, false);
 			this.property = property;
@@ -278,11 +284,13 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -293,6 +301,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -333,6 +342,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -342,6 +352,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
 		 */
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -369,6 +380,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -385,7 +397,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 			this(null);
 		}
 
-		CollectionJsonPagedResourcesSerializer(BeanProperty property) {
+		CollectionJsonPagedResourcesSerializer(@Nullable BeanProperty property) {
 
 			super(CollectionModel.class, false);
 			this.property = property;
@@ -414,11 +426,13 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
 		@Override
+		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
@@ -434,6 +448,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -452,6 +467,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
+		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
@@ -461,6 +477,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -509,6 +526,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -518,6 +536,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@Nullable
 		public RepresentationModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			TypeFactory typeFactory = ctxt.getTypeFactory();
@@ -544,8 +563,12 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
 				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(this.contentType);
-				return resource.add(firstItem.getLinks().merge(merged));
 
+				if (resource != null) {
+					resource.add(firstItem.getLinks().merge(merged));
+				}
+
+				return resource;
 			}
 
 			if (withOwnSelfLink.getTemplate() != null) {
@@ -599,6 +622,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -689,6 +713,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
+		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
@@ -819,6 +844,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 	 * @param resource
 	 * @return
 	 */
+	@Nullable
 	private static CollectionJsonTemplate findTemplate(RepresentationModel<?> resource) {
 
 		if (!resource.hasLink(IanaLinkRelations.SELF)) {

@@ -18,21 +18,19 @@ package org.springframework.hateoas.server.mvc;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.hateoas.server.RepresentationModelProcessor;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 /**
  * Special {@link RequestMappingHandlerAdapter} that tweaks the {@link HandlerMethodReturnValueHandlerComposite} to be
- * proxied by a {@link RepresentationModelProcessorHandlerMethodReturnValueHandler} which will invoke the {@link RepresentationModelProcessor}
- * s found in the application context and eventually delegate to the originally configured
- * {@link HandlerMethodReturnValueHandler}.
+ * proxied by a {@link RepresentationModelProcessorHandlerMethodReturnValueHandler} which will invoke the
+ * {@link RepresentationModelProcessor} s found in the application context and eventually delegate to the originally
+ * configured {@link HandlerMethodReturnValueHandler}.
  * <p/>
  * This is a separate component as it might make sense to deploy it in a standalone SpringMVC application to enable post
  * processing. It would actually make most sense in Spring HATEOAS project.
@@ -44,9 +42,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 @RequiredArgsConstructor
 public class RepresentationModelProcessorInvokingHandlerAdapter extends RequestMappingHandlerAdapter {
-
-	private static final Method RETURN_VALUE_HANDLER_METHOD = ReflectionUtils
-			.findMethod(RepresentationModelProcessorInvokingHandlerAdapter.class, "getReturnValueHandlers");
 
 	private @NonNull final RepresentationModelProcessorInvoker invoker;
 
@@ -79,7 +74,7 @@ public class RepresentationModelProcessorInvokingHandlerAdapter extends RequestM
 	@SuppressWarnings("unchecked")
 	private HandlerMethodReturnValueHandlerComposite getReturnValueHandlersComposite() {
 
-		Object handlers = ReflectionUtils.invokeMethod(RETURN_VALUE_HANDLER_METHOD, this);
+		Object handlers = this.getReturnValueHandlers();
 
 		if (handlers instanceof HandlerMethodReturnValueHandlerComposite) {
 			return (HandlerMethodReturnValueHandlerComposite) handlers;

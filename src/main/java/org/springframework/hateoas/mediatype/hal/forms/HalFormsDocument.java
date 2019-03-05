@@ -32,6 +32,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsLinksDeserializer;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -58,7 +59,7 @@ public class HalFormsDocument<T> {
 
 	@JsonUnwrapped //
 	@JsonInclude(Include.NON_NULL) //
-	@Wither(AccessLevel.PRIVATE) //
+	@Wither(value = AccessLevel.PRIVATE, onMethod = @__({ @Nullable })) //
 	private T resource;
 
 	@JsonInclude(Include.NON_EMPTY) @JsonIgnore //
@@ -71,6 +72,7 @@ public class HalFormsDocument<T> {
 
 	@JsonProperty("page") //
 	@JsonInclude(Include.NON_NULL) //
+	@Wither(onMethod = @__({ @Nullable })) //
 	private PagedModel.PageMetadata pageMetadata;
 
 	@Singular //
@@ -95,7 +97,7 @@ public class HalFormsDocument<T> {
 	 * @param resource can be {@literal null}.
 	 * @return
 	 */
-	public static <T> HalFormsDocument<T> forResource(T resource) {
+	public static <T> HalFormsDocument<T> forResource(@Nullable T resource) {
 		return new HalFormsDocument<T>().withResource(resource);
 	}
 

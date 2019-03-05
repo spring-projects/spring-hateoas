@@ -40,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestOperations;
@@ -139,7 +140,7 @@ public class Traverson {
 	 * @param operations
 	 * @return
 	 */
-	public Traverson setRestOperations(RestOperations operations) {
+	public Traverson setRestOperations(@Nullable RestOperations operations) {
 
 		this.operations = operations == null //
 				? createDefaultTemplate(this.mediaTypes) //
@@ -155,7 +156,7 @@ public class Traverson {
 	 * @param discoverer can be {@literal null}.
 	 * @return
 	 */
-	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
+	public Traverson setLinkDiscoverers(@Nullable List<? extends LinkDiscoverer> discoverer) {
 
 		List<? extends LinkDiscoverer> defaultedDiscoverers = discoverer == null //
 				? DEFAULTS.getLinkDiscoverers(mediaTypes) //
@@ -282,6 +283,7 @@ public class Traverson {
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
+		@Nullable
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
@@ -299,6 +301,7 @@ public class Traverson {
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
+		@Nullable
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");

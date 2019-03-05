@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
@@ -84,7 +85,7 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 		return METHODS.computeIfAbsent(key(type, method), __ -> delegate.getRequestMethod(type, method));
 	}
 
-	private static String key(Class<?> type, Method method) {
+	private static String key(Class<?> type, @Nullable Method method) {
 
 		StringBuilder builder = new StringBuilder(type.getName());
 
