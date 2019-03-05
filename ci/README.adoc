@@ -41,8 +41,11 @@ With this pipeline in place, you can now activate and expose it:
 
 1. Create a new release (on the main branch).
 ----
-% ci/create-release.sh <release version> <next snapshot version>
+% ci/create-release.sh <ticket> <release version> <next snapshot version>
 ----
+
+NOTE: Because <ticket> starts with `#`, it must be prefix on the command line with `\`, e.g.
+`ci/create-release.sh \#123 1.0.0.M1 1.0.0.BUILD-SNAPSHOT`.
 
 2. With the release tagged, push the tagged version to the release branch.
 ----
