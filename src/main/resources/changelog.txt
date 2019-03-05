@@ -3,6 +3,7 @@ Spring HATEOAS Changelog
 
 Changes in version 1.0.0.M1 (2019-03-05)
 ----------------------------------------
+- #854 - Migrate off Objenesis in favor of Spring's ProxyFactory.
 - #853 - Release 1.0 M1.
 - #850 - Upgrade to Spring Plugin 2.0 M1.
 - #847 - Make JDK 8 test step a smoke test for other test steps.
