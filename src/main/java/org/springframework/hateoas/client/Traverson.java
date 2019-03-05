@@ -40,7 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.plugin.core.OrderAwarePluginRegistry;
+import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -161,7 +161,7 @@ public class Traverson {
 				? DEFAULTS.getLinkDiscoverers(mediaTypes) //
 				: discoverer;
 
-		this.discoverers = new LinkDiscoverers(OrderAwarePluginRegistry.of(defaultedDiscoverers));
+		this.discoverers = new LinkDiscoverers(PluginRegistry.of(defaultedDiscoverers));
 
 		return this;
 	}

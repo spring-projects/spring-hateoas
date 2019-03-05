@@ -20,11 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
-import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
-import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
-import org.springframework.hateoas.server.core.Relation;
-import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
 
 /**
@@ -37,7 +32,7 @@ public class DelegatingRelProviderUnitTest {
 	@Test
 	public void foo() {
 
-		PluginRegistry<LinkRelationProvider, Class<?>> registry = OrderAwarePluginRegistry.of(new AnnotationLinkRelationProvider(),
+		PluginRegistry<LinkRelationProvider, Class<?>> registry = PluginRegistry.of(new AnnotationLinkRelationProvider(),
 				new DefaultLinkRelationProvider());
 
 		LinkRelationProvider delegatingProvider = new DelegatingLinkRelationProvider(registry);

@@ -19,11 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Test;
 import org.springframework.core.Ordered;
-import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
-import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.http.MediaType;
-import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
 
 /**
@@ -45,7 +41,8 @@ public class LinkDiscoverersUnitTest {
 		LinkDiscoverer low = new LowPriorityLinkDiscoverer();
 		LinkDiscoverer high = new HighPriorityLinkDiscoverer();
 
-		PluginRegistry<LinkDiscoverer, MediaType> registry = OrderAwarePluginRegistry.of(low, high);
+		PluginRegistry<LinkDiscoverer, MediaType> registry = PluginRegistry.of(low, high);
+
 		assertThat(registry.getRequiredPluginFor(MediaType.APPLICATION_JSON)).isEqualTo(high);
 	}
 
