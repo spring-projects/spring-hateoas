@@ -62,6 +62,7 @@ s/hateoas\.core\.EvoInflectorRelProvider/hateoas.server.core.EvoInflectorLinkRel
 s/hateoas\.core\.JsonPathLinkDiscoverer/hateoas.client.JsonPathLinkDiscoverer/g;\
 s/hateoas\.core\.LinkBuilderSupport/hateoas.server.core.LinkBuilderSupport/g;\
 s/hateoas\.core\.MethodParameters/hateoas.server.core.MethodParameters/g;\
+s/hateoas\.core\.Relation/hateoas.server.core.Relation/g;\
 \
 s/hateoas\.hal/hateoas.mediatype.hal/g;\
 \
