@@ -1,5 +1,6 @@
-image:https://spring.io/badges/spring-hateoas/ga.svg[http://projects.spring.io/spring-hateoas/#quick-start]
-image:https://spring.io/badges/spring-hateoas/snapshot.svg[http://projects.spring.io/spring-hateoas/#quick-start]
+image:https://spring.io/badges/spring-hateoas/ga.svg[link=https://spring.io/projects/spring-hateoas]
+image:https://spring.io/badges/spring-hateoas/snapshot.svg[link=https://spring.io/projects/spring-hateoas]
+image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://gitter.im/spring-projects/spring-hateoas]
 
 = Spring HATEOAS
 
