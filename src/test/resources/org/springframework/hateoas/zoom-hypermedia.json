@@ -1,0 +1,94 @@
+{
+  "_embedded" : {
+    "favorite products" : [ {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/777"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/998"
+        }
+      }
+    } ],
+    "purchased products" : [ {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/111"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/222"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/333"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/444"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/555"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/666"
+        }
+      }
+    }, {
+      "someProductProperty" : "someValue",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost/products/998"
+        }
+      }
+    } ]
+  },
+  "_links" : {
+    "self" : {
+      "href" : "/products"
+    },
+    "purchased products" : [ {
+      "href" : "http://localhost/products/111"
+    }, {
+      "href" : "http://localhost/products/222"
+    }, {
+      "href" : "http://localhost/products/333"
+    }, {
+      "href" : "http://localhost/products/444"
+    }, {
+      "href" : "http://localhost/products/555"
+    }, {
+      "href" : "http://localhost/products/666"
+    }, {
+      "href" : "http://localhost/products/998"
+    } ],
+    "favorite products" : [ {
+      "href" : "http://localhost/products/777"
+    }, {
+      "href" : "http://localhost/products/998"
+    } ]
+  }
+}

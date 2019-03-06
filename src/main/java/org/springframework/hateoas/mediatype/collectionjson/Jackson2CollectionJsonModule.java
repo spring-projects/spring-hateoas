@@ -191,6 +191,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		public void serialize(RepresentationModel<?> value, JsonGenerator jgen, SerializerProvider provider)
 				throws IOException {
 
+			if (!value.getPreferredMediaTypes().isEmpty()
+					&& !value.getPreferredMediaTypes().contains(MediaTypes.COLLECTION_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate Collection+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
+
 			String href = value.getRequiredLink(IanaLinkRelations.SELF.value()).getHref();
 
 			CollectionJson<Object> collectionJson = new CollectionJson<>() //
@@ -292,6 +298,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@SuppressWarnings("null")
 		public void serialize(EntityModel<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
+			if (!value.getPreferredMediaTypes().isEmpty()
+					&& !value.getPreferredMediaTypes().contains(MediaTypes.COLLECTION_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate Collection+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
+
 			String href = value.getRequiredLink(IanaLinkRelations.SELF).getHref();
 			Links withoutSelfLink = value.getLinks().without(IanaLinkRelations.SELF);
 
@@ -381,6 +393,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@SuppressWarnings("null")
 		public void serialize(CollectionModel<?> value, JsonGenerator jgen, SerializerProvider provider)
 				throws IOException {
+
+			if (!value.getPreferredMediaTypes().isEmpty()
+					&& !value.getPreferredMediaTypes().contains(MediaTypes.COLLECTION_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate Collection+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
 
 			CollectionJson<Object> collectionJson = new CollectionJson<>() //
 					.withVersion("1.0") //
@@ -472,6 +490,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		@SuppressWarnings("null")
 		public void serialize(PagedModel<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+
+			if (!value.getPreferredMediaTypes().isEmpty()
+					&& !value.getPreferredMediaTypes().contains(MediaTypes.COLLECTION_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate Collection+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
 
 			CollectionJson<?> collectionJson = new CollectionJson<>() //
 					.withVersion("1.0") //

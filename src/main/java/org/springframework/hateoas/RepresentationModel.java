@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,9 +26,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -39,6 +43,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 
 	private final List<Link> links;
+
+	private final @Getter(onMethod = @__(@JsonIgnore)) List<MediaType> preferredMediaTypes = new ArrayList<>();
 
 	public RepresentationModel() {
 		this.links = new ArrayList<>();
@@ -297,6 +303,15 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 		Assert.notNull(relation, "Link relation must not be null!");
 
 		return getLinks(relation.value());
+	}
+
+	/**
+	 * Add a hint about what {@link MediaType} this model prefers.
+	 *
+	 * @param preferredMediaTypes
+	 */
+	public void addPreferredMediaType(MediaType... preferredMediaTypes) {
+		this.preferredMediaTypes.addAll(Arrays.asList(preferredMediaTypes));
 	}
 
 	/*

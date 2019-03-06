@@ -51,6 +51,10 @@ public class MappingTestUtils {
 		return mapper;
 	}
 
+	public static ContextualMapper createMapper(Class<?> context) {
+		return createMapper(context, objectMapper -> {});
+	}
+
 	public static ContextualMapper createMapper(Class<?> context, Consumer<ObjectMapper> configurer) {
 
 		ObjectMapper mapper = defaultObjectMapper();

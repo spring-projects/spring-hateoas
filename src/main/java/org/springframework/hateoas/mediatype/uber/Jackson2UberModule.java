@@ -32,6 +32,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.RepresentationModel;
@@ -150,6 +151,11 @@ public class Jackson2UberModule extends SimpleModule {
 		public void serialize(RepresentationModel<?> value, JsonGenerator gen, SerializerProvider provider)
 				throws IOException {
 
+			if (!value.getPreferredMediaTypes().isEmpty() && !value.getPreferredMediaTypes().contains(MediaTypes.UBER_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate UBER+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
+
 			UberDocument doc = new UberDocument() //
 					.withUber(new Uber() //
 							.withVersion("1.0") //
@@ -239,6 +245,11 @@ public class Jackson2UberModule extends SimpleModule {
 		@Override
 		@SuppressWarnings("null")
 		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+
+			if (!value.getPreferredMediaTypes().isEmpty() && !value.getPreferredMediaTypes().contains(MediaTypes.UBER_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate UBER+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
 
 			UberDocument doc = new UberDocument().withUber(new Uber() //
 					.withVersion("1.0") //
@@ -330,6 +341,11 @@ public class Jackson2UberModule extends SimpleModule {
 		@SuppressWarnings("null")
 		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
+			if (!value.getPreferredMediaTypes().isEmpty() && !value.getPreferredMediaTypes().contains(MediaTypes.UBER_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate UBER+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
+
 			UberDocument doc = new UberDocument() //
 					.withUber(new Uber() //
 							.withVersion("1.0") //
@@ -419,6 +435,11 @@ public class Jackson2UberModule extends SimpleModule {
 		@Override
 		@SuppressWarnings("null")
 		public void serialize(PagedModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+
+			if (!value.getPreferredMediaTypes().isEmpty() && !value.getPreferredMediaTypes().contains(MediaTypes.UBER_JSON)) {
+				throw new IllegalStateException(
+						"You are about to generate UBER+JSON for a model that prefers " + value.getPreferredMediaTypes());
+			}
 
 			UberDocument doc = new UberDocument() //
 					.withUber(new Uber() //
