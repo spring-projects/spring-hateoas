@@ -32,8 +32,8 @@ public interface RepresentationModelProcessor<T extends RepresentationModel<?>> 
 	/**
 	 * Processes the given representation model, add links, alter the domain data etc.
 	 *
-	 * @param resource
-	 * @return the processed resource
+	 * @param model
+	 * @return the processed model
 	 */
-	T process(T resource);
+	T process(T model);
 }

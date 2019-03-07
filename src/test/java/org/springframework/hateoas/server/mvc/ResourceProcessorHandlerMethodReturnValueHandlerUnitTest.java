@@ -46,8 +46,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
-import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
-import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.ResourcesProcessorWrapper;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.CollectionModelProcessorWrapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -274,7 +273,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 		ResolvableType type = ResolvableType.forClass(PagedStringResources.class);
 
-		assertThat(ResourcesProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
+		assertThat(CollectionModelProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
 	}
 
 	/**
@@ -286,7 +285,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 		CollectionModel<Object> value = new CollectionModel<>(
 			Collections.singleton(wrappers.emptyCollectionOf(Object.class)));
-		ResourcesProcessorWrapper wrapper = new ResourcesProcessorWrapper(new SpecialResourcesProcessor());
+		CollectionModelProcessorWrapper wrapper = new CollectionModelProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));
 
@@ -348,7 +347,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public EntityModel<String> process(EntityModel<String> resource) {
+		public EntityModel<String> process(EntityModel<String> model) {
 			return BAR;
 		}
 	}
@@ -357,7 +356,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public EntityModel<Long> process(EntityModel<Long> resource) {
+		public EntityModel<Long> process(EntityModel<Long> model) {
 			return LONG_20;
 		}
 	}
@@ -366,7 +365,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public CollectionModel<EntityModel<String>> process(CollectionModel<EntityModel<String>> resource) {
+		public CollectionModel<EntityModel<String>> process(CollectionModel<EntityModel<String>> model) {
 			return BARS;
 		}
 	}
@@ -375,7 +374,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public StringResource process(StringResource resource) {
+		public StringResource process(StringResource model) {
 			return BAR_RES;
 		}
 	}
@@ -384,7 +383,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public LongResource process(LongResource resource) {
+		public LongResource process(LongResource model) {
 			return LONG_20_RES;
 		}
 	}
@@ -451,9 +450,9 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		boolean invoked = false;
 
 		@Override
-		public EntityModel<SampleProjection> process(EntityModel<SampleProjection> resource) {
+		public EntityModel<SampleProjection> process(EntityModel<SampleProjection> model) {
 			this.invoked = true;
-			return resource;
+			return model;
 		}
 	}
 
@@ -468,9 +467,9 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		boolean invoked = false;
 
 		@Override
-		public SpecialResources process(SpecialResources resource) {
+		public SpecialResources process(SpecialResources model) {
 			this.invoked = true;
-			return resource;
+			return model;
 		}
 	}
 }

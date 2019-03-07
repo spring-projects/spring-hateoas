@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,12 +28,17 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.RepresentationModelProcessor;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorHandlerMethodReturnValueHandler;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.hateoas.server.mvc.UriComponentsContributor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,6 +55,13 @@ class WebMvcHateoasConfiguration {
 			Collection<HypermediaMappingInformation> hypermediaTypes) {
 
 		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+	}
+
+	@Bean
+	HypermediaRepresentationModelBeanProcessorPostProcessor hypermediaRepresentionModelProcessorConfigurator(
+			List<RepresentationModelProcessor<?>> processors) {
+
+		return new HypermediaRepresentationModelBeanProcessorPostProcessor(processors);
 	}
 
 	@Bean
@@ -88,6 +101,34 @@ class WebMvcHateoasConfiguration {
 				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(RepresentationModel.class,
 						hypermedia.getMediaTypes(), hypermedia.configureObjectMapper(mapper.copy())));
 			});
+		}
+	}
+
+	/**
+	 * @author Greg Turnquist
+	 */
+	@RequiredArgsConstructor
+	static class HypermediaRepresentationModelBeanProcessorPostProcessor implements BeanPostProcessor {
+
+		private final List<RepresentationModelProcessor<?>> processors;
+
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+
+			if (RequestMappingHandlerAdapter.class.isInstance(bean)) {
+
+				RequestMappingHandlerAdapter adapter = (RequestMappingHandlerAdapter) bean;
+
+				HandlerMethodReturnValueHandlerComposite delegate = new HandlerMethodReturnValueHandlerComposite();
+				delegate.addHandlers(adapter.getReturnValueHandlers());
+
+				RepresentationModelProcessorHandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(
+						delegate, new RepresentationModelProcessorInvoker(processors));
+
+				adapter.setReturnValueHandlers(Collections.singletonList(handler));
+			}
+
+			return bean;
 		}
 	}
 

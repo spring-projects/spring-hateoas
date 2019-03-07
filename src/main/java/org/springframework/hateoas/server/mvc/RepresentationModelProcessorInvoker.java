@@ -62,9 +62,9 @@ public class RepresentationModelProcessorInvoker {
 			Class<?> rawType = processorType.getGeneric(0).resolve();
 
 			if (EntityModel.class.isAssignableFrom(rawType)) {
-				this.processors.add(new ResourceProcessorWrapper(processor));
+				this.processors.add(new EntityModelProcessorWrapper(processor));
 			} else if (CollectionModel.class.isAssignableFrom(rawType)) {
-				this.processors.add(new ResourcesProcessorWrapper(processor));
+				this.processors.add(new CollectionModelProcessorWrapper(processor));
 			} else {
 				this.processors.add(new DefaultProcessorWrapper(processor));
 			}
@@ -101,14 +101,15 @@ public class RepresentationModelProcessorInvoker {
 		Assert.notNull(referenceType, "Reference type must not be null!");
 
 		// For Resources implementations, process elements first
-		if (RepresentationModelProcessorHandlerMethodReturnValueHandler.RESOURCES_TYPE.isAssignableFrom(referenceType)) {
+		if (RepresentationModelProcessorHandlerMethodReturnValueHandler.COLLECTION_MODEL_TYPE
+				.isAssignableFrom(referenceType)) {
 
-			CollectionModel<?> resources = (CollectionModel<?>) value;
-			ResolvableType elementTargetType = ResolvableType
-					.forClass(CollectionModel.class, referenceType.getRawClass()).getGeneric(0);
-			List<Object> result = new ArrayList<>(resources.getContent().size());
+			CollectionModel<?> collectionModel = (CollectionModel<?>) value;
+			ResolvableType elementTargetType = ResolvableType.forClass(CollectionModel.class, referenceType.getRawClass())
+					.getGeneric(0);
+			List<Object> result = new ArrayList<>(collectionModel.getContent().size());
 
-			for (Object element : resources) {
+			for (Object element : collectionModel) {
 
 				ResolvableType elementType = ResolvableType.forClass(element.getClass());
 
@@ -119,7 +120,7 @@ public class RepresentationModelProcessorInvoker {
 				result.add(invokeProcessorsFor(element, elementTargetType));
 			}
 
-			ReflectionUtils.setField(RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD, resources,
+			ReflectionUtils.setField(RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD, collectionModel,
 					result);
 		}
 
@@ -247,19 +248,19 @@ public class RepresentationModelProcessorInvoker {
 	}
 
 	/**
-	 * {@link ProcessorWrapper} to deal with {@link RepresentationModelProcessor}s for {@link EntityModel}s.
-	 * Will fall back to peeking into the {@link EntityModel}'s content for type resolution.
+	 * {@link ProcessorWrapper} to deal with {@link RepresentationModelProcessor}s for {@link EntityModel}s. Will fall
+	 * back to peeking into the {@link EntityModel}'s content for type resolution.
 	 *
 	 * @author Oliver Gierke
 	 */
-	private static class ResourceProcessorWrapper extends RepresentationModelProcessorInvoker.DefaultProcessorWrapper {
+	private static class EntityModelProcessorWrapper extends RepresentationModelProcessorInvoker.DefaultProcessorWrapper {
 
 		/**
-		 * Creates a new {@link ResourceProcessorWrapper} for the given {@link RepresentationModelProcessor}.
+		 * Creates a new {@link EntityModelProcessorWrapper} for the given {@link RepresentationModelProcessor}.
 		 *
 		 * @param processor must not be {@literal null}.
 		 */
-		public ResourceProcessorWrapper(RepresentationModelProcessor<?> processor) {
+		public EntityModelProcessorWrapper(RepresentationModelProcessor<?> processor) {
 			super(processor);
 		}
 
@@ -270,7 +271,7 @@ public class RepresentationModelProcessorInvoker {
 		@Override
 		public boolean supports(ResolvableType type, Object value) {
 
-			if (!RepresentationModelProcessorHandlerMethodReturnValueHandler.RESOURCE_TYPE.isAssignableFrom(type)) {
+			if (!RepresentationModelProcessorHandlerMethodReturnValueHandler.ENTITY_MODEL_TYPE.isAssignableFrom(type)) {
 				return false;
 			}
 
@@ -278,28 +279,29 @@ public class RepresentationModelProcessorInvoker {
 		}
 
 		/**
-		 * Returns whether the given {@link EntityModel} matches the given target {@link ResolvableType}. We
-		 * inspect the {@link EntityModel}'s value to determine the match.
+		 * Returns whether the given {@link EntityModel} matches the given target {@link ResolvableType}. We inspect the
+		 * {@link EntityModel}'s value to determine the match.
 		 *
-		 * @param resource
+		 * @param entityModel
 		 * @param target must not be {@literal null}.
-		 * @return whether the given {@link EntityModel} can be assigned to the given target
-		 *         {@link ResolvableType}
+		 * @return whether the given {@link EntityModel} can be assigned to the given target {@link ResolvableType}
 		 */
-		private static boolean isValueTypeMatch(EntityModel<?> resource, ResolvableType target) {
+		private static boolean isValueTypeMatch(EntityModel<?> entityModel, ResolvableType target) {
 
-			if (resource == null || !isRawTypeAssignable(target, resource.getClass())) {
+			if (entityModel == null || !isRawTypeAssignable(target, entityModel.getClass())) {
 				return false;
 			}
 
-			Object content = resource.getContent();
+			Object content = entityModel.getContent();
 
 			if (content == null) {
 				return false;
 			}
 
 			ResolvableType type = findGenericType(target, EntityModel.class);
-			return type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass()));
+			
+			return target.isAssignableFrom(content.getClass()) || //
+					(type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass())));
 		}
 
 		private static ResolvableType findGenericType(ResolvableType source, Class<?> type) {
@@ -319,19 +321,20 @@ public class RepresentationModelProcessorInvoker {
 	}
 
 	/**
-	 * {@link ProcessorWrapper} for {@link RepresentationModelProcessor}s targeting {@link CollectionModel}.
-	 * Will peek into the content of the {@link CollectionModel} for type matching decisions if needed.
+	 * {@link ProcessorWrapper} for {@link RepresentationModelProcessor}s targeting {@link CollectionModel}. Will peek
+	 * into the content of the {@link CollectionModel} for type matching decisions if needed.
 	 *
 	 * @author Oliver Gierke
 	 */
-	public static class ResourcesProcessorWrapper extends RepresentationModelProcessorInvoker.DefaultProcessorWrapper {
+	public static class CollectionModelProcessorWrapper
+			extends RepresentationModelProcessorInvoker.DefaultProcessorWrapper {
 
 		/**
-		 * Creates a new {@link ResourcesProcessorWrapper} for the given {@link RepresentationModelProcessor}.
+		 * Creates a new {@link CollectionModelProcessorWrapper} for the given {@link RepresentationModelProcessor}.
 		 *
 		 * @param processor must not be {@literal null}.
 		 */
-		public ResourcesProcessorWrapper(RepresentationModelProcessor<?> processor) {
+		public CollectionModelProcessorWrapper(RepresentationModelProcessor<?> processor) {
 			super(processor);
 		}
 
@@ -342,29 +345,30 @@ public class RepresentationModelProcessorInvoker {
 		@Override
 		public boolean supports(ResolvableType type, Object value) {
 
-			if (!RepresentationModelProcessorHandlerMethodReturnValueHandler.RESOURCES_TYPE.isAssignableFrom(type)) {
+			if (!RepresentationModelProcessorHandlerMethodReturnValueHandler.COLLECTION_MODEL_TYPE.isAssignableFrom(type)) {
 				return false;
 			}
 
-			return super.supports(type, value) && isValueTypeMatch((CollectionModel<?>) value, getTargetType());
+			boolean defaultSupports = super.supports(type, value);
+			boolean valueTypeMatch = isValueTypeMatch((CollectionModel<?>) value, getTargetType());
+			return defaultSupports && valueTypeMatch;
 		}
 
 		/**
-		 * Returns whether the given {@link CollectionModel} instance matches the given
-		 * {@link ResolvableType}. We predict this by inspecting the first element of the content of the
-		 * {@link CollectionModel}.
+		 * Returns whether the given {@link CollectionModel} instance matches the given {@link ResolvableType}. We predict
+		 * this by inspecting the first element of the content of the {@link CollectionModel}.
 		 *
-		 * @param resources the {@link CollectionModel} to inspect.
+		 * @param collectionModel the {@link CollectionModel} to inspect.
 		 * @param target that target {@link ResolvableType}.
 		 * @return
 		 */
-		static boolean isValueTypeMatch(CollectionModel<?> resources, ResolvableType target) {
+		static boolean isValueTypeMatch(CollectionModel<?> collectionModel, ResolvableType target) {
 
-			if (resources == null) {
+			if (collectionModel == null) {
 				return false;
 			}
 
-			Collection<?> content = resources.getContent();
+			Collection<?> content = collectionModel.getContent();
 
 			if (content.isEmpty()) {
 				return false;
@@ -372,10 +376,9 @@ public class RepresentationModelProcessorInvoker {
 
 			ResolvableType superType = null;
 
-			for (Class<?> resourcesType : Arrays.<Class<?>> asList(resources.getClass(),
-					CollectionModel.class)) {
+			for (Class<?> collectionModelType : Arrays.<Class<?>> asList(collectionModel.getClass(), CollectionModel.class)) {
 
-				superType = getSuperType(target, resourcesType);
+				superType = getSuperType(target, collectionModelType);
 
 				if (superType != null) {
 					break;
@@ -390,7 +393,7 @@ public class RepresentationModelProcessorInvoker {
 			ResolvableType resourceType = superType.getGeneric(0);
 
 			if (element instanceof EntityModel) {
-				return ResourceProcessorWrapper.isValueTypeMatch((EntityModel<?>) element, resourceType);
+				return EntityModelProcessorWrapper.isValueTypeMatch((EntityModel<?>) element, resourceType);
 			} else if (element instanceof EmbeddedWrapper) {
 				return isRawTypeAssignable(resourceType, ((EmbeddedWrapper) element).getRelTargetType());
 			}

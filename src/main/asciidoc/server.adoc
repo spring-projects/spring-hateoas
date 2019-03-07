@@ -1,5 +1,7 @@
 [[server]]
 = Server-side support
+:code-dir: ../../../src/docs/java/org/springframework/hateoas
+:resource-dir: ../../../src/docs/resources/org/springframework/hateoas
 
 [[server.link-builder]]
 == [[fundamentals.obtaining-links]] [[fundamentals.obtaining-links.builder]] Building links
@@ -222,6 +224,66 @@ PersonModel model = assembler.toModel(person);
 CollectionModel<PersonModel> model = assembler.toCollectionModel(people);
 ----
 ====
+
+[[server.processors]]
+== Representation Model Processors
+
+Sometimes you need to tweak and adjust hypermedia representations after they have been <<server.representation-model-assembler,assembled>>.
+
+A perfect example is when you have a controller that deals with order fulfillment, but you need to add links related to making payments.
+
+Imagine having your ordering system producing this type of hypermedia:
+
+====
+[source, json, tabsize=2]
+----
+include::{resource-dir}/docs/order-plain.json[]
+----
+====
+
+You wish to add a link so the client can make payment, but don't want to mix details about your `PaymentController` into
+the `OrderController`.
+
+Instead of polluting the details of your ordering system, you can write a `RepresentationModelProcessor` like this:
+
+====
+[source, java, tabsize=2]
+----
+include::{code-dir}/PaymentProcessor.java[tag=code]
+----
+<1> This processor will only be applied to `EntityModel<Order>` objects.
+<2> Manipulate the existing `EntityModel` object by adding an unconditional link.
+<3> Return the `EntityModel` so it can be serialized into the requested media type.
+====
+
+Register the processor with your application:
+
+====
+[source, java, tabsize=2]
+----
+include::{code-dir}/PaymentProcessingApp.java[tag=code]
+----
+====
+
+Now when you issue a hypermedia respresentation of an `Order`, the client receives this:
+
+====
+[source, java, tabsize=2]
+----
+include::{resource-dir}/docs/order-with-payment-link.json[]
+----
+<1> You see the `LinkRelation.of("payments")` plugged in as this link's relation.
+<2> The URI was provided by the processor.
+====
+
+This example is quite simple, but you can easily:
+
+* Use `WebMvcLinkBuilder` or `WebFluxLinkBuilder` to construct a dynamic link to your `PaymentController`.
+* Inject any services needed to conditionally add other links (e.g. `cancel`, `amend`) that are driven by state.
+* Leverage cross cutting services like Spring Security to add, remove, or revise links based upon the current user's context.
+
+Also, in this example, the `PaymentProcessor` alters the provided `EntityModel<Order>`. You also have the power to
+_replace_ it with another object. Just be advised the API requires the return type to equal the input type.
 
 [[server.rel-provider]]
 == [[spis.rel-provider]] Using the `RelProvider` API
