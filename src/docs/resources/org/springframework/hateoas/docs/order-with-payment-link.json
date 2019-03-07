@@ -1,0 +1,12 @@
+{
+  "orderId" : "42",
+  "state" : "AWAITING_PAYMENT",
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost/orders/999"
+    },
+    "payments" : { // <1>
+      "href" : "/payments/42" // <2>
+    }
+  }
+}
