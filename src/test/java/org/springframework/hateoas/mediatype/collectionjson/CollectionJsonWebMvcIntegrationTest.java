@@ -22,8 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,11 +35,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -267,15 +265,10 @@ public class CollectionJsonWebMvcIntegrationTest {
 
 			EMPLOYEES.put(newEmployeeId, employee.getContent());
 
-			try {
-				return ResponseEntity.created(new URI(findOne(newEmployeeId) //
-						.getLink(IanaLinkRelations.SELF.value()) //
-						.map(link -> link.expand().getHref()) //
-						.orElse(""))) //
-						.build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
+			return ResponseEntity.created(findOne(newEmployeeId) //
+					.getRequiredLink(IanaLinkRelations.SELF) //
+					.toUri()) //
+					.build();
 		}
 
 		@PutMapping("/employees/{id}")
@@ -283,16 +276,11 @@ public class CollectionJsonWebMvcIntegrationTest {
 
 			EMPLOYEES.put(id, employee.getContent());
 
-			try {
-				return ResponseEntity.noContent() //
-						.location(new URI(findOne(id) //
-								.getLink(IanaLinkRelations.SELF.value()) //
-								.map(link -> link.expand().getHref()) //
-								.orElse(""))) //
-						.build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
+			return ResponseEntity.noContent() //
+					.location(findOne(id) //
+							.getRequiredLink(IanaLinkRelations.SELF) //
+							.toUri()) //
+					.build();
 		}
 
 		@PatchMapping("/employees/{id}")
@@ -312,16 +300,11 @@ public class CollectionJsonWebMvcIntegrationTest {
 
 			EMPLOYEES.put(id, newEmployee);
 
-			try {
-				return ResponseEntity.noContent() //
-						.location(new URI(findOne(id) //
-								.getLink(IanaLinkRelations.SELF.value()) //
-								.map(link -> link.expand().getHref()) //
-								.orElse(""))) //
-						.build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
+			return ResponseEntity.noContent() //
+					.location(findOne(id) //
+							.getRequiredLink(IanaLinkRelations.SELF) //
+							.toUri()) //
+					.build();
 		}
 	}
 

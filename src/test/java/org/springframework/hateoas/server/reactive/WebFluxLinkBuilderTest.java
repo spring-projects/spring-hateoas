@@ -55,10 +55,10 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkAtSameLevelAsExplicitServerExchangeShouldWork() throws URISyntaxException {
+	public void linkAtSameLevelAsExplicitServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).root(), this.exchange).withSelfRel().toMono() //
@@ -76,10 +76,10 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkAtSameLevelAsContextProvidedServerExchangeShouldWork() throws URISyntaxException {
+	public void linkAtSameLevelAsContextProvidedServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).root()).withSelfRel().toMono() //
@@ -97,11 +97,11 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void shallowLinkFromDeepExplicitServerExchangeShouldWork() throws URISyntaxException {
+	public void shallowLinkFromDeepExplicitServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api/employees"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api/employees"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).root(), this.exchange).withSelfRel().toMono() //
@@ -120,10 +120,10 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void shallowLinkFromDeepContextProvidedServerExchangeShouldWork() throws URISyntaxException {
+	public void shallowLinkFromDeepContextProvidedServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api/employees"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api/employees"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).root()).withSelfRel().toMono() //
@@ -142,10 +142,10 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void deepLinkFromShallowExplicitServerExchangeShouldWork() throws URISyntaxException {
+	public void deepLinkFromShallowExplicitServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).deep(), this.exchange).withSelfRel().toMono() //
@@ -163,10 +163,10 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void deepLinkFromShallowContextProvidedServerExchangeShouldWork() throws URISyntaxException {
+	public void deepLinkFromShallowContextProvidedServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/api"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).deep()).withSelfRel().toMono() //
@@ -185,10 +185,10 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkToRouteWithNoMappingShouldWork() throws URISyntaxException {
+	public void linkToRouteWithNoMappingShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/"));
+		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/"));
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController2.class).root()).withSelfRel().toMono() //

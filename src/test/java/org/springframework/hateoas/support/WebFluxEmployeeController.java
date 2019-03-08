@@ -18,14 +18,12 @@ package org.springframework.hateoas.support;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static reactor.function.TupleUtils.*;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -128,20 +126,17 @@ public class WebFluxEmployeeController {
 	@PostMapping("/employees")
 	public Mono<ResponseEntity<?>> newEmployee(@RequestBody Mono<EntityModel<Employee>> employee) {
 
-		return employee.flatMap(resource -> {
+		return employee //
+				.flatMap(resource -> {
 
-			int newEmployeeId = EMPLOYEES.size();
-			EMPLOYEES.put(newEmployeeId, resource.getContent());
-			return findOne(newEmployeeId);
-
-		}).map(findOne -> {
-
-			return ResponseEntity.created(URI.create(findOne //
-					.getLink(IanaLinkRelations.SELF) //
-					.map(link -> link.expand().getHref()) //
-					.orElse(""))) //
-					.build();
-		});
+					int newEmployeeId = EMPLOYEES.size();
+					EMPLOYEES.put(newEmployeeId, resource.getContent());
+					return findOne(newEmployeeId);
+				}) //
+				.map(findOne -> ResponseEntity.created(findOne //
+						.getRequiredLink(IanaLinkRelations.SELF) //
+						.toUri()) //
+						.build());
 	}
 
 	@PutMapping("/employees/{id}")
@@ -151,46 +146,34 @@ public class WebFluxEmployeeController {
 		return employee.flatMap(resource -> {
 			EMPLOYEES.put(id, resource.getContent());
 			return findOne(id);
-		}).map(findOne -> {
-
-			return ResponseEntity.noContent() //
-					.location(URI.create(findOne //
-							.getLink(IanaLinkRelations.SELF) //
-							.map(link -> link.expand().getHref()) //
-							.orElse(""))) //
-					.build();
-		});
+		}).map(findOne -> ResponseEntity.noContent() //
+				.location(findOne.getRequiredLink(IanaLinkRelations.SELF).toUri()).build());
 	}
 
 	@PatchMapping("/employees/{id}")
 	public Mono<ResponseEntity<?>> partiallyUpdateEmployee( //
 			@RequestBody Mono<EntityModel<Employee>> employee, @PathVariable Integer id) {
 
-		return employee.flatMap(resource -> {
+		return employee //
+				.flatMap(resource -> {
 
-			Employee oldEmployee = EMPLOYEES.get(id);
-			Employee newEmployee = oldEmployee;
+					Employee oldEmployee = EMPLOYEES.get(id);
+					Employee newEmployee = oldEmployee;
 
-			if (resource.getContent().getName() != null) {
-				newEmployee = newEmployee.withName(resource.getContent().getName());
-			}
+					if (resource.getContent().getName() != null) {
+						newEmployee = newEmployee.withName(resource.getContent().getName());
+					}
 
-			if (resource.getContent().getRole() != null) {
-				newEmployee = newEmployee.withRole(resource.getContent().getRole());
-			}
+					if (resource.getContent().getRole() != null) {
+						newEmployee = newEmployee.withRole(resource.getContent().getRole());
+					}
 
-			EMPLOYEES.put(id, newEmployee);
+					EMPLOYEES.put(id, newEmployee);
 
-			return findOne(id);
+					return findOne(id);
 
-		}).map(findOne -> {
-
-			return ResponseEntity.noContent() //
-					.location(URI.create(findOne //
-							.getLink(IanaLinkRelations.SELF) //
-							.map(link -> link.expand().getHref()) //
-							.orElse(""))) //
-					.build();
-		});
+				}) //
+				.map(findOne -> ResponseEntity.noContent() //
+						.location(findOne.getRequiredLink(IanaLinkRelations.SELF).toUri()).build());
 	}
 }
