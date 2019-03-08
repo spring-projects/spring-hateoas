@@ -16,10 +16,13 @@ The following example shows how to use it:
 Map<String, Object> parameters = new HashMap<>();
 parameters.put("user", 27);
 
-Traverson traverson = new Traverson(URI.create("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
-String name = traverson
-		.follow("movies", "movie", "actor").withTemplateParameters(parameters)
-		.toObject("$.name");
+Traverson traverson = new Traverson()
+	.uri(URI.create("http://localhost:8080/api/"))
+	.accept(MediaTypes.HAL_JSON);
+	
+String name = traverson.follow("movies", "movie", "actor")
+	.withTemplateParameters(parameters)
+	.as("$.name");
 ----
 ====
 
@@ -64,9 +67,9 @@ You can do so with only one slight tweak, as the following example shows:
 CollectionModelType<Item> collectionModelType =
 		TypeReferences.CollectionModelType<Item>() {};
 
-CollectionModel<Item> itemResource = traverson.//
-		follow(rel("items")).//
-		toObject(collectionModelType);
+CollectionModel<Item> itemResource = traverson
+	.follow(rel("items"))
+	.as(collectionModelType);
 ----
 ====
 
@@ -80,7 +83,7 @@ When working with hypermedia enabled representations, a common task is to find a
 Alternatively, you can set up and use an instance as follows:
 
 ====
-[source, java]
+[source, java, tabsize=2]
 ----
 String content = "{'_links' :  { 'foo' : { 'href' : '/foo/bar' }}}";
 LinkDiscoverer discoverer = new HalLinkDiscoverer();
