@@ -17,12 +17,15 @@ package org.springframework.hateoas.client;
 
 import static org.springframework.http.HttpMethod.*;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +54,7 @@ import com.jayway.jsonpath.JsonPath;
  * Component to ease traversing hypermedia APIs by following links with relation types. Highly inspired by the equally
  * named JavaScript library.
  *
- * @see https://github.com/basti1302/traverson
+ * @see {@link https://github.com/basti1302/traverson}
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Greg Turnquist
@@ -85,14 +88,16 @@ public class Traverson {
 	private LinkDiscoverers discoverers;
 
 	/**
-	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
-	 * interact with the service.
-	 *
-	 * @param baseUri must not be {@literal null}.
-	 * @param mediaTypes must not be {@literal null} or empty.
+	 * Creates a new {@link Traverson} with {@literal null} {@literal URI} and empty list of {@link MediaType}s. This is
+	 * to support using {@link #baseUri(URI)}} and {@link #accept(MediaType...)}} fluently.
 	 */
-	public Traverson(URI baseUri, MediaType... mediaTypes) {
-		this(baseUri, Arrays.asList(mediaTypes));
+	public Traverson() {
+
+		this.baseUri = null;
+		this.mediaTypes = Collections.emptyList();
+
+		setRestOperations(createDefaultTemplate(this.mediaTypes));
+		setLinkDiscoverers(Collections.emptyList());
 	}
 
 	/**
@@ -100,18 +105,65 @@ public class Traverson {
 	 * interact with the service.
 	 *
 	 * @param baseUri must not be {@literal null}.
-	 * @param mediaTypes must not be {@literal null} or empty.
+	 * @param mediaTypes must not be {@literal null}.
 	 */
-	public Traverson(URI baseUri, List<MediaType> mediaTypes) {
+	private Traverson(URI baseUri, List<MediaType> mediaTypes) {
 
 		Assert.notNull(baseUri, "Base URI must not be null!");
-		Assert.notEmpty(mediaTypes, "At least one media type must be given!");
+		Assert.notNull(mediaTypes, "mediaTypes must not be null!");
 
 		this.mediaTypes = mediaTypes;
 		this.baseUri = baseUri;
 
-		setLinkDiscoverers(DEFAULTS.getLinkDiscoverers(mediaTypes));
 		setRestOperations(createDefaultTemplate(this.mediaTypes));
+		setLinkDiscoverers(DEFAULTS.getLinkDiscoverers(this.mediaTypes));
+	}
+
+	/**
+	 * Create a new {@link Traverson} using the provided {@code baseUri}.
+	 *
+	 * @param baseUri
+	 * @return {@link Traverson}
+	 */
+	public Traverson baseUri(URI baseUri) {
+
+		Assert.notNull(baseUri, "baseUri must not be null!");
+
+		return new Traverson(baseUri, this.mediaTypes);
+	}
+
+	/**
+	 * Create a new {@link Traverson} using the provided {@link MediaType}s.
+	 *
+	 * @param mediaTypes
+	 * @return {@link Traverson}
+	 */
+	public Traverson accept(MediaType... mediaTypes) {
+
+		Assert.notEmpty(mediaTypes, "mediaTypes must not be null!");
+
+		return new Traverson(this.baseUri, Arrays.asList(mediaTypes));
+	}
+
+	/**
+	 * Sets up a {@link TraversalBuilder} to follow the given rels.
+	 *
+	 * @param rels must not be {@literal null} or empty.
+	 * @return
+	 * @see TraversalBuilder
+	 */
+	public TraversalBuilder follow(String... rels) {
+		return new TraversalBuilder().follow(rels);
+	}
+
+	/**
+	 * Sets up a {@link TraversalBuilder} for a single rel with customized details.
+	 *
+	 * @param hop must not be {@literal null}
+	 * @return
+	 */
+	public TraversalBuilder follow(Hop hop) {
+		return new TraversalBuilder().follow(hop);
 	}
 
 	/**
@@ -122,14 +174,6 @@ public class Traverson {
 	 */
 	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(MediaType... mediaTypes) {
 		return DEFAULTS.getHttpMessageConverters(Arrays.asList(mediaTypes));
-	}
-
-	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
-
-		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(DEFAULTS.getHttpMessageConverters(mediaTypes));
-
-		return template;
 	}
 
 	/**
@@ -166,37 +210,12 @@ public class Traverson {
 		return this;
 	}
 
-	/**
-	 * Sets up a {@link TraversalBuilder} to follow the given rels.
-	 *
-	 * @param rels must not be {@literal null} or empty.
-	 * @return
-	 * @see TraversalBuilder
-	 */
-	public TraversalBuilder follow(String... rels) {
-		return new TraversalBuilder().follow(rels);
-	}
+	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
 
-	/**
-	 * Sets up a {@link TraversalBuilder} for a single rel with customized details.
-	 *
-	 * @param hop must not be {@literal null}
-	 * @return
-	 */
-	public TraversalBuilder follow(Hop hop) {
-		return new TraversalBuilder().follow(hop);
-	}
+		RestTemplate template = new RestTemplate();
+		template.setMessageConverters(DEFAULTS.getHttpMessageConverters(mediaTypes));
 
-	private HttpEntity<?> prepareRequest(HttpHeaders headers) {
-
-		HttpHeaders toSend = new HttpHeaders();
-		toSend.putAll(headers);
-
-		if (headers.getAccept().isEmpty()) {
-			toSend.setAccept(mediaTypes);
-		}
-
-		return new HttpEntity<Void>(toSend);
+		return template;
 	}
 
 	/**
@@ -204,13 +223,12 @@ public class Traverson {
 	 *
 	 * @author Oliver Gierke
 	 */
+	@NoArgsConstructor(access = AccessLevel.PRIVATE)
 	public class TraversalBuilder {
 
 		private final List<Hop> rels = new ArrayList<>();
 		private Map<String, Object> templateParameters = new HashMap<>();
 		private HttpHeaders headers = new HttpHeaders();
-
-		private TraversalBuilder() {}
 
 		/**
 		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
@@ -279,34 +297,48 @@ public class Traverson {
 		/**
 		 * Executes the traversal and marshals the final response into an object of the given type.
 		 *
-		 * @param type must not be {@literal null}.
-		 * @return
+		 * @deprecated Use {@link #as(Class)}.
 		 */
+		@Deprecated
 		public <T> T toObject(Class<T> type) {
+			return as(type);
+		}
 
-			Assert.notNull(type, "Target type must not be null!");
-
-			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
-			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
-
-			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type).getBody();
+		/**
+		 * Executes the traversal and marshals the final response into an object of the given type.
+		 */
+		public <T> T as(Class<T> type) {
+			return toEntity(type).getBody();
 		}
 
 		/**
 		 * Executes the traversal and marshals the final response into an object of the given
 		 * {@link ParameterizedTypeReference}.
 		 *
-		 * @param type must not be {@literal null}.
-		 * @return
+		 * @deprecated Use {@link #as(ParameterizedTypeReference)}.
 		 */
+		@Deprecated
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
+			return as(type);
+		}
 
-			Assert.notNull(type, "Target type must not be null!");
+		/**
+		 * Executes the traversal and marshals the final response into an object of the given
+		 * {@link ParameterizedTypeReference}.
+		 */
+		public <T> T as(ParameterizedTypeReference<T> type) {
+			return toEntity(type).getBody();
+		}
 
-			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
-			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
-
-			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type).getBody();
+		/**
+		 * Executes the traversal and returns the result of the given JSON Path expression evaluated against the final
+		 * representation.
+		 *
+		 * @deprecated Use {@link #as(String)}.
+		 */
+		@Deprecated
+		public <T> T toObject(String jsonPath) {
+			return as(jsonPath);
 		}
 
 		/**
@@ -316,15 +348,11 @@ public class Traverson {
 		 * @param jsonPath must not be {@literal null} or empty.
 		 * @return
 		 */
-		public <T> T toObject(String jsonPath) {
+		public <T> T as(String jsonPath) {
 
-			Assert.hasText(jsonPath, "JSON path must not be null or empty!");
+			Assert.hasText(jsonPath, "jsonPath must not be null!");
 
-			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
-			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
-
-			String forObject = operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, String.class).getBody();
-			return JsonPath.read(forObject, jsonPath);
+			return JsonPath.read(as(String.class), jsonPath);
 		}
 
 		/**
@@ -334,6 +362,23 @@ public class Traverson {
 		 * @return
 		 */
 		public <T> ResponseEntity<T> toEntity(Class<T> type) {
+
+			Assert.notNull(type, "Target type must not be null!");
+
+			URIAndHeaders uriAndHeaders = traverseToExpandedFinalUrl();
+			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
+
+			return operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, type);
+		}
+
+		/**
+		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given
+		 * {@link ParameterizedTypeReference}..
+		 *
+		 * @param type must not be {@literal null}.
+		 * @return
+		 */
+		public <T> ResponseEntity<T> toEntity(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
 
@@ -423,6 +468,18 @@ public class Traverson {
 			}
 		}
 
+		private HttpEntity<?> prepareRequest(HttpHeaders headers) {
+
+			HttpHeaders toSend = new HttpHeaders();
+			toSend.putAll(headers);
+
+			if (headers.getAccept().isEmpty()) {
+				toSend.setAccept(mediaTypes);
+			}
+
+			return new HttpEntity<Void>(toSend);
+		}
+
 		/**
 		 * Combine two sets of {@link HttpHeaders} into one.
 		 *
@@ -442,7 +499,7 @@ public class Traverson {
 	}
 
 	/**
-	 * Temporary container for a string-base {@literal URI} and {@link HttpHeaders}.
+	 * Temporary container for a string-based {@literal URI} and {@link HttpHeaders}.
 	 */
 	@Value
 	@RequiredArgsConstructor
