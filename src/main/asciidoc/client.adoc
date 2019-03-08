@@ -15,10 +15,10 @@ The following example shows how to use it:
 Map<String, Object> parameters = new HashMap<>();
 parameters.put("user", 27);
 
-Traverson traverson = new Traverson(new URI("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
-String name = traverson.follow("movies", "movie", "actor").
-  withTemplateParameters(parameters).
-  toObject("$.name");
+Traverson traverson = new Traverson(URI.create("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
+String name = traverson
+  .follow("movies", "movie", "actor").withTemplateParameters(parameters)
+  .toObject("$.name");
 ----
 ====
 

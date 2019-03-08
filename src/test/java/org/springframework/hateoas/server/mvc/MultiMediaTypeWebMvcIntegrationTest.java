@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
@@ -507,11 +506,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 
 			EMPLOYEES.put(newEmployeeId, employee.getContent());
 
-			try {
-				return ResponseEntity.created(toUri(newEmployeeId)).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
+			return ResponseEntity.created(toUri(newEmployeeId)).build();
 		}
 
 		@PutMapping("/employees/{id}")
@@ -519,11 +514,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 
 			EMPLOYEES.put(id, employee.getContent());
 
-			try {
-				return ResponseEntity.noContent().location(toUri(id)).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
+			return ResponseEntity.noContent().location(toUri(id)).build();
 		}
 
 		@PatchMapping("/employees/{id}")
@@ -542,21 +533,14 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 
 			EMPLOYEES.put(id, newEmployee);
 
-			try {
-				return ResponseEntity.noContent().location(toUri(id)).build();
-			} catch (URISyntaxException e) {
-				return ResponseEntity.badRequest().body(e.getMessage());
-			}
+			return ResponseEntity.noContent().location(toUri(id)).build();
 		}
 
-		private URI toUri(Integer id) throws URISyntaxException {
+		private URI toUri(Integer id) {
 
-			String uri = findOne(id) //
-					.getLink(IanaLinkRelations.SELF.value()) //
-					.map(link -> link.expand().getHref()) //
-					.orElse("");
-
-			return new URI(uri);
+			return findOne(id) //
+					.getRequiredLink(IanaLinkRelations.SELF) //
+					.toUri();
 		}
 	}
 

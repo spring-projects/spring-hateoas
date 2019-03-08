@@ -17,8 +17,6 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +128,7 @@ public class EmployeeController {
 
 		Link link = linkTo(methodOn(getClass()).findOne(newEmployeeId)).withSelfRel().expand();
 
-		return ResponseEntity.created(URI.create(link.getHref())).build();
+		return ResponseEntity.created(link.toUri()).build();
 	}
 	// end::new[]
 
@@ -146,7 +144,7 @@ public class EmployeeController {
 		Link link = linkTo(methodOn(getClass()).findOne(id)).withSelfRel().expand();
 
 		return ResponseEntity.noContent() //
-				.location(URI.create(link.getHref())) //
+				.location(link.toUri()) //
 				.build();
 	}
 
@@ -170,18 +168,9 @@ public class EmployeeController {
 
 		EMPLOYEES.put(id, newEmployee);
 
-		try {
-			return ResponseEntity //
-					.noContent() //
-					.location( //
-							new URI(findOne(id) //
-									.getLink(IanaLinkRelations.SELF) //
-									.map(link -> link.expand().getHref()) //
-									.orElse("") //
-							) //
-					).build();
-		} catch (URISyntaxException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
+		return ResponseEntity //
+				.noContent() //
+				.location(findOne(id).getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+				.build();
 	}
 }
