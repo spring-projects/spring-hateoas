@@ -320,7 +320,7 @@ public class WebHandler {
 		 * @param attribute must not be {@literal null}.
 		 * @return
 		 */
-		protected BoundMethodParameter createParameter(MethodParameter parameter, Object value,
+		protected BoundMethodParameter createParameter(MethodParameter parameter, @Nullable Object value,
 				AnnotationAttribute attribute) {
 			return new BoundMethodParameter(parameter, value, attribute);
 		}
@@ -370,7 +370,7 @@ public class WebHandler {
 			 * @param value can be {@literal null}.
 			 * @param attribute can be {@literal null}.
 			 */
-			public BoundMethodParameter(MethodParameter parameter, Object value, AnnotationAttribute attribute) {
+			public BoundMethodParameter(MethodParameter parameter, @Nullable Object value, AnnotationAttribute attribute) {
 
 				Assert.notNull(parameter, "MethodParameter must not be null!");
 
@@ -404,6 +404,7 @@ public class WebHandler {
 			 *
 			 * @return
 			 */
+			@Nullable
 			public Object getValue() {
 				return value;
 			}

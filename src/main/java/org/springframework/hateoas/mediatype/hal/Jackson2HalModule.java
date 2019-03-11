@@ -431,7 +431,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Object firstElement = list.get(0);
 
-			if (!(firstElement instanceof HalLink)) {
+			if (!(HalLink.class.isInstance(firstElement))) {
 				serializeContents(list, jgen, provider);
 				return;
 			}

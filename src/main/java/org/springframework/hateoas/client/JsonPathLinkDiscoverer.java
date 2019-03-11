@@ -161,7 +161,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 */
 	private Links createLinksFrom(Object parseResult, LinkRelation rel) {
 
-		if (parseResult instanceof JSONArray) {
+		if (JSONArray.class.isInstance(parseResult)) {
 
 			JSONArray jsonArray = (JSONArray) parseResult;
 

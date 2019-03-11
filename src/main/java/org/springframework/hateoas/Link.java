@@ -242,8 +242,9 @@ public class Link implements Serializable {
 
 		String name = httpMethod.toString().toLowerCase();
 
-		if (inputType.resolve() != null) {
-			name += inputType.resolve().getSimpleName();
+		Class<?> resolvedInputType = inputType.resolve();
+		if (resolvedInputType != null) {
+			name += resolvedInputType.getSimpleName();
 		}
 
 		return andAffordance(name, httpMethod, inputType, queryMethodParameters, outputType);

@@ -293,8 +293,8 @@ public class RepresentationModelProcessorInvoker {
 		 * Returns whether the given {@link EntityModel} matches the given target {@link ResolvableType}. We inspect the
 		 * {@link EntityModel}'s value to determine the match.
 		 *
-		 * @param resource
-		 * @param target must not be {@literal null}.
+		 * @param resource can be {@literal null}.
+		 * @param target can be {@literal null}.
 		 * @return whether the given {@link EntityModel} can be assigned to the given target {@link ResolvableType}
 		 */
 		private static boolean isValueTypeMatch(@Nullable EntityModel<?> resource, @Nullable ResolvableType target) {

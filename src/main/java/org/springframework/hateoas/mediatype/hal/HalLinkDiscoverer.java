@@ -51,7 +51,7 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 	@SuppressWarnings("unchecked")
 	protected Link extractLink(Object element, LinkRelation rel) {
 
-		if (!(element instanceof Map)) {
+		if (!(Map.class.isInstance(element))) {
 			return super.extractLink(element, rel);
 		}
 

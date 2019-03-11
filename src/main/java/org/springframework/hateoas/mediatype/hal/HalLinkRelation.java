@@ -58,7 +58,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 
 		Assert.notNull(relation, "LinkRelation must not be null!");
 
-		if (relation instanceof HalLinkRelation) {
+		if (HalLinkRelation.class.isInstance(relation)) {
 			return (HalLinkRelation) relation;
 		}
 

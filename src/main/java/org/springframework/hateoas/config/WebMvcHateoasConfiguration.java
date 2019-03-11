@@ -110,7 +110,7 @@ class WebMvcHateoasConfiguration {
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-			if (!(bean instanceof RestTemplate)) {
+			if (!(RestTemplate.class.isInstance(bean))) {
 				return bean;
 			}
 
