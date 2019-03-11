@@ -128,7 +128,7 @@ public class RepresentationModelProcessorInvoker {
 			}
 		}
 
-		return (T) invokeProcessorsFor(Object.class.cast(value), referenceType);
+		return (T) invokeProcessorsFor((Object) value, referenceType);
 	}
 
 	/**

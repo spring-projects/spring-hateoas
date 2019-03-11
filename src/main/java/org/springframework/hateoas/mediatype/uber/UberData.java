@@ -150,7 +150,7 @@ class UberData {
 	/**
 	 * Simple scalar types that can be encoded by value, not type.
 	 */
-	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList(String.class));
+	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<>(Collections.singletonList(String.class));
 
 	/**
 	 * Set of all Spring HATEOAS resource types.

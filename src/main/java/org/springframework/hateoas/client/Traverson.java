@@ -70,7 +70,7 @@ public class Traverson {
 				Traverson.class.getClassLoader());
 
 		Assert.isTrue(ALL_DEFAULTS.size() == 1,
-				() -> String.format("Expected to find only one TraversonDefaults instance, but found: ", //
+				() -> String.format("Expected to find only one TraversonDefaults instance, but found: %s", //
 						ALL_DEFAULTS.stream() //
 								.map(Object::getClass) //
 								.map(Class::getName) //

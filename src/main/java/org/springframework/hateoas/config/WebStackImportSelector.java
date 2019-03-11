@@ -46,6 +46,6 @@ class WebStackImportSelector implements ImportSelector {
 			imports.add("org.springframework.hateoas.config.WebFluxHateoasConfiguration");
 		}
 
-		return imports.toArray(new String[imports.size()]);
+		return imports.toArray(new String[0]);
 	}
 }

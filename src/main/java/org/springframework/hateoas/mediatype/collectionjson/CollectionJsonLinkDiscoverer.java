@@ -120,7 +120,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 		return findSelfLink(representation) //
 				.map(Links::of) //
 				.map(it -> it.and(links)) //
-				.orElseGet(() -> links);
+				.orElse(links);
 	}
 
 	private Links addSelfLink(Links links, InputStream representation) {
@@ -128,7 +128,7 @@ public class CollectionJsonLinkDiscoverer extends JsonPathLinkDiscoverer {
 		return findSelfLink(representation) //
 				.map(Links::of) //
 				.map(it -> it.and(links)) //
-				.orElseGet(() -> links);
+				.orElse(links);
 	}
 
 	/**

@@ -166,7 +166,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 			JSONArray jsonArray = (JSONArray) parseResult;
 
 			return jsonArray.stream() //
-					.flatMap(it -> JSONArray.class.isInstance(it) ? ((JSONArray) it).stream() : Stream.of(it)) //
+					.flatMap(it -> it instanceof JSONArray ? ((JSONArray) it).stream() : Stream.of(it)) //
 					.map(it -> extractLink(it, rel)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), Links::of));
 		}

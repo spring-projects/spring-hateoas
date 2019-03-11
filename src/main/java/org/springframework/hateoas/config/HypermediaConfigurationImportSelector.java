@@ -54,7 +54,7 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 
 		// No additional filtering needed.
 		if (types.isEmpty()) {
-			return configurationProviders.toArray(new String[configurationProviders.size()]);
+			return configurationProviders.toArray(new String[0]);
 		}
 
 		// Filter the ones supporting the given media types

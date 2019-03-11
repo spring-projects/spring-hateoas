@@ -38,7 +38,7 @@ public class UriTemplateFactory {
 	 * @param mapping must not be {@literal null} or empty.
 	 * @return
 	 */
-	public static UriTemplate templateFor(@Nullable String mapping) {
+	public static UriTemplate templateFor(String mapping) {
 
 		Assert.hasText(mapping, "Mapping must not be null or empty!");
 
