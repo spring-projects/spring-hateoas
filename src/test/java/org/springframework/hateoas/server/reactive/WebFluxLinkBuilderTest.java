@@ -207,7 +207,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() throws URISyntaxException {
+	public void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() {
 
 		linkTo(methodOn(TestController2.class).root()).withSelfRel().toMono() //
 				.as(StepVerifier::create).expectNextMatches(link -> {
@@ -224,7 +224,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkToRouteWithExplictExchangeBeingNullShouldFallbackToRelativeUris() throws URISyntaxException {
+	public void linkToRouteWithExplictExchangeBeingNullShouldFallbackToRelativeUris() {
 
 		linkTo(methodOn(TestController2.class).root(), null).withSelfRel().toMono() //
 				.as(StepVerifier::create).expectNextMatches(link -> {

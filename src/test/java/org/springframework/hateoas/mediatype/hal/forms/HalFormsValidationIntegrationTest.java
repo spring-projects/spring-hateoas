@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -84,8 +83,9 @@ public class HalFormsValidationIntegrationTest {
 				.andReturn() //
 				.getResolvedException();
 
-		assertThat(exception.getMessage(), containsString("Affordance's URI http://localhost/employees"));
-		assertThat(exception.getMessage(), containsString("doesn't match self link http://localhost/employees/0"));
+		assertThat(exception).isNotNull();
+		assertThat(exception.getMessage()).contains("Affordance's URI http://localhost/employees");
+		assertThat(exception.getMessage()).contains("doesn't match self link http://localhost/employees/0");
 	}
 
 	@Test
@@ -95,8 +95,9 @@ public class HalFormsValidationIntegrationTest {
 				.andExpect(status().is5xxServerError()) //
 				.andReturn().getResolvedException();
 
-		assertThat(exception.getMessage(), containsString("Affordance's URI http://localhost/employees/0"));
-		assertThat(exception.getMessage(), containsString("doesn't match self link http://localhost/employees"));
+		assertThat(exception).isNotNull();
+		assertThat(exception.getMessage()).contains("Affordance's URI http://localhost/employees/0");
+		assertThat(exception.getMessage()).contains("doesn't match self link http://localhost/employees");
 	}
 
 	/**
