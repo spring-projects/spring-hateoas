@@ -66,20 +66,20 @@ public class PropertyUtils {
 			return findProperties(((EntityModel<?>) object).getContent());
 		}
 
-		return getPropertyDescriptors(object.getClass())
-			.collect(HashMap::new,
-				(hashMap, descriptor) -> {
-					try {
-						Method readMethod = descriptor.getReadMethod();
-						ReflectionUtils.makeAccessible(readMethod);
-						hashMap.put(descriptor.getName(), readMethod.invoke(object));
-					} catch (IllegalAccessException | InvocationTargetException e) {
-						throw new RuntimeException(e);
-					}
-				},
-				HashMap::putAll);
+		return getPropertyDescriptors(object.getClass()) //
+				.collect(HashMap::new, //
+						(hashMap, descriptor) -> {
+							try {
+								Method readMethod = descriptor.getReadMethod();
+								ReflectionUtils.makeAccessible(readMethod);
+								hashMap.put(descriptor.getName(), readMethod.invoke(object));
+							} catch (IllegalAccessException | InvocationTargetException e) {
+								throw new RuntimeException(e);
+							}
+						}, //
+						HashMap::putAll);
 	}
-	
+
 	public static List<String> findPropertyNames(ResolvableType resolvableType) {
 
 		if (WebStack.WEBFLUX.isAvailable()) {
@@ -92,14 +92,14 @@ public class PropertyUtils {
 		if (resolvableType.getRawClass() == null) {
 			return Collections.emptyList();
 		}
-		
+
 		if (resolvableType.getRawClass().equals(EntityModel.class)) {
 			Class<?> genericEntityModelParameter = resolvableType.resolveGeneric(0);
 
 			if (genericEntityModelParameter == null) {
 				return Collections.emptyList();
 			}
-			
+
 			return findPropertyNames(genericEntityModelParameter);
 		} else {
 			return findPropertyNames(resolvableType.getRawClass());
@@ -108,13 +108,13 @@ public class PropertyUtils {
 
 	public static List<String> findPropertyNames(Class<?> clazz) {
 
-		return getPropertyDescriptors(clazz)
-			.map(FeatureDescriptor::getName)
-			.collect(Collectors.toList());
+		return getPropertyDescriptors(clazz) //
+				.map(FeatureDescriptor::getName) //
+				.collect(Collectors.toList());
 	}
 
 	public static <T> T createObjectFromProperties(Class<T> clazz, Map<String, Object> properties) {
-		
+
 		T obj = BeanUtils.instantiateClass(clazz);
 
 		properties.forEach((key, value) -> {
@@ -142,10 +142,10 @@ public class PropertyUtils {
 	private static Stream<PropertyDescriptor> getPropertyDescriptors(Class<?> clazz) {
 
 		return Arrays.stream(BeanUtils.getPropertyDescriptors(clazz))
-			.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
-			.filter(descriptor -> !descriptorToBeIgnoredByJackson(clazz, descriptor))
-			.filter(descriptor -> !toBeIgnoredByJackson(clazz, descriptor.getName()))
-			.filter(descriptor -> !readerIsNotToBeIgnoredByJackson(descriptor));
+				.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
+				.filter(descriptor -> !descriptorToBeIgnoredByJackson(clazz, descriptor))
+				.filter(descriptor -> !toBeIgnoredByJackson(clazz, descriptor.getName()))
+				.filter(descriptor -> !readerIsNotToBeIgnoredByJackson(descriptor));
 	}
 
 	/**
@@ -184,15 +184,15 @@ public class PropertyUtils {
 	 */
 	private static boolean toBeIgnoredByJackson(@Nullable Annotation[] annotations) {
 
-		if (annotations != null) {
-			for (Annotation annotation : annotations) {
-				if (annotation.annotationType().equals(JsonIgnore.class)) {
-					return (Boolean) AnnotationUtils.getAnnotationAttributes(annotation).get("value");
-				}
-			}
+		if (annotations == null) {
+			return false;
 		}
 
-		return false;
+		return Arrays.stream(annotations) //
+				.filter(annotation -> annotation.annotationType().equals(JsonIgnore.class)) //
+				.findFirst() //
+				.map(annotation -> (Boolean) AnnotationUtils.getAnnotationAttributes(annotation).get("value")) //
+				.orElse(false);
 	}
 
 	/**
@@ -206,20 +206,15 @@ public class PropertyUtils {
 
 		Annotation[] annotations = AnnotationUtils.getAnnotations(clazz);
 
-		if (annotations != null) {
-			for (Annotation annotation : annotations) {
-				if (annotation.annotationType().equals(JsonIgnoreProperties.class)) {
-					String[] namesOfPropertiesToIgnore = (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value");
-					for (String propertyToIgnore : namesOfPropertiesToIgnore) {
-						if (propertyToIgnore.equalsIgnoreCase(field)) {
-							return true;
-						}
-					}
-				}
-			}
+		if (annotations == null) {
+			return false;
 		}
-		
-		return false;
+
+		return Arrays.stream(annotations) //
+				.filter(annotation -> annotation.annotationType().equals(JsonIgnoreProperties.class)) //
+				.map(annotation -> (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value")) //
+				.flatMap(Arrays::stream) //
+				.anyMatch(propertyName -> propertyName.equalsIgnoreCase(field));
 	}
 
 }

@@ -798,7 +798,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		return resources.getContent().stream().map(content -> {
 
-			if (!(EntityModel.class.isInstance(content))) {
+			if (!EntityModel.class.isInstance(content)) {
 				return new CollectionJsonItem<>().withRawData(content);
 			}
 

@@ -451,18 +451,4 @@ public class LinkUnitTest {
 	public void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
 		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Link("/{segment}/path").toUri());
 	}
-
-	@Test
-	public void foo() {
-		String foo = getIt();
-
-		if (foo == null) {
-			System.out.println("Yo");
-		}
-	}
-
-	private String getIt() {
-		return null;
-	}
-
 }
