@@ -155,8 +155,7 @@ public class EmployeeController {
 	// end::patch[]
 	{
 
-		Employee oldEmployee = EMPLOYEES.get(id);
-		Employee newEmployee = oldEmployee;
+		Employee newEmployee = EMPLOYEES.get(id);
 
 		if (employee.getContent().getName() != null) {
 			newEmployee = newEmployee.withName(employee.getContent().getName());

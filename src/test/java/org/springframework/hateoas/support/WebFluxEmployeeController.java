@@ -66,7 +66,7 @@ public class WebFluxEmployeeController {
 		WebFluxEmployeeController controller = methodOn(WebFluxEmployeeController.class);
 
 		return Flux.fromIterable(EMPLOYEES.keySet()) //
-				.flatMap(id -> findOne(id)) //
+				.flatMap(this::findOne) //
 				.collectList() //
 				.flatMap(resources -> linkTo(controller.all()).withSelfRel() //
 						.andAffordance(controller.newEmployee(null)) //
@@ -83,7 +83,7 @@ public class WebFluxEmployeeController {
 		WebFluxEmployeeController controller = methodOn(WebFluxEmployeeController.class);
 
 		return Flux.fromIterable(EMPLOYEES.keySet()) //
-				.flatMap(id -> findOne(id)) //
+				.flatMap(this::findOne) //
 				.filter(resource -> {
 
 					boolean nameMatches = name //
@@ -94,13 +94,12 @@ public class WebFluxEmployeeController {
 							.orElse(true);
 
 					return nameMatches && roleMatches;
-				}).collectList().flatMap(resources -> {
-					return linkTo(controller.all()).withSelfRel() //
-							.andAffordance(controller.newEmployee(null)) //
-							.andAffordance(controller.search(null, null)) //
-							.toMono() //
-							.map(selfLink -> new CollectionModel<>(resources, selfLink));
-				});
+				}).collectList().flatMap(resources -> linkTo(controller.all()) //
+						.withSelfRel() //
+						.andAffordance(controller.newEmployee(null)) //
+						.andAffordance(controller.search(null, null)) //
+						.toMono() //
+						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/{id}")
@@ -118,9 +117,7 @@ public class WebFluxEmployeeController {
 
 		return selfLink.zipWith(employeesLink) //
 				.map(function((left, right) -> Links.of(left, right))) //
-				.map(links -> {
-					return new EntityModel<>(EMPLOYEES.get(id), links);
-				});
+				.map(links -> new EntityModel<>(EMPLOYEES.get(id), links));
 	}
 
 	@PostMapping("/employees")
@@ -144,6 +141,7 @@ public class WebFluxEmployeeController {
 			@PathVariable Integer id) {
 
 		return employee.flatMap(resource -> {
+
 			EMPLOYEES.put(id, resource.getContent());
 			return findOne(id);
 		}).map(findOne -> ResponseEntity.noContent() //
@@ -157,8 +155,7 @@ public class WebFluxEmployeeController {
 		return employee //
 				.flatMap(resource -> {
 
-					Employee oldEmployee = EMPLOYEES.get(id);
-					Employee newEmployee = oldEmployee;
+					Employee newEmployee = EMPLOYEES.get(id);
 
 					if (resource.getContent().getName() != null) {
 						newEmployee = newEmployee.withName(resource.getContent().getName());
@@ -172,8 +169,9 @@ public class WebFluxEmployeeController {
 
 					return findOne(id);
 
-				}) //
-				.map(findOne -> ResponseEntity.noContent() //
-						.location(findOne.getRequiredLink(IanaLinkRelations.SELF).toUri()).build());
+				}).map(findOne -> ResponseEntity.noContent() //
+						.location(findOne.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
+						.build() //
+				);
 	}
 }
