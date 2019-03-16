@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.hateoas</groupId>
@@ -7,7 +7,7 @@
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
-	<url>http://github.com/SpringSource/spring-hateoas</url>
+	<url>https://github.com/SpringSource/spring-hateoas</url>
 	<description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
@@ -17,7 +17,7 @@
 
 	<organization>
 		<name>Pivotal, Inc.</name>
-		<url>http://www.spring.io</url>
+		<url>https://www.spring.io</url>
 	</organization>
 
 	<developers>
@@ -46,7 +46,7 @@
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
 			Copyright 2011 the original author or authors.
 
@@ -54,7 +54,7 @@
 			you may not use this file except in compliance with the License.
 			You may obtain a copy of the License at
 
-			     http://www.apache.org/licenses/LICENSE-2.0
+			     https://www.apache.org/licenses/LICENSE-2.0
 
 			Unless required by applicable law or agreed to in writing, software
 			distributed under the License is distributed on an "AS IS" BASIS,
@@ -92,7 +92,7 @@
 			<repositories>
 				<repository>
 					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/libs-snapshot</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -619,8 +619,8 @@
 					<additionalparam>-Xdoclint:none</additionalparam>
 					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
 					<links>
-						<link>http://static.springframework.org/spring/docs/4.1.x/javadoc-api</link>
-						<link>http://docs.oracle.com/javase/6/docs/api</link>
+						<link>https://docs.spring.io/spring/docs/4.1.x/javadoc-api</link>
+						<link>https://docs.oracle.com/javase/6/docs/api</link>
 					</links>
 				</configuration>
 			</plugin>
