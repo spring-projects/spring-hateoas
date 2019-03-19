@@ -101,6 +101,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 	abstract class PagedModelMixin<T> extends PagedModel<T> {
 
+		@Nullable
 		@Override
 		@JsonProperty("page")
 		@JsonInclude(Include.NON_EMPTY)
@@ -138,6 +139,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public Links deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 			return Links.of(delegate.deserialize(p, ctxt));
 		}
@@ -150,7 +152,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
-		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, @Nullable CurieProvider curieProvider,
+		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
 				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
 				HalFormsConfiguration halFormsConfiguration) {
 
@@ -166,6 +168,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,
 				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
 				AutowireCapableBeanFactory beanFactory) {
+
 			this(relProvider, curieProvider, messageSource, enforceEmbeddedCollections,
 					beanFactory.getBean(HalFormsConfiguration.class));
 		}

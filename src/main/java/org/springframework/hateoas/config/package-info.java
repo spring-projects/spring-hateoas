@@ -1,7 +1,5 @@
 /**
  * Spring container configuration support.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
 package org.springframework.hateoas.config;
-
-import org.springframework.lang.NonNullApi;

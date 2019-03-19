@@ -28,16 +28,17 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.LinkBuilderFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 /**
  * {@link FactoryBean} implementation to create {@link ControllerEntityLinks} instances looking up controller classes
  * from an {@link ApplicationContext}. The controller types are identified by the annotation type configured.
- * 
+ *
  * @author Oliver Gierke
  */
-public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<ControllerEntityLinks> implements
-		ApplicationContextAware {
+public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<ControllerEntityLinks>
+		implements ApplicationContextAware {
 
 	private Class<? extends Annotation> annotation;
 	private LinkBuilderFactory<? extends LinkBuilder> linkBuilderFactory;
@@ -45,7 +46,7 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 
 	/**
 	 * Configures the annotation type to inspect the {@link ApplicationContext} for beans that carry the given annotation.
-	 * 
+	 *
 	 * @param annotation must not be {@literal null}.
 	 */
 	public void setAnnotation(Class<? extends Annotation> annotation) {
@@ -55,14 +56,14 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 
 	/**
 	 * Configures the {@link LinkBuilderFactory} to be used to create {@link LinkBuilder} instances.
-	 * 
+	 *
 	 * @param linkBuilderFactory the linkBuilderFactory to set
 	 */
 	public void setLinkBuilderFactory(LinkBuilderFactory<? extends LinkBuilder> linkBuilderFactory) {
 		this.linkBuilderFactory = linkBuilderFactory;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
 	 */
@@ -71,16 +72,17 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 		this.context = context;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.beans.factory.config.AbstractFactoryBean#getObjectType()
 	 */
+	@NonNull
 	@Override
 	public Class<?> getObjectType() {
 		return ControllerEntityLinks.class;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.beans.factory.config.AbstractFactoryBean#createInstance()
 	 */
@@ -98,7 +100,7 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 		return new ControllerEntityLinks(controllerTypes, linkBuilderFactory);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.beans.factory.config.AbstractFactoryBean#afterPropertiesSet()
 	 */

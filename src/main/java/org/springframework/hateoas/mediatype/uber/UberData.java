@@ -63,18 +63,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 class UberData {
 
-	private String id;
-	private String name;
-	private String label;
-	private List<LinkRelation> rel;
-	private String url;
-	private UberAction action;
+	private @Nullable String id, name, label;
+	private @Nullable List<LinkRelation> rel;
+	private @Nullable String url;
+	private @Nullable UberAction action;
 	private boolean transclude;
-	private String model;
-	private List<String> sending;
-	private List<String> accepting;
-	private Object value;
-	private List<UberData> data;
+	private @Nullable String model;
+	private @Nullable List<String> sending;
+	private @Nullable List<String> accepting;
+	private @Nullable Object value;
+	private @Nullable List<UberData> data;
 
 	@JsonCreator
 	UberData(@JsonProperty("id") @Nullable String id, @JsonProperty("name") @Nullable String name,
@@ -136,13 +134,15 @@ class UberData {
 	@JsonIgnore
 	public List<Link> getLinks() {
 
-		if (this.url == null) {
+		String url = this.url;
+
+		if (url == null) {
 			return Links.NONE.toList();
 		}
 
 		return Optional.ofNullable(this.rel) //
 				.map(rels -> rels.stream() //
-						.map(rel -> new Link(this.url, rel)) //
+						.map(rel -> new Link(url, rel)) //
 						.collect(Collectors.toList())) //
 				.orElse(Collections.emptyList());
 	}
@@ -204,6 +204,7 @@ class UberData {
 		return data;
 	}
 
+	@SuppressWarnings("null")
 	static List<UberData> extractLinksAndContent(PagedModel<?> resources) {
 
 		List<UberData> collectionOfResources = extractLinksAndContent((CollectionModel<?>) resources);
@@ -266,7 +267,7 @@ class UberData {
 	private static Optional<UberData> extractContent(@Nullable Object content) {
 
 		return Optional.ofNullable(content) //
-				.filter(it -> !RESOURCE_TYPES.contains(content.getClass())) //
+				.filter(it -> !RESOURCE_TYPES.contains(it.getClass())) //
 				.map(it -> new UberData() //
 						.withName(StringUtils.uncapitalize(it.getClass().getSimpleName())) //
 						.withData(extractProperties(it)));

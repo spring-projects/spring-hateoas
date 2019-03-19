@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -95,7 +96,7 @@ public class Links implements Iterable<Link> {
 	 * @param source a comma separated list of {@link Link} representations.
 	 * @return the {@link Links} represented by the given {@link String}.
 	 */
-	public static Links parse(String source) {
+	public static Links parse(@Nullable String source) {
 
 		if (!StringUtils.hasText(source)) {
 			return NONE;
@@ -416,13 +417,13 @@ public class Links implements Iterable<Link> {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object arg0) {
+	public boolean equals(@Nullable Object obj) {
 
-		if (!(arg0 instanceof Links)) {
+		if (!(obj instanceof Links)) {
 			return false;
 		}
 
-		Links that = (Links) arg0;
+		Links that = (Links) obj;
 
 		return this.links.equals(that.links);
 	}

@@ -207,6 +207,9 @@ public class Traverson {
 	 */
 	public class TraversalBuilder {
 
+		private static final String MEDIA_TYPE_HEADER_NOT_FOUND = "Response for request to %s did not expose a content type! Unable to identify links!";
+		private static final String LINK_NOT_FOUND = "Expected to find link with rel '%s' in response %s!";
+
 		private final List<Hop> rels = new ArrayList<>();
 		private Map<String, Object> templateParameters = new HashMap<>();
 		private HttpHeaders headers = new HttpHeaders();
@@ -224,9 +227,9 @@ public class Traverson {
 
 			Assert.notNull(rels, "Rels must not be null!");
 
-			for (String rel : rels) {
-				this.rels.add(Hop.rel(rel));
-			}
+			Arrays.stream(rels) //
+					.map(Hop::rel) //
+					.forEach(this.rels::add);
 
 			return this;
 		}
@@ -327,6 +330,7 @@ public class Traverson {
 			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
 
 			String forObject = operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, String.class).getBody();
+
 			return JsonPath.read(forObject, jsonPath);
 		}
 
@@ -359,7 +363,7 @@ public class Traverson {
 		}
 
 		/**
-		 * Returns the templated {@link Link} found for the last rel in the rels configured to follow.
+		 * Returns the templated {@link Link} found for the last relation in the rels configured to follow.
 		 *
 		 * @return
 		 * @since 0.17
@@ -370,28 +374,28 @@ public class Traverson {
 
 		private Link traverseToLink(boolean expandFinalUrl) {
 
-			Assert.isTrue(this.rels.size() > 0, "At least one rel needs to be provided!");
+			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
 
 			URIAndHeaders expandedFinalUriAndHeaders = traverseToExpandedFinalUrl();
 			UriStringAndHeaders finalUriAndHeaders = traverseToFinalUrl();
 
 			return new Link(expandFinalUrl ? expandedFinalUriAndHeaders.getUri().toString() : finalUriAndHeaders.getUri(),
-					this.rels.get(this.rels.size() - 1).getRel());
+					rels.get(rels.size() - 1).getRel());
 		}
 
 		private UriStringAndHeaders traverseToFinalUrl() {
 
-			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(),
-					HttpHeaders.EMPTY);
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), HttpHeaders.EMPTY);
+
 			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(),
 					uriAndHeaders.getHttpHeaders());
 		}
 
 		private URIAndHeaders traverseToExpandedFinalUrl() {
 
-			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(),
-					HttpHeaders.EMPTY);
-			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(this.templateParameters),
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), HttpHeaders.EMPTY);
+
+			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(templateParameters),
 					uriAndHeaders.getHttpHeaders());
 		}
 
@@ -402,28 +406,28 @@ public class Traverson {
 			}
 
 			HttpEntity<?> request = prepareRequest(mergeHeaders(this.headers, extraHeaders));
-			UriTemplate template = new UriTemplate(uri);
+			URI target = new UriTemplate(uri).expand();
 
-			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(target, GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
+
+			if (contentType == null) {
+				throw new IllegalStateException(String.format(MEDIA_TYPE_HEADER_NOT_FOUND, target));
+			}
+
 			String responseBody = responseEntity.getBody();
 
 			Hop thisHop = rels.next();
 			Rel rel = Rels.getRelFor(thisHop.getRel(), discoverers);
 
-			Link link = rel.findInResponse(responseBody, contentType) //
-					.orElseThrow(() -> new IllegalStateException(
-							String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody)));
+			Link link = rel.findInResponse(responseBody == null ? "" : responseBody, contentType) //
+					.orElseThrow(() -> new IllegalStateException(String.format(LINK_NOT_FOUND, rel, responseBody)));
 
-			/*
-			 * Don't expand if the parameters are empty
-			 */
-			if (!thisHop.hasParameters()) {
-				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getHeaders());
-			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(this.templateParameters)).getHref(), rels,
-						thisHop.getHeaders());
-			}
+			String linkTarget = thisHop.hasParameters() //
+					? link.expand(thisHop.getMergedParameters(templateParameters)).getHref() //
+					: link.getHref();
+
+			return getAndFindLinkWithRel(linkTarget, rels, thisHop.getHeaders());
 		}
 
 		/**

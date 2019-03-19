@@ -28,7 +28,16 @@ import org.springframework.plugin.core.PluginRegistry;
 @RequiredArgsConstructor
 public class DelegatingLinkRelationProvider implements LinkRelationProvider {
 
-	private final @NonNull PluginRegistry<LinkRelationProvider, Class<?>> providers;
+	private final @NonNull PluginRegistry<LinkRelationProvider, LookupContext> providers;
+
+	/**
+	 * Creates a new {@link DefaultLinkRelationProvider} for the given {@link LinkRelationProvider}s.
+	 *
+	 * @param providers must not be {@literal null}.
+	 */
+	public DelegatingLinkRelationProvider(LinkRelationProvider... providers) {
+		this(PluginRegistry.of(providers));
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -36,7 +45,10 @@ public class DelegatingLinkRelationProvider implements LinkRelationProvider {
 	 */
 	@Override
 	public LinkRelation getItemResourceRelFor(Class<?> type) {
-		return providers.getRequiredPluginFor(type).getItemResourceRelFor(type);
+
+		LookupContext context = LookupContext.forItemResourceRelLookup(type);
+
+		return providers.getRequiredPluginFor(context).getItemResourceRelFor(type);
 	}
 
 	/*
@@ -45,7 +57,10 @@ public class DelegatingLinkRelationProvider implements LinkRelationProvider {
 	 */
 	@Override
 	public LinkRelation getCollectionResourceRelFor(java.lang.Class<?> type) {
-		return providers.getRequiredPluginFor(type).getCollectionResourceRelFor(type);
+
+		LookupContext context = LookupContext.forCollectionResourceRelLookup(type);
+
+		return providers.getRequiredPluginFor(context).getCollectionResourceRelFor(type);
 	}
 
 	/*
@@ -53,7 +68,7 @@ public class DelegatingLinkRelationProvider implements LinkRelationProvider {
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(java.lang.Class<?> delimiter) {
+	public boolean supports(LookupContext delimiter) {
 		return providers.hasPluginFor(delimiter);
 	}
 }

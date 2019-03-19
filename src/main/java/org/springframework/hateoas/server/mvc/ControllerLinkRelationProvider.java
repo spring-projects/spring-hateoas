@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.LinkRelationProvider;
@@ -23,21 +23,34 @@ import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 
 /**
- * @author Oliver Gierke
+ * {@link LinkRelationProvider} inspecting {@link ExposesResourceFor} annotations on controller classes.
+ *
+ * @author Oliver Drotbohm
  */
 public class ControllerLinkRelationProvider implements LinkRelationProvider {
 
 	private final Class<?> controllerType;
 	private final Class<?> entityType;
-	private final PluginRegistry<LinkRelationProvider, Class<?>> providers;
+	private final PluginRegistry<LinkRelationProvider, LookupContext> providers;
 
-	public ControllerLinkRelationProvider(Class<?> controller, PluginRegistry<LinkRelationProvider, Class<?>> providers) {
+	/**
+	 * Creates a new {@link ControllerLinkRelationProvider}
+	 *
+	 * @param controller must not be {@literal null}.
+	 * @param providers must not be {@literal null}.
+	 */
+	public ControllerLinkRelationProvider(Class<?> controller,
+			PluginRegistry<LinkRelationProvider, LookupContext> providers) {
 
 		Assert.notNull(controller, "Controller must not be null!");
+		Assert.notNull(providers, "LinkRelationProviders must not be null!");
 
-		ExposesResourceFor annotation = AnnotationUtils.findAnnotation(controller, ExposesResourceFor.class);
+		ExposesResourceFor annotation = AnnotatedElementUtils.findMergedAnnotation(controller, ExposesResourceFor.class);
 
-		Assert.notNull(annotation, "Controller must be annotated with ExposesResourceFor!");
+		if (annotation == null) {
+			throw new IllegalArgumentException(
+					String.format("Controller %s must be annotated with @ExposesResourceFor(…)!", controller.getName()));
+		}
 
 		this.controllerType = controller;
 		this.entityType = annotation.value();
@@ -50,7 +63,10 @@ public class ControllerLinkRelationProvider implements LinkRelationProvider {
 	 */
 	@Override
 	public LinkRelation getItemResourceRelFor(Class<?> resource) {
-		return providers.getRequiredPluginFor(entityType).getItemResourceRelFor(resource);
+
+		LookupContext context = LookupContext.forItemResourceRelLookup(entityType);
+
+		return providers.getRequiredPluginFor(context).getItemResourceRelFor(resource);
 	}
 
 	/*
@@ -59,7 +75,10 @@ public class ControllerLinkRelationProvider implements LinkRelationProvider {
 	 */
 	@Override
 	public LinkRelation getCollectionResourceRelFor(Class<?> resource) {
-		return providers.getRequiredPluginFor(entityType).getCollectionResourceRelFor(resource);
+
+		LookupContext context = LookupContext.forCollectionResourceRelLookup(entityType);
+
+		return providers.getRequiredPluginFor(context).getCollectionResourceRelFor(resource);
 	}
 
 	/*
@@ -67,7 +86,7 @@ public class ControllerLinkRelationProvider implements LinkRelationProvider {
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Class<?> delimiter) {
-		return controllerType.equals(delimiter);
+	public boolean supports(LookupContext context) {
+		return context.handlesType(controllerType);
 	}
 }

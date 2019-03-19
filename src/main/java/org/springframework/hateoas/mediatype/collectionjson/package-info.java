@@ -1,7 +1,5 @@
 /**
  * Value objects to build Collection+JSON representations.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
 package org.springframework.hateoas.mediatype.collectionjson;
-
-import org.springframework.lang.NonNullApi;

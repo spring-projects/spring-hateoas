@@ -60,6 +60,10 @@ class UriComponentsBuilderFactory {
 
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
+		if (requestAttributes == null) {
+			throw new IllegalStateException("Could not look up RequestAttributes!");
+		}
+
 		Assert.state(requestAttributes != null, REQUEST_ATTRIBUTES_MISSING);
 		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
 

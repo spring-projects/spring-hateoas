@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
+ * {@link LinkRelationProvider} that evaluates the {@link Relation} annotation on entity types.
+ *
  * @author Oliver Gierke
  * @author Alexander Baetz
  * @author Greg Turnquist
@@ -38,13 +41,12 @@ public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ord
 	 * @see org.springframework.hateoas.server.LinkRelationProvider#getCollectionResourceRelFor(java.lang.Class)
 	 */
 	@Override
-	@Nullable
 	public LinkRelation getCollectionResourceRelFor(Class<?> type) {
 
 		Relation annotation = lookupAnnotation(type);
 
 		if (annotation == null || Relation.NO_RELATION.equals(annotation.collectionRelation())) {
-			return null;
+			throw new IllegalArgumentException(String.format("No collection relation found for type %s!", type.getName()));
 		}
 
 		return LinkRelation.of(annotation.collectionRelation());
@@ -55,13 +57,14 @@ public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ord
 	 * @see org.springframework.hateoas.server.LinkRelationProvider#getItemResourceRelFor(java.lang.Class)
 	 */
 	@Override
-	@Nullable
 	public LinkRelation getItemResourceRelFor(Class<?> type) {
+
+		Assert.notNull(type, "Type must not be null!");
 
 		Relation annotation = lookupAnnotation(type);
 
 		if (annotation == null || Relation.NO_RELATION.equals(annotation.value())) {
-			return null;
+			throw new IllegalStateException(String.format("Type %s is not supported!", type.getName()));
 		}
 
 		return LinkRelation.of(annotation.value());
@@ -81,12 +84,27 @@ public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ord
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Class<?> delimiter) {
-		return lookupAnnotation(delimiter) != null;
+	public boolean supports(LookupContext context) {
+
+		Relation relation = lookupAnnotation(context.getType());
+
+		if (relation == null) {
+			return false;
+		}
+
+		if (context.isItemRelationLookup()) {
+			return !relation.value().equals(Relation.NO_RELATION);
+		}
+
+		if (context.isCollectionRelationLookup()) {
+			return !relation.collectionRelation().equals(Relation.NO_RELATION);
+		}
+
+		return false;
 	}
 
 	@Nullable
 	private Relation lookupAnnotation(Class<?> type) {
-		return annotationCache.computeIfAbsent(type, key -> AnnotationUtils.getAnnotation(key, Relation.class));
+		return annotationCache.computeIfAbsent(type, key -> AnnotatedElementUtils.getMergedAnnotation(key, Relation.class));
 	}
 }

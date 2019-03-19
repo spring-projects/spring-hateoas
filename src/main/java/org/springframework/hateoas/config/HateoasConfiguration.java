@@ -24,6 +24,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
@@ -83,14 +84,15 @@ class HateoasConfiguration {
 
 	@Primary
 	@Bean
-	DelegatingLinkRelationProvider _relProvider(PluginRegistry<LinkRelationProvider, Class<?>> relProviderPluginRegistry) {
+	DelegatingLinkRelationProvider _relProvider(
+			PluginRegistry<LinkRelationProvider, LookupContext> relProviderPluginRegistry) {
 		return new DelegatingLinkRelationProvider(relProviderPluginRegistry);
 	}
 
 	@Bean
-	PluginRegistryFactoryBean<LinkRelationProvider, Class<?>> relProviderPluginRegistry() {
+	PluginRegistryFactoryBean<LinkRelationProvider, LookupContext> relProviderPluginRegistry() {
 
-		PluginRegistryFactoryBean<LinkRelationProvider, Class<?>> factory = new PluginRegistryFactoryBean<>();
+		PluginRegistryFactoryBean<LinkRelationProvider, LookupContext> factory = new PluginRegistryFactoryBean<>();
 
 		factory.setType(LinkRelationProvider.class);
 		factory.setExclusions(new Class[] { DelegatingLinkRelationProvider.class });

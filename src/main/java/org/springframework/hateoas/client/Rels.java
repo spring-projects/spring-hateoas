@@ -57,11 +57,11 @@ class Rels {
 		/**
 		 * Returns the link contained in the given representation of the given {@link MediaType}.
 		 *
-		 * @param representation
-		 * @param mediaType
+		 * @param representation will never be {@literal null}.
+		 * @param mediaType will never be {@literal null}.
 		 * @return
 		 */
-		Optional<Link> findInResponse(@Nullable String representation, @Nullable MediaType mediaType);
+		Optional<Link> findInResponse(String representation, MediaType mediaType);
 	}
 
 	/**

@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
 /**
  * Strategy interface to discover a URI mapping and related {@link org.springframework.hateoas.Affordance}s for either a
  * given type or method.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -32,7 +32,7 @@ public interface MappingDiscoverer {
 
 	/**
 	 * Returns the mapping associated with the given type.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @return the type-level mapping or {@literal null} in case none is present.
 	 */
@@ -41,16 +41,17 @@ public interface MappingDiscoverer {
 
 	/**
 	 * Returns the mapping associated with the given {@link Method}. This will include the type-level mapping.
-	 * 
+	 *
 	 * @param method must not be {@literal null}.
 	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
 	 */
+	@Nullable
 	String getMapping(Method method);
 
 	/**
 	 * Returns the mapping for the given {@link Method} invoked on the given type. This can be used to calculate the
 	 * mapping for a super type method being invoked on a sub-type with a type mapping.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
@@ -61,7 +62,7 @@ public interface MappingDiscoverer {
 	/**
 	 * Returns the HTTP verbs for the given {@link Method} invoked on the given type. This can be used to build hypermedia
 	 * templates.
-	 * 
+	 *
 	 * @param type
 	 * @param method
 	 * @return

@@ -110,7 +110,6 @@ public class DefaultCurieProvider implements CurieProvider {
 	 * @see org.springframework.hateoas.hal.CurieProvider#getNamespacedRelFrom(org.springframework.hateoas.Link)
 	 */
 	@Override
-	@Nullable
 	public HalLinkRelation getNamespacedRelFrom(Link link) {
 		return getNamespacedRelFor(link.getRel());
 	}
@@ -120,7 +119,6 @@ public class DefaultCurieProvider implements CurieProvider {
 	 * @see org.springframework.hateoas.hal.CurieProvider#getNamespacedRelFrom(java.lang.String)
 	 */
 	@Override
-	@Nullable
 	public HalLinkRelation getNamespacedRelFor(LinkRelation relation) {
 
 		HalLinkRelation result = HalLinkRelation.of(relation);

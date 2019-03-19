@@ -44,6 +44,7 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
 	 */
+	@Nullable
 	@Override
 	public String getMapping(Class<?> type) {
 
@@ -56,6 +57,7 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
 	 */
+	@Nullable
 	@Override
 	public String getMapping(Method method) {
 
@@ -68,6 +70,7 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
 	 */
+	@Nullable
 	@Override
 	public String getMapping(Class<?> type, Method method) {
 

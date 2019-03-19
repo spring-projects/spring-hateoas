@@ -135,7 +135,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @see org.springframework.hateoas.Resources#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 
 		if (this == obj) {
 			return true;
@@ -262,7 +262,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 
 			if (this == obj) {
 				return true;

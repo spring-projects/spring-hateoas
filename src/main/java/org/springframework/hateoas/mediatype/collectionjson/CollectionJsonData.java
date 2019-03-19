@@ -35,16 +35,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 class CollectionJsonData {
 
 	@JsonInclude(Include.NON_NULL) //
-	private String name;
+	private @Nullable String name;
 
 	@JsonInclude(Include.NON_NULL) //
-	private Object value;
+	private @Nullable Object value;
 
 	@JsonInclude(Include.NON_NULL) //
-	private String prompt;
+	private @Nullable String prompt;
 
 	@JsonCreator
-	CollectionJsonData(@JsonProperty("name") @Nullable String name, @JsonProperty("value") @Nullable Object value,
+	CollectionJsonData(@JsonProperty("name") @Nullable String name, //
+			@JsonProperty("value") @Nullable Object value, //
 			@JsonProperty("prompt") @Nullable String prompt) {
 
 		this.name = name;

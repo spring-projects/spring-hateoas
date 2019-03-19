@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.plugin.core.PluginRegistry;
+import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
 
 /**
  * Unit tests for {@link DelegatingLinkRelationProvider}.
@@ -32,22 +32,20 @@ public class DelegatingRelProviderUnitTest {
 	@Test
 	public void foo() {
 
-		PluginRegistry<LinkRelationProvider, Class<?>> registry = PluginRegistry.of(new AnnotationLinkRelationProvider(),
+		LinkRelationProvider delegatingProvider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				new DefaultLinkRelationProvider());
 
-		LinkRelationProvider delegatingProvider = new DelegatingLinkRelationProvider(registry);
-
-		assertThat(delegatingProvider.supports(Sample.class)).isTrue();
+		assertThat(delegatingProvider.supports(LookupContext.forCollectionResourceRelLookup(Sample.class))).isTrue();
+		assertThat(delegatingProvider.supports(LookupContext.forItemResourceRelLookup(Sample.class))).isTrue();
 		assertThat(delegatingProvider.getItemResourceRelFor(Sample.class)).isEqualTo(LinkRelation.of("foo"));
 		assertThat(delegatingProvider.getCollectionResourceRelFor(Sample.class)).isEqualTo(LinkRelation.of("bar"));
 
-		assertThat(delegatingProvider.supports(String.class)).isTrue();
+		assertThat(delegatingProvider.supports(LookupContext.forCollectionResourceRelLookup(String.class))).isTrue();
+		assertThat(delegatingProvider.supports(LookupContext.forItemResourceRelLookup(String.class))).isTrue();
 		assertThat(delegatingProvider.getItemResourceRelFor(String.class)).isEqualTo(LinkRelation.of("string"));
 		assertThat(delegatingProvider.getCollectionResourceRelFor(String.class)).isEqualTo(LinkRelation.of("stringList"));
 	}
 
-	@Relation(value = "foo", collectionRelation = "bar")
-	static class Sample {
-
-	}
+	@Relation(itemRelation = "foo", collectionRelation = "bar")
+	static class Sample {}
 }

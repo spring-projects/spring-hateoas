@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,10 +44,13 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalIntegrationTest;
 import org.springframework.hateoas.mediatype.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
+import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.support.MappingUtils;
 
@@ -56,6 +60,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
@@ -64,12 +69,17 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 			new Link("bar", IanaLinkRelations.PREV) //
 	);
 
+	MessageSource messageSource = mock(MessageSource.class);
+
 	@Before
 	public void setUpModule() {
 
+		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
+				Jackson2HalIntegrationTest.DefaultLinkRelationProvider.INSTANCE);
+
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				new AnnotationLinkRelationProvider(), null, null, true, new HalFormsConfiguration()));
+				provider, CurieProvider.NONE, new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -118,8 +128,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	public void rendersResource() throws Exception {
 
-		EntityModel<SimplePojo> resource = new EntityModel<>(new SimplePojo("test1", 1),
-				new Link("localhost"));
+		EntityModel<SimplePojo> resource = new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost"));
 
 		assertThat(write(resource))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass())));
@@ -128,8 +137,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	public void deserializesResource() throws IOException {
 
-		EntityModel<SimplePojo> expected = new EntityModel<>(new SimplePojo("test1", 1),
-				new Link("localhost"));
+		EntityModel<SimplePojo> expected = new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost"));
 
 		EntityModel<SimplePojo> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass())),
@@ -176,8 +184,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(
-				content);
+		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources))
@@ -190,8 +197,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> expected = new CollectionModel<>(
-				content);
+		CollectionModel<EntityModel<SimplePojo>> expected = new CollectionModel<>(content);
 		expected.add(new Link("localhost"));
 
 		CollectionModel<EntityModel<SimplePojo>> result = mapper.readValue(
@@ -232,8 +238,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = new CollectionModel<>(
-				content);
+		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
 		assertThat(write(resources))
@@ -246,14 +251,13 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> expected = new CollectionModel<>(
-				content);
+		CollectionModel<EntityModel<SimpleAnnotatedPojo>> expected = new CollectionModel<>(content);
 		expected.add(new Link("localhost"));
 
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class, mapper.getTypeFactory()
-						.constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result).isEqualTo(expected);
 	}
@@ -269,8 +273,8 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("annotated-embedded-resources-reference.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class, mapper.getTypeFactory()
-						.constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
+				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result).isEqualTo(setupAnnotatedResources());
 	}
@@ -285,8 +289,8 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	public void deserializesPagedResource() throws Exception {
 		PagedModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("annotated-paged-resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(PagedModel.class, mapper.getTypeFactory()
-						.constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
+				mapper.getTypeFactory().constructParametricType(PagedModel.class,
+						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
@@ -294,8 +298,8 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	public void rendersCuriesCorrectly() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet(),
-				new Link("foo"), new Link("bar", "myrel"));
+		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet(), new Link("foo"),
+				new Link("bar", "myrel"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("curied-document.json", getClass())));
@@ -341,7 +345,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 			}
 		};
 
-		assertThat(getCuriedObjectMapper(provider, null).writeValueAsString(resources))
+		assertThat(getCuriedObjectMapper(provider, messageSource).writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("multiple-curies-document.json", getClass())));
 	}
 
@@ -396,7 +400,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		StaticMessageSource messageSource = new StaticMessageSource();
 		messageSource.addMessage(resourceBundleKey, Locale.US, "Foobar's title!");
 
-		ObjectMapper objectMapper = getCuriedObjectMapper(null, messageSource);
+		ObjectMapper objectMapper = getCuriedObjectMapper(CurieProvider.NONE, messageSource);
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
 		resource.add(new Link("target", "ns:foobar"));
@@ -429,19 +433,19 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
 		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
 
-		return new PagedModel<>(content, new PagedModel.PageMetadata(2, 0, 4),
-				PAGINATION_LINKS);
+		return new PagedModel<>(content, new PagedModel.PageMetadata(2, 0, 4), PAGINATION_LINKS);
 	}
 
-	private static ObjectMapper getCuriedObjectMapper() {
+	private ObjectMapper getCuriedObjectMapper() {
 
 		return getCuriedObjectMapper(new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}")),
-				null);
+				messageSource);
 	}
 
-	private static ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
+	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
 
 		ObjectMapper mapper = new ObjectMapper();
+
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
 				messageSource == null ? null : new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));

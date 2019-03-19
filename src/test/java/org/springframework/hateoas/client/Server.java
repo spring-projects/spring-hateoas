@@ -17,6 +17,7 @@ package org.springframework.hateoas.client;
 
 import static net.jadler.Jadler.*;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,13 +25,16 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.UUID;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
@@ -61,7 +65,8 @@ public class Server implements Closeable {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
+		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
+				new MessageSourceAccessor(mock(MessageSource.class))));
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //

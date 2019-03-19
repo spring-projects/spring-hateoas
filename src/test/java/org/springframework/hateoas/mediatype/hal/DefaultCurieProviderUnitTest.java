@@ -27,9 +27,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
-import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
-import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider.Curie;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -47,6 +44,7 @@ public class DefaultCurieProviderUnitTest {
 
 	CurieProvider provider = new DefaultCurieProvider("acme", URI_TEMPLATE);
 
+	@SuppressWarnings("null")
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsNullCurieName() {
 		new DefaultCurieProvider(null, URI_TEMPLATE);
@@ -57,6 +55,7 @@ public class DefaultCurieProviderUnitTest {
 		new DefaultCurieProvider("", URI_TEMPLATE);
 	}
 
+	@SuppressWarnings("null")
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsNullUriTemplateName() {
 		new DefaultCurieProvider("acme", null);

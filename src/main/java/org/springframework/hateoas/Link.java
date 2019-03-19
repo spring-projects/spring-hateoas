@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -459,18 +458,17 @@ public class Link implements Serializable {
 
 	/**
 	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
-	 * link. Will return {@literal null} if input {@link String} is either empty or {@literal null}.
+	 * link.
 	 *
 	 * @param element an RFC-5899 compatible representation of a link.
-	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
+	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-5899.
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
 	 * @return
 	 */
-	@Nullable
 	public static Link valueOf(String element) {
 
 		if (!StringUtils.hasText(element)) {
-			return null;
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
 		}
 
 		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);

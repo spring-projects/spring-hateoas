@@ -62,7 +62,7 @@ public class DefaultLinkRelationProvider implements LinkRelationProvider, Ordere
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(Class<?> delimiter) {
+	public boolean supports(LookupContext delimiter) {
 		return true;
 	}
 }

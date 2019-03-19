@@ -109,7 +109,7 @@ public class TypeReferences {
 		 * @see org.springframework.core.ParameterizedTypeReference#equals(java.lang.Object)
 		 */
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			return this == obj || obj instanceof SyntheticParameterizedTypeReference
 					&& this.type.equals(((SyntheticParameterizedTypeReference<?>) obj).type);
 		}

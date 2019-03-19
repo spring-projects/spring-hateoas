@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -124,7 +125,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 
 		if (obj == this) {
 			return true;

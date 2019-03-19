@@ -21,17 +21,12 @@ import lombok.Value;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
-import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.lang.Nullable;
-import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -40,9 +35,6 @@ import org.springframework.util.ReflectionUtils;
  * @author Oliver Gierke
  */
 public class DummyInvocationUtils {
-
-	private static final ObjenesisStd OBJENESIS = new ObjenesisStd();
-	private static final Map<Class<?>, Class<?>> CLASS_CACHE = new ConcurrentReferenceHashMap<>(16, ReferenceType.WEAK);
 
 	/**
 	 * Method interceptor that records the last method invocation and creates a proxy for the return value that exposes
@@ -86,6 +78,7 @@ public class DummyInvocationUtils {
 		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		public Object invoke(org.aopalliance.intercept.MethodInvocation invocation) {
 
 			Method method = invocation.getMethod();
@@ -162,30 +155,6 @@ public class DummyInvocationUtils {
 		}
 
 		return (T) factory.getProxy(classLoader);
-	}
-
-	/**
-	 * Returns the already created proxy class for the given source type or creates a new one.
-	 *
-	 * @param type must not be {@literal null}.
-	 * @param classLoader must not be {@literal null}.
-	 * @return
-	 */
-	private static Class<?> getOrCreateEnhancedClass(Class<?> type, ClassLoader classLoader) {
-
-		Assert.notNull(type, "Source type must not be null!");
-		Assert.notNull(classLoader, "ClassLoader must not be null!");
-
-		return CLASS_CACHE.computeIfAbsent(type, key -> {
-
-			Enhancer enhancer = new Enhancer();
-			enhancer.setSuperclass(key);
-			enhancer.setInterfaces(new Class<?>[] { LastInvocationAware.class });
-			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-			enhancer.setClassLoader(classLoader);
-
-			return enhancer.createClass();
-		});
 	}
 
 	@Value

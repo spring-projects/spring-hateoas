@@ -48,6 +48,7 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Trosien
  * @author Greg Turnquist
  */
+@SuppressWarnings("deprecation")
 public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebMvcLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer

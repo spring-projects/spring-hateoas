@@ -65,6 +65,7 @@ public class HalFormsTemplate {
 	private List<HalFormsProperty> properties;
 	private List<MediaType> contentTypes;
 
+	@SuppressWarnings("null")
 	private HalFormsTemplate() {
 		this(null, null, Collections.emptyList(), Collections.emptyList());
 	}
@@ -75,7 +76,7 @@ public class HalFormsTemplate {
 
 	/**
 	 * Returns a new {@link HalFormsTemplate} with the given {@link HalFormsProperty} added.
-	 * 
+	 *
 	 * @param property must not be {@literal null}.
 	 * @return
 	 */
@@ -91,7 +92,7 @@ public class HalFormsTemplate {
 
 	/**
 	 * Returns a new {@link HalFormsTemplate} with the given {@link MediaType} added as content type.
-	 * 
+	 *
 	 * @param mediaType must not be {@literal null}.
 	 * @return
 	 */

@@ -17,6 +17,7 @@ package org.springframework.hateoas.server.mvc;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.server.MethodLinkBuilderFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -24,7 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * SPI callback to enhance a {@link UriComponentsBuilder} when referring to a method through a dummy method invocation.
  * Will usually be implemented in implementations of {@link HandlerMethodArgumentResolver} as they represent exactly the
  * same functionality inverted.
- * 
+ *
  * @see MethodLinkBuilderFactory#linkTo(Object)
  * @author Oliver Gierke
  */
@@ -32,7 +33,7 @@ public interface UriComponentsContributor {
 
 	/**
 	 * Returns whether the {@link UriComponentsBuilder} supports the given {@link MethodParameter}.
-	 * 
+	 *
 	 * @param parameter will never be {@literal null}.
 	 * @return
 	 */
@@ -40,10 +41,10 @@ public interface UriComponentsContributor {
 
 	/**
 	 * Enhance the given {@link UriComponentsBuilder} with the given value.
-	 * 
+	 *
 	 * @param builder will never be {@literal null}.
-	 * @param parameter will never be {@literal null}.
+	 * @param parameter can be {@literal null}.
 	 * @param value can be {@literal null}.
 	 */
-	void enhance(UriComponentsBuilder builder, MethodParameter parameter, Object value);
+	void enhance(UriComponentsBuilder builder, @Nullable MethodParameter parameter, @Nullable Object value);
 }

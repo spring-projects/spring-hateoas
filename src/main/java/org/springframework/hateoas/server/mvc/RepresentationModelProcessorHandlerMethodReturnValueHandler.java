@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -29,6 +30,7 @@ import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -84,8 +86,8 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 	 */
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		Object value = returnValue;
 
@@ -99,8 +101,14 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 			return;
 		}
 
+		Method method = returnType.getMethod();
+
+		if (method == null) {
+			throw new IllegalStateException(String.format("Return type %s does not expose a method!", returnType));
+		}
+
 		// We have a Resource or Resources - find suitable processors
-		ResolvableType targetType = ResolvableType.forMethodReturnType(returnType.getMethod());
+		ResolvableType targetType = ResolvableType.forMethodReturnType(method);
 
 		// Unbox HttpEntity
 		if (HTTP_ENTITY_TYPE.isAssignableFrom(targetType)) {
@@ -127,7 +135,7 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 	 * @param originalValue the original input value.
 	 * @return
 	 */
-	Object rewrapResult(RepresentationModel<?> newBody, Object originalValue) {
+	Object rewrapResult(RepresentationModel<?> newBody, @Nullable Object originalValue) {
 
 		if (!(originalValue instanceof HttpEntity)) {
 			return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(newBody) : newBody;

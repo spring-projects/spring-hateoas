@@ -49,10 +49,10 @@ import com.fasterxml.jackson.databind.JavaType;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class CollectionJsonItem<T> {
 
-	private String href;
+	private @Nullable String href;
 	private List<CollectionJsonData> data;
 	private @JsonInclude(Include.NON_EMPTY) Links links;
-	private @Getter(onMethod = @__({ @JsonIgnore }), value = AccessLevel.PRIVATE) T rawData;
+	private @Nullable @Getter(onMethod = @__({ @JsonIgnore }), value = AccessLevel.PRIVATE) T rawData;
 
 	@JsonCreator
 	CollectionJsonItem(@JsonProperty("href") @Nullable String href, //
@@ -60,7 +60,7 @@ class CollectionJsonItem<T> {
 			@JsonProperty("links") @Nullable Links links) {
 
 		this.href = href;
-		this.data = data;
+		this.data = data == null ? Collections.emptyList() : data;
 		this.links = links == null ? Links.NONE : links;
 		this.rawData = null;
 	}
@@ -81,7 +81,7 @@ class CollectionJsonItem<T> {
 	 */
 	public List<CollectionJsonData> getData() {
 
-		if (this.data != null) {
+		if (!this.data.isEmpty()) {
 			return this.data;
 		}
 
@@ -89,8 +89,10 @@ class CollectionJsonItem<T> {
 			return Collections.singletonList(new CollectionJsonData().withValue(this.rawData));
 		}
 
-		return PropertyUtils.findProperties(this.rawData).entrySet().stream()
-				.map(entry -> new CollectionJsonData().withName(entry.getKey()).withValue(entry.getValue()))
+		return PropertyUtils.findProperties(this.rawData).entrySet().stream() //
+				.map(entry -> new CollectionJsonData() //
+						.withName(entry.getKey()) //
+						.withValue(entry.getValue())) //
 				.collect(Collectors.toList());
 	}
 
@@ -103,7 +105,7 @@ class CollectionJsonItem<T> {
 	@Nullable
 	public Object toRawData(JavaType javaType) {
 
-		if (this.data == null) {
+		if (this.data.isEmpty()) {
 			return null;
 		}
 
@@ -124,6 +126,8 @@ class CollectionJsonItem<T> {
 	}
 
 	public CollectionJsonItem<T> withOwnSelfLink() {
+
+		String href = this.href;
 
 		if (href == null) {
 			return this;

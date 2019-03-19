@@ -32,6 +32,7 @@ import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.lang.NonNull;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -92,6 +93,7 @@ class WebFluxHateoasConfiguration {
 		 * (non-Javadoc)
 		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
 		 */
+		@NonNull
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
@@ -143,5 +145,4 @@ class WebFluxHateoasConfiguration {
 			configurer.registerDefaults(false);
 		}
 	}
-
 }

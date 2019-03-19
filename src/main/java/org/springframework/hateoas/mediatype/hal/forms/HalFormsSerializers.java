@@ -54,8 +54,7 @@ class HalFormsSerializers {
 	/**
 	 * Serializer for {@link CollectionModel}.
 	 */
-	static class HalFormsResourceSerializer extends ContainerSerializer<EntityModel<?>>
-			implements ContextualSerializer {
+	static class HalFormsResourceSerializer extends ContainerSerializer<EntityModel<?>> implements ContextualSerializer {
 
 		private static final long serialVersionUID = -7912243216469101379L;
 
@@ -71,9 +70,13 @@ class HalFormsSerializers {
 			this(null);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 		@Override
-		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider)
-				throws IOException {
+		@SuppressWarnings("null")
+		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			HalFormsDocument<?> doc = HalFormsDocument.forResource(value.getContent()) //
 					.withLinks(value.getLinks()) //
@@ -82,30 +85,53 @@ class HalFormsSerializers {
 			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public boolean hasSingleElement(EntityModel<?> resource) {
 			return false;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer typeSerializer) {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
 			return new HalFormsResourceSerializer(property);
@@ -135,9 +161,13 @@ class HalFormsSerializers {
 			this(null, embeddedMapper);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 		@Override
-		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider)
-				throws IOException {
+		@SuppressWarnings("null")
+		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			Map<HalLinkRelation, Object> embeddeds = embeddedMapper.map(value);
 
@@ -162,30 +192,53 @@ class HalFormsSerializers {
 			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public boolean hasSingleElement(CollectionModel<?> resources) {
 			return resources.getContent().size() == 1;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer typeSerializer) {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
 			return new HalFormsResourcesSerializer(property, embeddedMapper);

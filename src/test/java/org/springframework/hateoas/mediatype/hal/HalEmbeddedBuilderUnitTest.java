@@ -26,10 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.UriTemplate;
-import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
-import org.springframework.hateoas.mediatype.hal.HalEmbeddedBuilder;
-import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
@@ -55,7 +51,7 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersSingleElementsWithSingleEntityRel() {
 
-		Map<HalLinkRelation, Object> map = setUpBuilder(null, "foo", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(CurieProvider.NONE, "foo", 1L);
 
 		assertThat(map.get(uncuried("string"))).isEqualTo("foo");
 		assertThat(map.get(uncuried("long"))).isEqualTo(1L);
@@ -64,7 +60,7 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rendersMultipleElementsWithCollectionResourceRel() {
 
-		Map<HalLinkRelation, Object> map = setUpBuilder(null, "foo", "bar", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(CurieProvider.NONE, "foo", "bar", 1L);
 
 		assertThat(map.containsKey(uncuried("string"))).isFalse();
 		assertThat(map.get(uncuried("long"))).isEqualTo(1L);
@@ -77,7 +73,7 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void correctlyPilesUpResourcesInCollectionRel() {
 
-		Map<HalLinkRelation, Object> map = setUpBuilder(null, "foo", "bar", "foobar", 1L);
+		Map<HalLinkRelation, Object> map = setUpBuilder(CurieProvider.NONE, "foo", "bar", "foobar", 1L);
 
 		assertThat(map.containsKey(uncuried("string"))).isFalse();
 		assertHasValues(map, uncuried("strings"), "foo", "bar", "foobar");
@@ -90,7 +86,7 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void forcesCollectionRelToBeUsedIfConfigured() {
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, null, true);
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, CurieProvider.NONE, true);
 		builder.add("Sample");
 
 		assertThat(builder.asMap().get(uncuried("string"))).isNull();
@@ -105,7 +101,7 @@ public class HalEmbeddedBuilderUnitTest {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
-		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, null, true);
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, CurieProvider.NONE, true);
 		builder.add(wrappers.wrap("MyValue", LinkRelation.of("foo")));
 
 		assertThat(builder.asMap().get(uncuried("foo"))).isInstanceOf(String.class);
@@ -115,8 +111,9 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #195
 	 */
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("null")
 	public void rejectsNullRelProvider() {
-		new HalEmbeddedBuilder(null, null, false);
+		new HalEmbeddedBuilder(null, CurieProvider.NONE, false);
 	}
 
 	/**

@@ -32,6 +32,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkBuilder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -84,7 +85,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilder#slash(java.lang.Object)
 	 */
-	public T slash(Object object) {
+	public T slash(@Nullable Object object) {
 
 		object = object instanceof Optional ? ((Optional<?>) object).orElse(null) : object;
 
@@ -117,7 +118,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 			String fragment = components.getFragment();
 
-			if (StringUtils.hasText(fragment)) {
+			if (fragment != null && !fragment.trim().isEmpty()) {
 				builder.fragment(encoded ? fragment : encodeFragment(fragment));
 			}
 

@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.Wither;
 
@@ -29,6 +28,7 @@ import java.util.Map;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsLinksDeserializer;
@@ -57,12 +57,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonPropertyOrder({ "resource", "resources", "embedded", "links", "templates", "metadata" })
 public class HalFormsDocument<T> {
 
+	@Nullable //
 	@JsonUnwrapped //
 	@JsonInclude(Include.NON_NULL) //
-	@Wither(value = AccessLevel.PRIVATE, onMethod = @__({ @Nullable })) //
 	private T resource;
 
-	@JsonInclude(Include.NON_EMPTY) @JsonIgnore //
+	@Nullable //
+	@JsonInclude(Include.NON_EMPTY) //
+	@JsonIgnore //
 	@Wither(AccessLevel.PRIVATE) //
 	private Collection<T> resources;
 
@@ -70,19 +72,19 @@ public class HalFormsDocument<T> {
 	@JsonInclude(Include.NON_EMPTY) //
 	private Map<HalLinkRelation, Object> embedded;
 
+	@Nullable //
 	@JsonProperty("page") //
 	@JsonInclude(Include.NON_NULL) //
-	@Wither(onMethod = @__({ @Nullable })) //
 	private PagedModel.PageMetadata pageMetadata;
 
-	@Singular //
+	// @Singular //
 	@JsonProperty("_links") //
 	@JsonInclude(Include.NON_EMPTY) //
 	@JsonSerialize(using = HalLinkListSerializer.class) //
 	@JsonDeserialize(using = HalFormsLinksDeserializer.class) //
 	private Links links;
 
-	@Singular //
+	// @Singular //
 	@JsonProperty("_templates") //
 	@JsonInclude(Include.NON_EMPTY) //
 	private Map<String, HalFormsTemplate> templates;
@@ -145,6 +147,14 @@ public class HalFormsDocument<T> {
 		Assert.notNull(key, "Template key must not be null!");
 
 		return this.templates.get(key);
+	}
+
+	public HalFormsDocument<T> withPageMetadata(@Nullable PageMetadata metadata) {
+		return new HalFormsDocument<T>(resource, resources, embedded, metadata, links, templates);
+	}
+
+	private HalFormsDocument<T> withResource(@Nullable T resource) {
+		return new HalFormsDocument<T>(resource, resources, embedded, pageMetadata, links, templates);
 	}
 
 	/**

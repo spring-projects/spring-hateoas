@@ -104,6 +104,7 @@ public class WebHandler {
 
 			for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR
 					.getBoundParameters(invocation)) {
+
 				values.put(parameter.getVariableName(), encodePath(parameter.asString()));
 			}
 
@@ -222,7 +223,7 @@ public class WebHandler {
 		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#createParameter(org.springframework.core.MethodParameter, java.lang.Object, org.springframework.hateoas.core.AnnotationAttribute)
 		 */
 		@Override
-		protected BoundMethodParameter createParameter(final MethodParameter parameter, Object value,
+		protected BoundMethodParameter createParameter(final MethodParameter parameter, @Nullable Object value,
 				AnnotationAttribute attribute) {
 
 			return new BoundMethodParameter(parameter, value, attribute) {
@@ -252,7 +253,7 @@ public class WebHandler {
 		 */
 		@Override
 		@Nullable
-		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
+		protected Object verifyParameterValue(MethodParameter parameter, @Nullable Object value) {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
@@ -334,7 +335,7 @@ public class WebHandler {
 		 * @return the verified value.
 		 */
 		@Nullable
-		protected Object verifyParameterValue(MethodParameter parameter, Object value) {
+		protected Object verifyParameterValue(MethodParameter parameter, @Nullable Object value) {
 			return value;
 		}
 
@@ -414,12 +415,21 @@ public class WebHandler {
 			 *
 			 * @return
 			 */
-			@Nullable
 			public String asString() {
 
-				return value == null //
-						? null //
-						: (String) CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
+				Object value = this.value;
+
+				if (value == null) {
+					throw new IllegalStateException("Cannot turn null value into required String!");
+				}
+
+				Object result = CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
+
+				if (result == null) {
+					throw new IllegalStateException(String.format("Conversion of value %s resulted in null!", value));
+				}
+
+				return (String) result;
 			}
 
 			/**

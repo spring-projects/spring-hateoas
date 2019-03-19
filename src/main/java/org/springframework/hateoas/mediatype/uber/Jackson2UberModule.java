@@ -23,12 +23,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
@@ -139,7 +141,12 @@ public class Jackson2UberModule extends SimpleModule {
 			this(null);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public void serialize(RepresentationModel<?> value, JsonGenerator gen, SerializerProvider provider)
 				throws IOException {
 
@@ -153,30 +160,53 @@ public class Jackson2UberModule extends SimpleModule {
 					.serialize(doc, gen, provider);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public boolean hasSingleElement(RepresentationModel<?> value) {
 			return false;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
 			return new UberRepresentationModelSerializer(property);
@@ -202,7 +232,12 @@ public class Jackson2UberModule extends SimpleModule {
 			this(null);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			UberDocument doc = new UberDocument().withUber(new Uber() //
@@ -214,30 +249,53 @@ public class Jackson2UberModule extends SimpleModule {
 					.serialize(doc, gen, provider);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public boolean hasSingleElement(EntityModel<?> value) {
 			return false;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
 			return new UberEntityModelSerializer(property);
@@ -269,6 +327,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			UberDocument doc = new UberDocument() //
@@ -281,30 +340,53 @@ public class Jackson2UberModule extends SimpleModule {
 					.serialize(doc, gen, provider);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 */
 		@Override
 		@Nullable
 		public JavaType getContentType() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 */
 		@Override
 		@Nullable
 		public JsonSerializer<?> getContentSerializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public boolean hasSingleElement(CollectionModel<?> value) {
 			return value.getContent().size() == 1;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
 			return new UberCollectionModelSerializer(property);
@@ -335,6 +417,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public void serialize(PagedModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			UberDocument doc = new UberDocument() //
@@ -372,6 +455,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public boolean hasSingleElement(PagedModel<?> value) {
 			return value.getContent().size() == 1;
 		}
@@ -382,6 +466,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 */
 		@Override
 		@Nullable
+		@SuppressWarnings("null")
 		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
@@ -391,6 +476,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) {
 			return new UberPagedModelSerializer(property);
 		}
@@ -420,6 +506,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public RepresentationModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
@@ -467,15 +554,13 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			if (property != null) {
-				JavaType vc = property.getType().getContentType();
-				return new UberRepresentationModelDeserializer(vc);
-			} else {
-				return new UberRepresentationModelDeserializer(ctxt.getContextualType());
-			}
+			JavaType type = property == null ? ctxt.getContextualType() : property.getType().getContentType();
+
+			return new UberRepresentationModelDeserializer(type);
 		}
 
 		/**
@@ -508,7 +593,12 @@ public class Jackson2UberModule extends SimpleModule {
 			this.contentType = contentType;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public EntityModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
@@ -527,20 +617,24 @@ public class Jackson2UberModule extends SimpleModule {
 
 			// Primitive type
 			List<UberData> data = uberData.getData();
+
+			if (data == null) {
+				throw new IllegalStateException();
+			}
+
 			if (isPrimitiveType(data)) {
-				Object scalarValue = data.get(0).getValue();
+
+				UberData firstItem = data.get(0);
+
+				Object scalarValue = firstItem.getValue();
 				return new EntityModel<>(scalarValue, links);
 			}
 
-			Map<String, Object> properties;
-			if (data == null) {
-				properties = new HashMap<>();
-			} else {
-				properties = data.stream().collect(Collectors.toMap(UberData::getName, UberData::getValue));
-			}
+			Map<String, Object> properties = data == null //
+					? new HashMap<>() //
+					: data.stream().collect(Collectors.toMap(UberData::getName, UberData::getValue));
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
-
 			Object value = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
 			return new EntityModel<>(value, links);
@@ -560,15 +654,13 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			if (property != null) {
-				JavaType vc = property.getType().getContentType();
-				return new UberEntityModelDeserializer(vc);
-			} else {
-				return new UberEntityModelDeserializer(ctxt.getContextualType());
-			}
+			JavaType type = property == null ? ctxt.getContextualType() : property.getType().getContentType();
+
+			return new UberEntityModelDeserializer(type);
 		}
 
 		/**
@@ -606,10 +698,10 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public CollectionModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
-
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
 
 			return extractResources(doc, rootType, this.contentType);
@@ -623,16 +715,18 @@ public class Jackson2UberModule extends SimpleModule {
 			return this.contentType;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			if (property != null) {
-				JavaType vc = property.getType().getContentType();
-				return new UberCollectionModelDeserializer(vc);
-			} else {
-				return new UberCollectionModelDeserializer(ctxt.getContextualType());
-			}
+			JavaType type = property == null ? ctxt.getContextualType() : property.getType().getContentType();
+
+			return new UberCollectionModelDeserializer(type);
 		}
 
 		/**
@@ -670,6 +764,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public PagedModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
@@ -690,16 +785,18 @@ public class Jackson2UberModule extends SimpleModule {
 			return this.contentType;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			if (property != null) {
-				JavaType vc = property.getType().getContentType();
-				return new UberPagedModelDeserializer(vc);
-			} else {
-				return new UberPagedModelDeserializer(ctxt.getContextualType());
-			}
+			JavaType type = property == null ? ctxt.getContextualType() : property.getType().getContentType();
+
+			return new UberPagedModelDeserializer(type);
 		}
 
 		/**
@@ -726,55 +823,65 @@ public class Jackson2UberModule extends SimpleModule {
 
 		for (UberData uberData : doc.getUber().getData()) {
 
-			if (uberData.getName() != null && uberData.getName().equals("page")) {
+			String name = uberData.getName();
+
+			if (name != null && name.equals("page")) {
 				continue;
 			}
 
-			if (uberData.getLinks().isEmpty()) {
+			if (!uberData.getLinks().isEmpty()) {
+				continue;
+			}
 
-				List<Link> resourceLinks = new ArrayList<>();
-				EntityModel<?> resource = null;
+			List<Link> resourceLinks = new ArrayList<>();
+			EntityModel<?> resource = null;
 
-				List<UberData> data = uberData.getData();
-				if (data == null) {
-					throw new RuntimeException("No content!");
-				}
+			List<UberData> data = uberData.getData();
 
-				for (UberData item : data) {
+			if (data == null) {
+				throw new RuntimeException("No content!");
+			}
 
-					if (item.getRel() != null) {
-						item.getRel().forEach(rel -> resourceLinks.add(new Link(item.getUrl(), rel)));
+			for (UberData item : data) {
+
+				List<LinkRelation> rel = item.getRel();
+
+				if (rel != null) {
+					item.getLinks().forEach(resourceLinks::add);
+				} else {
+
+					// Primitive type
+					List<UberData> itemData = item.getData();
+
+					if (isPrimitiveType(itemData)) {
+
+						if (itemData == null) {
+							throw new IllegalStateException();
+						}
+
+						UberData firstItem = itemData.get(0);
+						Object scalarValue = firstItem.getValue();
+						resource = new EntityModel<>(scalarValue, uberData.getLinks());
+
 					} else {
 
-						// Primitive type
-						List<UberData> itemData = item.getData();
-						if (isPrimitiveType(itemData)) {
-
-							Object scalarValue = itemData.get(0).getValue();
-							resource = new EntityModel<>(scalarValue, uberData.getLinks());
-						} else {
-
-							Map<String, Object> properties;
-							if (itemData == null) {
-								properties = new HashMap<>();
-							} else {
-								properties = itemData.stream() //
+						Map<String, Object> properties = itemData == null //
+								? new HashMap<>() //
+								: itemData.stream() //
 										.collect(Collectors.toMap(UberData::getName, UberData::getValue));
-							}
 
-							Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
-							resource = new EntityModel<>(obj, uberData.getLinks());
-						}
+						Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
+						resource = new EntityModel<>(obj, uberData.getLinks());
 					}
 				}
+			}
 
-				if (resource != null) {
+			if (resource != null) {
 
-					resource.add(resourceLinks);
-					content.add(resource);
-				} else {
-					throw new RuntimeException("No content!");
-				}
+				resource.add(resourceLinks);
+				content.add(resource);
+			} else {
+				throw new RuntimeException("No content!");
 			}
 		}
 
@@ -803,12 +910,12 @@ public class Jackson2UberModule extends SimpleModule {
 	private static PageMetadata extractPagingMetadata(UberDocument doc) {
 
 		return doc.getUber().getData().stream() //
-				.filter(uberData -> uberData.getName() != null && uberData.getName().equals("page")) //
+				.filter(uberData -> Optional.ofNullable(uberData.getName()).map("page"::equals).orElse(false)) //
 				.findFirst().map(Jackson2UberModule::convertUberDataToPageMetaData) //
 				.orElse(null);
 	}
 
-	@NotNull
+	@SuppressWarnings("null")
 	private static PageMetadata convertUberDataToPageMetaData(UberData uberData) {
 
 		int size = 0;
@@ -817,26 +924,30 @@ public class Jackson2UberModule extends SimpleModule {
 		int totalPages = 0;
 
 		List<UberData> content = uberData.getData();
+
 		if (content != null) {
+
 			for (UberData data : content) {
 
 				String name = data.getName();
+				Object value = data.getValue();
+
 				switch (name) {
 
 					case "size":
-						size = (int) data.getValue();
+						size = (int) value;
 						break;
 
 					case "number":
-						number = (int) data.getValue();
+						number = (int) value;
 						break;
 
 					case "totalElements":
-						totalElements = (int) data.getValue();
+						totalElements = (int) value;
 						break;
 
 					case "totalPages":
-						totalPages = (int) data.getValue();
+						totalPages = (int) value;
 						break;
 
 					default:
@@ -863,6 +974,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public UberAction deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 			return UberAction.valueOf(p.getText().toUpperCase());
 		}

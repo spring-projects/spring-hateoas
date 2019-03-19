@@ -45,7 +45,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 
 	private static final String RELATION_MESSAGE_TEMPLATE = "_links.%s.title";
 
-	private final String curie;
+	private final @Nullable String curie;
 	private final @NonNull @Getter String localPart;
 
 	/**
@@ -54,7 +54,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	 * @param relation must not be {@literal null}.
 	 * @return
 	 */
-	public static HalLinkRelation of(@Nullable LinkRelation relation) {
+	public static HalLinkRelation of(LinkRelation relation) {
 
 		Assert.notNull(relation, "LinkRelation must not be null!");
 
@@ -166,6 +166,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	 * @see org.springframework.context.MessageSourceResolvable#getCodes()
 	 */
 	@Override
+	@org.springframework.lang.NonNull
 	public String[] getCodes() {
 
 		return Stream.of(value(), localPart) //

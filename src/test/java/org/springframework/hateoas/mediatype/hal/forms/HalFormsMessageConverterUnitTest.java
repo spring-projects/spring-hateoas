@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,14 +29,14 @@ import java.io.OutputStream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsDocument;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsProperty;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsTemplate;
-import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule;
+import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -59,6 +60,9 @@ public class HalFormsMessageConverterUnitTest {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalFormsModule());
+		this.mapper.setHandlerInstantiator(
+				new Jackson2HalFormsModule.HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
+						new MessageSourceAccessor(mock(MessageSource.class)), true, new HalFormsConfiguration()));
 
 		TypeConstrainedMappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);

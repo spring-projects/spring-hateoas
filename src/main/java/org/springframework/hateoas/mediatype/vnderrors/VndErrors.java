@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -138,7 +139,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 
 		if (this == obj) {
 			return true;
@@ -235,7 +236,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
 		 */
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 
 			if (obj == this) {
 				return true;

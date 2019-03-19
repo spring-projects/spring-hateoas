@@ -85,7 +85,8 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(), messageSourceAccessor, halConfiguration.getIfAvailable(HalConfiguration::new)));
+				curieProvider.getIfAvailable(() -> CurieProvider.NONE), messageSourceAccessor,
+				halConfiguration.getIfAvailable(HalConfiguration::new)));
 
 		return mapper;
 	}

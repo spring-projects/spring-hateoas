@@ -27,6 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -74,6 +75,7 @@ public class Affordance {
 	 * @param mediaType
 	 * @return
 	 */
+	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
 		return (T) this.affordanceModels.get(mediaType);

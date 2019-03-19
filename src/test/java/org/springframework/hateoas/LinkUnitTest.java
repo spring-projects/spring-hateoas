@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
 
 /**
  * Unit tests for {@link Link}.
@@ -59,11 +58,13 @@ public class LinkUnitTest {
 		});
 	}
 
+	@SuppressWarnings("null")
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullHref() {
 		new Link(null);
 	}
 
+	@SuppressWarnings("null")
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullRel() {
 		new Link("foo", (String) null);
@@ -109,16 +110,6 @@ public class LinkUnitTest {
 	@Test
 	public void differentTypeDoesNotEqual() {
 		assertThat(new Link("foo")).isNotEqualTo(new RepresentationModel<>());
-	}
-
-	@Test
-	public void returnsNullForNullOrEmptyLink() {
-
-		assertSoftly(softly -> {
-
-			softly.assertThat(Link.valueOf(null)).isNull();
-			softly.assertThat(Link.valueOf("")).isNull();
-		});
 	}
 
 	/**

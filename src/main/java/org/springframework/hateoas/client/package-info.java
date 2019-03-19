@@ -1,7 +1,5 @@
 /**
  * Client side support.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
 package org.springframework.hateoas.client;
-
-import org.springframework.lang.NonNullApi;

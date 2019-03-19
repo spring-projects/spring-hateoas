@@ -19,10 +19,11 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 
 import com.fasterxml.jackson.databind.Module;
 
@@ -53,6 +54,7 @@ class CollectionJsonMediaTypeConfiguration implements HypermediaMappingInformati
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getJacksonModule()
 	 */
+	@NonNull
 	@Override
 	public Module getJacksonModule() {
 		return new Jackson2CollectionJsonModule();

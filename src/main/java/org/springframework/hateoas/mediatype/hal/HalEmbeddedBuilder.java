@@ -39,7 +39,6 @@ import org.springframework.util.Assert;
  */
 class HalEmbeddedBuilder {
 
-	private static final HalLinkRelation DEFAULT_REL = HalLinkRelation.uncuried("content");
 	private static final String INVALID_EMBEDDED_WRAPPER = "Embedded wrapper %s returned null for both the static rel and the rel target type! Make sure one of the two returns a non-null value!";
 
 	private final Map<HalLinkRelation, Object> embeddeds = new HashMap<>();
@@ -51,12 +50,13 @@ class HalEmbeddedBuilder {
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels
 	 * flag.
 	 *
-	 * @param provider can be {@literal null}.
+	 * @param provider must not be {@literal null}.
+	 * @param curieProvider must not be {@literal null}.
 	 * @param preferCollectionRels whether to prefer to ask the provider for collection rels.
 	 */
 	public HalEmbeddedBuilder(LinkRelationProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
-		Assert.notNull(provider, "Relprovider must not be null!");
+		Assert.notNull(provider, "LinkRelationProvider must not be null!");
 
 		this.provider = provider;
 		this.curieProvider = curieProvider;
@@ -69,7 +69,7 @@ class HalEmbeddedBuilder {
 	 *
 	 * @param source can be {@literal null}.
 	 */
-	public void add(Object source) {
+	public void add(@Nullable Object source) {
 
 		EmbeddedWrapper wrapper = wrappers.wrap(source);
 
@@ -114,10 +114,6 @@ class HalEmbeddedBuilder {
 				.map(HalLinkRelation::of) //
 				.orElseGet(() -> {
 
-					if (provider == null) {
-						return DEFAULT_REL;
-					}
-
 					Class<?> type = wrapper.getRelTargetType();
 
 					if (type == null) {
@@ -128,12 +124,9 @@ class HalEmbeddedBuilder {
 							? provider.getCollectionResourceRelFor(type) //
 							: provider.getItemResourceRelFor(type);
 
-					if (curieProvider != null) {
-						rel = curieProvider.getNamespacedRelFor(rel);
-					}
-
-					return rel == null ? DEFAULT_REL : HalLinkRelation.of(rel);
-
+					return curieProvider != CurieProvider.NONE //
+							? curieProvider.getNamespacedRelFor(rel) //
+							: HalLinkRelation.of(rel);
 				});
 	}
 

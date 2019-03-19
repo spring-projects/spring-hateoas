@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.hateoas.EntityModel;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 
 /**
  * Annotation to configure the relation to be used when embedding objects in HAL representations of {@link EntityModel}s
  * and {@link CollectionModel}.
- * 
+ *
  * @author Alexander Baetz
  * @author Oliver Gierke
  */
@@ -37,15 +38,24 @@ public @interface Relation {
 	String NO_RELATION = "";
 
 	/**
-	 * Defines the relation to be used when referring to a single resource.
-	 * 
+	 * Defines the relation to be used when referring to a single resource. Alias for {@link #itemRelation()}.
+	 *
 	 * @return
 	 */
+	@AliasFor("itemRelation")
 	String value() default NO_RELATION;
 
 	/**
+	 * Defines the relation to be used when referring to a single resource. Alias of {@link #value()}.
+	 *
+	 * @return
+	 */
+	@AliasFor("value")
+	String itemRelation() default NO_RELATION;
+
+	/**
 	 * Defines the relation to be used when referring to a collection of resources.
-	 * 
+	 *
 	 * @return
 	 */
 	String collectionRelation() default NO_RELATION;

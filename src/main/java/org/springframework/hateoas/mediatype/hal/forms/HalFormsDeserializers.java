@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Collection of components needed to deserialize a HAL-FORMS document.
- * 
+ *
  * @author Greg Turnquist
  */
 class HalFormsDeserializers {
@@ -58,7 +58,12 @@ class HalFormsDeserializers {
 			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class));
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			List<Object> result = new ArrayList<>();
@@ -86,18 +91,31 @@ class HalFormsDeserializers {
 			return result;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 */
 		@Override
 		public JavaType getContentType() {
 			return this.contentType;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 */
 		@Override
 		@Nullable
 		public JsonDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 */
 		@Override
+		@SuppressWarnings("null")
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
@@ -142,6 +160,7 @@ class HalFormsDeserializers {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public List<MediaType> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 			return MediaType.parseMediaTypes(p.getText());
 		}

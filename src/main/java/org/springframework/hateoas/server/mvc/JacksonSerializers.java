@@ -50,6 +50,7 @@ public class JacksonSerializers {
 		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
+		@SuppressWarnings("null")
 		public MediaType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 			return MediaType.parseMediaType(p.getText());
 		}

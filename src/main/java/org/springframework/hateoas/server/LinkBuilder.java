@@ -20,21 +20,23 @@ import java.net.URI;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.lang.Nullable;
 
 /**
  * Builder to ease building {@link Link} instances.
  *
  * @author Ricardo Gladwell
+ * @author Oliver Drotbohm
  */
 public interface LinkBuilder {
 
 	/**
 	 * Adds the given object's {@link String} representation as sub-resource to the current URI.
 	 *
-	 * @param object
+	 * @param object can be {@literal null}.
 	 * @return
 	 */
-	LinkBuilder slash(Object object);
+	LinkBuilder slash(@Nullable Object object);
 
 	/**
 	 * Creates a URI of the link built by the current builder instance.

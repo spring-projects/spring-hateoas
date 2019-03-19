@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 package org.springframework.hateoas.mediatype;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
@@ -31,8 +34,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -46,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class PropertyUtils {
 
@@ -67,43 +69,45 @@ public class PropertyUtils {
 		}
 
 		return getPropertyDescriptors(object.getClass()) //
-				.collect(HashMap::new, //
-						(hashMap, descriptor) -> {
-							try {
-								Method readMethod = descriptor.getReadMethod();
-								ReflectionUtils.makeAccessible(readMethod);
-								hashMap.put(descriptor.getName(), readMethod.invoke(object));
-							} catch (IllegalAccessException | InvocationTargetException e) {
-								throw new RuntimeException(e);
-							}
-						}, //
-						HashMap::putAll);
+				.collect(HashMap::new, (hashMap, descriptor) -> {
+
+					try {
+
+						Method readMethod = descriptor.getReadMethod();
+						ReflectionUtils.makeAccessible(readMethod);
+						hashMap.put(descriptor.getName(), readMethod.invoke(object));
+
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						throw new RuntimeException(e);
+					}
+
+				}, HashMap::putAll);
 	}
 
 	public static List<String> findPropertyNames(ResolvableType resolvableType) {
 
+		Class<?> type = resolvableType.getRawClass();
+
 		if (WebStack.WEBFLUX.isAvailable()) {
-			if (Mono.class.equals(resolvableType.getRawClass()) || Flux.class.equals(resolvableType.getRawClass())) {
+			if (Mono.class.equals(type) || Flux.class.equals(type)) {
 				ResolvableType generic = resolvableType.getGeneric(0);
 				return findPropertyNames(generic);
 			}
 		}
 
-		if (resolvableType.getRawClass() == null) {
+		if (type == null) {
 			return Collections.emptyList();
 		}
 
-		if (resolvableType.getRawClass().equals(EntityModel.class)) {
-			Class<?> genericEntityModelParameter = resolvableType.resolveGeneric(0);
-
-			if (genericEntityModelParameter == null) {
-				return Collections.emptyList();
-			}
-
-			return findPropertyNames(genericEntityModelParameter);
-		} else {
-			return findPropertyNames(resolvableType.getRawClass());
+		if (!type.equals(EntityModel.class)) {
+			return findPropertyNames(type);
 		}
+
+		Class<?> genericEntityModelParameter = resolvableType.resolveGeneric(0);
+
+		return genericEntityModelParameter == null //
+				? Collections.emptyList() //
+				: findPropertyNames(genericEntityModelParameter);
 	}
 
 	public static List<String> findPropertyNames(Class<?> clazz) {
@@ -118,16 +122,19 @@ public class PropertyUtils {
 		T obj = BeanUtils.instantiateClass(clazz);
 
 		properties.forEach((key, value) -> {
-			Optional<PropertyDescriptor> possibleProperty = Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, key));
-			possibleProperty.ifPresent(property -> {
-				try {
-					Method writeMethod = property.getWriteMethod();
-					ReflectionUtils.makeAccessible(writeMethod);
-					writeMethod.invoke(obj, value);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
-			});
+			Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, key)) //
+					.ifPresent(property -> {
+						try {
+
+							Method writeMethod = property.getWriteMethod();
+							ReflectionUtils.makeAccessible(writeMethod);
+							writeMethod.invoke(obj, value);
+
+						} catch (IllegalAccessException | InvocationTargetException e) {
+
+							throw new RuntimeException(e);
+						}
+					});
 		});
 
 		return obj;
@@ -135,7 +142,7 @@ public class PropertyUtils {
 
 	/**
 	 * Take a {@link Class} and find all properties that are NOT to be ignored, and return them as a {@link Stream}.
-	 * 
+	 *
 	 * @param clazz
 	 * @return
 	 */
@@ -159,16 +166,14 @@ public class PropertyUtils {
 
 		Field descriptorField = ReflectionUtils.findField(clazz, descriptor.getName());
 
-		if (descriptorField == null) {
-			return false;
-		}
-
-		return toBeIgnoredByJackson(AnnotationUtils.getAnnotations(descriptorField));
+		return descriptorField == null //
+				? false //
+				: toBeIgnoredByJackson(AnnotationUtils.getAnnotations(descriptorField));
 	}
 
 	/**
 	 * Check if a given {@link PropertyDescriptor} has {@link JsonIgnore} on the getter.
-	 * 
+	 *
 	 * @param descriptor
 	 * @return
 	 */
@@ -178,26 +183,24 @@ public class PropertyUtils {
 
 	/**
 	 * Scan a list of {@link Annotation}s for {@link JsonIgnore} annotations.
-	 * 
+	 *
 	 * @param annotations
 	 * @return
 	 */
 	private static boolean toBeIgnoredByJackson(@Nullable Annotation[] annotations) {
 
-		if (annotations == null) {
-			return false;
-		}
-
-		return Arrays.stream(annotations) //
-				.filter(annotation -> annotation.annotationType().equals(JsonIgnore.class)) //
-				.findFirst() //
-				.map(annotation -> (Boolean) AnnotationUtils.getAnnotationAttributes(annotation).get("value")) //
-				.orElse(false);
+		return annotations == null //
+				? false
+				: Arrays.stream(annotations) //
+						.filter(annotation -> annotation.annotationType().equals(JsonIgnore.class)) //
+						.findFirst() //
+						.map(annotation -> (Boolean) AnnotationUtils.getAnnotationAttributes(annotation).get("value")) //
+						.orElse(false);
 	}
 
 	/**
 	 * Check if a field name is to be ignored due to {@link JsonIgnoreProperties}.
-	 * 
+	 *
 	 * @param clazz
 	 * @param field
 	 * @return
@@ -206,15 +209,12 @@ public class PropertyUtils {
 
 		Annotation[] annotations = AnnotationUtils.getAnnotations(clazz);
 
-		if (annotations == null) {
-			return false;
-		}
-
-		return Arrays.stream(annotations) //
-				.filter(annotation -> annotation.annotationType().equals(JsonIgnoreProperties.class)) //
-				.map(annotation -> (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value")) //
-				.flatMap(Arrays::stream) //
-				.anyMatch(propertyName -> propertyName.equalsIgnoreCase(field));
+		return annotations == null //
+				? false //
+				: Arrays.stream(annotations) //
+						.filter(annotation -> annotation.annotationType().equals(JsonIgnoreProperties.class)) //
+						.map(annotation -> (String[]) AnnotationUtils.getAnnotationAttributes(annotation).get("value")) //
+						.flatMap(Arrays::stream) //
+						.anyMatch(propertyName -> propertyName.equalsIgnoreCase(field));
 	}
-
 }

@@ -20,8 +20,9 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -186,6 +187,7 @@ public class EmbeddedWrappers {
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.hal.EmbeddedWrapper#getValue()
 		 */
+		@NonNull
 		@Override
 		public Object getValue() {
 			return value;
@@ -195,6 +197,7 @@ public class EmbeddedWrappers {
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.EmbeddedWrappers.AbstractElementWrapper#peek()
 		 */
+		@NonNull
 		@Override
 		protected Object peek() {
 			return getValue();
@@ -283,6 +286,7 @@ public class EmbeddedWrappers {
 		public EmptyCollectionEmbeddedWrapper(Class<?> type) {
 
 			Assert.notNull(type, "Element type must not be null!");
+
 			this.type = type;
 		}
 
@@ -308,6 +312,7 @@ public class EmbeddedWrappers {
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.core.EmbeddedWrapper#getRelTargetType()
 		 */
+		@NonNull
 		@Override
 		public Class<?> getRelTargetType() {
 			return type;

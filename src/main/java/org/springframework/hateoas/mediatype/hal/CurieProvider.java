@@ -20,7 +20,6 @@ import java.util.Collection;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
-import org.springframework.lang.Nullable;
 
 /**
  * API to provide HAL curie information for links.
@@ -31,6 +30,24 @@ import org.springframework.lang.Nullable;
  * @since 0.9
  */
 public interface CurieProvider {
+
+	public static CurieProvider NONE = new CurieProvider() {
+
+		@Override
+		public HalLinkRelation getNamespacedRelFrom(Link link) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public HalLinkRelation getNamespacedRelFor(LinkRelation rel) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Collection<? extends Object> getCurieInformation(Links links) {
+			throw new UnsupportedOperationException();
+		}
+	};
 
 	/**
 	 * Returns the rel to be rendered for the given {@link Link}. Will potentially prefix the rel but also might decide
@@ -49,7 +66,6 @@ public interface CurieProvider {
 	 * @return
 	 * @since 0.17
 	 */
-	@Nullable
 	HalLinkRelation getNamespacedRelFor(LinkRelation rel);
 
 	/**

@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.client;
 
+import net.minidev.json.JSONArray;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -25,11 +27,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import net.minidev.json.JSONArray;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 import com.jayway.jsonpath.InvalidPathException;
@@ -124,7 +126,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
 	@Override
-	public boolean supports(MediaType delimiter) {
+	public boolean supports(@NonNull MediaType delimiter) {
 
 		return this.mediaTypes.stream() //
 				.anyMatch(mediaType -> mediaType.isCompatibleWith(delimiter));
