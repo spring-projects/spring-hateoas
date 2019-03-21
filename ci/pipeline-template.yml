@@ -387,36 +387,36 @@ jobs:
       path: spring-hateoas-github
       status: pending
   - aggregate:
-    - task: test (JDK 8)
+    - task: test-jdk8
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
-    - task: test (JDK 8 and Spring 5.1 snapshots)
+    - task: test-jdk8-spring51-next
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci,spring51-next" }
-    - task: test (JDK 8 and Spring 5.2 snapshots)
+    - task: test-jdk8-spring52-next
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci,spring52-next" }
-    - task: test (JDK 11)
+    - task: test-jdk11
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
-    - task: test (JDK 11 and Spring 5.1 snapshots)
+    - task: test-jdk11-spring51-next
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci,spring51-next" }
-    - task: test (JDK 11 and Spring 5.2 snapshots)
+    - task: test-jdk11-spring52-next
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci,spring52-next" }
-    - task: test (JDK 13)
+    - task: test-jdk13
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
-    - task: test (JDK 13 and Spring 5.1 snapshots)
+    - task: test-jdk13-spring51-next
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci,spring51-next" }
-    - task: test (JDK 13 and Spring 5.2 snapshots)
+    - task: test-jdk13-spring52-next
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci,spring52-next" }
@@ -701,36 +701,36 @@ jobs:
       path: spring-hateoas-examples-github
       status: pending
   - aggregate:
-    - task: test (JDK 8)
+    - task: test-jdk8
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "non-existent" }
-    - task: test (JDK 8 and Spring 5.1 snapshots)
+    - task: test-jdk8-spring51-next
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "spring51-next" }
-    - task: test (JDK 8 and Spring 5.2 snapshots)
+    - task: test-jdk8-spring52-next
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "spring52-next" }
-    - task: test (JDK 11)
+    - task: test-jdk11
       image: openjdk:11-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "non-existent" }
-    - task: test (JDK 11 and Spring 5.1 snapshots)
+    - task: test-jdk11-spring51-next
       image: openjdk:11-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "spring51-next" }
-    - task: test (JDK 11 and Spring 5.2 snapshots)
+    - task: test-jdk11-spring52-next
       image: openjdk:11-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "spring52-next" }
-    - task: test (JDK 13)
+    - task: test-jdk13
       image: openjdk:13-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "non-existent" }
-    - task: test (JDK 13 and Spring 5.1 snapshots)
+    - task: test-jdk13-spring51-next
       image: openjdk:13-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "spring51-next" }
-    - task: test (JDK 13 and Spring 5.2 snapshots)
+    - task: test-jdk13-spring52-next
       image: openjdk:13-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "spring52-next" }
