@@ -95,7 +95,7 @@ extensively to avoid surprises.
 [[mediatypes.hal.curie-provider]]
 === [[spis.curie-provider]] Using the `CurieProvider` API
 
-The http://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the http://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension `rel` URIs can be used by applications that do not wish to register a relation type. Each one is a URI that uniquely identifies the relation type. The `rel` URI can be serialized as a compact URI or http://www.w3.org/TR/curie[Curie]. For example, a curie of `ex:persons` stands for the link relation type `http://example.com/rels/persons` if `ex` is defined as `http://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
+The https://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the https://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension `rel` URIs can be used by applications that do not wish to register a relation type. Each one is a URI that uniquely identifies the relation type. The `rel` URI can be serialized as a compact URI or https://www.w3.org/TR/curie[Curie]. For example, a curie of `ex:persons` stands for the link relation type `https://example.com/rels/persons` if `ex` is defined as `https://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
 
 The `rel` values created by the default `RelProvider` are extension relation types and, as a result, must be URIs, which can cause a lot of overhead. The `CurieProvider` API takes care of that: It lets you define a base URI as a URI template and a prefix that stands for that base URI. If a `CurieProvider` is present, the `RelProvider` prepends all `rel` values with the curie prefix. Furthermore a `curies` link is automatically added to the HAL resource.
 
@@ -111,7 +111,7 @@ public class Config {
 
   @Bean
   public CurieProvider curieProvider() {
-    return new DefaultCurieProvider("ex", new UriTemplate("http://www.example.com/rels/{rel}"));
+    return new DefaultCurieProvider("ex", new UriTemplate("https://www.example.com/rels/{rel}"));
   }
 }
 ----
@@ -230,7 +230,7 @@ Spring HATEOAS more specifically will:
 [[mediatypes.uber]]
 == UBER - Uniform Basis for Exchanging Representations
 
-http://uberhypermedia.org/[UBER, window="_blank"] is an experimental JSON spec
+https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html[UBER, window="_blank"] is an experimental JSON spec
 
 [quote, Mike Amundsen, UBER spec]
 ____

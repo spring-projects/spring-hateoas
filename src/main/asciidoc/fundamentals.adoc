@@ -145,7 +145,7 @@ The model type can now be used like this:
 PersonModel model = new PersonModel();
 model.firstname = "Dave";
 model.lastname = "Matthews";
-model.add(new Link("http://myhost/people/42"));
+model.add(new Link("https://myhost/people/42"));
 ----
 ====
 
@@ -158,7 +158,7 @@ If you returned such an instance from a Spring MVC or WebFlux controller and the
 {
   "_links" : {
     "self" : {
-      "href" : "http://myhost/people/42"
+      "href" : "https://myhost/people/42"
     }
   },
   "firstname" : "Dave",

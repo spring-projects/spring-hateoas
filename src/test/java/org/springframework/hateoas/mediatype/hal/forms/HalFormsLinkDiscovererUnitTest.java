@@ -42,7 +42,7 @@ public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 */
 	@Test
 	public void discoversFullyQualifiedRel() {
-		assertThat(getDiscoverer().findLinkWithRel("http://foo.com/bar", getInputString())).isNotNull();
+		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", getInputString())).isNotNull();
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 				+ "media=\"pdf\";" //
 				+ "title=\"pdf customer copy\";" //
 				+ "type=\"portable document\";" //
-				+ "deprecation=\"http://example.com/customers/deprecated\";" //
+				+ "deprecation=\"https://example.com/customers/deprecated\";" //
 				+ "profile=\"my-profile\"" //
 				+ "name=\"my-name\"");
 

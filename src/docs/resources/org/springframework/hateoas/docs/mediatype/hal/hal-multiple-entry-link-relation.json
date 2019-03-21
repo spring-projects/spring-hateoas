@@ -1,8 +1,8 @@
 {
   "_links": {
     "item": [
-      { "href": "http://myhost/cart/42" },
-      { "href": "http://myhost/inventory/12" }
+      { "href": "https://myhost/cart/42" },
+      { "href": "https://myhost/inventory/12" }
     ]
   },
   "customer": "Dave Matthews"

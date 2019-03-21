@@ -76,7 +76,7 @@ public class HalConfiguration {
 	/**
 	 * Configures how to render a single link for the given link relation pattern, i.e. this can be either a fixed link
 	 * relation (like {@code search}), take wildcards to e.g. match links of a given curie (like {@code acme:*}) or even
-	 * complete URIs (like {@code http://api.acme.com/foo/**}).
+	 * complete URIs (like {@code https://api.acme.com/foo/**}).
 	 *
 	 * @param pattern must not be {@literal null}.
 	 * @param renderSingleLinks must not be {@literal null}.

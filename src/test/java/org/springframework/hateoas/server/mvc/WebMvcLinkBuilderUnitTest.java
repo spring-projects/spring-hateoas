@@ -155,7 +155,7 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://somethingDifferent"));
+		assertThat(link.getHref(), startsWith("https://somethingDifferent"));
 	}
 
 	/**
@@ -271,7 +271,7 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://foobar:8088"));
+		assertThat(link.getHref(), startsWith("https://foobar:8088"));
 	}
 
 	/**
@@ -285,7 +285,7 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://barfoo:8888"));
+		assertThat(link.getHref(), startsWith("https://barfoo:8888"));
 	}
 
 	/**
@@ -341,7 +341,7 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 
-		assertThat(link.getHref(), startsWith("http://foobarhost:9090/"));
+		assertThat(link.getHref(), startsWith("https://foobarhost:9090/"));
 	}
 
 	/**
@@ -356,7 +356,7 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 		adaptRequestFromForwardedHeaders();
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
-		assertThat(link.getHref(), startsWith("http://foobarhost/"));
+		assertThat(link.getHref(), startsWith("https://foobarhost/"));
 	}
 
 	/**
@@ -545,7 +545,7 @@ public class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		adaptRequestFromForwardedHeaders();
 
-		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), startsWith("http://proxy1:1443"));
+		assertThat(linkTo(PersonControllerImpl.class).withSelfRel().getHref(), startsWith("https://proxy1:1443"));
 	}
 
 	/**

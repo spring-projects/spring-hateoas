@@ -74,21 +74,21 @@ public class DefaultCurieProviderUnitTest {
 	@Test
 	public void doesNotPrefixIanaRels() {
 
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com"))) //
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com"))) //
 				.isEqualTo(HalLinkRelation.of(IanaLinkRelations.SELF));
 	}
 
 	@Test
 	public void prefixesNormalRels() {
 
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "book"))) //
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "book"))) //
 				.isEqualTo(HalLinkRelation.curied("acme", "book"));
 	}
 
 	@Test
 	public void doesNotPrefixQualifiedRels() {
 
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")))
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "custom:rel")))
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
 	}
 
@@ -98,12 +98,12 @@ public class DefaultCurieProviderUnitTest {
 	@Test
 	public void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
 
-		Link link = new Link("http://amazon.com", "custom:rel") //
+		Link link = new Link("https://amazon.com", "custom:rel") //
 				.withHreflang("en") //
 				.withTitle("the title") //
 				.withMedia("the media") //
 				.withType("the type") //
-				.withDeprecation("http://example.com/custom/deprecated");
+				.withDeprecation("https://example.com/custom/deprecated");
 
 		assertThat(provider.getNamespacedRelFrom(link)) //
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
