@@ -1,16 +1,10 @@
 package org.springframework.hateoas.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -18,7 +12,9 @@ import org.springframework.util.MimeType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Assembles {@link ExchangeStrategies} needed to wire a {@link WebClient} with hypermedia support.
@@ -52,15 +48,11 @@ public class WebClientConfigurer {
 			decoders.add(new Jackson2JsonDecoder(objectMapper, mimeTypes));
 		});
 
-		encoders.add(CharSequenceEncoder.allMimeTypes());
-		decoders.add(StringDecoder.allMimeTypes());
-
 		return ExchangeStrategies.builder().codecs(clientCodecConfigurer -> {
 
 			encoders.forEach(encoder -> clientCodecConfigurer.customCodecs().encoder(encoder));
 			decoders.forEach(decoder -> clientCodecConfigurer.customCodecs().decoder(decoder));
 
-			clientCodecConfigurer.registerDefaults(false);
 		}).build();
 	}
 
