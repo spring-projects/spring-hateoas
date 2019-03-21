@@ -61,7 +61,7 @@ public @interface EnableHypermediaSupport {
 		 * HAL - Hypermedia Application Language.
 		 *
 		 * @see http://stateless.co/hal_specification.html
-		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
+		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
 		HAL(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
 
@@ -82,7 +82,7 @@ public @interface EnableHypermediaSupport {
 		/**
 		 * UBER Hypermedia
 		 *
-		 * @see http://uberhypermedia.org/
+		 * @see https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html
 		 */
 		UBER(MediaTypes.UBER_JSON);
 

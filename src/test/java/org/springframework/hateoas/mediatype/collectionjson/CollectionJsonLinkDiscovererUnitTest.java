@@ -52,7 +52,7 @@ public class CollectionJsonLinkDiscovererUnitTest {
 
 		assertThat(link) //
 				.map(Link::getHref) //
-				.hasValue("http://example.org/friends/");
+				.hasValue("https://example.org/friends/");
 	}
 
 	@Test
@@ -62,20 +62,20 @@ public class CollectionJsonLinkDiscovererUnitTest {
 
 		assertThat(this.discoverer.findLinkWithRel("self", specBasedJson)) //
 				.map(Link::getHref) //
-				.hasValue("http://example.org/friends/");
+				.hasValue("https://example.org/friends/");
 
 		assertThat(this.discoverer.findLinkWithRel("feed", specBasedJson)) //
 				.map(Link::getHref) //
-				.hasValue("http://example.org/friends/rss");
+				.hasValue("https://example.org/friends/rss");
 
 		assertThat(this.discoverer.findLinksWithRel("blog", specBasedJson)) //
 				.extracting("href") //
-				.containsExactlyInAnyOrder("http://examples.org/blogs/jdoe", "http://examples.org/blogs/msmith",
-						"http://examples.org/blogs/rwilliams");
+				.containsExactlyInAnyOrder("https://examples.org/blogs/jdoe", "https://examples.org/blogs/msmith",
+						"https://examples.org/blogs/rwilliams");
 
 		assertThat(this.discoverer.findLinksWithRel("avatar", specBasedJson)) //
 				.extracting("href") //
-				.containsExactlyInAnyOrder("http://examples.org/images/jdoe", "http://examples.org/images/msmith",
-						"http://examples.org/images/rwilliams");
+				.containsExactlyInAnyOrder("https://examples.org/images/jdoe", "https://examples.org/images/msmith",
+						"https://examples.org/images/rwilliams");
 	}
 }

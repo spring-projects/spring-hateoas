@@ -1,15 +1,15 @@
 {
   "_links": {
     "self": {
-      "href": "http://myhost/person/1"
+      "href": "https://myhost/person/1"
     },
     "curies": {
       "name": "ex",
-      "href": "http://example.com/rels/{rel}",
+      "href": "https://example.com/rels/{rel}",
       "templated": true
     },
     "ex:orders": {
-      "href": "http://myhost/person/1/orders"
+      "href": "https://myhost/person/1/orders"
     }
   },
   "firstname": "Dave",

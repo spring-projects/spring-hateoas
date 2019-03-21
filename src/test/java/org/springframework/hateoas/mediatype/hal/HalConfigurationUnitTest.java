@@ -54,16 +54,16 @@ public class HalConfigurationUnitTest {
 	@Test // #811
 	public void registersWildcardedArrayLinksPatternForUri() {
 
-		HalConfiguration configuration = new HalConfiguration().withRenderSingleLinksFor("http://somehost/foo/**",
+		HalConfiguration configuration = new HalConfiguration().withRenderSingleLinksFor("https://somehost/foo/**",
 				RenderSingleLinks.AS_ARRAY);
 
-		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("http://somehost/foo")))
+		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("https://somehost/foo")))
 				.isEqualTo(RenderSingleLinks.AS_ARRAY);
-		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("http://somehost/foo/bar")))
+		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("https://somehost/foo/bar")))
 				.isEqualTo(RenderSingleLinks.AS_ARRAY);
-		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("http://somehost/foo/bar/foobar")))
+		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("https://somehost/foo/bar/foobar")))
 				.isEqualTo(RenderSingleLinks.AS_ARRAY);
-		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("http://somehost/bar")))
+		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("https://somehost/bar")))
 				.isEqualTo(RenderSingleLinks.AS_SINGLE);
 	}
 }

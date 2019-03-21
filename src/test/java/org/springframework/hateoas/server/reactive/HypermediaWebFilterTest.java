@@ -65,7 +65,7 @@ public class HypermediaWebFilterTest {
 	@Test
 	public void webFilterShouldEmbedExchangeIntoContext() {
 
-		this.testClient.get().uri("http://example.com/api") //
+		this.testClient.get().uri("https://example.com/api") //
 				.accept(MediaTypes.HAL_JSON) //
 				.exchange() //
 				.expectStatus().isOk() //
@@ -76,7 +76,7 @@ public class HypermediaWebFilterTest {
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks())//
-							.containsExactly(new Link("http://example.com/api", IanaLinkRelations.SELF));
+							.containsExactly(new Link("https://example.com/api", IanaLinkRelations.SELF));
 
 					return true;
 				}).verifyComplete();

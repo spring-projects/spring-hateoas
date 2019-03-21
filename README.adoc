@@ -4,7 +4,7 @@ image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://g
 
 = Spring HATEOAS
 
-This project provides some APIs to ease creating REST representations that follow the http://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+This project provides some APIs to ease creating REST representations that follow the https://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 
 == Project Status
 
@@ -75,6 +75,6 @@ git config core.commentchar "/"
 
 == Resources
 
-* Reference documentation - http://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], http://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
+* Reference documentation - https://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], https://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
 * https://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/[JavaDoc]
 * https://spring.io/guides/gs/rest-hateoas/[Getting started guide]

@@ -50,7 +50,7 @@ public class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 */
 	@Test
 	public void discoversFullyQualifiedRel() {
-		assertThat(getDiscoverer().findLinkWithRel("http://foo.com/bar", this.sample)).isNotNull();
+		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", this.sample)).isNotNull();
 	}
 
 	@Override

@@ -1,24 +1,24 @@
 {
   "collection": {
     "version": "1.0",
-    "href": "http://example.org/friends/", // <1>
+    "href": "https://example.org/friends/", // <1>
     "links": [   // <2>
       {
         "rel": "feed",
-        "href": "http://example.org/friends/rss"
+        "href": "https://example.org/friends/rss"
       },
       {
         "rel": "queries",
-        "href": "http://example.org/friends/?queries"
+        "href": "https://example.org/friends/?queries"
       },
       {
         "rel": "template",
-        "href": "http://example.org/friends/?template"
+        "href": "https://example.org/friends/?template"
       }
     ],
     "items": [  // <3>
       {
-        "href": "http://example.org/friends/jdoe",
+        "href": "https://example.org/friends/jdoe",
         "data": [  // <4>
           {
             "name": "fullname",
@@ -34,12 +34,12 @@
         "links": [ // <5>
           {
             "rel": "blog",
-            "href": "http://examples.org/blogs/jdoe",
+            "href": "https://examples.org/blogs/jdoe",
             "prompt": "Blog"
           },
           {
             "rel": "avatar",
-            "href": "http://examples.org/images/jdoe",
+            "href": "https://examples.org/images/jdoe",
             "prompt": "Avatar",
             "render": "image"
           }

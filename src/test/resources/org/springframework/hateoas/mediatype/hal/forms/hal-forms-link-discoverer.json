@@ -11,7 +11,7 @@
         "href": "secondHref"
       }
     ],
-    "http://foo.com/bar": {
+    "http://www.foo.com/bar": {
       "href": "fullRelHref"
     }
   }
