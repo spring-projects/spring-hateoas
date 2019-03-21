@@ -136,10 +136,10 @@ resources:
 groups:
 - name: spring-hateoas
   jobs:
-  - Test - JDK 8
-  - Test - JDK 11
-  - Test - JDK 13
-  - Build
+  - test-jdk8
+  - test-jdk11
+  - test-jdk13
+  - build
 - name: spring-hateoas-examples
   jobs:
   - spring-hateoas-examples-test-jdk8
@@ -161,7 +161,7 @@ groups:
   - 8-jdk-with-graphviz:latest
 
 jobs:
-- name: Test - JDK 8
+- name: test-jdk8
   serial: true
   public: true
   plan:
@@ -174,13 +174,13 @@ jobs:
     params: { PROFILE: "non-existent" }
   <<: *slack-test-failure
 
-- name: Test - JDK 11
+- name: test-jdk11
   serial: true
   public: true
   plan:
   - get: spring-hateoas-github
     trigger: true
-    passed: [ Test - JDK 8 ]
+    passed: [ test-jdk8 ]
   - get: openjdk:11-jdk
     trigger: true
   - task: test
@@ -189,13 +189,13 @@ jobs:
     params: { PROFILE: "non-existant" }
   <<: *slack-test-failure
 
-- name: Test - JDK 13
+- name: test-jdk13
   serial: true
   public: true
   plan:
   - get: spring-hateoas-github
     trigger: true
-    passed: [ Test - JDK 8 ]
+    passed: [ test-jdk8 ]
   - get: openjdk:13-jdk
     trigger: true
   - task: test
@@ -204,15 +204,15 @@ jobs:
     params: { PROFILE: "non-existant" }
   <<: *slack-test-failure
 
-- name: Build
+- name: build
   serial: true
   public: true
   plan:
   - get: spring-hateoas-github
     trigger: true
     passed: [
-      Test - JDK 11,
-      Test - JDK 13
+      test-jdk11,
+      test-jdk13
     ]
   - get: 8-jdk-with-graphviz:latest
     trigger: true
@@ -279,14 +279,14 @@ jobs:
       path: spring-hateoas-github
       status: pending
   - aggregate:
-    - task: test (JDK 8)
+    - task: test-jdk8
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
-    - task: test (JDK 11)
+    - task: test-jdk11
       image: openjdk:11-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
-    - task: test (JDK 13)
+    - task: test-jdk13
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
@@ -451,14 +451,14 @@ jobs:
       path: spring-hateoas-examples-github
       status: pending
   - aggregate:
-    - task: test (JDK 8)
+    - task: test-jdk8
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "non-existent" }
-    - task: test (JDK 11)
+    - task: test-jdk11
       image: openjdk:11-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "non-existent" }
-    - task: test (JDK 13)
+    - task: test-jdk13
       image: openjdk:13-jdk
       file: spring-hateoas-examples-github/ci/test.yml
       params: { PROFILE: "non-existent" }
