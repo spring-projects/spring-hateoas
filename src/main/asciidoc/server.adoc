@@ -1,8 +1,10 @@
 [[server]]
 = Server-side support
+:code-dir: ../../../src/docs/java/org/springframework/hateoas
+:resource-dir: ../../../src/docs/resources/org/springframework/hateoas
 
-[[server.link-builder]]
-== [[fundamentals.obtaining-links]] [[fundamentals.obtaining-links.builder]] Building links
+[[server.link-builder.webmvc]]
+== [[fundamentals.obtaining-links]] [[fundamentals.obtaining-links.builder]] Building links in Spring MVC
 
 Now we have the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link` instances in a less fragile way. Right now, we would have to duplicate URI strings all over the place. Doing so is brittle and unmaintainable.
 
@@ -72,7 +74,8 @@ return new ResponseEntity<PersonModel>(headers, HttpStatus.CREATED);
 [[fundamentals.obtaining-links.builder.methods]]
 ==== Building Links that Point to Methods
 
-As of version 0.4, you can even build links that point to methods or create dummy controller method invocations. The first approach is to hand a `Method` instance to the `WebMvcLinkBuilder`.
+You can even build links that point to methods or create dummy controller method invocations.
+The first approach is to hand a `Method` instance to the `WebMvcLinkBuilder`.
 The following example shows how to do so:
 
 ====
@@ -102,13 +105,98 @@ assertThat(link.getHref()).endsWith("/people/2");
 * The return type has to be capable of proxying, as we need to expose the method invocation on it.
 * The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
 
-[[server.link-builder.webmvc]]
-== Building links in Spring MVC
-
 [[server.link-builder.webflux]]
 == Building links in Spring WebFlux
 
 TODO
+
+[[server.link-builder.forwarded-headers]]
+== Forwarded header handling
+
+https://tools.ietf.org/html/rfc7239[RFC-7239 forwarding headers] are most commonly used when your application is behind a proxy, behind a load balancer, or in the cloud.
+The node that actually receives the web request is part of the infrastructure, and _forwards_ the request to your application.
+
+Your application may be running on `localhost:8080`, but to the outside world, you're expected to be at `reallycoolsite.com` (and on web's standart port 80).
+By having the proxy include extra headers (which many already do), Spring HATEOAS can generate links properly as it uses Spring Framework functionality to obtain the base URI of the original request.
+
+IMPORTANT: Anything that can change the root URI based on external inputs must be properly guarded.
+That's why, by default, forwarded header handling is *disabled*.
+You MUST enable it to be operational.
+If you are deploying to the cloud or into a configuration where you control the proxies and load balancers, then you'll certainly want to use this feature.
+
+To enable forwarded header handling you need to register Spring's `ForwardedHeaderFilter` for Spring MVC (details https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#filters-forwarded-headers[here]) or `ForwardedHeaderTransformer` for Spring WebFlux (details https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-forwarded-headers[here]) in your application.
+In a Spring Boot application those components can be simply declared as Spring beans as described https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-developing-web-applications.html#boot-features-embedded-container-servlets-filters-listeners-beans[here].
+
+.Registering a `ForwardedHeaderFilter`
+====
+[source, java, tabsize=2, indent=0]
+----
+include::{code-dir}/ForwardedEnabledConfig.java[tags=code-1]
+----
+====
+
+This will create a servlet filter that processes all the `X-Forwarded-…` headers.
+And it will register it properly with the servlet handlers.
+
+For a Spring WebFlux application, the reactive counterpart is `ForwardedHeaderTransformer`:
+
+.Registering a `ForwardedHeaderTransformer`
+====
+[source, java, tabsize=2, indent=0]
+----
+include::{code-dir}/ForwardedEnabledConfig.java[tags=code-2]
+----
+====
+
+This will create a function that transforms reactive web requests, processing `X-Forwarded-…` headers.
+And it will register it properly with WebFlux.
+
+With configuration as shown above in place, a request passing `X-Forwarded-…` headers will see those reflected in the links generated:
+
+.A request using `X-Forwarded-…` headers
+====
+[source, bash]
+----
+curl -v localhost:8080/employees \
+    -H 'X-Forwarded-Proto: https' \
+    -H 'X-Forwarded-Host: example.com' \
+    -H 'X-Forwarded-Port: 9001'
+----
+====
+
+.The corresponding response with the links generated to consider those headers
+====
+[source, json]
+----
+{
+  "_embedded": {
+    "employees": [
+      {
+        "id": 1,
+        "name": "Bilbo Baggins",
+        "role": "burglar",
+        "_links": {
+          "self": {
+            "href": "https://example.com:9001/employees/1"
+          },
+          "employees": {
+            "href": "https://example.com:9001/employees"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "https://example.com:9001/employees"
+    },
+    "root": {
+      "href": "https://example.com:9001"
+    }
+  }
+}
+----
+====
 
 [[server.entity-links]]
 == [[fundamentals.obtaining-links.entity-links]] Using the `EntityLinks` interface

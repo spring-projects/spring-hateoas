@@ -15,7 +15,7 @@ NOTE: Copies of this document may be made for your own use and for distribution 
 == Preface
 include::migrate-to-1.0.adoc[leveloffset=+2]
 include::fundamentals.adoc[leveloffset=+1]
-include::mediatypes.adoc[leveloffset=+1]
 include::server.adoc[leveloffset=+1]
+include::mediatypes.adoc[leveloffset=+1]
 include::configuration.adoc[leveloffset=+1]
 include::client.adoc[leveloffset=+1]
