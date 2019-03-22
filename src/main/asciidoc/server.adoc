@@ -359,6 +359,7 @@ Making those available to the `EntityLinks` instance available for injection is 
 ====
 [source, java]
 ----
+@Configuration
 class CustomEntityLinksConfiguration {
 
   @Bean
