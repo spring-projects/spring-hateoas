@@ -81,10 +81,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 		assertThat(links.linkFor(Person.class)).isNotNull();
 	}
 
-	/**
-	 * @see #43
-	 */
-	@Test
+	@Test // #43
 	public void returnsLinkBuilderForParameterizedController() {
 
 		when(linkBuilderFactory.linkTo(eq(ControllerWithParameters.class), (Object[]) any())) //

@@ -199,11 +199,13 @@ curl -v localhost:8080/employees \
 ====
 
 [[server.entity-links]]
-== [[fundamentals.obtaining-links.entity-links]] Using the `EntityLinks` interface
+== [[fundamentals.obtaining-links.entity-links]] Using the EntityLinks interface
 
-So far, we have created links by pointing to the web-framework implementations (that is, the Spring MVC controllers) and inspected the mapping. In many cases, these classes essentially read and write representations backed by a model class.
+So far, we have created links by pointing to the web-framework implementations (that is, the Spring MVC controllers) and inspected the mapping.
+In many cases, these classes essentially read and write representations backed by a model class.
 
-The `EntityLinks` interface now exposes an API to look up a `Link` or `LinkBuilder` based on the model types. The methods essentially return links that point either to the collection resource (such as `/people`) or to a single resource (such as `/people/1`).
+The `EntityLinks` interface now exposes an API to look up a `Link` or `LinkBuilder` based on the model types.
+The methods essentially return links that point either to the collection resource (such as `/people`) or to an item resource (such as `/people/1`).
 The following example shows how to use `EntityLinks`:
 
 ====
@@ -215,25 +217,46 @@ Link link = links.linkToItemResource(Customer.class, 1L);
 ----
 ====
 
-`EntityLinks` is available for dependency injection by activating either `@EnableHypermediaSupprt` or `@EnableEntityLinks` in your Spring MVC configuration. Activating this functionality causes all the Spring MVC controllers available in the current `ApplicationContext` to be inspected for the `@ExposesResourceFor(…)` annotation. The annotation exposes which model type the controller manages. Beyond that, we assume that you follow the URI mapping convention of a class level base mapping and assume that you have controller methods handling an appended `/{id}`. The following example shows an implementation of an `EntityLinks`-capable controller:
+`EntityLinks` is available via dependency injection by activating either `@EnableHypermediaSupprt` or `@EnableEntityLinks` in your Spring MVC configuration.
+This will cause a variety of default implementations of `EntityLinks` being registered.
+The most fundamental one is `ControllerEntityLinks` that inspects SpringMVC and Spring WebFlux controller classes.
+If you want to register your own implementation of `EntityLinks`, check out <<server.entity-links.spi, this section>>.
+
+[[server.entity-links.controller]]
+=== EntityLinks based on Spring MVC and WebFlux controllers
+
+Activating entity links functionality causes all the Spring MVC and WebFlux controllers available in the current `ApplicationContext` to be inspected for the `@ExposesResourceFor(…)` annotation.
+The annotation exposes which model type the controller manages.
+Beyond that, we assume that you adhere to following the URI mapping setup and conventions:
+
+* A type level `@ExposesResourceFor(…)` declaring which entity type the controller exposes collection and item resources for.
+* A class level base mapping that represents the collection resource.
+* An additional method level mapping that extends the mapping to append an identifier as additional path segment.
+
+The following example shows an implementation of an `EntityLinks`-capable controller:
 
 ====
 [source, java]
 ----
 @Controller
-@ExposesResourceFor(Order.class)
+@ExposesResourceFor(Order.class) <1>
+@RequestMapping("/orders") <2>
 class OrderController {
 
-  @GetMapping("/orders")
+  @GetMapping <3>
   ResponseEntity orders(…) { … }
 
-  @GetMapping("/{id}")
+  @GetMapping("{id}") <4>
   ResponseEntity order(@PathVariable("id") … ) { … }
 }
 ----
+<1> The controller indicates it's exposing collection and item resources for the entity `Order`.
+<2> Its collection resource is exposed under `/orders`
+<3> That collection resource can handle `GET` requests. Add more methods for other HTTP methods at your convenience.
+<4> An additional controller method to handle a subordinate resource taking a path variable to expose an item resource, i.e. a single `Order`.
 ====
 
-The controller exposes that it manages `Order` instances and exposes handler methods that are mapped to our convention. When youy enable `EntityLinks` through `@EnableEntityLinks` in your Spring MVC configuration, you can create links to the controller, as follows:
+With this in place, when youy enable `EntityLinks` through `@EnableEntityLinks` or `@EnableHypermediaSupport` in your Spring MVC configuration, you can create links to the controller, as follows:
 
 ====
 [source, java]
@@ -243,22 +266,112 @@ class PaymentController {
 
   private final EntityLinks entityLinks;
 
-  PaymentController(EntityLinks entityLinks) {
+  PaymentController(EntityLinks entityLinks) { <1>
     this.entityLinks = entityLinks;
   }
 
   @PutMapping(…)
   ResponseEntity payment(@PathVariable Long orderId) {
 
-    Link link = entityLinks.linkToItemResource(Order.class, orderId);
+    Link link = entityLinks.linkToItemResource(Order.class, orderId); <2>
     …
+  }
+}
+----
+<1> Inject `EntityLinks` made available by `@EnableEntityLinks` or `@EnableHypermediaSupport` in you configuration.
+<2> Use the APIs to build links by using the entity types instead of controller classes.
+====
+
+As you can see, you can refer to resources managing `Order` instances without referring to `OrderController` explicitly.
+
+[[server.entity-links.api]]
+=== EntityLinks API in detail
+
+Fundamentally, `EntityLinks` allows to build ``LinkBuilder``s and `Link` instances to collection and item resources of a entity type.
+Methods starting with `linkFor…` will produce `LinkBuilder` instances for you to extend and augment with additional path segments, parameters, etc.
+Methods starting with `linkTo` produce fully prepared `Link` instances.
+
+While for collection resources providing an entity type is sufficient, links to item resources will need an identifier provided.
+This usually looks like this
+
+.Obtaining a link to an item resource
+====
+[source, java]
+----
+entityLinks.linkToItemResource(order, order.getId());
+----
+====
+
+If you find yourself repeating those method calls the identifier extraction step can be pulled out into a reusable `Function` to be reused throughout different invocations:
+
+====
+[source, java]
+----
+Function<Order, Object> idExtractor = Order::getId; <1>
+
+entityLinks.linkToItemResource(order, idExtractor); <2>
+----
+<1> The identifier extraction is externalized so that it can be held in a field or constant.
+<2> The link lookup using the extractor.
+====
+
+[[server.entity-links.api.typed]]
+==== TypedEntityLinks
+
+As controller implementations are often grouped around entity types, you'll very often find yourself using the same extractor function (see <<server.entity-links.api>> for details) all over the controller class.
+We can centralize the identifier extraction logic even more by obtaining a `TypedEntityLinks` instance poviding the extractor once, so that the actually lookups don't have to deal with the extraction anymore at all.
+
+.Using TypedEntityLinks
+====
+[source, java]
+----
+class OrderController {
+
+  private final TypedEntityLinks<Order> links;
+
+  OrderController(EntityLinks entityLinks) { <1>
+    this.links = entityLinks.forType(Order::getId); <2>
+  }
+
+  @GetMapping
+  ResponseEntity<Order> someMethod(…) {
+
+    Order order = … // lookup order
+
+    Link link = links.linkToItemResource(order); <3>
+  }
+}
+----
+<1> Inject an `EntityLinks` instance.
+<2> Indicate you're going to look up `Order` instances with a certain identifier extractor function.
+<3> Lookup item resource links based on a sole `Order` instance.
+====
+
+[[server.entity-links.spi]]
+=== EntityLinks as SPI
+
+The `EntityLinks` instance created by `@EnableEntityLinks` / `@EnableHypermediaSupport` is of type `DelegatingEntityLinks` which will in turn pick up all other `EntityLinks` implementations available as beans in the `ApplicationContext`.
+It's registered as primary bean so that it's always the sole injection candidate when you inject `EntityLinks` in general.
+`ControllerEntityLinks` is the default implementation that will be included in the setup, but users are free to implement and register their own implementations.
+Making those available to the `EntityLinks` instance available for injection is a matter of registering your implementation as Spring bean.
+
+.Declaring a custom EntityLinks implementation
+====
+[source, java]
+----
+class CustomEntityLinksConfiguration {
+
+  @Bean
+  MyEntityLinks myEntityLinks(…) {
+    return new MyEntityLinks(…);
   }
 }
 ----
 ====
 
-You can then refer to the `Order` instances without referring to the `OrderController`.
-
+An example for the extensibility of this mechanism is Spring Data REST's https://github.com/spring-projects/spring-data-rest/blob/3a0cba94a2cc8739375ecf24086da2f7c3bbf038/spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/support/RepositoryEntityLinks.java[`RepositoryEntityLinks`], which uses the repository mapping information to create links pointing to resources backed by Spring Data repositories.
+At the same time, it even exposes additional lookup methods for other types of resources.
+If you want to make use of these, simply inject `RepositoryEntityLinks` explicitly.
 
 [[server.representation-model-assembler]]
 == [[fundamentals.resource-assembler]] Representation model assembler
