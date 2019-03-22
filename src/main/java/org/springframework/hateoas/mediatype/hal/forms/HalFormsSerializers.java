@@ -51,18 +51,18 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
  */
 class HalFormsSerializers {
 
-	static class HalFormsResourceSupportSerializer extends ContainerSerializer<RepresentationModel<?>>
+	static class HalFormsRepresentationModelSerializer extends ContainerSerializer<RepresentationModel<?>>
 			implements ContextualSerializer {
 
 		private final BeanProperty property;
 
-		HalFormsResourceSupportSerializer(@Nullable BeanProperty property) {
+		HalFormsRepresentationModelSerializer(@Nullable BeanProperty property) {
 
 			super(RepresentationModel.class, false);
 			this.property = property;
 		}
 
-		HalFormsResourceSupportSerializer() {
+		HalFormsRepresentationModelSerializer() {
 			this(null);
 		}
 
@@ -105,26 +105,26 @@ class HalFormsSerializers {
 
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) {
-			return new HalFormsResourceSupportSerializer(property);
+			return new HalFormsRepresentationModelSerializer(property);
 		}
 	}
 
 	/**
 	 * Serializer for {@link CollectionModel}.
 	 */
-	static class HalFormsResourceSerializer extends ContainerSerializer<EntityModel<?>> implements ContextualSerializer {
+	static class HalFormsEntityModelSerializer extends ContainerSerializer<EntityModel<?>> implements ContextualSerializer {
 
 		private static final long serialVersionUID = -7912243216469101379L;
 
 		private final BeanProperty property;
 
-		HalFormsResourceSerializer(@Nullable BeanProperty property) {
+		HalFormsEntityModelSerializer(@Nullable BeanProperty property) {
 
 			super(EntityModel.class, false);
 			this.property = property;
 		}
 
-		HalFormsResourceSerializer() {
+		HalFormsEntityModelSerializer() {
 			this(null);
 		}
 
@@ -192,14 +192,14 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourceSerializer(property);
+			return new HalFormsEntityModelSerializer(property);
 		}
 	}
 
 	/**
 	 * Serializer for {@link CollectionModel}
 	 */
-	static class HalFormsResourcesSerializer extends ContainerSerializer<CollectionModel<?>>
+	static class HalFormsCollectionModelSerializer extends ContainerSerializer<CollectionModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -3601146866067500734L;
@@ -207,7 +207,7 @@ class HalFormsSerializers {
 		private final BeanProperty property;
 		private final Jackson2HalModule.EmbeddedMapper embeddedMapper;
 
-		HalFormsResourcesSerializer(@Nullable BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsCollectionModelSerializer(@Nullable BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 
 			super(CollectionModel.class, false);
 
@@ -215,7 +215,7 @@ class HalFormsSerializers {
 			this.embeddedMapper = embeddedMapper;
 		}
 
-		HalFormsResourcesSerializer(Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsCollectionModelSerializer(Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 			this(null, embeddedMapper);
 		}
 
@@ -299,7 +299,7 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourcesSerializer(property, embeddedMapper);
+			return new HalFormsCollectionModelSerializer(property, embeddedMapper);
 		}
 	}
 

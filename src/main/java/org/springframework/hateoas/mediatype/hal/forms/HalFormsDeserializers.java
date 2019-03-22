@@ -15,13 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -33,6 +26,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Collection of components needed to deserialize a HAL-FORMS document.
@@ -41,20 +40,20 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  */
 class HalFormsDeserializers {
 
-	static class HalFormsResourcesDeserializer extends ContainerDeserializerBase<List<Object>>
+	static class HalFormsCollectionModelDeserializer extends ContainerDeserializerBase<List<Object>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = -7325599536381465624L;
 
 		private JavaType contentType;
 
-		HalFormsResourcesDeserializer(JavaType contentType) {
+		HalFormsCollectionModelDeserializer(JavaType contentType) {
 
 			super(contentType);
 			this.contentType = contentType;
 		}
 
-		HalFormsResourcesDeserializer() {
+		HalFormsCollectionModelDeserializer() {
 			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class));
 		}
 
@@ -119,7 +118,7 @@ class HalFormsDeserializers {
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			return new HalFormsResourcesDeserializer(
+			return new HalFormsCollectionModelDeserializer(
 					property == null ? ctxt.getContextualType() : property.getType().getContentType());
 		}
 	}

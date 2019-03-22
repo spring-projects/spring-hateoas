@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.hal.forms;
+package org.springframework.hateoas.mediatype.hal.forms;
 
 import org.junit.Before;
 import org.junit.Test;
