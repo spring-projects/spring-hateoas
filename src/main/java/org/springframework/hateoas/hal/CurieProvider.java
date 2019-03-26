@@ -23,7 +23,7 @@ import org.springframework.hateoas.Links;
 /**
  * API to provide HAL curie information for links.
  * 
- * @see http://tools.ietf.org/html/draft-kelly-json-hal#section-8.2
+ * @see https://tools.ietf.org/html/draft-kelly-json-hal#section-8.2
  * @author Oliver Gierke
  * @author Jeff Stano
  * @since 0.9

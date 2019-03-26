@@ -22,7 +22,7 @@ import org.springframework.hateoas.RelProvider;
  * {@link RelProvider} implementation using the Evo Inflector implementation of an algorithmic approach to English
  * plurals.
  * 
- * @see http://www.csse.monash.edu.au/~damian/papers/HTML/Plurals.html
+ * @see http://users.monash.edu/~damian/papers/HTML/Plurals.html
  * @author Oliver Gierke
  */
 public class EvoInflectorRelProvider extends DefaultRelProvider {
