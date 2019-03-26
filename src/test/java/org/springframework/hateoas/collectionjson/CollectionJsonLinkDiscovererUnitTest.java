@@ -49,7 +49,7 @@ public class CollectionJsonLinkDiscovererUnitTest {
 		Link link = this.discoverer.findLinkWithRel("self", specBasedJson);
 
 		assertThat(link).isNotNull();
-		assertThat(link.getHref()).isEqualTo("http://example.org/friends/");
+		assertThat(link.getHref()).isEqualTo("https://example.org/friends/");
 	}
 
 	@Test
@@ -60,29 +60,29 @@ public class CollectionJsonLinkDiscovererUnitTest {
 		Link selfLink = this.discoverer.findLinkWithRel("self", specBasedJson);
 
 		assertThat(selfLink).isNotNull();
-		assertThat(selfLink.getHref()).isEqualTo("http://example.org/friends/");
+		assertThat(selfLink.getHref()).isEqualTo("https://example.org/friends/");
 
 		Link feedLink = this.discoverer.findLinkWithRel("feed", specBasedJson);
 
 		assertThat(feedLink).isNotNull();
-		assertThat(feedLink.getHref()).isEqualTo("http://example.org/friends/rss");
+		assertThat(feedLink.getHref()).isEqualTo("https://example.org/friends/rss");
 
 		List<Link> links = this.discoverer.findLinksWithRel("blog", specBasedJson);
 
 		assertThat(links)
 			.extracting("href")
 			.containsExactlyInAnyOrder(
-				"http://examples.org/blogs/jdoe",
-				"http://examples.org/blogs/msmith",
-				"http://examples.org/blogs/rwilliams");
+				"https://examples.org/blogs/jdoe",
+				"https://examples.org/blogs/msmith",
+				"https://examples.org/blogs/rwilliams");
 
 		links = this.discoverer.findLinksWithRel("avatar", specBasedJson);
 
 		assertThat(links)
 			.extracting("href")
 			.containsExactlyInAnyOrder(
-				"http://examples.org/images/jdoe",
-				"http://examples.org/images/msmith",
-				"http://examples.org/images/rwilliams");
+				"https://examples.org/images/jdoe",
+				"https://examples.org/images/msmith",
+				"https://examples.org/images/rwilliams");
 	}
 }

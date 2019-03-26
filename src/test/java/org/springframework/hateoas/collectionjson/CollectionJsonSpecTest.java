@@ -68,7 +68,7 @@ public class CollectionJsonSpecTest {
 		ResourceSupport resource = mapper.readValue(specBasedJson, ResourceSupport.class);
 
 		assertThat(resource.getLinks()).hasSize(1);
-		assertThat(resource.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/"));
+		assertThat(resource.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/"));
 	}
 
 	/**
@@ -85,29 +85,29 @@ public class CollectionJsonSpecTest {
 				mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
 
 		assertThat(resources.getLinks()).hasSize(2);
-		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/"));
-		assertThat(resources.getRequiredLink("feed")).isEqualTo(new Link("http://example.org/friends/rss", "feed"));
+		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/"));
+		assertThat(resources.getRequiredLink("feed")).isEqualTo(new Link("https://example.org/friends/rss", "feed"));
 		assertThat(resources.getContent()).hasSize(3);
 
 		List<Resource<Friend>> friends = new ArrayList<>(resources.getContent());
 
 		assertThat(friends.get(0).getContent().getEmail()).isEqualTo("jdoe@example.org");
 		assertThat(friends.get(0).getContent().getFullname()).isEqualTo("J. Doe");
-		assertThat(friends.get(0).getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/jdoe"));
-		assertThat(friends.get(0).getRequiredLink("blog")).isEqualTo(new Link("http://examples.org/blogs/jdoe", "blog"));
-		assertThat(friends.get(0).getRequiredLink("avatar")).isEqualTo(new Link("http://examples.org/images/jdoe", "avatar"));
+		assertThat(friends.get(0).getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/jdoe"));
+		assertThat(friends.get(0).getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/jdoe", "blog"));
+		assertThat(friends.get(0).getRequiredLink("avatar")).isEqualTo(new Link("https://examples.org/images/jdoe", "avatar"));
 
 		assertThat(friends.get(1).getContent().getEmail()).isEqualTo("msmith@example.org");
 		assertThat(friends.get(1).getContent().getFullname()).isEqualTo("M. Smith");
-		assertThat(friends.get(1).getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/msmith"));
-		assertThat(friends.get(1).getRequiredLink("blog")).isEqualTo(new Link("http://examples.org/blogs/msmith", "blog"));
-		assertThat(friends.get(1).getRequiredLink("avatar")).isEqualTo(new Link("http://examples.org/images/msmith", "avatar"));
+		assertThat(friends.get(1).getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/msmith"));
+		assertThat(friends.get(1).getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/msmith", "blog"));
+		assertThat(friends.get(1).getRequiredLink("avatar")).isEqualTo(new Link("https://examples.org/images/msmith", "avatar"));
 
 		assertThat(friends.get(2).getContent().getEmail()).isEqualTo("rwilliams@example.org");
 		assertThat(friends.get(2).getContent().getFullname()).isEqualTo("R. Williams");
-		assertThat(friends.get(2).getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/rwilliams"));
-		assertThat(friends.get(2).getRequiredLink("blog")).isEqualTo(new Link("http://examples.org/blogs/rwilliams", "blog"));
-		assertThat(friends.get(2).getRequiredLink("avatar")).isEqualTo(new Link("http://examples.org/images/rwilliams", "avatar"));
+		assertThat(friends.get(2).getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/rwilliams"));
+		assertThat(friends.get(2).getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/rwilliams", "blog"));
+		assertThat(friends.get(2).getRequiredLink("avatar")).isEqualTo(new Link("https://examples.org/images/rwilliams", "avatar"));
 	}
 
 	/**
@@ -123,12 +123,12 @@ public class CollectionJsonSpecTest {
 				mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class));
 
 		assertThat(resource.getLinks()).hasSize(6);
-		assertThat(resource.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/jdoe"));
-		assertThat(resource.getRequiredLink("feed")).isEqualTo(new Link("http://example.org/friends/rss", "feed"));
-		assertThat(resource.getRequiredLink("queries")).isEqualTo(new Link("http://example.org/friends/?queries", "queries"));
-		assertThat(resource.getRequiredLink("template")).isEqualTo(new Link("http://example.org/friends/?template", "template"));
-		assertThat(resource.getRequiredLink("blog")).isEqualTo(new Link("http://examples.org/blogs/jdoe", "blog"));
-		assertThat(resource.getRequiredLink("avatar")).isEqualTo(new Link("http://examples.org/images/jdoe", "avatar"));
+		assertThat(resource.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/jdoe"));
+		assertThat(resource.getRequiredLink("feed")).isEqualTo(new Link("https://example.org/friends/rss", "feed"));
+		assertThat(resource.getRequiredLink("queries")).isEqualTo(new Link("https://example.org/friends/?queries", "queries"));
+		assertThat(resource.getRequiredLink("template")).isEqualTo(new Link("https://example.org/friends/?template", "template"));
+		assertThat(resource.getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/jdoe", "blog"));
+		assertThat(resource.getRequiredLink("avatar")).isEqualTo(new Link("https://examples.org/images/jdoe", "avatar"));
 
 		assertThat(resource.getContent().getEmail()).isEqualTo("jdoe@example.org");
 		assertThat(resource.getContent().getFullname()).isEqualTo("J. Doe");
@@ -148,7 +148,7 @@ public class CollectionJsonSpecTest {
 				mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
 
 		assertThat(resources.getContent()).hasSize(0);
-		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/"));
+		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/"));
 	}
 	/**
 	 * @see http://amundsen.com/media-types/collection/examples/ - Section 5. Template Representation
@@ -164,7 +164,7 @@ public class CollectionJsonSpecTest {
 				mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
 		
 		assertThat(resources.getContent()).hasSize(0);
-		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/"));
+		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/"));
 	}
 	/**
 	 * @see http://amundsen.com/media-types/collection/examples/ - Section 6. Error Representation
@@ -180,7 +180,7 @@ public class CollectionJsonSpecTest {
 				mapper.getTypeFactory().constructParametricType(Resource.class, Friend.class)));
 
 		assertThat(resources.getContent()).hasSize(0);
-		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("http://example.org/friends/"));
+		assertThat(resources.getRequiredLink(Link.REL_SELF)).isEqualTo(new Link("https://example.org/friends/"));
 	}
 	/**
 	 * @see http://amundsen.com/media-types/collection/examples/ - Section 7. Write Representation

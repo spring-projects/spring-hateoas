@@ -11,11 +11,11 @@
       },
       {
         "name": "blog",
-        "value": "http://example.org/blogs/wchandry"
+        "value": "https://example.org/blogs/wchandry"
       },
       {
         "name": "avatar",
-        "value": "http://example.org/images/wchandry"
+        "value": "https://example.org/images/wchandry"
       }
     ]
   }

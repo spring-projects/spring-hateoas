@@ -36,7 +36,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Custom URI template to support qualified URI template variables.
  * 
  * @author Oliver Gierke
- * @see http://tools.ietf.org/html/rfc6570
+ * @see https://tools.ietf.org/html/rfc6570
  * @since 0.9
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {

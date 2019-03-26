@@ -32,7 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Value object to partially implement the {@literal Forwarded} header defined in RFC 7239.
  *
  * @author Oliver Gierke
- * @see http://tools.ietf.org/html/rfc7239
+ * @see https://tools.ietf.org/html/rfc7239
  * @deprecated In Spring 5.1, all Forwarded headers will by handled by Spring MVC.
  */
 @Deprecated
