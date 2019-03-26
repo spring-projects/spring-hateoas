@@ -33,7 +33,7 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
 	static final String SAMPLE = "{ _links : { self : { href : 'selfHref' }, " + //
 			"relation : [ { href : 'firstHref' }, { href : 'secondHref' }], " + //
-			"'http://foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
+			"'http://www.foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
 
 	/**
 	 * @see #314
@@ -41,7 +41,7 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	@Test
 	public void discoversFullyQualifiedRel() {
 
-		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", SAMPLE);
+		Link link = getDiscoverer().findLinkWithRel("http://www.foo.com/bar", SAMPLE);
 
 		assertThat(link).isNotNull();
 		assertThat(link.getHref()).isEqualTo("fullRelHref");
