@@ -19,7 +19,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Representation of a web request's query parameter (http://example.com?name=foo) => {"name", "foo", true}.
+ * Representation of a web request's query parameter (https://example.com?name=foo) => {"name", "foo", true}.
  *
  * @author Greg Turnquist
  */

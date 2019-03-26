@@ -1,7 +1,7 @@
 {
   "version" : "1.0",
   "doc" : {
-    "href" : "http://example.org/samples/full/doc.html"
+    "href" : "https://example.org/samples/full/doc.html"
   },
   "descriptor" : [ {
     "id" : "search",

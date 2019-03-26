@@ -56,7 +56,7 @@ public class JacksonSerializationTest {
 	public void writesSampleDocument() throws Exception {
 
 		Alps alps = alps().//
-				doc(doc().href("http://example.org/samples/full/doc.html").build()). //
+				doc(doc().href("https://example.org/samples/full/doc.html").build()). //
 				descriptor(Arrays.asList(//
 						descriptor().id("search").type(Type.SAFE).//
 								doc(new Doc("A search form with two inputs.", Format.TEXT)).//

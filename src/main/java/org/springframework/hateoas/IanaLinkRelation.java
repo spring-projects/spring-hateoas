@@ -42,28 +42,28 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a substitute for this context
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-alternate
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-alternate
 	 */
 	ALTERNATE("alternate"),
 
 	/**
 	 * Refers to an appendix.
 	 * 
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	APPENDIX("appendix"),
 
 	/**
 	 * Refers to a collection of records, documents, or other materials of historical interest.
 	 *
-	 * @see http://www.w3.org/TR/2011/WD-html5-20110113/links.html#rel-archives
+	 * @see https://www.w3.org/TR/2011/WD-html5-20110113/links.html#rel-archives
 	 */
 	ARCHIVES("archives"),
 
 	/**
 	 * Refers to the context's author.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-author
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-author
 	 */
 	AUTHOR("author"),
 
@@ -77,7 +77,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Gives a permanent link to use for bookmarking purposes.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-bookmark
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-bookmark
 	 */
 	BOOKMARK("bookmark"),
 
@@ -91,7 +91,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a chapter in a collection of resources.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	CHAPTER("chapter"),
 
@@ -111,7 +111,7 @@ public enum IanaLinkRelation implements LinkRelation {
 
 	/**
 	 * Refers to a table of contents.
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	CONTENTS("contents"),
 
@@ -127,7 +127,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a copyright statement that applies to the link's context.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	COPYRIGHT("copyright"),
 
@@ -148,7 +148,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a resource providing information about the link's context.
 	 *
-	 * @see http://www.w3.org/TR/powder-dr/#assoc-linking
+	 * @see https://www.w3.org/TR/powder-dr/#assoc-linking
 	 */
 	DESCRIBED_BY("describedBy"),
 
@@ -223,14 +223,14 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a glossary of terms.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	GLOSSARY("glossary"),
 
 	/**
 	 * Refers to context-sensitive help.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-help
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-help
 	 */
 	HELP("help"),
 
@@ -244,21 +244,21 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a hub that enables registration for notification of updates to the context.
 	 *
-	 * @see http://pubsubhubbub.googlecode.com
+	 * @see https://pubsubhubbub.googlecode.com
 	 */
 	HUB("hub"),
 
 	/**
 	 * Refers to an icon representing the link's context.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-icon
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-icon
 	 */
 	ICON("icon"),
 
 	/**
 	 * Refers to an index.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	INDEX("index"),
 
@@ -453,7 +453,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Indicates that the link's context is a part of a series, and that the next in the series is the link target.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-next
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-next
 	 */
 	NEXT("next"),
 
@@ -467,14 +467,14 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Indicates that the context‚Äôs original author or publisher does not endorse the link target.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-nofollow
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-nofollow
 	 */
 	NOFOLLOW("nofollow"),
 
 	/**
 	 * Indicates that no referrer information is to be leaked when following the link.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-noreferrer
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-noreferrer
 	 */
 	NOREFERRER("noreferrer"),
 
@@ -495,7 +495,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Gives the address of the pingback resource for the link context.
 	 *
-	 * @see http://www.hixie.ch/specs/pingback/pingback
+	 * @see https://www.hixie.ch/specs/pingback/pingback
 	 */
 	PINGBACK("pingback"),
 
@@ -520,7 +520,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	 * from the link context, and that the user agent ought to fetch, such that the user agent can deliver a faster
 	 * response once the resource is requested in the future.
 	 * 
-	 * @see http://www.w3.org/TR/resource-hints/
+	 * @see https://www.w3.org/TR/resource-hints/
 	 */
 	PREFETCH("prefetch"),
 
@@ -528,7 +528,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	 * Refers to a resource that should be loaded early in the processing of the link's context, without blocking
 	 * rendering.
 	 *
-	 * @see http://www.w3.org/TR/preload/
+	 * @see https://www.w3.org/TR/preload/
 	 */
 	PRELOAD("preload"),
 
@@ -544,7 +544,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Indicates that the link's context is a part of a series, and that the previous in the series is the link target.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-prev
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-prev
 	 */
 	PREV("prev"),
 
@@ -558,7 +558,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to the previous resource in an ordered series of resources.  Synonym for "prev".
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	PREVIOUS("previous"),
 
@@ -617,7 +617,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to a section in a collection of resources.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	SECTION("section"),
 
@@ -638,21 +638,21 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Refers to the first resource in a collection of resources.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	START("start"),
 
 	/**
 	 * Refers to a stylesheet.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-stylesheet
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-stylesheet
 	 */
 	STYLESHEET("stylesheet"),
 
 	/**
 	 * Refers to a resource serving as a subsection in a collection of resources.
 	 *
-	 * @see http://www.w3.org/TR/1999/REC-html401-19991224
+	 * @see https://www.w3.org/TR/1999/REC-html401-19991224
 	 */
 	SUBSECTION("subsection"),
 
@@ -666,7 +666,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	/**
 	 * Gives a tag (identified by the given address) that applies to the current document.
 	 *
-	 * @see http://www.w3.org/TR/html5/links.html#link-type-tag
+	 * @see https://www.w3.org/TR/html5/links.html#link-type-tag
 	 */
 	TAG("tag"),
 
@@ -724,7 +724,7 @@ public enum IanaLinkRelation implements LinkRelation {
 	 * Identifies a target URI that supports the Webmention protcol. This allows clients that mention a resource in
 	 * some form of publishing process to contact that endpoint and inform it that this resource has been mentioned.
 	 *
-	 * @see http://www.w3.org/TR/webmention/
+	 * @see https://www.w3.org/TR/webmention/
 	 */
 	WEBMENTION("webmention"),
 
