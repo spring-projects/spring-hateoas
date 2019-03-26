@@ -69,7 +69,7 @@ public @interface EnableHypermediaSupport {
 		 * HAL - Hypermedia Application Language.
 		 * 
 		 * @see http://stateless.co/hal_specification.html
-		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
+		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
 		HAL,
 
@@ -90,7 +90,7 @@ public @interface EnableHypermediaSupport {
 		/**
 		 * UBER Hypermedia
 		 *
-		 * @see http://uberhypermedia.org/
+		 * @see https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html
 		 */
 		UBER;
 

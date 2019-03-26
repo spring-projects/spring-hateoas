@@ -2,7 +2,7 @@
   "uber" : {
     "version" : "1.0",
     "data" : [ {
-      "rel" : [ "self", "http://example.org/rels/todo" ],
+      "rel" : [ "self", "https://example.org/rels/todo" ],
       "url" : "localhost"
     }, {
       "rel" : [ "second" ],

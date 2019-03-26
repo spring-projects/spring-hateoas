@@ -5,7 +5,7 @@ Oliver Gierke; Greg Turnquist; Jay Bryant
 :toc: left
 :hide-uri-scheme:
 
-This project provides some APIs to ease creating REST representations that follow the http://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+This project provides some APIs to ease creating REST representations that follow the https://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 
 (C) 2012-2019 The original authors.
 
@@ -330,7 +330,7 @@ This section describes how to configure Spring HATEOAS.
 [[configuration.at-enable]]
 === Using `@EnableHypermediaSupport`
 
-To let the `ResourceSupport` subtypes be rendered according to the specification of various hypermedia representations types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support http://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
+To let the `ResourceSupport` subtypes be rendered according to the specification of various hypermedia representations types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support https://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
 
 * It registers necessary Jackson modules to render `Resource` and `Resources` in the hypermedia specific format.
 * If JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to look up links by their `rel` in plain JSON representations (see <<client.link-discoverer>>).
@@ -358,7 +358,7 @@ A `RelProvider` is automatically exposed as a Spring bean when you use `@EnableH
 [[spis.curie-provider]]
 === Using the `CurieProvider` API
 
-The http://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the http://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension `rel` URIs can be used by applications that do not wish to register a relation type. Each one is a URI that uniquely identifies the relation type. The `rel` URI can be serialized as a compact URI or http://www.w3.org/TR/curie[Curie]. For example, a curie of `ex:persons` stands for the link relation type `http://example.com/rels/persons` if `ex` is defined as `http://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
+The https://tools.ietf.org/html/rfc5988=section-4[Web Linking RFC] describes registered and extension link relation types. Registered rels are well-known strings registered with the https://www.iana.org/assignments/link-relations/link-relations.xhtml[IANA registry of link relation types]. Extension `rel` URIs can be used by applications that do not wish to register a relation type. Each one is a URI that uniquely identifies the relation type. The `rel` URI can be serialized as a compact URI or https://www.w3.org/TR/curie[Curie]. For example, a curie of `ex:persons` stands for the link relation type `https://example.com/rels/persons` if `ex` is defined as `https://example.com/rels/{rel}`. If curies are used, the base URI must be present in the response scope.
 
 The `rel` values created by the default `RelProvider` are extension relation types and, as a result, must be URIs, which can cause a lot of overhead. The `CurieProvider` API takes care of that: It lets you define a base URI as a URI template and a prefix that stands for that base URI. If a `CurieProvider` is present, the `RelProvider` prepends all `rel` values with the curie prefix. Furthermore a `curies` link is automatically added to the HAL resource.
 
@@ -374,7 +374,7 @@ public class Config {
 
   @Bean
   public CurieProvider curieProvider() {
-    return new DefaultCurieProvider("ex", new UriTemplate("http://www.example.com/rels/{rel}"));
+    return new DefaultCurieProvider("ex", new UriTemplate("https://www.example.com/rels/{rel}"));
   }
 }
 ----
@@ -391,7 +391,7 @@ The following example shows how to do so:
     "self" : { href: "http://myhost/person/1" },
     "curies" : {
          "name" : "ex",
-         "href" : "http://example.com/rels/{rel}",
+         "href" : "https://example.com/rels/{rel}",
          "templated" : true
     },
     "ex:orders" : { href : "http://myhost/person/1/orders" }

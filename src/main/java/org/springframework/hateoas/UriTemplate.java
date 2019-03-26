@@ -39,7 +39,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * 
  * @author Oliver Gierke
  * @author JamesE Richardson
- * @see http://tools.ietf.org/html/rfc6570
+ * @see https://tools.ietf.org/html/rfc6570
  * @since 0.9
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {

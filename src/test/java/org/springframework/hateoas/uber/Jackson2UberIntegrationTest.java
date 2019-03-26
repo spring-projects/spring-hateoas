@@ -219,7 +219,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	public void renderResourceWithMultipleRels() throws Exception {
 
 		Resource<String> data4 = new Resource<>("third", new Link("localhost"),
-				new Link("localhost").withRel("http://example.org/rels/todo"), new Link("second").withRel("second"),
+				new Link("localhost").withRel("https://example.org/rels/todo"), new Link("second").withRel("second"),
 				new Link("third").withRel("third"));
 
 		assertThat(write(data4)).isEqualTo(MappingUtils.read(new ClassPathResource("resource4.json", getClass())));
@@ -253,7 +253,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 		assertThat(actual3).isEqualTo(expected3);
 
 		Resource<String> expected4 = new Resource<>("third", new Link("localhost"),
-				new Link("localhost").withRel("http://example.org/rels/todo"), new Link("second").withRel("second"),
+				new Link("localhost").withRel("https://example.org/rels/todo"), new Link("second").withRel("second"),
 				new Link("third").withRel("third"));
 		Resource<String> actual4 = mapper.readValue(MappingUtils.read(new ClassPathResource("resource4.json", getClass())),
 				resourceStringType);

@@ -17,7 +17,7 @@
         "url" : "secondHref"
       },
       {
-        "rel" : ["http://foo.com/bar"],
+        "rel" : ["http://www.foo.com/bar"],
         "url" : "fullRelHref"
       }
     ]
