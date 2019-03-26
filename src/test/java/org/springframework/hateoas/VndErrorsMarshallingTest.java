@@ -60,9 +60,9 @@ public class VndErrorsMarshallingTest {
 		String json = read(new ClassPathResource("vnderror-single-item.json"));
 
 		VndError error = new VndError("Validation failed", "/username", 42, //
-			new Link("http://path.to/user/resource/1", VndErrors.REL_ABOUT),
-			new Link("http://path.to/describes", VndErrors.REL_DESCRIBES),
-			new Link("http://path.to/help", VndErrors.REL_HELP));
+			new Link("https://path.to/user/resource/1", VndErrors.REL_ABOUT),
+			new Link("https://path.to/describes", VndErrors.REL_DESCRIBES),
+			new Link("https://path.to/help", VndErrors.REL_HELP));
 
 		assertThat(mapper.readValue(json, VndError.class)).isEqualTo(error);
 	}
@@ -74,9 +74,9 @@ public class VndErrorsMarshallingTest {
 	public void singleItemVndErrorShouldSerialize() throws IOException {
 
 		VndError error = new VndError("Validation failed", "/username", 42, //
-			new Link("http://path.to/user/resource/1", VndErrors.REL_ABOUT),
-			new Link("http://path.to/describes", VndErrors.REL_DESCRIBES),
-			new Link("http://path.to/help", VndErrors.REL_HELP));
+			new Link("https://path.to/user/resource/1", VndErrors.REL_ABOUT),
+			new Link("https://path.to/describes", VndErrors.REL_DESCRIBES),
+			new Link("https://path.to/help", VndErrors.REL_HELP));
 
 		String json = read(new ClassPathResource("vnderror-single-item.json"));
 
@@ -93,10 +93,10 @@ public class VndErrorsMarshallingTest {
 		String json = read(new ClassPathResource("vnderrors-multiple-item.json"));
 
 		VndError error1 = new VndError("\"username\" field validation failed", null, 50, //
-			new Link("http://.../", VndErrors.REL_HELP));
+			new Link("https://.../", VndErrors.REL_HELP));
 
 		VndError error2 = new VndError("\"postcode\" field validation failed", null, 55, //
-			new Link("http://.../", VndErrors.REL_HELP));
+			new Link("https://.../", VndErrors.REL_HELP));
 
 		VndErrors vndErrors = new VndErrors().withError(error1).withError(error2);
 
@@ -110,10 +110,10 @@ public class VndErrorsMarshallingTest {
 	public void multipleItemVndErrorsShouldSerialize() throws IOException {
 
 		VndError error1 = new VndError("\"username\" field validation failed", null, 50, //
-			new Link("http://.../", VndErrors.REL_HELP));
+			new Link("https://.../", VndErrors.REL_HELP));
 
 		VndError error2 = new VndError("\"postcode\" field validation failed", null, 55, //
-			new Link("http://.../", VndErrors.REL_HELP));
+			new Link("https://.../", VndErrors.REL_HELP));
 
 		VndErrors vndErrors = new VndErrors().withError(error1).withError(error2);
 
@@ -131,13 +131,13 @@ public class VndErrorsMarshallingTest {
 		String json = read(new ClassPathResource("vnderrors-nested.json"));
 
 		VndError error = new VndError("Username must contain at least three characters", "/username", null, //
-			new Link("http://path.to/user/resource/1", VndErrors.REL_ABOUT));
+			new Link("https://path.to/user/resource/1", VndErrors.REL_ABOUT));
 
 		VndErrors vndErrors = new VndErrors()
 			.withError(error)
-			.withLink(new Link("http://path.to/describes").withRel(VndErrors.REL_DESCRIBES))
-			.withLink(new Link("http://path.to/help").withRel(VndErrors.REL_HELP))
-			.withLink(new Link("http://path.to/user/resource/1").withRel(VndErrors.REL_ABOUT))
+			.withLink(new Link("https://path.to/describes").withRel(VndErrors.REL_DESCRIBES))
+			.withLink(new Link("https://path.to/help").withRel(VndErrors.REL_HELP))
+			.withLink(new Link("https://path.to/user/resource/1").withRel(VndErrors.REL_ABOUT))
 			.withMessage("Validation failed")
 			.withLogref(42);
 
@@ -151,13 +151,13 @@ public class VndErrorsMarshallingTest {
 	public void nestedVndErrorsShouldSerialize() throws IOException {
 
 		VndError error = new VndError("Username must contain at least three characters", "/username", null, //
-			new Link("http://path.to/user/resource/1", VndErrors.REL_ABOUT));
+			new Link("https://path.to/user/resource/1", VndErrors.REL_ABOUT));
 
 		VndErrors vndErrors = new VndErrors()
 			.withError(error)
-			.withLink(new Link("http://path.to/describes").withRel(VndErrors.REL_DESCRIBES))
-			.withLink(new Link("http://path.to/help").withRel(VndErrors.REL_HELP))
-			.withLink(new Link("http://path.to/user/resource/1").withRel(VndErrors.REL_ABOUT))
+			.withLink(new Link("https://path.to/describes").withRel(VndErrors.REL_DESCRIBES))
+			.withLink(new Link("https://path.to/help").withRel(VndErrors.REL_HELP))
+			.withLink(new Link("https://path.to/user/resource/1").withRel(VndErrors.REL_ABOUT))
 			.withMessage("Validation failed")
 			.withLogref(42);
 

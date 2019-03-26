@@ -4,13 +4,13 @@
   "total" : 1,
   "_links" : {
     "describes" : {
-      "href" : "http://path.to/describes"
+      "href" : "https://path.to/describes"
     },
     "help" : {
-      "href" : "http://path.to/help"
+      "href" : "https://path.to/help"
     },
     "about" : {
-      "href" : "http://path.to/user/resource/1"
+      "href" : "https://path.to/user/resource/1"
     }
   },
   "_embedded" : {
@@ -19,7 +19,7 @@
       "path" : "/username",
       "_links" : {
         "about" : {
-          "href" : "http://path.to/user/resource/1"
+          "href" : "https://path.to/user/resource/1"
         }
       }
     } ]

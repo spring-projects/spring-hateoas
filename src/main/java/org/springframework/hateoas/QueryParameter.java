@@ -19,7 +19,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Web framework-neutral representation of a web request's query parameter (http://example.com?name=foo).
+ * Web framework-neutral representation of a web request's query parameter (https://example.com?name=foo).
  *
  * @author Greg Turnquist
  */
