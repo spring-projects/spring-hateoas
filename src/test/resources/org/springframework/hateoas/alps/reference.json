@@ -1,6 +1,6 @@
 {
   "doc" : {
-    "href" : "http://example.org/samples/full/doc.html"
+    "href" : "https://example.org/samples/full/doc.html"
   },
   "descriptors" : [ {
     "id" : "search",
