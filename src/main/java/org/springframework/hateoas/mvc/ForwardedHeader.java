@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * Value object to partially implement the {@literal Forwarded} header defined in RFC 7239.
  *
  * @author Oliver Gierke
- * @see http://tools.ietf.org/html/rfc7239
+ * @see https://tools.ietf.org/html/rfc7239
  */
 class ForwardedHeader {
 
