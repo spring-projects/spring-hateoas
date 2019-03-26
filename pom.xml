@@ -134,7 +134,7 @@
 								</goals>
 								<configuration>
 									<publisher>
-										<contextUrl>http://repo.spring.io</contextUrl>
+										<contextUrl>https://repo.spring.io</contextUrl>
 										<username>{{USERNAME}}</username>
 										<password>{{PASSWORD}}</password>
 										<repoKey>libs-snapshot-local</repoKey>
