@@ -84,7 +84,15 @@ public @interface EnableHypermediaSupport {
 		 *
 		 * @see https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html
 		 */
-		UBER(MediaTypes.UBER_JSON);
+		UBER(MediaTypes.UBER_JSON),
+
+		/**
+		 * JSON:API
+		 *
+		 * @see https://jsonapi.org/format/
+		 * @see http://www.iana.org/assignments/media-types/application/vnd.api+json
+		 */
+		JSON_API(MediaTypes.JSON_API);
 
 		private final List<MediaType> mediaTypes;
 

@@ -78,7 +78,7 @@ public class MediaTypes {
 	public static final MediaType COLLECTION_JSON = MediaType.valueOf(COLLECTION_JSON_VALUE);
 
 	/**
-	 * A String equivalent of {@link MediaTypes#UBER_JSON_VALUE}.
+	 * A String equivalent of {@link MediaTypes#UBER_JSON}.
 	 */
 	public static final String UBER_JSON_VALUE = "application/vnd.amundsen-uber+json";
 
@@ -86,4 +86,17 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/vnd.amundsen-uber+json}.
 	 */
 	public static final MediaType UBER_JSON = MediaType.parseMediaType(UBER_JSON_VALUE);
+
+
+	/**
+	 * A String equivalent of {@link MediaTypes#JSON_API}.
+	 */
+	public static final String JSON_API_VALUE = "application/vnd.api+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.api+json}.
+	 */
+	public static final MediaType JSON_API = MediaType.parseMediaType(JSON_API_VALUE);
+
+
 }
