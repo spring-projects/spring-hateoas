@@ -6,7 +6,7 @@ This section describes how to configure Spring HATEOAS.
 [[configuration.at-enable]]
 == Using `@EnableHypermediaSupport`
 
-To let the `RepresentationModel` subtypes be rendered according to the specification of various hypermedia representations types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support http://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
+To let the `RepresentationModel` subtypes be rendered according to the specification of various hypermedia representations types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support https://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
 
 * It registers necessary Jackson modules to render `EntityModel` and `CollectionModel` in the hypermedia specific format.
 * If JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to look up links by their `rel` in plain JSON representations (see <<client.link-discoverer>>).
