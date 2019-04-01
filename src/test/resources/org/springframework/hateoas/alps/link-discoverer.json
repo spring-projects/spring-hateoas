@@ -1,7 +1,7 @@
 {
   "version" : "1.0",
   "doc" : {
-    "href" : "http://example.org/samples/full/doc.html"
+    "href" : "https://example.org/samples/full/doc.html"
   },
   "descriptors" : [ {
     "id" : "sfirst descriptor",
@@ -17,7 +17,7 @@
     "href" : "selfHref"
   }, {
     "id" : "fully qualified descriptor",
-    "name" : "http://foo.com/bar",
+    "name" : "http://www.foo.com/bar",
     "href" : "fullRelHref"
   } ]
 }

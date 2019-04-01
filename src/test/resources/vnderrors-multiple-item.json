@@ -6,7 +6,7 @@
       "logref" : 50,
       "_links" : {
         "help" : {
-          "href" : "http://.../"
+          "href" : "https://.../"
         }
       }
     }, {
@@ -14,7 +14,7 @@
       "logref" : 55,
       "_links" : {
         "help" : {
-          "href" : "http://.../"
+          "href" : "https://.../"
         }
       }
     } ]

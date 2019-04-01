@@ -1,9 +1,9 @@
-image:https://spring.io/badges/spring-hateoas/ga.svg[http://projects.spring.io/spring-hateoas/#quick-start]
-image:https://spring.io/badges/spring-hateoas/snapshot.svg[http://projects.spring.io/spring-hateoas/#quick-start]
+image:https://spring.io/badges/spring-hateoas/ga.svg[https://projects.spring.io/spring-hateoas/#quick-start]
+image:https://spring.io/badges/spring-hateoas/snapshot.svg[https://projects.spring.io/spring-hateoas/#quick-start]
 
 = Spring HATEOAS
 
-This project provides some APIs to ease creating REST representations that follow the http://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+This project provides some APIs to ease creating REST representations that follow the https://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
 
 == Working with Spring HATEOAS
 
@@ -16,6 +16,6 @@ git config core.commentchar "/"
 
 == Resources
 
-* Reference documentation - http://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], http://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
-* http://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/api/[JavaDoc]
+* Reference documentation - https://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], https://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
+* https://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/api/[JavaDoc]
 * https://spring.io/guides/gs/rest-hateoas/[Getting started guide]

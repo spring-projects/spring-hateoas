@@ -4,13 +4,13 @@
   "logref" : 42,
   "_links" : {
     "about" : {
-      "href" : "http://path.to/user/resource/1"
+      "href" : "https://path.to/user/resource/1"
     },
     "describes" : {
-      "href" : "http://path.to/describes"
+      "href" : "https://path.to/describes"
     },
     "help" : {
-      "href" : "http://path.to/help"
+      "href" : "https://path.to/help"
     }
   }
 }

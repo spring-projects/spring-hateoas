@@ -1,16 +1,16 @@
 {
   "collection": {
     "version": "1.0",
-    "href": "http://example.org/friends/",
+    "href": "https://example.org/friends/",
     "links": [
       {
         "rel": "feed",
-        "href": "http://example.org/friends/rss"
+        "href": "https://example.org/friends/rss"
       }
     ],
     "items": [
       {
-        "href": "http://example.org/friends/jdoe",
+        "href": "https://example.org/friends/jdoe",
         "data": [
           {
             "name": "fullname",
@@ -26,19 +26,19 @@
         "links": [
           {
             "rel": "blog",
-            "href": "http://examples.org/blogs/jdoe",
+            "href": "https://examples.org/blogs/jdoe",
             "prompt": "Blog"
           },
           {
             "rel": "avatar",
-            "href": "http://examples.org/images/jdoe",
+            "href": "https://examples.org/images/jdoe",
             "prompt": "Avatar",
             "render": "image"
           }
         ]
       },
       {
-        "href": "http://example.org/friends/msmith",
+        "href": "https://example.org/friends/msmith",
         "data": [
           {
             "name": "fullname",
@@ -54,19 +54,19 @@
         "links": [
           {
             "rel": "blog",
-            "href": "http://examples.org/blogs/msmith",
+            "href": "https://examples.org/blogs/msmith",
             "prompt": "Blog"
           },
           {
             "rel": "avatar",
-            "href": "http://examples.org/images/msmith",
+            "href": "https://examples.org/images/msmith",
             "prompt": "Avatar",
             "render": "image"
           }
         ]
       },
       {
-        "href": "http://example.org/friends/rwilliams",
+        "href": "https://example.org/friends/rwilliams",
         "data": [
           {
             "name": "fullname",
@@ -82,12 +82,12 @@
         "links": [
           {
             "rel": "blog",
-            "href": "http://examples.org/blogs/rwilliams",
+            "href": "https://examples.org/blogs/rwilliams",
             "prompt": "Blog"
           },
           {
             "rel": "avatar",
-            "href": "http://examples.org/images/rwilliams",
+            "href": "https://examples.org/images/rwilliams",
             "prompt": "Avatar",
             "render": "image"
           }
@@ -97,7 +97,7 @@
     "queries": [
       {
         "rel": "search",
-        "href": "http://example.org/friends/search",
+        "href": "https://example.org/friends/search",
         "prompt": "Search",
         "data": [
           {
