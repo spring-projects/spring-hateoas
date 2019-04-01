@@ -146,7 +146,7 @@ public class TraversonTest {
 	@Test
 	public void sendsConfiguredHeadersForJsonPathExpression() {
 
-		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		String expectedHeader = "<https://www.example.com>;rel=\"home\"";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Link", expectedHeader);
@@ -165,7 +165,7 @@ public class TraversonTest {
 	@Test
 	public void sendsConfiguredHeadersForToEntity() {
 
-		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		String expectedHeader = "<https://www.example.com>;rel=\"home\"";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Link", expectedHeader);
