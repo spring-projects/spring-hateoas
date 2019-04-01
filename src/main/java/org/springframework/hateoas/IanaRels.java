@@ -25,7 +25,7 @@ import java.util.HashSet;
 /**
  * Static class to find out whether a relation type is defined by the IANA.
  * 
- * @see http://www.iana.org/assignments/link-relations/link-relations.xhtml
+ * @see https://www.iana.org/assignments/link-relations/link-relations.xhtml
  * @author Oliver Gierke
  * @author Roland Kulcsár
  */
