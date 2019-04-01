@@ -1,7 +1,7 @@
 {
   "collection": {
     "version": "1.0",
-    "href": "http://example.org/friends/",
+    "href": "https://example.org/friends/",
     "error": {
       "title": "Server Error",
       "code": "X1C2",
