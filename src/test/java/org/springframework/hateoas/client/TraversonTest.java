@@ -247,6 +247,23 @@ public class TraversonTest {
 		assertThat(link.isTemplated()).isFalse();
 	}
 
+	@Test
+	public void returnsTemplatedRequiredLinkIfRequested() {
+
+		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/github-with-template")), MediaTypes.HAL_JSON)
+				.follow("foo_url_templated");
+
+		Link link = follow.asTemplatedLink();
+
+		assertThat(link.isTemplated()).isTrue();
+		assertThat(link.getVariableNames()).contains("template");
+
+		link = follow.asLink();
+
+		assertThat(link.isTemplated()).isFalse();
+	}
+
+
 	/**
 	 * @see #258
 	 */

@@ -100,6 +100,12 @@ public class Server implements Closeable {
 				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
 				withContentType(MediaTypes.HAL_JSON.toString());
 
+		onRequest(). //
+				havingPathEqualTo("/github-with-template"). //
+				respond(). //
+				withBody("{ \"foo_url_templated\" : \"" + rootResource() + "/github/{issue}\"}"). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
 		org.springframework.core.io.Resource springagramRoot = resourceLoader
