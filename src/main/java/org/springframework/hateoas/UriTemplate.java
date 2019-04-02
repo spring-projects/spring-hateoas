@@ -278,8 +278,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		if (value == null) {
 
 			if (variable.isRequired()) {
-				throw new IllegalArgumentException(String.format("Template variable %s is required but no value was given!",
-						variable.getName()));
+				throw new IllegalArgumentException(
+						String.format("Template variable %s is required but no value was given!", variable.getName()));
 			}
 
 			return;

@@ -15,10 +15,6 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.hateoas.client.Hop.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -48,11 +44,23 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import static net.jadler.Jadler.verifyThatRequest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.hateoas.client.Hop.rel;
+
 /**
  * Integration tests for {@link Traverson}.
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Michael Wirth
  * @since 0.11
  */
 public class TraversonTest {
@@ -239,22 +247,21 @@ public class TraversonTest {
 		assertThat(link.isTemplated(), is(false));
 	}
 
-	@Test
+	@Test // #971
 	public void returnsTemplatedRequiredLinkIfRequested() {
 
-		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/github-with-template")), MediaTypes.HAL_JSON)
-				.follow("foo_url_templated");
+		Link templatedLink = new Traverson(URI.create(server.rootResource() + "/github-with-template"), MediaTypes.HAL_JSON) //
+				.follow("rel_to_templated_link") //
+				.asTemplatedLink();
 
-		Link link = follow.asTemplatedLink();
+		assertThat(templatedLink.isTemplated(), is(true));
+		assertThat(templatedLink.getVariableNames(), contains("issue"));
 
-		assertThat(link.isTemplated()).isTrue();
-		assertThat(link.getVariableNames()).contains("template");
+		Link expandedLink = templatedLink.expand("42");
 
-		link = follow.asLink();
-
-		assertThat(link.isTemplated()).isFalse();
+		assertThat(expandedLink.isTemplated(), is(false));
+		assertThat(expandedLink.getHref(), equalTo("/github/42"));
 	}
-
 
 	/**
 	 * @see #258
