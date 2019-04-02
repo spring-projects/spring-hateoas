@@ -15,10 +15,12 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.hateoas.client.Hop.*;
+import static net.jadler.Jadler.verifyThatRequest;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.hateoas.client.Hop.rel;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,9 +35,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -53,6 +55,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Michael Wirth
  * @since 0.11
  */
 public class TraversonTest {
@@ -247,22 +250,21 @@ public class TraversonTest {
 		assertThat(link.isTemplated()).isFalse();
 	}
 
-	@Test
+	@Test // #971
 	public void returnsTemplatedRequiredLinkIfRequested() {
 
-		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/github-with-template")), MediaTypes.HAL_JSON)
-				.follow("foo_url_templated");
+		Link templatedLink = new Traverson(URI.create(server.rootResource() + "/github-with-template"), MediaTypes.HAL_JSON) //
+				.follow("rel_to_templated_link") //
+				.asTemplatedLink();
 
-		Link link = follow.asTemplatedLink();
+		assertThat(templatedLink.isTemplated()).isTrue();
+		assertThat(templatedLink.getVariableNames()).contains("issue");
 
-		assertThat(link.isTemplated()).isTrue();
-		assertThat(link.getVariableNames()).contains("template");
+		Link expandedLink = templatedLink.expand("42");
 
-		link = follow.asLink();
-
-		assertThat(link.isTemplated()).isFalse();
+		assertThat(expandedLink.isTemplated()).isFalse();
+		assertThat(expandedLink.getHref()).isEqualTo("/github/42");
 	}
-
 
 	/**
 	 * @see #258

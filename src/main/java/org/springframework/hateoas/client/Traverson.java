@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.client;
 
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.GET;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -58,6 +58,7 @@ import com.jayway.jsonpath.JsonPath;
  * @author Greg Turnquist
  * @author Tom Bunting
  * @author Manish Misra
+ * @author Michael Wirth
  * @since 0.11
  */
 public class Traverson {
@@ -376,10 +377,7 @@ public class Traverson {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
 
-			URIAndHeaders expandedFinalUriAndHeaders = traverseToExpandedFinalUrl();
-			UriStringAndHeaders finalUriAndHeaders = traverseToFinalUrl();
-
-			return new Link(expandFinalUrl ? expandedFinalUriAndHeaders.getUri().toString() : finalUriAndHeaders.getUri(),
+			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().getUri().toString() : traverseToFinalUrl().getUri(),
 					rels.get(rels.size() - 1).getRel());
 		}
 

@@ -15,16 +15,8 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.UUID;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -43,14 +35,25 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.UUID;
+
+import static net.jadler.Jadler.closeJadler;
+import static net.jadler.Jadler.initJadler;
+import static net.jadler.Jadler.onRequest;
+import static net.jadler.Jadler.port;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.mock;
 
 /**
  * Helper class for integration tests.
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Michael Wirth
  */
 public class Server implements Closeable {
 
@@ -103,7 +106,7 @@ public class Server implements Closeable {
 		onRequest(). //
 				havingPathEqualTo("/github-with-template"). //
 				respond(). //
-				withBody("{ \"foo_url_templated\" : \"" + rootResource() + "/github/{issue}\"}"). //
+				withBody("{ \"_links\" : { \"rel_to_templated_link\" : { \"href\" : \"/github/{issue}\" }}}"). //
 				withContentType(MediaTypes.HAL_JSON.toString());
 
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase

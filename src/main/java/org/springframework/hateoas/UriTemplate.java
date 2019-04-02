@@ -196,7 +196,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	public List<String> getVariableNames() {
 
 		return variables.asList().stream() //
-				.map(TemplateVariable::getName).collect(Collectors.toList());
+				.map(TemplateVariable::getName) //
+				.collect(Collectors.toList());
 	}
 
 	/**
