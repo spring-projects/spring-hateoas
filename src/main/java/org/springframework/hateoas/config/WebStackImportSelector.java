@@ -15,8 +15,10 @@
  */
 package org.springframework.hateoas.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.type.AnnotationMetadata;
@@ -29,23 +31,44 @@ import org.springframework.hateoas.support.WebStack;
  */
 class WebStackImportSelector implements ImportSelector {
 
+	private static final String WEB_STACK_MISSING = "At least one web stack has to be selected in @EnableHypermediaSupport on %s!";
+
+	static Map<WebStack, String> CONFIGS;
+
+	static {
+
+		Map<WebStack, String> configs = new HashMap<>();
+
+		configs.put(WebStack.WEBMVC, "org.springframework.hateoas.config.WebMvcHateoasConfiguration");
+		configs.put(WebStack.WEBFLUX, "org.springframework.hateoas.config.WebFluxHateoasConfiguration");
+
+		CONFIGS = Collections.unmodifiableMap(configs);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.context.annotation.ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)
 	 */
 	@Override
-	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+	public String[] selectImports(AnnotationMetadata metadata) {
 
-		List<String> imports = new ArrayList<>();
+		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
 
-		if (WebStack.WEBMVC.isAvailable()) {
-			imports.add("org.springframework.hateoas.config.WebMvcHateoasConfiguration");
+		// Configuration class imported but not through @EnableHypermediaSupport
+
+		if (attributes == null) {
+			return new String[0];
 		}
 
-		if (WebStack.WEBFLUX.isAvailable()) {
-			imports.add("org.springframework.hateoas.config.WebFluxHateoasConfiguration");
+		WebStack[] stacks = (WebStack[]) attributes.get("stacks");
+
+		if (stacks.length == 0) {
+			throw new IllegalStateException(String.format(WEB_STACK_MISSING, metadata.getClassName()));
 		}
 
-		return imports.toArray(new String[0]);
+		return Arrays.stream(stacks) //
+				.filter(WebStack::isAvailable) //
+				.map(CONFIGS::get) //
+				.toArray(String[]::new);
 	}
 }

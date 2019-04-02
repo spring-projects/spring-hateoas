@@ -26,7 +26,9 @@ import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.support.WebStack;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans to support all
@@ -48,6 +50,15 @@ public @interface EnableHypermediaSupport {
 	 * @return
 	 */
 	HypermediaType[] type();
+
+	/**
+	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
+	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components like
+	 * {@link WebClient} but don't want to use hypermedia operations with it.
+	 *
+	 * @return
+	 */
+	WebStack[] stacks() default { WebStack.WEBMVC, WebStack.WEBFLUX };
 
 	/**
 	 * Hypermedia representation types supported.
