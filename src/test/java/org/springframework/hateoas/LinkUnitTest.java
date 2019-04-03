@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -113,13 +113,13 @@ public class LinkUnitTest {
 
 		assertThat(Link.valueOf("</something>;rel=\"foo\""), is(new Link("/something", "foo")));
 		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""), is(new Link("/something", "foo")));
-		assertThat(Link.valueOf("</customer/1>;rel=\"self\";hreflang=\"en\";media=\"pdf\";title=\"pdf customer copy\";type=\"portable document\";deprecation=\"http://example.com/customers/deprecated\""),
+		assertThat(Link.valueOf("</customer/1>;rel=\"self\";hreflang=\"en\";media=\"pdf\";title=\"pdf customer copy\";type=\"portable document\";deprecation=\"https://example.com/customers/deprecated\""),
 			is(new Link("/customer/1")
 				.withHreflang("en")
 				.withMedia("pdf")
 				.withTitle("pdf customer copy")
 				.withType("portable document")
-				.withDeprecation("http://example.com/customers/deprecated")));
+				.withDeprecation("https://example.com/customers/deprecated")));
 	}
 
 	/**
@@ -214,7 +214,7 @@ public class LinkUnitTest {
 	@Test
 	public void parsesUriLinkRelations() {
 
-		assertThat(Link.valueOf("<http://localhost>; rel=\"http://acme.com/rels/foo-bar\"").getRel(),
-				is("http://acme.com/rels/foo-bar"));
+		assertThat(Link.valueOf("<http://localhost>; rel=\"https://acme.com/rels/foo-bar\"").getRel(),
+				is("https://acme.com/rels/foo-bar"));
 	}
 }

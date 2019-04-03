@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.client;
 
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.GET;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -61,6 +61,8 @@ import com.jayway.jsonpath.JsonPath;
  * @author Dietrich Schulten
  * @author Greg Turnquist
  * @author Tom Bunting
+ * @author Manish Misra
+ * @author Michael Wirth
  * @since 0.11
  */
 public class Traverson {
@@ -397,6 +399,7 @@ public class Traverson {
 		private Link traverseToLink(boolean expandFinalUrl) {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
+
 			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().toString() : traverseToFinalUrl(),
 					rels.get(rels.size() - 1).getRel());
 		}

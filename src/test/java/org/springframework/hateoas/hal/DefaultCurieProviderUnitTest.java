@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,17 +70,17 @@ public class DefaultCurieProviderUnitTest {
 
 	@Test
 	public void doesNotPrefixIanaRels() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com")), is("self"));
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com")), is("self"));
 	}
 
 	@Test
 	public void prefixesNormalRels() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "book")), is("acme:book"));
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "book")), is("acme:book"));
 	}
 
 	@Test
 	public void doesNotPrefixQualifiedRels() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")), is("custom:rel"));
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "custom:rel")), is("custom:rel"));
 	}
 
 	/**
@@ -88,12 +88,12 @@ public class DefaultCurieProviderUnitTest {
 	 */
 	@Test
 	public void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
-		assertThat(provider.getNamespacedRelFrom(new Link("http://amazon.com", "custom:rel")
+		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "custom:rel")
 			.withHreflang("en")
 			.withTitle("the title")
 			.withMedia("the media")
 			.withType("the type")
-			.withDeprecation("http://example.com/custom/deprecated")), is("custom:rel"));
+			.withDeprecation("https://example.com/custom/deprecated")), is("custom:rel"));
 	}
 
 	/**

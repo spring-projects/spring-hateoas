@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,15 +15,8 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.hamcrest.Matchers.*;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.UUID;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.Link;
@@ -38,14 +31,24 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.UUID;
+
+import static net.jadler.Jadler.closeJadler;
+import static net.jadler.Jadler.initJadler;
+import static net.jadler.Jadler.onRequest;
+import static net.jadler.Jadler.port;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Helper class for integration tests.
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Michael Wirth
  */
 public class Server implements Closeable {
 
@@ -96,11 +99,21 @@ public class Server implements Closeable {
 				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
 				withContentType(MediaTypes.HAL_JSON.toString());
 
+		onRequest(). //
+				havingPathEqualTo("/github-with-template"). //
+				respond(). //
+				withBody("{ \"_links\" : { \"rel_to_templated_link\" : { \"href\" : \"/github/{issue}\" }}}"). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
-		org.springframework.core.io.Resource springagramRoot = resourceLoader.getResource("classpath:springagram-root.json");
-		org.springframework.core.io.Resource springagramItems = resourceLoader.getResource("classpath:springagram-items.json");
-		org.springframework.core.io.Resource springagramItem = resourceLoader.getResource("classpath:springagram-item.json");
-		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader.getResource("classpath:springagram-item-without-image.json");
+		org.springframework.core.io.Resource springagramRoot = resourceLoader
+				.getResource("classpath:springagram-root.json");
+		org.springframework.core.io.Resource springagramItems = resourceLoader
+				.getResource("classpath:springagram-items.json");
+		org.springframework.core.io.Resource springagramItem = resourceLoader
+				.getResource("classpath:springagram-item.json");
+		org.springframework.core.io.Resource springagramItemWithoutImage = resourceLoader
+				.getResource("classpath:springagram-item-without-image.json");
 
 		String springagramRootTemplate;
 		String springagramItemsTemplate;
@@ -118,7 +131,8 @@ public class Server implements Closeable {
 		}
 
 		String springagramRootHalDocument = String.format(springagramRootTemplate, rootResource(), rootResource());
-		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(), rootResource());
+		String springagramItemsHalDocument = String.format(springagramItemsTemplate, rootResource(), rootResource(),
+				rootResource());
 		String springagramItemHalDocument = String.format(springagramItemTemplate, rootResource(), rootResource());
 		String springagramItemWithoutImageHalDocument = String.format(springagramItemWithoutImageTemplate, rootResource());
 

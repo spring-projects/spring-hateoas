@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
 	static final String SAMPLE = "{ _links : { self : { href : 'selfHref' }, " + //
 			"relation : [ { href : 'firstHref' }, { href : 'secondHref' }], " + //
-			"'http://foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
+			"'http://www.foo.com/bar' : { href : 'fullRelHref' }, " + "}}";
 
 	/**
 	 * @see #314
@@ -43,7 +43,7 @@ public class HalLinkDiscovererUnitTest extends AbstractLinkDiscovererUnitTest {
 	@Test
 	public void discoversFullyQualifiedRel() {
 
-		Link link = getDiscoverer().findLinkWithRel("http://foo.com/bar", SAMPLE);
+		Link link = getDiscoverer().findLinkWithRel("http://www.foo.com/bar", SAMPLE);
 
 		assertThat(link, is(notNullValue()));
 		assertThat(link.getHref(), is("fullRelHref"));

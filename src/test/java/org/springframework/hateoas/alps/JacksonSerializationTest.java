@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,7 @@ public class JacksonSerializationTest {
 	public void writesSampleDocument() throws Exception {
 
 		Alps alps = alps().//
-				doc(doc().href("http://example.org/samples/full/doc.html").build()). //
+				doc(doc().href("https://example.org/samples/full/doc.html").build()). //
 				descriptors(Arrays.asList(//
 						descriptor().id("search").type(Type.SAFE).//
 								doc(new Doc("A search form with two inputs.", Format.TEXT)).//

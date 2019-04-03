@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,10 +15,6 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.hateoas.client.Hop.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -48,11 +44,23 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import static net.jadler.Jadler.verifyThatRequest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.hateoas.client.Hop.rel;
+
 /**
  * Integration tests for {@link Traverson}.
  * 
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Michael Wirth
  * @since 0.11
  */
 public class TraversonTest {
@@ -145,7 +153,7 @@ public class TraversonTest {
 	@Test
 	public void sendsConfiguredHeadersForJsonPathExpression() {
 
-		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		String expectedHeader = "<https://www.example.com>;rel=\"home\"";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Link", expectedHeader);
@@ -164,7 +172,7 @@ public class TraversonTest {
 	@Test
 	public void sendsConfiguredHeadersForToEntity() {
 
-		String expectedHeader = "<http://www.example.com>;rel=\"home\"";
+		String expectedHeader = "<https://www.example.com>;rel=\"home\"";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Link", expectedHeader);
@@ -237,6 +245,22 @@ public class TraversonTest {
 		link = follow.asLink();
 
 		assertThat(link.isTemplated(), is(false));
+	}
+
+	@Test // #971
+	public void returnsTemplatedRequiredLinkIfRequested() {
+
+		Link templatedLink = new Traverson(URI.create(server.rootResource() + "/github-with-template"), MediaTypes.HAL_JSON) //
+				.follow("rel_to_templated_link") //
+				.asTemplatedLink();
+
+		assertThat(templatedLink.isTemplated(), is(true));
+		assertThat(templatedLink.getVariableNames(), contains("issue"));
+
+		Link expandedLink = templatedLink.expand("42");
+
+		assertThat(expandedLink.isTemplated(), is(false));
+		assertThat(expandedLink.getHref(), equalTo("/github/42"));
 	}
 
 	/**

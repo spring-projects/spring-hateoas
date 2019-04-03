@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>0.26.0.BUILD-SNAPSHOT</version>
+	<version>0.25.2.BUILD-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
-	<url>http://github.com/SpringSource/spring-hateoas</url>
+	<url>https://github.com/SpringSource/spring-hateoas</url>
 	<description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2016</inceptionYear>
+	<inceptionYear>2012-2019</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
-		<url>http://www.spring.io</url>
+		<url>https://www.spring.io</url>
 	</organization>
 
 	<developers>
@@ -46,7 +46,7 @@
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
 			Copyright 2011 the original author or authors.
 
@@ -54,7 +54,7 @@
 			you may not use this file except in compliance with the License.
 			You may obtain a copy of the License at
 
-			     http://www.apache.org/licenses/LICENSE-2.0
+			     https://www.apache.org/licenses/LICENSE-2.0
 
 			Unless required by applicable law or agreed to in writing, software
 			distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,11 +68,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.18.RELEASE</spring.version>
+		<spring.version>4.3.22.RELEASE</spring.version>
 		<logback.version>1.1.11</logback.version>
-		<jacoco>0.7.8</jacoco>
+		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.8.10</jackson.version>
+		<jackson.version>2.8.11.20181123</jackson.version>
 		<jaxrs.version>2.0.1</jaxrs.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
@@ -87,12 +87,12 @@
 		<profile>
 			<id>spring43-next</id>
 			<properties>
-				<spring.version>4.3.19.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.23.BUILD-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
 					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/libs-snapshot</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -100,27 +100,43 @@
 		<profile>
 			<id>spring5</id>
 			<properties>
-				<spring.version>5.0.7.RELEASE</spring.version>
-				<jackson.version>2.9.6</jackson.version>
+				<spring.version>5.0.12.RELEASE</spring.version>
+				<jackson.version>2.9.7</jackson.version>
 			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-milestone</id>
-					<url>http://repo.spring.io/libs-milestone</url>
-				</repository>
-			</repositories>
 		</profile>
 
 		<profile>
 			<id>spring5-next</id>
 			<properties>
-				<spring.version>5.0.8.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.6</jackson.version>
+				<spring.version>5.0.13.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.9.8</jackson.version>
 			</properties>
 			<repositories>
 				<repository>
 					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/libs-snapshot</url>
+				</repository>
+			</repositories>
+		</profile>
+
+		<profile>
+			<id>spring51</id>
+			<properties>
+				<spring.version>5.1.4.RELEASE</spring.version>
+				<jackson.version>2.9.8</jackson.version>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>spring51-next</id>
+			<properties>
+				<spring.version>5.1.5.BUILD-SNAPSHOT</spring.version>
+				<jackson.version>2.9.8</jackson.version>
+			</properties>
+			<repositories>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<url>https://repo.spring.io/libs-snapshot</url>
 				</repository>
 			</repositories>
 		</profile>
@@ -137,7 +153,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
 						<executions>
 							<execution>
 								<goals>
@@ -196,6 +211,7 @@
 				<maven.install.skip>true</maven.install.skip>
 				<skipTests>true</skipTests>
 				<project.root>${basedir}</project.root>
+				<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 			</properties>
 
 			<dependencies>
@@ -205,6 +221,13 @@
 					<version>1.9.13.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
+				</dependency>
+				<dependency>
+					<groupId>io.spring.docresources</groupId>
+					<artifactId>spring-doc-resources</artifactId>
+					<version>${docs.resources.version}</version>
+					<type>zip</type>
+					<optional>true</optional>
 				</dependency>
 			</dependencies>
 
@@ -227,6 +250,20 @@
 								</goals>
 								<phase>generate-resources</phase>
 							</execution>
+							<execution>
+								<id>unpack-doc-resources</id>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<includeGroupIds>io.spring.docresources</includeGroupIds>
+									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+								</configuration>
+							</execution>
 						</executions>
 						<configuration>
 							<includeGroupIds>org.springframework.data</includeGroupIds>
@@ -248,7 +285,7 @@
 							<execution>
 								<id>aggregate-javadoc</id>
 								<goals>
-									<goal>aggregate</goal>
+									<goal>javadoc</goal>
 								</goals>
 								<phase>package</phase>
 							</execution>
@@ -256,9 +293,32 @@
 					</plugin>
 
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-asciidoc-resources</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/asciidoc</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.6</version>
+						<version>1.5.7.1</version>
 						<dependencies>
 							<dependency>
 								<groupId>org.asciidoctor</groupId>
@@ -276,14 +336,18 @@
 								</goals>
 								<configuration>
 									<backend>html5</backend>
+									<sourceHighlighter>highlight.js</sourceHighlighter>
 									<outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
 									<sectids>false</sectids>
-									<sourceHighlighter>prettify</sourceHighlighter>
 									<attributes>
+										<docinfo>shared</docinfo>
 										<linkcss>true</linkcss>
 										<icons>font</icons>
 										<sectanchors>true</sectanchors>
+										<stylesdir>css/</stylesdir>
 										<stylesheet>spring.css</stylesheet>
+										<highlightjsdir>js/highlight</highlightjsdir>
+										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
 									</attributes>
 								</configuration>
 							</execution>
@@ -303,15 +367,14 @@
 						</executions>
 
 						<configuration>
-							<sourceDirectory>${project.root}/src/main/asciidoc</sourceDirectory>
-							<sourceDocumentName>index.adoc</sourceDocumentName>
+							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
 							<doctype>book</doctype>
 							<attributes>
 								<version>${project.version}</version>
 								<projectName>${project.name}</projectName>
 								<projectVersion>${project.version}</projectVersion>
 								<allow-uri-read>true</allow-uri-read>
-								<toclevels>3</toclevels>
+								<toclevels>4</toclevels>
 								<numbered>true</numbered>
 								<baseDir>${project.basedir}</baseDir>
 							</attributes>
@@ -329,12 +392,6 @@
 								<phase>generate-resources</phase>
 								<configuration>
 									<target>
-										<copy todir="${project.root}/target/site/reference/html">
-											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css" />
-											</fileset>
-											<flattenmapper />
-										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
 												<include name="**/*.png" />
@@ -356,7 +413,6 @@
 								<configuration>
 									<target>
 										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
-										<copy file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${project.artifactId}-reference.epub" failonerror="false" />
 									</target>
 								</configuration>
 								<goals>
@@ -364,8 +420,45 @@
 								</goals>
 							</execution>
 
+							<execution>
+								<id>package-and-attach-docs-zip</id>
+								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+											<fileset dir="${project.build.directory}/site" />
+										</zip>
+									</tasks>
+								</configuration>
+							</execution>
+
 						</executions>
 
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.10</version>
+						<executions>
+							<execution>
+								<id>attach-zip</id>
+								<goals>
+									<goal>attach-artifact</goal>
+								</goals>
+								<configuration>
+									<artifacts>
+										<artifact>
+											<file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+											<type>zip</type>
+										</artifact>
+									</artifacts>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 
 					<plugin>
@@ -390,37 +483,23 @@
 						</executions>
 					</plugin>
 
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>wagon-maven-plugin</artifactId>
-						<version>1.0</version>
-						<configuration>
-							<fromDir>${project.build.directory}</fromDir>
-						</configuration>
-						<executions>
-							<execution>
-								<id>upload-static-resources</id>
-								<phase>deploy</phase>
-								<goals>
-									<goal>upload</goal>
-								</goals>
-								<configuration>
-									<fromDir>${project.build.directory}/static-resources</fromDir>
-									<includes>**</includes>
-									<serverId>static-dot-s2</serverId>
-									<url>scp://docs.af.pivotal.io</url>
-									<toDir>/var/www/domains/spring.io/www/htdocs/autorepo/docs/${project.artifactId}/${project.version}</toDir>
-									<optimize>true</optimize>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
 				</plugins>
 			</build>
 		</profile>
 
 	</profiles>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 
@@ -476,14 +555,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -511,7 +588,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.0</version>
+			<version>1.18.6</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -605,11 +682,32 @@
 			</extension>
 		</extensions>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.0.1</version>
+					<configuration>
+						<breakiterator>true</breakiterator>
+						<header>${project.name}</header>
+						<source>${source.level}</source>
+						<quiet>true</quiet>
+						<doclint>none</doclint>
+						<links>
+							<link>https://docs.spring.io/spring/docs/4.3.x/javadoc-api</link>
+							<link>https://docs.oracle.com/javase/6/docs/api</link>
+						</links>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>${source.level}</source>
 					<target>${source.level}</target>
@@ -661,18 +759,22 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
 				<configuration>
-					<breakiterator>true</breakiterator>
-					<header>${project.name}</header>
-					<source>${source.level}</source>
-					<quiet>true</quiet>
-					<additionalparam>-Xdoclint:none</additionalparam>
-					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
-					<links>
-						<link>http://static.springframework.org/spring/docs/4.3.x/javadoc-api</link>
-						<link>http://docs.oracle.com/javase/6/docs/api</link>
-					</links>
+					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
 			</plugin>
 
@@ -680,12 +782,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.8.2</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 
 		</plugins>
+
 	</build>
 
 	<pluginRepositories>

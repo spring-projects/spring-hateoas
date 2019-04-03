@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,7 @@ import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.core.AnnotationAttribute;
 import org.springframework.hateoas.core.AnnotationMappingDiscoverer;
+import org.springframework.hateoas.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware;
 import org.springframework.hateoas.core.DummyInvocationUtils.MethodInvocation;
 import org.springframework.hateoas.core.LinkBuilderSupport;
@@ -55,7 +56,7 @@ import org.springframework.web.util.UriTemplate;
 
 /**
  * Factory for {@link LinkBuilderSupport} instances based on the request mapping annotated on the given controller.
- * 
+ *
  * @author Ricardo Gladwell
  * @author Oliver Gierke
  * @author Dietrich Schulten
@@ -67,7 +68,8 @@ import org.springframework.web.util.UriTemplate;
  */
 public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<ControllerLinkBuilder> {
 
-	private static final MappingDiscoverer DISCOVERER = new AnnotationMappingDiscoverer(RequestMapping.class);
+	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR = new AnnotatedParametersParameterAccessor(
 			new AnnotationAttribute(PathVariable.class));
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR = new RequestParamParameterAccessor();
@@ -77,7 +79,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	/**
 	 * Configures the {@link UriComponentsContributor} to be used when building {@link Link} instances from method
 	 * invocations.
-	 * 
+	 *
 	 * @see #linkTo(Object)
 	 * @param uriComponentsContributors the uriComponentsContributors to set
 	 */
@@ -103,7 +105,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkBuilderFactory#linkTo(java.lang.Class, java.util.Map)
 	 */
@@ -112,7 +114,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method, java.lang.Object[])
 	 */
@@ -121,7 +123,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return ControllerLinkBuilder.linkTo(controller, method, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Object)
 	 */
@@ -136,9 +138,9 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		Method method = invocation.getMethod();
 
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), method);
-		UriComponentsBuilder builder = ControllerLinkBuilder.getBuilder().path(mapping);
+		UriComponentsBuilder builder = UriComponentsBuilderFactory.getBuilder().path(mapping);
 
-		UriTemplate template = new UriTemplate(mapping);
+		UriTemplate template = UriTemplateFactory.templateFor(mapping);
 		Map<String, Object> values = new HashMap<String, Object>();
 		Iterator<String> names = template.getVariableNames().iterator();
 
@@ -186,7 +188,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 		return new ControllerLinkBuilder(components, variables);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
 	 */
@@ -197,7 +199,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 	/**
 	 * Applies the configured {@link UriComponentsContributor}s to the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder will never be {@literal null}.
 	 * @param invocation will never be {@literal null}.
 	 * @return
@@ -223,7 +225,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	/**
 	 * Populates the given {@link UriComponentsBuilder} with request parameters found in the given
 	 * {@link BoundMethodParameter}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 * @param parameter must not be {@literal null}.
 	 */
@@ -271,7 +273,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 	/**
 	 * Custom extension of {@link AnnotatedParametersParameterAccessor} for {@link RequestParam} to allow {@literal null}
 	 * values handed in for optional request parameters.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	private static class RequestParamParameterAccessor extends AnnotatedParametersParameterAccessor {
@@ -280,7 +282,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			super(new AnnotationAttribute(RequestParam.class));
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#createParameter(org.springframework.core.MethodParameter, java.lang.Object, org.springframework.hateoas.core.AnnotationAttribute)
 		 */
@@ -290,7 +292,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 			return new BoundMethodParameter(parameter, value, attribute) {
 
-				/* 
+				/*
 				 * (non-Javadoc)
 				 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter#isRequired()
 				 */
@@ -309,7 +311,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			};
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#verifyParameterValue(org.springframework.core.MethodParameter, java.lang.Object)
 		 */
