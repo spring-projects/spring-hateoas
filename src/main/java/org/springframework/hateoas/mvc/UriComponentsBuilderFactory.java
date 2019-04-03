@@ -61,6 +61,18 @@ class UriComponentsBuilderFactory {
 				: cacheBaseUri(createBuilderFromRequest());
 	}
 
+	static URI getBaseUri() {
+		if (RequestContextHolder.getRequestAttributes() == null) {
+			return URI.create("/");
+		}
+
+		URI baseUri = getCachedBaseUri();
+
+		return baseUri != null //
+			? baseUri //
+			: cacheBaseUri(createBuilderFromRequest().build().toUri());
+	}
+
 	private static UriComponentsBuilder createBuilderFromRequest() {
 
 		HttpServletRequest request = getCurrentRequest();
@@ -113,11 +125,14 @@ class UriComponentsBuilderFactory {
 
 	private static UriComponentsBuilder cacheBaseUri(UriComponentsBuilder builder) {
 
-		URI uri = builder.build().toUri();
+		cacheBaseUri(builder.build().toUri());
+		return builder;
+	}
+
+	private static URI cacheBaseUri(URI uri) {
 
 		getRequestAttributes().setAttribute(CACHE_KEY, uri, RequestAttributes.SCOPE_REQUEST);
-
-		return builder;
+		return uri;
 	}
 
 	private static URI getCachedBaseUri() {

@@ -50,6 +50,20 @@ class AnnotatedParametersParameterAccessor {
 
 	private final @NonNull AnnotationAttribute attribute;
 
+	public List<AnnotatedMethodParameter> getAnnotatedParameters(Method method) {
+
+		Assert.notNull(method, "Method must not be null!");
+
+		MethodParameters parameters = getOrCreateMethodParametersFor(method);
+
+		List<AnnotatedMethodParameter> result = new ArrayList<AnnotatedMethodParameter>();
+		for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
+			result.add(new AnnotatedMethodParameter(parameter, attribute));
+		}
+
+		return result;
+	}
+
 	/**
 	 * Returns {@link BoundMethodParameter}s contained in the given {@link MethodInvocation}.
 	 * 
@@ -80,7 +94,7 @@ class AnnotatedParametersParameterAccessor {
 	/**
 	 * Create the {@link BoundMethodParameter} for the given {@link MethodParameter}, parameter value and
 	 * {@link AnnotationAttribute}.
-	 * 
+	 *
 	 * @param parameter must not be {@literal null}.
 	 * @param value can be {@literal null}.
 	 * @param attribute must not be {@literal null}.
@@ -105,7 +119,7 @@ class AnnotatedParametersParameterAccessor {
 
 	/**
 	 * Returns the {@link MethodParameters} for the given {@link Method}.
-	 * 
+	 *
 	 * @param method
 	 * @return
 	 */
@@ -198,11 +212,56 @@ class AnnotatedParametersParameterAccessor {
 
 		/**
 		 * Returns whether the given parameter is a required one. Defaults to {@literal true}.
-		 * 
+		 *
 		 * @return
 		 */
 		public boolean isRequired() {
 			return true;
+		}
+	}
+
+	/**
+	 * Represents a {@link MethodParameter} with connected annotation.
+	 */
+	static class AnnotatedMethodParameter {
+
+		private final MethodParameter parameter;
+		private final AnnotationAttribute attribute;
+
+		/**
+		 * Creates a new {@link BoundMethodParameter}
+		 *
+		 * @param parameter must not be {@literal null}.
+		 * @param attribute can be {@literal null}.
+		 */
+		public AnnotatedMethodParameter(MethodParameter parameter, AnnotationAttribute attribute) {
+
+			Assert.notNull(parameter, "MethodParameter must not be null!");
+
+			this.parameter = parameter;
+			this.attribute = attribute;
+		}
+
+		public MethodParameter getParameter() {
+			return parameter;
+		}
+
+		/**
+		 * Returns the name of the {@link UriTemplate} variable to be bound. The name will be derived from the configured
+		 * {@link AnnotationAttribute} or the {@link MethodParameter} name as fallback.
+		 *
+		 * @return
+		 */
+		public String getVariableName() {
+
+			if (attribute == null) {
+				return parameter.getParameterName();
+			}
+
+			Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
+			String annotationAttributeValue = attribute.getValueFrom(annotation);
+
+			return StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter.getParameterName();
 		}
 	}
 }
