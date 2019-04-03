@@ -1,0 +1,13 @@
+{
+  "collection" :
+  {
+    "version" : "1.0",
+    "href" : "http://example.com",
+    "links" : [
+      {
+        "rel": "http://www.foo.com/bar",
+        "href": "https://www.foo.com/bar/whatever"
+      }
+    ]
+  }
+}
