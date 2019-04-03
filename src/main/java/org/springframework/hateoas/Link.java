@@ -118,7 +118,7 @@ public class Link implements Serializable {
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(String href, String rel) {
-		this(new UriTemplate(href), LinkRelation.of(rel));
+		this(UriTemplate.of(href), LinkRelation.of(rel));
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class Link implements Serializable {
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(String href, LinkRelation rel) {
-		this(new UriTemplate(href), rel);
+		this(UriTemplate.of(href), rel);
 	}
 
 	/**
@@ -299,7 +299,7 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<String> getVariableNames() {
-		return getUriTemplate().getVariableNames();
+		return template.getVariableNames();
 	}
 
 	/**
@@ -309,7 +309,7 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
-		return getUriTemplate().getVariables();
+		return template.getVariables();
 	}
 
 	/**
@@ -318,7 +318,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public boolean isTemplated() {
-		return !getUriTemplate().getVariables().isEmpty();
+		return !template.getVariables().isEmpty();
 	}
 
 	/**
@@ -328,7 +328,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Object... arguments) {
-		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+		return new Link(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -338,7 +338,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Map<String, ? extends Object> arguments) {
-		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+		return new Link(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -388,15 +388,6 @@ public class Link implements Serializable {
 		Assert.notNull(rel, "Link relation must not be null!");
 
 		return this.rel.isSameAs(rel);
-	}
-
-	private UriTemplate getUriTemplate() {
-
-		if (this.template == null) {
-			this.template = new UriTemplate(href);
-		}
-
-		return this.template;
 	}
 
 	/**

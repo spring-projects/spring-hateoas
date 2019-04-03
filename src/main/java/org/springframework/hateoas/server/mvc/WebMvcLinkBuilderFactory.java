@@ -108,7 +108,7 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new, (builder, invocation) -> {
 
-			MethodParameters parameters = new MethodParameters(invocation.getMethod());
+			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
 			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
 
 			for (MethodParameter parameter : parameters.getParameters()) {

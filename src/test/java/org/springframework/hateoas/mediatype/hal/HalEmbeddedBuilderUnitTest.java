@@ -45,7 +45,7 @@ public class HalEmbeddedBuilderUnitTest {
 	@Before
 	public void setUp() {
 		provider = new EvoInflectorLinkRelationProvider();
-		curieProvider = new DefaultCurieProvider("curie", new UriTemplate("http://localhost/{rel}"));
+		curieProvider = new DefaultCurieProvider("curie", UriTemplate.of("http://localhost/{rel}"));
 	}
 
 	@Test

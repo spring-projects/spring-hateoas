@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.client;
 
-import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -385,15 +385,14 @@ public class Traverson {
 
 			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), HttpHeaders.EMPTY);
 
-			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(),
-					uriAndHeaders.getHttpHeaders());
+			return new UriStringAndHeaders(UriTemplate.of(uriAndHeaders.getUri()).toString(), uriAndHeaders.getHttpHeaders());
 		}
 
 		private URIAndHeaders traverseToExpandedFinalUrl() {
 
 			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), HttpHeaders.EMPTY);
 
-			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(templateParameters),
+			return new URIAndHeaders(UriTemplate.of(uriAndHeaders.getUri()).expand(templateParameters),
 					uriAndHeaders.getHttpHeaders());
 		}
 
@@ -404,7 +403,7 @@ public class Traverson {
 			}
 
 			HttpEntity<?> request = prepareRequest(mergeHeaders(this.headers, extraHeaders));
-			URI target = new UriTemplate(uri).expand();
+			URI target = UriTemplate.of(uri).expand();
 
 			ResponseEntity<String> responseEntity = operations.exchange(target, GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();

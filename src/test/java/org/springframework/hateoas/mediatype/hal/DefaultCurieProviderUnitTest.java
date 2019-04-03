@@ -40,7 +40,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 public class DefaultCurieProviderUnitTest {
 
-	private static final UriTemplate URI_TEMPLATE = new UriTemplate("http://localhost:8080/rels/{rel}");
+	private static final UriTemplate URI_TEMPLATE = UriTemplate.of("http://localhost:8080/rels/{rel}");
 
 	CurieProvider provider = new DefaultCurieProvider("acme", URI_TEMPLATE);
 
@@ -63,12 +63,12 @@ public class DefaultCurieProviderUnitTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsUriTemplateWithoutVariable() {
-		new DefaultCurieProvider("acme", new UriTemplate("http://localhost:8080/rels"));
+		new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void preventsUriTemplateWithMoreThanOneVariable() {
-		new DefaultCurieProvider("acme", new UriTemplate("http://localhost:8080/rels/{rel}/{another}"));
+		new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels/{rel}/{another}"));
 	}
 
 	@Test
@@ -170,7 +170,7 @@ public class DefaultCurieProviderUnitTest {
 	@Test
 	public void expandsNonAbsoluteUriWithApplicationUri() {
 
-		DefaultCurieProvider provider = new DefaultCurieProvider("name", new UriTemplate("/docs/{rel}"));
+		DefaultCurieProvider provider = new DefaultCurieProvider("name", UriTemplate.of("/docs/{rel}"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
@@ -189,8 +189,8 @@ public class DefaultCurieProviderUnitTest {
 	private static Map<String, UriTemplate> getCuries() {
 
 		Map<String, UriTemplate> curies = new HashMap<>(2);
-		curies.put("foo", new UriTemplate("/foo/{rel}"));
-		curies.put("bar", new UriTemplate("/bar/{rel}"));
+		curies.put("foo", UriTemplate.of("/foo/{rel}"));
+		curies.put("bar", UriTemplate.of("/bar/{rel}"));
 
 		return curies;
 	}

@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.server.core;
 
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -26,10 +26,8 @@ import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriComponents;
 
 /**
  * Extract information needed to assemble an {@link Affordance} from a Spring MVC web method.
@@ -43,44 +41,34 @@ public class SpringAffordanceBuilder {
 	 * Use the attributes of the current method call along with a collection of {@link AffordanceModelFactory}'s to create
 	 * a set of {@link Affordance}s.
 	 *
-	 * @param invocation
-	 * @param discoverer
-	 * @param components
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @param href must not be {@literal null}.
+	 * @param discoverer must not be {@literal null}.
 	 * @return
 	 */
-	public static List<Affordance> create(MethodInvocation invocation, MappingDiscoverer discoverer,
-			UriComponents components) {
+	public static List<Affordance> create(Class<?> type, Method method, String href, MappingDiscoverer discoverer) {
 
-		List<Affordance> affordances = new ArrayList<>();
+		String methodName = method.getName();
+		Link affordanceLink = new Link(href, LinkRelation.of(methodName));
 
-		for (HttpMethod requestMethod : discoverer.getRequestMethod(invocation.getTargetType(), invocation.getMethod())) {
+		MethodParameters parameters = MethodParameters.of(method);
 
-			String methodName = invocation.getMethod().getName();
+		ResolvableType inputType = parameters.getParametersWith(RequestBody.class).stream() //
+				.findFirst() //
+				.map(ResolvableType::forMethodParameter) //
+				.orElse(ResolvableType.NONE);
 
-			String href = components.toUriString().equals("") ? "/" : components.toUriString();
-			Link affordanceLink = new Link(href).withRel(LinkRelation.of(methodName));
+		List<QueryParameter> queryMethodParameters = parameters.getParametersWith(RequestParam.class).stream() //
+				.map(it -> it.getParameterAnnotation(RequestParam.class)) //
+				.filter(Objects::nonNull) //
+				.map(it -> new QueryParameter(it.name(), it.value(), it.required())) //
+				.collect(Collectors.toList());
 
-			MethodParameters invocationMethodParameters = new MethodParameters(invocation.getMethod());
+		ResolvableType outputType = ResolvableType.forMethodReturnType(method);
 
-			ResolvableType inputType = invocationMethodParameters.getParametersWith(RequestBody.class).stream() //
-					.findFirst() //
-					.map(ResolvableType::forMethodParameter) //
-					.orElse(ResolvableType.NONE);
-
-			List<QueryParameter> queryMethodParameters = invocationMethodParameters.getParametersWith(RequestParam.class)
-					.stream() //
-					.map(methodParameter -> methodParameter.getParameterAnnotation(RequestParam.class)) //
-					.filter(Objects::nonNull) //
-					.map(requestParam -> new QueryParameter(requestParam.name(), requestParam.value(), requestParam.required())) //
-					.collect(Collectors.toList());
-
-			ResolvableType outputType = ResolvableType.forMethodReturnType(invocation.getMethod());
-
-			affordances
-					.add(new Affordance(methodName, affordanceLink, requestMethod, inputType, queryMethodParameters, outputType));
-
-		}
-
-		return affordances;
+		return discoverer.getRequestMethod(type, method).stream() //
+				.map(it -> new Affordance(methodName, affordanceLink, it, inputType, queryMethodParameters, outputType)) //
+				.collect(Collectors.toList());
 	}
 }

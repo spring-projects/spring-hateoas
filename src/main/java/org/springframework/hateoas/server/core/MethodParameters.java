@@ -38,7 +38,8 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public class MethodParameters {
 
-	private static ParameterNameDiscoverer DISCOVERER = new DefaultParameterNameDiscoverer();
+	private static final ParameterNameDiscoverer DISCOVERER = new DefaultParameterNameDiscoverer();
+	private static final Map<Method, MethodParameters> CACHE = new ConcurrentReferenceHashMap<>();
 
 	private final List<MethodParameter> parameters;
 	private final Map<Class<?>, List<MethodParameter>> parametersWithAnnotationCache = new ConcurrentReferenceHashMap<>();
@@ -48,8 +49,21 @@ public class MethodParameters {
 	 *
 	 * @param method must not be {@literal null}.
 	 */
-	public MethodParameters(Method method) {
+	private MethodParameters(Method method) {
 		this(method, null);
+	}
+
+	/**
+	 * Returns the {@link MethodParameters} for the given {@link Method}.
+	 *
+	 * @param method must not be {@literal null}.
+	 * @return
+	 */
+	public static MethodParameters of(Method method) {
+
+		Assert.notNull(method, "Method must not be null!");
+
+		return CACHE.computeIfAbsent(method, MethodParameters::new);
 	}
 
 	/**
@@ -115,14 +129,15 @@ public class MethodParameters {
 	 * @param annotation must not be {@literal null}.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<MethodParameter> getParametersWith(Class<? extends Annotation> annotation) {
+
+		Assert.notNull(annotation, "Annotation must not be null!");
 
 		return parametersWithAnnotationCache.computeIfAbsent(annotation, key -> {
 
-			Assert.notNull(annotation, "Annotation must not be null!");
-
 			return getParameters().stream()//
-					.filter(it -> it.hasParameterAnnotation(annotation))//
+					.filter(it -> it.hasParameterAnnotation((Class<? extends Annotation>) key))//
 					.collect(Collectors.toList());
 		});
 	}

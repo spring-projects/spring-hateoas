@@ -105,7 +105,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 
 		return WebHandler.linkTo(invocationValue, ControllerLinkBuilder::new, (builder, invocation) -> {
 
-			MethodParameters parameters = new MethodParameters(invocation.getMethod());
+			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
 			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
 
 			for (MethodParameter parameter : parameters.getParameters()) {

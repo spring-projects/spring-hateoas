@@ -74,12 +74,12 @@ public class PropertyUtilsTest {
 	public void resourceWrappedSpringMvcParameter() {
 
 		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", EntityModel.class);
-		MethodParameters parameters = new MethodParameters(method);
+		MethodParameters parameters = MethodParameters.of(method);
 
-		ResolvableType resolvableType = parameters.getParametersWith(RequestBody.class).stream()
-			.findFirst()
-			.map(methodParameter -> ResolvableType.forMethodParameter(methodParameter.getMethod(), methodParameter.getParameterIndex()))
-			.orElseThrow(() -> new RuntimeException("Didn't find a parameter annotated with @RequestBody!"));
+		ResolvableType resolvableType = parameters.getParametersWith(RequestBody.class).stream().findFirst()
+				.map(methodParameter -> ResolvableType.forMethodParameter(methodParameter.getMethod(),
+						methodParameter.getParameterIndex()))
+				.orElseThrow(() -> new RuntimeException("Didn't find a parameter annotated with @RequestBody!"));
 
 		List<String> propertyNames = PropertyUtils.findPropertyNames(resolvableType);
 
@@ -90,19 +90,18 @@ public class PropertyUtilsTest {
 	@Test
 	public void objectWithIgnorableAttributes() {
 
-		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer", "password", "fbaggins", "ignore this one");
+		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer",
+				"password", "fbaggins", "ignore this one");
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employee);
 
 		assertThat(properties).hasSize(6);
-		assertThat(properties.keySet()).containsExactlyInAnyOrder("firstName", "lastName", "role", "username", "fullName", "usernameAndLastName");
-		assertThat(properties.entrySet()).containsExactlyInAnyOrder(
-			new SimpleEntry<>("firstName", "Frodo"),
-			new SimpleEntry<>("lastName", "Baggins"),
-			new SimpleEntry<>("role", "ring bearer"),
-			new SimpleEntry<>("username", "fbaggins"),
-			new SimpleEntry<>("fullName", "Frodo Baggins"),
-			new SimpleEntry<>("usernameAndLastName", "fbaggins+++Baggins"));
+		assertThat(properties.keySet()).containsExactlyInAnyOrder("firstName", "lastName", "role", "username", "fullName",
+				"usernameAndLastName");
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder(new SimpleEntry<>("firstName", "Frodo"),
+				new SimpleEntry<>("lastName", "Baggins"), new SimpleEntry<>("role", "ring bearer"),
+				new SimpleEntry<>("username", "fbaggins"), new SimpleEntry<>("fullName", "Frodo Baggins"),
+				new SimpleEntry<>("usernameAndLastName", "fbaggins+++Baggins"));
 	}
 
 	@Test
@@ -114,14 +113,13 @@ public class PropertyUtilsTest {
 
 		assertThat(properties).hasSize(2);
 		assertThat(properties.keySet()).containsExactlyInAnyOrder("name", "father");
-		assertThat(properties.entrySet()).containsExactlyInAnyOrder(
-			new SimpleEntry<>("name", "Frodo"),
-			new SimpleEntry<>("father", null));
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder(new SimpleEntry<>("name", "Frodo"),
+				new SimpleEntry<>("father", null));
 	}
 
 	@Data
 	@AllArgsConstructor
-	@JsonIgnoreProperties({"ignoreThisProperty"})
+	@JsonIgnoreProperties({ "ignoreThisProperty" })
 	static class EmployeeWithCustomizedReaders {
 
 		private String firstName;
@@ -159,12 +157,11 @@ public class PropertyUtilsTest {
 
 	@RestController
 	static class TestController {
-		
+
 		@GetMapping("/")
 		public Employee newEmployee(@RequestBody EntityModel<Employee> employee) {
 			return employee.getContent();
 		}
 	}
-
 
 }

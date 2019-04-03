@@ -22,6 +22,7 @@ import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -70,6 +71,8 @@ public class WebHandler {
 	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR //
 			= new RequestParamParameterAccessor();
 
+	private static final Map<AffordanceKey, List<Affordance>> AFFORDANCES_CACHE = new ConcurrentReferenceHashMap<>();
+
 	public interface LinkBuilderCreator<T extends LinkBuilder> {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
 	}
@@ -89,6 +92,7 @@ public class WebHandler {
 		MethodInvocation invocation = invocations.getLastInvocation();
 
 		return mappingToUriComponentsBuilder -> {
+
 			String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
 
 			UriComponentsBuilder builder = mappingToUriComponentsBuilder.apply(mapping);
@@ -145,7 +149,11 @@ public class WebHandler {
 				variables = variables.concat(variable);
 			}
 
-			List<Affordance> affordances = SpringAffordanceBuilder.create(invocation, DISCOVERER, components);
+			String href = components.toUriString().equals("") ? "/" : components.toUriString();
+
+			List<Affordance> affordances = AFFORDANCES_CACHE.computeIfAbsent(
+					AffordanceKey.of(invocation.getTargetType(), invocation.getMethod(), href),
+					key -> SpringAffordanceBuilder.create(key.type, key.method, key.href, DISCOVERER));
 
 			return creator.createBuilder(components, variables, affordances);
 		};
@@ -280,9 +288,6 @@ public class WebHandler {
 	@RequiredArgsConstructor
 	private static class AnnotatedParametersParameterAccessor {
 
-		private static final Map<Method, MethodParameters> METHOD_PARAMETERS_CACHE = new ConcurrentReferenceHashMap<>(16,
-				ConcurrentReferenceHashMap.ReferenceType.WEAK);
-
 		private final @NonNull AnnotationAttribute attribute;
 
 		/**
@@ -295,7 +300,7 @@ public class WebHandler {
 
 			Assert.notNull(invocation, "MethodInvocation must not be null!");
 
-			MethodParameters parameters = getOrCreateMethodParametersFor(invocation.getMethod());
+			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
 			Object[] arguments = invocation.getArguments();
 			List<BoundMethodParameter> result = new ArrayList<>();
 
@@ -337,16 +342,6 @@ public class WebHandler {
 		@Nullable
 		protected Object verifyParameterValue(MethodParameter parameter, @Nullable Object value) {
 			return value;
-		}
-
-		/**
-		 * Returns the {@link MethodParameters} for the given {@link Method}.
-		 *
-		 * @param method
-		 * @return
-		 */
-		private static MethodParameters getOrCreateMethodParametersFor(Method method) {
-			return METHOD_PARAMETERS_CACHE.computeIfAbsent(method, MethodParameters::new);
 		}
 
 		/**
@@ -441,5 +436,13 @@ public class WebHandler {
 				return true;
 			}
 		}
+	}
+
+	@Value(staticConstructor = "of")
+	private static class AffordanceKey {
+
+		Class<?> type;
+		Method method;
+		String href;
 	}
 }

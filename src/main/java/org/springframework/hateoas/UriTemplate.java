@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,7 +47,10 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
 
+	private static final Map<String, UriTemplate> CACHE = new ConcurrentHashMap<>();
+
 	private final TemplateVariables variables;
+	private String toString;
 	private String baseUri;
 
 	/**
@@ -54,7 +58,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 *
 	 * @param template must not be {@literal null} or empty.
 	 */
-	public UriTemplate(String template) {
+	private UriTemplate(String template) {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
@@ -97,13 +101,26 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @param baseUri must not be {@literal null} or empty.
 	 * @param variables must not be {@literal null}.
 	 */
-	public UriTemplate(String baseUri, TemplateVariables variables) {
+	UriTemplate(String baseUri, TemplateVariables variables) {
 
 		Assert.hasText(baseUri, "Base URI must not be null or empty!");
 		Assert.notNull(variables, "Template variables must not be null!");
 
 		this.baseUri = baseUri;
 		this.variables = variables;
+	}
+
+	/**
+	 * Returns a {@link UriTemplate} for the given {@link String} template.
+	 *
+	 * @param template must not be {@literal null} or empty.
+	 * @return
+	 */
+	public static UriTemplate of(String template) {
+
+		Assert.hasText(template, "Template must not be null or empty!");
+
+		return CACHE.computeIfAbsent(template, UriTemplate::new);
 	}
 
 	/**
@@ -267,10 +284,15 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	@Override
 	public String toString() {
 
-		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
-		boolean hasQueryParameters = !components.getQueryParams().isEmpty();
+		if (toString == null) {
 
-		return baseUri + getOptionalVariables().toString(hasQueryParameters);
+			UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
+			boolean hasQueryParameters = !components.getQueryParams().isEmpty();
+
+			this.toString = baseUri + getOptionalVariables().toString(hasQueryParameters);
+		}
+
+		return toString;
 	}
 
 	private TemplateVariables getOptionalVariables() {

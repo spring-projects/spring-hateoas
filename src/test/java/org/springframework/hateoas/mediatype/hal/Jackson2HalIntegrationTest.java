@@ -403,7 +403,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
 		resources.add(new Link("foo", "myrel"));
 
-		CurieProvider provider = new DefaultCurieProvider("default", new UriTemplate("/doc{?rel}")) {
+		CurieProvider provider = new DefaultCurieProvider("default", UriTemplate.of("/doc{?rel}")) {
 			@Override
 			public Collection<? extends Object> getCurieInformation(Links links) {
 				return Arrays.asList(new Curie("foo", "bar"), new Curie("bar", "foo"));
@@ -538,7 +538,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	private ObjectMapper getCuriedObjectMapper() {
-		return getCuriedObjectMapper(new DefaultCurieProvider("foo", new UriTemplate("http://localhost:8080/rels/{rel}")));
+		return getCuriedObjectMapper(new DefaultCurieProvider("foo", UriTemplate.of("http://localhost:8080/rels/{rel}")));
 	}
 
 	private ObjectMapper getCuriedObjectMapper(CurieProvider provider) {

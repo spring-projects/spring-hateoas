@@ -26,7 +26,7 @@ import org.springframework.core.MethodParameter;
 
 /**
  * Unit tests for {@link MethodParameters}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class MethodParametersUnitTest {
@@ -49,7 +49,7 @@ public class MethodParametersUnitTest {
 	public void returnsParametersOfAGivenType() throws Exception {
 
 		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
-		MethodParameters methodParameters = new MethodParameters(method);
+		MethodParameters methodParameters = MethodParameters.of(method);
 
 		List<MethodParameter> objectParameters = methodParameters.getParametersOfType(Object.class);
 		assertThat(objectParameters).hasSize(1);
