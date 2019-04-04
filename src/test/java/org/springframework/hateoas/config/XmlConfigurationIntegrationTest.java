@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.hateoas.RelProvider;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.server.LinkRelationProvider;
 
 /**
  * Integration tests for using {@link EnableHypermediaSupport} from within XML documents.
@@ -39,7 +39,7 @@ public class XmlConfigurationIntegrationTest {
 
 		ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("application-context.xml", getClass());
 
-		assertThat(context.getBean(RelProvider.class)).isNotNull();
+		assertThat(context.getBean(LinkRelationProvider.class)).isNotNull();
 
 		context.close();
 	}

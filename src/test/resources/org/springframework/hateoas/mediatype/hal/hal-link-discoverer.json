@@ -1,0 +1,18 @@
+{
+  "_links": {
+    "self": {
+      "href": "selfHref"
+    },
+    "relation": [
+      {
+        "href": "firstHref"
+      },
+      {
+        "href": "secondHref"
+      }
+    ],
+    "http://www.foo.com/bar": {
+      "href": "fullRelHref"
+    }
+  }
+}

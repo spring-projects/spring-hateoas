@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import org.junit.Test;
 
 /**
  * Integration tests for {@link Link} marshaling.
- * 
+ *
  * @author Oliver Gierke
  */
 public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
@@ -44,7 +44,7 @@ public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 
 		Link result = read(REFERENCE, Link.class);
 		assertThat(result.getHref()).isEqualTo("location");
-		assertThat(result.getRel()).isEqualTo("something");
+		assertThat(result.getRel()).isEqualTo(LinkRelation.of("something"));
 		assertThat(result.getAffordances()).hasSize(0);
 	}
 }

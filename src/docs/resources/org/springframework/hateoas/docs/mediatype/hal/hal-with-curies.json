@@ -1,0 +1,17 @@
+{
+  "_links": {
+    "self": {
+      "href": "https://myhost/person/1"
+    },
+    "curies": {
+      "name": "ex",
+      "href": "https://example.com/rels/{rel}",
+      "templated": true
+    },
+    "ex:orders": {
+      "href": "https://myhost/person/1/orders"
+    }
+  },
+  "firstname": "Dave",
+  "lastname": "Matthews"
+}

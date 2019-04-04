@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,46 +16,58 @@
 package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.List;
+import java.net.URI;
+import java.util.Collections;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
-import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 
 /**
  * Unit tests for {@link Link}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
 public class LinkUnitTest {
 
+	private static final Affordance TEST_AFFORDANCE = new Affordance(null, null, HttpMethod.GET, null,
+			Collections.emptyList(), null);
+
 	@Test
 	public void linkWithHrefOnlyBecomesSelfLink() {
-		Link link = new Link("foo");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+		assertThat(new Link("foo").hasRel(IanaLinkRelations.SELF)).isTrue();
 	}
 
 	@Test
 	public void createsLinkFromRelAndHref() {
-		Link link = new Link("foo", Link.REL_SELF);
-		assertThat(link.getHref()).isEqualTo("foo");
-		assertThat(link.getRel()).isEqualTo(Link.REL_SELF);
+
+		Link link = new Link("foo", IanaLinkRelations.SELF);
+
+		assertSoftly(softly -> {
+
+			softly.assertThat(link.getHref()).isEqualTo("foo");
+			softly.assertThat(link.hasRel(IanaLinkRelations.SELF)).isTrue();
+		});
 	}
 
+	@SuppressWarnings("null")
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullHref() {
 		new Link(null);
 	}
 
+	@SuppressWarnings("null")
 	@Test(expected = IllegalArgumentException.class)
 	public void rejectsNullRel() {
-		new Link("foo", null);
+		new Link("foo", (String) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -71,8 +83,8 @@ public class LinkUnitTest {
 	@Test
 	public void sameRelAndHrefMakeSameLink() {
 
-		Link left = new Link("foo", Link.REL_SELF);
-		Link right = new Link("foo", Link.REL_SELF);
+		Link left = new Link("foo", IanaLinkRelations.SELF);
+		Link right = new Link("foo", IanaLinkRelations.SELF);
 
 		TestUtils.assertEqualAndSameHashCode(left, right);
 	}
@@ -80,8 +92,8 @@ public class LinkUnitTest {
 	@Test
 	public void differentRelMakesDifferentLink() {
 
-		Link left = new Link("foo", Link.REL_PREVIOUS);
-		Link right = new Link("foo", Link.REL_NEXT);
+		Link left = new Link("foo", IanaLinkRelations.PREV);
+		Link right = new Link("foo", IanaLinkRelations.NEXT);
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
@@ -89,46 +101,48 @@ public class LinkUnitTest {
 	@Test
 	public void differentHrefMakesDifferentLink() {
 
-		Link left = new Link("foo", Link.REL_SELF);
-		Link right = new Link("bar", Link.REL_SELF);
+		Link left = new Link("foo", IanaLinkRelations.SELF);
+		Link right = new Link("bar", IanaLinkRelations.SELF);
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
 
 	@Test
 	public void differentTypeDoesNotEqual() {
-		assertThat(new Link("foo")).isNotEqualTo((Object) new ResourceSupport());
-	}
-
-	@Test
-	public void returnsNullForNullOrEmptyLink() {
-
-		assertThat(Link.valueOf(null)).isNull();
-		assertThat(Link.valueOf("")).isNull();
+		assertThat(new Link("foo")).isNotEqualTo(new RepresentationModel<>());
 	}
 
 	/**
 	 * @see #54
 	 * @see #100
+	 * @see #678
 	 */
 	@Test
 	public void parsesRFC5988HeaderIntoLink() {
 
-		assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(new Link("/something", "foo"));
-		assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\"")).isEqualTo(new Link("/something", "foo"));
-		assertThat(Link.valueOf("</customer/1>;" //
-				+ "rel=\"self\";" //
-				+ "hreflang=\"en\";" //
-				+ "media=\"pdf\";" //
-				+ "title=\"pdf customer copy\";" //
-				+ "type=\"portable document\";" //
-				+ "deprecation=\"http://example.com/customers/deprecated\"")) //
-						.isEqualTo(new Link("/customer/1") //
-								.withHreflang("en") //
-								.withMedia("pdf") //
-								.withTitle("pdf customer copy") //
-								.withType("portable document") //
-								.withDeprecation("http://example.com/customers/deprecated"));
+		assertSoftly(softly -> {
+
+			softly.assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(new Link("/something", "foo"));
+			softly.assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""))
+					.isEqualTo(new Link("/something", "foo"));
+			softly.assertThat(Link.valueOf("</customer/1>;" //
+					+ "rel=\"self\";" //
+					+ "hreflang=\"en\";" //
+					+ "media=\"pdf\";" //
+					+ "title=\"pdf customer copy\";" //
+					+ "type=\"portable document\";" //
+					+ "deprecation=\"https://example.com/customers/deprecated\";" //
+					+ "profile=\"my-profile\";" //
+					+ "name=\"my-name\";")) //
+					.isEqualTo(new Link("/customer/1") //
+							.withHreflang("en") //
+							.withMedia("pdf") //
+							.withTitle("pdf customer copy") //
+							.withType("portable document") //
+							.withDeprecation("https://example.com/customers/deprecated") //
+							.withProfile("my-profile") //
+							.withName("my-name"));
+		});
 	}
 
 	/**
@@ -136,10 +150,14 @@ public class LinkUnitTest {
 	 */
 	@Test
 	public void ignoresUnrecognizedAttributes() {
+
 		Link link = Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
 
-		assertThat(link.getHref()).isEqualTo("/something");
-		assertThat(link.getRel()).isEqualTo("foo");
+		assertSoftly(softly -> {
+
+			softly.assertThat(link.getHref()).isEqualTo("/something");
+			softly.assertThat(link.hasRel("foo")).isTrue();
+		});
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -165,10 +183,13 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo{?page}");
 
-		assertThat(link.isTemplated()).isTrue();
-		assertThat(link.getVariableNames()).hasSize(1);
-		assertThat(link.getVariableNames()).contains("page");
-		assertThat(link.expand("2")).isEqualTo(new Link("/foo?page=2"));
+		assertSoftly(softly -> {
+
+			softly.assertThat(link.isTemplated()).isTrue();
+			softly.assertThat(link.getVariableNames()).hasSize(1);
+			softly.assertThat(link.getVariableNames()).contains("page");
+			softly.assertThat(link.expand("2")).isEqualTo(new Link("/foo?page=2"));
+		});
 	}
 
 	/**
@@ -179,8 +200,11 @@ public class LinkUnitTest {
 
 		Link link = new Link("/foo");
 
-		assertThat(link.isTemplated()).isFalse();
-		assertThat(link.getVariableNames()).hasSize(0);
+		assertSoftly(softly -> {
+
+			softly.assertThat(link.isTemplated()).isFalse();
+			softly.assertThat(link.getVariableNames()).hasSize(0);
+		});
 	}
 
 	/**
@@ -189,7 +213,7 @@ public class LinkUnitTest {
 	@Test
 	public void serializesCorrectly() throws IOException {
 
-		Link link = new Link("http://foobar{?foo,bar}");
+		Link link = new Link("https://foobar{?foo,bar}");
 
 		ObjectOutputStream stream = new ObjectOutputStream(new ByteArrayOutputStream());
 		stream.writeObject(link);
@@ -211,8 +235,9 @@ public class LinkUnitTest {
 	 */
 	@Test
 	public void parsesLinkRelationWithDotAndMinus() {
-		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").getRel())
-				.isEqualTo("rel-with-minus-and-.");
+
+		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").hasRel("rel-with-minus-and-."))
+				.isTrue();
 	}
 
 	/**
@@ -221,8 +246,8 @@ public class LinkUnitTest {
 	@Test
 	public void parsesUriLinkRelations() {
 
-		assertThat(Link.valueOf("<http://localhost>; rel=\"http://acme.com/rels/foo-bar\"").getRel()) //
-				.isEqualTo("http://acme.com/rels/foo-bar");
+		assertThat(Link.valueOf("<http://localhost>; rel=\"https://acme.com/rels/foo-bar\"").getRel()) //
+				.isEqualTo(LinkRelation.of("https://acme.com/rels/foo-bar"));
 	}
 
 	/**
@@ -232,18 +257,21 @@ public class LinkUnitTest {
 	public void linkWithAffordancesShouldWorkProperly() {
 
 		Link originalLink = new Link("/foo");
-		Link linkWithAffordance = originalLink.andAffordance(new TestAffordance());
-		Link linkWithTwoAffordances = linkWithAffordance.andAffordance(new TestAffordance());
+		Link linkWithAffordance = originalLink.andAffordance(TEST_AFFORDANCE);
+		Link linkWithTwoAffordances = linkWithAffordance.andAffordance(TEST_AFFORDANCE);
 
-		assertThat(originalLink.getAffordances()).hasSize(0);
-		assertThat(linkWithAffordance.getAffordances()).hasSize(1);
-		assertThat(linkWithTwoAffordances.getAffordances()).hasSize(2);
+		assertSoftly(softly -> {
 
-		assertThat(originalLink.hashCode()).isNotEqualTo(linkWithAffordance.hashCode());
-		assertThat(originalLink).isNotEqualTo(linkWithAffordance);
+			softly.assertThat(originalLink.getAffordances()).hasSize(0);
+			softly.assertThat(linkWithAffordance.getAffordances()).hasSize(1);
+			softly.assertThat(linkWithTwoAffordances.getAffordances()).hasSize(2);
 
-		assertThat(linkWithAffordance.hashCode()).isNotEqualTo(linkWithTwoAffordances.hashCode());
-		assertThat(linkWithAffordance).isNotEqualTo(linkWithTwoAffordances);
+			softly.assertThat(originalLink.hashCode()).isNotEqualTo(linkWithAffordance.hashCode());
+			softly.assertThat(originalLink).isNotEqualTo(linkWithAffordance);
+
+			softly.assertThat(linkWithAffordance.hashCode()).isNotEqualTo(linkWithTwoAffordances.hashCode());
+			softly.assertThat(linkWithAffordance).isNotEqualTo(linkWithTwoAffordances);
+		});
 	}
 
 	/**
@@ -266,47 +294,152 @@ public class LinkUnitTest {
 
 		Link link = new Link("/");
 
-		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(null));
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel((String) null));
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(""));
 	}
 
-	static class TestAffordance implements Affordance {
+	@Test
+	public void affordanceConvenienceMethodChainsExistingLink() {
 
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.Affordance#getAffordanceModel(org.springframework.http.MediaType)
-		 */
-		@Override
-		public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
-			return null;
-		}
+		Link link = new Link("/").andAffordance("name", HttpMethod.POST, ResolvableType.forClass(Employee.class),
+				Collections.emptyList(), ResolvableType.forClass(Employee.class));
 
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.Affordance#getHttpMethod()
-		 */
-		@Override
-		public HttpMethod getHttpMethod() {
-			return HttpMethod.PATCH;
-		}
+		assertThat(link.getHref()).isEqualTo("/");
+		assertThat(link.hasRel(IanaLinkRelations.SELF)).isTrue();
+		assertThat(link.getAffordances()).hasSize(1);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
 
-		/* 
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.Affordance#getName()
-		 */
-		@Override
-		public String getName() {
-			return null;
-		}
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName()).isEqualTo("name");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
 
-		@Override
-		public List<MethodParameter> getInputMethodParameters() {
-			return null;
-		}
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName()).isEqualTo("name");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
 
-		@Override
-		public List<QueryParameter> getQueryMethodParameters() {
-			return null;
-		}
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getName()).isEqualTo("name");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+	}
+
+	@Test
+	public void affordanceConvenienceMethodDefaultsNameBasedOnHttpVerb() {
+
+		Link link = new Link("/").andAffordance(HttpMethod.POST, ResolvableType.forClass(Employee.class),
+				Collections.emptyList(), ResolvableType.forClass(Employee.class));
+
+		assertThat(link.getHref()).isEqualTo("/");
+		assertThat(link.hasRel(IanaLinkRelations.SELF)).isTrue();
+		assertThat(link.getAffordances()).hasSize(1);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName())
+				.isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName())
+				.isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getName())
+				.isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+	}
+
+	@Test
+	public void affordanceConvenienceMethodHandlesBareClasses() {
+
+		Link link = new Link("/").andAffordance(HttpMethod.POST, Employee.class, Collections.emptyList(), Employee.class);
+
+		assertThat(link.getHref()).isEqualTo("/");
+		assertThat(link.hasRel(IanaLinkRelations.SELF)).isTrue();
+		assertThat(link.getAffordances()).hasSize(1);
+		assertThat(link.getAffordances().get(0).getAffordanceModels()).hasSize(3);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getName())
+				.isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.COLLECTION_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getName())
+				.isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.HAL_FORMS_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getName())
+				.isEqualTo("postEmployee");
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getHttpMethod())
+				.isEqualTo(HttpMethod.POST);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getInputType().resolve())
+				.isEqualTo(Employee.class);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getQueryMethodParameters())
+				.hasSize(0);
+		assertThat(link.getAffordances().get(0).getAffordanceModel(MediaTypes.UBER_JSON).getOutputType().resolve())
+				.isEqualTo(Employee.class);
+	}
+
+	@Test
+	public void createsUriForSimpleLink() {
+		assertThat(new Link("/something").toUri()).isEqualTo(URI.create("/something"));
+	}
+
+	@Test
+	public void createsUriForTemplateWithOptionalParameters() {
+		assertThat(new Link("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
+	}
+
+	@Test
+	public void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Link("/{segment}/path").toUri());
 	}
 }

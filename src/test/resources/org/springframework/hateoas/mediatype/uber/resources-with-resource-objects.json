@@ -1,0 +1,38 @@
+{
+  "uber" : {
+    "version" : "1.0",
+    "data" : [ {
+      "rel" : [ "self" ],
+      "url" : "localhost"
+    }, {
+      "rel" : [ "next" ],
+      "url" : "/page/2"
+    }, {
+      "data" : [ {
+        "rel" : [ "self" ],
+        "url" : "localhost"
+      }, {
+        "rel" : [ "orders" ],
+        "url" : "orders"
+      }, {
+        "name" : "string",
+        "data" : [ {
+          "value" : "first"
+        } ]
+      } ]
+    }, {
+      "data" : [ {
+        "rel" : [ "self" ],
+        "url" : "remotehost"
+      }, {
+        "rel" : [ "orders" ],
+        "url" : "order"
+      }, {
+        "name" : "string",
+        "data" : [ {
+          "value" : "second"
+        } ]
+      } ]
+    } ]
+  }
+}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,8 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.hal.HalConfiguration.RenderSingleLinks.*;
+import static org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks.*;
+import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -30,32 +31,29 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.collectionjson.CollectionJsonLinkDiscoverer;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.core.DelegatingEntityLinks;
-import org.springframework.hateoas.core.DelegatingRelProvider;
-import org.springframework.hateoas.hal.HalConfiguration;
-import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.forms.HalFormsConfiguration;
-import org.springframework.hateoas.hal.forms.HalFormsLinkDiscoverer;
-import org.springframework.hateoas.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
+import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
+import org.springframework.hateoas.server.EntityLinks;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.DelegatingEntityLinks;
+import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
+import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -68,14 +66,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Integration tests for {@link EnableHypermediaSupport}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
 @RunWith(MockitoJUnitRunner.class)
 public class EnableHypermediaSupportIntegrationTest {
-
-	MockMvc mockMvc;
 
 	@Test
 	public void bootstrapHalConfiguration() {
@@ -87,34 +83,62 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertHalFormsSetupForConfigClass(HalFormsConfig.class);
 	}
 
+	@Test
 	public void bootstrapJsonCollectionConfiguration() {
 		assertCollectionJsonSetupForConfigClass(CollectionJsonConfig.class);
 	}
 
 	@Test
+	public void bootstrapUberConfiguration() {
+		assertUberSetupForConfigClass(UberConfig.class);
+	}
+
+	@Test
 	public void registersHalLinkDiscoverers() {
 
-		withContext(HalConfig.class, context -> {
+		withServletContext(HalConfig.class, context -> {
 
 			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
 
 			assertThat(discoverers).isNotNull();
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON)).isInstanceOf(HalLinkDiscoverer.class);
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8)).isInstanceOf(HalLinkDiscoverer.class);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
 
-	@Test
+	@Test // #833
 	public void registersHalFormsLinkDiscoverers() {
 
-		withContext(HalFormsConfig.class, context -> {
+		withServletContext(HalFormsConfig.class, context -> {
 
 			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
-					.isInstanceOf(HalFormsLinkDiscoverer.class);
+					.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
+			assertRelProvidersSetUp(context);
+		});
+	}
+
+	@Test // #833
+	public void registersHalAndHalFormsLinkDiscoverers() {
+
+		withServletContext(HalAndHalFormsConfig.class, context -> {
+
+			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+			assertThat(discoverers).isNotNull();
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
+					.hasValueSatisfying(HalFormsLinkDiscoverer.class::isInstance);
+
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -122,13 +146,27 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersCollectionJsonLinkDiscoverers() {
 
-		withContext(CollectionJsonConfig.class, context -> {
+		withServletContext(CollectionJsonConfig.class, context -> {
 
 			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.COLLECTION_JSON))
-					.isInstanceOf(CollectionJsonLinkDiscoverer.class);
+					.hasValueSatisfying(CollectionJsonLinkDiscoverer.class::isInstance);
+			assertRelProvidersSetUp(context);
+		});
+	}
+
+	@Test
+	public void registersUberLinkDiscoverers() {
+
+		withServletContext(UberConfig.class, context -> {
+
+			LinkDiscoverers discoverers = context.getBean(LinkDiscoverers.class);
+
+			assertThat(discoverers).isNotNull();
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.UBER_JSON))
+					.hasValueSatisfying(UberLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -148,6 +186,11 @@ public class EnableHypermediaSupportIntegrationTest {
 		assertCollectionJsonSetupForConfigClass(ExtendedCollectionJsonConfig.class);
 	}
 
+	@Test
+	public void bootstrapsUberConfigurationForSubclass() {
+		assertUberSetupForConfigClass(ExtendedUberConfig.class);
+	}
+
 	/**
 	 * @see #134, #219
 	 */
@@ -155,7 +198,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	@SuppressWarnings("unchecked")
 	public void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
-		withContext(HalConfig.class, context -> {
+		withServletContext(HalConfig.class, context -> {
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
@@ -187,7 +230,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	@SuppressWarnings("unchecked")
 	public void halFormsSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
-		withContext(HalFormsConfig.class, context -> {
+		withServletContext(HalFormsConfig.class, context -> {
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
@@ -219,7 +262,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	@SuppressWarnings("unchecked")
 	public void collectionJsonSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
-		withContext(CollectionJsonConfig.class, context -> {
+		withServletContext(CollectionJsonConfig.class, context -> {
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
@@ -247,13 +290,48 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void uberSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+
+		withServletContext(UberConfig.class, context -> {
+
+			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+
+			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes()) //
+					.hasSize(1) //
+					.contains(MediaTypes.UBER_JSON);
+
+			boolean found = false;
+
+			for (HandlerMethodArgumentResolver resolver : getResolvers(adapter)) {
+
+				if (resolver instanceof AbstractMessageConverterMethodArgumentResolver) {
+
+					found = true;
+
+					AbstractMessageConverterMethodArgumentResolver processor = (AbstractMessageConverterMethodArgumentResolver) resolver;
+					List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils
+							.getField(processor, "messageConverters");
+
+					assertThat(converters.get(0)).isInstanceOf(TypeConstrainedMappingJackson2HttpMessageConverter.class);
+					assertThat(converters.get(0).getSupportedMediaTypes()) //
+							.hasSize(1) //
+							.contains(MediaTypes.UBER_JSON);
+				}
+			}
+
+			assertThat(found).isTrue();
+		});
+	}
+
 	/**
 	 * @see #293
 	 */
 	@Test
-	public void registersHttpMessageConvertersForRestTemplate() {
+	public void registersHalHttpMessageConvertersForRestTemplate() {
 
-		withContext(HalConfig.class, context -> {
+		withServletContext(HalConfig.class, context -> {
 
 			RestTemplate template = context.getBean(RestTemplate.class);
 
@@ -265,14 +343,17 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersHalFormsHttpMessageConvertersForRestTemplate() {
 
-		withContext(HalFormsConfig.class, context -> {
-
-			foo(context, RestTemplate.class, it -> it.getMessageConverters().get(0), converter -> {
-
-				assertThat(converter.getSupportedMediaTypes()) //
-						.hasSize(1).contains(MediaTypes.HAL_FORMS_JSON);
-			});
-		});
+		withServletContext( //
+				HalFormsConfig.class, //
+				context -> foo( //
+						context, //
+						RestTemplate.class, //
+						it -> it.getMessageConverters().get(0), //
+						converter -> assertThat(converter.getSupportedMediaTypes()) // //
+								.hasSize(1) //
+								.contains(MediaTypes.HAL_FORMS_JSON) //
+				) //
+		);
 	}
 
 	private static <T, S> void foo(ApplicationContext context, Class<T> beanType, Function<T, S> extractor,
@@ -296,7 +377,7 @@ public class EnableHypermediaSupportIntegrationTest {
 			Optional<ObjectMapper> result = adapter.getMessageConverters().stream()//
 					.filter(it -> it.getSupportedMediaTypes().contains(mediaType)).findFirst() //
 					.map(AbstractJackson2HttpMessageConverter.class::cast) //
-					.map(it -> it.getObjectMapper());
+					.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
 
 			if (!result.isPresent()) {
 				fail("Couldn't find ObjectMapper from HttpMessageConverter supporting " + mediaType);
@@ -315,11 +396,23 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void registersCollectionJsonHttpMessageConvertersForRestTemplate() {
 
-		withContext(CollectionJsonConfig.class, context -> {
+		withServletContext(CollectionJsonConfig.class, context -> {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
 			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()).hasSize(1)
 					.contains(MediaTypes.COLLECTION_JSON);
+		});
+	}
+
+	@Test
+	public void registersUberHttpMessageConvertersForRestTemplate() {
+
+		withServletContext(UberConfig.class, context -> {
+			RestTemplate template = context.getBean(RestTemplate.class);
+
+			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
+					.hasSize(1) //
+					.contains(MediaTypes.UBER_JSON);
 		});
 	}
 
@@ -329,12 +422,15 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
 
-		withContext(HalConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+		withServletContext( //
+				HalConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.HAL_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	/**
@@ -343,29 +439,49 @@ public class EnableHypermediaSupportIntegrationTest {
 	@Test
 	public void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
 
-		withContext(HalFormsConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.HAL_FORMS_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+		withServletContext( //
+				HalFormsConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.HAL_FORMS_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	@Test
 	public void configuresDefaultObjectMapperForCollectionJsonToIgnoreUnknownProperties() {
 
-		withContext(CollectionJsonConfig.class, context -> {
+		withServletContext( //
+				CollectionJsonConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.COLLECTION_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
+	}
 
-			assertObjectMapper(context, MediaTypes.COLLECTION_JSON, mapper -> {
-				assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
-			});
-		});
+	@Test
+	public void configuresDefaultObjectMapperForUberToIgnoreUnknownProperties() {
+
+		withServletContext( //
+				UberConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.UBER_JSON, //
+						mapper -> assertThat(mapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) //
+								.isFalse() //
+				) //
+		);
 	}
 
 	@Test
 	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
 
-		withContext(HalConfig.class, context -> {
+		withServletContext(HalConfig.class, context -> {
 
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
@@ -377,45 +493,33 @@ public class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(mapper).hasValueSatisfying(it -> {
 
-				ResourceSupport resourceSupport = new ResourceSupport();
+				RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 				resourceSupport.add(new Link("localhost").withSelfRel());
 
-				assertThatCode(() -> { //
+				assertThatCode(() -> {
 					assertThat(it.writeValueAsString(resourceSupport)) //
 							.isEqualTo("{\"_links\":{\"self\":{\"href\":\"localhost\"}}}");
-				});
+				}).doesNotThrowAnyException();
 			});
 		});
 	}
 
 	@Test
-	public void verifyRenderSingleLinkAsArrayViaOverridingBean() throws JsonProcessingException {
+	public void verifyRenderSingleLinkAsArrayViaOverridingBean() {
 
-		withContext(RenderLinkAsSingleLinksConfig.class, context -> {
-
-			assertObjectMapper(context, MediaTypes.HAL_JSON, mapper -> {
-
-				ResourceSupport resourceSupport = new ResourceSupport();
-				resourceSupport.add(new Link("localhost").withSelfRel());
-
-				assertThat(mapper.writeValueAsString(resourceSupport))
-						.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
-			});
-
-		});
-	}
-
-	private static <E extends Exception> void withContext(Class<?> configuration,
-			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
-
-		try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
-
-			context.register(configuration);
-			context.setServletContext(new MockServletContext());
-			context.refresh();
-
-			consumer.accept(context);
-		}
+		withServletContext( //
+				RenderLinkAsSingleLinksConfig.class, //
+				context -> assertObjectMapper( //
+						context, //
+						MediaTypes.HAL_JSON, //
+						mapper -> { //
+							RepresentationModel<?> resourceSupport = new RepresentationModel<>(); //
+							resourceSupport.add(new Link("localhost").withSelfRel()); //
+							assertThat(mapper.writeValueAsString(resourceSupport)) //
+									.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"); //
+						} //
+				) //
+		);
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -426,13 +530,13 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	private static void assertRelProvidersSetUp(ApplicationContext context) {
 
-		assertThat(context.getBeansOfType(RelProvider.class).values()) //
-				.anySatisfy(it -> assertThat(it).isInstanceOf(DelegatingRelProvider.class));
+		assertThat(context.getBeansOfType(LinkRelationProvider.class).values()) //
+				.anySatisfy(it -> assertThat(it).isInstanceOf(DelegatingLinkRelationProvider.class));
 	}
 
 	private static void assertHalSetupForConfigClass(Class<?> configClass) {
 
-		withContext(configClass, context -> {
+		withServletContext(configClass, context -> {
 
 			assertEntityLinksSetUp(context);
 			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(HalLinkDiscoverer.class);
@@ -445,7 +549,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	private static void assertHalFormsSetupForConfigClass(Class<?> configClass) {
 
-		withContext(configClass, context -> {
+		withServletContext(configClass, context -> {
 
 			assertEntityLinksSetUp(context);
 			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(HalFormsLinkDiscoverer.class);
@@ -458,7 +562,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	private static void assertCollectionJsonSetupForConfigClass(Class<?> configClass) {
 
-		withContext(configClass, context -> {
+		withServletContext(configClass, context -> {
 
 			assertEntityLinksSetUp(context);
 			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(CollectionJsonLinkDiscoverer.class);
@@ -468,9 +572,21 @@ public class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	private static void assertUberSetupForConfigClass(Class<?> configClass) {
+
+		withServletContext(configClass, context -> {
+
+			assertEntityLinksSetUp(context);
+			assertThat(context.getBean(LinkDiscoverer.class)).isInstanceOf(UberLinkDiscoverer.class);
+
+			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
+			assertThat(rmha.getMessageConverters().get(0)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
+		});
+	}
+
 	/**
 	 * Method to mitigate API changes between Spring 3.2 and 4.0.
-	 * 
+	 *
 	 * @param adapter
 	 * @return
 	 */
@@ -536,12 +652,6 @@ public class EnableHypermediaSupportIntegrationTest {
 		public RestTemplate restTemplate() {
 			return new RestTemplate();
 		}
-
-		@Bean
-		public HalFormsConfiguration halFormsConfiguration() {
-			return new HalFormsConfiguration();
-		}
-
 	}
 
 	@Configuration
@@ -579,6 +689,33 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	@EnableHypermediaSupport(type = HypermediaType.COLLECTION_JSON)
 	static class AlternateDelegateConfig {
+
+	}
+
+	@EnableWebMvc
+	@Configuration
+	@Import(DelegateUberHypermediaConfig.class)
+	static class UberConfig {
+
+		@Bean
+		public RestTemplate restTemplate() {
+			return new RestTemplate();
+		}
+	}
+
+	@Configuration
+	static class ExtendedUberConfig extends UberConfig {
+
+	}
+
+	@Configuration
+	@EnableHypermediaSupport(type = HypermediaType.UBER)
+	static class DelegateUberHypermediaConfig {
+
+	}
+
+	@EnableHypermediaSupport(type = { HypermediaType.HAL, HypermediaType.HAL_FORMS })
+	static class HalAndHalFormsConfig {
 
 	}
 }

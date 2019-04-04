@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,24 +20,20 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.LinkDiscoverer;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.support.WebStack;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans available for
- * injection to ease building hypermedia related code. Which components get registered depends on the hypermedia type
- * being activated through the {@link #type()} attribute. Hypermedia-type-specific implementations of the following
- * components will be registered:
- * <ul>
- * <li>{@link LinkDiscoverer}</li>
- * <li>a Jackson 2 module to correctly marshal the resource model classes into the appropriate representation.
- * </ul>
- * 
- * @see LinkDiscoverer
- * @see EntityLinks
+ * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans to support all
+ * appropriate web stacks based on selected {@link HypermediaMappingInformation}-type as well as the classpath.
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -45,19 +41,28 @@ import org.springframework.hateoas.LinkDiscoverer;
 @Target(ElementType.TYPE)
 @Documented
 @EnableEntityLinks
-@Import({ HypermediaSupportBeanDefinitionRegistrar.class, HateoasConfiguration.class })
+@Import({ HypermediaConfigurationImportSelector.class, HateoasConfiguration.class, WebStackImportSelector.class })
 public @interface EnableHypermediaSupport {
 
 	/**
 	 * The hypermedia type to be supported.
-	 * 
+	 *
 	 * @return
 	 */
 	HypermediaType[] type();
 
 	/**
+	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
+	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components like
+	 * {@link WebClient} but don't want to use hypermedia operations with it.
+	 *
+	 * @return
+	 */
+	WebStack[] stacks() default { WebStack.WEBMVC, WebStack.WEBFLUX };
+
+	/**
 	 * Hypermedia representation types supported.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
 	 */
@@ -65,24 +70,41 @@ public @interface EnableHypermediaSupport {
 
 		/**
 		 * HAL - Hypermedia Application Language.
-		 * 
+		 *
 		 * @see http://stateless.co/hal_specification.html
-		 * @see http://tools.ietf.org/html/draft-kelly-json-hal-05
+		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL,
+		HAL(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
-		 * 
+		 *
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
-		HAL_FORMS,
+		HAL_FORMS(MediaTypes.HAL_FORMS_JSON),
 
 		/**
 		 * Collection+JSON
 		 *
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
-		COLLECTION_JSON;
+		COLLECTION_JSON(MediaTypes.COLLECTION_JSON),
+
+		/**
+		 * UBER Hypermedia
+		 *
+		 * @see https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html
+		 */
+		UBER(MediaTypes.UBER_JSON);
+
+		private final List<MediaType> mediaTypes;
+
+		HypermediaType(MediaType... mediaTypes) {
+			this.mediaTypes = Arrays.asList(mediaTypes);
+		}
+
+		public List<MediaType> getMediaTypes() {
+			return this.mediaTypes;
+		}
 	}
 }

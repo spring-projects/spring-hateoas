@@ -1,6 +1,135 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.0.M1 (2019-03-05)
+----------------------------------------
+- #854 - Migrate off Objenesis in favor of Spring's ProxyFactory.
+- #853 - Release 1.0 M1.
+- #850 - Upgrade to Spring Plugin 2.0 M1.
+- #847 - Make JDK 8 test step a smoke test for other test steps.
+- #846 - Add Spring HATEAOS Examples to pipeline.
+- #845 - Polish code in Link, UriTemplate and TemplateVariables.
+- #844 - Move TypeReferences to server.core package.
+- #843 - Extend EntityLinks with override that allows to use a identifier extractor function.
+- #842 - Remove Identifiable.
+- #841 - Add curie builder capabilities to HalLinkRelation.
+- #840 - Add methods to detect required links to LinkDiscoverer.
+- #838 - Make sure BeanPostProcessor creation does not prematurely trigger all other configuration.
+- #833 - Package refactorings to add SPI to create custom media type implementations.
+- #825 - Ensure LinkRelation complies with RFC8288.
+- #819 - Migrate off deprecated OrderAwarePluginRegistry APIs.
+- #818 - Remove Spring HATEOAS custom Forwarded header handling.
+- #815 - Add ability to do releases through Concourse.
+- #813 - Upgrade to Kotlin 1.3.21.
+- #812 - General overhaul and refactorings.
+- #811 - Add support for specifying array serialization for a particular link relation.
+- #808 - Upgrade to Spring Framework 5.1.5.
+- #807 - Remove log output in UberWebMvcIntegrationTest.
+- #806 - Remove package cycle between ….hateoas and ….hateoas.core.
+- #805 - Add Links.getRequiredLink(…).
+- #804 - Avoid log output in MultiMediaTypeWebMvcIntegrationTest.
+- #803 - Remove reflective invocation of JsonPath.compile(…) in JsonPathLinkDiscoverer.
+- #798 - Modernizing the documentation production and appearance.
+- #797 - Editing pass.
+- #793 - Switch from @Order to Ordered in RelProvider implementations.
+- #792 - Upgrade to Jackson 2.9.8.
+- #791 - Support HAL name property.
+- #788 - Clean up code base.
+- #787 - HalLinkDiscoverer doesn't extract link properties other than href.
+- #785 - #784 - Introduce UBER+JSON mediatype.
+- #784 - Add support for UBER+JSON.
+- #778 - Transform IANA Link Relations into a series of constants.
+- #772 - Fix pipeline so it tests against JDK 12 on pull requests.
+- #764 - Migrate build jobs to Concourse CI.
+- #760 - Make Spring Plugin a full dependency in 1.0.
+- #759 - #667 - Ignore unknown properties in LinkMixin.
+- #758 - Migrate all Forward header handling to Spring MVC.
+- #754 - Upgrade to Jackson 2.9.7.
+- #752 - Upgrade to latest Spring 5.0.x.
+- #751 - Align assertions with its Javadoc in Hop.header().
+- #743 - Allow specifying a custom header value for each hop in Traverson.
+- #728 - Add Spring WebFlux support.
+- #719 - Simplify configuration setup.
+- #715 - Provide link builder DSL to write idiomatic Kotlin code.
+- #714 - Use system-dependent line separator in tests.
+- #711 - Upgrade to Spring Framework 5.0.6.RELEASE.
+- #707 - Add support for Spring Data REST.
+- #701 - Obvious Fix: typo.
+- #700 - Remove JAX-RS support.
+- #699 - Convert link with RFC5988 additional attributes.
+- #695 - Remove Jaxb annotations.
+- #686 - Support whitespace in Links Header.
+- #682 - Obvious Fix : typo :).
+- #678 - Add profile property.
+- #672 - Add Maven Wrapper.
+- #671 - When looking up a single link by rel, don't create intermediate list.
+- #669 - Remove list creation in ResourceSupport.getLink().
+- #667 - Templated URIs in a HAL document cannot be deserialized.
+- #662 - Upgrade to Spring Framework 5.0.1.
+- #655 - Retire Java8Utils in 1.0.
+- #653 - Use Java 8 Stream API.
+- #652 - Move off Jackson deprecations.
+- #649 - Use Java 8 Map enhancements.
+- #648 - Add Java 9 automatic module name.
+- #647 - Move to AssertJ and Mockito 2.0.
+- #646 - Upgrade to Lombok 1.16.18.
+- #645 - Upgrade to Spring Plugin 2.0.
+- #644 - Remove OSGi metadata creation setup from build.
+- #643 - Upgrade to Spring Framework 5 as development baseline.
+- #642 - Move to Java 8 as development baseline.
+- #641 - Set up 1.0 development.
+- #627 - Upgrade Spring Framework to recent versions.
+- #612 - #340 - Adds new Affordances API + HAL-Forms mediatype.
+- #572 - Enhance ResourceAssemblerSupport to allow generics.
+- #483 - UriTemplate Does not handle composite values.
+- #482 - Add support for Collection+JSON media type.
+- #416 - ResourceAssemblerSupport.toResources() should return Resources<D> instead of List<D>.
+
+
+Changes in version 0.25.0.RELEASE (2018-07-25)
+----------------------------------------------
+- #730 - Release 0.25.
+- #724 - Ensure Spring 4.3 / 5 compatibility in EncodingUtils.
+- #723 - Backport simplified configuration setup.
+- #722 - Update build plugins.
+- #721 - Upgrade to Lombok 1.18.0.
+- #720 - Upgrade to Spring 4.3.18.
+- #665 - ALPS spec name is "descriptor" not "descriptors".
+
+
+Changes in version 0.24.0.RELEASE (2017-10-30)
+----------------------------------------------
+- #661 - Release 0.24.
+- #658 - Remove unused Enhancer variable.
+- #639 - Add support for Optional parameters in ControllerLinkBuilder.
+- #638 - Fix typos in Javadoc.
+- #635 - Upgrade Spring Framework 5 build profile to 5.0 GA.
+- #623 - Upgrade Spring 5 build profile to Jackson 2.9.1.
+- #621 - #617 - Use SynthesizingMethodParameter to support AliasFor attributes.
+- #617 - Parameter names not detected in case @AliasFor'ed attributes are used.
+- #604 - Make JacksonSerializationTest platform independent.
+- #603 - Fix typos.
+- #601 - #597 - Add ALPS mediatype and LinkDiscoverer.
+- #600 - Fix typo in UriTemplate.
+- #597 - Migrate ALPS media type and LinkDiscoverer from Spring Data REST.
+- #594 - Guard against Spring 5's Not Nullable policy.
+- #586 - #585 - Add script to run ALL build profiles.
+- #585 - Make it easier to test all profiles.
+- #584 - #580 - Update IANA relation types.
+- #583 - Make sure build profile for Spring 5 uses compatible Jackson version.
+- #582 - LinkBuilderSupport.slash(…) fails to append path segments with a colon.
+- #580 - Update IANA relation types.
+- #575 - spring5-next profile breaks Spring HATEOAS.
+- #567 - Add extra attributes to Link and use for HAL mediatype.
+- #564 - Add license file to the project.
+- #558 - HypermediaSupportBeanDefinitionRegistrar double registers message converters.
+- #557 - Update "JSON" to "Jackson" in reference docs.
+- #555 - Fixed syntax highlighting and content of a few code blocks in the reference guide.
+- #553 - Fix typo in build file.
+- #552 - Upgrade Spring 5 next to M5.
+- #542 - "Get Link functionality" of ResourceSupport class.
+- #538 - Update location of static resources.
+
 Changes in version 0.23.0.RELEASE (2016-12-22)
 ----------------------------------------------
 - #529 - Release 0.23.
@@ -264,13 +393,13 @@ Changes in version 0.3.0.RELEASE (2012-10-09)
 - #10 - Renamed (Paged)Resources.fromEntities(…) to ….wrap(…)
 - #9 - Added constructor to PagedResources to take an Iterable of Links
 - #7 - Excluded getId() of ResourceSupport from default JSON rendering
-- Switched from Collection to Iterable in constructor of Resources 
+- Switched from Collection to Iterable in constructor of Resources
 - Moved from ResourceEnricher to ResourceProcessor to allow manipulating the resource instance
 
 Changes in version 0.2.0.RELEASE (2012-08-23)
 ---------------------------------------------
 - added ResourceEnricher SPI
-- fixed equals(…)/hashCode() in Resource/Resources/PagedResources 
+- fixed equals(…)/hashCode() in Resource/Resources/PagedResources
 - Added PagedResources abstraction (collection resource with pagination information)
 - Enhanced resource abstraction with default implementation for Resource and Resources
 

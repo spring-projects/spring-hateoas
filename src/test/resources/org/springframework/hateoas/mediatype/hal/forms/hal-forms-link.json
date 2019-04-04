@@ -1,0 +1,14 @@
+{
+  "_links" : {
+    "self" : {
+      "href" : "/customer/1",
+      "hreflang" : "en",
+      "media" : "pdf",
+      "title" : "pdf customer copy",
+      "type" : "portable document",
+      "deprecation" : "https://example.com/customers/deprecated",
+      "profile" : "my-profile",
+      "name" : "my-name"
+    }
+  }
+}

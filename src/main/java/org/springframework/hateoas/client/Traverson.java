@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,49 +30,54 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.client.Rels.Rel;
-import org.springframework.hateoas.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.plugin.core.OrderAwarePluginRegistry;
+import org.springframework.lang.Nullable;
+import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
 /**
  * Component to ease traversing hypermedia APIs by following links with relation types. Highly inspired by the equally
  * named JavaScript library.
- * 
+ *
  * @see https://github.com/basti1302/traverson
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Greg Turnquist
  * @author Tom Bunting
  * @author Manish Misra
+ * @author Michael Wirth
  * @since 0.11
  */
 public class Traverson {
 
-	private static final LinkDiscoverers DEFAULT_LINK_DISCOVERERS;
+	private static final TraversonDefaults DEFAULTS;
 
 	static {
-		LinkDiscoverer discoverer = new HalLinkDiscoverer();
-		DEFAULT_LINK_DISCOVERERS = new LinkDiscoverers(OrderAwarePluginRegistry.create(Arrays.asList(discoverer)));
+
+		List<TraversonDefaults> ALL_DEFAULTS = SpringFactoriesLoader.loadFactories(TraversonDefaults.class,
+				Traverson.class.getClassLoader());
+
+		Assert.isTrue(ALL_DEFAULTS.size() == 1,
+				() -> String.format("Expected to find only one TraversonDefaults instance, but found: %s", //
+						ALL_DEFAULTS.stream() //
+								.map(Object::getClass) //
+								.map(Class::getName) //
+								.collect(Collectors.joining(", "))));
+
+		DEFAULTS = ALL_DEFAULTS.get(0);
 	}
 
 	private final URI baseUri;
@@ -86,7 +89,7 @@ public class Traverson {
 	/**
 	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
 	 * interact with the service.
-	 * 
+	 *
 	 * @param baseUri must not be {@literal null}.
 	 * @param mediaTypes must not be {@literal null} or empty.
 	 */
@@ -97,7 +100,7 @@ public class Traverson {
 	/**
 	 * Creates a new {@link Traverson} interacting with the given base URI and using the given {@link MediaType}s to
 	 * interact with the service.
-	 * 
+	 *
 	 * @param baseUri must not be {@literal null}.
 	 * @param mediaTypes must not be {@literal null} or empty.
 	 */
@@ -108,114 +111,66 @@ public class Traverson {
 
 		this.mediaTypes = mediaTypes;
 		this.baseUri = baseUri;
-		this.discoverers = DEFAULT_LINK_DISCOVERERS;
 
+		setLinkDiscoverers(DEFAULTS.getLinkDiscoverers(mediaTypes));
 		setRestOperations(createDefaultTemplate(this.mediaTypes));
 	}
 
 	/**
 	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
-	 * 
+	 *
 	 * @param mediaTypes must not be {@literal null}.
 	 * @return
 	 */
 	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(MediaType... mediaTypes) {
-		return getDefaultMessageConverters(Arrays.asList(mediaTypes));
-	}
-
-	/**
-	 * Returns all {@link HttpMessageConverter}s that will be registered for the given {@link MediaType}s by default.
-	 * 
-	 * @param mediaTypes must not be {@literal null}.
-	 * @return
-	 */
-	public static List<HttpMessageConverter<?>> getDefaultMessageConverters(List<MediaType> mediaTypes) {
-
-		Assert.notNull(mediaTypes, "Media types must not be null!");
-
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
-
-		List<MediaType> halFlavors = getHalJsonFlavors(mediaTypes);
-
-		if (!halFlavors.isEmpty()) {
-			converters.add(getHalConverter(halFlavors));
-		}
-
-		return converters;
-	}
-
-	/**
-	 * Returns all HAL JSON compatible media types from the given list.
-	 * 
-	 * @param mediaTypes must not be {@literal null}.
-	 * @return
-	 */
-	private static List<MediaType> getHalJsonFlavors(Collection<MediaType> mediaTypes) {
-
-		return mediaTypes.stream() //
-				.filter(MediaTypes.HAL_JSON::isCompatibleWith) //
-				.collect(Collectors.toList());
+		return DEFAULTS.getHttpMessageConverters(Arrays.asList(mediaTypes));
 	}
 
 	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
 
 		RestTemplate template = new RestTemplate();
-		template.setMessageConverters(getDefaultMessageConverters(mediaTypes));
+		template.setMessageConverters(DEFAULTS.getHttpMessageConverters(mediaTypes));
 
 		return template;
 	}
 
 	/**
-	 * Creates a new {@link HttpMessageConverter} to support HAL.
-	 * 
-	 * @return
-	 */
-	private static final HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
-
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-
-		converter.setObjectMapper(mapper);
-		converter.setSupportedMediaTypes(halFlavours);
-
-		return converter;
-	}
-
-	/**
 	 * Configures the {@link RestOperations} to use. If {@literal null} is provided a default {@link RestTemplate} will be
 	 * used.
-	 * 
+	 *
 	 * @param operations
 	 * @return
 	 */
-	public Traverson setRestOperations(RestOperations operations) {
+	public Traverson setRestOperations(@Nullable RestOperations operations) {
 
-		this.operations = operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
+		this.operations = operations == null //
+				? createDefaultTemplate(this.mediaTypes) //
+				: operations;
+
 		return this;
 	}
 
 	/**
 	 * Sets the {@link LinkDiscoverers} to use. By default a single {@link HalLinkDiscoverer} is registered. If
 	 * {@literal null} is provided the default is reapplied.
-	 * 
+	 *
 	 * @param discoverer can be {@literal null}.
 	 * @return
 	 */
-	public Traverson setLinkDiscoverers(List<? extends LinkDiscoverer> discoverer) {
+	public Traverson setLinkDiscoverers(@Nullable List<? extends LinkDiscoverer> discoverer) {
 
-		this.discoverers = this.discoverers == null ? DEFAULT_LINK_DISCOVERERS
-				: new LinkDiscoverers(OrderAwarePluginRegistry.create(discoverer));
+		List<? extends LinkDiscoverer> defaultedDiscoverers = discoverer == null //
+				? DEFAULTS.getLinkDiscoverers(mediaTypes) //
+				: discoverer;
+
+		this.discoverers = new LinkDiscoverers(PluginRegistry.of(defaultedDiscoverers));
 
 		return this;
 	}
 
 	/**
 	 * Sets up a {@link TraversalBuilder} to follow the given rels.
-	 * 
+	 *
 	 * @param rels must not be {@literal null} or empty.
 	 * @return
 	 * @see TraversalBuilder
@@ -248,10 +203,13 @@ public class Traverson {
 
 	/**
 	 * Builder API to customize traversals.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	public class TraversalBuilder {
+
+		private static final String MEDIA_TYPE_HEADER_NOT_FOUND = "Response for request to %s did not expose a content type! Unable to identify links!";
+		private static final String LINK_NOT_FOUND = "Expected to find link with rel '%s' in response %s!";
 
 		private final List<Hop> rels = new ArrayList<>();
 		private Map<String, Object> templateParameters = new HashMap<>();
@@ -262,7 +220,7 @@ public class Traverson {
 		/**
 		 * Follows the given rels one by one, which means a request per rel to discover the next resource with the rel in
 		 * line.
-		 * 
+		 *
 		 * @param rels must not be {@literal null}.
 		 * @return
 		 */
@@ -270,9 +228,9 @@ public class Traverson {
 
 			Assert.notNull(rels, "Rels must not be null!");
 
-			for (String rel : rels) {
-				this.rels.add(Hop.rel(rel));
-			}
+			Arrays.stream(rels) //
+					.map(Hop::rel) //
+					.forEach(this.rels::add);
 
 			return this;
 		}
@@ -297,7 +255,7 @@ public class Traverson {
 		/**
 		 * Adds the given operations parameters to the traversal. If a link discovered by the traversal is templated, the
 		 * given parameters will be used to expand the operations into a resolvable URI.
-		 * 
+		 *
 		 * @param parameters can be {@literal null}.
 		 * @return
 		 */
@@ -311,7 +269,7 @@ public class Traverson {
 
 		/**
 		 * The {@link HttpHeaders} that shall be used for the requests of the traversal.
-		 * 
+		 *
 		 * @param headers can be {@literal null}.
 		 * @return
 		 */
@@ -325,10 +283,11 @@ public class Traverson {
 
 		/**
 		 * Executes the traversal and marshals the final response into an object of the given type.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
+		@Nullable
 		public <T> T toObject(Class<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
@@ -342,10 +301,11 @@ public class Traverson {
 		/**
 		 * Executes the traversal and marshals the final response into an object of the given
 		 * {@link ParameterizedTypeReference}.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
+		@Nullable
 		public <T> T toObject(ParameterizedTypeReference<T> type) {
 
 			Assert.notNull(type, "Target type must not be null!");
@@ -359,7 +319,7 @@ public class Traverson {
 		/**
 		 * Executes the traversal and returns the result of the given JSON Path expression evaluated against the final
 		 * representation.
-		 * 
+		 *
 		 * @param jsonPath must not be {@literal null} or empty.
 		 * @return
 		 */
@@ -371,12 +331,13 @@ public class Traverson {
 			HttpEntity<?> requestEntity = prepareRequest(mergeHeaders(this.headers, uriAndHeaders.getHttpHeaders()));
 
 			String forObject = operations.exchange(uriAndHeaders.getUri(), GET, requestEntity, String.class).getBody();
+
 			return JsonPath.read(forObject, jsonPath);
 		}
 
 		/**
 		 * Returns the raw {@link ResponseEntity} with the representation unmarshalled into an instance of the given type.
-		 * 
+		 *
 		 * @param type must not be {@literal null}.
 		 * @return
 		 */
@@ -393,7 +354,7 @@ public class Traverson {
 		/**
 		 * Returns the {@link Link} found for the last rel in the rels configured to follow. Will expand the final
 		 * {@link Link} using the
-		 * 
+		 *
 		 * @return
 		 * @see #withTemplateParameters(Map)
 		 * @since 0.15
@@ -403,8 +364,8 @@ public class Traverson {
 		}
 
 		/**
-		 * Returns the templated {@link Link} found for the last rel in the rels configured to follow.
-		 * 
+		 * Returns the templated {@link Link} found for the last relation in the rels configured to follow.
+		 *
 		 * @return
 		 * @since 0.17
 		 */
@@ -414,25 +375,25 @@ public class Traverson {
 
 		private Link traverseToLink(boolean expandFinalUrl) {
 
-			Assert.isTrue(this.rels.size() > 0, "At least one rel needs to be provided!");
+			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
 
-			URIAndHeaders expandedFinalUriAndHeaders = traverseToExpandedFinalUrl();
-			UriStringAndHeaders finalUriAndHeaders = traverseToFinalUrl();
-
-			return new Link(expandFinalUrl ? expandedFinalUriAndHeaders.getUri().toString() : finalUriAndHeaders.getUri(),
-				this.rels.get(this.rels.size() - 1).getRel());
+			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().getUri().toString() : traverseToFinalUrl().getUri(),
+					rels.get(rels.size() - 1).getRel());
 		}
 
 		private UriStringAndHeaders traverseToFinalUrl() {
 
-			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
-			return new UriStringAndHeaders(new UriTemplate(uriAndHeaders.getUri()).toString(), uriAndHeaders.getHttpHeaders());
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), HttpHeaders.EMPTY);
+
+			return new UriStringAndHeaders(UriTemplate.of(uriAndHeaders.getUri()).toString(), uriAndHeaders.getHttpHeaders());
 		}
 
 		private URIAndHeaders traverseToExpandedFinalUrl() {
 
-			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), this.rels.iterator(), HttpHeaders.EMPTY);
-			return new URIAndHeaders(new UriTemplate(uriAndHeaders.getUri()).expand(this.templateParameters), uriAndHeaders.getHttpHeaders());
+			UriStringAndHeaders uriAndHeaders = getAndFindLinkWithRel(baseUri.toString(), rels.iterator(), HttpHeaders.EMPTY);
+
+			return new URIAndHeaders(UriTemplate.of(uriAndHeaders.getUri()).expand(templateParameters),
+					uriAndHeaders.getHttpHeaders());
 		}
 
 		private UriStringAndHeaders getAndFindLinkWithRel(String uri, Iterator<Hop> rels, HttpHeaders extraHeaders) {
@@ -442,35 +403,33 @@ public class Traverson {
 			}
 
 			HttpEntity<?> request = prepareRequest(mergeHeaders(this.headers, extraHeaders));
-			UriTemplate template = new UriTemplate(uri);
+			URI target = UriTemplate.of(uri).expand();
 
-			ResponseEntity<String> responseEntity = operations.exchange(template.expand(), GET, request, String.class);
+			ResponseEntity<String> responseEntity = operations.exchange(target, GET, request, String.class);
 			MediaType contentType = responseEntity.getHeaders().getContentType();
+
+			if (contentType == null) {
+				throw new IllegalStateException(String.format(MEDIA_TYPE_HEADER_NOT_FOUND, target));
+			}
+
 			String responseBody = responseEntity.getBody();
 
 			Hop thisHop = rels.next();
-
 			Rel rel = Rels.getRelFor(thisHop.getRel(), discoverers);
-			Link link = rel.findInResponse(responseBody, contentType);
 
-			if (link == null) {
-				throw new IllegalStateException(
-						String.format("Expected to find link with rel '%s' in response %s!", rel, responseBody));
-			}
+			Link link = rel.findInResponse(responseBody == null ? "" : responseBody, contentType) //
+					.orElseThrow(() -> new IllegalStateException(String.format(LINK_NOT_FOUND, rel, responseBody)));
 
-			/*
-			 * Don't expand if the parameters are empty
-			 */
-			if (!thisHop.hasParameters()) {
-				return getAndFindLinkWithRel(link.getHref(), rels, thisHop.getHeaders());
-			} else {
-				return getAndFindLinkWithRel(link.expand(thisHop.getMergedParameters(this.templateParameters)).getHref(), rels, thisHop.getHeaders());
-			}
+			String linkTarget = thisHop.hasParameters() //
+					? link.expand(thisHop.getMergedParameters(templateParameters)).getHref() //
+					: link.getHref();
+
+			return getAndFindLinkWithRel(linkTarget, rels, thisHop.getHeaders());
 		}
 
 		/**
 		 * Combine two sets of {@link HttpHeaders} into one.
-		 * 
+		 *
 		 * @param headersA
 		 * @param headersB
 		 * @return

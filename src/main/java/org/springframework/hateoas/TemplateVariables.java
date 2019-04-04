@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
 
 /**
  * Wrapper type for a collection of {@link TemplateVariable}.
- * 
+ *
  * @author Oliver Gierke
  */
 @EqualsAndHashCode
@@ -46,7 +46,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	/**
 	 * Creates a new {@link TemplateVariables} for the given {@link TemplateVariable}s.
-	 * 
+	 *
 	 * @param variables must not be {@literal null}.
 	 */
 	public TemplateVariables(TemplateVariable... variables) {
@@ -55,18 +55,20 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	/**
 	 * Creates a new {@link TemplateVariables} for the given {@link TemplateVariable}s.
-	 * 
+	 *
 	 * @param variables must not be {@literal null}.
 	 */
 	public TemplateVariables(List<TemplateVariable> variables) {
 
 		Assert.notNull(variables, "Template variables must not be null!");
+		Assert.noNullElements(variables.toArray(), "Variables must not contain null values!");
+
 		this.variables = Collections.unmodifiableList(variables);
 	}
 
 	/**
 	 * Concatenates the given {@link TemplateVariable}s to the current one.
-	 * 
+	 *
 	 * @param variables must not be {@literal null}.
 	 * @return
 	 */
@@ -76,7 +78,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	/**
 	 * Concatenates the given {@link TemplateVariable}s to the current one.
-	 * 
+	 *
 	 * @param variables must not be {@literal null}.
 	 * @return
 	 */
@@ -95,7 +97,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	/**
 	 * Concatenates the given {@link TemplateVariables} to the current one.
-	 * 
+	 *
 	 * @param variables must not be {@literal null}.
 	 * @return
 	 */
@@ -105,7 +107,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	/**
 	 * Returns the contained {@link TemplateVariable}s as {@link List}.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<TemplateVariable> asList() {
@@ -118,7 +120,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 				.anyMatch(variable -> variable.isEquivalent(candidate));
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
@@ -138,7 +140,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 	/**
 	 * Returns the string representation of the template but forcing a continued style of expressing request parameters.
-	 * 
+	 *
 	 * @param appended
 	 * @return
 	 */

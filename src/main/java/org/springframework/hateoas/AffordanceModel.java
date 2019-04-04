@@ -1,11 +1,11 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,23 +15,89 @@
  */
 package org.springframework.hateoas;
 
-import java.util.Collection;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-import org.springframework.http.MediaType;
+import java.util.List;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 
 /**
- * An affordance model is a media type specific description of an affordance.
- * 
+ * Collection of attributes needed to render any form of hypermedia.
+ *
  * @author Greg Turnquist
- * @author Oliver Gierke
+ * @author Oliver Drotbohm
  */
-public interface AffordanceModel {
+@EqualsAndHashCode
+@AllArgsConstructor
+@Getter
+public abstract class AffordanceModel {
 
 	/**
-	 * The media types this is a model for. Can be multiple ones as often media types come in different flavors like an
-	 * XML and JSON one and in simple cases a single model might serve them all.
-	 * 
-	 * @return will never be {@literal null}.
+	 * Name for the REST action of this resource.
 	 */
-	Collection<MediaType> getMediaTypes();
+	private String name;
+
+	/**
+	 * {@link Link} for the URI of the resource.
+	 */
+	private Link link;
+
+	/**
+	 * Request method verb for this resource. For multiple methods, add multiple {@link Affordance}s.
+	 */
+	private HttpMethod httpMethod;
+
+	/**
+	 * Domain type used to create a new resource.
+	 */
+	private ResolvableType inputType;
+
+	/**
+	 * Collection of {@link QueryParameter}s to interrogate a resource.
+	 */
+	private List<QueryParameter> queryMethodParameters;
+
+	/**
+	 * Response body domain type.
+	 */
+	private ResolvableType outputType;
+
+	/**
+	 * Expand the {@link Link} into an {@literal href} with no parameters.
+	 *
+	 * @return
+	 */
+	public String getURI() {
+		return this.link.expand().getHref();
+	}
+
+	/**
+	 * Returns whether the {@link Affordance} has the given {@link HttpMethod}.
+	 *
+	 * @param method must not be {@literal null}.
+	 * @return
+	 */
+	public boolean hasHttpMethod(HttpMethod method) {
+
+		Assert.notNull(method, "HttpMethod must not be null!");
+
+		return this.httpMethod.equals(method);
+	}
+
+	/**
+	 * Returns whether the {@link Affordance} points to the target of the given {@link Link}.
+	 *
+	 * @param link must not be {@literal null}.
+	 * @return
+	 */
+	public boolean pointsToTargetOf(Link link) {
+
+		Assert.notNull(link, "Link must not be null!");
+
+		return getURI().equals(link.expand().getHref());
+	}
 }

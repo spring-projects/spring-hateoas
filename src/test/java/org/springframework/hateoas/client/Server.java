@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,8 +15,25 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.*;
-import static org.hamcrest.Matchers.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.context.MessageSource;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,44 +41,35 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.hateoas.core.EvoInflectorRelProvider;
-import org.springframework.hateoas.hal.Jackson2HalModule;
-import org.springframework.http.MediaType;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StreamUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static net.jadler.Jadler.closeJadler;
+import static net.jadler.Jadler.initJadler;
+import static net.jadler.Jadler.onRequest;
+import static net.jadler.Jadler.port;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.mock;
 
 /**
  * Helper class for integration tests.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Michael Wirth
  */
 public class Server implements Closeable {
 
 	private final ObjectMapper mapper;
-	private final RelProvider relProvider;
+	private final LinkRelationProvider relProvider;
 
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<>();
-	private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public Server() {
 
-		this.relProvider = new EvoInflectorRelProvider();
+		this.relProvider = new EvoInflectorLinkRelationProvider();
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, null, null));
+		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
+				new MessageSourceAccessor(mock(MessageSource.class))));
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //
@@ -95,7 +103,14 @@ public class Server implements Closeable {
 				withBody("{ \"_links\" : { \"self\" : { \"href\" : \"/{?template}\" }}}"). //
 				withContentType(MediaTypes.HAL_JSON.toString());
 
+		onRequest(). //
+				havingPathEqualTo("/github-with-template"). //
+				respond(). //
+				withBody("{ \"_links\" : { \"rel_to_templated_link\" : { \"href\" : \"/github/{issue}\" }}}"). //
+				withContentType(MediaTypes.HAL_JSON.toString());
+
 		// Sample traversal of HAL docs based on Spring-a-Gram showcase
+		ResourceLoader resourceLoader = new DefaultResourceLoader();
 		org.springframework.core.io.Resource springagramRoot = resourceLoader
 				.getResource("classpath:springagram-root.json");
 		org.springframework.core.io.Resource springagramItems = resourceLoader
@@ -167,15 +182,15 @@ public class Server implements Closeable {
 		return "http://localhost:" + port();
 	}
 
-	public String mockResourceFor(Resource<?> resource) {
+	public String mockResourceFor(EntityModel<?> resource) {
 
 		Object content = resource.getContent();
 
-		Class<? extends Object> type = content.getClass();
-		String collectionRel = relProvider.getCollectionResourceRelFor(type);
-		String singleRel = relProvider.getItemResourceRelFor(type);
+		Class<?> type = content.getClass();
+		LinkRelation collectionRel = relProvider.getCollectionResourceRelFor(type);
+		LinkRelation singleRel = relProvider.getItemResourceRelFor(type);
 
-		String baseResourceUri = String.format("%s/%s", rootResource(), collectionRel);
+		String baseResourceUri = String.format("%s/%s", rootResource(), collectionRel.value());
 		String resourceUri = String.format("%s/%s", baseResourceUri, UUID.randomUUID().toString());
 
 		baseResources.add(new Link(baseResourceUri, collectionRel), new Link(resourceUri, singleRel));
@@ -187,13 +202,13 @@ public class Server implements Closeable {
 
 	public void finishMocking() {
 
-		Resources<String> resources = new Resources<>(Collections.emptyList());
+		CollectionModel<String> resources = new CollectionModel<>(Collections.emptyList());
 
 		for (Link link : baseResources.keySet()) {
 
 			resources.add(link);
 
-			Resources<String> nested = new Resources<>(Collections.emptyList());
+			CollectionModel<String> nested = new CollectionModel<>(Collections.emptyList());
 			nested.add(baseResources.get(link));
 
 			register(link.getHref(), nested);
@@ -217,12 +232,12 @@ public class Server implements Closeable {
 		}
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.io.Closeable#close()
 	 */
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		closeJadler();
 	}
 }

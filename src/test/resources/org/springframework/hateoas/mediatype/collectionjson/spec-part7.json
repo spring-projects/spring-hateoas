@@ -1,0 +1,22 @@
+{
+  "template": {
+    "data": [
+      {
+        "name": "full-name",
+        "value": "W. Chandry"
+      },
+      {
+        "name": "email",
+        "value": "wchandry@example.org"
+      },
+      {
+        "name": "blog",
+        "value": "https://example.org/blogs/wchandry"
+      },
+      {
+        "name": "avatar",
+        "value": "https://example.org/images/wchandry"
+      }
+    ]
+  }
+}

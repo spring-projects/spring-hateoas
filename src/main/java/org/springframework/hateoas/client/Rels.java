@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,17 +15,18 @@
  */
 package org.springframework.hateoas.client;
 
+import java.util.Optional;
+
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkDiscoverer;
-import org.springframework.hateoas.LinkDiscoverers;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.jayway.jsonpath.JsonPath;
 
 /**
  * Helper class to find {@link Link} instances in representations.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.11
@@ -34,7 +35,7 @@ class Rels {
 
 	/**
 	 * Creates a new {@link Rel} for the given relation name and {@link LinkDiscoverers}.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @param discoverers must not be {@literal null}.
 	 * @return
@@ -55,17 +56,17 @@ class Rels {
 
 		/**
 		 * Returns the link contained in the given representation of the given {@link MediaType}.
-		 * 
-		 * @param representation
-		 * @param mediaType
+		 *
+		 * @param representation will never be {@literal null}.
+		 * @param mediaType will never be {@literal null}.
 		 * @return
 		 */
-		Link findInResponse(String representation, MediaType mediaType);
+		Optional<Link> findInResponse(String representation, MediaType mediaType);
 	}
 
 	/**
 	 * {@link Rel} to using a {@link LinkDiscoverer} based on the given {@link MediaType}.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	private static class LinkDiscovererRel implements Rel {
@@ -75,7 +76,7 @@ class Rels {
 
 		/**
 		 * Creates a new {@link LinkDiscovererRel} for the given relation name and {@link LinkDiscoverers}.
-		 * 
+		 *
 		 * @param rel must not be {@literal null} or empty.
 		 * @param discoverers must not be {@literal null}.
 		 */
@@ -88,21 +89,16 @@ class Rels {
 			this.discoverers = discoverers;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.client.Rels.Rel#findInResponse(java.lang.String, org.springframework.http.MediaType)
 		 */
 		@Override
-		public Link findInResponse(String response, MediaType mediaType) {
+		public Optional<Link> findInResponse(String response, MediaType mediaType) {
 
-			LinkDiscoverer discoverer = discoverers.getLinkDiscovererFor(mediaType);
-
-			if (discoverer == null) {
-				throw new IllegalStateException(String.format("Did not find LinkDiscoverer supporting media type %s!",
-						mediaType));
-			}
-
-			return discoverer.findLinkWithRel(rel, response);
+			return discoverers //
+					.getRequiredLinkDiscovererFor(mediaType) //
+					.findLinkWithRel(rel, response);
 		}
 
 		/*
@@ -118,7 +114,7 @@ class Rels {
 
 	/**
 	 * A relation that's being looked up by a JSONPath expression.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	private static class JsonPathRel implements Rel {
@@ -128,7 +124,7 @@ class Rels {
 
 		/**
 		 * Creates a new {@link JsonPathRel} for the given JSON path.
-		 * 
+		 *
 		 * @param jsonPath must not be {@literal null} or empty.
 		 */
 		private JsonPathRel(String jsonPath) {
@@ -141,13 +137,13 @@ class Rels {
 			this.rel = lastSegment.contains("[") ? lastSegment.substring(0, lastSegment.indexOf("[")) : lastSegment;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.client.Rels.Rel#findInResponse(java.lang.String, org.springframework.http.MediaType)
 		 */
 		@Override
-		public Link findInResponse(String representation, MediaType mediaType) {
-			return new Link(JsonPath.<Object> read(representation, jsonPath).toString(), rel);
+		public Optional<Link> findInResponse(@Nullable String representation, @Nullable MediaType mediaType) {
+			return Optional.of(new Link(JsonPath.read(representation, jsonPath).toString(), rel));
 		}
 	}
 }

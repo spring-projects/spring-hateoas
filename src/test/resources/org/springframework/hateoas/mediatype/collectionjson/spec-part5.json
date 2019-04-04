@@ -1,0 +1,30 @@
+{
+  "collection": {
+    "version": "1.0",
+    "href": "https://example.org/friends/",
+    "template": {
+      "data": [
+        {
+          "name": "full-name",
+          "value": "",
+          "prompt": "Full Name"
+        },
+        {
+          "name": "email",
+          "value": "",
+          "prompt": "Email"
+        },
+        {
+          "name": "blog",
+          "value": "",
+          "prompt": "Blog"
+        },
+        {
+          "name": "avatar",
+          "value": "",
+          "prompt": "Avatar"
+        }
+      ]
+    }
+  }
+}

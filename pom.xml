@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.hateoas</groupId>
@@ -7,17 +7,17 @@
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
-	<url>http://github.com/SpringSource/spring-hateoas</url>
+	<url>https://github.com/SpringSource/spring-hateoas</url>
 	<description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2017</inceptionYear>
+	<inceptionYear>2012-2019</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
-		<url>http://www.spring.io</url>
+		<url>https://www.spring.io</url>
 	</organization>
 
 	<developers>
@@ -46,15 +46,15 @@
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-			Copyright 2011 the original author or authors.
+			Copyright 2011-2019 the original author or authors.
 
 			Licensed under the Apache License, Version 2.0 (the "License");
 			you may not use this file except in compliance with the License.
 			You may obtain a copy of the License at
 
-			     http://www.apache.org/licenses/LICENSE-2.0
+			     https://www.apache.org/licenses/LICENSE-2.0
 
 			Unless required by applicable law or agreed to in writing, software
 			distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,34 +68,25 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.0.6.RELEASE</spring.version>
+		<source.level>1.8</source.level>
+		<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
+		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.9.1</jackson.version>
+		<jackson.version>2.9.8</jackson.version>
 		<java-module-name>spring.hateoas</java-module-name>
-		<minidevjson.version>2.2.1</minidevjson.version>
 		<jsonpath.version>2.2.0</jsonpath.version>
+		<jsr305.version>3.0.2</jsr305.version>
+		<minidevjson.version>2.2.1</minidevjson.version>
+		<reactor-bom.version>Californium-SR4</reactor-bom.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<evo.version>1.2.2</evo.version>
-		<source.level>1.8</source.level>
+		<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
+		<spring-plugin.version>2.0.0.BUILD-SNAPSHOT</spring-plugin.version>
+		<kotlin.version>1.3.21</kotlin.version>
 	</properties>
 
 	<profiles>
-
-		<profile>
-			<id>spring5-next</id>
-			<properties>
-				<spring.version>5.0.7.BUILD-SNAPSHOT</spring.version>
-				<jackson.version>2.9.2</jackson.version>
-			</properties>
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>http://repo.spring.io/libs-snapshot</url>
-				</repository>
-			</repositories>
-		</profile>
 
 		<profile>
 
@@ -109,9 +100,9 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.10.4</version>
 						<executions>
 							<execution>
+								<id>create-javadoc-jar</id>
 								<goals>
 									<goal>jar</goal>
 								</goals>
@@ -167,16 +158,15 @@
 				<shared.resources>${project.build.directory}/shared-resources</shared.resources>
 				<maven.install.skip>true</maven.install.skip>
 				<skipTests>true</skipTests>
-				<project.root>${basedir}</project.root>
 			</properties>
 
 			<dependencies>
 				<dependency>
-					<groupId>org.springframework.data.build</groupId>
-					<artifactId>spring-data-build-resources</artifactId>
-					<version>2.0.0.RELEASE</version>
-					<scope>provided</scope>
+					<groupId>io.spring.docresources</groupId>
+					<artifactId>spring-doc-resources</artifactId>
+					<version>${docs.resources.version}</version>
 					<type>zip</type>
+					<optional>true</optional>
 				</dependency>
 			</dependencies>
 
@@ -193,20 +183,126 @@
 						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>unpack-shared-resources</id>
+								<id>unpack-doc-resources</id>
 								<goals>
 									<goal>unpack-dependencies</goal>
 								</goals>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
+								<configuration>
+									<includeGroupIds>io.spring.docresources</includeGroupIds>
+									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+								</configuration>
 							</execution>
 						</executions>
 						<configuration>
-							<includeGroupIds>org.springframework.data</includeGroupIds>
-							<includeArtifactIds>spring-data-build-resources</includeArtifactIds>
 							<includeTypes>zip</includeTypes>
 							<excludeTransitive>true</excludeTransitive>
-							<outputDirectory>${shared.resources}</outputDirectory>
 						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-asciidoc-resources</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/asciidoc</directory>
+											<filtering>false</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctor-maven-plugin</artifactId>
+						<version>1.5.7.1</version>
+						<dependencies>
+							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj-pdf</artifactId>
+								<version>1.5.0-alpha.16</version>
+							</dependency>
+							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj-diagram</artifactId>
+								<version>1.5.10</version>
+							</dependency>
+						</dependencies>
+						<executions>
+
+							<execution>
+								<id>html</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>process-asciidoc</goal>
+								</goals>
+								<configuration>
+									<backend>html5</backend>
+									<sourceHighlighter>highlight.js</sourceHighlighter>
+									<outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
+									<sectids>false</sectids>
+									<attributes>
+										<code-dir>${basedir}/src/docs/java/org/springframework/hateoas</code-dir>
+										<resource-dir>${basedir}/src/docs/resources/org/springframework/hateoas</resource-dir>
+										<docinfo>shared</docinfo>
+										<linkcss>true</linkcss>
+										<icons>font</icons>
+										<sectanchors>true</sectanchors>
+										<stylesdir>css/</stylesdir>
+										<stylesheet>spring.css</stylesheet>
+										<highlightjsdir>js/highlight</highlightjsdir>
+										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
+									</attributes>
+									<requires>
+										<require>asciidoctor-diagram</require>
+									</requires>
+								</configuration>
+							</execution>
+
+							<execution>
+								<id>pdf</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>process-asciidoc</goal>
+								</goals>
+								<configuration>
+									<backend>pdf</backend>
+									<sourceHighlighter>coderay</sourceHighlighter>
+									<attributes>
+										<code-dir>${basedir}/src/docs/java/org/springframework/hateoas</code-dir>
+									</attributes>
+								</configuration>
+							</execution>
+
+						</executions>
+
+						<configuration>
+							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
+							<sourceDocumentName>index.adoc</sourceDocumentName>
+							<doctype>book</doctype>
+							<attributes>
+								<version>${project.version}</version>
+								<projectName>${project.name}</projectName>
+								<projectVersion>${project.version}</projectVersion>
+								<allow-uri-read>true</allow-uri-read>
+								<toclevels>4</toclevels>
+								<numbered>true</numbered>
+								<baseDir>${project.basedir}</baseDir>
+							</attributes>
+						</configuration>
+
 					</plugin>
 
 					<!--
@@ -218,77 +314,13 @@
 						<artifactId>maven-javadoc-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>aggregate-javadoc</id>
+								<id>javadoc</id>
+								<phase>prepare-package</phase>
 								<goals>
-									<goal>aggregate</goal>
+									<goal>javadoc</goal>
 								</goals>
-								<phase>package</phase>
 							</execution>
 						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>org.asciidoctor</groupId>
-						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.6</version>
-						<dependencies>
-							<dependency>
-								<groupId>org.asciidoctor</groupId>
-								<artifactId>asciidoctorj-pdf</artifactId>
-								<version>1.5.0-alpha.16</version>
-							</dependency>
-						</dependencies>
-						<executions>
-
-							<execution>
-								<id>html</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>html5</backend>
-									<outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
-									<sectids>false</sectids>
-									<sourceHighlighter>prettify</sourceHighlighter>
-									<attributes>
-										<linkcss>true</linkcss>
-										<icons>font</icons>
-										<sectanchors>true</sectanchors>
-										<stylesheet>spring.css</stylesheet>
-									</attributes>
-								</configuration>
-							</execution>
-
-							<execution>
-								<id>pdf</id>
-								<phase>generate-resources</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>pdf</backend>
-									<sourceHighlighter>coderay</sourceHighlighter>
-								</configuration>
-							</execution>
-
-						</executions>
-
-						<configuration>
-							<sourceDirectory>${project.root}/src/main/asciidoc</sourceDirectory>
-							<sourceDocumentName>index.adoc</sourceDocumentName>
-							<doctype>book</doctype>
-							<attributes>
-								<version>${project.version}</version>
-								<projectName>${project.name}</projectName>
-								<projectVersion>${project.version}</projectVersion>
-								<allow-uri-read>true</allow-uri-read>
-								<toclevels>3</toclevels>
-								<numbered>true</numbered>
-								<baseDir>${project.basedir}</baseDir>
-							</attributes>
-						</configuration>
-
 					</plugin>
 
 					<plugin>
@@ -298,16 +330,13 @@
 
 							<execution>
 								<id>copy-documentation-resources</id>
-								<phase>generate-resources</phase>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
 								<configuration>
 									<target>
-										<copy todir="${project.root}/target/site/reference/html">
-											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css" />
-											</fileset>
-											<flattenmapper />
-										</copy>
-										<copy todir="${project.root}/target/site/reference/html/images">
+										<copy todir="${basedir}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
 												<include name="**/*.png" />
 												<include name="**/*.gif" />
@@ -317,18 +346,14 @@
 										</copy>
 									</target>
 								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
 							</execution>
 
 							<execution>
 								<id>rename-reference-docs</id>
-								<phase>process-resources</phase>
+								<phase>prepare-package</phase>
 								<configuration>
 									<target>
-										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
-										<copy file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${project.artifactId}-reference.epub" failonerror="false" />
+										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${basedir}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
 									</target>
 								</configuration>
 								<goals>
@@ -336,53 +361,43 @@
 								</goals>
 							</execution>
 
-						</executions>
-
-					</plugin>
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.1.0</version>
-						<executions>
 							<execution>
-								<id>static</id>
-								<goals>
-									<goal>single</goal>
-								</goals>
+								<id>package-and-attach-docs-zip</id>
 								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
 								<configuration>
-									<descriptors>
-										<descriptor>${shared.resources}/assemblies/static-resources.xml</descriptor>
-									</descriptors>
-									<finalName>static-resources</finalName>
-									<appendAssemblyId>false</appendAssemblyId>
+									<tasks>
+										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+											<fileset dir="${project.build.directory}/site"/>
+										</zip>
+									</tasks>
 								</configuration>
 							</execution>
+
 						</executions>
+
 					</plugin>
 
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>wagon-maven-plugin</artifactId>
-						<version>1.0</version>
-						<configuration>
-							<fromDir>${project.build.directory}</fromDir>
-						</configuration>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.10</version>
 						<executions>
 							<execution>
-								<id>upload-static-resources</id>
-								<phase>deploy</phase>
+								<id>attach-zip</id>
 								<goals>
-									<goal>upload</goal>
+									<goal>attach-artifact</goal>
 								</goals>
+								<phase>package</phase>
 								<configuration>
-									<fromDir>${project.build.directory}/static-resources</fromDir>
-									<includes>**</includes>
-									<serverId>static-dot-s2</serverId>
-									<url>scp://docs.af.pivotal.io</url>
-									<toDir>/var/www/domains/spring.io/www/htdocs/autorepo/docs/${project.artifactId}/${project.version}</toDir>
-									<optimize>true</optimize>
+									<artifacts>
+										<artifact>
+											<file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
+											<type>zip</type>
+										</artifact>
+									</artifacts>
 								</configuration>
 							</execution>
 						</executions>
@@ -394,7 +409,39 @@
 
 	</profiles>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>${reactor-bom.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
+
+		<!-- Kotlin extension -->
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib</artifactId>
+			<version>${kotlin.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-reflect</artifactId>
+			<version>${kotlin.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-test</artifactId>
+			<version>${kotlin.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -430,13 +477,20 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webflux</artifactId>
+			<version>${spring.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
-			<version>2.0.0.BUILD-SNAPSHOT</version>
-			<optional>true</optional>
+			<version>${spring-plugin.version}</version>
 		</dependency>
 
 		<dependency>
@@ -457,7 +511,6 @@
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 			<version>${jsonpath.version}</version>
-			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -470,7 +523,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.16.18</version>
+			<version>1.18.4</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -511,14 +564,14 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.10.0</version>
+			<version>2.23.4</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.8.0</version>
+			<version>3.11.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -530,16 +583,27 @@
 		</dependency>
 
 		<dependency>
-			<groupId>xmlunit</groupId>
-			<artifactId>xmlunit</artifactId>
-			<version>1.6</version>
+			<groupId>net.jadler</groupId>
+			<artifactId>jadler-all</artifactId>
+			<version>1.3.0</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
-			<groupId>net.jadler</groupId>
-			<artifactId>jadler-all</artifactId>
-			<version>1.3.0</version>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor.addons</groupId>
+			<artifactId>reactor-extra</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -550,6 +614,13 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit</artifactId>
+			<version>0.9.3</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
@@ -564,17 +635,69 @@
 			</extension>
 		</extensions>
 
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.4</version>
+					<configuration>
+						<breakiterator>true</breakiterator>
+						<header>${project.name}</header>
+						<source>${source.level}</source>
+						<quiet>true</quiet>
+						<additionalparam>-Xdoclint:none</additionalparam>
+						<links>
+							<link>https://docs.spring.io/spring/docs/5.1.x/javadoc-api</link>
+							<link>https://docs.oracle.com/javase/8/docs/api</link>
+						</links>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>add-docs-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/docs/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-docs-resources</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>src/docs/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.1</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>${source.level}</source>
 					<target>${source.level}</target>
-					<configuration>
-						<parameters>true</parameters>
-					</configuration>
 				</configuration>
 			</plugin>
 
@@ -609,29 +732,51 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
 				<configuration>
-					<breakiterator>true</breakiterator>
-					<header>${project.name}</header>
-					<source>${source.level}</source>
-					<quiet>true</quiet>
-					<additionalparam>-Xdoclint:none</additionalparam>
-					<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
-					<links>
-						<link>http://static.springframework.org/spring/docs/4.1.x/javadoc-api</link>
-						<link>http://docs.oracle.com/javase/6/docs/api</link>
-					</links>
+					<useSystemClassLoader>false</useSystemClassLoader>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-maven-plugin</artifactId>
+				<version>${kotlin.version}</version>
+				<configuration>
+					<jvmTarget>${source.level}</jvmTarget>
+				</configuration>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<sourceDirs>
+								<sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+								<sourceDir>${project.basedir}/src/main/java</sourceDir>
+							</sourceDirs>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-compile</id>
+						<goals>
+							<goal>test-compile</goal>
+						</goals>
+						<configuration>
+							<sourceDirs>
+								<sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+								<sourceDir>${project.basedir}/src/test/java</sourceDir>
+							</sourceDirs>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.8.2</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 
 		</plugins>

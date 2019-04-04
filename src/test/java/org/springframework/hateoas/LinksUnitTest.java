@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Unit test for {@link Links}.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -43,30 +43,30 @@ public class LinksUnitTest {
 
 	static final String LINKS2 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(THIRD, FOURTH));
 
-	static final Links reference = new Links(new Link("/something", "foo"), new Link("/somethingElse", "bar"));
-	static final Links reference2 = new Links(new Link("/something", "foo").withHreflang("en"),
+	static final Links reference = Links.of(new Link("/something", "foo"), new Link("/somethingElse", "bar"));
+	static final Links reference2 = Links.of(new Link("/something", "foo").withHreflang("en"),
 			new Link("/somethingElse", "bar").withHreflang("de"));
 
 	@Test
 	public void parsesLinkHeaderLinks() {
 
-		assertThat(Links.valueOf(LINKS)).isEqualTo(reference);
-		assertThat(Links.valueOf(LINKS2)).isEqualTo(reference2);
+		assertThat(Links.parse(LINKS)).isEqualTo(reference);
+		assertThat(Links.parse(LINKS2)).isEqualTo(reference2);
 		assertThat(reference.toString()).isEqualTo(LINKS);
 		assertThat(reference2.toString()).isEqualTo(LINKS2);
 	}
 
 	@Test
 	public void skipsEmptyLinkElements() {
-		assertThat(Links.valueOf(LINKS + ",,,")).isEqualTo(reference);
-		assertThat(Links.valueOf(LINKS2 + ",,,")).isEqualTo(reference2);
+		assertThat(Links.parse(LINKS + ",,,")).isEqualTo(reference);
+		assertThat(Links.parse(LINKS2 + ",,,")).isEqualTo(reference2);
 	}
 
 	@Test
 	public void returnsNullForNullOrEmptySource() {
 
-		assertThat(Links.valueOf(null)).isEqualTo(Links.NO_LINKS);
-		assertThat(Links.valueOf("")).isEqualTo(Links.NO_LINKS);
+		assertThat(Links.parse(null)).isEqualTo(Links.NONE);
+		assertThat(Links.parse("")).isEqualTo(Links.NONE);
 	}
 
 	/**
@@ -87,9 +87,9 @@ public class LinksUnitTest {
 
 		Link withComma = new Link("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
 
-		assertThat(Links.valueOf(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
+		assertThat(Links.parse(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
 
-		Links twoWithCommaInFirst = Links.valueOf(WITH_COMMA.concat(",").concat(SECOND));
+		Links twoWithCommaInFirst = Links.parse(WITH_COMMA.concat(",").concat(SECOND));
 
 		assertThat(twoWithCommaInFirst.getLink("foo")).hasValue(withComma);
 		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
@@ -100,6 +100,39 @@ public class LinksUnitTest {
 	 */
 	@Test
 	public void parsesLinksWithWhitespace() {
-		assertThat(Links.valueOf(WITH_WHITESPACE)).isEqualTo(reference);
+		assertThat(Links.parse(WITH_WHITESPACE)).isEqualTo(reference);
+	}
+
+	@Test // #805
+	public void returnsRequiredLink() {
+
+		Link reference = new Link("http://localhost", "someRel");
+		Links links = Links.of(reference);
+
+		assertThat(links.getRequiredLink("someRel")).isEqualTo(reference);
+	}
+
+	@Test // #805
+	public void rejectsMissingLinkWithIllegalArgumentException() {
+
+		Links links = Links.of();
+
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+				.isThrownBy(() -> links.getRequiredLink("self")) //
+				.withMessageContaining("self");
+	}
+
+	@Test
+	public void detectsContainedLinks() {
+
+		Link first = new Link("http://localhost", "someRel");
+		Link second = new Link("http://localhost", "someOtherRel");
+
+		assertThat(Links.of(first).contains(first)).isTrue();
+		assertThat(Links.of(first).contains(second)).isFalse();
+
+		assertThat(Links.of(first).containsSameLinksAs(Links.of(first, second))).isFalse();
+		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first))).isFalse();
+		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first, second))).isTrue();
 	}
 }

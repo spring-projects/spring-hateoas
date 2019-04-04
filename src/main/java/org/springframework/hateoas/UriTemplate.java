@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,11 +22,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
@@ -34,25 +36,29 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Custom URI template to support qualified URI template variables.
- * 
+ *
  * @author Oliver Gierke
- * @see http://tools.ietf.org/html/rfc6570
+ * @author JamesE Richardson
+ * @see https://tools.ietf.org/html/rfc6570
  * @since 0.9
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
-	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,]+)\\}");
+	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
 
+	private static final Map<String, UriTemplate> CACHE = new ConcurrentHashMap<>();
+
 	private final TemplateVariables variables;
+	private String toString;
 	private String baseUri;
 
 	/**
 	 * Creates a new {@link UriTemplate} using the given template string.
-	 * 
+	 *
 	 * @param template must not be {@literal null} or empty.
 	 */
-	public UriTemplate(String template) {
+	private UriTemplate(String template) {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
@@ -68,7 +74,14 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			String[] names = matcher.group(2).split(",");
 
 			for (String name : names) {
-				TemplateVariable variable = new TemplateVariable(name, type);
+
+				TemplateVariable variable;
+
+				if (name.endsWith(VariableType.COMPOSITE_PARAM.toString())) {
+					variable = new TemplateVariable(name.substring(0, name.length() - 1), VariableType.COMPOSITE_PARAM);
+				} else {
+					variable = new TemplateVariable(name, type);
+				}
 
 				if (!variable.isRequired() && start < baseUriEndIndex) {
 					baseUriEndIndex = start;
@@ -84,27 +97,43 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Creates a new {@link UriTemplate} from the given base URI and {@link TemplateVariables}.
-	 * 
+	 *
 	 * @param baseUri must not be {@literal null} or empty.
-	 * @param variables defaults to {@link TemplateVariables#NONE}.
+	 * @param variables must not be {@literal null}.
 	 */
-	public UriTemplate(String baseUri, TemplateVariables variables) {
+	UriTemplate(String baseUri, TemplateVariables variables) {
 
 		Assert.hasText(baseUri, "Base URI must not be null or empty!");
+		Assert.notNull(variables, "Template variables must not be null!");
 
 		this.baseUri = baseUri;
-		this.variables = variables == null ? TemplateVariables.NONE : variables;
+		this.variables = variables;
+	}
+
+	/**
+	 * Returns a {@link UriTemplate} for the given {@link String} template.
+	 *
+	 * @param template must not be {@literal null} or empty.
+	 * @return
+	 */
+	public static UriTemplate of(String template) {
+
+		Assert.hasText(template, "Template must not be null or empty!");
+
+		return CACHE.computeIfAbsent(template, UriTemplate::new);
 	}
 
 	/**
 	 * Creates a new {@link UriTemplate} with the current {@link TemplateVariable}s augmented with the given ones.
-	 * 
-	 * @param variables can be {@literal null}.
+	 *
+	 * @param variables must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
 	public UriTemplate with(TemplateVariables variables) {
 
-		if (variables == null) {
+		Assert.notNull(variables, "TemplateVariables must not be null!");
+
+		if (variables.equals(TemplateVariables.NONE)) {
 			return this;
 		}
 
@@ -131,8 +160,21 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
+	 * Creates a new {@link UriTemplate} with the given {@link TemplateVariable} added.
+	 *
+	 * @param variable must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public UriTemplate with(TemplateVariable variable) {
+
+		Assert.notNull(variable, "Template variable must not be null!");
+
+		return with(new TemplateVariables(variable));
+	}
+
+	/**
 	 * Creates a new {@link UriTemplate} with a {@link TemplateVariable} with the given name and type added.
-	 * 
+	 *
 	 * @param variableName must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
 	 * @return will never be {@literal null}.
@@ -143,43 +185,42 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Returns whether the given candidate is a URI template.
-	 * 
+	 *
 	 * @param candidate
 	 * @return
 	 */
 	public static boolean isTemplate(String candidate) {
 
-		if (!StringUtils.hasText(candidate)) {
-			return false;
-		}
-
-		return VARIABLE_REGEX.matcher(candidate).find();
+		return StringUtils.hasText(candidate) //
+				? VARIABLE_REGEX.matcher(candidate).find()
+				: false;
 	}
 
 	/**
 	 * Returns the {@link TemplateVariable}s discovered.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<TemplateVariable> getVariables() {
-		return this.variables.asList();
+		return variables.asList();
 	}
 
 	/**
 	 * Returns the names of the variables discovered.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<String> getVariableNames() {
 
 		return variables.asList().stream() //
-				.map(TemplateVariable::getName).collect(Collectors.toList());
+				.map(TemplateVariable::getName) //
+				.collect(Collectors.toList());
 	}
 
 	/**
 	 * Expands the {@link UriTemplate} using the given parameters. The values will be applied in the order of the
 	 * variables discovered.
-	 * 
+	 *
 	 * @param parameters
 	 * @return
 	 * @see #expand(Map)
@@ -205,7 +246,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Expands the {@link UriTemplate} using the given parameters.
-	 * 
+	 *
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
@@ -227,26 +268,31 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		return builder.build().toUri();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
 	public Iterator<TemplateVariable> iterator() {
-		return this.variables.iterator();
+		return variables.iterator();
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 
-		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
-		boolean hasQueryParameters = !components.getQueryParams().isEmpty();
+		if (toString == null) {
 
-		return baseUri + getOptionalVariables().toString(hasQueryParameters);
+			UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
+			boolean hasQueryParameters = !components.getQueryParams().isEmpty();
+
+			this.toString = baseUri + getOptionalVariables().toString(hasQueryParameters);
+		}
+
+		return toString;
 	}
 
 	private TemplateVariables getOptionalVariables() {
@@ -258,12 +304,12 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	/**
 	 * Appends the value for the given {@link TemplateVariable} to the given {@link UriComponentsBuilder}.
-	 * 
+	 *
 	 * @param builder must not be {@literal null}.
 	 * @param variable must not be {@literal null}.
 	 * @param value can be {@literal null}.
 	 */
-	private static void appendToBuilder(UriComponentsBuilder builder, TemplateVariable variable, Object value) {
+	private static void appendToBuilder(UriComponentsBuilder builder, TemplateVariable variable, @Nullable Object value) {
 
 		if (value == null) {
 
@@ -276,6 +322,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		switch (variable.getType()) {
+			case COMPOSITE_PARAM:
+				appendComposite(builder, variable.getName(), value);
+				break;
 			case REQUEST_PARAM:
 			case REQUEST_PARAM_CONTINUED:
 				builder.queryParam(variable.getName(), value);
@@ -287,6 +336,32 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			case FRAGMENT:
 				builder.fragment(value.toString());
 				break;
+		}
+	}
+
+	/**
+	 * Expand what could be a single value, a {@link List}, or a {@link Map}.
+	 *
+	 * @param builder
+	 * @param name
+	 * @param value
+	 * @see https://tools.ietf.org/html/rfc6570#section-2.4.2
+	 */
+	@SuppressWarnings("unchecked")
+	private static void appendComposite(UriComponentsBuilder builder, String name, Object value) {
+
+		if (value instanceof Iterable) {
+
+			((Iterable<?>) value).forEach(it -> builder.queryParam(name, it));
+
+		} else if (value instanceof Map) {
+
+			((Map<Object, Object>) value).entrySet() //
+					.forEach(it -> builder.queryParam(it.getKey().toString(), it.getValue()));
+
+		} else {
+
+			builder.queryParam(name, value);
 		}
 	}
 }

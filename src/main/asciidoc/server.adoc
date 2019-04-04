@@ -1,0 +1,438 @@
+[[server]]
+= Server-side support
+:code-dir: ../../../src/docs/java/org/springframework/hateoas
+:resource-dir: ../../../src/docs/resources/org/springframework/hateoas
+
+[[server.link-builder.webmvc]]
+== [[fundamentals.obtaining-links]] [[fundamentals.obtaining-links.builder]] Building links in Spring MVC
+
+Now we have the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link` instances in a less fragile way. Right now, we would have to duplicate URI strings all over the place. Doing so is brittle and unmaintainable.
+
+Assume you have your Spring MVC controllers implemented as follows:
+
+====
+[source, java]
+----
+@Controller
+class PersonController {
+
+  @GetMapping("/people")
+  HttpEntity<PersonModel> showAll() { … }
+
+  @GetMapping(value = "/{person}", method = RequestMethod.GET)
+  HttpEntity<PersonModel> show(@PathVariable Long person) { … }
+}
+----
+====
+
+We see two conventions here. The first is a collection resource that is exposed through `@GetMapping` annotation of the controller method, with individual elements of that collection exposed as direct sub resources. The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as `/people/{id}/addresses`). Suppose you would like to link to the collection resource of all people. Following the approach from up above would cause two problems:
+
+* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values. This is cumbersome and requires ugly manual string concatenation code.
+* You probably do not want to concatenate the `/people` on top of your base URI, because you would then have to maintain the information in multiple places. If you change the mapping, you then have to change all the clients pointing to it.
+
+Spring HATEOAS now provides a `WebMvcLinkBuilder` that lets you create links by pointing to controller classes.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+import static org.sfw.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+Link link = linkTo(PersonController.class).withRel("people");
+
+assertThat(link.getRel()).isEqualTo(LinkRelation.of("people"));
+assertThat(link.getHref()).endsWith("/people");
+----
+====
+
+The `WebMvcLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at `http://localhost:8080/your-app`, this is exactly the URI on top of which you are constructing additional parts. The builder now inspects the given controller class for its root mapping and, thus, ends up with `http://localhost:8080/your-app/people`. You can also build more nested links as well.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+Person person = new Person(1L, "Dave", "Matthews");
+//                 /person                 /     1
+Link link = linkTo(PersonController.class).slash(person.getId()).withSelfRel();
+assertThat(link.getRel(), is(IanaLinkRelation.SELF.value()));
+assertThat(link.getHref(), endsWith("/people/1"));
+----
+====
+
+The builder also allows creating URI instances to build up (for example, response header values):
+
+====
+[source, java]
+----
+HttpHeaders headers = new HttpHeaders();
+headers.setLocation(linkTo(PersonController.class).slash(person).toUri());
+
+return new ResponseEntity<PersonModel>(headers, HttpStatus.CREATED);
+----
+====
+
+[[fundamentals.obtaining-links.builder.methods]]
+==== Building Links that Point to Methods
+
+You can even build links that point to methods or create dummy controller method invocations.
+The first approach is to hand a `Method` instance to the `WebMvcLinkBuilder`.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+Method method = PersonController.class.getMethod("show", Long.class);
+Link link = linkTo(method, 2L).withSelfRel();
+
+assertThat(link.getHref()).endsWith("/people/2"));
+----
+====
+
+This is still a bit dissatisfying, as we have to first get a `Method` instance, which throws an exception and is generally quite cumbersome. At least we do not repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy, which we can create byi using the `methodOn(…)` helper.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
+
+assertThat(link.getHref()).endsWith("/people/2");
+----
+====
+
+`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method for which we want to obtain the mapping. However, there are a few constraints on the methods that can be obtained byusing this technique:
+
+* The return type has to be capable of proxying, as we need to expose the method invocation on it.
+* The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
+
+[[server.link-builder.webflux]]
+== Building links in Spring WebFlux
+
+TODO
+
+[[server.link-builder.forwarded-headers]]
+== Forwarded header handling
+
+https://tools.ietf.org/html/rfc7239[RFC-7239 forwarding headers] are most commonly used when your application is behind a proxy, behind a load balancer, or in the cloud.
+The node that actually receives the web request is part of the infrastructure, and _forwards_ the request to your application.
+
+Your application may be running on `localhost:8080`, but to the outside world, you're expected to be at `reallycoolsite.com` (and on web's standart port 80).
+By having the proxy include extra headers (which many already do), Spring HATEOAS can generate links properly as it uses Spring Framework functionality to obtain the base URI of the original request.
+
+IMPORTANT: Anything that can change the root URI based on external inputs must be properly guarded.
+That's why, by default, forwarded header handling is *disabled*.
+You MUST enable it to be operational.
+If you are deploying to the cloud or into a configuration where you control the proxies and load balancers, then you'll certainly want to use this feature.
+
+To enable forwarded header handling you need to register Spring's `ForwardedHeaderFilter` for Spring MVC (details https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#filters-forwarded-headers[here]) or `ForwardedHeaderTransformer` for Spring WebFlux (details https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#webflux-forwarded-headers[here]) in your application.
+In a Spring Boot application those components can be simply declared as Spring beans as described https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-developing-web-applications.html#boot-features-embedded-container-servlets-filters-listeners-beans[here].
+
+.Registering a `ForwardedHeaderFilter`
+====
+[source, java, tabsize=2, indent=0]
+----
+include::{code-dir}/ForwardedEnabledConfig.java[tags=code-1]
+----
+====
+
+This will create a servlet filter that processes all the `X-Forwarded-…` headers.
+And it will register it properly with the servlet handlers.
+
+For a Spring WebFlux application, the reactive counterpart is `ForwardedHeaderTransformer`:
+
+.Registering a `ForwardedHeaderTransformer`
+====
+[source, java, tabsize=2, indent=0]
+----
+include::{code-dir}/ForwardedEnabledConfig.java[tags=code-2]
+----
+====
+
+This will create a function that transforms reactive web requests, processing `X-Forwarded-…` headers.
+And it will register it properly with WebFlux.
+
+With configuration as shown above in place, a request passing `X-Forwarded-…` headers will see those reflected in the links generated:
+
+.A request using `X-Forwarded-…` headers
+====
+[source, bash]
+----
+curl -v localhost:8080/employees \
+    -H 'X-Forwarded-Proto: https' \
+    -H 'X-Forwarded-Host: example.com' \
+    -H 'X-Forwarded-Port: 9001'
+----
+====
+
+.The corresponding response with the links generated to consider those headers
+====
+[source, json]
+----
+{
+  "_embedded": {
+    "employees": [
+      {
+        "id": 1,
+        "name": "Bilbo Baggins",
+        "role": "burglar",
+        "_links": {
+          "self": {
+            "href": "https://example.com:9001/employees/1"
+          },
+          "employees": {
+            "href": "https://example.com:9001/employees"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "https://example.com:9001/employees"
+    },
+    "root": {
+      "href": "https://example.com:9001"
+    }
+  }
+}
+----
+====
+
+[[server.entity-links]]
+== [[fundamentals.obtaining-links.entity-links]] Using the EntityLinks interface
+
+So far, we have created links by pointing to the web-framework implementations (that is, the Spring MVC controllers) and inspected the mapping.
+In many cases, these classes essentially read and write representations backed by a model class.
+
+The `EntityLinks` interface now exposes an API to look up a `Link` or `LinkBuilder` based on the model types.
+The methods essentially return links that point either to the collection resource (such as `/people`) or to an item resource (such as `/people/1`).
+The following example shows how to use `EntityLinks`:
+
+====
+[source, java]
+----
+EntityLinks links = …;
+LinkBuilder builder = links.linkFor(Customer.class);
+Link link = links.linkToItemResource(Customer.class, 1L);
+----
+====
+
+`EntityLinks` is available via dependency injection by activating either `@EnableHypermediaSupprt` or `@EnableEntityLinks` in your Spring MVC configuration.
+This will cause a variety of default implementations of `EntityLinks` being registered.
+The most fundamental one is `ControllerEntityLinks` that inspects SpringMVC and Spring WebFlux controller classes.
+If you want to register your own implementation of `EntityLinks`, check out <<server.entity-links.spi, this section>>.
+
+[[server.entity-links.controller]]
+=== EntityLinks based on Spring MVC and WebFlux controllers
+
+Activating entity links functionality causes all the Spring MVC and WebFlux controllers available in the current `ApplicationContext` to be inspected for the `@ExposesResourceFor(…)` annotation.
+The annotation exposes which model type the controller manages.
+Beyond that, we assume that you adhere to following the URI mapping setup and conventions:
+
+* A type level `@ExposesResourceFor(…)` declaring which entity type the controller exposes collection and item resources for.
+* A class level base mapping that represents the collection resource.
+* An additional method level mapping that extends the mapping to append an identifier as additional path segment.
+
+The following example shows an implementation of an `EntityLinks`-capable controller:
+
+====
+[source, java]
+----
+@Controller
+@ExposesResourceFor(Order.class) <1>
+@RequestMapping("/orders") <2>
+class OrderController {
+
+  @GetMapping <3>
+  ResponseEntity orders(…) { … }
+
+  @GetMapping("{id}") <4>
+  ResponseEntity order(@PathVariable("id") … ) { … }
+}
+----
+<1> The controller indicates it's exposing collection and item resources for the entity `Order`.
+<2> Its collection resource is exposed under `/orders`
+<3> That collection resource can handle `GET` requests. Add more methods for other HTTP methods at your convenience.
+<4> An additional controller method to handle a subordinate resource taking a path variable to expose an item resource, i.e. a single `Order`.
+====
+
+With this in place, when youy enable `EntityLinks` through `@EnableEntityLinks` or `@EnableHypermediaSupport` in your Spring MVC configuration, you can create links to the controller, as follows:
+
+====
+[source, java]
+----
+@Controller
+class PaymentController {
+
+  private final EntityLinks entityLinks;
+
+  PaymentController(EntityLinks entityLinks) { <1>
+    this.entityLinks = entityLinks;
+  }
+
+  @PutMapping(…)
+  ResponseEntity payment(@PathVariable Long orderId) {
+
+    Link link = entityLinks.linkToItemResource(Order.class, orderId); <2>
+    …
+  }
+}
+----
+<1> Inject `EntityLinks` made available by `@EnableEntityLinks` or `@EnableHypermediaSupport` in you configuration.
+<2> Use the APIs to build links by using the entity types instead of controller classes.
+====
+
+As you can see, you can refer to resources managing `Order` instances without referring to `OrderController` explicitly.
+
+[[server.entity-links.api]]
+=== EntityLinks API in detail
+
+Fundamentally, `EntityLinks` allows to build ``LinkBuilder``s and `Link` instances to collection and item resources of a entity type.
+Methods starting with `linkFor…` will produce `LinkBuilder` instances for you to extend and augment with additional path segments, parameters, etc.
+Methods starting with `linkTo` produce fully prepared `Link` instances.
+
+While for collection resources providing an entity type is sufficient, links to item resources will need an identifier provided.
+This usually looks like this
+
+.Obtaining a link to an item resource
+====
+[source, java]
+----
+entityLinks.linkToItemResource(order, order.getId());
+----
+====
+
+If you find yourself repeating those method calls the identifier extraction step can be pulled out into a reusable `Function` to be reused throughout different invocations:
+
+====
+[source, java]
+----
+Function<Order, Object> idExtractor = Order::getId; <1>
+
+entityLinks.linkToItemResource(order, idExtractor); <2>
+----
+<1> The identifier extraction is externalized so that it can be held in a field or constant.
+<2> The link lookup using the extractor.
+====
+
+[[server.entity-links.api.typed]]
+==== TypedEntityLinks
+
+As controller implementations are often grouped around entity types, you'll very often find yourself using the same extractor function (see <<server.entity-links.api>> for details) all over the controller class.
+We can centralize the identifier extraction logic even more by obtaining a `TypedEntityLinks` instance poviding the extractor once, so that the actually lookups don't have to deal with the extraction anymore at all.
+
+.Using TypedEntityLinks
+====
+[source, java]
+----
+class OrderController {
+
+  private final TypedEntityLinks<Order> links;
+
+  OrderController(EntityLinks entityLinks) { <1>
+    this.links = entityLinks.forType(Order::getId); <2>
+  }
+
+  @GetMapping
+  ResponseEntity<Order> someMethod(…) {
+
+    Order order = … // lookup order
+
+    Link link = links.linkToItemResource(order); <3>
+  }
+}
+----
+<1> Inject an `EntityLinks` instance.
+<2> Indicate you're going to look up `Order` instances with a certain identifier extractor function.
+<3> Lookup item resource links based on a sole `Order` instance.
+====
+
+[[server.entity-links.spi]]
+=== EntityLinks as SPI
+
+The `EntityLinks` instance created by `@EnableEntityLinks` / `@EnableHypermediaSupport` is of type `DelegatingEntityLinks` which will in turn pick up all other `EntityLinks` implementations available as beans in the `ApplicationContext`.
+It's registered as primary bean so that it's always the sole injection candidate when you inject `EntityLinks` in general.
+`ControllerEntityLinks` is the default implementation that will be included in the setup, but users are free to implement and register their own implementations.
+Making those available to the `EntityLinks` instance available for injection is a matter of registering your implementation as Spring bean.
+
+.Declaring a custom EntityLinks implementation
+====
+[source, java]
+----
+@Configuration
+class CustomEntityLinksConfiguration {
+
+  @Bean
+  MyEntityLinks myEntityLinks(…) {
+    return new MyEntityLinks(…);
+  }
+}
+----
+====
+
+An example for the extensibility of this mechanism is Spring Data REST's https://github.com/spring-projects/spring-data-rest/blob/3a0cba94a2cc8739375ecf24086da2f7c3bbf038/spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/support/RepositoryEntityLinks.java[`RepositoryEntityLinks`], which uses the repository mapping information to create links pointing to resources backed by Spring Data repositories.
+At the same time, it even exposes additional lookup methods for other types of resources.
+If you want to make use of these, simply inject `RepositoryEntityLinks` explicitly.
+
+[[server.representation-model-assembler]]
+== [[fundamentals.resource-assembler]] Representation model assembler
+
+As the mapping from an entity to a representation model must be used in multiple places, it makes sense to create a dedicated class responsible for doing so. The conversion contains very custom steps but also a few boilerplate steps:
+
+. Instantiation of the model class
+. Adding a link with a `rel` of `self` pointing to the resource that gets rendered.
+
+Spring HATEOAS now provides a `RepresentationModelAssemblerSupport` base class that helps reduce the amount of code you need to write.
+The following example shows how to use it:
+
+====
+[source, java]
+----
+class PersonModelAssembler extends RepresentationModelAssemblerSupport<Person, PersonModel> {
+
+  public PersonModelAssembler() {
+    super(PersonController.class, PersonModel.class);
+  }
+
+  @Override
+  public PersonModel toModel(Person person) {
+
+    PersonModel resource = createResource(person);
+    // … do further mapping
+    return resource;
+  }
+}
+----
+====
+
+Setting the class up as we did in the preceding example gives you the following benefits:
+
+* There are a handful of `createModelWithId(…)` methods that let you create an instance of the resource and have a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controller's request mapping plus the ID of the entity (for example, `/people/1`).
+* The resource type gets instantiated by reflection and expects a no-arg constructor. If you want to use a dedicated constructor or avoid the reflection performance overhead, you can override `instantiateModel(…)`.
+
+You can then use the assembler to either assemble a `RepresentationModel` or a `CollectionModel`.
+The following example creates a `CollectionModel` of `PersonModel` instances:
+
+====
+[source, java]
+----
+Person person = new Person(…);
+Iterable<Person> people = Collections.singletonList(person);
+
+PersonModelAssembler assembler = new PersonModelAssembler();
+PersonModel model = assembler.toModel(person);
+CollectionModel<PersonModel> model = assembler.toCollectionModel(people);
+----
+====
+
+[[server.rel-provider]]
+== [[spis.rel-provider]] Using the `RelProvider` API
+
+When building links, you usually need to determine the relation type to be used for the link. In most cases, the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to look up the relation types behind a `RelProvider` API that lets you determine the relation types for single and collection resources. The algorithm for looking up the relation type follows:
+
+. If the type is annotated with `@Relation`, we use the values configured in the annotation.
+. If not, we default to the uncapitalized simple class name plus an appended `List` for the collection `rel`.
+. If the https://github.com/atteo/evo-inflector[EVO inflector] JAR is in the classpath, we use the plural of the single resource `rel` provided by the pluralizing algorithm.
+. `@Controller` classes annotated with `@ExposesResourceFor` (see <<fundamentals.obtaining-links.entity-links>> for details) transparently look up the relation types for the type configured in the annotation, so that you can use `relProvider.getItemResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
+
+A `RelProvider` is automatically exposed as a Spring bean when you use `@EnableHypermediaSupport`. You can plug in custom providers by implementing the interface and exposing them as Spring beans in turn.

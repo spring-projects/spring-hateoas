@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,7 @@ import java.util.Collections;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.junit.Assume;
 import org.junit.Test;
-import org.springframework.hateoas.PagedResources.PageMetadata;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -35,7 +35,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Integration tests for serialization of {@link PagedResources}.
+ * Integration tests for serialization of {@link PagedModel}.
  * 
  * @author Oliver Gierke
  */
@@ -65,8 +65,8 @@ public class Jackson2PagedResourcesIntegrationTest {
 		user.firstname = "Dave";
 		user.lastname = "Matthews";
 
-		PageMetadata metadata = new PagedResources.PageMetadata(1, 0, 2);
-		PagedResources<User> resources = new PagedResources<>(Collections.singleton(user), metadata);
+		PageMetadata metadata = new PagedModel.PageMetadata(1, 0, 2);
+		PagedModel<User> resources = new PagedModel<>(Collections.singleton(user), metadata);
 
 		Method method = Sample.class.getMethod("someMethod");
 		StringWriter writer = new StringWriter();
@@ -84,7 +84,7 @@ public class Jackson2PagedResourcesIntegrationTest {
 	}
 
 	interface Sample {
-		Resources<?> someMethod();
+		CollectionModel<?> someMethod();
 	}
 
 	static class User {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,14 +27,16 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.core.ResolvableType;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.core.MethodParameters;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.mediatype.PropertyUtils;
+import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Greg Turnquist
@@ -58,7 +60,7 @@ public class PropertyUtilsTest {
 	public void simpleObjectWrappedAsResource() {
 
 		Employee employee = new Employee("Frodo Baggins", "ring bearer");
-		Resource<Employee> employeeResource = new Resource<>(employee);
+		EntityModel<Employee> employeeResource = new EntityModel<>(employee);
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employeeResource);
 
@@ -69,42 +71,55 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void resourceWrappedSpringMvcParameter() throws NoSuchMethodException {
+	public void resourceWrappedSpringMvcParameter() {
 
-		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", Resource.class);
-		MethodParameters parameters = new MethodParameters(method);
+		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", EntityModel.class);
+		MethodParameters parameters = MethodParameters.of(method);
 
-		ResolvableType resolvableType = parameters.getParametersWith(RequestBody.class).stream()
-			.findFirst()
-			.map(methodParameter -> ResolvableType.forMethodParameter(methodParameter.getMethod(), methodParameter.getParameterIndex()))
-			.orElseThrow(() -> new RuntimeException("Didn't find a parameter annotated with @RequestBody!"));
+		ResolvableType resolvableType = parameters.getParametersWith(RequestBody.class).stream().findFirst()
+				.map(methodParameter -> ResolvableType.forMethodParameter(methodParameter.getMethod(),
+						methodParameter.getParameterIndex()))
+				.orElseThrow(() -> new RuntimeException("Didn't find a parameter annotated with @RequestBody!"));
 
-		List<String> properties = PropertyUtils.findProperties(resolvableType);
+		List<String> propertyNames = PropertyUtils.findPropertyNames(resolvableType);
 
-		assertThat(properties).hasSize(2);
-		assertThat(properties).contains("name", "role");
+		assertThat(propertyNames).hasSize(2);
+		assertThat(propertyNames).contains("name", "role");
 	}
 
 	@Test
 	public void objectWithIgnorableAttributes() {
 
-		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer", "password", "fbaggins");
+		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer",
+				"password", "fbaggins", "ignore this one");
 
 		Map<String, Object> properties = PropertyUtils.findProperties(employee);
 
 		assertThat(properties).hasSize(6);
-		assertThat(properties.keySet()).containsExactlyInAnyOrder("firstName", "lastName", "role", "username", "fullName", "usernameAndLastName");
-		assertThat(properties.entrySet()).containsExactlyInAnyOrder(
-			new SimpleEntry<>("firstName", "Frodo"),
-			new SimpleEntry<>("lastName", "Baggins"),
-			new SimpleEntry<>("role", "ring bearer"),
-			new SimpleEntry<>("username", "fbaggins"),
-			new SimpleEntry<>("fullName", "Frodo Baggins"),
-			new SimpleEntry<>("usernameAndLastName", "fbaggins+++Baggins"));
+		assertThat(properties.keySet()).containsExactlyInAnyOrder("firstName", "lastName", "role", "username", "fullName",
+				"usernameAndLastName");
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder(new SimpleEntry<>("firstName", "Frodo"),
+				new SimpleEntry<>("lastName", "Baggins"), new SimpleEntry<>("role", "ring bearer"),
+				new SimpleEntry<>("username", "fbaggins"), new SimpleEntry<>("fullName", "Frodo Baggins"),
+				new SimpleEntry<>("usernameAndLastName", "fbaggins+++Baggins"));
+	}
+
+	@Test
+	public void objectWithNullReturningGetter() {
+
+		EmployeeWithNullReturningGetter employee = new EmployeeWithNullReturningGetter("Frodo");
+
+		Map<String, Object> properties = PropertyUtils.findProperties(employee);
+
+		assertThat(properties).hasSize(2);
+		assertThat(properties.keySet()).containsExactlyInAnyOrder("name", "father");
+		assertThat(properties.entrySet()).containsExactlyInAnyOrder(new SimpleEntry<>("name", "Frodo"),
+				new SimpleEntry<>("father", null));
 	}
 
 	@Data
 	@AllArgsConstructor
+	@JsonIgnoreProperties({ "ignoreThisProperty" })
 	static class EmployeeWithCustomizedReaders {
 
 		private String firstName;
@@ -112,6 +127,7 @@ public class PropertyUtilsTest {
 		private String role;
 		@JsonIgnore private String password;
 		@JsonIgnore(false) private String username;
+		private String ignoreThisProperty;
 
 		public String getFullName() {
 			return this.firstName + " " + this.lastName;
@@ -128,14 +144,24 @@ public class PropertyUtilsTest {
 		}
 	}
 
-	@RestController
-	static class TestController {
-		
-		@GetMapping("/")
-		public Employee newEmployee(@RequestBody Resource<Employee> employee) {
-			return employee.getContent();
+	@Data
+	static class EmployeeWithNullReturningGetter {
+
+		private String name;
+		private String father;
+
+		EmployeeWithNullReturningGetter(String name) {
+			this.name = name;
 		}
 	}
 
+	@RestController
+	static class TestController {
+
+		@GetMapping("/")
+		public Employee newEmployee(@RequestBody EntityModel<Employee> employee) {
+			return employee.getContent();
+		}
+	}
 
 }

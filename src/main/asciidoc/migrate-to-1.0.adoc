@@ -1,0 +1,63 @@
+[[migrate-to-1.0]]
+= Migrating to Spring HATEOAS 1.0
+
+For 1.0 we took the chance to re-evaluate some of the design and package structure choices we had made for the 0.x branch.
+There had been an incredible amount of feedback on it and the major version bump seemed to be the most natural place to refactor those.
+
+[[migrate-to-1.0.changes]]
+== The changes
+
+The biggest changes in package structure were driven by the introduction of a hypermedia type registration API to support additional media types in Spring HATEOAS.
+This lead to the clear separation of client and server APIs (packages named respectively) as well as media type implementations in the package `mediatype`.
+
+The easiest way to get your code base upgraded to the new API is by using the <<migrate-to-1.0.script, migration script>>.
+Before we jump to that, here are the changes at a quick glance.
+
+[[migrate-to-1.0.changes.representation-models]]
+=== Representation models
+
+The `ResourceSupport`/`Resource`/`Resources`/`PagedResources` group of classes never really felt appropriately named.
+After all, these types do not actually manifest resources but rather representation models that can be enriched with hypermedia information and affordances.
+Here's how new names map to the old ones:
+
+* `ResourceSupport` is now `RepresentationModel`
+* `Resource` is now `EntityModel`
+* `Resources` is now `CollectionModel`
+* `PagedResources` is now `PagedModel`
+
+Consequently, `ResourceAssembler` has been renamed to `RepresentationModelAssembler` and its methods `toResource(…)` and `toResources(…)` have been renamed to `toModel(…)` and `toCollectionModel(…)` respectively.
+Also the name changes have been reflected in the classes contained in `TypeReferences`.
+
+* `RepresentationModel.getLinks()` now exposes a `Links` instance (over a `List<Link>`) as that exposes additional API to concatenate and merge different `Links` instances using various strategies.
+  Also it has been turned into a self-bound generic type to allow the methods that add links to the instance return the instance itself.
+* The `LinkDiscoverer` API has been moved to the `client` package.
+* The `LinkBuilder` and `EntityLinks` APIs have been moved to the `server` package.
+* `ControllerLinkBuilder` has been moved into `server.mvc` and deprecated to be replaced by `WebMvcLinkBuilder`.
+* `VndError` has been moved to the `mediatype.vnderror` package.
+
+[[migrate-to-1.0.script]]
+== The migration script
+
+You can find https://github.com/spring-projects/spring-hateoas/tree/master/etc[a script] to run from your application root that will update all import statements and static method references to Spring HATEOAS types that moved in our source code repository.
+Simply download that, run it from your project root.
+By default it will inspect all Java source files and replace the legacy Spring HATEOAS type references with the new ones.
+
+.Sample application of the migration script
+====
+[source]
+----
+$ ./migrate-to-1.0.sh
+
+Migrating Spring HATEOAS references to 1.0 for files : *.java
+
+Adapting ./src/main/java/…
+…
+
+Done!
+----
+====
+
+Note that the script will not necessarily be able to entirely fix all changes, but it should cover the most important refactorings.
+
+Now verify the changes made to the files in your favorite Git client and commit as appropriate.
+In case you find method or type references unmigrated, please open a ticket in out issue tracker.

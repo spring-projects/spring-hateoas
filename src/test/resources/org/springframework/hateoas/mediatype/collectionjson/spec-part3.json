@@ -1,0 +1,50 @@
+{
+  "collection": {
+    "version": "1.0",
+    "href": "https://example.org/friends/",
+    "links": [
+      {
+        "rel": "feed",
+        "href": "https://example.org/friends/rss"
+      },
+      {
+        "rel": "queries",
+        "href": "https://example.org/friends/?queries"
+      },
+      {
+        "rel": "template",
+        "href": "https://example.org/friends/?template"
+      }
+    ],
+    "items": [
+      {
+        "href": "https://example.org/friends/jdoe",
+        "data": [
+          {
+            "name": "fullname",
+            "value": "J. Doe",
+            "prompt": "Full Name"
+          },
+          {
+            "name": "email",
+            "value": "jdoe@example.org",
+            "prompt": "Email"
+          }
+        ],
+        "links": [
+          {
+            "rel": "blog",
+            "href": "https://examples.org/blogs/jdoe",
+            "prompt": "Blog"
+          },
+          {
+            "rel": "avatar",
+            "href": "https://examples.org/images/jdoe",
+            "prompt": "Avatar",
+            "render": "image"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,1 +1,13 @@
-org.springframework.hateoas.core.AffordanceModelFactory=org.springframework.hateoas.hal.forms.HalFormsAffordanceModelFactory,org.springframework.hateoas.collectionjson.CollectionJsonAffordanceModelFactory
+org.springframework.hateoas.AffordanceModelFactory=\
+ org.springframework.hateoas.mediatype.collectionjson.CollectionJsonAffordanceModelFactory,\
+ org.springframework.hateoas.mediatype.hal.forms.HalFormsAffordanceModelFactory,\
+ org.springframework.hateoas.mediatype.uber.UberAffordanceModelFactory
+
+org.springframework.hateoas.config.MediaTypeConfigurationProvider=\
+ org.springframework.hateoas.mediatype.collectionjson.CollectionJsonMediaTypeConfigurationProvider,\
+ org.springframework.hateoas.mediatype.hal.HalMediaTypeConfigurationProvider,\
+ org.springframework.hateoas.mediatype.hal.forms.HalFormsMediaTypeConfigurationProvider,\
+ org.springframework.hateoas.mediatype.uber.UberMediaTypeConfigurationProvider
+ 
+org.springframework.hateoas.client.TraversonDefaults=\
+ org.springframework.hateoas.mediatype.hal.HalTraversonDefaults

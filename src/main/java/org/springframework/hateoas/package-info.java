@@ -1,9 +1,10 @@
 /**
- * Value objects to ease creating {@link org.springframework.hateoas.Link}s and link driven representations for REST webservices.
+ * Value objects to ease creating {@link org.springframework.hateoas.Link}s and link driven representations for REST
+ * webservices.
+ *
+ * @author Oliver Drotbohm
+ * @author Jens Schauder
+ * @author Greg Turnquist
  */
-@XmlSchema(xmlns = { @XmlNs(prefix = "atom", namespaceURI = org.springframework.hateoas.Link.ATOM_NAMESPACE) }, elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@org.springframework.lang.NonNullApi
 package org.springframework.hateoas;
-
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlSchema;
-

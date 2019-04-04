@@ -1,11 +1,11 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.experimental.Wither;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,10 +31,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
+import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -43,95 +42,143 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Value object for links.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Jens Schauder
  */
-@XmlType(name = "link", namespace = Link.ATOM_NAMESPACE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
-@EqualsAndHashCode(of = { "rel", "href", "hreflang", "media", "title", "deprecation", "affordances" })
+@EqualsAndHashCode(
+		of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
 	private static final String URI_PATTERN = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 
+	private static final Pattern URI_AND_ATTRIBUTES_PATTERN = Pattern.compile("<(.*)>;(.*)");
+	private static final Pattern KEY_AND_VALUE_PATTERN = Pattern
+			.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}.\\-\\s]*|" + URI_PATTERN + ")\"");
+
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
-	public static final String REL_SELF = "self";
-	public static final String REL_FIRST = "first";
-	public static final String REL_PREVIOUS = "prev";
-	public static final String REL_NEXT = "next";
-	public static final String REL_LAST = "last";
+	/**
+	 * @deprecated Use {@link IanaLinkRelations#SELF} instead.
+	 */
+	public static final @Deprecated LinkRelation REL_SELF = IanaLinkRelations.SELF;
 
-	private @XmlAttribute @Wither String rel;
-	private @XmlAttribute @Wither String href;
-	private @XmlAttribute @Wither String hreflang;
-	private @XmlAttribute @Wither String media;
-	private @XmlAttribute @Wither String title;
-	private @XmlAttribute @Wither String type;
-	private @XmlAttribute @Wither String deprecation;
-	private @XmlTransient @JsonIgnore UriTemplate template;
-	private @XmlTransient @JsonIgnore List<Affordance> affordances;
+	/**
+	 * @deprecated Use {@link IanaLinkRelations#FIRST} instead.
+	 */
+	public static final @Deprecated LinkRelation REL_FIRST = IanaLinkRelations.FIRST;
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelations#PREV} instead.
+	 */
+	public static final @Deprecated LinkRelation REL_PREVIOUS = IanaLinkRelations.PREV;
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelations#NEXT} instead.
+	 */
+	public static final @Deprecated LinkRelation REL_NEXT = IanaLinkRelations.NEXT;
+
+	/**
+	 * @deprecated Use {@link IanaLinkRelations#LAST} instead.
+	 */
+	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
+
+	private LinkRelation rel;
+	private @Wither String href;
+	private @Wither String hreflang;
+	private @Wither String media;
+	private @Wither String title;
+	private @Wither String type;
+	private @Wither String deprecation;
+	private @Wither String profile;
+	private @Wither String name;
+	private @JsonIgnore UriTemplate template;
+	private @JsonIgnore List<Affordance> affordances;
 
 	/**
 	 * Creates a new link to the given URI with the self rel.
-	 * 
-	 * @see #REL_SELF
+	 *
+	 * @see IanaLinkRelations#SELF
 	 * @param href must not be {@literal null} or empty.
 	 */
 	public Link(String href) {
-		this(href, REL_SELF);
+		this(href, IanaLinkRelations.SELF);
 	}
 
 	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
-	 * 
+	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(String href, String rel) {
-		this(new UriTemplate(href), rel);
+		this(UriTemplate.of(href), LinkRelation.of(rel));
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given URI with the given rel.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	public Link(String href, LinkRelation rel) {
+		this(UriTemplate.of(href), rel);
 	}
 
 	/**
 	 * Creates a new Link from the given {@link UriTemplate} and rel.
-	 * 
+	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
 	 */
 	public Link(UriTemplate template, String rel) {
-
-		Assert.notNull(template, "UriTemplate must not be null!");
-		Assert.hasText(rel, "Rel must not be null or empty!");
-
-		this.template = template;
-		this.href = template.toString();
-		this.rel = rel;
-		this.affordances = new ArrayList<Affordance>();
+		this(template, LinkRelation.of(rel));
 	}
 
-	public Link(String href, String rel, List<Affordance> affordances) {
+	/**
+	 * Creates a new Link from the given {@link UriTemplate} and rel.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	public Link(UriTemplate template, LinkRelation rel) {
+		this(template, rel, Collections.emptyList());
+	}
 
-		this(href, rel);
+	/**
+	 * Creates a new Link from the given {@link UriTemplate}, link relation and affordances.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param rel must not be {@literal null} or empty.
+	 */
+	private Link(UriTemplate template, LinkRelation rel, List<Affordance> affordances) {
 
-		Assert.notNull(affordances, "affordances must not be null!");
+		Assert.notNull(template, "UriTemplate must not be null!");
+		Assert.notNull(rel, "LinkRelation must not be null!");
+		Assert.notNull(affordances, "Affordances must not be null!");
 
+		this.template = template;
+		this.rel = rel;
+		this.href = template.toString();
 		this.affordances = affordances;
 	}
 
 	/**
-	 * Empty constructor required by the marshalling framework.
+	 * Empty constructor required by the marshaling framework.
 	 */
 	protected Link() {
-		this.affordances = new ArrayList<Affordance>();
+		this.affordances = new ArrayList<>();
 	}
 
 	/**
 	 * Returns safe copy of {@link Affordance}s.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Affordance> getAffordances() {
@@ -140,11 +187,11 @@ public class Link implements Serializable {
 
 	/**
 	 * Returns a {@link Link} pointing to the same URI but with the {@code self} relation.
-	 * 
+	 *
 	 * @return
 	 */
 	public Link withSelfRel() {
-		return withRel(Link.REL_SELF);
+		return withRel(IanaLinkRelations.SELF);
 	}
 
 	/**
@@ -157,7 +204,7 @@ public class Link implements Serializable {
 
 		Assert.notNull(affordance, "Affordance must not be null!");
 
-		List<Affordance> newAffordances = new ArrayList<Affordance>();
+		List<Affordance> newAffordances = new ArrayList<>();
 		newAffordances.addAll(this.affordances);
 		newAffordances.add(affordance);
 
@@ -165,14 +212,68 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Convenience method when chaining an existing {@link Link}.
+	 *
+	 * @param name
+	 * @param httpMethod
+	 * @param inputType
+	 * @param queryMethodParameters
+	 * @param outputType
+	 * @return
+	 */
+	public Link andAffordance(String name, HttpMethod httpMethod, ResolvableType inputType,
+			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+		return andAffordance(new Affordance(name, this, httpMethod, inputType, queryMethodParameters, outputType));
+	}
+
+	/**
+	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
+	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
+	 *
+	 * @param httpMethod
+	 * @param inputType
+	 * @param queryMethodParameters
+	 * @param outputType
+	 * @return
+	 */
+	public Link andAffordance(HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters,
+			ResolvableType outputType) {
+
+		String name = httpMethod.toString().toLowerCase();
+
+		Class<?> resolvedInputType = inputType.resolve();
+		if (resolvedInputType != null) {
+			name += resolvedInputType.getSimpleName();
+		}
+
+		return andAffordance(name, httpMethod, inputType, queryMethodParameters, outputType);
+	}
+
+	/**
+	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
+	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
+	 *
+	 * @param httpMethod
+	 * @param inputType
+	 * @param queryMethodParameters
+	 * @param outputType
+	 * @return
+	 */
+	public Link andAffordance(HttpMethod httpMethod, Class<?> inputType, List<QueryParameter> queryMethodParameters,
+			Class<?> outputType) {
+		return andAffordance(httpMethod, ResolvableType.forClass(inputType), queryMethodParameters,
+				ResolvableType.forClass(outputType));
+	}
+
+	/**
 	 * Create new {@link Link} with additional {@link Affordance}s.
-	 * 
+	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
 	public Link andAffordances(List<Affordance> affordances) {
 
-		List<Affordance> newAffordances = new ArrayList<Affordance>();
+		List<Affordance> newAffordances = new ArrayList<>();
 		newAffordances.addAll(this.affordances);
 		newAffordances.addAll(affordances);
 
@@ -181,68 +282,91 @@ public class Link implements Serializable {
 
 	/**
 	 * Creats a new {@link Link} with the given {@link Affordance}s.
-	 * 
+	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
 	 */
 	public Link withAffordances(List<Affordance> affordances) {
 
 		return new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
-				this.template, affordances);
+				this.profile, this.name, this.template, affordances);
 	}
 
 	/**
 	 * Returns the variable names contained in the template.
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
 	public List<String> getVariableNames() {
-		return getUriTemplate().getVariableNames();
+		return template.getVariableNames();
 	}
 
 	/**
 	 * Returns all {@link TemplateVariables} contained in the {@link Link}.
-	 * 
+	 *
 	 * @return
 	 */
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
-		return getUriTemplate().getVariables();
+		return template.getVariables();
 	}
 
 	/**
-	 * Returns whether the link is templated.
-	 * 
+	 * Returns whether or not the link is templated.
+	 *
 	 * @return
 	 */
 	public boolean isTemplated() {
-		return !getUriTemplate().getVariables().isEmpty();
+		return !template.getVariables().isEmpty();
 	}
 
 	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
-	 * 
+	 *
 	 * @param arguments
 	 * @return
 	 */
 	public Link expand(Object... arguments) {
-		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+		return new Link(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
-	 * 
+	 *
 	 * @param arguments must not be {@literal null}.
 	 * @return
 	 */
 	public Link expand(Map<String, ? extends Object> arguments) {
-		return new Link(getUriTemplate().expand(arguments).toString(), getRel());
+		return new Link(template.expand(arguments).toString(), getRel());
+	}
+
+	/**
+	 * Creates a new {@link Link} with the same href but given {@link LinkRelation}.
+	 *
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 */
+	public Link withRel(LinkRelation relation) {
+
+		Assert.notNull(relation, "LinkRelation must not be null!");
+
+		return new Link(relation, href, hreflang, media, title, type, deprecation, profile, name, template, affordances);
+	}
+
+	/**
+	 * Creates a new {@link Link} with the same href but given {@link LinkRelation}.
+	 *
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 */
+	public Link withRel(String relation) {
+		return withRel(LinkRelation.of(relation));
 	}
 
 	/**
 	 * Returns whether the current {@link Link} has the given link relation.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -250,16 +374,37 @@ public class Link implements Serializable {
 
 		Assert.hasText(rel, "Link relation must not be null or empty!");
 
-		return this.rel.equals(rel);
+		return hasRel(LinkRelation.of(rel));
 	}
 
-	private UriTemplate getUriTemplate() {
+	/**
+	 * Returns whether the {@link Link} has the given {@link LinkRelation}.
+	 *
+	 * @param rel must not be {@literal null}.
+	 * @return
+	 */
+	public boolean hasRel(LinkRelation rel) {
 
-		if (template == null) {
-			this.template = new UriTemplate(href);
+		Assert.notNull(rel, "Link relation must not be null!");
+
+		return this.rel.isSameAs(rel);
+	}
+
+	/**
+	 * Returns the current href as URI after expanding the links without any arguments, i.e. all optional URI
+	 * {@link TemplateVariable}s will be dropped. If the href contains mandatory {@link TemplateVariable}s, the URI
+	 * creation will fail with an {@link IllegalStateException}.
+	 *
+	 * @return will never be {@literal null}.
+	 * @throws IllegalStateException in case the href contains mandatory URI {@link TemplateVariable}s.
+	 */
+	public URI toUri() {
+
+		try {
+			return URI.create(expand().getHref());
+		} catch (IllegalArgumentException o_O) {
+			throw new IllegalStateException(o_O);
 		}
-
-		return template;
 	}
 
 	/*
@@ -269,7 +414,7 @@ public class Link implements Serializable {
 	@Override
 	public String toString() {
 
-		String linkString = String.format("<%s>;rel=\"%s\"", href, rel);
+		String linkString = String.format("<%s>;rel=\"%s\"", href, rel.value());
 
 		if (hreflang != null) {
 			linkString += ";hreflang=\"" + hreflang + "\"";
@@ -291,26 +436,33 @@ public class Link implements Serializable {
 			linkString += ";deprecation=\"" + deprecation + "\"";
 		}
 
+		if (profile != null) {
+			linkString += ";profile=\"" + profile + "\"";
+		}
+
+		if (name != null) {
+			linkString += ";name=\"" + name + "\"";
+		}
+
 		return linkString;
 	}
 
 	/**
 	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
-	 * link. Will return {@literal null} if an empty or {@literal null} {@link String} is given.
-	 * 
+	 * link.
+	 *
 	 * @param element an RFC-5899 compatible representation of a link.
-	 * @throws IllegalArgumentException if a non-empty {@link String} was given that does not adhere to RFC-5899.
+	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-5899.
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
 	 * @return
 	 */
 	public static Link valueOf(String element) {
 
 		if (!StringUtils.hasText(element)) {
-			return null;
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
 		}
 
-		Pattern uriAndAttributes = Pattern.compile("<(.*)>;(.*)");
-		Matcher matcher = uriAndAttributes.matcher(element);
+		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);
 
 		if (matcher.find()) {
 
@@ -342,6 +494,14 @@ public class Link implements Serializable {
 				link = link.withDeprecation(attributes.get("deprecation"));
 			}
 
+			if (attributes.containsKey("profile")) {
+				link = link.withProfile(attributes.get("profile"));
+			}
+
+			if (attributes.containsKey("name")) {
+				link = link.withName(attributes.get("name"));
+			}
+
 			return link;
 
 		} else {
@@ -351,7 +511,7 @@ public class Link implements Serializable {
 
 	/**
 	 * Parses the links attributes from the given source {@link String}.
-	 * 
+	 *
 	 * @param source
 	 * @return
 	 */
@@ -361,10 +521,8 @@ public class Link implements Serializable {
 			return Collections.emptyMap();
 		}
 
-		Map<String, String> attributes = new HashMap<String, String>();
-		Pattern keyAndValue = Pattern
-				.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}\\.\\-\\s]*|" + URI_PATTERN + ")\"");
-		Matcher matcher = keyAndValue.matcher(source);
+		Map<String, String> attributes = new HashMap<>();
+		Matcher matcher = KEY_AND_VALUE_PATTERN.matcher(source);
 
 		while (matcher.find()) {
 			attributes.put(matcher.group(1), matcher.group(2));

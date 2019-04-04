@@ -1,0 +1,20 @@
+{
+  "uber": {
+    "version": "1.0",
+    "data": [
+      {
+        "name": "employee",
+        "data": [
+          {
+            "name": "role",
+            "value": "gardener"
+          },
+          {
+            "name": "name",
+            "value": "Samwise Gamgee"
+          }
+        ]
+      }
+    ]
+  }
+}

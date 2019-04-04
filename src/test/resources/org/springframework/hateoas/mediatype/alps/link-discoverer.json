@@ -1,0 +1,23 @@
+{
+  "version" : "1.0",
+  "doc" : {
+    "href" : "https://example.org/samples/full/doc.html"
+  },
+  "descriptors" : [ {
+    "id" : "sfirst descriptor",
+    "name" : "relation",
+    "href" : "firstHref"
+  }, {
+    "id" : "second description",
+    "name" : "relation",
+    "href" : "secondHref"
+  }, {
+    "id" : "self descriptor",
+    "name" : "self",
+    "href" : "selfHref"
+  }, {
+    "id" : "fully qualified descriptor",
+    "name" : "http://www.foo.com/bar",
+    "href" : "fullRelHref"
+  } ]
+}

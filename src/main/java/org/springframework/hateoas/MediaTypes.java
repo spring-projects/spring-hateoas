@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -76,4 +76,14 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/vnd.collection+json}.
 	 */
 	public static final MediaType COLLECTION_JSON = MediaType.valueOf(COLLECTION_JSON_VALUE);
+
+	/**
+	 * A String equivalent of {@link MediaTypes#UBER_JSON_VALUE}.
+	 */
+	public static final String UBER_JSON_VALUE = "application/vnd.amundsen-uber+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.amundsen-uber+json}.
+	 */
+	public static final MediaType UBER_JSON = MediaType.parseMediaType(UBER_JSON_VALUE);
 }

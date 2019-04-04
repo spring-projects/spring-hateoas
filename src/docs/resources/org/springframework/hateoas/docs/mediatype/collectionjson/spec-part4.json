@@ -1,0 +1,19 @@
+{
+  "collection": {
+    "version": "1.0",
+    "href": "https://example.org/friends/",
+    "queries": [
+      {
+        "rel": "search",
+        "href": "https://example.org/friends/search",
+        "prompt": "Search",
+        "data": [
+          {
+            "name": "search",
+            "value": ""
+          }
+        ]
+      }
+    ]
+  }
+}
