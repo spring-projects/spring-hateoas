@@ -63,7 +63,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	protected LinkBuilderSupport(UriComponentsBuilder builder, List<Affordance> affordances) {
 
-		Assert.notNull(builder, "UriComponents must not be null!");
+		Assert.notNull(builder, "UriComponentsBuilder must not be null!");
 		Assert.notNull(affordances, "Affordances must not be null!");
 
 		this.builder = builder.cloneBuilder();
@@ -72,12 +72,10 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	protected LinkBuilderSupport(UriComponents components, List<Affordance> affordances) {
 
-		String uriString = components.toUriString();
-		UriComponentsBuilder builder = uriString.isEmpty() //
-				? UriComponentsBuilder.fromUri(components.toUri()) //
-				: UriComponentsBuilder.fromUriString(uriString);
+		Assert.notNull(components, "UriComponents must not be null!");
+		Assert.notNull(affordances, "Affordances must not be null!");
 
-		this.builder = builder;
+		this.builder = UriComponentsBuilder.fromUriString(components.toUriString());
 		this.affordances = affordances;
 	}
 
