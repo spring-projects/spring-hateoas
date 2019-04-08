@@ -15,11 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
@@ -27,8 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.ClassPathResource;
@@ -55,7 +51,7 @@ public class HalFormsMessageConverterUnitTest {
 	ObjectMapper mapper;
 	HttpMessageConverter<Object> messageConverter;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		this.mapper = new ObjectMapper();
@@ -88,18 +84,18 @@ public class HalFormsMessageConverterUnitTest {
 
 		Object convertedMessage = this.messageConverter.read(HalFormsDocument.class, message);
 
-		assertThat(convertedMessage, instanceOf(HalFormsDocument.class));
+		assertThat(convertedMessage).isInstanceOf(HalFormsDocument.class);
 
 		HalFormsDocument<?> halFormsDocument = (HalFormsDocument<?>) convertedMessage;
 
 		assertThat(halFormsDocument.getLinks()).hasSize(2);
 		assertThat(halFormsDocument.getLinks()).extracting(Link::getHref).containsExactly("/employees", "/employees/1");
 
-		assertThat(halFormsDocument.getTemplates().size(), is(1));
-		assertThat(halFormsDocument.getTemplates().keySet(), hasItems("default"));
-		assertThat(halFormsDocument.getTemplates().get("default").getContentType(), is("application/hal+json"));
-		assertThat(halFormsDocument.getTemplates().get("default").getHttpMethod(), is(HttpMethod.GET));
-		assertThat(halFormsDocument.getTemplates().get("default").getMethod(), is(HttpMethod.GET.toString().toLowerCase()));
+		assertThat(halFormsDocument.getTemplates().size()).isEqualTo(1);
+		assertThat(halFormsDocument.getTemplates().keySet()).containsExactly("default");
+		assertThat(halFormsDocument.getTemplates().get("default").getContentType()).isEqualTo("application/hal+json");
+		assertThat(halFormsDocument.getTemplates().get("default").getHttpMethod()).isEqualTo(HttpMethod.GET);
+		assertThat(halFormsDocument.getTemplates().get("default").getMethod()).isEqualTo(HttpMethod.GET.toString().toLowerCase());
 	}
 
 	@Test
@@ -139,6 +135,6 @@ public class HalFormsMessageConverterUnitTest {
 
 		this.messageConverter.write(expected, MediaTypes.HAL_FORMS_JSON, convertedMessage);
 
-		assertThat(this.mapper.readValue(stream.toString(), HalFormsDocument.class), is(expected));
+		assertThat(this.mapper.readValue(stream.toString(), HalFormsDocument.class)).isEqualTo(expected);
 	}
 }

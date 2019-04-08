@@ -16,7 +16,7 @@
 package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assumptions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.StringWriter;
@@ -25,8 +25,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 
 import org.apache.commons.io.output.WriterOutputStream;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
@@ -59,7 +58,7 @@ public class Jackson2PagedResourcesIntegrationTest {
 	@Test
 	public void serializesPagedResourcesCorrectly() throws Exception {
 
-		Assume.assumeThat(SPRING_4_2_WRITE_METHOD, is(notNullValue()));
+		assumeThat(SPRING_4_2_WRITE_METHOD).isNotNull();
 
 		User user = new User();
 		user.firstname = "Dave";

@@ -29,24 +29,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
-import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.ResourcesProcessorWrapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -59,7 +58,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	static final EntityModel<String> FOO = new EntityModel<>("foo");
@@ -95,7 +94,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	@Mock HandlerMethodReturnValueHandler delegate;
 	List<RepresentationModelProcessor<?>> resourceProcessors;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resourceProcessors = new ArrayList<>();
 	}

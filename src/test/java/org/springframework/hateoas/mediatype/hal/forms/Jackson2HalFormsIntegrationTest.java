@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -71,7 +71,7 @@ public class Jackson2HalFormsIntegrationTest extends AbstractJackson2Marshalling
 
 	MessageSource messageSource = mock(MessageSource.class);
 
-	@Before
+	@BeforeEach
 	public void setUpModule() {
 
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),

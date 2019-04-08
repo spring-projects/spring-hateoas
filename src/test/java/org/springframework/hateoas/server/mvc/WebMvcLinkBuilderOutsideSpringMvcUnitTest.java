@@ -18,8 +18,8 @@ package org.springframework.hateoas.server.mvc;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -34,7 +34,7 @@ public class WebMvcLinkBuilderOutsideSpringMvcUnitTest {
 	/**
 	 * Clear out any existing request attributes left behind by other tests
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 		RequestContextHolder.setRequestAttributes(null);
 	}

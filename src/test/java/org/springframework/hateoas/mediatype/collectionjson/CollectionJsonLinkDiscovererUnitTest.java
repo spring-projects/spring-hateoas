@@ -20,12 +20,11 @@ import static org.assertj.core.api.Assertions.*;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.support.MappingUtils;
 
 /**
@@ -38,7 +37,7 @@ public class CollectionJsonLinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.discoverer = new CollectionJsonLinkDiscoverer();
 	}

@@ -15,19 +15,16 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.mediatype.collectionjson.CollectionJson;
-import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonItem;
-import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule;
 import org.springframework.hateoas.support.MappingUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +37,7 @@ public class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		mapper = new ObjectMapper();
@@ -64,6 +61,6 @@ public class JacksonSerializationTest {
 
 		String actual = mapper.writeValueAsString(collection);
 
-		assertThat(actual, is(MappingUtils.read(new ClassPathResource("reference.json", getClass()))));
+		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("reference.json", getClass())));
 	}
 }

@@ -22,8 +22,8 @@ import static org.springframework.hateoas.mediatype.hal.HalLinkRelation.*;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.server.LinkRelationProvider;
@@ -42,7 +42,7 @@ public class HalEmbeddedBuilderUnitTest {
 	LinkRelationProvider provider;
 	CurieProvider curieProvider;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		provider = new EvoInflectorLinkRelationProvider();
 		curieProvider = new DefaultCurieProvider("curie", UriTemplate.of("http://localhost/{rel}"));
@@ -110,10 +110,13 @@ public class HalEmbeddedBuilderUnitTest {
 	/**
 	 * @see #195
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings("null")
 	public void rejectsNullRelProvider() {
-		new HalEmbeddedBuilder(null, CurieProvider.NONE, false);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new HalEmbeddedBuilder(null, CurieProvider.NONE, false);
+		});
 	}
 
 	/**
@@ -170,9 +173,12 @@ public class HalEmbeddedBuilderUnitTest {
 	/**
 	 * @see #286
 	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void rejectsInvalidEmbeddedWrapper() {
-		new HalEmbeddedBuilder(provider, curieProvider, false).add(mock(EmbeddedWrapper.class));
+
+		assertThatIllegalStateException().isThrownBy(() -> {
+			new HalEmbeddedBuilder(provider, curieProvider, false).add(mock(EmbeddedWrapper.class));
+		});
 	}
 
 	@SuppressWarnings("unchecked")

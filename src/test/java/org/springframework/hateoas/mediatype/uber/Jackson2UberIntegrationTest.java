@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.CollectionModel;
@@ -55,7 +55,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 			new Link("bar", IanaLinkRelations.PREV) //
 	);
 
-	@Before
+	@BeforeEach
 	public void setUpModule() {
 
 		this.mapper.registerModule(new Jackson2UberModule());

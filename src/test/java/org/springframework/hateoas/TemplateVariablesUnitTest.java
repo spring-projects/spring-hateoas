@@ -20,7 +20,7 @@ import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
@@ -174,32 +174,44 @@ public class TemplateVariablesUnitTest {
 	/**
 	 * @see #228
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void variableRejectsEmptyName() {
-		new TemplateVariable("", PATH_VARIABLE);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TemplateVariable("", PATH_VARIABLE);
+		});
 	}
 
 	/**
 	 * @see #228
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void variableRejectsNullName() {
-		new TemplateVariable(null, PATH_VARIABLE);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TemplateVariable(null, PATH_VARIABLE);
+		});
 	}
 
 	/**
 	 * @see #228
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void variableRejectsNullType() {
-		new TemplateVariable("foo", null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TemplateVariable("foo", null);
+		});
 	}
 
 	/**
 	 * @see #228
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void variableRejectsNullDescription() {
-		new TemplateVariable("foo", PATH_VARIABLE, null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TemplateVariable("foo", PATH_VARIABLE, null);
+		});
 	}
 }

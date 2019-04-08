@@ -22,8 +22,8 @@ import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +46,7 @@ public class HypermediaWebFilterTest {
 
 	WebTestClient testClient;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();

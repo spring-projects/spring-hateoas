@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link RepresentationModel}.
@@ -82,17 +82,22 @@ public class RepresentationModelUnitTest {
 		assertThat(support.getLinks(IanaLinkRelations.NEXT.value())).contains(second);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNullLinkBeingAdded() {
 
-		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add((Link) null);
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			RepresentationModel<?> support = new RepresentationModel<>();
+			support.add((Link) null);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNullLinksBeingAdded() {
-		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add((Iterable<Link>) null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			RepresentationModel<?> support = new RepresentationModel<>();
+			support.add((Iterable<Link>) null);
+		});
 	}
 
 	@Test

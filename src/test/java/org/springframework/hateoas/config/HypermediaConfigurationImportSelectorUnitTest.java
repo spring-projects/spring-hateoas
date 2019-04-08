@@ -21,7 +21,7 @@ import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;

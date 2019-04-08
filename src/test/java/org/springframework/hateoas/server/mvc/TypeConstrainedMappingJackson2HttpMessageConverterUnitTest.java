@@ -18,10 +18,9 @@ package org.springframework.hateoas.server.mvc;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 
 /**
@@ -34,9 +33,12 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	/**
 	 * @see #219
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullType() {
-		new TypeConstrainedMappingJackson2HttpMessageConverter(null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TypeConstrainedMappingJackson2HttpMessageConverter(null);
+		});
 	}
 
 	/**

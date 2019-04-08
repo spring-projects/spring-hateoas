@@ -25,8 +25,8 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.CollectionModel;
@@ -54,7 +54,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 			new Link("foo", IanaLinkRelations.NEXT), //
 			new Link("bar", IanaLinkRelations.PREV));
 
-	@Before
+	@BeforeEach
 	public void setUpModule() {
 
 		mapper.registerModule(new Jackson2CollectionJsonModule());

@@ -19,12 +19,11 @@ import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static org.springframework.hateoas.support.CustomHypermediaType.*;
 import static org.springframework.hateoas.support.MappingUtils.*;
 
-import reactor.core.publisher.Mono;
-
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +44,7 @@ public class CustomHypermediaWebFluxTest {
 
 	WebTestClient testClient;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();

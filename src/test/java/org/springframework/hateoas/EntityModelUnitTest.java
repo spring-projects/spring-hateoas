@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link EntityModel}.
@@ -66,8 +66,11 @@ public class EntityModelUnitTest {
 		assertThat(right).isNotEqualTo(left);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsCollectionContent() {
-		new EntityModel<Object>(Collections.emptyList());
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new EntityModel<Object>(Collections.emptyList());
+		});
 	}
 }

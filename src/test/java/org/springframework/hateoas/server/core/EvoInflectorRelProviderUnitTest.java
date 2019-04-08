@@ -17,10 +17,9 @@ package org.springframework.hateoas.server.core;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 
 /**
  * Unit tests for {@link EvoInflectorLinkRelationProvider}.

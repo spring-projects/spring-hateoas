@@ -15,7 +15,9 @@
  */
 package org.springframework.hateoas.server.core;
 
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
 import org.springframework.http.MediaType;
 
@@ -26,8 +28,11 @@ import org.springframework.http.MediaType;
  */
 public class JsonPathLinkDiscovererUnitTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullPattern() {
-		new JsonPathLinkDiscoverer(null, MediaType.ALL);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new JsonPathLinkDiscoverer(null, MediaType.ALL);
+		});
 	}
 }

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.web.util.UriComponentsBuilder;

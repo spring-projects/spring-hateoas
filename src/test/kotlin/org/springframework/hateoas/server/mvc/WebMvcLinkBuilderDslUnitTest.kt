@@ -16,7 +16,7 @@
 package org.springframework.hateoas.mvc
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.hateoas.*
 import org.springframework.hateoas.server.mvc.*
 import org.springframework.http.ResponseEntity

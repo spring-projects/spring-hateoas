@@ -24,7 +24,7 @@ import java.net.URI;
 import java.util.Collections;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpMethod;
@@ -59,25 +59,37 @@ public class LinkUnitTest {
 	}
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullHref() {
-		new Link(null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link(null);
+		});
 	}
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullRel() {
-		new Link("foo", (String) null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link("foo", (String) null);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsEmptyHref() {
-		new Link("");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link("");
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsEmptyRel() {
-		new Link("foo", "");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link("foo", "");
+		});
 	}
 
 	@Test
@@ -160,19 +172,28 @@ public class LinkUnitTest {
 		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsMissingRelAttribute() {
-		Link.valueOf("</something>;title=\"title\"");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Link.valueOf("</something>;title=\"title\"");
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsLinkWithoutAttributesAtAll() {
-		Link.valueOf("</something>");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Link.valueOf("</something>");
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNonRFC5988String() {
-		Link.valueOf("foo");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Link.valueOf("foo");
+		});
 	}
 
 	/**

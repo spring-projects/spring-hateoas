@@ -17,7 +17,7 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for {@link org.springframework.hateoas.Link} marshaling.

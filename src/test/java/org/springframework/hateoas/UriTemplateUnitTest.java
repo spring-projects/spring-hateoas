@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
@@ -147,11 +147,13 @@ public class UriTemplateUnitTest {
 	/**
 	 * @see #137
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsMissingRequiredPathVariable() {
 
-		UriTemplate template = UriTemplate.of("/foo/{bar}");
-		template.expand(Collections.emptyMap());
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			UriTemplate template = UriTemplate.of("/foo/{bar}");
+			template.expand(Collections.emptyMap());
+		});
 	}
 
 	/**
@@ -246,9 +248,12 @@ public class UriTemplateUnitTest {
 	/**
 	 * @see #273
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsEmptyBaseUri() {
-		new UriTemplate(null, TemplateVariables.NONE);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new UriTemplate(null, TemplateVariables.NONE);
+		});
 	}
 
 	/**

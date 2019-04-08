@@ -17,7 +17,7 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;

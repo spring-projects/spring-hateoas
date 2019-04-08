@@ -22,20 +22,19 @@ import reactor.test.StepVerifier;
 
 import java.net.URI;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.client.Actor;
 import org.springframework.hateoas.client.Movie;
 import org.springframework.hateoas.client.Server;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -50,7 +49,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	private URI baseUri;
 	private Server server;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		this.server = new Server();
@@ -68,7 +67,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 		this.baseUri = URI.create(this.server.rootResource());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 
 		if (this.server != null) {

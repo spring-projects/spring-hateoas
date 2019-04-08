@@ -21,12 +21,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.mediatype.alps.AlpsLinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.util.StreamUtils;
 
 /**

@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation.HalLinkRelationBuilder;

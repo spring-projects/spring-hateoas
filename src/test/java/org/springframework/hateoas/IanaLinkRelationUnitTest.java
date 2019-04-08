@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.Value;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Greg Turnquist

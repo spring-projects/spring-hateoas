@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedModel.PageMetadata;
 
 /**
@@ -34,7 +34,7 @@ public class PagedModelUnitTest {
 
 	PagedModel<Object> resources;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resources = new PagedModel<>(Collections.emptyList(), metadata);
 	}
@@ -58,33 +58,45 @@ public class PagedModelUnitTest {
 	/**
 	 * @see #89
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNegativePageSize() {
-		new PageMetadata(-1, 0, 0);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(-1, 0, 0);
+		});
 	}
 
 	/**
 	 * @see #89
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNegativePageNumber() {
-		new PageMetadata(0, -1, 0);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(0, -1, 0);
+		});
 	}
 
 	/**
 	 * @see #89
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNegativeTotalElements() {
-		new PageMetadata(0, 0, -1);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(0, 0, -1);
+		});
 	}
 
 	/**
 	 * @see #89
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNegativeTotalPages() {
-		new PageMetadata(0, 0, 0, -1);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(0, 0, 0, -1);
+		});
 	}
 
 	/**

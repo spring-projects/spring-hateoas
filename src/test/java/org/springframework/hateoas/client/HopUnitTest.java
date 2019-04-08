@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link Hop}.
@@ -33,17 +33,23 @@ public class HopUnitTest {
 	/**
 	 * @see #346
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullRelationName() {
-		Hop.rel(null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Hop.rel(null);
+		});
 	}
 
 	/**
 	 * @see #346
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsEmptyRelationName() {
-		Hop.rel("");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Hop.rel("");
+		});
 	}
 
 	/**

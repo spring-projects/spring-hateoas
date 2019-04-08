@@ -22,14 +22,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.hateoas.mediatype.alps.Alps;
-import org.springframework.hateoas.mediatype.alps.Doc;
-import org.springframework.hateoas.mediatype.alps.Format;
-import org.springframework.hateoas.mediatype.alps.Type;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +41,7 @@ public class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		mapper = new ObjectMapper();

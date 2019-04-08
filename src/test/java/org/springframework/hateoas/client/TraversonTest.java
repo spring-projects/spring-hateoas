@@ -15,12 +15,10 @@
  */
 package org.springframework.hateoas.client;
 
-import static net.jadler.Jadler.verifyThatRequest;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.hateoas.client.Hop.rel;
+import static net.jadler.Jadler.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.hateoas.client.Hop.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,10 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -48,6 +46,8 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.context.event.annotation.AfterTestClass;
+import org.springframework.test.context.event.annotation.BeforeTestClass;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -65,7 +65,7 @@ public class TraversonTest {
 
 	Traverson traverson;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUpClass() {
 
 		server = new Server();
@@ -74,13 +74,13 @@ public class TraversonTest {
 		setUpActors();
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() throws IOException {
 
 		if (server != null) {
@@ -91,17 +91,23 @@ public class TraversonTest {
 	/**
 	 * @see #131
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullBaseUri() {
-		new Traverson(null, MediaTypes.HAL_JSON);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Traverson(null, MediaTypes.HAL_JSON);
+		});
 	}
 
 	/**
 	 * @see #131
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsEmptyMediaTypes() {
-		new Traverson(baseUri);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Traverson(baseUri);
+		});
 	}
 
 	/**

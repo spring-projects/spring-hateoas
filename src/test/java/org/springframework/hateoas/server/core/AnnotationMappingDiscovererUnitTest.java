@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,9 +34,12 @@ public class AnnotationMappingDiscovererUnitTest {
 
 	MappingDiscoverer discoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullAnnotation() {
-		new AnnotationMappingDiscoverer(null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new AnnotationMappingDiscoverer(null);
+		});
 	}
 
 	@Test

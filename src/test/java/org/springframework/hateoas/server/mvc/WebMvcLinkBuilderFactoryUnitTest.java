@@ -25,15 +25,13 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.hateoas.server.mvc.UriComponentsContributor;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.ControllerWithMethods;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.PersonsAddressesController;

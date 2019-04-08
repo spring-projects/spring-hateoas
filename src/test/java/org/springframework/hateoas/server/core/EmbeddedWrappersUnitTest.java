@@ -20,10 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.core.EmbeddedWrapper;
-import org.springframework.hateoas.server.core.EmbeddedWrappers;
 
 /**
  * Unit tests for {@link EmbeddedWrappers}.
@@ -63,9 +61,12 @@ public class EmbeddedWrappersUnitTest {
 	/**
 	 * @see #286
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsEmptyCollectionWithoutExplicitRel() {
-		wrappers.wrap(Collections.emptySet());
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			wrappers.wrap(Collections.emptySet());
+		});
 	}
 
 	@SuppressWarnings("unchecked")

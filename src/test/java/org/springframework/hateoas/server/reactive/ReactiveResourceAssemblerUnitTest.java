@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -28,8 +29,8 @@ import reactor.test.StepVerifier;
 import java.util.Collection;
 
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -48,7 +49,7 @@ public class ReactiveResourceAssemblerUnitTest {
 
 	ServerWebExchange exchange;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		this.assembler = new TestAssembler();

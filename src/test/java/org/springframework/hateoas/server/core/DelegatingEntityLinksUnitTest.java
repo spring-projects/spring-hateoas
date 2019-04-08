@@ -18,13 +18,7 @@ package org.springframework.hateoas.server.core;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
@@ -36,26 +30,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * 
  * @author Oliver Gierke
  */
-@RunWith(MockitoJUnitRunner.class)
 public class DelegatingEntityLinksUnitTest extends TestUtils {
 
-	@Mock EntityLinks target;
-
-	@Before
-	@Override
-	public void setUp() {
-		when(target.supports(String.class)).thenReturn(true);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullPluginRegistry() {
-		new DelegatingEntityLinks(null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DelegatingEntityLinks(null);
+		});
 	}
 
 	@Test
 	public void throwsExceptionForUnsupportedClass() {
 
-		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.create());
+		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.empty());
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 				.isThrownBy(() -> links.linkFor(String.class)) //
@@ -65,7 +53,10 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	@Test
 	public void supportsDomainTypeBackedByPlugin() {
 
-		EntityLinks links = createDelegatingEntityLinks();
+		EntityLinks target = mock(EntityLinks.class);
+		when(target.supports(String.class)).thenReturn(true);
+
+		EntityLinks links = createDelegatingEntityLinks(target);
 
 		assertThat(links.supports(String.class)).isTrue();
 	}
@@ -73,13 +64,16 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	@Test
 	public void delegatesLinkForCall() {
 
-		createDelegatingEntityLinks().linkFor(String.class);
+		EntityLinks target = mock(EntityLinks.class);
+		when(target.supports(String.class)).thenReturn(true);
+
+		createDelegatingEntityLinks(target).linkFor(String.class);
 
 		verify(target, times(1)).linkFor(String.class);
 	}
 
-	private EntityLinks createDelegatingEntityLinks() {
-		return new DelegatingEntityLinks(SimplePluginRegistry.create(Arrays.asList(target)));
+	private EntityLinks createDelegatingEntityLinks(EntityLinks target) {
+		return new DelegatingEntityLinks(SimplePluginRegistry.of(target));
 	}
 
 	@ExposesResourceFor(String.class)

@@ -18,11 +18,12 @@ package org.springframework.hateoas.server.reactive;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Data;
+
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -40,7 +41,7 @@ public class SimpleReactiveResourceAssemblerTest {
 
 	@Mock ServerWebExchange exchange;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		this.testResourceAssembler = new TestResourceAssemblerSimple();

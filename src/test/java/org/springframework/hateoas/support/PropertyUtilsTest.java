@@ -25,7 +25,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;

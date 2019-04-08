@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
@@ -45,30 +45,45 @@ public class DefaultCurieProviderUnitTest {
 	CurieProvider provider = new DefaultCurieProvider("acme", URI_TEMPLATE);
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNullCurieName() {
-		new DefaultCurieProvider(null, URI_TEMPLATE);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider(null, URI_TEMPLATE);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsEmptyCurieName() {
-		new DefaultCurieProvider("", URI_TEMPLATE);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("", URI_TEMPLATE);
+		});
 	}
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsNullUriTemplateName() {
-		new DefaultCurieProvider("acme", null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("acme", null);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsUriTemplateWithoutVariable() {
-		new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels"));
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels"));
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void preventsUriTemplateWithMoreThanOneVariable() {
-		new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels/{rel}/{another}"));
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels/{rel}/{another}"));
+		});
 	}
 
 	@Test

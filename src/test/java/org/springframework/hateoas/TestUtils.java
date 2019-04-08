@@ -22,7 +22,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -40,7 +40,7 @@ public class TestUtils {
 
 	protected MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		request = new MockHttpServletRequest();

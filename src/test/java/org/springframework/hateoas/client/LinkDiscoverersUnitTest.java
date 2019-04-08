@@ -17,7 +17,7 @@ package org.springframework.hateoas.client;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
@@ -30,9 +30,12 @@ import org.springframework.plugin.core.PluginRegistry;
  */
 public class LinkDiscoverersUnitTest {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void rejectsNullPluginRegistry() {
-		new LinkDiscoverers(null);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new LinkDiscoverers(null);
+		});
 	}
 
 	@Test

@@ -24,8 +24,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.ClassPathResource;
@@ -62,7 +62,7 @@ public class VndErrorsMarshallingTest {
 		json2Reference = readFile(new ClassPathResource("vnderror2.json"));
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
