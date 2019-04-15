@@ -58,7 +58,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Michael Wirth
  * @since 0.11
  */
-public class TraversonTest {
+class TraversonTest {
 
 	static URI baseUri;
 	static Server server;
@@ -75,7 +75,7 @@ public class TraversonTest {
 	}
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
 
 	}
@@ -92,7 +92,7 @@ public class TraversonTest {
 	 * @see #131
 	 */
 	@Test
-	public void rejectsNullBaseUri() {
+	void rejectsNullBaseUri() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new Traverson(null, MediaTypes.HAL_JSON);
@@ -103,7 +103,7 @@ public class TraversonTest {
 	 * @see #131
 	 */
 	@Test
-	public void rejectsEmptyMediaTypes() {
+	void rejectsEmptyMediaTypes() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new Traverson(baseUri);
@@ -114,7 +114,7 @@ public class TraversonTest {
 	 * @see #131
 	 */
 	@Test
-	public void sendsConfiguredMediaTypesInAcceptHeader() {
+	void sendsConfiguredMediaTypesInAcceptHeader() {
 
 		traverson.follow().toObject(String.class);
 
@@ -127,7 +127,7 @@ public class TraversonTest {
 	 * @see #131
 	 */
 	@Test
-	public void readsTraversalIntoJsonPathExpression() {
+	void readsTraversalIntoJsonPathExpression() {
 		assertThat(traverson.follow("movies", "movie", "actor").<String> toObject("$.name")).isEqualTo("Keanu Reaves");
 	}
 
@@ -135,7 +135,7 @@ public class TraversonTest {
 	 * @see #131
 	 */
 	@Test
-	public void readsJsonPathTraversalIntoJsonPathExpression() {
+	void readsJsonPathTraversalIntoJsonPathExpression() {
 
 		assertThat(traverson.follow(//
 				"$._links.movies.href", //
@@ -148,7 +148,7 @@ public class TraversonTest {
 	 * @see #131
 	 */
 	@Test
-	public void readsTraversalIntoResourceInstance() {
+	void readsTraversalIntoResourceInstance() {
 
 		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new ParameterizedTypeReference<EntityModel<Actor>>() {};
 		EntityModel<Actor> result = traverson.follow("movies", "movie", "actor").toObject(typeReference);
@@ -160,7 +160,7 @@ public class TraversonTest {
 	 * @see #187
 	 */
 	@Test
-	public void sendsConfiguredHeadersForJsonPathExpression() {
+	void sendsConfiguredHeadersForJsonPathExpression() {
 
 		String expectedHeader = "<https://www.example.com>;rel=\"home\"";
 
@@ -179,7 +179,7 @@ public class TraversonTest {
 	 * @see #187
 	 */
 	@Test
-	public void sendsConfiguredHeadersForToEntity() {
+	void sendsConfiguredHeadersForToEntity() {
 
 		String expectedHeader = "<https://www.example.com>;rel=\"home\"";
 
@@ -198,7 +198,7 @@ public class TraversonTest {
 	 * @see #201, #203
 	 */
 	@Test
-	public void allowsCustomizingRestTemplate() {
+	void allowsCustomizingRestTemplate() {
 
 		CountingInterceptor interceptor = new CountingInterceptor();
 
@@ -216,7 +216,7 @@ public class TraversonTest {
 	 * @see #185
 	 */
 	@Test
-	public void usesCustomLinkDiscoverer() {
+	void usesCustomLinkDiscoverer() {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/github"), MediaType.APPLICATION_JSON);
 		this.traverson.setLinkDiscoverers(Arrays.asList(new GitHubLinkDiscoverer()));
@@ -229,7 +229,7 @@ public class TraversonTest {
 	 * @see #212
 	 */
 	@Test
-	public void shouldReturnLastLinkFound() {
+	void shouldReturnLastLinkFound() {
 
 		Link result = traverson.follow("movies").asLink();
 
@@ -241,7 +241,7 @@ public class TraversonTest {
 	 * @see #307
 	 */
 	@Test
-	public void returnsTemplatedLinkIfRequested() {
+	void returnsTemplatedLinkIfRequested() {
 
 		TraversalBuilder follow = new Traverson(URI.create(server.rootResource().concat("/link")), MediaTypes.HAL_JSON)
 				.follow("self");
@@ -257,7 +257,7 @@ public class TraversonTest {
 	}
 
 	@Test // #971
-	public void returnsTemplatedRequiredLinkIfRequested() {
+	void returnsTemplatedRequiredLinkIfRequested() {
 
 		Link templatedLink = new Traverson(URI.create(server.rootResource() + "/github-with-template"), MediaTypes.HAL_JSON) //
 				.follow("rel_to_templated_link") //
@@ -276,7 +276,7 @@ public class TraversonTest {
 	 * @see #258
 	 */
 	@Test
-	public void returnsDefaultMessageConvertersForHal() {
+	void returnsDefaultMessageConvertersForHal() {
 
 		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON);
 
@@ -295,7 +295,7 @@ public class TraversonTest {
 	 * @see #258
 	 */
 	@Test
-	public void returnsDefaultMessageConverters() {
+	void returnsDefaultMessageConverters() {
 
 		List<HttpMessageConverter<?>> converters = Traverson.getDefaultMessageConverters();
 
@@ -307,7 +307,7 @@ public class TraversonTest {
 	 * @see #346
 	 */
 	@Test
-	public void chainMultipleFollowOperations() {
+	void chainMultipleFollowOperations() {
 
 		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new ParameterizedTypeReference<EntityModel<Actor>>() {};
 		EntityModel<Actor> result = traverson.follow("movies").follow("movie").follow("actor").toObject(typeReference);
@@ -319,7 +319,7 @@ public class TraversonTest {
 	 * @see #346
 	 */
 	@Test
-	public void allowAlteringTheDetailsOfASingleHop() {
+	void allowAlteringTheDetailsOfASingleHop() {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
@@ -345,7 +345,7 @@ public class TraversonTest {
 	 * @see #346
 	 */
 	@Test
-	public void allowAlteringTheDetailsOfASingleHopByMapOperations() {
+	void allowAlteringTheDetailsOfASingleHopByMapOperations() {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
@@ -373,7 +373,7 @@ public class TraversonTest {
 	 * @see #346
 	 */
 	@Test
-	public void allowGlobalsToImpactSingleHops() {
+	void allowGlobalsToImpactSingleHops() {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
@@ -398,7 +398,7 @@ public class TraversonTest {
 	 * @see #337
 	 */
 	@Test
-	public void doesNotDoubleEncodeURI() {
+	void doesNotDoubleEncodeURI() {
 
 		this.traverson = new Traverson(URI.create(server.rootResource() + "/springagram"), MediaTypes.HAL_JSON);
 
@@ -412,7 +412,7 @@ public class TraversonTest {
 	}
 
 	@Test
-	public void customHeaders() {
+	void customHeaders() {
 
 		String customHeaderName = "X-CustomHeader";
 

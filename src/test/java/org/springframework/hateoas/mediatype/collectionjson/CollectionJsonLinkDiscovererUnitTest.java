@@ -33,17 +33,17 @@ import org.springframework.hateoas.support.MappingUtils;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public class CollectionJsonLinkDiscovererUnitTest {
+class CollectionJsonLinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.discoverer = new CollectionJsonLinkDiscoverer();
 	}
 
 	@Test
-	public void spec1Links() throws IOException {
+	void spec1Links() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
 
@@ -55,7 +55,7 @@ public class CollectionJsonLinkDiscovererUnitTest {
 	}
 
 	@Test
-	public void spec2Links() throws IOException {
+	void spec2Links() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
 

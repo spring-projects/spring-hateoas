@@ -46,12 +46,12 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class CollectionJsonWebFluxIntegrationTest {
+class CollectionJsonWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		WebFluxEmployeeController.reset();
 	}
 
@@ -59,7 +59,7 @@ public class CollectionJsonWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void singleEmployee() {
+	void singleEmployee() {
 
 		this.testClient.get().uri("http://localhost/employees/0")
 				.accept(MediaTypes.COLLECTION_JSON)
@@ -94,7 +94,7 @@ public class CollectionJsonWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void collectionOfEmployees() {
+	void collectionOfEmployees() {
 
 		this.testClient.get().uri("http://localhost/employees")
 				.accept(MediaTypes.COLLECTION_JSON)
@@ -136,7 +136,7 @@ public class CollectionJsonWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String specBasedJson = read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 

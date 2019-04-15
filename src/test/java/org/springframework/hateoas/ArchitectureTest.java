@@ -29,14 +29,14 @@ import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
  *
  * @author Oliver Gierke
  */
-public class ArchitectureTest {
+class ArchitectureTest {
 
 	ImportOptions options = new ImportOptions().with(ImportOption.Predefined.DONT_INCLUDE_TESTS);
 	JavaClasses classes = new ClassFileImporter(options) //
 			.importPackages("org.springframework.hateoas");
 
 	@Test
-	public void assertNoCyclicPackageDependencies() {
+	void assertNoCyclicPackageDependencies() {
 
 		SliceRule rule = SlicesRuleDefinition.slices() //
 				.matching("org.springframework.hateoas.(**)..") //

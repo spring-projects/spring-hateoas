@@ -40,12 +40,12 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 /**
  * @author Greg Turnquist
  */
-public class CustomHypermediaWebFluxTest {
+class CustomHypermediaWebFluxTest {
 
 	WebTestClient testClient;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestConfig.class);
@@ -60,7 +60,7 @@ public class CustomHypermediaWebFluxTest {
 	}
 
 	@Test // #833
-	public void getUsingCustomMediaType() throws IOException {
+	void getUsingCustomMediaType() throws IOException {
 
 		this.testClient.get().uri("http://localhost/employees/1") //
 				.accept(FRODO_MEDIATYPE) //

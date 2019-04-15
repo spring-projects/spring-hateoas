@@ -27,20 +27,20 @@ import org.junit.jupiter.api.Test;
  * 
  * @author Oliver Gierke
  */
-public class CollectionModelUnitTest {
+class CollectionModelUnitTest {
 
 	Set<EntityModel<String>> foo = Collections.singleton(new EntityModel<>("foo"));
 	Set<EntityModel<String>> bar = Collections.singleton(new EntityModel<>("bar"));
 
 	@Test
-	public void equalsForSelfReference() {
+	void equalsForSelfReference() {
 
 		CollectionModel<EntityModel<String>> resource = new CollectionModel<>(foo);
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
-	public void equalsWithEqualContent() {
+	void equalsWithEqualContent() {
 
 		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
 		CollectionModel<EntityModel<String>> right = new CollectionModel<>(foo);
@@ -50,7 +50,7 @@ public class CollectionModelUnitTest {
 	}
 
 	@Test
-	public void notEqualForDifferentContent() {
+	void notEqualForDifferentContent() {
 
 		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
 		CollectionModel<EntityModel<String>> right = new CollectionModel<>(bar);
@@ -60,7 +60,7 @@ public class CollectionModelUnitTest {
 	}
 
 	@Test
-	public void notEqualForDifferentLinks() {
+	void notEqualForDifferentLinks() {
 
 		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
 		CollectionModel<EntityModel<String>> right = new CollectionModel<>(bar);

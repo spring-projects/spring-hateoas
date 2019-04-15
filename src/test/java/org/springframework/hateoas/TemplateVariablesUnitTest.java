@@ -28,13 +28,13 @@ import org.springframework.hateoas.TemplateVariable.VariableType;
  * 
  * @author Oliver Gierke
  */
-public class TemplateVariablesUnitTest {
+class TemplateVariablesUnitTest {
 
 	/**
 	 * @see #137
 	 */
 	@Test
-	public void rendersNoTempalteVariablesAsEmptyString() {
+	void rendersNoTempalteVariablesAsEmptyString() {
 		assertThat(TemplateVariables.NONE.toString()).isEqualTo("");
 	}
 
@@ -42,7 +42,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void rendersSingleVariableCorrectly() {
+	void rendersSingleVariableCorrectly() {
 
 		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
 		assertThat(variables.toString()).isEqualTo("{/foo}");
@@ -52,7 +52,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void combinesMultipleVariablesOfTheSameType() {
+	void combinesMultipleVariablesOfTheSameType() {
 
 		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM);
 		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
@@ -66,7 +66,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void combinesMultipleVariablesOfTheDifferentType() {
+	void combinesMultipleVariablesOfTheDifferentType() {
 
 		TemplateVariable first = new TemplateVariable("foo", SEGMENT);
 		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
@@ -80,7 +80,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void concatsVariables() {
+	void concatsVariables() {
 
 		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
 		variables = variables.concat(new TemplateVariable("bar", REQUEST_PARAM));
@@ -92,7 +92,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void combinesContinuedParamWithParam() {
+	void combinesContinuedParamWithParam() {
 
 		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM);
 		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM_CONTINUED);
@@ -106,7 +106,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void combinesContinuedParameterWithParameter() {
+	void combinesContinuedParameterWithParameter() {
 
 		TemplateVariable first = new TemplateVariable("foo", REQUEST_PARAM_CONTINUED);
 		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
@@ -120,7 +120,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #198
 	 */
 	@Test
-	public void dropsDuplicateTemplateVariable() {
+	void dropsDuplicateTemplateVariable() {
 
 		TemplateVariable variable = new TemplateVariable("foo", REQUEST_PARAM);
 		TemplateVariables variables = new TemplateVariables(variable);
@@ -135,7 +135,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #217
 	 */
 	@Test
-	public void considersRequestParameterVariablesEquivalent() {
+	void considersRequestParameterVariablesEquivalent() {
 
 		TemplateVariable parameter = new TemplateVariable("foo", REQUEST_PARAM);
 		TemplateVariable continued = new TemplateVariable("foo", REQUEST_PARAM_CONTINUED);
@@ -150,7 +150,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #217
 	 */
 	@Test
-	public void considersFragementVariable() {
+	void considersFragementVariable() {
 
 		assertThat(new TemplateVariable("foo", VariableType.FRAGMENT).isFragment()).isTrue();
 		assertThat(new TemplateVariable("foo", VariableType.REQUEST_PARAM).isFragment()).isFalse();
@@ -160,7 +160,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #217
 	 */
 	@Test
-	public void doesNotAddEquivalentVariable() {
+	void doesNotAddEquivalentVariable() {
 
 		TemplateVariable parameter = new TemplateVariable("foo", VariableType.REQUEST_PARAM);
 		TemplateVariable parameterContinued = new TemplateVariable("foo", VariableType.REQUEST_PARAM_CONTINUED);
@@ -175,7 +175,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #228
 	 */
 	@Test
-	public void variableRejectsEmptyName() {
+	void variableRejectsEmptyName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new TemplateVariable("", PATH_VARIABLE);
@@ -186,7 +186,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #228
 	 */
 	@Test
-	public void variableRejectsNullName() {
+	void variableRejectsNullName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new TemplateVariable(null, PATH_VARIABLE);
@@ -197,7 +197,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #228
 	 */
 	@Test
-	public void variableRejectsNullType() {
+	void variableRejectsNullType() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new TemplateVariable("foo", null);
@@ -208,7 +208,7 @@ public class TemplateVariablesUnitTest {
 	 * @see #228
 	 */
 	@Test
-	public void variableRejectsNullDescription() {
+	void variableRejectsNullDescription() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new TemplateVariable("foo", PATH_VARIABLE, null);

@@ -45,12 +45,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  *
  * @author Greg Turnquist
  */
-public class CollectionJsonSpecTest {
+class CollectionJsonSpecTest {
 
 	ObjectMapper mapper;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		mapper = new ObjectMapper();
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -63,7 +63,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart1() throws IOException {
+	void specPart1() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
 
@@ -78,7 +78,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart2() throws IOException {
+	void specPart2() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
 
@@ -124,7 +124,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart3() throws IOException {
+	void specPart3() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part3.json", getClass()));
 
@@ -150,7 +150,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart4() throws IOException {
+	void specPart4() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part4.json", getClass()));
 
@@ -168,7 +168,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart5() throws IOException {
+	void specPart5() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part5.json", getClass()));
 
@@ -186,7 +186,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart6() throws IOException {
+	void specPart6() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part6.json", getClass()));
 
@@ -204,7 +204,7 @@ public class CollectionJsonSpecTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void specPart7() throws IOException {
+	void specPart7() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 

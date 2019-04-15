@@ -28,13 +28,13 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
  * 
  * @author Oliver Gierke
  */
-public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
+class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 
 	/**
 	 * @see #219
 	 */
 	@Test
-	public void rejectsNullType() {
+	void rejectsNullType() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new TypeConstrainedMappingJackson2HttpMessageConverter(null);
@@ -45,7 +45,7 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	 * @see #219, #360
 	 */
 	@Test
-	public void canReadTypeIfAssignableToConfiguredType() {
+	void canReadTypeIfAssignableToConfiguredType() {
 
 		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);
@@ -59,7 +59,7 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	 * @see #219, #360
 	 */
 	@Test
-	public void canWriteTypeIfAssignableToConfiguredType() {
+	void canWriteTypeIfAssignableToConfiguredType() {
 
 		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);

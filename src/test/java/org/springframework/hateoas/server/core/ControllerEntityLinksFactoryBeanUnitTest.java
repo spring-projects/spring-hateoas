@@ -32,10 +32,10 @@ import org.springframework.stereotype.Controller;
  *
  * @author Oliver Gierke
  */
-public class ControllerEntityLinksFactoryBeanUnitTest {
+class ControllerEntityLinksFactoryBeanUnitTest {
 
 	@Test
-	public void rejectsFactoryBeanIfAnnotationNotSet() {
+	void rejectsFactoryBeanIfAnnotationNotSet() {
 
 		ControllerEntityLinksFactoryBean builder = new ControllerEntityLinksFactoryBean();
 
@@ -45,7 +45,7 @@ public class ControllerEntityLinksFactoryBeanUnitTest {
 	}
 
 	@Test
-	public void discoversSampleControllerFromApplicationContext() throws Exception {
+	void discoversSampleControllerFromApplicationContext() throws Exception {
 
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("controller", new RootBeanDefinition(SampleController.class));

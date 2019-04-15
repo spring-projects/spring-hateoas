@@ -28,7 +28,7 @@ import org.springframework.hateoas.LinkRelation;
  *
  * @author Oliver Gierke
  */
-public class EmbeddedWrappersUnitTest {
+class EmbeddedWrappersUnitTest {
 
 	EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
@@ -36,7 +36,7 @@ public class EmbeddedWrappersUnitTest {
 	 * @see #286
 	 */
 	@Test
-	public void createsWrapperForEmptyCollection() {
+	void createsWrapperForEmptyCollection() {
 
 		EmbeddedWrapper wrapper = wrappers.emptyCollectionOf(String.class);
 
@@ -49,7 +49,7 @@ public class EmbeddedWrappersUnitTest {
 	 * @see #286
 	 */
 	@Test
-	public void createsWrapperForEmptyCollectionAndExplicitRel() {
+	void createsWrapperForEmptyCollectionAndExplicitRel() {
 
 		EmbeddedWrapper wrapper = wrappers.wrap(Collections.emptySet(), LinkRelation.of("rel"));
 
@@ -62,7 +62,7 @@ public class EmbeddedWrappersUnitTest {
 	 * @see #286
 	 */
 	@Test
-	public void rejectsEmptyCollectionWithoutExplicitRel() {
+	void rejectsEmptyCollectionWithoutExplicitRel() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			wrappers.wrap(Collections.emptySet());

@@ -33,12 +33,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 /**
  * @author Greg Turnquist
  */
-public class JacksonSerializationTest {
+class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2CollectionJsonModule());
@@ -46,7 +46,7 @@ public class JacksonSerializationTest {
 	}
 
 	@Test
-	public void createSimpleCollection() throws IOException {
+	void createSimpleCollection() throws IOException {
 
 		CollectionJson<?> collection = new CollectionJson<>().withVersion("1.0").withHref("localhost")
 				.withLinks(Links.of(new Link("foo").withSelfRel())) //

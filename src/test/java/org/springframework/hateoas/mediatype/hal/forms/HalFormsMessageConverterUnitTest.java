@@ -46,13 +46,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-public class HalFormsMessageConverterUnitTest {
+class HalFormsMessageConverterUnitTest {
 
 	ObjectMapper mapper;
 	HttpMessageConverter<Object> messageConverter;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalFormsModule());
@@ -68,7 +68,7 @@ public class HalFormsMessageConverterUnitTest {
 	}
 
 	@Test
-	public void canReadAHalFormsDocumentMessage() throws IOException {
+	void canReadAHalFormsDocumentMessage() throws IOException {
 
 		HttpInputMessage message = new HttpInputMessage() {
 			@Override
@@ -100,7 +100,7 @@ public class HalFormsMessageConverterUnitTest {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void canWriteAHalFormsDocumentMessage() throws IOException {
+	void canWriteAHalFormsDocumentMessage() throws IOException {
 
 		HalFormsProperty property = HalFormsProperty.named("my-name")//
 				.withReadOnly(true) //

@@ -26,12 +26,12 @@ import org.springframework.hateoas.server.LinkRelationProvider;
  *
  * @author Oliver Gierke
  */
-public class EvoInflectorRelProviderUnitTest {
+class EvoInflectorRelProviderUnitTest {
 
 	LinkRelationProvider provider = new EvoInflectorLinkRelationProvider();
 
 	@Test
-	public void buildsCollectionRelCorrectly() {
+	void buildsCollectionRelCorrectly() {
 		assertRels(City.class, "city", "cities");
 		assertRels(Person.class, "person", "persons");
 	}

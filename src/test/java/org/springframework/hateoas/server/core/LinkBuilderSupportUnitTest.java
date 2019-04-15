@@ -31,17 +31,17 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Kamill Sokol
  */
-public class LinkBuilderSupportUnitTest extends TestUtils {
+class LinkBuilderSupportUnitTest extends TestUtils {
 
 	@Test
-	public void callingSlashWithEmptyStringIsNoOp() {
+	void callingSlashWithEmptyStringIsNoOp() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 		assertThat(builder.slash("")).isEqualTo(builder);
 	}
 
 	@Test
-	public void appendsFragmentCorrectly() {
+	void appendsFragmentCorrectly() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 		builder = builder.slash("foo#bar");
@@ -60,7 +60,7 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 	 * @see #582
 	 */
 	@Test
-	public void appendsPathContainingColonsCorrectly() {
+	void appendsPathContainingColonsCorrectly() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 

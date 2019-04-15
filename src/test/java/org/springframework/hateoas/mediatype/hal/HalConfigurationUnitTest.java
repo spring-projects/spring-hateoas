@@ -27,10 +27,10 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLi
  * @author Oliver Drotbohm
  * @soundtrack Port Cities - Montreal (Single)
  */
-public class HalConfigurationUnitTest {
+class HalConfigurationUnitTest {
 
 	@Test // #811
-	public void registersSimpleArrayLinksPattern() {
+	void registersSimpleArrayLinksPattern() {
 
 		HalConfiguration configuration = new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY);
 
@@ -39,7 +39,7 @@ public class HalConfigurationUnitTest {
 	}
 
 	@Test // #811
-	public void registersWildcardedArrayLinksPattern() {
+	void registersWildcardedArrayLinksPattern() {
 
 		HalConfiguration configuration = new HalConfiguration().withRenderSingleLinksFor("foo*",
 				RenderSingleLinks.AS_ARRAY);
@@ -51,7 +51,7 @@ public class HalConfigurationUnitTest {
 	}
 
 	@Test // #811
-	public void registersWildcardedArrayLinksPatternForUri() {
+	void registersWildcardedArrayLinksPatternForUri() {
 
 		HalConfiguration configuration = new HalConfiguration().withRenderSingleLinksFor("https://somehost/foo/**",
 				RenderSingleLinks.AS_ARRAY);

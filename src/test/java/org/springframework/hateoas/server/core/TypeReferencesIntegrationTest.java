@@ -52,7 +52,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-public class TypeReferencesIntegrationTest {
+class TypeReferencesIntegrationTest {
 
 	private static final String HAL_USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
 
@@ -88,7 +88,7 @@ public class TypeReferencesIntegrationTest {
 	MockRestServiceServer server;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.server = createServer(template);
 	}
 
@@ -96,7 +96,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourceTypeReferenceWithHal() {
+	void usesResourceTypeReferenceWithHal() {
 
 		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE_HAL, MediaTypes.HAL_JSON));
 
@@ -110,7 +110,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #482
 	 */
 	@Test
-	public void usesResourceTypeReferenceWithCollectionJson() {
+	void usesResourceTypeReferenceWithCollectionJson() {
 
 		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
 
@@ -124,7 +124,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesTypeReferenceWithHal() {
+	void usesResourcesTypeReferenceWithHal() {
 
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER_HAL, MediaTypes.HAL_JSON));
 
@@ -144,7 +144,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #482
 	 */
 	@Test
-	public void usesResourcesTypeReferenceWithCollectionJson() {
+	void usesResourcesTypeReferenceWithCollectionJson() {
 
 		server.expect(requestTo("/resources"))
 				.andRespond(withSuccess(RESOURCES_OF_USER_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
@@ -165,7 +165,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesOfResourceTypeReferenceWithHal() {
+	void usesResourcesOfResourceTypeReferenceWithHal() {
 
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE_HAL, MediaTypes.HAL_JSON));
 
@@ -185,7 +185,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #482
 	 */
 	@Test
-	public void usesResourcesOfResourceTypeReferenceWithCollectionJson() {
+	void usesResourcesOfResourceTypeReferenceWithCollectionJson() {
 
 		server.expect(requestTo("/resources"))
 				.andRespond(withSuccess(RESOURCES_OF_RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));

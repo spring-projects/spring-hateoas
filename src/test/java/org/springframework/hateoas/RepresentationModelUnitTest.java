@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test;
  *
  * @author Oliver Gierke
  */
-public class RepresentationModelUnitTest {
+class RepresentationModelUnitTest {
 
 	@Test
-	public void setsUpWithEmptyLinkList() {
+	void setsUpWithEmptyLinkList() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 
@@ -40,7 +40,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void addsLinkCorrectly() {
+	void addsLinkCorrectly() {
 
 		Link link = new Link("foo", IanaLinkRelations.NEXT.value());
 		RepresentationModel<?> support = new RepresentationModel<>();
@@ -53,7 +53,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void addsMultipleLinkRelationsCorrectly() {
+	void addsMultipleLinkRelationsCorrectly() {
 
 		Link link = new Link("/customers/1", "customers");
 		Link link2 = new Link("/orders/1/customer", "customers");
@@ -67,7 +67,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void addsLinksCorrectly() {
+	void addsLinksCorrectly() {
 
 		Link first = new Link("foo", IanaLinkRelations.PREV.value());
 		Link second = new Link("bar", IanaLinkRelations.NEXT.value());
@@ -83,7 +83,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void preventsNullLinkBeingAdded() {
+	void preventsNullLinkBeingAdded() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 
@@ -93,7 +93,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void preventsNullLinksBeingAdded() {
+	void preventsNullLinksBeingAdded() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 
@@ -103,7 +103,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void sameLinkListMeansSameResource() {
+	void sameLinkListMeansSameResource() {
 
 		RepresentationModel<?> first = new RepresentationModel<>();
 		RepresentationModel<?> second = new RepresentationModel<>();
@@ -118,7 +118,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void differentLinkListsNotEqual() {
+	void differentLinkListsNotEqual() {
 
 		RepresentationModel<?> first = new RepresentationModel<>();
 		RepresentationModel<?> second = new RepresentationModel<>();
@@ -129,7 +129,7 @@ public class RepresentationModelUnitTest {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void subclassNotEquals() {
+	void subclassNotEquals() {
 
 		RepresentationModel<?> left = new RepresentationModel<>();
 		RepresentationModel<?> right = new RepresentationModel() {
@@ -152,7 +152,7 @@ public class RepresentationModelUnitTest {
 	 * @see #178
 	 */
 	@Test
-	public void doesNotEqualNull() {
+	void doesNotEqualNull() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 		assertThat(support.equals(null)).isFalse();
@@ -162,7 +162,7 @@ public class RepresentationModelUnitTest {
 	 * @see #267
 	 */
 	@Test
-	public void addsLinksViaVarargs() {
+	void addsLinksViaVarargs() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(new Link("/self", "self"), new Link("/another", "another"));

@@ -42,12 +42,12 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 /**
  * @author Greg Turnquist
  */
-public class HypermediaWebFilterTest {
+class HypermediaWebFilterTest {
 
 	WebTestClient testClient;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(WebFluxConfig.class);
@@ -63,7 +63,7 @@ public class HypermediaWebFilterTest {
 	 * @see #728
 	 */
 	@Test
-	public void webFilterShouldEmbedExchangeIntoContext() {
+	void webFilterShouldEmbedExchangeIntoContext() {
 
 		this.testClient.get().uri("https://example.com/api") //
 				.accept(MediaTypes.HAL_JSON) //

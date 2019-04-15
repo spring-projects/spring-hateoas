@@ -34,12 +34,12 @@ import org.springframework.util.StreamUtils;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-public class AlpsLinkDiscoverUnitTest extends LinkDiscovererUnitTest {
+class AlpsLinkDiscoverUnitTest extends LinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new AlpsLinkDiscoverer();
 
 	@Test
-	public void discoversFullyQualifiedRel() {
+	void discoversFullyQualifiedRel() {
 
 		Optional<Link> link = getDiscoverer().findLinkWithRel("http://www.foo.com/bar", getInputString());
 

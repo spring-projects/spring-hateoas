@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * 
  * @author Oliver Gierke
  */
-public class DelegatingEntityLinksUnitTest extends TestUtils {
+class DelegatingEntityLinksUnitTest extends TestUtils {
 
 	@Test
-	public void rejectsNullPluginRegistry() {
+	void rejectsNullPluginRegistry() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new DelegatingEntityLinks(null);
@@ -41,7 +41,7 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void throwsExceptionForUnsupportedClass() {
+	void throwsExceptionForUnsupportedClass() {
 
 		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.empty());
 
@@ -51,7 +51,7 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void supportsDomainTypeBackedByPlugin() {
+	void supportsDomainTypeBackedByPlugin() {
 
 		EntityLinks target = mock(EntityLinks.class);
 		when(target.supports(String.class)).thenReturn(true);
@@ -62,7 +62,7 @@ public class DelegatingEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void delegatesLinkForCall() {
+	void delegatesLinkForCall() {
 
 		EntityLinks target = mock(EntityLinks.class);
 		when(target.supports(String.class)).thenReturn(true);

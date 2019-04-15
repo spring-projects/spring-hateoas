@@ -27,7 +27,7 @@ import org.springframework.hateoas.RepresentationModel;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-public class EmployeeResource extends RepresentationModel<EmployeeResource> {
+class EmployeeResource extends RepresentationModel<EmployeeResource> {
 
 	private String name;
 }

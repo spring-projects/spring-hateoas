@@ -29,13 +29,13 @@ import org.springframework.web.context.request.RequestContextHolder;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public class WebMvcLinkBuilderOutsideSpringMvcUnitTest {
+class WebMvcLinkBuilderOutsideSpringMvcUnitTest {
 
 	/**
 	 * Clear out any existing request attributes left behind by other tests
 	 */
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		RequestContextHolder.setRequestAttributes(null);
 	}
 
@@ -43,7 +43,7 @@ public class WebMvcLinkBuilderOutsideSpringMvcUnitTest {
 	 * @see #408
 	 */
 	@Test
-	public void requestingLinkOutsideWebRequest() {
+	void requestingLinkOutsideWebRequest() {
 
 		Link link = linkTo(
 				methodOn(WebMvcLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))

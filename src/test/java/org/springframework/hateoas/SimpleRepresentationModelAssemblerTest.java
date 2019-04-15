@@ -28,13 +28,13 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 /**
  * @author Greg Turnquist
  */
-public class SimpleRepresentationModelAssemblerTest {
+class SimpleRepresentationModelAssemblerTest {
 
 	/**
 	 * @see #572
 	 */
 	@Test
-	public void convertingToResourceShouldWork() {
+	void convertingToResourceShouldWork() {
 
 		TestResourceAssembler assembler = new TestResourceAssembler();
 		EntityModel<Employee> resource = assembler.toModel(new Employee("Frodo"));
@@ -47,7 +47,7 @@ public class SimpleRepresentationModelAssemblerTest {
 	 * @see #572
 	 */
 	@Test
-	public void convertingToResourcesShouldWork() {
+	void convertingToResourcesShouldWork() {
 
 		TestResourceAssembler assembler = new TestResourceAssembler();
 		CollectionModel<EntityModel<Employee>> resources = assembler
@@ -61,7 +61,7 @@ public class SimpleRepresentationModelAssemblerTest {
 	 * @see #572
 	 */
 	@Test
-	public void convertingToResourceWithCustomLinksShouldWork() {
+	void convertingToResourceWithCustomLinksShouldWork() {
 
 		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
 		EntityModel<Employee> resource = assembler.toModel(new Employee("Frodo"));
@@ -74,7 +74,7 @@ public class SimpleRepresentationModelAssemblerTest {
 	 * @see #572
 	 */
 	@Test
-	public void convertingToResourcesWithCustomLinksShouldWork() {
+	void convertingToResourcesWithCustomLinksShouldWork() {
 
 		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
 		CollectionModel<EntityModel<Employee>> resources = assembler

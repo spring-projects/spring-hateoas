@@ -32,13 +32,13 @@ import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
  *
  * @author Oliver Gierke
  */
-public class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
+class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new UberLinkDiscoverer();
 	String sample;
 
 	@BeforeEach
-	public void setUp() throws IOException {
+	void setUp() throws IOException {
 
 		this.discoverer = new UberLinkDiscoverer();
 		this.sample = read(new ClassPathResource("link-discovery.json", getClass()));
@@ -48,7 +48,7 @@ public class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #784
 	 */
 	@Test
-	public void discoversFullyQualifiedRel() {
+	void discoversFullyQualifiedRel() {
 		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", this.sample)).isNotNull();
 	}
 

@@ -34,7 +34,7 @@ public abstract class AbstractJackson2MarshallingIntegrationTest {
 	protected ObjectMapper mapper;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		mapper = new ObjectMapper();
 	}
 

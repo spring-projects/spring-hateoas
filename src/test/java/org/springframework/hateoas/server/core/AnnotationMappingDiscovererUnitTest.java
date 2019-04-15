@@ -30,12 +30,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Kevin Conaway
  * @author Mark Paluch
  */
-public class AnnotationMappingDiscovererUnitTest {
+class AnnotationMappingDiscovererUnitTest {
 
 	MappingDiscoverer discoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
 
 	@Test
-	public void rejectsNullAnnotation() {
+	void rejectsNullAnnotation() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new AnnotationMappingDiscoverer(null);
@@ -43,30 +43,30 @@ public class AnnotationMappingDiscovererUnitTest {
 	}
 
 	@Test
-	public void discoversTypeLevelMapping() {
+	void discoversTypeLevelMapping() {
 		assertThat(discoverer.getMapping(MyController.class)).isEqualTo("/type");
 	}
 
 	@Test
-	public void discoversMethodLevelMapping() throws Exception {
+	void discoversMethodLevelMapping() throws Exception {
 		Method method = MyController.class.getMethod("method");
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/method");
 	}
 
 	@Test
-	public void returnsNullForNonExistentTypeLevelMapping() {
+	void returnsNullForNonExistentTypeLevelMapping() {
 		assertThat(discoverer.getMapping(ControllerWithoutTypeLevelMapping.class)).isNull();
 	}
 
 	@Test
-	public void resolvesMethodLevelMappingWithoutTypeLevelMapping() throws Exception {
+	void resolvesMethodLevelMappingWithoutTypeLevelMapping() throws Exception {
 
 		Method method = ControllerWithoutTypeLevelMapping.class.getMethod("method");
 		assertThat(discoverer.getMapping(method)).isEqualTo("/method");
 	}
 
 	@Test
-	public void resolvesMethodLevelMappingWithSlashRootMapping() throws Exception {
+	void resolvesMethodLevelMappingWithSlashRootMapping() throws Exception {
 
 		Method method = SlashRootMapping.class.getMethod("method");
 		assertThat(discoverer.getMapping(method)).isEqualTo("/method");
@@ -76,7 +76,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #46
 	 */
 	@Test
-	public void treatsMissingMethodMappingAsEmptyMapping() throws Exception {
+	void treatsMissingMethodMappingAsEmptyMapping() throws Exception {
 
 		Method method = MyController.class.getMethod("noMethodMapping");
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type");
@@ -86,7 +86,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #114
 	 */
 	@Test
-	public void detectsClassMappingOnSuperType() throws Exception {
+	void detectsClassMappingOnSuperType() throws Exception {
 
 		Method method = ChildController.class.getMethod("mapping");
 		assertThat(discoverer.getMapping(method)).isEqualTo("/parent/child");
@@ -96,7 +96,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #114
 	 */
 	@Test
-	public void includesTypeMappingFromChildClass() throws Exception {
+	void includesTypeMappingFromChildClass() throws Exception {
 
 		Method method = ParentWithMethod.class.getMethod("mapping");
 		assertThat(discoverer.getMapping(ChildWithTypeMapping.class, method)).isEqualTo("/child/parent");
@@ -106,7 +106,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #269
 	 */
 	@Test
-	public void handlesSlashes() throws Exception {
+	void handlesSlashes() throws Exception {
 
 		Method method = ControllerWithoutSlashes.class.getMethod("noslash");
 		assertThat(discoverer.getMapping(method)).isEqualTo("slashes/noslash");
@@ -125,7 +125,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #269
 	 */
 	@Test
-	public void removesMultipleSlashes() throws Exception {
+	void removesMultipleSlashes() throws Exception {
 
 		Method method = ControllerWithMultipleSlashes.class.getMethod("withslash");
 
@@ -136,7 +136,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #186
 	 */
 	@Test
-	public void usesFirstMappingInCaseMultipleOnesAreDefined() throws Exception {
+	void usesFirstMappingInCaseMultipleOnesAreDefined() throws Exception {
 
 		Method method = MultipleMappingsController.class.getMethod("method");
 
@@ -147,7 +147,7 @@ public class AnnotationMappingDiscovererUnitTest {
 	 * @see #471
 	 */
 	@Test
-	public void discoversMethodLevelMappingUsingComposedAnnotation() throws Exception {
+	void discoversMethodLevelMappingUsingComposedAnnotation() throws Exception {
 
 		Method method = MyController.class.getMethod("methodWithComposedAnnotation");
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/otherMethod");

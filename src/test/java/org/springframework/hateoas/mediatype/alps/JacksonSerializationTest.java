@@ -37,12 +37,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class JacksonSerializationTest {
+class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
@@ -53,7 +53,7 @@ public class JacksonSerializationTest {
 	 * @see #141
 	 */
 	@Test
-	public void writesSampleDocument() throws Exception {
+	void writesSampleDocument() throws Exception {
 
 		Alps alps = alps().//
 				doc(doc().href("https://example.org/samples/full/doc.html").build()). //

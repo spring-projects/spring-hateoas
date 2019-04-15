@@ -28,10 +28,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Oliver Gierke
  */
-public class StringLinkRelationUnitTests {
+class StringLinkRelationUnitTests {
 
 	@Test
-	public void serializesAsPlainString() throws Exception {
+	void serializesAsPlainString() throws Exception {
 
 		Sample sample = new Sample();
 		sample.relation = StringLinkRelation.of("foo");
@@ -42,7 +42,7 @@ public class StringLinkRelationUnitTests {
 	}
 
 	@Test
-	public void deserializesUsingFactoryMethod() throws Exception {
+	void deserializesUsingFactoryMethod() throws Exception {
 
 		ObjectMapper mapper = new ObjectMapper();
 

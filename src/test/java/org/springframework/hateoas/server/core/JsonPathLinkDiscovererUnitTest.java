@@ -26,10 +26,10 @@ import org.springframework.http.MediaType;
  * 
  * @author Oliver Gierke
  */
-public class JsonPathLinkDiscovererUnitTest {
+class JsonPathLinkDiscovererUnitTest {
 
 	@Test
-	public void rejectsNullPattern() {
+	void rejectsNullPattern() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new JsonPathLinkDiscoverer(null, MediaType.ALL);

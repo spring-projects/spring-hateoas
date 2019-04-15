@@ -39,13 +39,13 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Greg Turnquist
  */
-public class HypermediaRestTemplateBeanPostProcessorTest {
+class HypermediaRestTemplateBeanPostProcessorTest {
 
 	/**
 	 * @see #728
 	 */
 	@Test
-	public void shouldRegisterJustHal() {
+	void shouldRegisterJustHal() {
 
 		withContext(HalConfig.class, context -> {
 
@@ -62,7 +62,7 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	 * @see #728
 	 */
 	@Test
-	public void shouldRegisterHalAndCollectionJsonMessageConverters() {
+	void shouldRegisterHalAndCollectionJsonMessageConverters() {
 
 		withContext(HalAndCollectionJsonConfig.class, context -> {
 
@@ -80,7 +80,7 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	 * @see #728
 	 */
 	@Test
-	public void shouldRegisterHypermediaMessageConverters() {
+	void shouldRegisterHypermediaMessageConverters() {
 
 		withContext(AllHypermediaConfig.class, context -> {
 
@@ -97,7 +97,7 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	}
 
 	@Test // #833
-	public void shouldRegisterCustomHypermediaMessageConverters() {
+	void shouldRegisterCustomHypermediaMessageConverters() {
 
 		withContext(CustomHypermediaConfig.class, context -> {
 

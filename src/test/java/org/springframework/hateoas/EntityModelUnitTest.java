@@ -26,17 +26,17 @@ import org.junit.jupiter.api.Test;
  * 
  * @author Oliver Gierke
  */
-public class EntityModelUnitTest {
+class EntityModelUnitTest {
 
 	@Test
-	public void equalsForSelfReference() {
+	void equalsForSelfReference() {
 
 		EntityModel<String> resource = new EntityModel<>("foo");
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
-	public void equalsWithEqualContent() {
+	void equalsWithEqualContent() {
 
 		EntityModel<String> left = new EntityModel<>("foo");
 		EntityModel<String> right = new EntityModel<>("foo");
@@ -46,7 +46,7 @@ public class EntityModelUnitTest {
 	}
 
 	@Test
-	public void notEqualForDifferentContent() {
+	void notEqualForDifferentContent() {
 
 		EntityModel<String> left = new EntityModel<>("foo");
 		EntityModel<String> right = new EntityModel<>("bar");
@@ -56,7 +56,7 @@ public class EntityModelUnitTest {
 	}
 
 	@Test
-	public void notEqualForDifferentLinks() {
+	void notEqualForDifferentLinks() {
 
 		EntityModel<String> left = new EntityModel<>("foo");
 		EntityModel<String> right = new EntityModel<>("foo");
@@ -67,7 +67,7 @@ public class EntityModelUnitTest {
 	}
 
 	@Test
-	public void rejectsCollectionContent() {
+	void rejectsCollectionContent() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new EntityModel<Object>(Collections.emptyList());

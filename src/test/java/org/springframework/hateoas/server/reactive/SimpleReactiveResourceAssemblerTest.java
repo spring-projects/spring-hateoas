@@ -33,7 +33,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * @author Greg Turnquist
  */
-public class SimpleReactiveResourceAssemblerTest {
+class SimpleReactiveResourceAssemblerTest {
 
 	TestResourceAssemblerSimple testResourceAssembler;
 
@@ -42,7 +42,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	@Mock ServerWebExchange exchange;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.testResourceAssembler = new TestResourceAssemblerSimple();
 		this.resourceAssemblerWithCustomLink = new ResourceAssemblerWithCustomLinkSimple();
@@ -52,7 +52,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	 * @see #728
 	 */
 	@Test
-	public void convertingToResourceShouldWork() {
+	void convertingToResourceShouldWork() {
 
 		this.testResourceAssembler.toModel(new Employee("Frodo"), this.exchange).as(StepVerifier::create)
 				.expectNextMatches(resource -> {
@@ -67,7 +67,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	 * @see #728
 	 */
 	@Test
-	public void convertingToResourcesShouldWork() {
+	void convertingToResourcesShouldWork() {
 
 		this.testResourceAssembler.toCollectionModel(Flux.just(new Employee("Frodo")), this.exchange)
 				.as(StepVerifier::create).expectNextMatches(resources -> {
@@ -83,7 +83,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	 * @see #728
 	 */
 	@Test
-	public void convertingToResourceWithCustomLinksShouldWork() {
+	void convertingToResourceWithCustomLinksShouldWork() {
 
 		this.resourceAssemblerWithCustomLink.toModel(new Employee("Frodo"), this.exchange).as(StepVerifier::create)
 				.expectNextMatches(resource -> {
@@ -99,7 +99,7 @@ public class SimpleReactiveResourceAssemblerTest {
 	 * @see #728
 	 */
 	@Test
-	public void convertingToResourcesWithCustomLinksShouldWork() {
+	void convertingToResourcesWithCustomLinksShouldWork() {
 
 		this.resourceAssemblerWithCustomLink.toCollectionModel(Flux.just(new Employee("Frodo")), this.exchange)
 				.as(StepVerifier::create).expectNextMatches(resources -> {

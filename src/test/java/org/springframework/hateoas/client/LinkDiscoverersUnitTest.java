@@ -28,10 +28,10 @@ import org.springframework.plugin.core.PluginRegistry;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class LinkDiscoverersUnitTest {
+class LinkDiscoverersUnitTest {
 
 	@Test
-	public void rejectsNullPluginRegistry() {
+	void rejectsNullPluginRegistry() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new LinkDiscoverers(null);
@@ -39,7 +39,7 @@ public class LinkDiscoverersUnitTest {
 	}
 
 	@Test
-	public void favorsCustomLinkDiscovererOverDefault() {
+	void favorsCustomLinkDiscovererOverDefault() {
 
 		LinkDiscoverer low = new LowPriorityLinkDiscoverer();
 		LinkDiscoverer high = new HighPriorityLinkDiscoverer();

@@ -54,7 +54,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 /**
  * @author Greg Turnquist
  */
-public class HypermediaWebFluxConfigurerTest {
+class HypermediaWebFluxConfigurerTest {
 
 	EntityModelType<Employee> resourceEmployeeType = new EntityModelType<Employee>() {};
 	CollectionModelType<EntityModel<Employee>> resourcesEmployeeType = new CollectionModelType<EntityModel<Employee>>() {};
@@ -77,7 +77,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringHalShouldServeHal() {
+	void registeringHalShouldServeHal() {
 
 		setUp(HalWebFluxConfig.class);
 
@@ -93,7 +93,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringHalFormsShouldServeHalForms() {
+	void registeringHalFormsShouldServeHalForms() {
 
 		setUp(HalFormsWebFluxConfig.class);
 
@@ -109,7 +109,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringCollectionJsonShouldServerCollectionJson() {
+	void registeringCollectionJsonShouldServerCollectionJson() {
 
 		setUp(CollectionJsonWebFluxConfig.class);
 
@@ -125,7 +125,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringUberShouldServerUber() {
+	void registeringUberShouldServerUber() {
 
 		setUp(UberWebFluxConfig.class);
 
@@ -141,7 +141,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringHalAndHalFormsShouldServerHalAndHalForms() {
+	void registeringHalAndHalFormsShouldServerHalAndHalForms() {
 
 		setUp(AllHalWebFluxConfig.class);
 
@@ -158,7 +158,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringHalAndHalFormsShouldAllowCreatingViaHalAndHalForms() {
+	void registeringHalAndHalFormsShouldAllowCreatingViaHalAndHalForms() {
 
 		setUp(AllHalWebFluxConfig.class);
 
@@ -173,7 +173,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringHalAndCollectionJsonShouldServerHalAndCollectionJson() {
+	void registeringHalAndCollectionJsonShouldServerHalAndCollectionJson() {
 
 		setUp(HalAndCollectionJsonWebFluxConfig.class);
 
@@ -194,7 +194,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringHalAndCollectionJsonShouldAllowCreatingViaHalAndCollectionJson() {
+	void registeringHalAndCollectionJsonShouldAllowCreatingViaHalAndCollectionJson() {
 
 		setUp(HalAndCollectionJsonWebFluxConfig.class);
 
@@ -212,7 +212,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringAllHypermediaTypesShouldServerThemAll() {
+	void registeringAllHypermediaTypesShouldServerThemAll() {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
 
@@ -237,7 +237,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void registeringAllHypermediaTypesShouldAllowCreatingThroughAllFormats() {
+	void registeringAllHypermediaTypesShouldAllowCreatingThroughAllFormats() {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
 
@@ -258,7 +258,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void callingForUnregisteredMediaTypeShouldFail() {
+	void callingForUnregisteredMediaTypeShouldFail() {
 
 		setUp(HalWebFluxConfig.class);
 
@@ -270,7 +270,7 @@ public class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	public void reactorTypesShouldWork() {
+	void reactorTypesShouldWork() {
 
 		setUp(HalWebFluxConfig.class);
 

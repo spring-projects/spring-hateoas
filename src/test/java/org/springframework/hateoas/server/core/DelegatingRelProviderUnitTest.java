@@ -27,10 +27,10 @@ import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
  *
  * @author Oliver Gierke
  */
-public class DelegatingRelProviderUnitTest {
+class DelegatingRelProviderUnitTest {
 
 	@Test
-	public void foo() {
+	void foo() {
 
 		LinkRelationProvider delegatingProvider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				new DefaultLinkRelationProvider());

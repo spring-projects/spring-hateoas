@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Oliver Gierke
  */
-public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	private static final String REFERENCE = "{\"rel\":\"something\",\"href\":\"location\"}";
 
@@ -32,7 +32,7 @@ public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	 * @see #14
 	 */
 	@Test
-	public void writesLinkCorrectly() throws Exception {
+	void writesLinkCorrectly() throws Exception {
 		assertThat(write(new Link("location", "something"))).isEqualTo(REFERENCE);
 	}
 
@@ -40,7 +40,7 @@ public class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	 * @see #14
 	 */
 	@Test
-	public void readsLinkCorrectly() throws Exception {
+	void readsLinkCorrectly() throws Exception {
 
 		Link result = read(REFERENCE, Link.class);
 		assertThat(result.getHref()).isEqualTo("location");

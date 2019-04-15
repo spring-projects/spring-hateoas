@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final Links PAGINATION_LINKS = Links.of( //
 			new Link("localhost", IanaLinkRelations.SELF), //
@@ -55,14 +55,14 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 			new Link("bar", IanaLinkRelations.PREV));
 
 	@BeforeEach
-	public void setUpModule() {
+	void setUpModule() {
 
 		mapper.registerModule(new Jackson2CollectionJsonModule());
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
 	@Test
-	public void rendersSingleLinkAsObject() throws Exception {
+	void rendersSingleLinkAsObject() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
@@ -72,7 +72,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void deserializeSingleLink() throws Exception {
+	void deserializeSingleLink() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
@@ -83,7 +83,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void rendersMultipleLinkAsArray() throws Exception {
+	void rendersMultipleLinkAsArray() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
@@ -94,7 +94,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void rendersResourceSupportBasedObject() throws Exception {
+	void rendersResourceSupportBasedObject() throws Exception {
 
 		ResourceWithAttributes resource = new ResourceWithAttributes("test value");
 		resource.add(new Link("localhost").withSelfRel());
@@ -104,7 +104,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void deserializeResourceSupportBasedObject() throws Exception {
+	void deserializeResourceSupportBasedObject() throws Exception {
 
 		ResourceWithAttributes expected = new ResourceWithAttributes("test value");
 		expected.add(new Link("localhost").withSelfRel());
@@ -114,7 +114,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void deserializeMultipleLinks() throws Exception {
+	void deserializeMultipleLinks() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
@@ -127,7 +127,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void rendersSimpleResourcesAsEmbedded() throws Exception {
+	void rendersSimpleResourcesAsEmbedded() throws Exception {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
@@ -140,7 +140,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void deserializesSimpleResourcesAsEmbedded() throws Exception {
+	void deserializesSimpleResourcesAsEmbedded() throws Exception {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
@@ -157,7 +157,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void renderResource() throws Exception {
+	void renderResource() throws Exception {
 
 		EntityModel<String> data = new EntityModel<>("first", new Link("localhost"));
 
@@ -165,7 +165,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void deserializeResource() throws Exception {
+	void deserializeResource() throws Exception {
 
 		EntityModel<?> expected = new EntityModel<>("first", new Link("localhost"));
 
@@ -177,7 +177,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void renderComplexStructure() throws Exception {
+	void renderComplexStructure() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -193,7 +193,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void deserializeResources() throws Exception {
+	void deserializeResources() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -213,7 +213,7 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void renderSimplePojos() throws Exception {
+	void renderSimplePojos() throws Exception {
 
 		List<EntityModel<SimplePojo>> data = new ArrayList<>();
 		data.add(new EntityModel<>(new SimplePojo("text", 1), new Link("localhost"),
@@ -230,14 +230,14 @@ public class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2Marsh
 	}
 
 	@Test
-	public void serializesPagedResource() throws Exception {
+	void serializesPagedResource() throws Exception {
 
 		String actual = write(setupAnnotatedPagedResources());
 		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())));
 	}
 
 	@Test
-	public void deserializesPagedResource() throws Exception {
+	void deserializesPagedResource() throws Exception {
 
 		PagedModel<EntityModel<SimplePojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),

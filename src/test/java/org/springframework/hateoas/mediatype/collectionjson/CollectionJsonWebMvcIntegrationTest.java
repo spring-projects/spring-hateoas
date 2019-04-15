@@ -68,21 +68,21 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class CollectionJsonWebMvcIntegrationTest {
+class CollectionJsonWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
 		WebMvcEmployeeController.reset();
 	}
 
 	@Test
-	public void singleEmployee() throws Exception {
+	void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0") //
 				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
@@ -113,7 +113,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployees() throws Exception {
+	void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees") //
 				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
@@ -149,7 +149,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 

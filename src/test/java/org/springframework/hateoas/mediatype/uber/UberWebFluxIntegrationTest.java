@@ -46,12 +46,12 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class UberWebFluxIntegrationTest {
+class UberWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		WebFluxEmployeeController.reset();
 	}
 
@@ -59,7 +59,7 @@ public class UberWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void singleEmployee() {
+	void singleEmployee() {
 
 		this.testClient.get().uri("http://localhost/employees/0")
 				.accept(MediaTypes.UBER_JSON)
@@ -105,7 +105,7 @@ public class UberWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void collectionOfEmployees() {
+	void collectionOfEmployees() {
 
 		this.testClient.get().uri("http://localhost/employees")
 				.accept(MediaTypes.UBER_JSON)
@@ -188,7 +188,7 @@ public class UberWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String input = read(new ClassPathResource("create-employee.json", getClass()));
 

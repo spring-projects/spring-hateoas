@@ -52,12 +52,12 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Ross Turner
  */
 @Deprecated
-public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
+class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 
 	ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
 
 	@Test
-	public void createsLinkToControllerRoot() {
+	void createsLinkToControllerRoot() {
 
 		Link link = factory.linkTo(PersonControllerImpl.class).withSelfRel();
 
@@ -67,7 +67,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void createsLinkToParameterizedControllerRoot() {
+	void createsLinkToParameterizedControllerRoot() {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, 15).withSelfRel();
 
@@ -77,7 +77,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void appliesParameterValueIfContributorConfigured() {
+	void appliesParameterValueIfContributorConfigured() {
 
 		ControllerLinkBuilderFactory factory = new ControllerLinkBuilderFactory();
 		factory.setUriComponentsContributors(Collections.singletonList(new SampleUriComponentsContributor()));
@@ -94,7 +94,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #57
 	 */
 	@Test
-	public void usesDateTimeFormatForUriBinding() {
+	void usesDateTimeFormatForUriBinding() {
 
 		DateTime now = DateTime.now();
 
@@ -107,7 +107,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #96
 	 */
 	@Test
-	public void linksToMethodWithPathVariableContainingBlank() {
+	void linksToMethodWithPathVariableContainingBlank() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -118,7 +118,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #96
 	 */
 	@Test
-	public void createsLinkToParameterizedControllerRootContainingBlank() {
+	void createsLinkToParameterizedControllerRootContainingBlank() {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, "with blank").withSelfRel();
 
@@ -131,7 +131,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #209
 	 */
 	@Test
-	public void createsLinkToControllerMethodWithMapRequestParam() {
+	void createsLinkToControllerMethodWithMapRequestParam() {
 
 		Map<String, String> queryParams = new LinkedHashMap<>();
 		queryParams.put("firstKey", "firstValue");
@@ -148,7 +148,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #209
 	 */
 	@Test
-	public void createsLinkToControllerMethodWithMultiValueMapRequestParam() {
+	void createsLinkToControllerMethodWithMultiValueMapRequestParam() {
 
 		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 		queryParams.put("key1", Arrays.asList("value1a", "value1b"));
@@ -166,7 +166,7 @@ public class ControllerLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #372
 	 */
 	@Test
-	public void createsLinkToParameterizedControllerRootWithParameterMap() {
+	void createsLinkToParameterizedControllerRootWithParameterMap() {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, Collections.singletonMap("id", "17")).withSelfRel();
 

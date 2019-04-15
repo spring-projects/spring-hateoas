@@ -32,7 +32,7 @@ import org.springframework.hateoas.client.LinkDiscovererUnitTest;
  *
  * @author Greg Turnquist
  */
-public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
+class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalFormsLinkDiscoverer();
 
@@ -40,7 +40,7 @@ public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #314
 	 */
 	@Test
-	public void discoversFullyQualifiedRel() {
+	void discoversFullyQualifiedRel() {
 		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", getInputString())).isNotNull();
 	}
 
@@ -48,7 +48,7 @@ public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #787
 	 */
 	@Test
-	public void discoversAllTheLinkAttributes() throws IOException {
+	void discoversAllTheLinkAttributes() throws IOException {
 
 		String linkText = read(new ClassPathResource("hal-forms-link.json", getClass()));
 

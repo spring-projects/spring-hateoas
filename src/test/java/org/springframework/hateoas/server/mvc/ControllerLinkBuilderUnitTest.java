@@ -51,10 +51,10 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Greg Turnquist
  */
 @Deprecated
-public class ControllerLinkBuilderUnitTest extends TestUtils {
+class ControllerLinkBuilderUnitTest extends TestUtils {
 
 	@Test
-	public void createsLinkToControllerRoot() {
+	void createsLinkToControllerRoot() {
 
 		Link link = linkTo(PersonControllerImpl.class).withSelfRel();
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -62,7 +62,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void createsLinkToParameterizedControllerRoot() {
+	void createsLinkToParameterizedControllerRoot() {
 
 		Link link = linkTo(PersonsAddressesController.class, 15).withSelfRel();
 
@@ -74,7 +74,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #70
 	 */
 	@Test
-	public void createsLinkToMethodOnParameterizedControllerRoot() {
+	void createsLinkToMethodOnParameterizedControllerRoot() {
 
 		Link link = linkTo(methodOn(PersonsAddressesController.class, 15).getAddressesForCountry("DE")).withSelfRel();
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -82,7 +82,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void createsLinkToSubResource() {
+	void createsLinkToSubResource() {
 
 		Link link = linkTo(PersonControllerImpl.class).slash("something").withSelfRel();
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -90,7 +90,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void createsLinkWithCustomRel() {
+	void createsLinkWithCustomRel() {
 
 		Link link = linkTo(PersonControllerImpl.class).withRel(IanaLinkRelations.NEXT);
 
@@ -102,19 +102,19 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #186
 	 */
 	@Test
-	public void usesFirstMappingInCaseMultipleOnesAreDefined() {
+	void usesFirstMappingInCaseMultipleOnesAreDefined() {
 		assertThat(linkTo(InvalidController.class).withSelfRel().getHref()).endsWith("/persons");
 	}
 
 	@Test
-	public void createsLinkToUnmappedController() {
+	void createsLinkToUnmappedController() {
 
 		Link link = linkTo(UnmappedController.class).withSelfRel();
 		assertThat(link.getHref()).isEqualTo("http://localhost");
 	}
 
 	@Test
-	public void appendingNullIsANoOp() {
+	void appendingNullIsANoOp() {
 
 		Link link = linkTo(PersonControllerImpl.class).slash(null).withSelfRel();
 		assertThat(link.getHref()).endsWith("/people");
@@ -124,7 +124,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void linksToMethod() {
+	void linksToMethod() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).myMethod(null)).withSelfRel();
 		assertPointsToMockServer(link);
@@ -132,7 +132,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void linksToMethodWithPathVariable() {
+	void linksToMethodWithPathVariable() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("1")).withSelfRel();
 		assertPointsToMockServer(link);
@@ -143,7 +143,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #33
 	 */
 	@Test
-	public void usesForwardedHostAsHostIfHeaderIsSet() {
+	void usesForwardedHostAsHostIfHeaderIsSet() {
 
 		request.addHeader("X-Forwarded-Host", "somethingDifferent");
 
@@ -157,7 +157,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #112
 	 */
 	@Test
-	public void usesForwardedSslIfHeaderIsSet() {
+	void usesForwardedSslIfHeaderIsSet() {
 
 		request.addHeader("X-Forwarded-Ssl", "on");
 
@@ -171,7 +171,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #112
 	 */
 	@Test
-	public void usesForwardedSslIfHeaderIsSetOff() {
+	void usesForwardedSslIfHeaderIsSetOff() {
 
 		request.addHeader("X-Forwarded-Ssl", "off");
 
@@ -185,7 +185,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #112
 	 */
 	@Test
-	public void usesForwardedSslAndHostIfHeaderIsSet() {
+	void usesForwardedSslAndHostIfHeaderIsSet() {
 
 		request.addHeader("X-Forwarded-Host", "somethingDifferent");
 		request.addHeader("X-Forwarded-Ssl", "on");
@@ -200,7 +200,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #26, #39
 	 */
 	@Test
-	public void addsRequestParametersHandedIntoSlashCorrectly() {
+	void addsRequestParametersHandedIntoSlashCorrectly() {
 
 		Link link = linkTo(PersonController.class).slash("?foo=bar").withSelfRel();
 
@@ -212,7 +212,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #26, #39
 	 */
 	@Test
-	public void linksToMethodWithPathVariableAndRequestParams() {
+	void linksToMethodWithPathVariableAndRequestParams() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, 5)).withSelfRel();
 
@@ -228,7 +228,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #26, #39
 	 */
 	@Test
-	public void linksToMethodWithPathVariableAndMultiValueRequestParams() {
+	void linksToMethodWithPathVariableAndMultiValueRequestParams() {
 
 		Link link = linkTo(
 				methodOn(ControllerWithMethods.class).methodWithMultiValueRequestParams("1", Arrays.asList(3, 7), 5))
@@ -246,7 +246,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #26, #39
 	 */
 	@Test
-	public void returnsUriComponentsBuilder() {
+	void returnsUriComponentsBuilder() {
 
 		UriComponents components = linkTo(PersonController.class).slash("something?foo=bar").toUriComponentsBuilder()
 				.build();
@@ -259,7 +259,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #90
 	 */
 	@Test
-	public void usesForwardedHostAndPortFromHeader() {
+	void usesForwardedHostAndPortFromHeader() {
 
 		request.addHeader("X-Forwarded-Host", "foobar:8088");
 
@@ -273,7 +273,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #90
 	 */
 	@Test
-	public void usesFirstHostOfXForwardedHost() {
+	void usesFirstHostOfXForwardedHost() {
 
 		request.addHeader("X-Forwarded-Host", "barfoo:8888, localhost:8088");
 
@@ -287,7 +287,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #122, #169
 	 */
 	@Test
-	public void appendsOptionalParameterVariableForUnsetParameter() {
+	void appendsOptionalParameterVariableForUnsetParameter() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalNextPage(null)).withSelfRel();
 
@@ -299,7 +299,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #122, #169
 	 */
 	@Test
-	public void rejectsMissingPathVariable() {
+	void rejectsMissingPathVariable() {
 
 		ControllerLinkBuilder builder = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null));
 
@@ -312,7 +312,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #122, #169
 	 */
 	@Test
-	public void rejectsMissingRequiredRequestParam() {
+	void rejectsMissingRequiredRequestParam() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
 
@@ -327,7 +327,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #170
 	 */
 	@Test
-	public void usesForwardedPortFromHeader() {
+	void usesForwardedPortFromHeader() {
 
 		request.addHeader("X-Forwarded-Host", "foobarhost");
 		request.addHeader("X-Forwarded-Port", "9090");
@@ -344,7 +344,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #170
 	 */
 	@Test
-	public void usesForwardedHostFromHeaderWithDefaultPort() {
+	void usesForwardedHostFromHeaderWithDefaultPort() {
 
 		request.addHeader("X-Forwarded-Host", "foobarhost");
 		request.setServerPort(8080);
@@ -359,7 +359,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #114
 	 */
 	@Test
-	public void discoversParentClassTypeMappingForInvocation() {
+	void discoversParentClassTypeMappingForInvocation() {
 
 		Link link = linkTo(methodOn(ChildController.class).myMethod()).withSelfRel();
 		assertThat(link.getHref()).endsWith("/parent/child");
@@ -369,7 +369,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #114
 	 */
 	@Test
-	public void includesTypeMappingFromChildClass() {
+	void includesTypeMappingFromChildClass() {
 
 		Link link = linkTo(methodOn(ChildWithTypeMapping.class).myMethod()).withSelfRel();
 		assertThat(link.getHref()).endsWith("/child/parent");
@@ -379,7 +379,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #96
 	 */
 	@Test
-	public void linksToMethodWithPathVariableContainingBlank() {
+	void linksToMethodWithPathVariableContainingBlank() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
 
@@ -391,7 +391,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #192
 	 */
 	@Test
-	public void usesRootMappingOfTargetClassForMethodsOfParentClass() {
+	void usesRootMappingOfTargetClassForMethodsOfParentClass() {
 
 		Link link = linkTo(methodOn(ChildControllerWithRootMapping.class) //
 				.someEmptyMappedMethod()) //
@@ -404,7 +404,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #192
 	 */
 	@Test
-	public void usesRootMappingOfTargetClassForMethodsOfParent() throws Exception {
+	void usesRootMappingOfTargetClassForMethodsOfParent() throws Exception {
 
 		Method method = ParentControllerWithoutRootMapping.class.getMethod("someEmptyMappedMethod");
 
@@ -416,7 +416,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #257, #107
 	 */
 	@Test
-	public void usesXForwardedProtoHeaderAsLinkSchema() {
+	void usesXForwardedProtoHeaderAsLinkSchema() {
 
 		for (String proto : Arrays.asList("http", "https")) {
 
@@ -434,7 +434,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #257, #107
 	 */
 	@Test
-	public void usesProtoValueFromForwardedHeaderAsLinkSchema() {
+	void usesProtoValueFromForwardedHeaderAsLinkSchema() {
 
 		for (String proto : Arrays.asList("http", "https")) {
 
@@ -452,7 +452,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #257, #107
 	 */
 	@Test
-	public void favorsStandardForwardHeaderOverXForwardedProto() {
+	void favorsStandardForwardHeaderOverXForwardedProto() {
 
 		request.addHeader("X-Forwarded-Proto", "foo");
 		request.addHeader("Forwarded", "proto=bar");
@@ -467,7 +467,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #331
 	 */
 	@Test
-	public void linksToMethodWithRequestParamImplicitlySetToFalse() {
+	void linksToMethodWithRequestParamImplicitlySetToFalse() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
 
@@ -478,7 +478,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #398
 	 */
 	@Test
-	public void encodesRequestParameterWithSpecialValue() {
+	void encodesRequestParameterWithSpecialValue() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam("Spring#\n")).withSelfRel();
 
@@ -490,7 +490,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #169
 	 */
 	@Test
-	public void createsPartiallyExpandedLink() {
+	void createsPartiallyExpandedLink() {
 
 		Link link = linkTo(methodOn(PersonsAddressesController.class, "some id").getAddressesForCountry(null))
 				.withSelfRel();
@@ -503,7 +503,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #169
 	 */
 	@Test
-	public void addsRequestParameterVariablesForMissingRequiredParameter() {
+	void addsRequestParameterVariablesForMissingRequiredParameter() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, null)).withSelfRel();
@@ -518,7 +518,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #169
 	 */
 	@Test
-	public void addsOptionalRequestParameterTemplateForMissingValue() {
+	void addsOptionalRequestParameterTemplateForMissingValue() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
 
@@ -534,7 +534,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #509
 	 */
 	@Test
-	public void supportsTwoProxiesAddingXForwardedPort() {
+	void supportsTwoProxiesAddingXForwardedPort() {
 
 		request.addHeader("X-Forwarded-Port", "1443,8443");
 		request.addHeader("X-Forwarded-Host", "proxy1,proxy2");
@@ -548,7 +548,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #509
 	 */
 	@Test
-	public void resolvesAmbiguousXForwardedHeaders() {
+	void resolvesAmbiguousXForwardedHeaders() {
 
 		request.addHeader("X-Forwarded-Proto", "http");
 		request.addHeader("X-Forwarded-Ssl", "on");
@@ -560,7 +560,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #527
 	 */
 	@Test
-	public void createsLinkRelativeToContextRoot() {
+	void createsLinkRelativeToContextRoot() {
 
 		request.setContextPath("/ctx");
 		request.setServletPath("/foo");
@@ -573,7 +573,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #639
 	 */
 	@Test
-	public void considersEmptyOptionalMethodParameterOptional() {
+	void considersEmptyOptionalMethodParameterOptional() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithJdk8Optional(Optional.empty())).withSelfRel();
 
@@ -585,7 +585,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #639
 	 */
 	@Test
-	public void considersOptionalWithValueMethodParameterOptional() {
+	void considersOptionalWithValueMethodParameterOptional() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithJdk8Optional(Optional.of(1))).withSelfRel();
 
@@ -597,7 +597,7 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	 * @see #617
 	 */
 	@Test
-	public void alternativePathVariableParameter() {
+	void alternativePathVariableParameter() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithAlternatePathVariable("bar")).withSelfRel();
 		assertThat(link.getHref()).isEqualTo("http://localhost/something/bar/foo");

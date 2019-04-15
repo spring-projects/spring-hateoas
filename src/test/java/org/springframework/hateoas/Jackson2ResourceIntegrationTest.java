@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-public class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 
@@ -21,7 +21,7 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 	 * @throws Exception
 	 */
 	@Test
-	public void inlinesContent() throws Exception {
+	void inlinesContent() throws Exception {
 
 		Person person = new Person();
 		person.firstname = "Dave";
@@ -37,7 +37,7 @@ public class Jackson2ResourceIntegrationTest extends AbstractJackson2Marshalling
 	 * @see #27
 	 */
 	@Test
-	public void readsResourceSupportCorrectly() throws Exception {
+	void readsResourceSupportCorrectly() throws Exception {
 
 		PersonResource result = read(REFERENCE, PersonResource.class);
 

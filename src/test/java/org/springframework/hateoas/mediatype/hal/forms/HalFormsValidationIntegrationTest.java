@@ -64,19 +64,19 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HalFormsValidationIntegrationTest {
+class HalFormsValidationIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.mockMvc = webAppContextSetup(this.context).build();
 	}
 
 	@Test
-	public void singleEmployee() throws Exception {
+	void singleEmployee() throws Exception {
 
 		Exception exception = this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON))
 				.andExpect(status().is5xxServerError()) //
@@ -89,7 +89,7 @@ public class HalFormsValidationIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployees() throws Exception {
+	void collectionOfEmployees() throws Exception {
 
 		Exception exception = this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().is5xxServerError()) //

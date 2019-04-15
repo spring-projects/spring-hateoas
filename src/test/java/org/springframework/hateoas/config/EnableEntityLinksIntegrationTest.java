@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-public class EnableEntityLinksIntegrationTest {
+class EnableEntityLinksIntegrationTest {
 
 	@Configuration
 	@EnableEntityLinks
@@ -51,7 +51,7 @@ public class EnableEntityLinksIntegrationTest {
 	@Autowired DelegatingEntityLinks builder;
 
 	@Test
-	public void initializesDelegatingEntityLinks() {
+	void initializesDelegatingEntityLinks() {
 
 		assertThat(builder).isNotNull();
 		assertThat(builder.supports(Person.class)).isTrue();

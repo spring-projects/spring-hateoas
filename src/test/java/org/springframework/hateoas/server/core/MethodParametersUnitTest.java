@@ -29,10 +29,10 @@ import org.springframework.core.MethodParameter;
  *
  * @author Oliver Gierke
  */
-public class MethodParametersUnitTest {
+class MethodParametersUnitTest {
 
 	@Test
-	public void prefersAnnotatedParameterOverDiscovered() throws Exception {
+	void prefersAnnotatedParameterOverDiscovered() throws Exception {
 
 		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
 		MethodParameters parameters = new MethodParameters(method, new AnnotationAttribute(Qualifier.class));
@@ -46,7 +46,7 @@ public class MethodParametersUnitTest {
 	 * @see #138
 	 */
 	@Test
-	public void returnsParametersOfAGivenType() throws Exception {
+	void returnsParametersOfAGivenType() throws Exception {
 
 		Method method = Sample.class.getMethod("method", String.class, String.class, Object.class);
 		MethodParameters methodParameters = MethodParameters.of(method);

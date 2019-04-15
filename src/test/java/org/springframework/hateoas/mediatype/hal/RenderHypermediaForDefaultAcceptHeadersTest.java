@@ -57,14 +57,14 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class RenderHypermediaForDefaultAcceptHeadersTest {
+class RenderHypermediaForDefaultAcceptHeadersTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.mockMvc = webAppContextSetup(this.context).build();
 	}
 
@@ -74,7 +74,7 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 	 * @see #695
 	 */
 	@Test
-	public void browserBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
+	void browserBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.APPLICATION_XHTML_XML, MediaType.ALL)) //
 				.andExpect(status().isOk())
@@ -87,7 +87,7 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 	 * @see #695
 	 */
 	@Test
-	public void curlBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
+	void curlBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.ALL)) //
 				.andExpect(status().isOk())

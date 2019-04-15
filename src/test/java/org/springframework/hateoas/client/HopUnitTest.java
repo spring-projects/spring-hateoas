@@ -28,13 +28,13 @@ import org.junit.jupiter.api.Test;
  * @author Oliver Gierke
  * @soundtrack Dave Matthews Band - The Stone (Before These Crowded Streets)
  */
-public class HopUnitTest {
+class HopUnitTest {
 
 	/**
 	 * @see #346
 	 */
 	@Test
-	public void rejectsNullRelationName() {
+	void rejectsNullRelationName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			Hop.rel(null);
@@ -45,7 +45,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void rejectsEmptyRelationName() {
+	void rejectsEmptyRelationName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			Hop.rel("");
@@ -56,7 +56,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void hasNoParametersByDefault() {
+	void hasNoParametersByDefault() {
 		assertThat(Hop.rel("rel").getParameters()).isEmpty();
 	}
 
@@ -64,7 +64,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void addsParameterForSingluarWither() {
+	void addsParameterForSingluarWither() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 
@@ -76,7 +76,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void replacesParametersForWither() {
+	void replacesParametersForWither() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value").withParameters(Collections.singletonMap("foo", "bar"));
 
@@ -88,7 +88,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void mergesGlobalParameters() {
+	void mergesGlobalParameters() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 
@@ -101,7 +101,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void localParameterOverridesGlobalOnMerging() {
+	void localParameterOverridesGlobalOnMerging() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 

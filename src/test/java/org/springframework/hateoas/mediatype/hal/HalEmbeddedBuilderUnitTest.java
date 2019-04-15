@@ -37,19 +37,19 @@ import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  */
-public class HalEmbeddedBuilderUnitTest {
+class HalEmbeddedBuilderUnitTest {
 
 	LinkRelationProvider provider;
 	CurieProvider curieProvider;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		provider = new EvoInflectorLinkRelationProvider();
 		curieProvider = new DefaultCurieProvider("curie", UriTemplate.of("http://localhost/{rel}"));
 	}
 
 	@Test
-	public void rendersSingleElementsWithSingleEntityRel() {
+	void rendersSingleElementsWithSingleEntityRel() {
 
 		Map<HalLinkRelation, Object> map = setUpBuilder(CurieProvider.NONE, "foo", 1L);
 
@@ -58,7 +58,7 @@ public class HalEmbeddedBuilderUnitTest {
 	}
 
 	@Test
-	public void rendersMultipleElementsWithCollectionResourceRel() {
+	void rendersMultipleElementsWithCollectionResourceRel() {
 
 		Map<HalLinkRelation, Object> map = setUpBuilder(CurieProvider.NONE, "foo", "bar", 1L);
 
@@ -71,7 +71,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #110
 	 */
 	@Test
-	public void correctlyPilesUpResourcesInCollectionRel() {
+	void correctlyPilesUpResourcesInCollectionRel() {
 
 		Map<HalLinkRelation, Object> map = setUpBuilder(CurieProvider.NONE, "foo", "bar", "foobar", 1L);
 
@@ -84,7 +84,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #135
 	 */
 	@Test
-	public void forcesCollectionRelToBeUsedIfConfigured() {
+	void forcesCollectionRelToBeUsedIfConfigured() {
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, CurieProvider.NONE, true);
 		builder.add("Sample");
@@ -97,7 +97,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #195
 	 */
 	@Test
-	public void doesNotPreferCollectionsIfRelAwareWasAdded() {
+	void doesNotPreferCollectionsIfRelAwareWasAdded() {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
@@ -112,7 +112,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 */
 	@Test
 	@SuppressWarnings("null")
-	public void rejectsNullRelProvider() {
+	void rejectsNullRelProvider() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new HalEmbeddedBuilder(null, CurieProvider.NONE, false);
@@ -123,7 +123,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void rendersSingleElementsWithSingleEntityRelWithCurieProvider() {
+	void rendersSingleElementsWithSingleEntityRelWithCurieProvider() {
 
 		Map<HalLinkRelation, Object> map = setUpBuilder(curieProvider, "foo", 1L);
 
@@ -135,7 +135,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void rendersMultipleElementsWithCollectionResourceRelWithCurieProvider() {
+	void rendersMultipleElementsWithCollectionResourceRelWithCurieProvider() {
 
 		Map<HalLinkRelation, Object> map = setUpBuilder(curieProvider, "foo", "bar", 1L);
 
@@ -148,7 +148,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void correctlyPilesUpResourcesInCollectionRelWithCurieprovider() {
+	void correctlyPilesUpResourcesInCollectionRelWithCurieprovider() {
 
 		Map<HalLinkRelation, Object> map = setUpBuilder(curieProvider, "foo", "bar", "foobar", 1L);
 
@@ -161,7 +161,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void forcesCollectionRelToBeUsedIfConfiguredWithCurieProvider() {
+	void forcesCollectionRelToBeUsedIfConfiguredWithCurieProvider() {
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, true);
 		builder.add("Sample");
@@ -174,7 +174,7 @@ public class HalEmbeddedBuilderUnitTest {
 	 * @see #286
 	 */
 	@Test
-	public void rejectsInvalidEmbeddedWrapper() {
+	void rejectsInvalidEmbeddedWrapper() {
 
 		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, false);
 

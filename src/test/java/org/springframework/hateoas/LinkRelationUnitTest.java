@@ -28,17 +28,17 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Greg Turnquist
  */
-public class LinkRelationUnitTest {
+class LinkRelationUnitTest {
 
 	@Test
-	public void customLinkRelationShouldWork() {
+	void customLinkRelationShouldWork() {
 
 		LinkRelation linkRelation = new CustomLinkRelation("customer");
 		assertThat(linkRelation.value()).isEqualTo("customer");
 	}
 
 	@Test
-	public void customEnumBasedLinkRelationShouldWork() {
+	void customEnumBasedLinkRelationShouldWork() {
 
 		assertThat(MyOwnLinkRelation.FOO.value()).isEqualTo("foo");
 		assertThat(MyOwnLinkRelation.BAR.value()).isEqualTo("bar");
@@ -49,7 +49,7 @@ public class LinkRelationUnitTest {
 	}
 
 	@Test // #825
-	public void verifyRFC8288CaseInsensitiveMatching() {
+	void verifyRFC8288CaseInsensitiveMatching() {
 
 		assertThat(LinkRelation.of("self")).isEqualTo(LinkRelation.of("SELF"));
 		assertThat(LinkRelation.of("SeLf")).isEqualTo(IanaLinkRelations.SELF);

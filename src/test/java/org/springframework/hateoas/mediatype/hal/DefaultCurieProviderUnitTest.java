@@ -38,7 +38,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class DefaultCurieProviderUnitTest {
+class DefaultCurieProviderUnitTest {
 
 	private static final UriTemplate URI_TEMPLATE = UriTemplate.of("http://localhost:8080/rels/{rel}");
 
@@ -46,7 +46,7 @@ public class DefaultCurieProviderUnitTest {
 
 	@SuppressWarnings("null")
 	@Test
-	public void preventsNullCurieName() {
+	void preventsNullCurieName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new DefaultCurieProvider(null, URI_TEMPLATE);
@@ -54,7 +54,7 @@ public class DefaultCurieProviderUnitTest {
 	}
 
 	@Test
-	public void preventsEmptyCurieName() {
+	void preventsEmptyCurieName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new DefaultCurieProvider("", URI_TEMPLATE);
@@ -63,7 +63,7 @@ public class DefaultCurieProviderUnitTest {
 
 	@SuppressWarnings("null")
 	@Test
-	public void preventsNullUriTemplateName() {
+	void preventsNullUriTemplateName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new DefaultCurieProvider("acme", null);
@@ -71,7 +71,7 @@ public class DefaultCurieProviderUnitTest {
 	}
 
 	@Test
-	public void preventsUriTemplateWithoutVariable() {
+	void preventsUriTemplateWithoutVariable() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels"));
@@ -79,7 +79,7 @@ public class DefaultCurieProviderUnitTest {
 	}
 
 	@Test
-	public void preventsUriTemplateWithMoreThanOneVariable() {
+	void preventsUriTemplateWithMoreThanOneVariable() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels/{rel}/{another}"));
@@ -87,21 +87,21 @@ public class DefaultCurieProviderUnitTest {
 	}
 
 	@Test
-	public void doesNotPrefixIanaRels() {
+	void doesNotPrefixIanaRels() {
 
 		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com"))) //
 				.isEqualTo(HalLinkRelation.of(IanaLinkRelations.SELF));
 	}
 
 	@Test
-	public void prefixesNormalRels() {
+	void prefixesNormalRels() {
 
 		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "book"))) //
 				.isEqualTo(HalLinkRelation.curied("acme", "book"));
 	}
 
 	@Test
-	public void doesNotPrefixQualifiedRels() {
+	void doesNotPrefixQualifiedRels() {
 
 		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "custom:rel")))
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
@@ -111,7 +111,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #100
 	 */
 	@Test
-	public void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
+	void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
 
 		Link link = new Link("https://amazon.com", "custom:rel") //
 				.withHreflang("en") //
@@ -128,7 +128,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void doesNotPrefixIanaRelsForRelAsString() {
+	void doesNotPrefixIanaRelsForRelAsString() {
 
 		assertThat(provider.getNamespacedRelFor(IanaLinkRelations.SELF)) //
 				.isEqualTo(HalLinkRelation.uncuried("self"));
@@ -138,7 +138,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void prefixesNormalRelsForRelAsString() {
+	void prefixesNormalRelsForRelAsString() {
 
 		assertThat(provider.getNamespacedRelFor(LinkRelation.of("book"))) //
 				.isEqualTo(HalLinkRelation.curied("acme", "book"));
@@ -148,7 +148,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void doesNotPrefixQualifiedRelsForRelAsString() {
+	void doesNotPrefixQualifiedRelsForRelAsString() {
 
 		assertThat(provider.getNamespacedRelFor(HalLinkRelation.curied("custom", "rel")))
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
@@ -158,7 +158,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #363
 	 */
 	@Test
-	public void configuresMultipleCuriesWithoutDefaultCorrectly() {
+	void configuresMultipleCuriesWithoutDefaultCorrectly() {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries());
 
@@ -170,7 +170,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #363
 	 */
 	@Test
-	public void configuresMultipleCuriesWithDefaultCorrectly() {
+	void configuresMultipleCuriesWithDefaultCorrectly() {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries(), "foo");
 
@@ -183,7 +183,7 @@ public class DefaultCurieProviderUnitTest {
 	 * #421
 	 */
 	@Test
-	public void expandsNonAbsoluteUriWithApplicationUri() {
+	void expandsNonAbsoluteUriWithApplicationUri() {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider("name", UriTemplate.of("/docs/{rel}"));
 

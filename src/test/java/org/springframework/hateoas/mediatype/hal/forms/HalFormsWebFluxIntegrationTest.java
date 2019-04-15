@@ -46,12 +46,12 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HalFormsWebFluxIntegrationTest {
+class HalFormsWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		WebFluxEmployeeController.reset();
 	}
 
@@ -59,7 +59,7 @@ public class HalFormsWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void singleEmployee() {
+	void singleEmployee() {
 
 		this.testClient.get().uri("http://localhost/employees/0")
 				.accept(MediaTypes.HAL_FORMS_JSON)
@@ -92,7 +92,7 @@ public class HalFormsWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void collectionOfEmployees() {
+	void collectionOfEmployees() {
 
 		this.testClient.get().uri("http://localhost/employees")
 				.accept(MediaTypes.HAL_FORMS_JSON)
@@ -122,7 +122,7 @@ public class HalFormsWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
 

@@ -27,10 +27,10 @@ import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
  * 
  * @author Oliver Gierke
  */
-public class VndErrorsUnitTest {
+class VndErrorsUnitTest {
 
 	@Test
-	public void rendersToStringCorrectly() {
+	void rendersToStringCorrectly() {
 
 		VndError error = new VndErrors.VndError("logref", "message", new Link("foo", "bar"));
 		assertThat(error.toString()).isEqualTo("VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]");

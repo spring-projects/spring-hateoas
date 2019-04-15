@@ -47,14 +47,14 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class UberWebMvcIntegrationTest {
+class UberWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
 		WebMvcEmployeeController.reset();
@@ -64,7 +64,7 @@ public class UberWebMvcIntegrationTest {
 	 * @see #784
 	 */
 	@Test
-	public void singleEmployee() throws Exception {
+	void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.UBER_JSON)) //
 				.andExpect(status().isOk()) //
@@ -106,7 +106,7 @@ public class UberWebMvcIntegrationTest {
 	 * @see #784
 	 */
 	@Test
-	public void collectionOfEmployees() throws Exception {
+	void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.UBER_JSON)) //
 				.andExpect(status().isOk()) //
@@ -185,7 +185,7 @@ public class UberWebMvcIntegrationTest {
 	 * @see #784
 	 */
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String input = read(new ClassPathResource("create-employee.json", getClass()));
 

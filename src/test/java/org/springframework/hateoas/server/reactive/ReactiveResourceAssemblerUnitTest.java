@@ -39,7 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * @author Greg Turnquist
  */
-public class ReactiveResourceAssemblerUnitTest {
+class ReactiveResourceAssemblerUnitTest {
 
 	TestAssembler assembler;
 
@@ -50,7 +50,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	ServerWebExchange exchange;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.assembler = new TestAssembler();
 		this.assemblerWithCustomResources = new TestAssemblerWithCustomResources();
@@ -62,7 +62,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	 * @see #728
 	 */
 	@Test
-	public void simpleConversionShouldWork() {
+	void simpleConversionShouldWork() {
 
 		this.assembler.toModel(this.employee, this.exchange).as(StepVerifier::create)
 				.expectNextMatches(employeeResource -> {
@@ -79,7 +79,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	 * @see #728
 	 */
 	@Test
-	public void defaultResourcesConversionShouldWork() {
+	void defaultResourcesConversionShouldWork() {
 
 		this.assembler.toCollectionModel(Flux.just(this.employee), this.exchange).as(StepVerifier::create)
 				.expectNextMatches(employeeResources -> {
@@ -101,7 +101,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	 * @see #728
 	 */
 	@Test
-	public void customResourcesShouldWork() {
+	void customResourcesShouldWork() {
 
 		this.assemblerWithCustomResources.toCollectionModel(Flux.just(this.employee), this.exchange) //
 				.as(StepVerifier::create) //

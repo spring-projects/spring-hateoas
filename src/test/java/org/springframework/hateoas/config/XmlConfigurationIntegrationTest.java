@@ -29,13 +29,13 @@ import org.springframework.hateoas.server.LinkRelationProvider;
  * 
  * @author Oliver Gierke
  */
-public class XmlConfigurationIntegrationTest {
+class XmlConfigurationIntegrationTest {
 
 	/**
 	 * @see #259
 	 */
 	@Test
-	public void enablesHyperMediaSupportFromXml() {
+	void enablesHyperMediaSupportFromXml() {
 
 		ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("application-context.xml", getClass());
 

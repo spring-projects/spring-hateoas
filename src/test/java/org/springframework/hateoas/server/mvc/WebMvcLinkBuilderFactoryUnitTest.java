@@ -51,12 +51,12 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kamill Sokol
  * @author Ross Turner
  */
-public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
+class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 
 	WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 
 	@Test
-	public void createsLinkToControllerRoot() {
+	void createsLinkToControllerRoot() {
 
 		Link link = factory.linkTo(PersonControllerImpl.class).withSelfRel();
 
@@ -66,7 +66,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void createsLinkToParameterizedControllerRoot() {
+	void createsLinkToParameterizedControllerRoot() {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, 15).withSelfRel();
 
@@ -76,7 +76,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void appliesParameterValueIfContributorConfigured() {
+	void appliesParameterValueIfContributorConfigured() {
 
 		WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 		factory.setUriComponentsContributors(Collections.singletonList(new SampleUriComponentsContributor()));
@@ -93,7 +93,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #57
 	 */
 	@Test
-	public void usesDateTimeFormatForUriBinding() {
+	void usesDateTimeFormatForUriBinding() {
 
 		DateTime now = DateTime.now();
 
@@ -106,7 +106,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #96
 	 */
 	@Test
-	public void linksToMethodWithPathVariableContainingBlank() {
+	void linksToMethodWithPathVariableContainingBlank() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -117,7 +117,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #96
 	 */
 	@Test
-	public void createsLinkToParameterizedControllerRootContainingBlank() {
+	void createsLinkToParameterizedControllerRootContainingBlank() {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, "with blank").withSelfRel();
 
@@ -130,7 +130,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #209
 	 */
 	@Test
-	public void createsLinkToControllerMethodWithMapRequestParam() {
+	void createsLinkToControllerMethodWithMapRequestParam() {
 
 		Map<String, String> queryParams = new LinkedHashMap<>();
 		queryParams.put("firstKey", "firstValue");
@@ -147,7 +147,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #209
 	 */
 	@Test
-	public void createsLinkToControllerMethodWithMultiValueMapRequestParam() {
+	void createsLinkToControllerMethodWithMultiValueMapRequestParam() {
 
 		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 		queryParams.put("key1", Arrays.asList("value1a", "value1b"));
@@ -165,7 +165,7 @@ public class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	 * @see #372
 	 */
 	@Test
-	public void createsLinkToParameterizedControllerRootWithParameterMap() {
+	void createsLinkToParameterizedControllerRootWithParameterMap() {
 
 		Link link = factory.linkTo(PersonsAddressesController.class, Collections.singletonMap("id", "17")).withSelfRel();
 

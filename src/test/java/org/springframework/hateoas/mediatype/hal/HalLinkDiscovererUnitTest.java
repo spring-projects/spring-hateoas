@@ -34,7 +34,7 @@ import org.springframework.hateoas.client.LinkDiscovererUnitTest;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
+class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
 
@@ -42,7 +42,7 @@ public class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #314
 	 */
 	@Test
-	public void discoversFullyQualifiedRel() {
+	void discoversFullyQualifiedRel() {
 
 		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", getInputString())) //
 				.map(Link::getHref) //
@@ -53,7 +53,7 @@ public class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #787
 	 */
 	@Test
-	public void discoversAllTheLinkAttributes() throws IOException {
+	void discoversAllTheLinkAttributes() throws IOException {
 
 		String linkText = read(new ClassPathResource("hal-link.json", getClass()));
 
@@ -75,7 +75,7 @@ public class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #470
 	 */
 	@Test
-	public void supportsHalUtf8() {
+	void supportsHalUtf8() {
 		assertThat(getDiscoverer().supports(MediaTypes.HAL_JSON_UTF8)).isTrue();
 	}
 

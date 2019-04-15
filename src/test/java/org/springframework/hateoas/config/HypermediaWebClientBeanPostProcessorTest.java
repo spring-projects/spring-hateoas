@@ -44,13 +44,13 @@ import org.springframework.web.reactive.function.client.WebClient;
  * 
  * @author Greg Turnquist
  */
-public class HypermediaWebClientBeanPostProcessorTest {
+class HypermediaWebClientBeanPostProcessorTest {
 
 	private URI baseUri;
 	private Server server;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.server = new Server();
 
@@ -68,7 +68,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 
 		if (this.server != null) {
 			this.server.close();
@@ -79,7 +79,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	 * @see #728
 	 */
 	@Test
-	public void shouldHandleRootHalDocument() {
+	void shouldHandleRootHalDocument() {
 
 		withContext(HalConfig.class, context -> {
 
@@ -103,7 +103,7 @@ public class HypermediaWebClientBeanPostProcessorTest {
 	 * @see #728
 	 */
 	@Test
-	public void shouldHandleNavigatingToAResourceObject() {
+	void shouldHandleNavigatingToAResourceObject() {
 
 		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new EntityModelType<Actor>() {};
 

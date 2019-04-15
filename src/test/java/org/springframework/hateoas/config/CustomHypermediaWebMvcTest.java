@@ -52,18 +52,18 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class CustomHypermediaWebMvcTest {
+class CustomHypermediaWebMvcTest {
 
 	private @Autowired WebApplicationContext context;
 	private MockMvc mockMvc;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		this.mockMvc = webAppContextSetup(this.context).build();
 	}
 
 	@Test // #833
-	public void getUsingCustomMediaType() throws Exception {
+	void getUsingCustomMediaType() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
 				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString() + ";charset=UTF-8")) //

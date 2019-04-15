@@ -74,7 +74,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class MultiMediaTypeWebMvcIntegrationTest {
+class MultiMediaTypeWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
@@ -83,7 +83,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	private static Map<Integer, Employee> EMPLOYEES;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
 
@@ -94,7 +94,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void singleEmployeeCollectionJson() throws Exception {
+	void singleEmployeeCollectionJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.COLLECTION_JSON_VALUE)) //
 				.andExpect(status().isOk()) //
@@ -124,7 +124,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployeesCollectionJson() throws Exception {
+	void collectionOfEmployeesCollectionJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.COLLECTION_JSON_VALUE)) //
 				.andExpect(status().isOk()) //
@@ -159,7 +159,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void createNewEmployeeCollectionJson() throws Exception {
+	void createNewEmployeeCollectionJson() throws Exception {
 
 		String specBasedJson = MappingUtils
 				.read(new ClassPathResource("spec-part7-adjusted.json", CollectionJsonLinkDiscoverer.class));
@@ -195,7 +195,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void singleEmployeeHalForms() throws Exception {
+	void singleEmployeeHalForms() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
@@ -220,7 +220,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployeesHalForms() throws Exception {
+	void collectionOfEmployeesHalForms() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
@@ -243,7 +243,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void createNewEmployeeHalForms() throws Exception {
+	void createNewEmployeeHalForms() throws Exception {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", HalFormsLinkDiscoverer.class));
 
@@ -274,7 +274,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void singleEmployeeUber() throws Exception {
+	void singleEmployeeUber() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.UBER_JSON)) //
 				.andExpect(status().isOk()) //
@@ -312,7 +312,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployeesUber() throws Exception {
+	void collectionOfEmployeesUber() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.UBER_JSON)) //
 				.andExpect(status().isOk()) //
@@ -387,7 +387,7 @@ public class MultiMediaTypeWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void createNewEmployeeUber() throws Exception {
+	void createNewEmployeeUber() throws Exception {
 
 		String input = MappingUtils.read(new ClassPathResource("create-employee.json", UberLinkDiscoverer.class));
 

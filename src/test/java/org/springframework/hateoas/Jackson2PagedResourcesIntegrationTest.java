@@ -38,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
  * 
  * @author Oliver Gierke
  */
-public class Jackson2PagedResourcesIntegrationTest {
+class Jackson2PagedResourcesIntegrationTest {
 
 	private static String REFERENCE = "{\"links\":[],\"content\":[{\"firstname\":\"Dave\",\"lastname\":\"Matthews\"}],\"page\":{\"size\":1,\"totalElements\":2,\"totalPages\":2,\"number\":0}}";
 
@@ -56,7 +56,7 @@ public class Jackson2PagedResourcesIntegrationTest {
 	 * @see SPR-13318
 	 */
 	@Test
-	public void serializesPagedResourcesCorrectly() throws Exception {
+	void serializesPagedResourcesCorrectly() throws Exception {
 
 		assumeThat(SPRING_4_2_WRITE_METHOD).isNotNull();
 

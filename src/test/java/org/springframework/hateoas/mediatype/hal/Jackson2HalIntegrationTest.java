@@ -83,7 +83,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	MessageSource messageSource = mock(MessageSource.class);
 
 	@BeforeEach
-	public void setUpModule() {
+	void setUpModule() {
 
 		MessageSourceAccessor accessor = new MessageSourceAccessor(messageSource);
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
@@ -98,7 +98,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #29
 	 */
 	@Test
-	public void rendersSingleLinkAsObject() throws Exception {
+	void rendersSingleLinkAsObject() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
@@ -110,7 +110,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #100
 	 */
 	@Test
-	public void rendersAllExtraRFC5988Attributes() throws Exception {
+	void rendersAllExtraRFC5988Attributes() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost", "self") //
@@ -129,7 +129,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #699
 	 */
 	@Test
-	public void deserializeAllExtraRFC5988Attributes() throws Exception {
+	void deserializeAllExtraRFC5988Attributes() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost", "self") //
@@ -142,7 +142,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void rendersWithOneExtraRFC5988Attribute() throws Exception {
+	void rendersWithOneExtraRFC5988Attribute() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
@@ -154,7 +154,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #699
 	 */
 	@Test
-	public void deserializeOneExtraRFC5988Attribute() throws Exception {
+	void deserializeOneExtraRFC5988Attribute() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost", "self").withTitle("the title"));
@@ -163,7 +163,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void deserializeSingleLink() throws Exception {
+	void deserializeSingleLink() throws Exception {
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
 		assertThat(read(SINGLE_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
@@ -173,7 +173,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #29
 	 */
 	@Test
-	public void rendersMultipleLinkAsArray() throws Exception {
+	void rendersMultipleLinkAsArray() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
@@ -183,7 +183,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void deserializeMultipleLinks() throws Exception {
+	void deserializeMultipleLinks() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
@@ -193,7 +193,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void rendersSimpleResourcesAsEmbedded() throws Exception {
+	void rendersSimpleResourcesAsEmbedded() throws Exception {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
@@ -206,7 +206,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void deserializesSimpleResourcesAsEmbedded() throws Exception {
+	void deserializesSimpleResourcesAsEmbedded() throws Exception {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
@@ -223,7 +223,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void rendersSingleResourceResourcesAsEmbedded() throws Exception {
+	void rendersSingleResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
@@ -235,7 +235,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void deserializesSingleResourceResourcesAsEmbedded() throws Exception {
+	void deserializesSingleResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
@@ -252,7 +252,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
+	void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimplePojo>> resources = setupResources();
 		resources.add(new Link("localhost"));
@@ -261,7 +261,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	public void deserializesMultipleResourceResourcesAsEmbedded() throws Exception {
+	void deserializesMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimplePojo>> expected = setupResources();
 		expected.add(new Link("localhost"));
@@ -277,7 +277,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #47, #60
 	 */
 	@Test
-	public void serializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
+	void serializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
@@ -292,7 +292,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #47, #60
 	 */
 	@Test
-	public void deserializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
+	void deserializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
 		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
@@ -311,7 +311,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #63
 	 */
 	@Test
-	public void serializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
+	void serializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
 		assertThat(write(setupAnnotatedResources())).isEqualTo(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE);
 	}
 
@@ -319,7 +319,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #63
 	 */
 	@Test
-	public void deserializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
+	void deserializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE,
 				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
@@ -332,7 +332,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #63
 	 */
 	@Test
-	public void serializesPagedResource() throws Exception {
+	void serializesPagedResource() throws Exception {
 		assertThat(write(setupAnnotatedPagedResources())).isEqualTo(ANNOTATED_PAGED_RESOURCES);
 	}
 
@@ -340,7 +340,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #64
 	 */
 	@Test
-	public void deserializesPagedResource() throws Exception {
+	void deserializesPagedResource() throws Exception {
 		PagedModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(ANNOTATED_PAGED_RESOURCES,
 				mapper.getTypeFactory().constructParametricType(PagedModel.class,
 						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimpleAnnotatedPojo.class)));
@@ -352,7 +352,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #125
 	 */
 	@Test
-	public void rendersCuriesCorrectly() throws Exception {
+	void rendersCuriesCorrectly() throws Exception {
 
 		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet(), new Link("foo"),
 				new Link("bar", "myrel"));
@@ -364,7 +364,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #125
 	 */
 	@Test
-	public void doesNotRenderCuriesIfNoLinkIsPresent() throws Exception {
+	void doesNotRenderCuriesIfNoLinkIsPresent() throws Exception {
 
 		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources)).isEqualTo(EMPTY_DOCUMENT);
@@ -374,7 +374,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #125
 	 */
 	@Test
-	public void doesNotRenderCuriesIfNoCurieLinkIsPresent() throws Exception {
+	void doesNotRenderCuriesIfNoCurieLinkIsPresent() throws Exception {
 
 		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
 		resources.add(new Link("foo"));
@@ -386,7 +386,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #137
 	 */
 	@Test
-	public void rendersTemplate() throws Exception {
+	void rendersTemplate() throws Exception {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(new Link("/foo{?bar}", "search"));
@@ -398,7 +398,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #142
 	 */
 	@Test
-	public void rendersMultipleCuries() throws Exception {
+	void rendersMultipleCuries() throws Exception {
 
 		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
 		resources.add(new Link("foo", "myrel"));
@@ -418,7 +418,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #286, #236
 	 */
 	@Test
-	public void rendersEmptyEmbeddedCollections() throws Exception {
+	void rendersEmptyEmbeddedCollections() throws Exception {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
@@ -434,7 +434,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #378
 	 */
 	@Test
-	public void rendersTitleIfMessageSourceResolvesNamespacedKey() throws Exception {
+	void rendersTitleIfMessageSourceResolvesNamespacedKey() throws Exception {
 		verifyResolvedTitle("_links.ns:foobar.title");
 	}
 
@@ -442,12 +442,12 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #378
 	 */
 	@Test
-	public void rendersTitleIfMessageSourceResolvesLocalKey() throws Exception {
+	void rendersTitleIfMessageSourceResolvesLocalKey() throws Exception {
 		verifyResolvedTitle("_links.foobar.title");
 	}
 
 	@Test
-	public void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
+	void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
 		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
 				new MessageSourceAccessor(messageSource),
@@ -463,7 +463,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #667
 	 */
 	@Test
-	public void handleTemplatedLinksOnDeserialization() throws IOException {
+	void handleTemplatedLinksOnDeserialization() throws IOException {
 
 		RepresentationModel<?> original = new RepresentationModel<>();
 		original.add(new Link("/orders{?id}", "order"));
@@ -480,7 +480,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test // #811
-	public void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
+	void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
 
 		AnnotationLinkRelationProvider provider = new AnnotationLinkRelationProvider();
 		MessageSourceAccessor accessor = new MessageSourceAccessor(messageSource);
