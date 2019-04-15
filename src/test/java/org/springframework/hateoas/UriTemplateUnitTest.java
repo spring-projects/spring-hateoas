@@ -150,8 +150,9 @@ public class UriTemplateUnitTest {
 	@Test
 	public void rejectsMissingRequiredPathVariable() {
 
+		UriTemplate template = UriTemplate.of("/foo/{bar}");
+
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			UriTemplate template = UriTemplate.of("/foo/{bar}");
 			template.expand(Collections.emptyMap());
 		});
 	}

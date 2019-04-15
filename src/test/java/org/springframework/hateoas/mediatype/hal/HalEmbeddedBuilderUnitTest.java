@@ -176,8 +176,10 @@ public class HalEmbeddedBuilderUnitTest {
 	@Test
 	public void rejectsInvalidEmbeddedWrapper() {
 
+		HalEmbeddedBuilder builder = new HalEmbeddedBuilder(provider, curieProvider, false);
+
 		assertThatIllegalStateException().isThrownBy(() -> {
-			new HalEmbeddedBuilder(provider, curieProvider, false).add(mock(EmbeddedWrapper.class));
+			builder.add(mock(EmbeddedWrapper.class));
 		});
 	}
 

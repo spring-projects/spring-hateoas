@@ -301,9 +301,10 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void rejectsMissingPathVariable() {
 
+		ControllerLinkBuilder builder = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null));
+
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null))//
-					.withSelfRel().expand();
+			builder.withSelfRel().expand();
 		});
 	}
 
@@ -313,10 +314,10 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 	@Test
 	public void rejectsMissingRequiredRequestParam() {
 
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
 
-			assertThat(link.getVariableNames()).containsExactly("id");
+		assertThat(link.getVariableNames()).containsExactly("id");
+		assertThatIllegalArgumentException().isThrownBy(() -> {
 
 			link.expand();
 		});
@@ -521,7 +522,8 @@ public class ControllerLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
 
-		assertThat(link.getVariables()).containsExactly(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED));
+		assertThat(link.getVariables())
+				.containsExactly(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED));
 
 		UriComponents components = toComponents(link);
 

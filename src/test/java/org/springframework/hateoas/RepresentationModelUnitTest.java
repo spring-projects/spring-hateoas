@@ -85,8 +85,9 @@ public class RepresentationModelUnitTest {
 	@Test
 	public void preventsNullLinkBeingAdded() {
 
+		RepresentationModel<?> support = new RepresentationModel<>();
+
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			RepresentationModel<?> support = new RepresentationModel<>();
 			support.add((Link) null);
 		});
 	}
@@ -94,8 +95,9 @@ public class RepresentationModelUnitTest {
 	@Test
 	public void preventsNullLinksBeingAdded() {
 
+		RepresentationModel<?> support = new RepresentationModel<>();
+
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			RepresentationModel<?> support = new RepresentationModel<>();
 			support.add((Iterable<Link>) null);
 		});
 	}
