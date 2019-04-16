@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.server.reactive;
 
-import static org.springframework.hateoas.server.reactive.HypermediaWebFilter.*;
+import static org.springframework.web.filter.reactive.ServerWebExchangeContextFilter.*;
 
 import lombok.RequiredArgsConstructor;
 
@@ -241,7 +241,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation) {
 
 		return linkToInternal(invocation,
-				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(SERVER_WEB_EXCHANGE, null))));
+				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(EXCHANGE_CONTEXT_ATTRIBUTE, null))));
 	}
 
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> exchange) {

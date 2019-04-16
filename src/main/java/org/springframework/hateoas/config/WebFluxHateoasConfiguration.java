@@ -27,13 +27,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.hateoas.server.reactive.HypermediaWebFilter;
 import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.lang.NonNull;
 import org.springframework.util.MimeType;
+import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -67,14 +67,10 @@ class WebFluxHateoasConfiguration {
 		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
-	/**
-	 * TODO: Replace with Spring Framework filter when https://github.com/spring-projects/spring-framework/issues/21746 is
-	 * completed.
-	 */
 	@Bean
-	@Lazy // To avoid creation on a WebMVC app using WebClient only
-	HypermediaWebFilter hypermediaWebFilter() {
-		return new HypermediaWebFilter();
+	@Lazy
+	ServerWebExchangeContextFilter serverWebExchangeContextFilter() {
+		return new ServerWebExchangeContextFilter();
 	}
 
 	/**
