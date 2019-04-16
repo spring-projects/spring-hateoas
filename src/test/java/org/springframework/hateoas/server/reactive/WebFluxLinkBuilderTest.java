@@ -17,8 +17,8 @@ package org.springframework.hateoas.server.reactive;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.hateoas.server.reactive.HypermediaWebFilter.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
+import static org.springframework.web.filter.reactive.ServerWebExchangeContextFilter.*;
 
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -82,7 +82,7 @@ class WebFluxLinkBuilderTest {
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).root()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)) //
+				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
 				.as(StepVerifier::create).expectNextMatches(link -> {
 
 					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -126,7 +126,7 @@ class WebFluxLinkBuilderTest {
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).root()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)) //
+				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
 				.as(StepVerifier::create).expectNextMatches(link -> {
 
 					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -169,7 +169,7 @@ class WebFluxLinkBuilderTest {
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController.class).deep()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)) //
+				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
 				.as(StepVerifier::create).expectNextMatches(link -> {
 
 					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
@@ -191,7 +191,7 @@ class WebFluxLinkBuilderTest {
 		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
 
 		linkTo(methodOn(TestController2.class).root()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(SERVER_WEB_EXCHANGE, this.exchange)) //
+				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
 				.as(StepVerifier::create).expectNextMatches(link -> {
 
 					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);

@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 /**
+ * Verify WebFlux properly activates the {@link org.springframework.web.filter.reactive.ServerWebExchangeContextFilter}.
+ *
  * @author Greg Turnquist
  */
 class HypermediaWebFilterTest {
