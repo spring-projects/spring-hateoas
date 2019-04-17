@@ -24,9 +24,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +43,7 @@ import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 /**
  * @author Greg Turnquist
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
 public class RepresentationModelProcessorIntegrationTest {
@@ -74,7 +74,7 @@ public class RepresentationModelProcessorIntegrationTest {
 
 	private MockMvc mockMvc;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
