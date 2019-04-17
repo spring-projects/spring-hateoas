@@ -250,7 +250,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 				WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
 
 		return exchange.map(WebFluxLinkBuilder::getBuilderCreator) //
-				.map(linkTo::apply);
+				.map(linkTo);
 	}
 
 	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder exchange) {
