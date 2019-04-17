@@ -130,8 +130,12 @@ public class RepresentationModelProcessorInvoker {
 			}
 
 			if (RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD != null) {
-				ReflectionUtils.setField(RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD,
-						collectionModel, result);
+
+				ReflectionUtils.setField( //
+						RepresentationModelProcessorHandlerMethodReturnValueHandler.CONTENT_FIELD, //
+						collectionModel, //
+						result //
+				);
 			}
 		}
 

@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas.server.mvc;
 
+import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.util.ReflectionUtils.*;
 
@@ -63,8 +62,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	static final EntityModel<String> FOO = new EntityModel<>("foo");
 	static final CollectionModel<EntityModel<String>> FOOS = new CollectionModel<>(Collections.singletonList(FOO));
-	static final PagedModel<EntityModel<String>> FOO_PAGE = new PagedModel<>(Collections.singleton(FOO),
-			new PageMetadata(1, 0, 10));
+	static final PagedModel<EntityModel<String>> FOO_PAGE = new PagedModel<>(singleton(FOO), new PageMetadata(1, 0, 10));
 	static final StringResource FOO_RES = new StringResource("foo");
 	static final HttpEntity<EntityModel<String>> FOO_ENTITY = new HttpEntity<>(FOO);
 	static final ResponseEntity<EntityModel<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO, HttpStatus.OK);
@@ -281,8 +279,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	void doesNotInvokeAProcessorForASpecializedType() throws Exception {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
-		CollectionModel<Object> value = new CollectionModel<>(
-				Collections.singleton(wrappers.emptyCollectionOf(Object.class)));
+		CollectionModel<Object> value = new CollectionModel<>(singleton(wrappers.emptyCollectionOf(Object.class)));
 		CollectionModelProcessorWrapper wrapper = new CollectionModelProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));
