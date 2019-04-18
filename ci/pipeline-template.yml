@@ -340,6 +340,17 @@ jobs:
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
+    - task: test-spring-next-jdk8
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "ci,spring-next" }
+    - task: test-spring-next-jdk11
+      image: openjdk:11-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "ci,spring-next" }
+    - task: test-spring-next-jdk13
+      image: openjdk:13-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "ci,spring-next" }
   on_failure:
     aggregate:
     - put: spring-hateoas-pull-requests
