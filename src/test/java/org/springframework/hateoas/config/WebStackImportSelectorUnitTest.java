@@ -17,7 +17,7 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -28,12 +28,12 @@ import org.springframework.hateoas.support.WebStack;
  *
  * @author Oliver Drotbohm
  */
-public class WebStackImportSelectorUnitTest {
+class WebStackImportSelectorUnitTest {
 
 	WebStackImportSelector selector = new WebStackImportSelector();
 
 	@Test // #973
-	public void activatesAllWebStacksByDefault() {
+	void activatesAllWebStacksByDefault() {
 
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(DefaultHypermedia.class);
 
@@ -42,7 +42,7 @@ public class WebStackImportSelectorUnitTest {
 	}
 
 	@Test // #973
-	public void activatesWebMvcOnlyifConfigured() {
+	void activatesWebMvcOnlyifConfigured() {
 
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(WebMvcHypermedia.class);
 
@@ -50,7 +50,7 @@ public class WebStackImportSelectorUnitTest {
 	}
 
 	@Test // #973
-	public void activatesWebFluxOnlyIfConfigured() {
+	void activatesWebFluxOnlyIfConfigured() {
 
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(WebFluxHypermedia.class);
 
@@ -58,7 +58,7 @@ public class WebStackImportSelectorUnitTest {
 	}
 
 	@Test // #973
-	public void rejectsNoStacksSelected() {
+	void rejectsNoStacksSelected() {
 
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(NoStacksHypermedia.class);
 

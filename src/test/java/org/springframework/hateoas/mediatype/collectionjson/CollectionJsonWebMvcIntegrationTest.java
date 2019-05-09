@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +48,7 @@ import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,24 +65,24 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 /**
  * @author Greg Turnquist
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class CollectionJsonWebMvcIntegrationTest {
+class CollectionJsonWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
 		WebMvcEmployeeController.reset();
 	}
 
 	@Test
-	public void singleEmployee() throws Exception {
+	void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0") //
 				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
@@ -113,7 +113,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void collectionOfEmployees() throws Exception {
+	void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees") //
 				.accept(MediaTypes.COLLECTION_JSON_VALUE)) //
@@ -149,7 +149,7 @@ public class CollectionJsonWebMvcIntegrationTest {
 	}
 
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 

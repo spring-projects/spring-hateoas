@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
@@ -35,7 +35,7 @@ import org.springframework.hateoas.Links;
 public abstract class LinkDiscovererUnitTest {
 
 	@Test
-	public void findsSingleLink() {
+	void findsSingleLink() {
 
 		assertThat(getDiscoverer().findLinkWithRel("self", getInputString())) //
 				.hasValue(new Link("selfHref"));
@@ -47,14 +47,14 @@ public abstract class LinkDiscovererUnitTest {
 	}
 
 	@Test
-	public void findsFirstLink() {
+	void findsFirstLink() {
 
 		assertThat(getDiscoverer().findLinkWithRel("relation", getInputString()))
 				.hasValue(new Link("firstHref", "relation"));
 	}
 
 	@Test
-	public void findsAllLinks() {
+	void findsAllLinks() {
 
 		Links links = getDiscoverer().findLinksWithRel("relation", getInputString());
 
@@ -63,26 +63,26 @@ public abstract class LinkDiscovererUnitTest {
 	}
 
 	@Test
-	public void returnsForInexistingLink() {
+	void returnsForInexistingLink() {
 		assertThat(getDiscoverer().findLinkWithRel("something", getInputString())).isEmpty();
 	}
 
 	@Test
-	public void returnsForInexistingLinkFromInputStream() throws Exception {
+	void returnsForInexistingLinkFromInputStream() throws Exception {
 
 		InputStream inputStream = new ByteArrayInputStream(getInputString().getBytes("UTF-8"));
 		assertThat(getDiscoverer().findLinkWithRel("something", inputStream)).isEmpty();
 	}
 
 	@Test
-	public void returnsNullForNonExistingLinkContainer() {
+	void returnsNullForNonExistingLinkContainer() {
 
 		assertThat(getDiscoverer().findLinksWithRel("something", getInputStringWithoutLinkContainer())).isEmpty();
 		assertThat(getDiscoverer().findLinkWithRel("something", getInputStringWithoutLinkContainer())).isEmpty();
 	}
 
 	@Test // #840
-	public void throwsExceptionForRequiredLinkNotFoundInString() {
+	void throwsExceptionForRequiredLinkNotFoundInString() {
 
 		LinkDiscoverer discoverer = getDiscoverer();
 
@@ -91,7 +91,7 @@ public abstract class LinkDiscovererUnitTest {
 	}
 
 	@Test // #840
-	public void throwsExceptionForRequiredLinkNotFoundInInputStream() throws IOException {
+	void throwsExceptionForRequiredLinkNotFoundInInputStream() throws IOException {
 
 		LinkDiscoverer discoverer = getDiscoverer();
 

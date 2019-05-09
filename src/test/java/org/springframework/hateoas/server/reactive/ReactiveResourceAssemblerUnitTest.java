@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -28,8 +29,8 @@ import reactor.test.StepVerifier;
 import java.util.Collection;
 
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -38,7 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * @author Greg Turnquist
  */
-public class ReactiveResourceAssemblerUnitTest {
+class ReactiveResourceAssemblerUnitTest {
 
 	TestAssembler assembler;
 
@@ -48,8 +49,8 @@ public class ReactiveResourceAssemblerUnitTest {
 
 	ServerWebExchange exchange;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		this.assembler = new TestAssembler();
 		this.assemblerWithCustomResources = new TestAssemblerWithCustomResources();
@@ -61,7 +62,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	 * @see #728
 	 */
 	@Test
-	public void simpleConversionShouldWork() {
+	void simpleConversionShouldWork() {
 
 		this.assembler.toModel(this.employee, this.exchange).as(StepVerifier::create)
 				.expectNextMatches(employeeResource -> {
@@ -78,7 +79,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	 * @see #728
 	 */
 	@Test
-	public void defaultResourcesConversionShouldWork() {
+	void defaultResourcesConversionShouldWork() {
 
 		this.assembler.toCollectionModel(Flux.just(this.employee), this.exchange).as(StepVerifier::create)
 				.expectNextMatches(employeeResources -> {
@@ -100,7 +101,7 @@ public class ReactiveResourceAssemblerUnitTest {
 	 * @see #728
 	 */
 	@Test
-	public void customResourcesShouldWork() {
+	void customResourcesShouldWork() {
 
 		this.assemblerWithCustomResources.toCollectionModel(Flux.just(this.employee), this.exchange) //
 				.as(StepVerifier::create) //

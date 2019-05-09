@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link Hop}.
@@ -28,29 +28,35 @@ import org.junit.Test;
  * @author Oliver Gierke
  * @soundtrack Dave Matthews Band - The Stone (Before These Crowded Streets)
  */
-public class HopUnitTest {
+class HopUnitTest {
 
 	/**
 	 * @see #346
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullRelationName() {
-		Hop.rel(null);
-	}
+	@Test
+	void rejectsNullRelationName() {
 
-	/**
-	 * @see #346
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsEmptyRelationName() {
-		Hop.rel("");
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Hop.rel(null);
+		});
 	}
 
 	/**
 	 * @see #346
 	 */
 	@Test
-	public void hasNoParametersByDefault() {
+	void rejectsEmptyRelationName() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Hop.rel("");
+		});
+	}
+
+	/**
+	 * @see #346
+	 */
+	@Test
+	void hasNoParametersByDefault() {
 		assertThat(Hop.rel("rel").getParameters()).isEmpty();
 	}
 
@@ -58,7 +64,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void addsParameterForSingluarWither() {
+	void addsParameterForSingluarWither() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 
@@ -70,7 +76,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void replacesParametersForWither() {
+	void replacesParametersForWither() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value").withParameters(Collections.singletonMap("foo", "bar"));
 
@@ -82,7 +88,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void mergesGlobalParameters() {
+	void mergesGlobalParameters() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 
@@ -95,7 +101,7 @@ public class HopUnitTest {
 	 * @see #346
 	 */
 	@Test
-	public void localParameterOverridesGlobalOnMerging() {
+	void localParameterOverridesGlobalOnMerging() {
 
 		Hop hop = Hop.rel("rel").withParameter("key", "value");
 

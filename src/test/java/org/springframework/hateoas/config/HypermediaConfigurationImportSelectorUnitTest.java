@@ -21,7 +21,7 @@ import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
@@ -33,10 +33,10 @@ import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
  *
  * @author Greg Turnquist
  */
-public class HypermediaConfigurationImportSelectorUnitTest {
+class HypermediaConfigurationImportSelectorUnitTest {
 
 	@Test // #833
-	public void testHalImportConfiguration() {
+	void testHalImportConfiguration() {
 
 		withContext(HalConfig.class, context -> {
 
@@ -48,7 +48,7 @@ public class HypermediaConfigurationImportSelectorUnitTest {
 	}
 
 	@Test // #833
-	public void testHalFormsImportConfiguration() {
+	void testHalFormsImportConfiguration() {
 
 		withContext(HalFormsConfig.class, context -> {
 
@@ -60,7 +60,7 @@ public class HypermediaConfigurationImportSelectorUnitTest {
 	}
 
 	@Test // #833
-	public void testHalAndHalFormsImportConfigurations() {
+	void testHalAndHalFormsImportConfigurations() {
 
 		withContext(HalAndHalFormsConfig.class, context -> {
 
@@ -74,7 +74,7 @@ public class HypermediaConfigurationImportSelectorUnitTest {
 	}
 
 	@Test // #833
-	public void testAllImportConfigurations() {
+	void testAllImportConfigurations() {
 
 		withContext(AllConfig.class, context -> {
 

@@ -17,14 +17,14 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Integration tests for {@link org.springframework.hateoas.RepresentationModel}.
  *
  * @author Oliver Gierke
  */
-public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 
@@ -32,7 +32,7 @@ public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Mars
 	 * @see #27
 	 */
 	@Test
-	public void doesNotRenderId() throws Exception {
+	void doesNotRenderId() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
@@ -44,7 +44,7 @@ public class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Mars
 	 * @see #27
 	 */
 	@Test
-	public void readResourceSupportCorrectly() throws Exception {
+	void readResourceSupportCorrectly() throws Exception {
 
 		RepresentationModel<?> result = read(REFERENCE, RepresentationModel.class);
 

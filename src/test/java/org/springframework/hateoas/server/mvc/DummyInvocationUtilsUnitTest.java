@@ -18,7 +18,7 @@ package org.springframework.hateoas.server.mvc;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * @author Oliver Gierke
  */
-public class DummyInvocationUtilsUnitTest extends TestUtils {
+class DummyInvocationUtilsUnitTest extends TestUtils {
 
 	@Test
-	public void pathVariableWithDefaultParameter() {
+	void pathVariableWithDefaultParameter() {
 
 		Link link = linkTo(methodOn(SampleController.class).someMethod(1L)).withSelfRel();
 
@@ -41,7 +41,7 @@ public class DummyInvocationUtilsUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void pathVariableWithNameParameter() {
+	void pathVariableWithNameParameter() {
 
 		Link link = linkTo(methodOn(SampleController.class).someOtherMethod(2L)).withSelfRel();
 

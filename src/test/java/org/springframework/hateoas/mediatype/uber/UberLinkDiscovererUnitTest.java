@@ -20,26 +20,25 @@ import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.client.LinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
-import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
 
 /**
  * Unit tests for {@link HalLinkDiscoverer}.
  *
  * @author Oliver Gierke
  */
-public class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
+class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new UberLinkDiscoverer();
 	String sample;
 
-	@Before
-	public void setUp() throws IOException {
+	@BeforeEach
+	void setUp() throws IOException {
 
 		this.discoverer = new UberLinkDiscoverer();
 		this.sample = read(new ClassPathResource("link-discovery.json", getClass()));
@@ -49,7 +48,7 @@ public class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #784
 	 */
 	@Test
-	public void discoversFullyQualifiedRel() {
+	void discoversFullyQualifiedRel() {
 		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", this.sample)).isNotNull();
 	}
 

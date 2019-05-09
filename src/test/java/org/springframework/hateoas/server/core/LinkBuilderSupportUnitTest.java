@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -31,17 +31,17 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Kamill Sokol
  */
-public class LinkBuilderSupportUnitTest extends TestUtils {
+class LinkBuilderSupportUnitTest extends TestUtils {
 
 	@Test
-	public void callingSlashWithEmptyStringIsNoOp() {
+	void callingSlashWithEmptyStringIsNoOp() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 		assertThat(builder.slash("")).isEqualTo(builder);
 	}
 
 	@Test
-	public void appendsFragmentCorrectly() {
+	void appendsFragmentCorrectly() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 		builder = builder.slash("foo#bar");
@@ -60,7 +60,7 @@ public class LinkBuilderSupportUnitTest extends TestUtils {
 	 * @see #582
 	 */
 	@Test
-	public void appendsPathContainingColonsCorrectly() {
+	void appendsPathContainingColonsCorrectly() {
 
 		SampleLinkBuilder builder = new SampleLinkBuilder(UriComponentsBuilder.newInstance(), Collections.emptyList());
 

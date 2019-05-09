@@ -24,9 +24,9 @@ import lombok.Data;
 
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,13 +35,12 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.server.core.TypeReferences;
 import org.springframework.hateoas.server.core.TypeReferences.CollectionModelType;
 import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,9 +50,9 @@ import org.springframework.web.client.RestTemplate;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
-public class TypeReferencesIntegrationTest {
+class TypeReferencesIntegrationTest {
 
 	private static final String HAL_USER = "\"firstname\" : \"Dave\", \"lastname\" : \"Matthews\"";
 
@@ -88,8 +87,8 @@ public class TypeReferencesIntegrationTest {
 	@Autowired RestTemplate template;
 	MockRestServiceServer server;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		this.server = createServer(template);
 	}
 
@@ -97,7 +96,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourceTypeReferenceWithHal() {
+	void usesResourceTypeReferenceWithHal() {
 
 		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE_HAL, MediaTypes.HAL_JSON));
 
@@ -111,7 +110,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #482
 	 */
 	@Test
-	public void usesResourceTypeReferenceWithCollectionJson() {
+	void usesResourceTypeReferenceWithCollectionJson() {
 
 		server.expect(requestTo("/resource")).andRespond(withSuccess(RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
 
@@ -125,7 +124,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesTypeReferenceWithHal() {
+	void usesResourcesTypeReferenceWithHal() {
 
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_USER_HAL, MediaTypes.HAL_JSON));
 
@@ -145,7 +144,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #482
 	 */
 	@Test
-	public void usesResourcesTypeReferenceWithCollectionJson() {
+	void usesResourcesTypeReferenceWithCollectionJson() {
 
 		server.expect(requestTo("/resources"))
 				.andRespond(withSuccess(RESOURCES_OF_USER_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
@@ -166,7 +165,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #306
 	 */
 	@Test
-	public void usesResourcesOfResourceTypeReferenceWithHal() {
+	void usesResourcesOfResourceTypeReferenceWithHal() {
 
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE_HAL, MediaTypes.HAL_JSON));
 
@@ -186,7 +185,7 @@ public class TypeReferencesIntegrationTest {
 	 * @see #482
 	 */
 	@Test
-	public void usesResourcesOfResourceTypeReferenceWithCollectionJson() {
+	void usesResourcesOfResourceTypeReferenceWithCollectionJson() {
 
 		server.expect(requestTo("/resources"))
 				.andRespond(withSuccess(RESOURCES_OF_RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));

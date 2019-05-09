@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas.server.mvc;
 
+import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.util.ReflectionUtils.*;
 
@@ -29,25 +28,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
-import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
-import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.ResourcesProcessorWrapper;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.CollectionModelProcessorWrapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,24 +57,21 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	static final EntityModel<String> FOO = new EntityModel<>("foo");
 	static final CollectionModel<EntityModel<String>> FOOS = new CollectionModel<>(Collections.singletonList(FOO));
-	static final PagedModel<EntityModel<String>> FOO_PAGE = new PagedModel<>(
-		Collections.singleton(FOO), new PageMetadata(1, 0, 10));
+	static final PagedModel<EntityModel<String>> FOO_PAGE = new PagedModel<>(singleton(FOO), new PageMetadata(1, 0, 10));
 	static final StringResource FOO_RES = new StringResource("foo");
 	static final HttpEntity<EntityModel<String>> FOO_ENTITY = new HttpEntity<>(FOO);
-	static final ResponseEntity<EntityModel<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO,
-		HttpStatus.OK);
+	static final ResponseEntity<EntityModel<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO, HttpStatus.OK);
 	static final HttpEntity<StringResource> FOO_RES_ENTITY = new HttpEntity<>(FOO_RES);
 	static final EntityModel<String> BAR = new EntityModel<>("bar");
 	static final CollectionModel<EntityModel<String>> BARS = new CollectionModel<>(Collections.singletonList(BAR));
 	static final StringResource BAR_RES = new StringResource("bar");
 	static final HttpEntity<EntityModel<String>> BAR_ENTITY = new HttpEntity<>(BAR);
-	static final ResponseEntity<EntityModel<String>> BAR_RESP_ENTITY = new ResponseEntity<>(BAR,
-		HttpStatus.OK);
+	static final ResponseEntity<EntityModel<String>> BAR_RESP_ENTITY = new ResponseEntity<>(BAR, HttpStatus.OK);
 	static final HttpEntity<StringResource> BAR_RES_ENTITY = new HttpEntity<>(BAR_RES);
 	static final EntityModel<Long> LONG_10 = new EntityModel<>(10L);
 	static final EntityModel<Long> LONG_20 = new EntityModel<>(20L);
@@ -95,8 +90,8 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	@Mock HandlerMethodReturnValueHandler delegate;
 	List<RepresentationModelProcessor<?>> resourceProcessors;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		resourceProcessors = new ArrayList<>();
 	}
 
@@ -104,7 +99,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void supportsIfDelegateSupports() {
+	void supportsIfDelegateSupports() {
 		assertSupport(true);
 	}
 
@@ -112,7 +107,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void doesNotSupportIfDelegateDoesNot() {
+	void doesNotSupportIfDelegateDoesNot() {
 		assertSupport(false);
 	}
 
@@ -120,7 +115,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesStringResource() throws Exception {
+	void postProcessesStringResource() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -132,7 +127,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesStringResourceInResponseEntity() throws Exception {
+	void postProcessesStringResourceInResponseEntity() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -144,7 +139,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesStringResourceInWildcardResponseEntity() throws Exception {
+	void postProcessesStringResourceInWildcardResponseEntity() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -156,7 +151,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesStringResources() throws Exception {
+	void postProcessesStringResources() throws Exception {
 
 		resourceProcessors.add(StringResourcesProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -168,7 +163,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesSpecializedStringResource() throws Exception {
+	void postProcessesSpecializedStringResource() throws Exception {
 
 		resourceProcessors.add(SpecializedStringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -180,7 +175,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesSpecializedStringUsingStringResourceProcessor() throws Exception {
+	void postProcessesSpecializedStringUsingStringResourceProcessor() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -192,7 +187,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesLongResource() throws Exception {
+	void postProcessesLongResource() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -204,7 +199,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesSpecializedLongResource() throws Exception {
+	void postProcessesSpecializedLongResource() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(SpecializedLongResourceProcessor.INSTANCE);
@@ -216,7 +211,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void doesNotPostProcesseLongResourceWithSpecializedLongResourceProcessor() throws Exception {
+	void doesNotPostProcesseLongResourceWithSpecializedLongResourceProcessor() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(SpecializedLongResourceProcessor.INSTANCE);
@@ -228,7 +223,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void postProcessesSpecializedLongResourceUsingLongResourceProcessor() throws Exception {
+	void postProcessesSpecializedLongResourceUsingLongResourceProcessor() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 		resourceProcessors.add(LongResourceProcessor.INSTANCE);
@@ -240,7 +235,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void usesHeaderLinksResponseEntityForResourceIfConfigured() throws Exception {
+	void usesHeaderLinksResponseEntityForResourceIfConfigured() throws Exception {
 		usesHeaderLinksResponseEntityIfConfigured(Function.identity());
 	}
 
@@ -248,7 +243,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void usesHeaderLinksResponseEntityIfConfigured() throws Exception {
+	void usesHeaderLinksResponseEntityIfConfigured() throws Exception {
 		usesHeaderLinksResponseEntityIfConfigured(ResponseEntity::ok);
 	}
 
@@ -270,23 +265,22 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void resourcesProcessorMatchesValueSubTypes() {
+	void resourcesProcessorMatchesValueSubTypes() {
 
 		ResolvableType type = ResolvableType.forClass(PagedStringResources.class);
 
-		assertThat(ResourcesProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
+		assertThat(CollectionModelProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
 	}
 
 	/**
 	 * @see #362
 	 */
 	@Test
-	public void doesNotInvokeAProcessorForASpecializedType() throws Exception {
+	void doesNotInvokeAProcessorForASpecializedType() throws Exception {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
-		CollectionModel<Object> value = new CollectionModel<>(
-			Collections.singleton(wrappers.emptyCollectionOf(Object.class)));
-		ResourcesProcessorWrapper wrapper = new ResourcesProcessorWrapper(new SpecialResourcesProcessor());
+		CollectionModel<Object> value = new CollectionModel<>(singleton(wrappers.emptyCollectionOf(Object.class)));
+		CollectionModelProcessorWrapper wrapper = new CollectionModelProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));
 
@@ -297,21 +291,22 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	 * @see #362
 	 */
 	@Test
-	public void registersProcessorForProxyType() {
+	void registersProcessorForProxyType() {
 
 		ProjectionProcessor processor = new ProjectionProcessor();
 		ProxyFactory factory = new ProxyFactory(processor);
 
 		resourceProcessors.add((RepresentationModelProcessor<?>) factory.getProxy());
 
-		new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate, new RepresentationModelProcessorInvoker(resourceProcessors));
+		new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate,
+				new RepresentationModelProcessorInvoker(resourceProcessors));
 	}
 
 	/**
 	 * @see #486
 	 */
 	@Test
-	public void processesElementsForWildcardedResources() throws Exception {
+	void processesElementsForWildcardedResources() throws Exception {
 
 		resourceProcessors.add(StringResourceProcessor.INSTANCE);
 
@@ -348,7 +343,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public EntityModel<String> process(EntityModel<String> resource) {
+		public EntityModel<String> process(EntityModel<String> model) {
 			return BAR;
 		}
 	}
@@ -357,7 +352,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public EntityModel<Long> process(EntityModel<Long> resource) {
+		public EntityModel<Long> process(EntityModel<Long> model) {
 			return LONG_20;
 		}
 	}
@@ -366,7 +361,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public CollectionModel<EntityModel<String>> process(CollectionModel<EntityModel<String>> resource) {
+		public CollectionModel<EntityModel<String>> process(CollectionModel<EntityModel<String>> model) {
 			return BARS;
 		}
 	}
@@ -375,7 +370,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public StringResource process(StringResource resource) {
+		public StringResource process(StringResource model) {
 			return BAR_RES;
 		}
 	}
@@ -384,7 +379,7 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		INSTANCE;
 
 		@Override
-		public LongResource process(LongResource resource) {
+		public LongResource process(LongResource model) {
 			return LONG_20_RES;
 		}
 	}
@@ -451,9 +446,9 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		boolean invoked = false;
 
 		@Override
-		public EntityModel<SampleProjection> process(EntityModel<SampleProjection> resource) {
+		public EntityModel<SampleProjection> process(EntityModel<SampleProjection> model) {
 			this.invoked = true;
-			return resource;
+			return model;
 		}
 	}
 
@@ -468,9 +463,9 @@ public class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		boolean invoked = false;
 
 		@Override
-		public SpecialResources process(SpecialResources resource) {
+		public SpecialResources process(SpecialResources model) {
 			this.invoked = true;
-			return resource;
+			return model;
 		}
 	}
 }

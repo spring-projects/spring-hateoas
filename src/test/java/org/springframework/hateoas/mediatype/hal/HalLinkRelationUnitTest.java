@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation.HalLinkRelationBuilder;
@@ -27,10 +27,10 @@ import org.springframework.hateoas.mediatype.hal.HalLinkRelation.HalLinkRelation
  *
  * @author Oliver Drotbohm
  */
-public class HalLinkRelationUnitTest {
+class HalLinkRelationUnitTest {
 
 	@Test // #841
-	public void createsCuriedLinkRelation() {
+	void createsCuriedLinkRelation() {
 
 		HalLinkRelation relation = HalLinkRelation.curied("curie", "relation");
 
@@ -39,7 +39,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // #841
-	public void curieBuilderCreatesLinkRelations() {
+	void curieBuilderCreatesLinkRelations() {
 
 		HalLinkRelationBuilder builder = HalLinkRelation.curieBuilder("curie");
 
@@ -47,7 +47,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // #841
-	public void parsesCuriedLinkRelation() {
+	void parsesCuriedLinkRelation() {
 
 		HalLinkRelation relation = HalLinkRelation.of(LinkRelation.of("already:curied"));
 
@@ -56,7 +56,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // #841
-	public void parsesUncuriedLinkRelation() {
+	void parsesUncuriedLinkRelation() {
 
 		HalLinkRelation relation = HalLinkRelation.of(LinkRelation.of("uncuried"));
 
@@ -65,7 +65,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // 841
-	public void returnsHalLinkRelationOnCreation() {
+	void returnsHalLinkRelationOnCreation() {
 
 		HalLinkRelation relation = HalLinkRelation.curied("curie", "relation");
 
@@ -73,7 +73,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // 841
-	public void curiesLinkRelation() {
+	void curiesLinkRelation() {
 
 		HalLinkRelation relation = HalLinkRelation.of(LinkRelation.of("relation"));
 
@@ -84,7 +84,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // 841
-	public void skipsCurieIfAlreadyCuried() {
+	void skipsCurieIfAlreadyCuried() {
 
 		HalLinkRelation relation = HalLinkRelation.curied("curie", "relation");
 
@@ -92,7 +92,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // #841
-	public void skipsCurieForIanaLinkRelation() {
+	void skipsCurieForIanaLinkRelation() {
 
 		HalLinkRelation relation = HalLinkRelation.of(IanaLinkRelations.SELF).curieIfUncuried("curie");
 
@@ -100,7 +100,7 @@ public class HalLinkRelationUnitTest {
 	}
 
 	@Test // #841
-	public void exposesValueAndLocalPartAsMessageCode() {
+	void exposesValueAndLocalPartAsMessageCode() {
 
 		HalLinkRelation relation = HalLinkRelation.curied("curie", "relation");
 

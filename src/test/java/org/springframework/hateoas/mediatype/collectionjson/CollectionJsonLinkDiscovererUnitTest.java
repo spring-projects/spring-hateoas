@@ -20,12 +20,11 @@ import static org.assertj.core.api.Assertions.*;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.support.MappingUtils;
 
 /**
@@ -34,17 +33,17 @@ import org.springframework.hateoas.support.MappingUtils;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public class CollectionJsonLinkDiscovererUnitTest {
+class CollectionJsonLinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		this.discoverer = new CollectionJsonLinkDiscoverer();
 	}
 
 	@Test
-	public void spec1Links() throws IOException {
+	void spec1Links() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
 
@@ -56,7 +55,7 @@ public class CollectionJsonLinkDiscovererUnitTest {
 	}
 
 	@Test
-	public void spec2Links() throws IOException {
+	void spec2Links() throws IOException {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
 

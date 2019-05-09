@@ -22,8 +22,8 @@ import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,12 +42,12 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 /**
  * @author Greg Turnquist
  */
-public class HypermediaWebFilterTest {
+class HypermediaWebFilterTest {
 
 	WebTestClient testClient;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(WebFluxConfig.class);
@@ -63,7 +63,7 @@ public class HypermediaWebFilterTest {
 	 * @see #728
 	 */
 	@Test
-	public void webFilterShouldEmbedExchangeIntoContext() {
+	void webFilterShouldEmbedExchangeIntoContext() {
 
 		this.testClient.get().uri("https://example.com/api") //
 				.accept(MediaTypes.HAL_JSON) //

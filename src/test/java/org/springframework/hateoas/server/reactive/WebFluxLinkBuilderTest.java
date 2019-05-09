@@ -25,12 +25,11 @@ import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -45,8 +44,8 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@RunWith(MockitoJUnitRunner.class)
-public class WebFluxLinkBuilderTest {
+@ExtendWith(MockitoExtension.class)
+class WebFluxLinkBuilderTest {
 
 	@Mock ServerWebExchange exchange;
 	@Mock ServerHttpRequest request;
@@ -55,7 +54,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkAtSameLevelAsExplicitServerExchangeShouldWork() {
+	void linkAtSameLevelAsExplicitServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
@@ -76,7 +75,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkAtSameLevelAsContextProvidedServerExchangeShouldWork() {
+	void linkAtSameLevelAsContextProvidedServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
@@ -97,7 +96,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void shallowLinkFromDeepExplicitServerExchangeShouldWork() {
+	void shallowLinkFromDeepExplicitServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 
@@ -120,7 +119,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void shallowLinkFromDeepContextProvidedServerExchangeShouldWork() {
+	void shallowLinkFromDeepContextProvidedServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api/employees"));
@@ -142,7 +141,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void deepLinkFromShallowExplicitServerExchangeShouldWork() {
+	void deepLinkFromShallowExplicitServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
@@ -163,7 +162,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void deepLinkFromShallowContextProvidedServerExchangeShouldWork() {
+	void deepLinkFromShallowContextProvidedServerExchangeShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
@@ -185,7 +184,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkToRouteWithNoMappingShouldWork() {
+	void linkToRouteWithNoMappingShouldWork() {
 
 		when(this.exchange.getRequest()).thenReturn(this.request);
 		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/"));
@@ -207,7 +206,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() {
+	void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() {
 
 		linkTo(methodOn(TestController2.class).root()).withSelfRel().toMono() //
 				.as(StepVerifier::create).expectNextMatches(link -> {
@@ -224,7 +223,7 @@ public class WebFluxLinkBuilderTest {
 	 * @see #728
 	 */
 	@Test
-	public void linkToRouteWithExplictExchangeBeingNullShouldFallbackToRelativeUris() {
+	void linkToRouteWithExplictExchangeBeingNullShouldFallbackToRelativeUris() {
 
 		linkTo(methodOn(TestController2.class).root(), null).withSelfRel().toMono() //
 				.as(StepVerifier::create).expectNextMatches(link -> {

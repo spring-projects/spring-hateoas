@@ -22,9 +22,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -44,17 +44,17 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 /**
  * @author Greg Turnquist
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class UberWebMvcIntegrationTest {
+class UberWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		this.mockMvc = webAppContextSetup(this.context).build();
 		WebMvcEmployeeController.reset();
@@ -64,7 +64,7 @@ public class UberWebMvcIntegrationTest {
 	 * @see #784
 	 */
 	@Test
-	public void singleEmployee() throws Exception {
+	void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.UBER_JSON)) //
 				.andExpect(status().isOk()) //
@@ -106,7 +106,7 @@ public class UberWebMvcIntegrationTest {
 	 * @see #784
 	 */
 	@Test
-	public void collectionOfEmployees() throws Exception {
+	void collectionOfEmployees() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaTypes.UBER_JSON)) //
 				.andExpect(status().isOk()) //
@@ -185,7 +185,7 @@ public class UberWebMvcIntegrationTest {
 	 * @see #784
 	 */
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String input = read(new ClassPathResource("create-employee.json", getClass()));
 

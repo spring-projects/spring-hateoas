@@ -23,9 +23,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,7 @@ import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,21 +49,21 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  *
  * @author Greg Turnquist
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class CustomHypermediaWebMvcTest {
+class CustomHypermediaWebMvcTest {
 
 	private @Autowired WebApplicationContext context;
 	private MockMvc mockMvc;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		this.mockMvc = webAppContextSetup(this.context).build();
 	}
 
 	@Test // #833
-	public void getUsingCustomMediaType() throws Exception {
+	void getUsingCustomMediaType() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
 				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString() + ";charset=UTF-8")) //

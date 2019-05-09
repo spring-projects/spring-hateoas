@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,31 +70,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-@RunWith(MockitoJUnitRunner.class)
-public class EnableHypermediaSupportIntegrationTest {
+@ExtendWith(MockitoExtension.class)
+class EnableHypermediaSupportIntegrationTest {
 
 	@Test
-	public void bootstrapHalConfiguration() {
+	void bootstrapHalConfiguration() {
 		assertHalSetupForConfigClass(HalConfig.class);
 	}
 
 	@Test
-	public void bootstrapHalFormsConfiguration() {
+	void bootstrapHalFormsConfiguration() {
 		assertHalFormsSetupForConfigClass(HalFormsConfig.class);
 	}
 
 	@Test
-	public void bootstrapJsonCollectionConfiguration() {
+	void bootstrapJsonCollectionConfiguration() {
 		assertCollectionJsonSetupForConfigClass(CollectionJsonConfig.class);
 	}
 
 	@Test
-	public void bootstrapUberConfiguration() {
+	void bootstrapUberConfiguration() {
 		assertUberSetupForConfigClass(UberConfig.class);
 	}
 
 	@Test
-	public void registersHalLinkDiscoverers() {
+	void registersHalLinkDiscoverers() {
 
 		withServletContext(HalConfig.class, context -> {
 
@@ -110,7 +110,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test // #833
-	public void registersHalFormsLinkDiscoverers() {
+	void registersHalFormsLinkDiscoverers() {
 
 		withServletContext(HalFormsConfig.class, context -> {
 
@@ -124,7 +124,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test // #833
-	public void registersHalAndHalFormsLinkDiscoverers() {
+	void registersHalAndHalFormsLinkDiscoverers() {
 
 		withServletContext(HalAndHalFormsConfig.class, context -> {
 
@@ -144,7 +144,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void registersCollectionJsonLinkDiscoverers() {
+	void registersCollectionJsonLinkDiscoverers() {
 
 		withServletContext(CollectionJsonConfig.class, context -> {
 
@@ -158,7 +158,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void registersUberLinkDiscoverers() {
+	void registersUberLinkDiscoverers() {
 
 		withServletContext(UberConfig.class, context -> {
 
@@ -172,22 +172,22 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void bootstrapsHalConfigurationForSubclass() {
+	void bootstrapsHalConfigurationForSubclass() {
 		assertHalSetupForConfigClass(ExtendedHalConfig.class);
 	}
 
 	@Test
-	public void bootstrapsHalFormsConfigurationForSubclass() {
+	void bootstrapsHalFormsConfigurationForSubclass() {
 		assertHalFormsSetupForConfigClass(ExtendedHalFormsConfig.class);
 	}
 
 	@Test
-	public void bootstrapsCollectionJsonConfigurationForSubclass() {
+	void bootstrapsCollectionJsonConfigurationForSubclass() {
 		assertCollectionJsonSetupForConfigClass(ExtendedCollectionJsonConfig.class);
 	}
 
 	@Test
-	public void bootstrapsUberConfigurationForSubclass() {
+	void bootstrapsUberConfigurationForSubclass() {
 		assertUberSetupForConfigClass(ExtendedUberConfig.class);
 	}
 
@@ -196,7 +196,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	 */
 	@Test
 	@SuppressWarnings("unchecked")
-	public void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+	void halSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
 		withServletContext(HalConfig.class, context -> {
 
@@ -228,7 +228,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void halFormsSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+	void halFormsSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
 		withServletContext(HalFormsConfig.class, context -> {
 
@@ -260,7 +260,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void collectionJsonSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+	void collectionJsonSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
 		withServletContext(CollectionJsonConfig.class, context -> {
 
@@ -292,7 +292,7 @@ public class EnableHypermediaSupportIntegrationTest {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void uberSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
+	void uberSetupIsAppliedToAllTransitiveComponentsInRequestMappingHandlerAdapter() {
 
 		withServletContext(UberConfig.class, context -> {
 
@@ -329,7 +329,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	 * @see #293
 	 */
 	@Test
-	public void registersHalHttpMessageConvertersForRestTemplate() {
+	void registersHalHttpMessageConvertersForRestTemplate() {
 
 		withServletContext(HalConfig.class, context -> {
 
@@ -341,7 +341,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void registersHalFormsHttpMessageConvertersForRestTemplate() {
+	void registersHalFormsHttpMessageConvertersForRestTemplate() {
 
 		withServletContext( //
 				HalFormsConfig.class, //
@@ -394,7 +394,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void registersCollectionJsonHttpMessageConvertersForRestTemplate() {
+	void registersCollectionJsonHttpMessageConvertersForRestTemplate() {
 
 		withServletContext(CollectionJsonConfig.class, context -> {
 			RestTemplate template = context.getBean(RestTemplate.class);
@@ -405,7 +405,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void registersUberHttpMessageConvertersForRestTemplate() {
+	void registersUberHttpMessageConvertersForRestTemplate() {
 
 		withServletContext(UberConfig.class, context -> {
 			RestTemplate template = context.getBean(RestTemplate.class);
@@ -420,7 +420,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	 * @see #341
 	 */
 	@Test
-	public void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
+	void configuresDefaultObjectMapperForHalToIgnoreUnknownProperties() {
 
 		withServletContext( //
 				HalConfig.class, //
@@ -437,7 +437,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	 * @see #341
 	 */
 	@Test
-	public void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
+	void configuresDefaultObjectMapperForHalFormsToIgnoreUnknownProperties() {
 
 		withServletContext( //
 				HalFormsConfig.class, //
@@ -451,7 +451,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void configuresDefaultObjectMapperForCollectionJsonToIgnoreUnknownProperties() {
+	void configuresDefaultObjectMapperForCollectionJsonToIgnoreUnknownProperties() {
 
 		withServletContext( //
 				CollectionJsonConfig.class, //
@@ -465,7 +465,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void configuresDefaultObjectMapperForUberToIgnoreUnknownProperties() {
+	void configuresDefaultObjectMapperForUberToIgnoreUnknownProperties() {
 
 		withServletContext( //
 				UberConfig.class, //
@@ -479,7 +479,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
+	void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
 
 		withServletContext(HalConfig.class, context -> {
 
@@ -505,7 +505,7 @@ public class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	public void verifyRenderSingleLinkAsArrayViaOverridingBean() {
+	void verifyRenderSingleLinkAsArrayViaOverridingBean() {
 
 		withServletContext( //
 				RenderLinkAsSingleLinksConfig.class, //

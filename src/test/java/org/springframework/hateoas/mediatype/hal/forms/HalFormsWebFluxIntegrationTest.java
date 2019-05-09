@@ -19,9 +19,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.support.JsonPathUtils.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -29,13 +29,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.config.WebClientConfigurer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.config.WebClientConfigurer;
 import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
@@ -43,15 +43,15 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 /**
  * @author Greg Turnquist
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HalFormsWebFluxIntegrationTest {
+class HalFormsWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		WebFluxEmployeeController.reset();
 	}
 
@@ -59,7 +59,7 @@ public class HalFormsWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void singleEmployee() {
+	void singleEmployee() {
 
 		this.testClient.get().uri("http://localhost/employees/0")
 				.accept(MediaTypes.HAL_FORMS_JSON)
@@ -92,7 +92,7 @@ public class HalFormsWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void collectionOfEmployees() {
+	void collectionOfEmployees() {
 
 		this.testClient.get().uri("http://localhost/employees")
 				.accept(MediaTypes.HAL_FORMS_JSON)
@@ -122,7 +122,7 @@ public class HalFormsWebFluxIntegrationTest {
 	 * @see #728
 	 */
 	@Test
-	public void createNewEmployee() throws Exception {
+	void createNewEmployee() throws Exception {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
 

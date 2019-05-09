@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedModel.PageMetadata;
 
 /**
@@ -28,19 +28,19 @@ import org.springframework.hateoas.PagedModel.PageMetadata;
  * 
  * @author Oliver Gierke
  */
-public class PagedModelUnitTest {
+class PagedModelUnitTest {
 
 	static final PageMetadata metadata = new PagedModel.PageMetadata(10, 1, 200);
 
 	PagedModel<Object> resources;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		resources = new PagedModel<>(Collections.emptyList(), metadata);
 	}
 
 	@Test
-	public void discoversNextLink() {
+	void discoversNextLink() {
 
 		resources.add(new Link("foo", IanaLinkRelations.NEXT.value()));
 
@@ -48,7 +48,7 @@ public class PagedModelUnitTest {
 	}
 
 	@Test
-	public void discoversPreviousLink() {
+	void discoversPreviousLink() {
 
 		resources.add(new Link("custom", IanaLinkRelations.PREV.value()));
 
@@ -58,40 +58,52 @@ public class PagedModelUnitTest {
 	/**
 	 * @see #89
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNegativePageSize() {
-		new PageMetadata(-1, 0, 0);
-	}
+	@Test
+	void preventsNegativePageSize() {
 
-	/**
-	 * @see #89
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNegativePageNumber() {
-		new PageMetadata(0, -1, 0);
-	}
-
-	/**
-	 * @see #89
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNegativeTotalElements() {
-		new PageMetadata(0, 0, -1);
-	}
-
-	/**
-	 * @see #89
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNegativeTotalPages() {
-		new PageMetadata(0, 0, 0, -1);
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(-1, 0, 0);
+		});
 	}
 
 	/**
 	 * @see #89
 	 */
 	@Test
-	public void allowsOneIndexedPages() {
+	void preventsNegativePageNumber() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(0, -1, 0);
+		});
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test
+	void preventsNegativeTotalElements() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(0, 0, -1);
+		});
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test
+	void preventsNegativeTotalPages() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new PageMetadata(0, 0, 0, -1);
+		});
+	}
+
+	/**
+	 * @see #89
+	 */
+	@Test
+	void allowsOneIndexedPages() {
 		new PageMetadata(10, 1, 0);
 	}
 
@@ -99,7 +111,7 @@ public class PagedModelUnitTest {
 	 * @see #309
 	 */
 	@Test
-	public void calculatesTotalPagesCorrectly() {
+	void calculatesTotalPagesCorrectly() {
 		assertThat(new PageMetadata(5, 0, 16).getTotalPages()).isEqualTo(4L);
 	}
 }

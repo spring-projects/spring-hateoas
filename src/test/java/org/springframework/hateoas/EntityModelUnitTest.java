@@ -19,24 +19,24 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link EntityModel}.
  * 
  * @author Oliver Gierke
  */
-public class EntityModelUnitTest {
+class EntityModelUnitTest {
 
 	@Test
-	public void equalsForSelfReference() {
+	void equalsForSelfReference() {
 
 		EntityModel<String> resource = new EntityModel<>("foo");
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
-	public void equalsWithEqualContent() {
+	void equalsWithEqualContent() {
 
 		EntityModel<String> left = new EntityModel<>("foo");
 		EntityModel<String> right = new EntityModel<>("foo");
@@ -46,7 +46,7 @@ public class EntityModelUnitTest {
 	}
 
 	@Test
-	public void notEqualForDifferentContent() {
+	void notEqualForDifferentContent() {
 
 		EntityModel<String> left = new EntityModel<>("foo");
 		EntityModel<String> right = new EntityModel<>("bar");
@@ -56,7 +56,7 @@ public class EntityModelUnitTest {
 	}
 
 	@Test
-	public void notEqualForDifferentLinks() {
+	void notEqualForDifferentLinks() {
 
 		EntityModel<String> left = new EntityModel<>("foo");
 		EntityModel<String> right = new EntityModel<>("foo");
@@ -66,8 +66,11 @@ public class EntityModelUnitTest {
 		assertThat(right).isNotEqualTo(left);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsCollectionContent() {
-		new EntityModel<Object>(Collections.emptyList());
+	@Test
+	void rejectsCollectionContent() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new EntityModel<Object>(Collections.emptyList());
+		});
 	}
 }

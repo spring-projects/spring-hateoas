@@ -17,8 +17,8 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.core.DelegatingEntityLinks;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -34,9 +34,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * 
  * @author Oliver Gierke
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
-public class EnableEntityLinksIntegrationTest {
+class EnableEntityLinksIntegrationTest {
 
 	@Configuration
 	@EnableEntityLinks
@@ -51,7 +51,7 @@ public class EnableEntityLinksIntegrationTest {
 	@Autowired DelegatingEntityLinks builder;
 
 	@Test
-	public void initializesDelegatingEntityLinks() {
+	void initializesDelegatingEntityLinks() {
 
 		assertThat(builder).isNotNull();
 		assertThat(builder.supports(Person.class)).isTrue();

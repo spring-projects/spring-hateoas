@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
@@ -38,55 +38,70 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class DefaultCurieProviderUnitTest {
+class DefaultCurieProviderUnitTest {
 
 	private static final UriTemplate URI_TEMPLATE = UriTemplate.of("http://localhost:8080/rels/{rel}");
 
 	CurieProvider provider = new DefaultCurieProvider("acme", URI_TEMPLATE);
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNullCurieName() {
-		new DefaultCurieProvider(null, URI_TEMPLATE);
-	}
+	@Test
+	void preventsNullCurieName() {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsEmptyCurieName() {
-		new DefaultCurieProvider("", URI_TEMPLATE);
-	}
-
-	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNullUriTemplateName() {
-		new DefaultCurieProvider("acme", null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsUriTemplateWithoutVariable() {
-		new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels"));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsUriTemplateWithMoreThanOneVariable() {
-		new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels/{rel}/{another}"));
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider(null, URI_TEMPLATE);
+		});
 	}
 
 	@Test
-	public void doesNotPrefixIanaRels() {
+	void preventsEmptyCurieName() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("", URI_TEMPLATE);
+		});
+	}
+
+	@SuppressWarnings("null")
+	@Test
+	void preventsNullUriTemplateName() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("acme", null);
+		});
+	}
+
+	@Test
+	void preventsUriTemplateWithoutVariable() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels"));
+		});
+	}
+
+	@Test
+	void preventsUriTemplateWithMoreThanOneVariable() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new DefaultCurieProvider("acme", UriTemplate.of("http://localhost:8080/rels/{rel}/{another}"));
+		});
+	}
+
+	@Test
+	void doesNotPrefixIanaRels() {
 
 		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com"))) //
 				.isEqualTo(HalLinkRelation.of(IanaLinkRelations.SELF));
 	}
 
 	@Test
-	public void prefixesNormalRels() {
+	void prefixesNormalRels() {
 
 		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "book"))) //
 				.isEqualTo(HalLinkRelation.curied("acme", "book"));
 	}
 
 	@Test
-	public void doesNotPrefixQualifiedRels() {
+	void doesNotPrefixQualifiedRels() {
 
 		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "custom:rel")))
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
@@ -96,7 +111,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #100
 	 */
 	@Test
-	public void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
+	void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
 
 		Link link = new Link("https://amazon.com", "custom:rel") //
 				.withHreflang("en") //
@@ -113,7 +128,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void doesNotPrefixIanaRelsForRelAsString() {
+	void doesNotPrefixIanaRelsForRelAsString() {
 
 		assertThat(provider.getNamespacedRelFor(IanaLinkRelations.SELF)) //
 				.isEqualTo(HalLinkRelation.uncuried("self"));
@@ -123,7 +138,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void prefixesNormalRelsForRelAsString() {
+	void prefixesNormalRelsForRelAsString() {
 
 		assertThat(provider.getNamespacedRelFor(LinkRelation.of("book"))) //
 				.isEqualTo(HalLinkRelation.curied("acme", "book"));
@@ -133,7 +148,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #229
 	 */
 	@Test
-	public void doesNotPrefixQualifiedRelsForRelAsString() {
+	void doesNotPrefixQualifiedRelsForRelAsString() {
 
 		assertThat(provider.getNamespacedRelFor(HalLinkRelation.curied("custom", "rel")))
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
@@ -143,7 +158,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #363
 	 */
 	@Test
-	public void configuresMultipleCuriesWithoutDefaultCorrectly() {
+	void configuresMultipleCuriesWithoutDefaultCorrectly() {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries());
 
@@ -155,7 +170,7 @@ public class DefaultCurieProviderUnitTest {
 	 * @see #363
 	 */
 	@Test
-	public void configuresMultipleCuriesWithDefaultCorrectly() {
+	void configuresMultipleCuriesWithDefaultCorrectly() {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider(getCuries(), "foo");
 
@@ -168,7 +183,7 @@ public class DefaultCurieProviderUnitTest {
 	 * #421
 	 */
 	@Test
-	public void expandsNonAbsoluteUriWithApplicationUri() {
+	void expandsNonAbsoluteUriWithApplicationUri() {
 
 		DefaultCurieProvider provider = new DefaultCurieProvider("name", UriTemplate.of("/docs/{rel}"));
 

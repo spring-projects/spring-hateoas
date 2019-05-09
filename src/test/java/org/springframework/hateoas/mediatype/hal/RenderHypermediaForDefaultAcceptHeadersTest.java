@@ -26,22 +26,22 @@ import lombok.experimental.Wither;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,17 +54,17 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * @author Greg Turnquist
  * @author Jens Schauder
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class RenderHypermediaForDefaultAcceptHeadersTest {
+class RenderHypermediaForDefaultAcceptHeadersTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		this.mockMvc = webAppContextSetup(this.context).build();
 	}
 
@@ -74,7 +74,7 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 	 * @see #695
 	 */
 	@Test
-	public void browserBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
+	void browserBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.APPLICATION_XHTML_XML, MediaType.ALL)) //
 				.andExpect(status().isOk())
@@ -87,7 +87,7 @@ public class RenderHypermediaForDefaultAcceptHeadersTest {
 	 * @see #695
 	 */
 	@Test
-	public void curlBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
+	void curlBasedDefaultAcceptHeadersShouldProduceHalJson() throws Exception {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.ALL)) //
 				.andExpect(status().isOk())

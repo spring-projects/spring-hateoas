@@ -17,7 +17,7 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,13 +29,13 @@ import org.springframework.hateoas.server.LinkRelationProvider;
  * 
  * @author Oliver Gierke
  */
-public class XmlConfigurationIntegrationTest {
+class XmlConfigurationIntegrationTest {
 
 	/**
 	 * @see #259
 	 */
 	@Test
-	public void enablesHyperMediaSupportFromXml() {
+	void enablesHyperMediaSupportFromXml() {
 
 		ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("application-context.xml", getClass());
 

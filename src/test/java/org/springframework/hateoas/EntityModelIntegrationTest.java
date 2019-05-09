@@ -17,7 +17,7 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -28,12 +28,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
 
 	@Test
-	public void inlinesContent() throws Exception {
+	void inlinesContent() throws Exception {
 
 		Person person = new Person();
 		person.firstname = "Dave";
@@ -49,7 +49,7 @@ public class EntityModelIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #14
 	 */
 	@Test
-	public void readsResourceSupportCorrectly() throws Exception {
+	void readsResourceSupportCorrectly() throws Exception {
 
 		PersonModel result = read(REFERENCE, PersonModel.class);
 

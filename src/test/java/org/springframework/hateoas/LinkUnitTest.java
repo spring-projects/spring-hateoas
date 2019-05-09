@@ -24,7 +24,7 @@ import java.net.URI;
 import java.util.Collections;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpMethod;
@@ -36,18 +36,18 @@ import org.springframework.http.HttpMethod;
  * @author Greg Turnquist
  * @author Jens Schauder
  */
-public class LinkUnitTest {
+class LinkUnitTest {
 
 	private static final Affordance TEST_AFFORDANCE = new Affordance(null, null, HttpMethod.GET, null,
 			Collections.emptyList(), null);
 
 	@Test
-	public void linkWithHrefOnlyBecomesSelfLink() {
+	void linkWithHrefOnlyBecomesSelfLink() {
 		assertThat(new Link("foo").hasRel(IanaLinkRelations.SELF)).isTrue();
 	}
 
 	@Test
-	public void createsLinkFromRelAndHref() {
+	void createsLinkFromRelAndHref() {
 
 		Link link = new Link("foo", IanaLinkRelations.SELF);
 
@@ -59,29 +59,41 @@ public class LinkUnitTest {
 	}
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullHref() {
-		new Link(null);
+	@Test
+	void rejectsNullHref() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link(null);
+		});
 	}
 
 	@SuppressWarnings("null")
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullRel() {
-		new Link("foo", (String) null);
-	}
+	@Test
+	void rejectsNullRel() {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsEmptyHref() {
-		new Link("");
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsEmptyRel() {
-		new Link("foo", "");
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link("foo", (String) null);
+		});
 	}
 
 	@Test
-	public void sameRelAndHrefMakeSameLink() {
+	void rejectsEmptyHref() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link("");
+		});
+	}
+
+	@Test
+	void rejectsEmptyRel() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new Link("foo", "");
+		});
+	}
+
+	@Test
+	void sameRelAndHrefMakeSameLink() {
 
 		Link left = new Link("foo", IanaLinkRelations.SELF);
 		Link right = new Link("foo", IanaLinkRelations.SELF);
@@ -90,7 +102,7 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void differentRelMakesDifferentLink() {
+	void differentRelMakesDifferentLink() {
 
 		Link left = new Link("foo", IanaLinkRelations.PREV);
 		Link right = new Link("foo", IanaLinkRelations.NEXT);
@@ -99,7 +111,7 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void differentHrefMakesDifferentLink() {
+	void differentHrefMakesDifferentLink() {
 
 		Link left = new Link("foo", IanaLinkRelations.SELF);
 		Link right = new Link("bar", IanaLinkRelations.SELF);
@@ -108,7 +120,7 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void differentTypeDoesNotEqual() {
+	void differentTypeDoesNotEqual() {
 		assertThat(new Link("foo")).isNotEqualTo(new RepresentationModel<>());
 	}
 
@@ -118,7 +130,7 @@ public class LinkUnitTest {
 	 * @see #678
 	 */
 	@Test
-	public void parsesRFC5988HeaderIntoLink() {
+	void parsesRFC5988HeaderIntoLink() {
 
 		assertSoftly(softly -> {
 
@@ -149,7 +161,7 @@ public class LinkUnitTest {
 	 * @see #100
 	 */
 	@Test
-	public void ignoresUnrecognizedAttributes() {
+	void ignoresUnrecognizedAttributes() {
 
 		Link link = Link.valueOf("</something>;rel=\"foo\";unknown=\"should fail\"");
 
@@ -160,26 +172,35 @@ public class LinkUnitTest {
 		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsMissingRelAttribute() {
-		Link.valueOf("</something>;title=\"title\"");
+	@Test
+	void rejectsMissingRelAttribute() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Link.valueOf("</something>;title=\"title\"");
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsLinkWithoutAttributesAtAll() {
-		Link.valueOf("</something>");
+	@Test
+	void rejectsLinkWithoutAttributesAtAll() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Link.valueOf("</something>");
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNonRFC5988String() {
-		Link.valueOf("foo");
+	@Test
+	void rejectsNonRFC5988String() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Link.valueOf("foo");
+		});
 	}
 
 	/**
 	 * @see #137
 	 */
 	@Test
-	public void isTemplatedIfSourceContainsTemplateVariables() {
+	void isTemplatedIfSourceContainsTemplateVariables() {
 
 		Link link = new Link("/foo{?page}");
 
@@ -196,7 +217,7 @@ public class LinkUnitTest {
 	 * @see #137
 	 */
 	@Test
-	public void isntTemplatedIfSourceDoesNotContainTemplateVariables() {
+	void isntTemplatedIfSourceDoesNotContainTemplateVariables() {
 
 		Link link = new Link("/foo");
 
@@ -211,7 +232,7 @@ public class LinkUnitTest {
 	 * @see #172
 	 */
 	@Test
-	public void serializesCorrectly() throws IOException {
+	void serializesCorrectly() throws IOException {
 
 		Link link = new Link("https://foobar{?foo,bar}");
 
@@ -224,7 +245,7 @@ public class LinkUnitTest {
 	 * @see #312
 	 */
 	@Test
-	public void keepsCompleteBaseUri() {
+	void keepsCompleteBaseUri() {
 
 		Link link = new Link("/customer/{customerId}/programs", "programs");
 		assertThat(link.getHref()).isEqualTo("/customer/{customerId}/programs");
@@ -234,7 +255,7 @@ public class LinkUnitTest {
 	 * @see #504
 	 */
 	@Test
-	public void parsesLinkRelationWithDotAndMinus() {
+	void parsesLinkRelationWithDotAndMinus() {
 
 		assertThat(Link.valueOf("<http://localhost>; rel=\"rel-with-minus-and-.\"").hasRel("rel-with-minus-and-."))
 				.isTrue();
@@ -244,7 +265,7 @@ public class LinkUnitTest {
 	 * @see #504
 	 */
 	@Test
-	public void parsesUriLinkRelations() {
+	void parsesUriLinkRelations() {
 
 		assertThat(Link.valueOf("<http://localhost>; rel=\"https://acme.com/rels/foo-bar\"").getRel()) //
 				.isEqualTo(LinkRelation.of("https://acme.com/rels/foo-bar"));
@@ -254,7 +275,7 @@ public class LinkUnitTest {
 	 * @see #340
 	 */
 	@Test
-	public void linkWithAffordancesShouldWorkProperly() {
+	void linkWithAffordancesShouldWorkProperly() {
 
 		Link originalLink = new Link("/foo");
 		Link linkWithAffordance = originalLink.andAffordance(TEST_AFFORDANCE);
@@ -278,7 +299,7 @@ public class LinkUnitTest {
 	 * @see #671
 	 */
 	@Test
-	public void exposesLinkRelation() {
+	void exposesLinkRelation() {
 
 		Link link = new Link("/", "foo");
 
@@ -290,7 +311,7 @@ public class LinkUnitTest {
 	 * @see #671
 	 */
 	@Test
-	public void rejectsInvalidRelationsOnHasRel() {
+	void rejectsInvalidRelationsOnHasRel() {
 
 		Link link = new Link("/");
 
@@ -299,7 +320,7 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void affordanceConvenienceMethodChainsExistingLink() {
+	void affordanceConvenienceMethodChainsExistingLink() {
 
 		Link link = new Link("/").andAffordance("name", HttpMethod.POST, ResolvableType.forClass(Employee.class),
 				Collections.emptyList(), ResolvableType.forClass(Employee.class));
@@ -341,7 +362,7 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void affordanceConvenienceMethodDefaultsNameBasedOnHttpVerb() {
+	void affordanceConvenienceMethodDefaultsNameBasedOnHttpVerb() {
 
 		Link link = new Link("/").andAffordance(HttpMethod.POST, ResolvableType.forClass(Employee.class),
 				Collections.emptyList(), ResolvableType.forClass(Employee.class));
@@ -386,7 +407,7 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void affordanceConvenienceMethodHandlesBareClasses() {
+	void affordanceConvenienceMethodHandlesBareClasses() {
 
 		Link link = new Link("/").andAffordance(HttpMethod.POST, Employee.class, Collections.emptyList(), Employee.class);
 
@@ -429,17 +450,17 @@ public class LinkUnitTest {
 	}
 
 	@Test
-	public void createsUriForSimpleLink() {
+	void createsUriForSimpleLink() {
 		assertThat(new Link("/something").toUri()).isEqualTo(URI.create("/something"));
 	}
 
 	@Test
-	public void createsUriForTemplateWithOptionalParameters() {
+	void createsUriForTemplateWithOptionalParameters() {
 		assertThat(new Link("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
 	}
 
 	@Test
-	public void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
+	void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
 		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Link("/{segment}/path").toUri());
 	}
 }

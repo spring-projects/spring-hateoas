@@ -17,7 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -26,10 +26,10 @@ import lombok.Value;
 
 import java.util.Arrays;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
@@ -45,13 +45,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * @author Oliver Gierke
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ControllerEntityLinksUnitTest extends TestUtils {
+@ExtendWith(MockitoExtension.class)
+class ControllerEntityLinksUnitTest extends TestUtils {
 
 	@Mock LinkBuilderFactory<LinkBuilder> linkBuilderFactory;
 
 	@Test
-	public void rejectsUnannotatedController() {
+	void rejectsUnannotatedController() {
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 				.isThrownBy(() -> new ControllerEntityLinks(singletonList(InvalidController.class), linkBuilderFactory)) //
@@ -59,20 +59,20 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void rejectsNullControllerList() {
+	void rejectsNullControllerList() {
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 				.isThrownBy(() -> new ControllerEntityLinks(null, linkBuilderFactory));
 	}
 
 	@Test
-	public void rejectsNullLinkBuilderFactory() {
+	void rejectsNullLinkBuilderFactory() {
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 				.isThrownBy(() -> new ControllerEntityLinks(singletonList(SampleController.class), null));
 	}
 
 	@Test
-	public void registersControllerForEntity() {
+	void registersControllerForEntity() {
 
 		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
 		EntityLinks links = new ControllerEntityLinks(singletonList(SampleController.class), linkBuilderFactory);
@@ -82,7 +82,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test // #43
-	public void returnsLinkBuilderForParameterizedController() {
+	void returnsLinkBuilderForParameterizedController() {
 
 		when(linkBuilderFactory.linkTo(eq(ControllerWithParameters.class), (Object[]) any())) //
 				.thenReturn(linkTo(ControllerWithParameters.class, "1"));
@@ -95,7 +95,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test
-	public void rejectsUnmanagedEntity() {
+	void rejectsUnmanagedEntity() {
 
 		EntityLinks links = new ControllerEntityLinks(Arrays.asList(SampleController.class, ControllerWithParameters.class),
 				linkBuilderFactory);
@@ -111,7 +111,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test // #843
-	public void returnsItemResourceLinkForExtractorFunction() {
+	void returnsItemResourceLinkForExtractorFunction() {
 
 		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
 
@@ -122,7 +122,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test // #843
-	public void returnsTypeEntityLinks() {
+	void returnsTypeEntityLinks() {
 
 		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
 
@@ -136,7 +136,7 @@ public class ControllerEntityLinksUnitTest extends TestUtils {
 	}
 
 	@Test // #843
-	public void returnsExtendedTypedEntityLinks() {
+	void returnsExtendedTypedEntityLinks() {
 
 		when(linkBuilderFactory.linkTo(SampleController.class, new Object[0])).thenReturn(linkTo(SampleController.class));
 

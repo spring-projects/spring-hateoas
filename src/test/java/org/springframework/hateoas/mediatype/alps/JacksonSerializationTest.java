@@ -22,14 +22,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.hateoas.mediatype.alps.Alps;
-import org.springframework.hateoas.mediatype.alps.Doc;
-import org.springframework.hateoas.mediatype.alps.Format;
-import org.springframework.hateoas.mediatype.alps.Type;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,12 +37,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class JacksonSerializationTest {
+class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
@@ -57,7 +53,7 @@ public class JacksonSerializationTest {
 	 * @see #141
 	 */
 	@Test
-	public void writesSampleDocument() throws Exception {
+	void writesSampleDocument() throws Exception {
 
 		Alps alps = alps().//
 				doc(doc().href("https://example.org/samples/full/doc.html").build()). //

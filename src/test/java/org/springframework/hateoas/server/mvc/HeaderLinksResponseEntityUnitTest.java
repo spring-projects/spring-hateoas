@@ -19,9 +19,9 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.springframework.hateoas.Link;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -32,7 +32,7 @@ import org.springframework.http.ResponseEntity;
  * 
  * @author Oliver Gierke
  */
-public class HeaderLinksResponseEntityUnitTest {
+class HeaderLinksResponseEntityUnitTest {
 
 	static final Object CONTENT = new Object();
 	static final Link LINK = new Link("href", "rel");
@@ -41,7 +41,7 @@ public class HeaderLinksResponseEntityUnitTest {
 	ResponseEntity<EntityModel<Object>> entity = new ResponseEntity<>(resource, HttpStatus.OK);
 
 	@Test
-	public void movesRootResourceLinksToHeader() {
+	void movesRootResourceLinksToHeader() {
 
 		HttpEntity<EntityModel<Object>> wrapper = HeaderLinksResponseEntity.wrap(entity);
 
@@ -57,7 +57,7 @@ public class HeaderLinksResponseEntityUnitTest {
 	}
 
 	@Test
-	public void defaultStatusCodeToOkForHttpEntities() {
+	void defaultStatusCodeToOkForHttpEntities() {
 
 		HttpEntity<EntityModel<Object>> entity = new HttpEntity<>(resource);
 		ResponseEntity<EntityModel<Object>> wrappedEntity = HeaderLinksResponseEntity.wrap(entity);

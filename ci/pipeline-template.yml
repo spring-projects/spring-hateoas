@@ -137,8 +137,11 @@ groups:
 - name: spring-hateoas
   jobs:
   - test-jdk8
+  - test-spring-next-jdk8
   - test-jdk11
+  - test-spring-next-jdk11
   - test-jdk13
+  - test-spring-next-jdk13
   - build
 - name: spring-hateoas-examples
   jobs:
@@ -174,6 +177,20 @@ jobs:
     params: { PROFILE: "non-existent" }
   <<: *slack-test-failure
 
+- name: test-spring-next-jdk8
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+    passed: [ test-jdk8 ]
+  - get: openjdk:8-jdk
+    trigger: true
+  - task: test
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring-next" }
+  <<: *slack-test-failure
+
 - name: test-jdk11
   serial: true
   public: true
@@ -187,6 +204,21 @@ jobs:
     image: openjdk:11-jdk
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "non-existant" }
+  <<: *slack-test-failure
+
+- name: test-spring-next-jdk11
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+    passed: [ test-jdk8 ]
+  - get: openjdk:11-jdk
+    trigger: true
+  - task: test
+    image: openjdk:11-jdk
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring-next" }
   <<: *slack-test-failure
 
 - name: test-jdk13
@@ -204,6 +236,21 @@ jobs:
     params: { PROFILE: "non-existant" }
   <<: *slack-test-failure
 
+- name: test-spring-next-jdk13
+  serial: true
+  public: true
+  plan:
+  - get: spring-hateoas-github
+    trigger: true
+    passed: [ test-jdk8 ]
+  - get: openjdk:13-jdk
+    trigger: true
+  - task: test
+    image: openjdk:13-jdk
+    file: spring-hateoas-github/ci/test.yml
+    params: { PROFILE: "spring-next" }
+  <<: *slack-test-failure
+
 - name: build
   serial: true
   public: true
@@ -211,8 +258,11 @@ jobs:
   - get: spring-hateoas-github
     trigger: true
     passed: [
+      test-spring-next-jdk8,
       test-jdk11,
-      test-jdk13
+      test-spring-next-jdk11,
+      test-jdk13,
+      test-spring-next-jdk13
     ]
   - get: 8-jdk-with-graphviz:latest
     trigger: true
@@ -290,6 +340,17 @@ jobs:
       image: openjdk:13-jdk
       file: spring-hateoas-github/ci/test.yml
       params: { PROFILE: "ci" }
+    - task: test-spring-next-jdk8
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "ci,spring-next" }
+    - task: test-spring-next-jdk11
+      image: openjdk:11-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "ci,spring-next" }
+    - task: test-spring-next-jdk13
+      image: openjdk:13-jdk
+      file: spring-hateoas-github/ci/test.yml
+      params: { PROFILE: "ci,spring-next" }
   on_failure:
     aggregate:
     - put: spring-hateoas-pull-requests

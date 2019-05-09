@@ -20,20 +20,19 @@ import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 
 /**
  * Unit tests for {@link HalFormsLinkDiscoverer}.
  *
  * @author Greg Turnquist
  */
-public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
+class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalFormsLinkDiscoverer();
 
@@ -41,7 +40,7 @@ public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #314
 	 */
 	@Test
-	public void discoversFullyQualifiedRel() {
+	void discoversFullyQualifiedRel() {
 		assertThat(getDiscoverer().findLinkWithRel("http://www.foo.com/bar", getInputString())).isNotNull();
 	}
 
@@ -49,7 +48,7 @@ public class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	 * @see #787
 	 */
 	@Test
-	public void discoversAllTheLinkAttributes() throws IOException {
+	void discoversAllTheLinkAttributes() throws IOException {
 
 		String linkText = read(new ClassPathResource("hal-forms-link.json", getClass()));
 

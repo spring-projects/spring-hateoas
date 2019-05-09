@@ -17,22 +17,21 @@ package org.springframework.hateoas.server.core;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 
 /**
  * Unit tests for {@link EvoInflectorLinkRelationProvider}.
  *
  * @author Oliver Gierke
  */
-public class EvoInflectorRelProviderUnitTest {
+class EvoInflectorRelProviderUnitTest {
 
 	LinkRelationProvider provider = new EvoInflectorLinkRelationProvider();
 
 	@Test
-	public void buildsCollectionRelCorrectly() {
+	void buildsCollectionRelCorrectly() {
 		assertRels(City.class, "city", "cities");
 		assertRels(Person.class, "person", "persons");
 	}

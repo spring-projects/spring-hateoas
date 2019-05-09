@@ -25,7 +25,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;
@@ -41,10 +41,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * @author Greg Turnquist
  */
-public class PropertyUtilsTest {
+class PropertyUtilsTest {
 
 	@Test
-	public void simpleObject() {
+	void simpleObject() {
 
 		Employee employee = new Employee("Frodo Baggins", "ring bearer");
 
@@ -57,7 +57,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void simpleObjectWrappedAsResource() {
+	void simpleObjectWrappedAsResource() {
 
 		Employee employee = new Employee("Frodo Baggins", "ring bearer");
 		EntityModel<Employee> employeeResource = new EntityModel<>(employee);
@@ -71,7 +71,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void resourceWrappedSpringMvcParameter() {
+	void resourceWrappedSpringMvcParameter() {
 
 		Method method = ReflectionUtils.findMethod(TestController.class, "newEmployee", EntityModel.class);
 		MethodParameters parameters = MethodParameters.of(method);
@@ -88,7 +88,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void objectWithIgnorableAttributes() {
+	void objectWithIgnorableAttributes() {
 
 		EmployeeWithCustomizedReaders employee = new EmployeeWithCustomizedReaders("Frodo", "Baggins", "ring bearer",
 				"password", "fbaggins", "ignore this one");
@@ -105,7 +105,7 @@ public class PropertyUtilsTest {
 	}
 
 	@Test
-	public void objectWithNullReturningGetter() {
+	void objectWithNullReturningGetter() {
 
 		EmployeeWithNullReturningGetter employee = new EmployeeWithNullReturningGetter("Frodo");
 

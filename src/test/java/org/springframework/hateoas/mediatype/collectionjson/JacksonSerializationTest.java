@@ -15,19 +15,16 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.mediatype.collectionjson.CollectionJson;
-import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonItem;
-import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule;
 import org.springframework.hateoas.support.MappingUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,12 +33,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 /**
  * @author Greg Turnquist
  */
-public class JacksonSerializationTest {
+class JacksonSerializationTest {
 
 	ObjectMapper mapper;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2CollectionJsonModule());
@@ -49,7 +46,7 @@ public class JacksonSerializationTest {
 	}
 
 	@Test
-	public void createSimpleCollection() throws IOException {
+	void createSimpleCollection() throws IOException {
 
 		CollectionJson<?> collection = new CollectionJson<>().withVersion("1.0").withHref("localhost")
 				.withLinks(Links.of(new Link("foo").withSelfRel())) //
@@ -64,6 +61,6 @@ public class JacksonSerializationTest {
 
 		String actual = mapper.writeValueAsString(collection);
 
-		assertThat(actual, is(MappingUtils.read(new ClassPathResource("reference.json", getClass()))));
+		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("reference.json", getClass())));
 	}
 }

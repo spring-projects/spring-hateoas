@@ -20,17 +20,15 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.core.EmbeddedWrapper;
-import org.springframework.hateoas.server.core.EmbeddedWrappers;
 
 /**
  * Unit tests for {@link EmbeddedWrappers}.
  *
  * @author Oliver Gierke
  */
-public class EmbeddedWrappersUnitTest {
+class EmbeddedWrappersUnitTest {
 
 	EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 
@@ -38,7 +36,7 @@ public class EmbeddedWrappersUnitTest {
 	 * @see #286
 	 */
 	@Test
-	public void createsWrapperForEmptyCollection() {
+	void createsWrapperForEmptyCollection() {
 
 		EmbeddedWrapper wrapper = wrappers.emptyCollectionOf(String.class);
 
@@ -51,7 +49,7 @@ public class EmbeddedWrappersUnitTest {
 	 * @see #286
 	 */
 	@Test
-	public void createsWrapperForEmptyCollectionAndExplicitRel() {
+	void createsWrapperForEmptyCollectionAndExplicitRel() {
 
 		EmbeddedWrapper wrapper = wrappers.wrap(Collections.emptySet(), LinkRelation.of("rel"));
 
@@ -63,9 +61,12 @@ public class EmbeddedWrappersUnitTest {
 	/**
 	 * @see #286
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsEmptyCollectionWithoutExplicitRel() {
-		wrappers.wrap(Collections.emptySet());
+	@Test
+	void rejectsEmptyCollectionWithoutExplicitRel() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			wrappers.wrap(Collections.emptySet());
+		});
 	}
 
 	@SuppressWarnings("unchecked")

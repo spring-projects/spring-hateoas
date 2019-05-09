@@ -19,18 +19,18 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.Value;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Greg Turnquist
  */
-public class IanaLinkRelationUnitTest {
+class IanaLinkRelationUnitTest {
 
 	/**
 	 * @see #778
 	 */
 	@Test
-	public void extractingValueOfIanaLinkRelationShouldWork() {
+	void extractingValueOfIanaLinkRelationShouldWork() {
 		assertThat(IanaLinkRelations.ABOUT.value()).isEqualTo("about");
 	}
 
@@ -38,7 +38,7 @@ public class IanaLinkRelationUnitTest {
 	 * @see #778
 	 */
 	@Test
-	public void testingForOfficialIanaLinkRelation() {
+	void testingForOfficialIanaLinkRelation() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.isIanaRel((String) null));
 		assertThatIllegalArgumentException().isThrownBy(() -> IanaLinkRelations.isIanaRel((LinkRelation) null));
@@ -53,7 +53,7 @@ public class IanaLinkRelationUnitTest {
 	 * @see #778
 	 */
 	@Test
-	public void parsingIanaLinkRelationsShouldWork() {
+	void parsingIanaLinkRelationsShouldWork() {
 
 		assertThat(IanaLinkRelations.parse("about")).isEqualTo(IanaLinkRelations.ABOUT);
 		assertThat(IanaLinkRelations.parse("ABOUT")).isEqualTo(IanaLinkRelations.ABOUT);
@@ -65,12 +65,12 @@ public class IanaLinkRelationUnitTest {
 	}
 
 	@Test
-	public void testIanaLinkRelationShouldPass() {
+	void testIanaLinkRelationShouldPass() {
 		assertThat(IanaLinkRelations.isIanaRel(IanaLinkRelations.ABOUT)).isTrue();
 	}
 
 	@Test
-	public void comparingNonIanaLinkRelationsToIanaLinkRelationsDontGuaranteeAMatch() {
+	void comparingNonIanaLinkRelationsToIanaLinkRelationsDontGuaranteeAMatch() {
 
 		assertThat(IanaLinkRelations.isIanaRel(new CustomLinkRelation("about"))).isTrue();
 		assertThat(IanaLinkRelations.isIanaRel(new CustomLinkRelation("ABOUT"))).isTrue();

@@ -18,7 +18,7 @@ package org.springframework.hateoas;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,8 +33,8 @@ public abstract class AbstractJackson2MarshallingIntegrationTest {
 
 	protected ObjectMapper mapper;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		mapper = new ObjectMapper();
 	}
 

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.StringUtils;
 
 /**
@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class LinksUnitTest {
+class LinksUnitTest {
 
 	static final String FIRST = "</something>;rel=\"foo\"";
 	static final String SECOND = "</somethingElse>;rel=\"bar\"";
@@ -48,7 +48,7 @@ public class LinksUnitTest {
 			new Link("/somethingElse", "bar").withHreflang("de"));
 
 	@Test
-	public void parsesLinkHeaderLinks() {
+	void parsesLinkHeaderLinks() {
 
 		assertThat(Links.parse(LINKS)).isEqualTo(reference);
 		assertThat(Links.parse(LINKS2)).isEqualTo(reference2);
@@ -57,13 +57,13 @@ public class LinksUnitTest {
 	}
 
 	@Test
-	public void skipsEmptyLinkElements() {
+	void skipsEmptyLinkElements() {
 		assertThat(Links.parse(LINKS + ",,,")).isEqualTo(reference);
 		assertThat(Links.parse(LINKS2 + ",,,")).isEqualTo(reference2);
 	}
 
 	@Test
-	public void returnsNullForNullOrEmptySource() {
+	void returnsNullForNullOrEmptySource() {
 
 		assertThat(Links.parse(null)).isEqualTo(Links.NONE);
 		assertThat(Links.parse("")).isEqualTo(Links.NONE);
@@ -74,7 +74,7 @@ public class LinksUnitTest {
 	 * @see #100
 	 */
 	@Test
-	public void getSingleLinkByRel() {
+	void getSingleLinkByRel() {
 		assertThat(reference.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
 		assertThat(reference2.getLink("bar")).hasValue(new Link("/somethingElse", "bar").withHreflang("de"));
 	}
@@ -83,7 +83,7 @@ public class LinksUnitTest {
 	 * @see #440
 	 */
 	@Test
-	public void parsesLinkWithComma() {
+	void parsesLinkWithComma() {
 
 		Link withComma = new Link("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
 
@@ -99,12 +99,12 @@ public class LinksUnitTest {
 	 * @see https://tools.ietf.org/html/rfc5988#section-5.5
 	 */
 	@Test
-	public void parsesLinksWithWhitespace() {
+	void parsesLinksWithWhitespace() {
 		assertThat(Links.parse(WITH_WHITESPACE)).isEqualTo(reference);
 	}
 
 	@Test // #805
-	public void returnsRequiredLink() {
+	void returnsRequiredLink() {
 
 		Link reference = new Link("http://localhost", "someRel");
 		Links links = Links.of(reference);
@@ -113,7 +113,7 @@ public class LinksUnitTest {
 	}
 
 	@Test // #805
-	public void rejectsMissingLinkWithIllegalArgumentException() {
+	void rejectsMissingLinkWithIllegalArgumentException() {
 
 		Links links = Links.of();
 
@@ -123,7 +123,7 @@ public class LinksUnitTest {
 	}
 
 	@Test
-	public void detectsContainedLinks() {
+	void detectsContainedLinks() {
 
 		Link first = new Link("http://localhost", "someRel");
 		Link second = new Link("http://localhost", "someOtherRel");

@@ -19,17 +19,17 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link RepresentationModel}.
  *
  * @author Oliver Gierke
  */
-public class RepresentationModelUnitTest {
+class RepresentationModelUnitTest {
 
 	@Test
-	public void setsUpWithEmptyLinkList() {
+	void setsUpWithEmptyLinkList() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 
@@ -40,7 +40,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void addsLinkCorrectly() {
+	void addsLinkCorrectly() {
 
 		Link link = new Link("foo", IanaLinkRelations.NEXT.value());
 		RepresentationModel<?> support = new RepresentationModel<>();
@@ -53,7 +53,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void addsMultipleLinkRelationsCorrectly() {
+	void addsMultipleLinkRelationsCorrectly() {
 
 		Link link = new Link("/customers/1", "customers");
 		Link link2 = new Link("/orders/1/customer", "customers");
@@ -67,7 +67,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void addsLinksCorrectly() {
+	void addsLinksCorrectly() {
 
 		Link first = new Link("foo", IanaLinkRelations.PREV.value());
 		Link second = new Link("bar", IanaLinkRelations.NEXT.value());
@@ -82,21 +82,28 @@ public class RepresentationModelUnitTest {
 		assertThat(support.getLinks(IanaLinkRelations.NEXT.value())).contains(second);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNullLinkBeingAdded() {
+	@Test
+	void preventsNullLinkBeingAdded() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add((Link) null);
-	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void preventsNullLinksBeingAdded() {
-		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add((Iterable<Link>) null);
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			support.add((Link) null);
+		});
 	}
 
 	@Test
-	public void sameLinkListMeansSameResource() {
+	void preventsNullLinksBeingAdded() {
+
+		RepresentationModel<?> support = new RepresentationModel<>();
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			support.add((Iterable<Link>) null);
+		});
+	}
+
+	@Test
+	void sameLinkListMeansSameResource() {
 
 		RepresentationModel<?> first = new RepresentationModel<>();
 		RepresentationModel<?> second = new RepresentationModel<>();
@@ -111,7 +118,7 @@ public class RepresentationModelUnitTest {
 	}
 
 	@Test
-	public void differentLinkListsNotEqual() {
+	void differentLinkListsNotEqual() {
 
 		RepresentationModel<?> first = new RepresentationModel<>();
 		RepresentationModel<?> second = new RepresentationModel<>();
@@ -122,7 +129,7 @@ public class RepresentationModelUnitTest {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void subclassNotEquals() {
+	void subclassNotEquals() {
 
 		RepresentationModel<?> left = new RepresentationModel<>();
 		RepresentationModel<?> right = new RepresentationModel() {
@@ -145,7 +152,7 @@ public class RepresentationModelUnitTest {
 	 * @see #178
 	 */
 	@Test
-	public void doesNotEqualNull() {
+	void doesNotEqualNull() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 		assertThat(support.equals(null)).isFalse();
@@ -155,7 +162,7 @@ public class RepresentationModelUnitTest {
 	 * @see #267
 	 */
 	@Test
-	public void addsLinksViaVarargs() {
+	void addsLinksViaVarargs() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(new Link("/self", "self"), new Link("/another", "another"));

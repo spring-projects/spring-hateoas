@@ -24,8 +24,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.ClassPathResource;
@@ -46,7 +46,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class VndErrorsMarshallingTest {
+class VndErrorsMarshallingTest {
 
 	ObjectMapper jackson2Mapper;
 
@@ -62,8 +62,8 @@ public class VndErrorsMarshallingTest {
 		json2Reference = readFile(new ClassPathResource("vnderror2.json"));
 	}
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
@@ -80,7 +80,7 @@ public class VndErrorsMarshallingTest {
 	 * @see #62
 	 */
 	@Test
-	public void jackson2Marshalling() throws Exception {
+	void jackson2Marshalling() throws Exception {
 
 		assertThat(jackson2Mapper.writeValueAsString(errors)) //
 				.isEqualToIgnoringWhitespace(json2Reference);
@@ -90,7 +90,7 @@ public class VndErrorsMarshallingTest {
 	 * @see #93, #94
 	 */
 	@Test
-	public void jackson2UnMarshalling() throws Exception {
+	void jackson2UnMarshalling() throws Exception {
 		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class)).isEqualTo(errors);
 	}
 

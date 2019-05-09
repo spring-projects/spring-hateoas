@@ -17,7 +17,7 @@ package org.springframework.hateoas.client;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.Ordered;
 import org.springframework.http.MediaType;
 import org.springframework.plugin.core.PluginRegistry;
@@ -28,15 +28,18 @@ import org.springframework.plugin.core.PluginRegistry;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class LinkDiscoverersUnitTest {
+class LinkDiscoverersUnitTest {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullPluginRegistry() {
-		new LinkDiscoverers(null);
+	@Test
+	void rejectsNullPluginRegistry() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new LinkDiscoverers(null);
+		});
 	}
 
 	@Test
-	public void favorsCustomLinkDiscovererOverDefault() {
+	void favorsCustomLinkDiscovererOverDefault() {
 
 		LinkDiscoverer low = new LowPriorityLinkDiscoverer();
 		LinkDiscoverer high = new HighPriorityLinkDiscoverer();

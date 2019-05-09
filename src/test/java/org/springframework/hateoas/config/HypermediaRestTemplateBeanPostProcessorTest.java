@@ -22,11 +22,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.http.MediaType;
@@ -40,13 +39,13 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Greg Turnquist
  */
-public class HypermediaRestTemplateBeanPostProcessorTest {
+class HypermediaRestTemplateBeanPostProcessorTest {
 
 	/**
 	 * @see #728
 	 */
 	@Test
-	public void shouldRegisterJustHal() {
+	void shouldRegisterJustHal() {
 
 		withContext(HalConfig.class, context -> {
 
@@ -63,7 +62,7 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	 * @see #728
 	 */
 	@Test
-	public void shouldRegisterHalAndCollectionJsonMessageConverters() {
+	void shouldRegisterHalAndCollectionJsonMessageConverters() {
 
 		withContext(HalAndCollectionJsonConfig.class, context -> {
 
@@ -81,7 +80,7 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	 * @see #728
 	 */
 	@Test
-	public void shouldRegisterHypermediaMessageConverters() {
+	void shouldRegisterHypermediaMessageConverters() {
 
 		withContext(AllHypermediaConfig.class, context -> {
 
@@ -98,7 +97,7 @@ public class HypermediaRestTemplateBeanPostProcessorTest {
 	}
 
 	@Test // #833
-	public void shouldRegisterCustomHypermediaMessageConverters() {
+	void shouldRegisterCustomHypermediaMessageConverters() {
 
 		withContext(CustomHypermediaConfig.class, context -> {
 

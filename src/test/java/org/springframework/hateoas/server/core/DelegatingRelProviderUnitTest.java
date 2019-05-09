@@ -17,7 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
@@ -27,10 +27,10 @@ import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
  *
  * @author Oliver Gierke
  */
-public class DelegatingRelProviderUnitTest {
+class DelegatingRelProviderUnitTest {
 
 	@Test
-	public void foo() {
+	void foo() {
 
 		LinkRelationProvider delegatingProvider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				new DefaultLinkRelationProvider());

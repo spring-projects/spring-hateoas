@@ -18,10 +18,9 @@ package org.springframework.hateoas.server.mvc;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 
 /**
@@ -29,21 +28,24 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
  * 
  * @author Oliver Gierke
  */
-public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
+class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 
 	/**
 	 * @see #219
 	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullType() {
-		new TypeConstrainedMappingJackson2HttpMessageConverter(null);
+	@Test
+	void rejectsNullType() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TypeConstrainedMappingJackson2HttpMessageConverter(null);
+		});
 	}
 
 	/**
 	 * @see #219, #360
 	 */
 	@Test
-	public void canReadTypeIfAssignableToConfiguredType() {
+	void canReadTypeIfAssignableToConfiguredType() {
 
 		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);
@@ -57,7 +59,7 @@ public class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	 * @see #219, #360
 	 */
 	@Test
-	public void canWriteTypeIfAssignableToConfiguredType() {
+	void canWriteTypeIfAssignableToConfiguredType() {
 
 		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);

@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.CollectionModel;
@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Greg Turnquist
  * @author Jens Schauder
  */
-public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final Links PAGINATION_LINKS = Links.of( //
 			new Link("localhost", IanaLinkRelations.SELF), //
@@ -55,8 +55,8 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 			new Link("bar", IanaLinkRelations.PREV) //
 	);
 
-	@Before
-	public void setUpModule() {
+	@BeforeEach
+	void setUpModule() {
 
 		this.mapper.registerModule(new Jackson2UberModule());
 		this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -66,7 +66,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void rendersSingleLinkAsObject() throws Exception {
+	void rendersSingleLinkAsObject() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
@@ -79,7 +79,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeSingleLink() throws Exception {
+	void deserializeSingleLink() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
@@ -93,7 +93,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void rendersMultipleLinkAsArray() throws Exception {
+	void rendersMultipleLinkAsArray() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
@@ -107,7 +107,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeMultipleLinks() throws Exception {
+	void deserializeMultipleLinks() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
@@ -121,7 +121,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void rendersSimpleResourcesAsEmbedded() throws Exception {
+	void rendersSimpleResourcesAsEmbedded() throws Exception {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
@@ -137,7 +137,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializesSimpleResourcesWithNoLinks() throws Exception {
+	void deserializesSimpleResourcesWithNoLinks() throws Exception {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
@@ -158,7 +158,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeComplexResourcesSimply() throws IOException {
+	void deserializeComplexResourcesSimply() throws IOException {
 
 		List<EntityModel<String>> content = new ArrayList<>();
 		content.add(new EntityModel<>("first"));
@@ -183,7 +183,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void renderSimpleResource() throws Exception {
+	void renderSimpleResource() throws Exception {
 
 		EntityModel<String> data = new EntityModel<>("first", new Link("localhost"));
 
@@ -194,7 +194,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void renderResourceWithCustomRel() throws Exception {
+	void renderResourceWithCustomRel() throws Exception {
 
 		EntityModel<String> data2 = new EntityModel<>("second",
 				new Link("localhost").withRel("custom"));
@@ -206,7 +206,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void renderResourceWithMultipleLinks() throws Exception {
+	void renderResourceWithMultipleLinks() throws Exception {
 
 		EntityModel<String> data3 = new EntityModel<>("third", new Link("localhost"),
 				new Link("second").withRel("second"), new Link("third").withRel("third"));
@@ -218,7 +218,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void renderResourceWithMultipleRels() throws Exception {
+	void renderResourceWithMultipleRels() throws Exception {
 
 		EntityModel<String> data4 = new EntityModel<>("third", new Link("localhost"),
 				new Link("localhost").withRel("https://example.org/rels/todo"), new Link("second").withRel("second"),
@@ -231,7 +231,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeResource() throws IOException {
+	void deserializeResource() throws IOException {
 
 		JavaType resourceStringType = mapper.getTypeFactory().constructParametricType(EntityModel.class,
 				String.class);
@@ -269,7 +269,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void renderComplexStructure() throws Exception {
+	void renderComplexStructure() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -288,7 +288,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeResources() throws Exception {
+	void deserializeResources() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -310,7 +310,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeEmptyValue() throws Exception {
+	void deserializeEmptyValue() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -332,7 +332,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void serializeEmptyResources() throws Exception {
+	void serializeEmptyResources() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -350,7 +350,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeEmptyResources() {
+	void deserializeEmptyResources() {
 
 		List<EntityModel<String>> data = new ArrayList<>();
 		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
@@ -374,7 +374,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeResourcesSimply() throws Exception {
+	void deserializeResourcesSimply() throws Exception {
 
 		List<String> data = new ArrayList<>();
 		data.add("first");
@@ -395,7 +395,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void serializeWrappedSimplePojo() throws Exception {
+	void serializeWrappedSimplePojo() throws Exception {
 
 		Employee employee = new Employee("Frodo", "ring bearer");
 		EntityModel<Employee> expected = new EntityModel<>(employee,
@@ -410,7 +410,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeWrappedSimplePojo() throws IOException {
+	void deserializeWrappedSimplePojo() throws IOException {
 
 		Employee employee = new Employee("Frodo", "ring bearer");
 		EntityModel<Employee> expected = new EntityModel<>(employee,
@@ -427,7 +427,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeWrappedEmptyPojo() throws IOException {
+	void deserializeWrappedEmptyPojo() throws IOException {
 
 		Employee employee = new Employee();
 		EntityModel<Employee> expected = new EntityModel<>(employee,
@@ -444,7 +444,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void serializeConcreteResourceSupport() throws Exception {
+	void serializeConcreteResourceSupport() throws Exception {
 
 		EmployeeResource expected = new EmployeeResource("Frodo", "ring bearer");
 		expected.add(new Link("/employees/1").withSelfRel());
@@ -459,7 +459,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeConcreteResourceSupport() throws Exception {
+	void deserializeConcreteResourceSupport() throws Exception {
 
 		EmployeeResource expected = new EmployeeResource("Frodo", "ring bearer");
 		expected.add(new Link("/employees/1").withSelfRel());
@@ -475,7 +475,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializeEmptyConcreteResourceSupport() throws Exception {
+	void deserializeEmptyConcreteResourceSupport() throws Exception {
 
 		EmployeeResource expected = new EmployeeResource(null, null);
 		expected.add(new Link("/employees/1").withSelfRel());
@@ -492,7 +492,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void serializesPagedResource() throws Exception {
+	void serializesPagedResource() throws Exception {
 
 		String actual = write(setupAnnotatedPagedResources());
 		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())));
@@ -502,7 +502,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializesPagedResource() throws Exception {
+	void deserializesPagedResource() throws Exception {
 
 		PagedModel<EntityModel<Employee>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),
@@ -516,7 +516,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void deserializesPagedResourceWithEmptyPageInformation() throws Exception {
+	void deserializesPagedResourceWithEmptyPageInformation() throws Exception {
 
 		PagedModel<EntityModel<Employee>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("paged-resources-empty-page.json", getClass())),
@@ -530,7 +530,7 @@ public class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingInte
 	 * @see #784
 	 */
 	@Test
-	public void handleTemplatedLinksOnDeserialization() throws IOException {
+	void handleTemplatedLinksOnDeserialization() throws IOException {
 
 		RepresentationModel<?> original = new RepresentationModel<>();
 		original.add(new Link("/orders{?id}", "order"));
