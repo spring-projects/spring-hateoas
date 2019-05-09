@@ -80,9 +80,9 @@
 		<jsr305.version>3.0.2</jsr305.version>
 		<junit.version>5.4.1</junit.version>
 		<minidevjson.version>2.2.1</minidevjson.version>
-		<reactor-bom.version>Dysprosium-BUILD-SNAPSHOT</reactor-bom.version>
+		<reactor-bom.version>Dysprosium-M1</reactor-bom.version>
 		<slf4j.version>1.7.25</slf4j.version>
-		<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
+		<spring.version>5.2.0.M2</spring.version>
 		<spring-plugin.version>2.0.0.M1</spring-plugin.version>
 		<kotlin.version>1.3.21</kotlin.version>
 	</properties>
