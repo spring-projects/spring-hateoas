@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
+	<version>1.0.0.M2</version>
 
 	<name>Spring HATEOAS</name>
 	<url>https://github.com/SpringSource/spring-hateoas</url>
@@ -378,7 +378,7 @@
 								<configuration>
 									<tasks>
 										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-											<fileset dir="${project.build.directory}/site"/>
+											<fileset dir="${project.build.directory}/site" />
 										</zip>
 									</tasks>
 								</configuration>
