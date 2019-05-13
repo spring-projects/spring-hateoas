@@ -1,49 +1,53 @@
 ---
 resource_types:
 - name: artifactory-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: springio/artifactory-resource
     tag:        latest
 
 - name: github-status
-  type: docker-image
+  type: registry-image
   source:
     repository: dpb587/github-status-resource
     tag:        master
 
 - name: pull-request
-  type: docker-image
+  type: registry-image
   source:
     repository: jtarchie/pr
     tag:        latest
 
 - name: slack-notification
-  type: docker-image
+  type: registry-image
   source:
     repository: nebhale/slack-notification-resource
 
 resources:
 - name: openjdk:8-jdk
-  type: docker-image
+  type: registry-image
+  icon: docker
   source:
     repository: openjdk
     tag:        8-jdk
 
 - name: openjdk:11-jdk
-  type: docker-image
+  type: registry-image
+  icon: docker
   source:
     repository: openjdk
     tag:        11-jdk
 
 - name: openjdk:13-jdk
-  type: docker-image
+  type: registry-image
+  icon: docker
   source:
     repository: openjdk
     tag:        13-jdk
 
 - name: spring-hateoas-github
   type: git
+  icon: github-circle
   source:
     uri: https://github.com/spring-projects/spring-hateoas.git
     branch: ((branch))
@@ -52,6 +56,7 @@ resources:
 
 - name: spring-hateoas-artifactory
   type: artifactory-resource
+  icon: package-variant
   source:
     uri: https://repo.spring.io
     username: ((artifactory-username))
@@ -60,6 +65,7 @@ resources:
 
 - name: spring-hateoas-pull-requests
   type: pull-request
+  icon: source-pull
   source:
     access_token: ((github-access-token))
     repo: spring-projects/spring-hateoas
@@ -67,12 +73,14 @@ resources:
 
 - name: spring-hateoas-release
   type: git
+  icon: github-circle
   source:
     uri: https://github.com/spring-projects/spring-hateoas.git
-    branch: ((release-branch))
+    tag_filter: 1*
 
 - name: spring-hateoas-status
   type: github-status
+  icon: eye-check
   source:
     access_token: ((github-access-token))
     repository:   spring-projects/spring-hateoas
@@ -80,12 +88,14 @@ resources:
 
 - name: spring-hateoas-examples-github
   type: git
+  icon: github-circle
   source:
     uri: https://github.com/spring-projects/spring-hateoas-examples.git
     branch: ((branch))
 
 - name: spring-hateoas-examples-artifactory
   type: artifactory-resource
+  icon: package-variant
   source:
     uri: https://repo.spring.io
     username: ((artifactory-username))
@@ -94,6 +104,7 @@ resources:
 
 - name: spring-hateoas-examples-pull-requests
   type: pull-request
+  icon: source-pull
   source:
     access_token: ((github-access-token))
     repo: spring-projects/spring-hateoas-examples
@@ -101,12 +112,14 @@ resources:
 
 - name: spring-hateoas-examples-release
   type: git
+  icon: github-circle
   source:
     uri: https://github.com/spring-projects/spring-hateoas-examples.git
-    branch: ((release-branch))
+    tag_filter: v*
 
 - name: spring-hateoas-examples-status
   type: github-status
+  icon: eye-check
   source:
     access_token: ((github-access-token))
     repository:   spring-projects/spring-hateoas-examples
@@ -114,11 +127,13 @@ resources:
 
 - name: slack
   type: slack-notification
+  icon: slack
   source:
     url: ((slack))
 
 - name: 8-jdk-with-graphviz-docker-image-github
   type: git
+  icon: github-circle
   source:
     uri: https://github.com/spring-projects/spring-hateoas.git
     branch: master
@@ -127,9 +142,10 @@ resources:
 
 - name: 8-jdk-with-graphviz:latest
   type: docker-image
+  icon: docker
   source:
     repository: springci/spring-hateoas-8-jdk-with-graphviz
-    email:      ((docker-email))
+    email: ((docker-email))
     username:   ((docker-username))
     password:   ((docker-password))
 
@@ -175,7 +191,15 @@ jobs:
   - task: test
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "non-existent" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: test-spring-next-jdk8
   serial: true
@@ -189,7 +213,15 @@ jobs:
   - task: test
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "spring-next" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: test-jdk11
   serial: true
@@ -204,7 +236,15 @@ jobs:
     image: openjdk:11-jdk
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "non-existant" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: test-spring-next-jdk11
   serial: true
@@ -219,7 +259,15 @@ jobs:
     image: openjdk:11-jdk
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "spring-next" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: test-jdk13
   serial: true
@@ -234,7 +282,15 @@ jobs:
     image: openjdk:13-jdk
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "non-existant" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: test-spring-next-jdk13
   serial: true
@@ -249,7 +305,15 @@ jobs:
     image: openjdk:13-jdk
     file: spring-hateoas-github/ci/test.yml
     params: { PROFILE: "spring-next" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: build
   serial: true
@@ -393,7 +457,15 @@ jobs:
   - task: test
     file: spring-hateoas-examples-github/ci/test.yml
     params: { PROFILE: "non-existent" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: spring-hateoas-examples-test-jdk11
   serial: true
@@ -411,7 +483,15 @@ jobs:
     image: openjdk:11-jdk
     file: spring-hateoas-examples-github/ci/test.yml
     params: { PROFILE: "non-existant" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: spring-hateoas-examples-test-jdk13
   serial: true
@@ -429,7 +509,15 @@ jobs:
     image: openjdk:13-jdk
     file: spring-hateoas-examples-github/ci/test.yml
     params: { PROFILE: "non-existant" }
-  <<: *slack-test-failure
+  on_failure:
+    put: slack
+    params:
+      attachments:
+        - color: danger
+          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
+          text: "Test has failed"
+          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
+          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 - name: spring-hateoas-examples-build
   serial: true
@@ -768,27 +856,5 @@ jobs:
             text: "Releasing to artifactory has succeeded!"
             title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
             title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-
-slack-test-success: &slack-test-success
-  on_success:
-    put: slack
-    params:
-      attachments:
-        - color: good
-          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
-          text: "Test has succeeded"
-          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
-          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-
-slack-test-failure: &slack-test-failure
-  on_failure:
-    put: slack
-    params:
-      attachments:
-        - color: danger
-          fallback: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME <FAILURE>"
-          text: "Test has failed"
-          title: "$BUILD_PIPELINE_NAME/$BUILD_JOB_NAME #$BUILD_NAME"
-          title_link: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
 
 

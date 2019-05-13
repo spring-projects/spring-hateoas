@@ -27,7 +27,7 @@ WARNING: Do NOT check this file into source control! If you'll check, `credentia
 With this in place, run the following `fly` commands to create pipelines:
 
 ----
-% fly -t spring-data sp -p spring-hateoas -c ci/pipeline-template.yml -l credentials.yml -v branch=master -v release-branch=release
+% fly -t spring-data sp -p spring-hateoas -c ci/pipeline-template.yml -l credentials.yml -v branch=master
 ----
 
 With this pipeline in place, you can now activate and expose it:
