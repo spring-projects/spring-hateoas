@@ -155,7 +155,7 @@
 		<profile>
 
 			<!--
-				Profile to be activated when building the distribution atrifacts.
+				Profile to be activated when building the distribution artifacts.
 
 				Generates reference documentation, aggregates JavaDoc etc.
 			-->
@@ -259,7 +259,7 @@
 								<configuration>
 									<backend>html5</backend>
 									<sourceHighlighter>highlight.js</sourceHighlighter>
-									<outputDirectory>${project.build.directory}/site/reference/html</outputDirectory>
+									<outputDirectory>${project.reporting.outputDirectory}/reference/html</outputDirectory>
 									<sectids>false</sectids>
 									<attributes>
 										<code-dir>${basedir}/src/docs/java/org/springframework/hateoas</code-dir>
@@ -329,6 +329,9 @@
 								</goals>
 							</execution>
 						</executions>
+						<configuration>
+							<reportOutputDirectory>${project.reporting.outputDirectory}/api</reportOutputDirectory>
+						</configuration>
 					</plugin>
 
 					<plugin>
@@ -344,7 +347,7 @@
 								</goals>
 								<configuration>
 									<target>
-										<copy todir="${basedir}/target/site/reference/html/images">
+										<copy todir="${project.reporting.outputDirectory}/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
 												<include name="**/*.png" />
 												<include name="**/*.gif" />
@@ -361,7 +364,7 @@
 								<phase>prepare-package</phase>
 								<configuration>
 									<target>
-										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${basedir}/target/site/reference/pdf/${project.artifactId}-reference.pdf" failonerror="false" />
+										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.reporting.outputDirectory}/reference/pdf/${project.artifactId}-reference.pdf" />
 									</target>
 								</configuration>
 								<goals>
@@ -370,24 +373,74 @@
 							</execution>
 
 							<execution>
-								<id>package-and-attach-docs-zip</id>
-								<phase>package</phase>
+								<id>copy-changelog</id>
+								<phase>prepare-package</phase>
+								<configuration>
+									<target>
+										<copy file="${basedir}/src/main/resources/changelog.txt" tofile="${project.reporting.outputDirectory}/changelog.txt" />
+									</target>
+								</configuration>
 								<goals>
 									<goal>run</goal>
 								</goals>
-								<configuration>
-									<tasks>
-										<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-											<fileset dir="${project.build.directory}/site" />
-										</zip>
-									</tasks>
-								</configuration>
 							</execution>
 
 						</executions>
 
 					</plugin>
 
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>wagon-maven-plugin</artifactId>
+						<configuration>
+							<fromDir>${project.build.directory}</fromDir>
+							<serverId>static-dot-s2</serverId>
+							<url>scp://docs.af.pivotal.io</url>
+						</configuration>
+
+						<executions>
+
+							<!-- Distribute static resources -->
+
+							<execution>
+								<id>upload-static-resources</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<fromDir>${project.reporting.outputDirectory}</fromDir>
+									<includes>**</includes>
+									<toDir>/var/www/domains/spring.io/www/htdocs/autorepo/docs/spring-hateoas/${project.version}</toDir>
+									<optimize>true</optimize>
+								</configuration>
+							</execution>
+
+							<!-- Makes sure resources can be overriden by others -->
+							<execution>
+								<id>make-resources-group-writable</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>sshexec</goal>
+								</goals>
+								<configuration> <!-- Prevent reformatting, wrap with CDATA -->
+									<commands>
+										<command>
+											<![CDATA[
+												 if [ -d /var/www/domains/spring.io/www/htdocs/autorepo/docs/spring-hateoas/${project.version}/ ]
+												 then
+													find /var/www/domains/spring.io/www/htdocs/autorepo/docs/spring-hateoas/${project.version}/ ! -perm -g=w -exec chmod g+w {} \;
+												 fi
+												]]>
+										</command>
+									</commands>
+								</configuration>
+							</execution>
+
+						</executions>
+					</plugin>
+
+					<!--
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>build-helper-maven-plugin</artifactId>
@@ -409,6 +462,15 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+					-->
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
 					</plugin>
 
 				</plugins>
