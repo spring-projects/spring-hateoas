@@ -1,6 +1,32 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.0.M2 (2019-05-13)
+----------------------------------------
+- #988 - Release 1.0 M2.
+- #985 - Stabilize on Spring Framework 5.2.0.M1.
+- #983 - Switch to Spring's ServerWebExchangeContextFilter.
+- #980 - Migrate to JUnit 5.
+- #977 - Performance improvements in link generation.
+- #973 - Add configuration options to select the web stack to add hypermedia support for.
+- #971 - Traverson to templated Link fails.
+- #919 - Upgrade to Spring Framework 5.2 M2.
+- #911 - Rename pull request tasks.
+- #910 - URL Cleanup.
+- #891 - Overhaul documentation section on EntityLinks.
+- #886 - Add section on forward header handling to reference documents.
+- #885 - Re-enable default registry of WebFlux encoders and decoders.
+- #867 - WebClientConfigurer overrides exchange strategies.
+- #863 - Removal of spring-plugin library.
+- #860 - Switch to URI.create().
+- #859 - Fix RepresentationModelProcessor to smoothly register with Spring MVC.
+- #856 - Improve migration script.
+- #855 - URL Cleanup.
+- #831 - Add nullability annotations to codebase.
+- #830 - Reorganize the labels.
+- #459 - Add Spring HATEOAS room to Gitter.
+
+
 Changes in version 1.0.0.M1 (2019-03-05)
 ----------------------------------------
 - #854 - Migrate off Objenesis in favor of Spring's ProxyFactory.

@@ -15,10 +15,12 @@
  */
 package org.springframework.hateoas.support;
 
+import net.minidev.json.JSONArray;
+
 import java.time.Duration;
 import java.util.Iterator;
+import java.util.List;
 
-import net.minidev.json.JSONArray;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Links;
 import org.springframework.http.HttpEntity;
@@ -35,7 +37,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 25;
+	private static final int MILESTONE_ID = 30;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {
@@ -61,7 +63,8 @@ class ChangelogCreator {
 			readPage(response.getBody(), printHeader);
 			printHeader = false;
 
-			Links links = Links.parse(response.getHeaders().get(HttpHeaders.LINK).get(0));
+			List<String> linksInHeader = response.getHeaders().get(HttpHeaders.LINK);
+			Links links = linksInHeader == null ? Links.NONE : Links.parse(linksInHeader.get(0));
 
 			if (links.getLink(IanaLinkRelations.NEXT).isPresent()) {
 

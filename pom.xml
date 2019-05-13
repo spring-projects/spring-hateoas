@@ -76,15 +76,13 @@
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson.version>2.9.8</jackson.version>
 		<java-module-name>spring.hateoas</java-module-name>
-		<jsonpath.version>2.2.0</jsonpath.version>
-		<jsr305.version>3.0.2</jsr305.version>
-		<junit.version>5.4.1</junit.version>
-		<minidevjson.version>2.2.1</minidevjson.version>
+		<jsonpath.version>2.4.0</jsonpath.version>
+		<junit.version>5.4.2</junit.version>
 		<reactor-bom.version>Dysprosium-M1</reactor-bom.version>
-		<slf4j.version>1.7.25</slf4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 		<spring.version>5.2.0.M2</spring.version>
 		<spring-plugin.version>2.0.0.M1</spring-plugin.version>
-		<kotlin.version>1.3.21</kotlin.version>
+		<kotlin.version>1.3.31</kotlin.version>
 	</properties>
 
 	<profiles>
