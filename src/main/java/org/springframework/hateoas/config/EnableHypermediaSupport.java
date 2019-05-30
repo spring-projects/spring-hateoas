@@ -74,7 +74,7 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
+		HAL(MediaTypes.HAL_JSON),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support

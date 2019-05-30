@@ -90,7 +90,7 @@ public class RepresentationModelProcessorIntegrationTest {
 	public void collectionModelProcessorShouldWork() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees").accept(HAL_JSON)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
@@ -109,7 +109,7 @@ public class RepresentationModelProcessorIntegrationTest {
 	public void entityModelProcessorShouldWork() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees/1").accept(HAL_JSON)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
@@ -125,7 +125,7 @@ public class RepresentationModelProcessorIntegrationTest {
 	public void wildcardProcessorShouldNotWork() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees").accept(HAL_JSON)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();

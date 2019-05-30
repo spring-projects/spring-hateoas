@@ -36,7 +36,7 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 	 * Constructor for {@link MediaTypes#HAL_JSON}.
 	 */
 	public HalLinkDiscoverer() {
-		this(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		this(MediaTypes.HAL_JSON);
 	}
 
 	protected HalLinkDiscoverer(MediaType... mediaTypes) {

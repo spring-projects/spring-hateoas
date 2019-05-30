@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.hal;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class HalTraversonDefaults implements TraversonDefaults {
 
-	private static final List<MediaType> HAL_FLAVORS = Arrays.asList(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+	private static final List<MediaType> HAL_FLAVORS = Collections.singletonList(MediaTypes.HAL_JSON);
 
 	/*
 	 * (non-Javadoc)
@@ -54,7 +53,7 @@ class HalTraversonDefaults implements TraversonDefaults {
 		converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
 		List<MediaType> halFlavors = mediaTypes.stream() //
-				.filter(it -> HAL_FLAVORS.contains(it)) //
+				.filter(HAL_FLAVORS::contains) //
 				.collect(Collectors.toList());
 
 		if (!halFlavors.isEmpty()) {

@@ -52,7 +52,6 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
-							MediaTypes.HAL_JSON_UTF8, //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json"));
 		});
@@ -69,7 +68,6 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
-							MediaTypes.HAL_JSON_UTF8, //
 							MediaTypes.COLLECTION_JSON, //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json"));
@@ -87,7 +85,6 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
-							MediaTypes.HAL_JSON_UTF8, //
 							MediaTypes.HAL_FORMS_JSON, //
 							MediaTypes.COLLECTION_JSON, //
 							MediaTypes.UBER_JSON, //
@@ -104,7 +101,6 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
-							MediaTypes.HAL_JSON_UTF8, //
 							MediaType.parseMediaType("application/frodo+json"), //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json") //
