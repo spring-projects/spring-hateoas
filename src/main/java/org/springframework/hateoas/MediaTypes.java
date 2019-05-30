@@ -38,16 +38,6 @@ public class MediaTypes {
 	public static final MediaType HAL_JSON = MediaType.valueOf(HAL_JSON_VALUE);
 
 	/**
-	 * A String equivalent of {@link MediaTypes#HAL_JSON_UTF8}.
-	 */
-	public static final String HAL_JSON_UTF8_VALUE = HAL_JSON_VALUE + ";charset=UTF-8";
-
-	/**
-	 * Public constant media type for {@code application/hal+json;charset=UTF-8}.
-	 */
-	public static final MediaType HAL_JSON_UTF8 = MediaType.valueOf(HAL_JSON_UTF8_VALUE);
-
-	/**
 	 * A String equivalent of {@link MediaTypes#ALPS_JSON}.
 	 */
 	public static final String ALPS_JSON_VALUE = "application/alps+json";

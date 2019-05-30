@@ -81,12 +81,12 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 	}
 
 	/**
@@ -145,9 +145,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHalWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
@@ -162,8 +162,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHalWebFluxConfig.class);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 
 		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
 		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
@@ -177,9 +177,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalAndCollectionJsonWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
@@ -198,8 +198,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalAndCollectionJsonWebFluxConfig.class);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 
 		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
 		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
@@ -216,9 +216,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
@@ -241,8 +241,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 
 		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
 		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
@@ -276,7 +276,7 @@ class HypermediaWebFluxConfigurerTest {
 
 		this.testClient.get().uri("/reactive").accept(MediaTypes.HAL_JSON).exchange() //
 				.expectStatus().isOk() //
-				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(RepresentationModel.class).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resourceSupport -> {
 
@@ -287,7 +287,7 @@ class HypermediaWebFluxConfigurerTest {
 				}).verifyComplete();
 
 		this.testClient.get().uri("/reactive/employees").accept(MediaTypes.HAL_JSON).exchange() //
-				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(this.resourcesEmployeeType).getResponseBody() //
 				.as(StepVerifier::create).expectNextMatches(resources -> {
 
@@ -304,7 +304,7 @@ class HypermediaWebFluxConfigurerTest {
 				}).verifyComplete();
 
 		this.testClient.get().uri("/reactive/employees/1").accept(MediaTypes.HAL_JSON).exchange() //
-				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(this.resourceEmployeeType).getResponseBody() //
 				.as(StepVerifier::create).expectNextMatches(employee -> {
 

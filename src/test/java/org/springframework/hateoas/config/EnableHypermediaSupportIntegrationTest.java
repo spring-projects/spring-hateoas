@@ -110,8 +110,6 @@ class EnableHypermediaSupportIntegrationTest {
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
 					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
-					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -139,8 +137,6 @@ class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
-					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
 					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
@@ -210,7 +206,7 @@ class EnableHypermediaSupportIntegrationTest {
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
 			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes()) //
-					.contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+					.contains(MediaTypes.HAL_JSON);
 
 			boolean found = false;
 
@@ -225,7 +221,7 @@ class EnableHypermediaSupportIntegrationTest {
 							.getField(processor, "messageConverters");
 
 					assertThat(converters.get(0)).isInstanceOfSatisfying(TypeConstrainedMappingJackson2HttpMessageConverter.class,
-							it -> assertThat(it.getSupportedMediaTypes()).contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
+							it -> assertThat(it.getSupportedMediaTypes()).contains(MediaTypes.HAL_JSON));
 				}
 			}
 
@@ -343,7 +339,7 @@ class EnableHypermediaSupportIntegrationTest {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
 			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
-					.contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+					.contains(MediaTypes.HAL_JSON);
 		});
 	}
 

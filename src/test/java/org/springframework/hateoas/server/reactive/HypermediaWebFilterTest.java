@@ -71,7 +71,7 @@ class HypermediaWebFilterTest {
 				.accept(MediaTypes.HAL_JSON) //
 				.exchange() //
 				.expectStatus().isOk() //
-				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(RepresentationModel.class) //
 				.getResponseBody() //
 				.as(StepVerifier::create) //

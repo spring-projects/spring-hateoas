@@ -78,7 +78,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.APPLICATION_XHTML_XML, MediaType.ALL)) //
 				.andExpect(status().isOk())
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
 	}
 
 	/**
@@ -91,7 +91,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.ALL)) //
 				.andExpect(status().isOk())
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
 	}
 
 	@RestController

@@ -71,14 +71,6 @@ class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 				.hasValue(expected);
 	}
 
-	/**
-	 * @see #470
-	 */
-	@Test
-	void supportsHalUtf8() {
-		assertThat(getDiscoverer().supports(MediaTypes.HAL_JSON_UTF8)).isTrue();
-	}
-
 	@Override
 	protected LinkDiscoverer getDiscoverer() {
 		return discoverer;
