@@ -1,0 +1,87 @@
+image:https://spring.io/badges/spring-hateoas/ga.svg[link=https://spring.io/projects/spring-hateoas]
+image:https://spring.io/badges/spring-hateoas/snapshot.svg[link=https://spring.io/projects/spring-hateoas]
+image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://gitter.im/spring-projects/spring-hateoas]
+
+image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2Fmaster&subject=master[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
+image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F0.25.x&subject=0.25.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
+
+
+= Spring HATEOAS
+
+This project provides some APIs to ease creating REST representations that follow the https://en.wikipedia.org/wiki/HATEOAS[HATEOAS] principle when working with Spring and especially Spring MVC. The core problem it tries to address is link creation and representation assembly.
+
+== Working with Spring HATEOAS
+
+Since all commits are headlined with its github issue, git will treat it as a comment. To get around this, apply the following configuration to your clone:
+
+[source]
+----
+git config core.commentchar "/"
+----
+
+== Making a release
+
+1. Create a new release (on the main branch).
++
+----
+% ci/create-release.sh <release version> <next snapshot version>
+----
++
+2. With the release tagged, push the tagged version to the release branch.
++
+----
+% git checkout -b release-0.x
+% git reset --hard <tag>
+% git push -f origin release-0.x
+----
+
+NOTE: You can chain the previous set of commands together using `&&`.
+
+The pipeline will build and release the "release" branch. It will also build a new a new snapshot and stage it on artifactory.
+
+The pipeline will pick up the next tag and release it. It will also build a new snapshot and stage it on artifactory.
+
+=== Running CI tasks locally
+
+Since the pipeline uses Docker, it's easy to:
+
+* Debug what went wrong on your local machine.
+* Test out a a tweak to your `test.sh` script before sending it out.
+* Experiment against a new image before submitting your pull request.
+
+All of these use cases are great reasons to essentially run what Jenkins does on your local machine.
+
+IMPORTANT: To do this you must have Docker installed on your machine.
+
+1. `docker run -it --mount type=bind,source="$(pwd)",target=/spring-hateoas-github adoptopenjdk/openjdk8:latest /bin/bash`
++
+This will launch the Docker image and mount your source code at `spring-hateoas-github`.
++
+2. `cd spring-hateoas-github`
++
+Next, run the `test.sh` script from inside the container:
++
+2. `PROFILE=none ci/test.sh`
+
+Since the container is binding to your source, you can make edits from your IDE and continue to run build jobs.
+
+If you need to test the `build.sh` script, then do this:
+
+1. `docker run -it --mount type=bind,source="$(pwd)",target=/spring-hateoas-github --mount type=bind,source="/tmp/spring-hateoas-artifactory",target=/spring-hateoas-artifactory adoptopenjdk/openjdk8:latest /bin/bash`
++
+This will launch the Docker image and mount your source code at `spring-hateoas-github` and the temporary
+artifactory output directory at `spring-hateoas-artifactory`.
++
+Next, run the `build.sh` script from inside the container:
++
+2. `ci/build.sh`
+
+IMPORTANT: `build.sh` will attempt to push to Artifactory. If you don't supply credentials, it will fail.
+
+NOTE: Docker containers can eat up disk space fast! From time to time, run `docker system prune` to clean out old images.
+
+== Resources
+
+* Reference documentation - https://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], https://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
+* https://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/[JavaDoc]
+* https://spring.io/guides/gs/rest-hateoas/[Getting started guide]
