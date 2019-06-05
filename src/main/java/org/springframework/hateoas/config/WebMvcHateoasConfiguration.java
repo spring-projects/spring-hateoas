@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Spring MVC HATEOAS Configuration
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 @Configuration
 class WebMvcHateoasConfiguration {
@@ -59,10 +60,16 @@ class WebMvcHateoasConfiguration {
 	}
 
 	@Bean
-	HypermediaRepresentationModelBeanProcessorPostProcessor hypermediaRepresentionModelProcessorConfigurator(
+	RepresentationModelProcessorInvoker representationModelProcessorInvoker(
 			List<RepresentationModelProcessor<?>> processors) {
+		return new RepresentationModelProcessorInvoker(processors);
+	}
 
-		return new HypermediaRepresentationModelBeanProcessorPostProcessor(processors);
+	@Bean
+	static HypermediaRepresentationModelBeanProcessorPostProcessor hypermediaRepresentionModelProcessorConfigurator(
+			ObjectProvider<RepresentationModelProcessorInvoker> invoker) {
+
+		return new HypermediaRepresentationModelBeanProcessorPostProcessor(invoker);
 	}
 
 	@Bean
@@ -107,12 +114,18 @@ class WebMvcHateoasConfiguration {
 
 	/**
 	 * @author Greg Turnquist
+	 * @author Oliver Drotbohm
 	 */
 	@RequiredArgsConstructor
 	static class HypermediaRepresentationModelBeanProcessorPostProcessor implements BeanPostProcessor {
 
-		private final List<RepresentationModelProcessor<?>> processors;
+		private final ObjectProvider<RepresentationModelProcessorInvoker> invoker;
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization(java.lang.Object, java.lang.String)
+		 */
+		@NonNull
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
@@ -124,7 +137,7 @@ class WebMvcHateoasConfiguration {
 				delegate.addHandlers(adapter.getReturnValueHandlers());
 
 				RepresentationModelProcessorHandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(
-						delegate, new RepresentationModelProcessorInvoker(processors));
+						delegate, () -> invoker.getObject());
 
 				adapter.setReturnValueHandlers(Collections.singletonList(handler));
 			}

@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -60,7 +61,7 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 	}
 
 	private final @NonNull HandlerMethodReturnValueHandler delegate;
-	private final @NonNull RepresentationModelProcessorInvoker invoker;
+	private final @NonNull Supplier<RepresentationModelProcessorInvoker> invoker;
 
 	private boolean rootLinksAsHeaders = false;
 
@@ -122,7 +123,7 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 			targetType = returnValueType;
 		}
 
-		RepresentationModel<?> result = invoker.invokeProcessorsFor((RepresentationModel) value, targetType);
+		RepresentationModel<?> result = invoker.get().invokeProcessorsFor((RepresentationModel) value, targetType);
 		delegate.handleReturnValue(rewrapResult(result, returnValue), returnType, mavContainer, webRequest);
 	}
 

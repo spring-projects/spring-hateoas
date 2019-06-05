@@ -18,6 +18,7 @@ package org.springframework.hateoas.server.mvc;
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.util.ReflectionUtils.*;
 
@@ -53,7 +54,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 
 /**
  * Unit tests for {@link RepresentationModelProcessorHandlerMethodReturnValueHandler}.
- * 
+ *
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
@@ -253,7 +254,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		MethodParameter parameter = METHOD_PARAMS.get("resource");
 
 		RepresentationModelProcessorHandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(
-				delegate, new RepresentationModelProcessorInvoker(resourceProcessors));
+				delegate, () -> new RepresentationModelProcessorInvoker(resourceProcessors));
 		handler.setRootLinksAsHeaders(true);
 		handler.handleReturnValue(mapper.apply(resource), parameter, null, null);
 
@@ -299,7 +300,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		resourceProcessors.add((RepresentationModelProcessor<?>) factory.getProxy());
 
 		new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate,
-				new RepresentationModelProcessorInvoker(resourceProcessors));
+				() -> new RepresentationModelProcessorInvoker(resourceProcessors));
 	}
 
 	/**
@@ -322,7 +323,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		}
 
 		HandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate,
-				new RepresentationModelProcessorInvoker(resourceProcessors));
+				() -> new RepresentationModelProcessorInvoker(resourceProcessors));
 		handler.handleReturnValue(returnValue, methodParam, null, null);
 
 		verify(delegate, times(1)).handleReturnValue(expected, methodParam, null, null);
@@ -334,7 +335,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 		when(delegate.supportsReturnType(Mockito.any(MethodParameter.class))).thenReturn(value);
 
 		HandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(delegate,
-				new RepresentationModelProcessorInvoker(resourceProcessors));
+				() -> new RepresentationModelProcessorInvoker(resourceProcessors));
 
 		assertThat(handler.supportsReturnType(parameter)).isEqualTo(value);
 	}
