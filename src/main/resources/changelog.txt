@@ -1,6 +1,18 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.0.M3 (2019-06-14)
+----------------------------------------
+- #1002 - Release 1.0 M3. 
+- #1001 - Upgrade to Reactor Dysprosium M2.
+- #1000 - Upgrade to Spring Framework 5.0 M3.
+- #999 - Introduce Jenkins CI.
+- #998 - Prevent eager bean instantiation from WebMvcHateoasConfiguration.
+- #997 - Upgrade to Jackson 2.9.9.
+- #990 - Fix deployment of Javadoc and reference docs.
+- #989 - Update pipeline to support Concourse 5.
+- #888 - Upgrade to Spring Plugin 2.0 M2.
+
 Changes in version 1.0.0.M2 (2019-05-13)
 ----------------------------------------
 - #988 - Release 1.0 M2.
