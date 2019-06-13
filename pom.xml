@@ -81,7 +81,7 @@
 		<reactor-bom.version>Dysprosium-M2</reactor-bom.version>
 		<slf4j.version>1.7.26</slf4j.version>
 		<spring.version>5.2.0.M3</spring.version>
-		<spring-plugin.version>2.0.0.M1</spring-plugin.version>
+		<spring-plugin.version>2.0.0.M2</spring-plugin.version>
 		<kotlin.version>1.3.31</kotlin.version>
 	</properties>
 
