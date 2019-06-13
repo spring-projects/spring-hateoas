@@ -66,7 +66,7 @@ class CustomHypermediaWebMvcTest {
 	void getUsingCustomMediaType() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
