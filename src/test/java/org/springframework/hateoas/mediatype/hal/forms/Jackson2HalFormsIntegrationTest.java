@@ -18,6 +18,8 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import lombok.Getter;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +30,8 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -53,10 +57,12 @@ import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.support.MappingUtils;
+import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jayway.jsonpath.JsonPath;
 
 /**
  * @author Greg Turnquist
@@ -79,7 +85,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				provider, CurieProvider.NONE, new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
+				provider, CurieProvider.NONE, new MessageSourceAccessor(messageSource, Locale.US), true,
+				new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -393,6 +400,31 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		assertThat(deserialized).isEqualTo(original);
 	}
 
+	@ParameterizedTest // #979
+	@ValueSource(strings = { "firstname._prompt", //
+			"HalFormsPayload.firstname._prompt", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload.firstname._prompt" })
+	public void usesResourceBundleToCreatePropertyPrompts(String key) {
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(key, Locale.US, "Vorname");
+
+		Link link = new Link("some:link") //
+				.andAffordance(HttpMethod.POST, HalFormsPayload.class, Collections.emptyList(), Object.class);
+
+		EntityModel<HalFormsPayload> model = new EntityModel<>(new HalFormsPayload(), link);
+		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThatCode(() -> {
+
+			String promptString = JsonPath.compile("$._templates.default.properties[0].prompt") //
+					.read(mapper.writeValueAsString(model));
+
+			assertThat(promptString).isEqualTo("Vorname");
+
+		}).doesNotThrowAnyException();
+	}
+
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
 
 		LocaleContextHolder.setLocale(Locale.US);
@@ -448,10 +480,16 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
-				messageSource == null ? null : new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
+				messageSource == null ? null : new MessageSourceAccessor(messageSource, Locale.US), true,
+				new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);
 
 		return mapper;
+	}
+
+	public static class HalFormsPayload {
+		private @Getter String firstname;
+
 	}
 }

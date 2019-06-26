@@ -15,12 +15,17 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import lombok.RequiredArgsConstructor;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -32,7 +37,9 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -58,16 +65,18 @@ class HalFormsSerializers {
 
 		private static final long serialVersionUID = -7912243216469101379L;
 
+		private final MessageSourceAccessor accessor;
 		private final BeanProperty property;
 
-		HalFormsResourceSerializer(@Nullable BeanProperty property) {
+		HalFormsResourceSerializer(MessageSourceAccessor accessor, @Nullable BeanProperty property) {
 
 			super(EntityModel.class, false);
+			this.accessor = accessor;
 			this.property = property;
 		}
 
-		HalFormsResourceSerializer() {
-			this(null);
+		HalFormsResourceSerializer(MessageSourceAccessor accessor) {
+			this(accessor, null);
 		}
 
 		/*
@@ -80,7 +89,7 @@ class HalFormsSerializers {
 
 			HalFormsDocument<?> doc = HalFormsDocument.forResource(value.getContent()) //
 					.withLinks(value.getLinks()) //
-					.withTemplates(findTemplates(value));
+					.withTemplates(findTemplates(value, accessor));
 
 			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
@@ -134,7 +143,7 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourceSerializer(property);
+			return new HalFormsResourceSerializer(accessor, property);
 		}
 	}
 
@@ -148,17 +157,20 @@ class HalFormsSerializers {
 
 		private final BeanProperty property;
 		private final Jackson2HalModule.EmbeddedMapper embeddedMapper;
+		private final MessageSourceAccessor accessor;
 
-		HalFormsResourcesSerializer(@Nullable BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsResourcesSerializer(MessageSourceAccessor accessor, @Nullable BeanProperty property,
+				Jackson2HalModule.EmbeddedMapper embeddedMapper) {
 
 			super(CollectionModel.class, false);
 
 			this.property = property;
 			this.embeddedMapper = embeddedMapper;
+			this.accessor = accessor;
 		}
 
-		HalFormsResourcesSerializer(Jackson2HalModule.EmbeddedMapper embeddedMapper) {
-			this(null, embeddedMapper);
+		HalFormsResourcesSerializer(MessageSourceAccessor accessor, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+			this(accessor, null, embeddedMapper);
 		}
 
 		/*
@@ -179,14 +191,14 @@ class HalFormsSerializers {
 						.withEmbedded(embeddeds) //
 						.withPageMetadata(((PagedModel<?>) value).getMetadata()) //
 						.withLinks(value.getLinks()) //
-						.withTemplates(findTemplates(value));
+						.withTemplates(findTemplates(value, accessor));
 
 			} else {
 
 				doc = HalFormsDocument.empty() //
 						.withEmbedded(embeddeds) //
 						.withLinks(value.getLinks()) //
-						.withTemplates(findTemplates(value));
+						.withTemplates(findTemplates(value, accessor));
 			}
 
 			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
@@ -241,7 +253,7 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourcesSerializer(property, embeddedMapper);
+			return new HalFormsResourcesSerializer(accessor, property, embeddedMapper);
 		}
 	}
 
@@ -251,14 +263,16 @@ class HalFormsSerializers {
 	 * @param resource
 	 * @return
 	 */
-	private static Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource) {
+	private static Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource,
+			MessageSourceAccessor accessor) {
 
 		if (!resource.hasLink(IanaLinkRelations.SELF)) {
 			return Collections.emptyMap();
 		}
 
 		Map<String, HalFormsTemplate> templates = new HashMap<>();
-		List<Affordance> affordances = resource.getLink(IanaLinkRelations.SELF).map(Link::getAffordances)
+		List<Affordance> affordances = resource.getLink(IanaLinkRelations.SELF) //
+				.map(Link::getAffordances) //
 				.orElse(Collections.emptyList());
 
 		affordances.stream() //
@@ -268,8 +282,14 @@ class HalFormsSerializers {
 				.peek(it -> validate(resource, it)) //
 				.forEach(it -> {
 
+					Class<?> type = it.getInputType().resolve(Object.class);
+
+					List<HalFormsProperty> propertiesWithPrompt = it.getInputProperties().stream() //
+							.map(property -> property.withPrompt(accessor.getMessage(PromptLookup.of(type, property))))
+							.collect(Collectors.toList());
+
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
-							.withProperties(it.getInputProperties());
+							.withProperties(propertiesWithPrompt);
 
 					/*
 					 * First template in HAL-FORMS is "default".
@@ -278,6 +298,40 @@ class HalFormsSerializers {
 				});
 
 		return templates;
+	}
+
+	@RequiredArgsConstructor(staticName = "of")
+	static class PromptLookup implements MessageSourceResolvable {
+
+		private static final String PROMPT_TEMPLATE = "%s._prompt";
+
+		private final Class<?> type;
+		private final HalFormsProperty property;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
+		 */
+		@Nullable
+		@Override
+		public String getDefaultMessage() {
+			return StringUtils.capitalize(property.getName());
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.context.MessageSourceResolvable#getCodes()
+		 */
+		@NonNull
+		@Override
+		public String[] getCodes() {
+
+			String globalCode = String.format(PROMPT_TEMPLATE, property.getName());
+			String localCode = String.format("%s.%s", type.getSimpleName(), globalCode);
+			String qualifiedCode = String.format("%s.%s", type.getName(), globalCode);
+
+			return new String[] { qualifiedCode, localCode, globalCode };
+		}
 	}
 
 	/**

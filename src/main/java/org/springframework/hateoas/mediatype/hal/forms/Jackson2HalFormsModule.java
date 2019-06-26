@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
@@ -82,12 +83,14 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
+		setMixInAnnotation(EntityModel.class, EntityModelMixin.class);
 		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
 		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
-
-		addSerializer(new HalFormsResourceSerializer());
 	}
+
+	@JsonSerialize(using = HalFormsResourceSerializer.class)
+	abstract class EntityModelMixin<T> extends EntityModel<T> {}
 
 	@JsonSerialize(using = HalFormsResourcesSerializer.class)
 	abstract class CollectionModelMixin<T> extends CollectionModel<T> {
@@ -160,7 +163,8 @@ class Jackson2HalFormsModule extends SimpleModule {
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
-			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(mapper));
+			this.serializers.put(HalFormsResourceSerializer.class, new HalFormsResourceSerializer(accessor));
+			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(accessor, mapper));
 			this.serializers.put(HalLinkListSerializer.class,
 					new HalLinkListSerializer(curieProvider, mapper, accessor, halFormsConfiguration.toHalConfiguration()));
 		}
