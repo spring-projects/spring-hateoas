@@ -280,7 +280,6 @@ class HalFormsSerializers {
 				.map(it -> it.getAffordanceModel(MediaTypes.HAL_FORMS_JSON)) //
 				.map(HalFormsAffordanceModel.class::cast) //
 				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
-				.peek(it -> validate(resource, it)) //
 				.forEach(it -> {
 
 					Class<?> type = it.getInputType().resolve(Object.class);
@@ -386,23 +385,6 @@ class HalFormsSerializers {
 			String qualifiedCode = String.format("%s.%s", type.getName(), globalCode);
 
 			return new String[] { qualifiedCode, localCode, globalCode };
-		}
-	}
-
-	/**
-	 * Verify that the resource's self link and the affordance's URI have the same relative path.
-	 *
-	 * @param resource
-	 * @param model
-	 */
-	private static void validate(RepresentationModel<?> resource, HalFormsAffordanceModel model) {
-
-		String affordanceUri = model.getURI();
-		String selfLinkUri = resource.getRequiredLink(IanaLinkRelations.SELF.value()).expand().getHref();
-
-		if (!affordanceUri.equals(selfLinkUri)) {
-			throw new IllegalStateException("Affordance's URI " + affordanceUri + " doesn't match self link " + selfLinkUri
-					+ " as expected in HAL-FORMS");
 		}
 	}
 }
