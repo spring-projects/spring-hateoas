@@ -521,7 +521,8 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
 
-		assertThat(link.getVariables()).containsExactly(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED));
+		assertThat(link.getVariables())
+				.containsExactly(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED));
 
 		UriComponents components = toComponents(link);
 
@@ -599,6 +600,18 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithAlternatePathVariable("bar")).withSelfRel();
 		assertThat(link.getHref()).isEqualTo("http://localhost/something/bar/foo");
+	}
+
+	/**
+	 * @see #1003, #122, #169
+	 */
+	@Test
+	void appendsOptionalParameterIfSet() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalNextPage(1)).withSelfRel();
+
+		assertThat(link.getVariables()).isEmpty();
+		assertThat(link.expand().getHref()).endsWith("/foo?offset=1");
 	}
 
 	private static UriComponents toComponents(Link link) {

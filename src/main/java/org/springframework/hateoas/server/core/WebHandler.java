@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -370,10 +371,12 @@ public class WebHandler {
 
 				Assert.notNull(parameter, "MethodParameter must not be null!");
 
+				boolean isOptionalWrapper = Optional.class.isAssignableFrom(parameter.getParameterType());
+
 				this.parameter = parameter;
 				this.value = value;
 				this.attribute = attribute;
-				this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, parameter.isOptional() ? 1 : 0);
+				this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, isOptionalWrapper ? 1 : 0);
 			}
 
 			/**
