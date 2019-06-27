@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Oliver Gierke
  */
-class StringLinkRelationUnitTests {
+class StringLinkRelationUnitTest {
 
 	@Test
 	void serializesAsPlainString() throws Exception {
