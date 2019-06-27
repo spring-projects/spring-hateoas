@@ -89,6 +89,14 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		return instance;
 	}
 
+	protected Class<?> getControllerClass() {
+		return this.controllerClass;
+	}
+
+	protected Class<D> getResourceType() {
+		return this.resourceType;
+	}
+
 	/**
 	 * Instantiates the resource object. Default implementation will assume a no-arg constructor and use reflection but
 	 * can be overridden to manually set up the object instance initially (e.g. to improve performance if this becomes an
