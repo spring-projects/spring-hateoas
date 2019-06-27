@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -285,23 +286,77 @@ class HalFormsSerializers {
 					Class<?> type = it.getInputType().resolve(Object.class);
 
 					List<HalFormsProperty> propertiesWithPrompt = it.getInputProperties().stream() //
-							.map(property -> property.withPrompt(accessor.getMessage(PromptLookup.of(type, property))))
+							.map(property -> property.withPrompt(accessor.getMessage(PropertyPrompt.of(type, property))))
 							.collect(Collectors.toList());
 
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
 							.withProperties(propertiesWithPrompt);
 
+					String defaultedName = templates.isEmpty() ? "default" : it.getName();
+					String title = accessor.getMessage(TemplateTitle.of(it, templates.isEmpty()));
+
+					if (StringUtils.hasText(title)) {
+						template = template.withTitle(title);
+					}
+
 					/*
 					 * First template in HAL-FORMS is "default".
 					 */
-					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
+					templates.put(defaultedName, template);
 				});
 
 		return templates;
 	}
 
 	@RequiredArgsConstructor(staticName = "of")
-	static class PromptLookup implements MessageSourceResolvable {
+	static class TemplateTitle implements MessageSourceResolvable {
+
+		private static final String TEMPLATE_TEMPLATE = "_templates.%s.title";
+
+		private final HalFormsAffordanceModel affordance;
+		private final boolean soleTemplate;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.context.MessageSourceResolvable#getCodes()
+		 */
+		@NonNull
+		@Override
+		public String[] getCodes() {
+
+			Stream<String> seed = Stream.concat(//
+					Stream.of(affordance.getName()), //
+					soleTemplate ? Stream.of("default") : Stream.empty());
+
+			Class<?> type = affordance.getInputType().resolve(Object.class);
+
+			return seed.flatMap(it -> getCodesFor(it, type)) //
+					.toArray(String[]::new);
+		}
+
+		private static Stream<String> getCodesFor(String name, Class<?> type) {
+
+			String global = String.format(TEMPLATE_TEMPLATE, name);
+
+			return Stream.of(//
+					String.format("%s.%s", type.getName(), global), //
+					String.format("%s.%s", type.getSimpleName(), global), //
+					global);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
+		 */
+		@Nullable
+		@Override
+		public String getDefaultMessage() {
+			return "";
+		}
+	}
+
+	@RequiredArgsConstructor(staticName = "of")
+	static class PropertyPrompt implements MessageSourceResolvable {
 
 		private static final String PROMPT_TEMPLATE = "%s._prompt";
 

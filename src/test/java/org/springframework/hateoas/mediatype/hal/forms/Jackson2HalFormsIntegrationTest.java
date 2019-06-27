@@ -404,7 +404,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@ValueSource(strings = { "firstname._prompt", //
 			"HalFormsPayload.firstname._prompt", //
 			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload.firstname._prompt" })
-	public void usesResourceBundleToCreatePropertyPrompts(String key) {
+	void usesResourceBundleToCreatePropertyPrompts(String key) {
 
 		StaticMessageSource source = new StaticMessageSource();
 		source.addMessage(key, Locale.US, "Vorname");
@@ -421,6 +421,35 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 					.read(mapper.writeValueAsString(model));
 
 			assertThat(promptString).isEqualTo("Vorname");
+
+		}).doesNotThrowAnyException();
+	}
+
+	@ParameterizedTest // #849
+	@ValueSource(strings = { //
+			"_templates.postHalFormsPayload.title", //
+			"HalFormsPayload._templates.postHalFormsPayload.title", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload._templates.postHalFormsPayload.title", //
+			"_templates.default.title", //
+			"HalFormsPayload._templates.default.title", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload._templates.default.title" })
+	void usesResourceBundleToCreateTemplateTitle(String key) {
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(key, Locale.US, "Template title");
+
+		Link link = new Link("some:link") //
+				.andAffordance(HttpMethod.POST, HalFormsPayload.class, Collections.emptyList(), Object.class);
+
+		EntityModel<HalFormsPayload> model = new EntityModel<>(new HalFormsPayload(), link);
+		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThatCode(() -> {
+
+			String promptString = JsonPath.compile("$._templates.default.title") //
+					.read(mapper.writeValueAsString(model));
+
+			assertThat(promptString).isEqualTo("Template title");
 
 		}).doesNotThrowAnyException();
 	}
