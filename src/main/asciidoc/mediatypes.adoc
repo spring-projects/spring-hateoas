@@ -110,6 +110,27 @@ _links.payment.title=Proceed to checkout
 ----
 ====
 
+This will result in the following HAL representation:
+
+.A sample HAL document with link titles defined
+====
+[source, javascript]
+----
+{
+  "_links" : {
+    "cancel" : {
+      "href" : "…"
+      "title" : "Cancel order"
+    },
+    "payment" : {
+      "href" : "…"
+      "title" : "Proceed to checkout"
+    }
+  }
+}
+----
+====
+
 [[mediatypes.hal.curie-provider]]
 === [[spis.curie-provider]] Using the `CurieProvider` API
 
@@ -190,22 +211,21 @@ HAL-FORMS contains attributes that are intended for human interpretation, like a
 These can be defined and internationalized using Spring's resource bundle support and the `rest-messages` resource bundle configured by Spring HATEOAS by default.
 
 ==== Template titles
-To define a template title use the following pattern: `_template.$affordanceName.title`. Note, that in HAL-FORMS, the name of a template is `default` if it is the only one.
+To define a template title use the following pattern: `_templates.$affordanceName.title`. Note, that in HAL-FORMS, the name of a template is `default` if it is the only one.
 This means that you'll usually have to qualify the key with the local or fully qualified input type name that affordance describes.
 
 .Defining HAL-FORMS template titles
 ====
 [source]
 ----
-_template.default.title=Some title <1>
-_template.postOrder.title=Create order <2>
-Order._template.default.title=Create order <3>
-com.acme.order.Order._template.default.title=Create order <4>
-
+_templates.default.title=Some title <1>
+_templates.putEmployee.title=Create employee <2>
+Employee._templates.default.title=Create employee <3>
+com.acme.Employee._templates.default.title=Create employee <4>
 ----
 <1> A global definition for the title using `default` as key.
 <2> A global definition for the title using the actual affordance name as key. Unless defined explicitly when creating the affordance, this defaults to `$httpMethod + $simpleInputTypeName`.
-<3> A locally defined title to be applied to all types named `Order`.
+<3> A locally defined title to be applied to all types named `Employee`.
 <4> A title definition using the fully-qualified type name.
 ====
 
@@ -219,15 +239,46 @@ The keys can be defined globally, locally or fully-qualified and need an `._prom
 ====
 [source]
 ----
-email._prompt=Email address <1>
-Customer.email_prompt=Email address <2>
-com.acme.Customer.email._prompt <3>
+firstName._prompt=Firstname <1>
+Employee.firstName=Firstname <2>
+com.acme.Employee.firstName._prompt=Firstname <3>
 ----
-<1> All properties named `email` will get "Email address" rendered, independent of the type they're declared in.
-<2> Properties in types named `Customer` will be prompted "Email address".
-<3> The `email` property of `com.acme.Customer` will get a prompt of "Email address" assigned.
+<1> All properties named `email` will get "Firstname" rendered, independent of the type they're declared in.
+<2> The `firstName` property in types named `Employee` will be prompted "Firstname".
+<3> The `firstName` property of `com.acme.Employee` will get a prompt of "Firstname" assigned.
 ====
 
+A sample document with both template titles and property prompts defined would then look something like this:
+
+.A sample HAL-FORMS document with internationalized template titles and property prompts
+====
+[source]
+----
+{
+  …,
+  "_templates" : {
+    "default" : {
+      "title" : "Create employee",
+      "method" : "put",
+      "contentType" : "",
+      "properties" : [ {
+        "name" : "firstName",
+        "prompt" : "Firstname",
+        "required" : true
+      }, {
+        "name" : "lastName",
+        "prompt" : "Lastname",
+        "required" : true
+      }, {
+        "name" : "role",
+        "prompt" : "Role",
+        "required" : true
+      } ]
+    }
+  }
+}
+----
+====
 
 [[mediatypes.collection-json]]
 == Collection+JSON
@@ -241,7 +292,6 @@ management and querying of simple collections.
 ____
 
 Collection+JSON provides a uniform way to represent both single item resources as well as collections.
-
 To enable this media type, put the following configuration in your code:
 
 .Collection+JSON enabled application
@@ -301,9 +351,7 @@ The UBER document format is a minimal read/write hypermedia type designed to sup
 hypermedia-based transitions.
 ____
 
-UBER provides a uniform way to represent both single item resources as well as collections.
-
-To enable this media type, put the following configuration in your code:
+UBER provides a uniform way to represent both single item resources as well as collections. To enable this media type, put the following configuration in your code:
 
 .UBER+JSON enabled application
 ====
@@ -356,7 +404,7 @@ That implementation class could then look as follows:
 
 .An example `MediaTypeConfigurationProvider` implementation in `META-INF/spring.factories`
 ====
-[source,java]
+[source, java]
 ----
 class MyMediaTypeConfigurationProvider
   implements MediaTypeConfigurationProvider {
