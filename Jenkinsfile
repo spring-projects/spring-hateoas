@@ -62,6 +62,39 @@ pipeline {
 						sh "PROFILE=none ci/test.sh"
 					}
 				}
+				stage("test: spring-next (jdk8)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk8:latest'
+							args '-v $HOME/.m2:/root/.m2'
+						}
+					}
+					steps {
+						sh "PROFILE=spring-next ci/test.sh"
+					}
+				}
+				stage("test: spring-next (jdk11)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk11:latest'
+							args '-v $HOME/.m2:/root/.m2'
+						}
+					}
+					steps {
+						sh "PROFILE=spring-next ci/test.sh"
+					}
+				}
+				stage("test: spring-next (jdk12)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk12:latest'
+							args '-v $HOME/.m2:/root/.m2'
+						}
+					}
+					steps {
+						sh "PROFILE=spring-next ci/test.sh"
+					}
+				}
 			}
 		}
 
