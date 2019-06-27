@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,52 +15,26 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.RequiredArgsConstructor;
 
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 
 /**
+ * HAL-FORMS specific configuration extension of {@link HalConfiguration}.
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-class HalFormsConfiguration {
+@RequiredArgsConstructor
+public class HalFormsConfiguration {
 
-	private @Wither @Getter RenderSingleLinks renderSingleLinks = RenderSingleLinks.AS_SINGLE;
-
-	public enum RenderSingleLinks {
-
-		/**
-		 * A single {@link Link} is rendered as a JSON object.
-		 */
-		AS_SINGLE,
-
-		/**
-		 * A single {@link Link} is rendered as a JSON Array.
-		 */
-		AS_ARRAY
-	}
+	private final @Getter HalConfiguration halConfiguration;
 
 	/**
-	 * Translate a {@link HalFormsConfiguration} into a {@link HalConfiguration}.
-	 *
-	 * @return
+	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
 	 */
-	public HalConfiguration toHalConfiguration() {
-
-		if (this.getRenderSingleLinks() == RenderSingleLinks.AS_SINGLE) {
-			return new HalConfiguration().withRenderSingleLinks(HalConfiguration.RenderSingleLinks.AS_SINGLE);
-		}
-
-		if (this.getRenderSingleLinks() == RenderSingleLinks.AS_ARRAY) {
-			return new HalConfiguration().withRenderSingleLinks(HalConfiguration.RenderSingleLinks.AS_ARRAY);
-		}
-
-		throw new IllegalStateException("Don't know how to translate " + this);
+	public HalFormsConfiguration() {
+		this.halConfiguration = new HalConfiguration();
 	}
 }

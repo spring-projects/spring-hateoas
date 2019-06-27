@@ -82,12 +82,16 @@ class Jackson2HalFormsModule extends SimpleModule {
 		super("hal-forms-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
+		setMixInAnnotation(Links.class, LinksMixin.class);
 		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
 		setMixInAnnotation(EntityModel.class, EntityModelMixin.class);
 		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
 		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
 	}
+
+	@JsonSerialize(using = HalLinkListSerializer.class)
+	abstract class LinksMixin {}
 
 	@JsonSerialize(using = HalFormsResourceSerializer.class)
 	abstract class EntityModelMixin<T> extends EntityModel<T> {}
@@ -156,17 +160,16 @@ class Jackson2HalFormsModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
-				HalFormsConfiguration halFormsConfiguration) {
+				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections, HalFormsConfiguration configuration) {
 
-			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, halFormsConfiguration.toHalConfiguration());
+			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, configuration.getHalConfiguration());
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 
 			this.serializers.put(HalFormsResourceSerializer.class, new HalFormsResourceSerializer(accessor));
 			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(accessor, mapper));
 			this.serializers.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, accessor, halFormsConfiguration.toHalConfiguration()));
+					new HalLinkListSerializer(curieProvider, mapper, accessor, configuration.getHalConfiguration()));
 		}
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,
