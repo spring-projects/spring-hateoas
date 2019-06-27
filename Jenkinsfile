@@ -30,11 +30,12 @@ pipeline {
 			agent {
 				docker {
 					image 'adoptopenjdk/openjdk8:latest'
-					args '-v $HOME/.m2:/root/.m2'
+					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
 			steps {
-				sh "PROFILE=none ci/test.sh"
+				sh 'rm -rf ?'
+				sh 'PROFILE=none ci/test.sh'
 			}
 		}
 
@@ -44,55 +45,60 @@ pipeline {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/root/.m2'
+							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
 					steps {
-						sh "PROFILE=none ci/test.sh"
+						sh 'rm -rf ?'
+						sh 'PROFILE=none ci/test.sh'
 					}
 				}
 				stage("test: baseline (jdk12)") {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk12:latest'
-							args '-v $HOME/.m2:/root/.m2'
+							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
 					steps {
-						sh "PROFILE=none ci/test.sh"
+						sh 'rm -rf ?'
+						sh 'PROFILE=none ci/test.sh'
 					}
 				}
 				stage("test: spring-next (jdk8)") {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk8:latest'
-							args '-v $HOME/.m2:/root/.m2'
+							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
 					steps {
-						sh "PROFILE=spring-next ci/test.sh"
+						sh 'rm -rf ?'
+						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
 				stage("test: spring-next (jdk11)") {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/root/.m2'
+							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
 					steps {
-						sh "PROFILE=spring-next ci/test.sh"
+						sh 'rm -rf ?'
+						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
 				stage("test: spring-next (jdk12)") {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk12:latest'
-							args '-v $HOME/.m2:/root/.m2'
+							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
 					steps {
-						sh "PROFILE=spring-next ci/test.sh"
+						sh 'rm -rf ?'
+						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
 			}
@@ -102,7 +108,7 @@ pipeline {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/root/.m2'
+					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
 
@@ -112,11 +118,13 @@ pipeline {
 
 			steps {
 				script {
+					sh 'rm -rf ?'
+
 					// Warm up this plugin quietly before using it.
-					sh "./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version"
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
 					PROJECT_VERSION = sh(
-							script: "./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO",
+							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
 							returnStdout: true
 					).trim()
 
@@ -153,7 +161,7 @@ pipeline {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/root/.m2'
+					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
 
@@ -163,11 +171,13 @@ pipeline {
 
 			steps {
 				script {
+					sh 'rm -rf ?'
+
 					// Warm up this plugin quietly before using it.
-					sh "./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version"
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
 					PROJECT_VERSION = sh(
-							script: "./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO",
+							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
 							returnStdout: true
 					).trim()
 
@@ -187,7 +197,7 @@ pipeline {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/root/.m2'
+					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
 
@@ -198,11 +208,13 @@ pipeline {
 
 			steps {
 				script {
+					sh 'rm -rf ?'
+
 					// Warm up this plugin quietly before using it.
-					sh "./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version"
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
 					PROJECT_VERSION = sh(
-							script: "./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO",
+							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
 							returnStdout: true
 					).trim()
 
