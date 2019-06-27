@@ -92,6 +92,24 @@ NOTE: The pattern-based approach uses Spring's `AntPathMatcher`.
 All of these `HalConfiguration` withers can be combined to form one comprehensive policy. Be sure to test your API
 extensively to avoid surprises.
 
+[[mediatypes.hal.i18n]]
+=== Link title internationalization
+
+HAL defines a `title` attribute for its link objects.
+These titles can be populated by using Spring's resource bundle abstraction and a resource bundle named `rest-messages` so that clients can use them in their UIs directly.
+This bundle will be set up automatically and is used during HAL link serialization.
+
+To define a title for a link, use the key template `_links.$relationName.title` as follows:
+
+.A sample `rest-messages.properties`
+====
+[source]
+----
+_links.cancel.title=Cancel order
+_links.payment.title=Proceed to checkout
+----
+====
+
 [[mediatypes.hal.curie-provider]]
 === [[spis.curie-provider]] Using the `CurieProvider` API
 
@@ -165,6 +183,51 @@ Read about the <<fundamentals.affordances,Affordances API>> to augment your cont
 
 As for single-item (`EntityModel`) and aggregate root collections (`CollectionModel`), Spring HATEOAS renders them
 identically to <<mediatypes.hal,HAL documents>>.
+
+[[mediatypes.hal-forms.i18n]]
+=== Internationalization of form attributes
+HAL-FORMS contains attributes that are intended for human interpretation, like a template's title or property prompts.
+These can be defined and internationalized using Spring's resource bundle support and the `rest-messages` resource bundle configured by Spring HATEOAS by default.
+
+==== Template titles
+To define a template title use the following pattern: `_template.$affordanceName.title`. Note, that in HAL-FORMS, the name of a template is `default` if it is the only one.
+This means that you'll usually have to qualify the key with the local or fully qualified input type name that affordance describes.
+
+.Defining HAL-FORMS template titles
+====
+[source]
+----
+_template.default.title=Some title <1>
+_template.postOrder.title=Create order <2>
+Order._template.default.title=Create order <3>
+com.acme.order.Order._template.default.title=Create order <4>
+
+----
+<1> A global definition for the title using `default` as key.
+<2> A global definition for the title using the actual affordance name as key. Unless defined explicitly when creating the affordance, this defaults to `$httpMethod + $simpleInputTypeName`.
+<3> A locally defined title to be applied to all types named `Order`.
+<4> A title definition using the fully-qualified type name.
+====
+
+NOTE: Keys using the actual affordance name enjoy preference over the defaulted ones.
+
+==== Property prompts
+Property prompts can also be resolved via the `rest-messages` resource bundle automatically configured by Spring HATEOAS. 
+The keys can be defined globally, locally or fully-qualified and need an `._prompt` concatenated to the actual property key:
+
+.Defining prompts for an `email` property
+====
+[source]
+----
+email._prompt=Email address <1>
+Customer.email_prompt=Email address <2>
+com.acme.Customer.email._prompt <3>
+----
+<1> All properties named `email` will get "Email address" rendered, independent of the type they're declared in.
+<2> Properties in types named `Customer` will be prompted "Email address".
+<3> The `email` property of `com.acme.Customer` will get a prompt of "Email address" assigned.
+====
+
 
 [[mediatypes.collection-json]]
 == Collection+JSON
