@@ -38,8 +38,7 @@ git config core.commentchar "/"
 NOTE: You can chain the previous set of commands together using `&&`.
 
 The pipeline will build and release the "release" branch. It will also build a new a new snapshot and stage it on artifactory.
-
-The pipeline will pick up the next tag and release it. It will also build a new snapshot and stage it on artifactory.
+And if it's a `.RELEASE`, the pipeline will push it out to Maven Central.
 
 === Running CI tasks locally
 
