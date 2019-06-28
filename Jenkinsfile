@@ -33,6 +33,7 @@ pipeline {
 					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
+			options { timeout(time: 30, unit: 'MINUTES') }
 			steps {
 				sh 'rm -rf ?'
 				sh 'PROFILE=none ci/test.sh'
@@ -48,6 +49,7 @@ pipeline {
 							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
+					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
 						sh 'rm -rf ?'
 						sh 'PROFILE=none ci/test.sh'
@@ -60,6 +62,7 @@ pipeline {
 							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
+					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
 						sh 'rm -rf ?'
 						sh 'PROFILE=none ci/test.sh'
@@ -72,6 +75,7 @@ pipeline {
 							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
+					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
 						sh 'rm -rf ?'
 						sh 'PROFILE=spring-next ci/test.sh'
@@ -84,6 +88,7 @@ pipeline {
 							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
+					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
 						sh 'rm -rf ?'
 						sh 'PROFILE=spring-next ci/test.sh'
@@ -96,6 +101,7 @@ pipeline {
 							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 						}
 					}
+					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
 						sh 'rm -rf ?'
 						sh 'PROFILE=spring-next ci/test.sh'
@@ -111,6 +117,7 @@ pipeline {
 					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
+			options { timeout(time: 20, unit: 'MINUTES') }
 
 			environment {
 				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
@@ -164,6 +171,7 @@ pipeline {
 					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
+			options { timeout(time: 20, unit: 'MINUTES') }
 
 			environment {
 				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
@@ -200,6 +208,7 @@ pipeline {
 					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
 				}
 			}
+			options { timeout(time: 20, unit: 'MINUTES') }
 
 			environment {
 				BINTRAY = credentials('Bintray-spring-operator')
