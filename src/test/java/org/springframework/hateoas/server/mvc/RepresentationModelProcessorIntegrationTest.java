@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.springframework.hateoas.MediaTypes.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -129,8 +129,6 @@ public class RepresentationModelProcessorIntegrationTest {
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
-
-		System.out.println(results);
 
 		assertThat(DISCOVERER.findRequiredLinkWithRel(WILDCARD_LINK_RELATION, results).getHref())
 				.isEqualTo("/non-specific-collection/link");
