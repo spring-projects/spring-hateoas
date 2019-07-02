@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -98,6 +99,41 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 		Assert.notNull(links, "Given links must not be null!");
 
 		add(Arrays.asList(links));
+
+		return (T) this;
+	}
+
+	/**
+	 * Adds the {@link Link} produced by the given Supplier if the guard is {@literal true}.
+	 *
+	 * @param guard whether to add the {@link Link} produced by the given {@link Supplier}.
+	 * @param link the {@link Link} to add in case the guard is {@literal true}.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public T addIf(boolean guard, Supplier<Link> link) {
+
+		if (guard) {
+			add(link.get());
+		}
+
+		return (T) this;
+	}
+
+	/**
+	 * Adds all {@link Link}s produced by the given Supplier if the guard is {@literal true}.
+	 *
+	 * @param guard whether to add the {@link Link}s produced by the given {@link Supplier}.
+	 * @param links the {@link Link}s to add in case the guard is {@literal true}.
+	 * @return
+	 * @see Links
+	 */
+	@SuppressWarnings("unchecked")
+	public T addAllIf(boolean guard, Supplier<? extends Iterable<Link>> links) {
+
+		if (guard) {
+			add(links.get());
+		}
 
 		return (T) this;
 	}

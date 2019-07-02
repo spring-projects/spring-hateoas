@@ -170,4 +170,28 @@ class RepresentationModelUnitTest {
 		assertThat(support.hasLink("self")).isTrue();
 		assertThat(support.hasLink("another")).isTrue();
 	}
+
+	@Test // #1014
+	void addsGuardedLink() {
+
+		RepresentationModel<?> model = new RepresentationModel<>();
+
+		model.addIf(true, () -> new Link("added", "foo"));
+		assertThat(model.hasLink("foo")).isTrue();
+
+		model.addIf(false, () -> new Link("not-added", "bar"));
+		assertThat(model.hasLink("bar")).isFalse();
+	}
+
+	@Test // #1014
+	void addsGuardedLinks() {
+
+		RepresentationModel<?> model = new RepresentationModel<>();
+
+		model.addAllIf(true, () -> Links.of(new Link("added", "foo")));
+		assertThat(model.hasLink("foo")).isTrue();
+
+		model.addAllIf(false, () -> Links.of(new Link("not-added", "bar")));
+		assertThat(model.hasLink("bar")).isFalse();
+	}
 }
