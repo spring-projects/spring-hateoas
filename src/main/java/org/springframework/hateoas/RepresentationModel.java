@@ -76,7 +76,8 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 	/**
 	 * Adds all given {@link Link}s to the resource.
 	 *
-	 * @param links
+	 * @param links must not be {@literal null}.
+	 * @see Links
 	 */
 	@SuppressWarnings("unchecked")
 	public T add(Iterable<Link> links) {
