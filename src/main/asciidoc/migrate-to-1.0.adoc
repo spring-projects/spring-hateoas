@@ -33,6 +33,7 @@ Also the name changes have been reflected in the classes contained in `TypeRefer
 * The `LinkDiscoverer` API has been moved to the `client` package.
 * The `LinkBuilder` and `EntityLinks` APIs have been moved to the `server` package.
 * `ControllerLinkBuilder` has been moved into `server.mvc` and deprecated to be replaced by `WebMvcLinkBuilder`.
+* `RelProvider` has been renamed to `LinkRelationProvider` and returns `LinkRelation` instances instead of `String`s.
 * `VndError` has been moved to the `mediatype.vnderror` package.
 
 [[migrate-to-1.0.script]]

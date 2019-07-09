@@ -486,13 +486,13 @@ Also, in this example, the `PaymentProcessor` alters the provided `EntityModel<O
 _replace_ it with another object. Just be advised the API requires the return type to equal the input type.
 
 [[server.rel-provider]]
-== [[spis.rel-provider]] Using the `RelProvider` API
+== [[spis.rel-provider]] Using the `LinkRelationProvider` API
 
-When building links, you usually need to determine the relation type to be used for the link. In most cases, the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to look up the relation types behind a `RelProvider` API that lets you determine the relation types for single and collection resources. The algorithm for looking up the relation type follows:
+When building links, you usually need to determine the relation type to be used for the link. In most cases, the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to look up the relation types behind a `LinkRelationProvider` API that lets you determine the relation types for single and collection resources. The algorithm for looking up the relation type follows:
 
 . If the type is annotated with `@Relation`, we use the values configured in the annotation.
 . If not, we default to the uncapitalized simple class name plus an appended `List` for the collection `rel`.
 . If the https://github.com/atteo/evo-inflector[EVO inflector] JAR is in the classpath, we use the plural of the single resource `rel` provided by the pluralizing algorithm.
-. `@Controller` classes annotated with `@ExposesResourceFor` (see <<fundamentals.obtaining-links.entity-links>> for details) transparently look up the relation types for the type configured in the annotation, so that you can use `relProvider.getItemResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
+. `@Controller` classes annotated with `@ExposesResourceFor` (see <<fundamentals.obtaining-links.entity-links>> for details) transparently look up the relation types for the type configured in the annotation, so that you can use `LinkRelationProvider.getItemResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
 
-A `RelProvider` is automatically exposed as a Spring bean when you use `@EnableHypermediaSupport`. You can plug in custom providers by implementing the interface and exposing them as Spring beans in turn.
+A `LinkRelationProvider` is automatically exposed as a Spring bean when you use `@EnableHypermediaSupport`. You can plug in custom providers by implementing the interface and exposing them as Spring beans in turn.
