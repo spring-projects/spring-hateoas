@@ -174,6 +174,16 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 				.toArray(String[]::new);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
+	 */
+	@Override
+	@org.springframework.lang.NonNull
+	public String getDefaultMessage() {
+		return "";
+	}
+
 	/**
 	 * Simple builder interface to easily create multiple {@link HalLinkRelation}s for a single curie.
 	 *

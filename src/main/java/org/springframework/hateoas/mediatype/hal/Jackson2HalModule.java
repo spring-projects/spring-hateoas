@@ -965,8 +965,8 @@ public class Jackson2HalModule extends SimpleModule {
 			return link;
 		}
 
-		@JsonInclude(Include.NON_NULL)
 		@Nullable
+		@JsonInclude(Include.NON_EMPTY)
 		public String getTitle() {
 			return title;
 		}

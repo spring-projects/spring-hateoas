@@ -495,6 +495,27 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 				.isEqualTo("{\"_links\":{\"foo\":[{\"href\":\"/some-href\"}]}}");
 	}
 
+	@Test // #1019
+	void doesNotRenderTitleForEmptyString() throws Exception {
+
+		Link link = new Link("/some-href", "foo");
+
+		assertThat(mapper.writeValueAsString(new Jackson2HalModule.HalLink(link, ""))) //
+				.isEqualTo("{\"href\":\"/some-href\"}");
+	}
+
+	@Test // #1019
+	void resolvesMissingHalLinkRelationToEmptyString() throws Exception {
+
+		HalLinkRelation relation = HalLinkRelation.of(LinkRelation.of("someRel"));
+
+		MessageSourceAccessor accessor = new MessageSourceAccessor(new StaticMessageSource());
+
+		assertThatCode(() -> {
+			assertThat(accessor.getMessage(relation)).isEqualTo("");
+		}).doesNotThrowAnyException();
+	}
+
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
 
 		LocaleContextHolder.setLocale(Locale.US);
