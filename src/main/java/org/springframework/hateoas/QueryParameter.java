@@ -15,19 +15,82 @@
  */
 package org.springframework.hateoas;
 
-import lombok.Data;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.experimental.Wither;
+
+import java.util.Optional;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Representation of a web request's query parameter (https://example.com?name=foo) => {"name", "foo", true}.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
-@Data
-@RequiredArgsConstructor
+@Value
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class QueryParameter {
 
 	private final String name;
-	private final String value;
+	private final @Nullable @Wither String value;
 	private final boolean required;
+
+	/**
+	 * Creates a new {@link QueryParameter} from the given {@link MethodParameter}.
+	 *
+	 * @param parameter must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public static QueryParameter of(MethodParameter parameter) {
+
+		MergedAnnotation<RequestParam> annotation = MergedAnnotations //
+				.from(parameter.getParameter()) //
+				.get(RequestParam.class);
+
+		String name = annotation.isPresent() && annotation.hasNonDefaultValue("name") //
+				? annotation.getString("name") //
+				: parameter.getParameterName();
+
+		if (name == null || !StringUtils.hasText(name)) {
+			throw new IllegalStateException(String.format("Couldn't determine parameter name for %s!", parameter));
+		}
+
+		boolean required = annotation.isPresent() && annotation.hasNonDefaultValue("required") //
+				? annotation.getBoolean("required") //
+				: !Optional.class.equals(parameter.getParameterType()); //
+
+		return required ? required(name) : optional(name);
+	}
+
+	/**
+	 * Creates a new required {@link QueryParameter} with the given name;
+	 *
+	 * @param name must not be {@literal null} or empty.
+	 * @return
+	 */
+	public static QueryParameter required(String name) {
+
+		Assert.hasText(name, "Name must not be null or empty!");
+
+		return new QueryParameter(name, null, true);
+	}
+
+	/**
+	 * Creates a new optional {@link QueryParameter} with the given name;
+	 *
+	 * @param name must not be {@literal null} or empty.
+	 * @return
+	 */
+	public static QueryParameter optional(String name) {
+		return new QueryParameter(name, null, false);
+	}
 }

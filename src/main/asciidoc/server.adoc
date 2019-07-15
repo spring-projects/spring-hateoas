@@ -110,6 +110,72 @@ assertThat(link.getHref()).endsWith("/people/2");
 
 TODO
 
+[[server.affordances]]
+== Affordances
+
+[quote, James J. Gibson, The Ecological Approach to Visual Perception (page 126)]
+____
+The affordances of the environment are what it offers …​ what it provides or furnishes, either for good or ill. The verb 'to afford' is found in the dictionary, but the noun 'affordance' is not. I have made it up.
+____
+
+REST-based resources provide not just data but controls.
+The last ingredient to form a flexible service are detailed *affordances* on how to use the various controls.
+Because affordances are associated with links, Spring HATEOAS provides an API to attach as many related methods as needed to a link.
+Just as you can create links by pointing to Spring MVC controller methods (see <<server.link-builder.webmvc>> for details) you
+The following code shows how to take a *self* link and associate two more affordances:
+
+.Connecting affordances to `GET /employees/{id}`
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{code-dir}/EmployeeController.java[tag=get]
+----
+<1> Create the *self* link.
+<2> Associate the `updateEmployee` method with the `self` link.
+<3> Associate the `partiallyUpdateEmployee` method with the `self` link.
+====
+
+Using `.andAffordance(afford(...))`, you can use the controller's methods to connect a `PUT` and a `PATCH` operation to a `GET` operation.
+Imagine that the related methods *afforded* above looking like this:
+
+.`updateEmpoyee` method that responds to `PUT /employees/{id}`
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{code-dir}/EmployeeController.java[tag=put]
+----
+====
+
+.`partiallyUpdateEmployee` method that responds to `PATCH /employees/{id}`
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{code-dir}/EmployeeController.java[tag=patch]
+----
+====
+
+Pointing to those methods using the `afford(…)` methods will cause Spring HATEOAS to analyze the request body and response types and capture metadata to allow different media type implementations to use that information to translate that into descriptions of the input and outputs.
+
+[[server.affordances.api]]
+=== Building affordances manually
+
+While the primary way to register affordances for a link, it might be necessary to build some of them manually.
+This can be achieved by using the `Affordances` API:
+
+.Using the `Affordances` API to manually register affordances
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{code-dir}/AffordancesSample.java[tag=affordances]
+----
+<1> You start by creating an instance of `Affordances` from a `Link` instance creating the context for describing the affordances.
+<2> Each affordance starts with the HTTP method it's supposed to support. We then register a type as payload description and name the affordance explicitly. The latter can be omitted and a default name will be derived from the HTTP method and input type name. This effectively creates the same affordance as the pointer to `EmployeeController.newEmployee(…)` created.
+<3> The next affordance is built to reflect what's happening for the pointer to `EmployeeController.search(…)`. Here we define `Employee` to be the model for the response created and explicitly register ``QueryParameter``s.
+====
+
+Affordances are backed by media type specific affordance models that translate the general affordance metadata into specific representations.
+Please make sure to check the section on affordances in the <<mediatypes>> section to find more details about how to control the exposure of that metadata.
+
 [[server.link-builder.forwarded-headers]]
 == Forwarded header handling
 

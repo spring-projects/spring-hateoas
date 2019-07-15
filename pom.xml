@@ -799,6 +799,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>2.0.1.Final</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.4</version>
@@ -993,6 +1000,7 @@
 				<configuration>
 					<source>${source.level}</source>
 					<target>${source.level}</target>
+					<parameters>true</parameters>
 				</configuration>
 			</plugin>
 

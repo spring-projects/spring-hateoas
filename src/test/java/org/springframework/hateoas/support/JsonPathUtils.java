@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.support;
 
+import lombok.RequiredArgsConstructor;
+
 import org.assertj.core.matcher.AssertionMatcher;
 import org.hamcrest.Matcher;
 import org.springframework.lang.Nullable;
@@ -36,12 +38,37 @@ public class JsonPathUtils {
 	}
 
 	public static AssertionMatcher<String> jsonPath(String expression, @Nullable Object expectedValue) {
+		return new JsonPathAssertionMatcher(expression, expectedValue);
+	}
 
-		return new AssertionMatcher<String>() {
-			@Override
-			public void assertion(String actual) throws AssertionError {
-				new JsonPathExpectationsHelper(expression).assertValue(actual, expectedValue);
+	@RequiredArgsConstructor
+	public static class JsonPathAssertionMatcher extends AssertionMatcher<String> {
+
+		private final String expression;
+		private final @Nullable Object expected;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.assertj.core.matcher.AssertionMatcher#assertion(java.lang.Object)
+		 */
+		@Override
+		public void assertion(String actual) throws AssertionError {
+
+			JsonPathExpectationsHelper helper = new JsonPathExpectationsHelper(expression);
+
+			if (expected == null) {
+				helper.doesNotHaveJsonPath(actual);
+			} else {
+				helper.assertValue(actual, expected);
 			}
-		};
+		}
+
+		public JsonPathAssertionMatcher doesNotExist() {
+			return new JsonPathAssertionMatcher(this.expression, null);
+		}
+	}
+
+	public static JsonPathAssertionMatcher jsonPath(String expression) {
+		return new JsonPathAssertionMatcher(expression, null);
 	}
 }

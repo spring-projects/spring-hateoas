@@ -392,7 +392,7 @@ class UberData {
 			return Collections.singletonList(new UberData().withValue(obj));
 		}
 
-		return PropertyUtils.findProperties(obj).entrySet().stream()
+		return PropertyUtils.extractPropertyValues(obj).entrySet().stream()
 				.map(entry -> new UberData().withName(entry.getKey()).withValue(entry.getValue())).collect(Collectors.toList());
 	}
 

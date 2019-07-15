@@ -1,4 +1,4 @@
-org.springframework.hateoas.AffordanceModelFactory=\
+org.springframework.hateoas.mediatype.AffordanceModelFactory=\
  org.springframework.hateoas.mediatype.collectionjson.CollectionJsonAffordanceModelFactory,\
  org.springframework.hateoas.mediatype.hal.forms.HalFormsAffordanceModelFactory,\
  org.springframework.hateoas.mediatype.uber.UberAffordanceModelFactory

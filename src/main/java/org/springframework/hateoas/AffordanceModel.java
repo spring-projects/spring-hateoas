@@ -18,8 +18,14 @@ package org.springframework.hateoas;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
@@ -54,7 +60,7 @@ public abstract class AffordanceModel {
 	/**
 	 * Domain type used to create a new resource.
 	 */
-	private ResolvableType inputType;
+	private InputPayloadMetadata input;
 
 	/**
 	 * Collection of {@link QueryParameter}s to interrogate a resource.
@@ -64,7 +70,7 @@ public abstract class AffordanceModel {
 	/**
 	 * Response body domain type.
 	 */
-	private ResolvableType outputType;
+	private PayloadMetadata output;
 
 	/**
 	 * Expand the {@link Link} into an {@literal href} with no parameters.
@@ -99,5 +105,210 @@ public abstract class AffordanceModel {
 		Assert.notNull(link, "Link must not be null!");
 
 		return getURI().equals(link.expand().getHref());
+	}
+
+	/**
+	 * Metadata about payloads.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	public interface PayloadMetadata {
+
+		public static PayloadMetadata NONE = NoPayloadMetadata.INSTANCE;
+
+		/**
+		 * Returns all properties contained in a payload.
+		 *
+		 * @return
+		 */
+		Stream<PropertyMetadata> stream();
+
+		default Optional<PropertyMetadata> getPropertyMetadata(String name) {
+			return stream().filter(it -> it.hasName(name)).findFirst();
+		}
+	}
+
+	/**
+	 * Payload metadata for incoming requests.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	public interface InputPayloadMetadata extends PayloadMetadata {
+
+		static InputPayloadMetadata NONE = from(PayloadMetadata.NONE);
+
+		static InputPayloadMetadata from(PayloadMetadata metadata) {
+
+			return InputPayloadMetadata.class.isInstance(metadata) //
+					? InputPayloadMetadata.class.cast(metadata)
+					: DelegatingInputPayloadMetadata.of(metadata);
+		}
+
+		/**
+		 * Applies the {@link InputPayloadMetadata} to the given target.
+		 *
+		 * @param <T>
+		 * @param target
+		 * @return
+		 */
+		<T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target);
+
+		<T extends Named> T customize(T target, Function<PropertyMetadata, T> customizer);
+
+		/**
+		 * Returns the I18n codes to be used to resolve a name for the payload metadata.
+		 *
+		 * @return
+		 */
+		List<String> getI18nCodes();
+	}
+
+	/**
+	 * {@link InputPayloadMetadata} to delegate to a target {@link PayloadMetadata} not applying any customizations.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	@ToString
+	@EqualsAndHashCode
+	@RequiredArgsConstructor(staticName = "of")
+	private static class DelegatingInputPayloadMetadata implements InputPayloadMetadata {
+
+		private final PayloadMetadata metadata;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PayloadMetadata#stream()
+		 */
+		@Override
+		public Stream<PropertyMetadata> stream() {
+			return metadata.stream();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#customize(org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured)
+		 */
+		@Override
+		public <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
+			return target;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#customize(org.springframework.hateoas.AffordanceModel.Named, java.util.function.Function)
+		 */
+		@Override
+		public <T extends Named> T customize(T target, Function<PropertyMetadata, T> customizer) {
+			return target;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getI18nCodes()
+		 */
+		@Override
+		public List<String> getI18nCodes() {
+			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * Metadata about the property model of a representation.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	public interface PropertyMetadata {
+
+		/**
+		 * The name of the property.
+		 *
+		 * @return will never be {@literal null} or empty.
+		 */
+		String getName();
+
+		/**
+		 * Whether the property has the given name.
+		 *
+		 * @param name must not be {@literal null} or empty.
+		 * @return
+		 */
+		default boolean hasName(String name) {
+
+			Assert.hasText(name, "Name must not be null or empty!");
+
+			return getName().equals(name);
+		}
+
+		/**
+		 * Whether the property is required to be submitted or always present in the representation returned.
+		 *
+		 * @return
+		 */
+		boolean isRequired();
+
+		/**
+		 * Whether the property is read only, i.e. must not be manipulated in requests modifying state.
+		 *
+		 * @return
+		 */
+		boolean isReadOnly();
+
+		/**
+		 * Returns the (regular expression) pattern the property has to adhere to.
+		 *
+		 * @return will never be {@literal null}.
+		 */
+		Optional<String> getPattern();
+
+		/**
+		 * Return the type of the property. If no type can be determined, return {@link Object}.
+		 *
+		 * @return
+		 */
+		ResolvableType getType();
+	}
+
+	/**
+	 * SPI for a type that can get {@link PropertyMetadata} applied.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	public interface PropertyMetadataConfigured<T> {
+
+		/**
+		 * Applies the given {@link PropertyMetadata}.
+		 *
+		 * @param metadata will never be {@literal null}.
+		 * @return
+		 */
+		T apply(PropertyMetadata metadata);
+	}
+
+	/**
+	 * A named component.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	public interface Named {
+		String getName();
+	}
+
+	/**
+	 * Empty {@link PayloadMetadata}.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	private static enum NoPayloadMetadata implements PayloadMetadata {
+
+		INSTANCE;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PayloadMetadata#stream()
+		 */
+		@Override
+		public Stream<PropertyMetadata> stream() {
+			return Stream.empty();
+		}
 	}
 }

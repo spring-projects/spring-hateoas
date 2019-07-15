@@ -24,12 +24,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 
 /**
@@ -47,8 +45,8 @@ class CollectionJsonAffordanceModel extends AffordanceModel {
 	private final @Getter List<CollectionJsonData> inputProperties;
 	private final @Getter List<CollectionJsonData> queryProperties;
 
-	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
@@ -66,7 +64,7 @@ class CollectionJsonAffordanceModel extends AffordanceModel {
 			return Collections.emptyList();
 		}
 
-		return PropertyUtils.findPropertyNames(getInputType()).stream() //
+		return getInput().stream().map(PropertyMetadata::getName) //
 				.map(propertyName -> new CollectionJsonData() //
 						.withName(propertyName) //
 						.withValue("")) //

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.support;
+package org.springframework.hateoas.mediatype;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.experimental.Wither;
-
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.Affordances.AffordanceBuilder;
 
 /**
- * @author Greg Turnquist
+ * Operations commons to all builder APIs.
+ *
+ * @author Oliver Drotbohm
+ * @see AffordanceBuilder
  */
-@Data
-@Wither
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Employee {
+public interface AffordanceOperations {
 
-	private @NotNull String name;
-	private String role;
-
-	Employee() {
-		this(null, null);
-	}
+	/**
+	 * Returns a {@link Link} equipped with the {@link Affordance} currently under construction.
+	 *
+	 * @return will never be {@literal null}.
+	 */
+	Link toLink();
 }

@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas;
+package org.springframework.hateoas.mediatype;
 
 import java.util.List;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.AffordanceModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
+import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -45,6 +49,6 @@ public interface AffordanceModelFactory {
 	 * @param outputType
 	 * @return
 	 */
-	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType);
+	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType);
 }

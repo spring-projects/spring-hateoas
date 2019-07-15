@@ -168,12 +168,13 @@ class Jackson2HalFormsModule extends SimpleModule {
 			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, configuration.getHalConfiguration());
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
+			HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, accessor);
 
 			this.serializers.put(HalFormsRepresentationModelSerializer.class,
-					new HalFormsRepresentationModelSerializer(accessor));
-			this.serializers.put(HalFormsEntityModelSerializer.class, new HalFormsEntityModelSerializer(accessor));
+					new HalFormsRepresentationModelSerializer(builder));
+			this.serializers.put(HalFormsEntityModelSerializer.class, new HalFormsEntityModelSerializer(builder));
 			this.serializers.put(HalFormsCollectionModelSerializer.class,
-					new HalFormsCollectionModelSerializer(accessor, mapper));
+					new HalFormsCollectionModelSerializer(builder, mapper));
 			this.serializers.put(HalLinkListSerializer.class,
 					new HalLinkListSerializer(curieProvider, mapper, accessor, configuration.getHalConfiguration()));
 		}

@@ -18,6 +18,11 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 
 /**
@@ -30,11 +35,29 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 public class HalFormsConfiguration {
 
 	private final @Getter HalConfiguration halConfiguration;
+	private final Map<Class<?>, String> patterns = new HashMap<>();
 
 	/**
 	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
 	 */
 	public HalFormsConfiguration() {
 		this.halConfiguration = new HalConfiguration();
+	}
+
+	public HalFormsConfiguration registerPattern(Class<?> type, String pattern) {
+
+		patterns.put(type, pattern);
+
+		return this;
+	}
+
+	/**
+	 * Returns the regular expression pattern that is registered for the given type.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @return
+	 */
+	Optional<String> getTypePatternFor(ResolvableType type) {
+		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
 	}
 }

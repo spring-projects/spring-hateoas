@@ -89,7 +89,7 @@ class CollectionJsonItem<T> {
 			return Collections.singletonList(new CollectionJsonData().withValue(this.rawData));
 		}
 
-		return PropertyUtils.findProperties(this.rawData).entrySet().stream() //
+		return PropertyUtils.extractPropertyValues(this.rawData).entrySet().stream() //
 				.map(entry -> new CollectionJsonData() //
 						.withName(entry.getKey()) //
 						.withValue(entry.getValue())) //

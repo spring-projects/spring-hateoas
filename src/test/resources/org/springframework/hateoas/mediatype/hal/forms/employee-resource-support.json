@@ -6,12 +6,9 @@
   },
   "_templates" : {
     "default" : {
-      "title" : null,
       "method" : "post",
-      "contentType" : "",
       "properties" : [ {
-        "name" : "name",
-        "required" : true
+        "name" : "name"
       } ]
     }
   },

@@ -7,35 +7,24 @@
       "href" : "http://localhost:8080/employees/1"
     }
   },
-  "_templates" : {  // <1>
+  "_templates" : {
     "default" : {
-      "title" : null,
-      "method" : "put", // <2>
-      "contentType" : "",
-      "properties" : [ { // <3>
-        "name" : "firstName",
-        "required" : true // <4>
-      }, {
-        "name" : "lastName",
+      "method" : "put",
+      "properties" : [ {
+        "name" : "name",
         "required" : true
       }, {
         "name" : "role",
-        "required" : true
+        "regex" : "[A-Z_]"
       } ]
     },
     "partiallyUpdateEmployee" : { // <5>
-      "title" : null,
       "method" : "patch", // <6>
-      "contentType" : "",
       "properties" : [ {
-        "name" : "firstName",
-        "required" : false // <7>
-      }, {
-        "name" : "lastName",
-        "required" : false
+        "name" : "name"
       }, {
         "name" : "role",
-        "required" : false
+        "regex" : "[A-Z_]"
       } ]
     }
   }

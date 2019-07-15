@@ -61,31 +61,31 @@ class HalFormsWebFluxIntegrationTest {
 	@Test
 	void singleEmployee() {
 
-		this.testClient.get().uri("http://localhost/employees/0")
-				.accept(MediaTypes.HAL_FORMS_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.HAL_FORMS_JSON)
-				.expectBody(String.class)
-				.value(jsonPath("$.name", is("Frodo Baggins")))
-				.value(jsonPath("$.role", is("ring bearer")))
+		this.testClient.get().uri("http://localhost/employees/0").accept(MediaTypes.HAL_FORMS_JSON).exchange()
 
-				.value(jsonPath("$._links.*", hasSize(2)))
-				.value(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
-				.value(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.HAL_FORMS_JSON) //
+				.expectBody(String.class)//
 
-				.value(jsonPath("$._templates.*", hasSize(2)))
-				.value(jsonPath("$._templates['default'].method", is("put")))
-				.value(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.value(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.value(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.value(jsonPath("$._templates['default'].properties[1].required", is(true)))
+				.value(jsonPath("$.name", is("Frodo Baggins"))) //
+				.value(jsonPath("$.role", is("ring bearer"))) //
 
-				.value(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
-				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
+				.value(jsonPath("$._links.*", hasSize(2))) //
+				.value(jsonPath("$._links['self'].href", is("http://localhost/employees/0"))) //
+				.value(jsonPath("$._links['employees'].href", is("http://localhost/employees"))) //
+
+				.value(jsonPath("$._templates.*", hasSize(2))) //
+				.value(jsonPath("$._templates['default'].method", is("put"))) //
+				.value(jsonPath("$._templates['default'].properties[0].name", is("name"))) //
+				.value(jsonPath("$._templates['default'].properties[0].required", is(true))) //
+				.value(jsonPath("$._templates['default'].properties[1].name", is("role"))) //
+				.value(jsonPath("$._templates['default'].properties[1].required").doesNotExist()) //
+
+				.value(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch"))) //
+				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name"))) //
+				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required").doesNotExist()) //
+				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role"))) //
+				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required").doesNotExist());
 	}
 
 	/**
@@ -94,12 +94,8 @@ class HalFormsWebFluxIntegrationTest {
 	@Test
 	void collectionOfEmployees() {
 
-		this.testClient.get().uri("http://localhost/employees")
-				.accept(MediaTypes.HAL_FORMS_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.HAL_FORMS_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees").accept(MediaTypes.HAL_FORMS_JSON).exchange().expectStatus()
+				.isOk().expectHeader().contentType(MediaTypes.HAL_FORMS_JSON).expectBody(String.class)
 				.value(jsonPath("$._embedded.employees[0].name", is("Frodo Baggins")))
 				.value(jsonPath("$._embedded.employees[0].role", is("ring bearer")))
 				.value(jsonPath("$._embedded.employees[0]._links['self'].href", is("http://localhost/employees/0")))
@@ -110,12 +106,11 @@ class HalFormsWebFluxIntegrationTest {
 				.value(jsonPath("$._links.*", hasSize(1)))
 				.value(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.value(jsonPath("$._templates.*", hasSize(1)))
-				.value(jsonPath("$._templates['default'].method", is("post")))
+				.value(jsonPath("$._templates.*", hasSize(1))).value(jsonPath("$._templates['default'].method", is("post")))
 				.value(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.value(jsonPath("$._templates['default'].properties[0].required", is(true)))
 				.value(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.value(jsonPath("$._templates['default'].properties[1].required", is(true)));
+				.value(jsonPath("$._templates['default'].properties[1].required").doesNotExist());
 	}
 
 	/**
@@ -126,12 +121,9 @@ class HalFormsWebFluxIntegrationTest {
 
 		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
 
-		this.testClient.post().uri("http://localhost/employees")
-				.contentType(MediaTypes.HAL_FORMS_JSON)
-				.syncBody(specBasedJson)
-				.exchange()
-				.expectStatus().isCreated()
-				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
+		this.testClient.post().uri("http://localhost/employees").contentType(MediaTypes.HAL_FORMS_JSON)
+				.syncBody(specBasedJson).exchange().expectStatus().isCreated().expectHeader()
+				.valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
 	}
 
 	@Configuration
@@ -147,10 +139,8 @@ class HalFormsWebFluxIntegrationTest {
 		@Bean
 		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
 
-			return WebTestClient.bindToApplicationContext(ctx).build()
-				.mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies())
-				.build();
+			return WebTestClient.bindToApplicationContext(ctx).build().mutate()
+					.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
 		}
 	}
 }

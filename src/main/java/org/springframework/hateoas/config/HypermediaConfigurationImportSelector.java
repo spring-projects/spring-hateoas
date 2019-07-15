@@ -44,7 +44,8 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 
 		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
 
-		Collection<MediaType> types = attributes == null ? Collections.emptyList()
+		Collection<MediaType> types = attributes == null //
+				? Collections.emptyList() //
 				: Arrays.stream((HypermediaType[]) attributes.get("type")) //
 						.flatMap(it -> it.getMediaTypes().stream()) //
 						.collect(Collectors.toList());

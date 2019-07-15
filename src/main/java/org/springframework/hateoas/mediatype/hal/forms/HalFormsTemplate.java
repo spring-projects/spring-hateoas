@@ -26,6 +26,7 @@ import lombok.experimental.Wither;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.MediaTypesDeserializer;
 import org.springframework.http.HttpMethod;
@@ -37,6 +38,8 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -60,7 +63,7 @@ public class HalFormsTemplate {
 
 	public static final String DEFAULT_KEY = "default";
 
-	private String title;
+	private @JsonInclude(Include.NON_EMPTY) String title;
 	private @Wither(AccessLevel.PRIVATE) HttpMethod httpMethod;
 	private List<HalFormsProperty> properties;
 	private List<MediaType> contentTypes;
@@ -108,6 +111,7 @@ public class HalFormsTemplate {
 
 	// Jackson helper methods to create the right representation format
 
+	@JsonInclude(Include.NON_EMPTY)
 	String getContentType() {
 		return StringUtils.collectionToDelimitedString(contentTypes, ", ");
 	}
@@ -124,5 +128,9 @@ public class HalFormsTemplate {
 
 	void setMethod(String method) {
 		this.httpMethod = HttpMethod.valueOf(method.toUpperCase());
+	}
+
+	Optional<HalFormsProperty> getPropertyByName(String name) {
+		return properties.stream().filter(it -> it.getName().equals(name)).findFirst();
 	}
 }

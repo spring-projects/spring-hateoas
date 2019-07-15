@@ -200,10 +200,41 @@ include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample.json[]
 ====
 
 Checkout the https://rwcbook.github.io/hal-forms/[HAL-FORMS spec] to understand the details of the *_templates* attribute.
-Read about the <<fundamentals.affordances,Affordances API>> to augment your controllers with this extra metadata.
+Read about the <<server.affordances,Affordances API>> to augment your controllers with this extra metadata.
 
 As for single-item (`EntityModel`) and aggregate root collections (`CollectionModel`), Spring HATEOAS renders them
 identically to <<mediatypes.hal,HAL documents>>.
+
+[[mediatypes.hal-forms.metadata]]
+=== Defining HAL-FORMS metadata
+HAL-FORMS allows to describe criterias for each form field.
+Spring HATEOAS allows to customize those by shaping the model type for the input and output types and using annotations on them.
+
+[options="header", cols="1,4"]
+|===============
+|Attribute|Description
+|`readOnly`| Set to `true` if there's no setter method for the property. If that is present, use Jackson's `@JsonProperty(Access.READ_ONLY)` on the accessors or field explicitly. Not rendered by default, thus defaulting to `false`.
+|`regex`| Can be customized by using JSR-303's `@Pattern` annotation either on the field or a type. In case of the latter the pattern will be used for every property declared as that particular type. Not rendered by default.
+|`required`| Can be customized by using JSR-303's `@NotNull`. Not rendered by default and thus defaulting to `false`. Templates using `PATCH` as method will automatically have set all properties to not required.
+|===============
+
+For types that you cannot annotate manually, you can register a custom pattern via a `HalFormsConfiguration` bean present in the application context.
+
+[source, java]
+----
+@Configuration
+class CustomConfiguration {
+
+  @Bean
+  HalFormsConfiguration halFormsConfiguration() {
+
+    HalFormsConfiguration configuration = new HalFormsConfiguration();
+    configuration.registerPatternFor(CreditCardNumber.class, "[0-9]{16}");
+  }
+}
+----
+
+This setup will cause the HAL-FORMS template properties for representation model properties of type `CreditCardNumber` to declare a `regex` field with value `[0-9]{16}`.
 
 [[mediatypes.hal-forms.i18n]]
 === Internationalization of form attributes
@@ -232,7 +263,7 @@ com.acme.Employee._templates.default.title=Create employee <4>
 NOTE: Keys using the actual affordance name enjoy preference over the defaulted ones.
 
 ==== Property prompts
-Property prompts can also be resolved via the `rest-messages` resource bundle automatically configured by Spring HATEOAS. 
+Property prompts can also be resolved via the `rest-messages` resource bundle automatically configured by Spring HATEOAS.
 The keys can be defined globally, locally or fully-qualified and need an `._prompt` concatenated to the actual property key:
 
 .Defining prompts for an `email` property
@@ -326,7 +357,7 @@ The previous fragment was lifted from the spec. When Spring HATEOAS renders an `
 
 * Put the `self` link into both the document's `href` attribute and the item-level `href` attribute.
 * Put the rest of the model's links into both the top-level `links` as well as the item-level `links`.
-* Extract the properties from the `EntityModel` and turn them into 
+* Extract the properties from the `EntityModel` and turn them into
 ====
 
 When rendering a collection of resources, the document is almost the same, except there will be multiple entries inside

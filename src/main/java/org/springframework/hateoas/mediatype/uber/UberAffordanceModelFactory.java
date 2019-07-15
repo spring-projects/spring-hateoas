@@ -19,9 +19,10 @@ import lombok.Getter;
 
 import java.util.List;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModelFactory;
+import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
+import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
+import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.QueryParameter;
@@ -40,11 +41,11 @@ class UberAffordanceModelFactory implements AffordanceModelFactory {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.core.ResolvableType, java.util.List, org.springframework.core.ResolvableType)
+	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.hateoas.mediatype.PayloadMetadata, java.util.List, org.springframework.core.ResolvableType)
 	 */
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
+			InputPayloadMetadata inputType, List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 		return new UberAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 	}
 }

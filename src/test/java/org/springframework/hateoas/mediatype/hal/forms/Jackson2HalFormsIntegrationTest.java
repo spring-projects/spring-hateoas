@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import lombok.Getter;
+import net.minidev.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,9 +40,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalIntegrationTest;
@@ -57,6 +69,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * @author Greg Turnquist
@@ -73,6 +86,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 	@BeforeEach
 	void setUpModule() {
+
+		// TestAffordances.enableMediaTypes(MediaTypes.HAL_FORMS_JSON);
 
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				Jackson2HalIntegrationTest.DefaultLinkRelationProvider.INSTANCE);
@@ -130,11 +145,14 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void rendersRepresentationModelWithTemplates() throws Exception {
 
 		EmployeeResource resource = new EmployeeResource("Frodo Baggins");
-		Link selfLink = new Link("/employees/1");
-		selfLink = selfLink.andAffordance(new Affordance("foo", selfLink, HttpMethod.POST,
-				ResolvableType.forClass(EmployeeResource.class), Collections.emptyList(),
-				ResolvableType.forClass(EmployeeResource.class)));
-		resource.add(selfLink);
+
+		Link link = Affordances.of(new Link("/employees/1")) //
+				.afford(HttpMethod.POST) //
+				.withInputAndOutput(EmployeeResource.class) //
+				.withName("foo") //
+				.toLink();
+
+		resource.add(link);
 
 		assertThat(write(resource))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("employee-resource-support.json", getClass())));
@@ -417,8 +435,12 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		StaticMessageSource source = new StaticMessageSource();
 		source.addMessage(key, Locale.US, "Vorname");
 
-		Link link = new Link("some:link") //
-				.andAffordance(HttpMethod.POST, HalFormsPayload.class, Collections.emptyList(), Object.class);
+		Link link = Affordances.of(new Link("some:link")) //
+				.afford(HttpMethod.POST) //
+				.withInput(HalFormsPayload.class) //
+				.withOutput(Object.class) //
+				.withName("sample") //
+				.toLink();
 
 		EntityModel<HalFormsPayload> model = new EntityModel<>(new HalFormsPayload(), link);
 		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
@@ -446,8 +468,10 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		StaticMessageSource source = new StaticMessageSource();
 		source.addMessage(key, Locale.US, "Template title");
 
-		Link link = new Link("some:link") //
-				.andAffordance(HttpMethod.POST, HalFormsPayload.class, Collections.emptyList(), Object.class);
+		Link link = Affordances.of(new Link("some:link")) //
+				.afford(HttpMethod.POST) //
+				.withInput(HalFormsPayload.class) //
+				.toLink();
 
 		EntityModel<HalFormsPayload> model = new EntityModel<>(new HalFormsPayload(), link);
 		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
@@ -460,6 +484,62 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 			assertThat(promptString).isEqualTo("Template title");
 
 		}).doesNotThrowAnyException();
+	}
+
+	@Test
+	void doesNotRenderPromptPropertyIfEmpty() throws Exception {
+
+		HalFormsProperty property = HalFormsProperty.named("someName");
+
+		assertThatPathDoesNotExist(property.withPrompt(""), "$.prompt");
+		assertValueForPath(property.withPrompt("Some prompt"), "$.prompt", "Some prompt");
+	}
+
+	@Test
+	void doesNotRenderRequiredPropertyIfFalse() throws Exception {
+
+		HalFormsProperty property = HalFormsProperty.named("someName");
+
+		assertThatPathDoesNotExist(property, "$.required");
+		assertValueForPath(property.withRequired(true), ".required", true);
+	}
+
+	@Test
+	void considersJsr303AnnotationsForTemplates() throws Exception {
+
+		Link link = Affordances.of(new Link("localhost:8080")) //
+				.afford(HttpMethod.POST) //
+				.withInput(Jsr303Sample.class) //
+				.toLink();
+
+		EntityModel<Jsr303Sample> model = new EntityModel<>(new Jsr303Sample(), link);
+
+		assertValueForPath(model, "$._templates.default.properties[0].readOnly", true);
+		assertValueForPath(model, "$._templates.default.properties[0].regex", "[\\w\\s]");
+		assertValueForPath(model, "$._templates.default.properties[0].required", true);
+	}
+
+	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {
+
+		ObjectMapper mapper = getCuriedObjectMapper();
+		String json = mapper.writeValueAsString(toMarshall);
+
+		assertThatExceptionOfType(PathNotFoundException.class) //
+				.isThrownBy(() -> JsonPath.compile(path).read(json));
+	}
+
+	private void assertValueForPath(Object toMarshall, String path, Object expected) throws Exception {
+
+		ObjectMapper mapper = getCuriedObjectMapper();
+		String json = mapper.writeValueAsString(toMarshall);
+
+		Object actual = JsonPath.compile(path).read(json);
+
+		Object value = JSONArray.class.isInstance(actual) //
+				? JSONArray.class.cast(actual).get(0) //
+				: actual;
+
+		assertThat(value).isEqualTo(expected);
 	}
 
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
@@ -527,6 +607,19 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 	public static class HalFormsPayload {
 		private @Getter String firstname;
+	}
 
+	public static class Jsr303Sample {
+
+		private String firstname;
+
+		/**
+		 * @return the firstname
+		 */
+		@NotNull
+		@Pattern(regexp = "[\\w\\s]")
+		public String getFirstname() {
+			return firstname;
+		}
 	}
 }

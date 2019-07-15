@@ -17,15 +17,15 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.mediatype.AffordanceModelFactory;
+import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -60,15 +60,20 @@ public class SpringAffordanceBuilder {
 				.orElse(ResolvableType.NONE);
 
 		List<QueryParameter> queryMethodParameters = parameters.getParametersWith(RequestParam.class).stream() //
-				.map(it -> it.getParameterAnnotation(RequestParam.class)) //
-				.filter(Objects::nonNull) //
-				.map(it -> new QueryParameter(it.name(), it.value(), it.required())) //
+				.map(QueryParameter::of) //
 				.collect(Collectors.toList());
 
 		ResolvableType outputType = ResolvableType.forMethodReturnType(method);
+		Affordances affordances = Affordances.of(affordanceLink);
 
 		return discoverer.getRequestMethod(type, method).stream() //
-				.map(it -> new Affordance(methodName, affordanceLink, it, inputType, queryMethodParameters, outputType)) //
+				.flatMap(it -> affordances.afford(it) //
+						.withInput(inputType) //
+						.withOutput(outputType) //
+						.withParameters(queryMethodParameters) //
+						.withName(methodName) //
+						.build() //
+						.stream()) //
 				.collect(Collectors.toList());
 	}
 }

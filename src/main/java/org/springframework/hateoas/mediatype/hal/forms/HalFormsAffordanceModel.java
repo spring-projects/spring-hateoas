@@ -26,12 +26,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -45,12 +43,11 @@ import org.springframework.http.MediaType;
 class HalFormsAffordanceModel extends AffordanceModel {
 
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
-	private static final Set<HttpMethod> REQUIRED_METHODS = EnumSet.of(POST, PUT);
 
 	private final @Getter List<HalFormsProperty> inputProperties;
 
-	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
@@ -67,10 +64,10 @@ class HalFormsAffordanceModel extends AffordanceModel {
 			return Collections.emptyList();
 		}
 
-		return PropertyUtils.findPropertyNames(getInputType()).stream() //
-				.map(propertyName -> new HalFormsProperty() //
-						.withName(propertyName) //
-						.withRequired(REQUIRED_METHODS.contains(getHttpMethod()))) //
+		return getInput().stream() //
+				.map(PropertyMetadata::getName) //
+				.map(it -> new HalFormsProperty() //
+						.withName(it)) //
 				.collect(Collectors.toList());
 	}
 }

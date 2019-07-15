@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.support;
+package org.springframework.hateoas;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.Wither;
 
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import javax.validation.constraints.Pattern;
 
 /**
- * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
+// tag:hal-forms-model[]
 @Data
-@Wither
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Employee {
+public class EmployeeModel extends RepresentationModel<EmployeeModel> {
 
-	private @NotNull String name;
+	@NotNull //
+	private String name;
+
+	@Pattern(regexp = "[A-Z_]") //
 	private String role;
-
-	Employee() {
-		this(null, null);
-	}
 }
+// end:hal-forms-model[]

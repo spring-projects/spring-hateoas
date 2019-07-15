@@ -74,8 +74,10 @@ class HalFormsWebMvcIntegrationTest {
 	void singleEmployee() throws Exception {
 
 		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
+
 				.andExpect(status().isOk()) //
-				.andExpect(jsonPath("$.name", is("Frodo Baggins"))).andExpect(jsonPath("$.role", is("ring bearer")))
+				.andExpect(jsonPath("$.name", is("Frodo Baggins"))) //
+				.andExpect(jsonPath("$.role", is("ring bearer")))
 
 				.andExpect(jsonPath("$._links.*", hasSize(2)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
@@ -84,15 +86,15 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._templates.*", hasSize(2)))
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
+				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
+				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist())
 
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required").doesNotExist())
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required").doesNotExist());
 	}
 
 	@Test
@@ -113,9 +115,9 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._templates.*", hasSize(1)))
 				.andExpect(jsonPath("$._templates['default'].method", is("post")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
+				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)));
+				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist());
 	}
 
 	@Test

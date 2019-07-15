@@ -19,8 +19,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.Wither;
+
+import org.springframework.hateoas.AffordanceModel.Named;
+import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
+import org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -36,15 +41,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @Wither
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(force = true)
-public class HalFormsProperty {
+@ToString
+public class HalFormsProperty implements PropertyMetadataConfigured<HalFormsProperty>, Named {
 
 	private @NonNull String name;
-	private Boolean readOnly;
+	private @JsonInclude(Include.NON_DEFAULT) boolean readOnly;
 	private String value;
-	private String prompt;
+	private @JsonInclude(Include.NON_EMPTY) String prompt;
 	private String regex;
 	private boolean templated;
-	private @JsonInclude boolean required;
+	private @JsonInclude(Include.NON_DEFAULT) boolean required;
 	private boolean multi;
 
 	/**
@@ -53,8 +59,21 @@ public class HalFormsProperty {
 	 * @param name must not be {@literal null}.
 	 * @return
 	 */
-
 	public static HalFormsProperty named(String name) {
 		return new HalFormsProperty().withName(name);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.mediatype.PropertyMetadataAware#apply(org.springframework.hateoas.mediatype.PropertyUtils.PropertyMetadata)
+	 */
+	public HalFormsProperty apply(PropertyMetadata metadata) {
+
+		HalFormsProperty customized = withRequired(metadata.isRequired()) //
+				.withReadOnly(metadata.isReadOnly());
+
+		return metadata.getPattern() //
+				.map(customized::withRegex) //
+				.orElse(customized);
 	}
 }

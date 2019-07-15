@@ -58,24 +58,24 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Value
 @Wither
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-@JsonPropertyOrder({ "attributes", "resource", "resources", "embedded", "links", "templates", "metadata" })
+@JsonPropertyOrder({ "attributes", "entity", "entities", "embedded", "links", "templates", "metadata" })
 public class HalFormsDocument<T> {
 
 	@Nullable //
-	@Getter(onMethod = @__(@JsonAnyGetter))
-	@JsonInclude(Include.NON_EMPTY) //
+	@Getter(onMethod = @__(@JsonAnyGetter)) @JsonInclude(Include.NON_EMPTY) //
 	@Wither(AccessLevel.PRIVATE) //
 	private Map<String, Object> attributes;
 
+	@Nullable //
 	@JsonUnwrapped //
 	@JsonInclude(Include.NON_NULL) //
-	private T resource;
+	private T entity;
 
 	@Nullable //
 	@JsonInclude(Include.NON_EMPTY) //
 	@JsonIgnore //
 	@Wither(AccessLevel.PRIVATE) //
-	private Collection<T> resources;
+	private Collection<T> entities;
 
 	@JsonProperty("_embedded") //
 	@JsonInclude(Include.NON_EMPTY) //
@@ -86,14 +86,12 @@ public class HalFormsDocument<T> {
 	@JsonInclude(Include.NON_NULL) //
 	private PagedModel.PageMetadata pageMetadata;
 
-	// @Singular //
 	@JsonProperty("_links") //
 	@JsonInclude(Include.NON_EMPTY) //
 	@JsonSerialize(using = HalLinkListSerializer.class) //
 	@JsonDeserialize(using = HalFormsLinksDeserializer.class) //
 	private Links links;
 
-	// @Singular //
 	@JsonProperty("_templates") //
 	@JsonInclude(Include.NON_EMPTY) //
 	private Map<String, HalFormsTemplate> templates;
@@ -110,7 +108,7 @@ public class HalFormsDocument<T> {
 	 */
 	public static HalFormsDocument<?> forRepresentationModel(RepresentationModel<?> model) {
 
-		Map<String, Object> attributes = PropertyUtils.findProperties(model);
+		Map<String, Object> attributes = PropertyUtils.extractPropertyValues(model);
 		attributes.remove("links");
 
 		return new HalFormsDocument<>().withAttributes(attributes);
@@ -122,21 +120,21 @@ public class HalFormsDocument<T> {
 	 * @param resource can be {@literal null}.
 	 * @return
 	 */
-	public static <T> HalFormsDocument<T> forResource(@Nullable T resource) {
-		return new HalFormsDocument<T>().withResource(resource);
+	public static <T> HalFormsDocument<T> forEntity(@Nullable T resource) {
+		return new HalFormsDocument<T>().withEntity(resource);
 	}
 
 	/**
 	 * returns a new {@link HalFormsDocument} for the given resources.
 	 *
-	 * @param resources must not be {@literal null}.
+	 * @param entities must not be {@literal null}.
 	 * @return
 	 */
-	public static <T> HalFormsDocument<T> forResources(Collection<T> resources) {
+	public static <T> HalFormsDocument<T> forEntities(Collection<T> entities) {
 
-		Assert.notNull(resources, "Resources must not be null!");
+		Assert.notNull(entities, "Resources must not be null!");
 
-		return new HalFormsDocument<T>().withResources(resources);
+		return new HalFormsDocument<T>().withEntities(entities);
 	}
 
 	/**
@@ -173,11 +171,11 @@ public class HalFormsDocument<T> {
 	}
 
 	public HalFormsDocument<T> withPageMetadata(@Nullable PageMetadata metadata) {
-		return new HalFormsDocument<T>(attributes, resource, resources, embedded, metadata, links, templates);
+		return new HalFormsDocument<T>(attributes, entity, entities, embedded, metadata, links, templates);
 	}
 
-	private HalFormsDocument<T> withResource(@Nullable T resource) {
-		return new HalFormsDocument<T>(attributes, resource, resources, embedded, pageMetadata, links, templates);
+	private HalFormsDocument<T> withEntity(@Nullable T entity) {
+		return new HalFormsDocument<T>(attributes, entity, entities, embedded, pageMetadata, links, templates);
 	}
 
 	/**
@@ -190,7 +188,7 @@ public class HalFormsDocument<T> {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links.and(link), templates);
+		return new HalFormsDocument<>(attributes, entity, entities, embedded, pageMetadata, links.and(link), templates);
 	}
 
 	/**
@@ -208,7 +206,7 @@ public class HalFormsDocument<T> {
 		Map<String, HalFormsTemplate> templates = new HashMap<>(this.templates);
 		templates.put(name, template);
 
-		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, entity, entities, embedded, pageMetadata, links, templates);
 	}
 
 	/**
@@ -226,6 +224,6 @@ public class HalFormsDocument<T> {
 		Map<HalLinkRelation, Object> embedded = new HashMap<>(this.embedded);
 		embedded.put(key, value);
 
-		return new HalFormsDocument<>(attributes, resource, resources, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, entity, entities, embedded, pageMetadata, links, templates);
 	}
 }

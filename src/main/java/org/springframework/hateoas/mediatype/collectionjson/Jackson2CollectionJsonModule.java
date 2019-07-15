@@ -37,6 +37,7 @@ import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -947,6 +948,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		return selfLink.getAffordances().stream() //
 				.map(it -> it.getAffordanceModel(MediaTypes.COLLECTION_JSON)) //
+				.peek(it -> Assert.notNull(it, "No Collection/JSON affordance model found but expected!"))
 				.map(CollectionJsonAffordanceModel.class::cast) //
 				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
 				.filter(it -> !it.pointsToTargetOf(selfLink)) //

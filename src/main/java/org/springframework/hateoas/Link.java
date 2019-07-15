@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -209,60 +207,6 @@ public class Link implements Serializable {
 		newAffordances.add(affordance);
 
 		return withAffordances(newAffordances);
-	}
-
-	/**
-	 * Convenience method when chaining an existing {@link Link}.
-	 *
-	 * @param name
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 * @return
-	 */
-	public Link andAffordance(String name, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
-		return andAffordance(new Affordance(name, this, httpMethod, inputType, queryMethodParameters, outputType));
-	}
-
-	/**
-	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
-	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
-	 *
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 * @return
-	 */
-	public Link andAffordance(HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters,
-			ResolvableType outputType) {
-
-		String name = httpMethod.toString().toLowerCase();
-
-		Class<?> resolvedInputType = inputType.resolve();
-		if (resolvedInputType != null) {
-			name += resolvedInputType.getSimpleName();
-		}
-
-		return andAffordance(name, httpMethod, inputType, queryMethodParameters, outputType);
-	}
-
-	/**
-	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
-	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
-	 *
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 * @return
-	 */
-	public Link andAffordance(HttpMethod httpMethod, Class<?> inputType, List<QueryParameter> queryMethodParameters,
-			Class<?> outputType) {
-		return andAffordance(httpMethod, ResolvableType.forClass(inputType), queryMethodParameters,
-				ResolvableType.forClass(outputType));
 	}
 
 	/**
