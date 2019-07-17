@@ -31,11 +31,14 @@ import org.springframework.hateoas.server.core.DelegatingEntityLinks;
  * through an instance of {@link DelegatingEntityLinks}.
  *
  * @author Oliver Gierke
+ * @deprecated since 1.0 RC, to be removed in 1.0 RC2. EntityLinks are enabled by {@link EnableHypermediaSupport}
+ *             automatically, so there's no need to explicitly activate them.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
 @Documented
 @Import({ EntityLinksConfiguration.class, WebMvcEntityLinksConfiguration.class })
+@Deprecated
 public @interface EnableEntityLinks {
 }
