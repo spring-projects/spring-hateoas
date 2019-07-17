@@ -66,6 +66,7 @@ s/hateoas\.core\.Relation/hateoas.server.core.Relation/g;\
 \
 s/hateoas\.hal/hateoas.mediatype.hal/g;\
 \
+s/hateoas\.mvc\.BasicLinkBuilder/hateoas.server.mvc.BasicLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilder/hateoas.server.mvc.WebMvcLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilderFactory/hateoas.server.mvc.WebMvcLinkBuilderFactory/g;\
 s/hateoas\.mvc\.HeaderLinksResponseEntity/hateoas.server.core.HeaderLinksResponseEntity/g;\
