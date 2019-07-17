@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.hateoas</groupId>
@@ -48,20 +49,20 @@
 			<name>Apache License, Version 2.0</name>
 			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-			Copyright 2011-2019 the original author or authors.
+				Copyright 2011-2019 the original author or authors.
 
-			Licensed under the Apache License, Version 2.0 (the "License");
-			you may not use this file except in compliance with the License.
-			You may obtain a copy of the License at
+				Licensed under the Apache License, Version 2.0 (the "License");
+				you may not use this file except in compliance with the License.
+				You may obtain a copy of the License at
 
-			     https://www.apache.org/licenses/LICENSE-2.0
+				https://www.apache.org/licenses/LICENSE-2.0
 
-			Unless required by applicable law or agreed to in writing, software
-			distributed under the License is distributed on an "AS IS" BASIS,
-			WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-			implied.
-			See the License for the specific language governing permissions and
-			limitations under the License.
+				Unless required by applicable law or agreed to in writing, software
+				distributed under the License is distributed on an "AS IS" BASIS,
+				WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+				implied.
+				See the License for the specific language governing permissions and
+				limitations under the License.
 			</comments>
 		</license>
 	</licenses>
@@ -155,16 +156,21 @@
 		<profile>
 
 			<!--
-				Profile to be activated when building the distribution artifacts.
-
-				Generates reference documentation, aggregates JavaDoc etc.
+				Profile to be activated when building the docs artifacts.
 			-->
 
 			<id>distribute</id>
 
 			<properties>
 				<shared.resources>${project.build.directory}/shared-resources</shared.resources>
+				<generated-asciidoc-sources.directory>${project.build.directory}/generated-asciidoc-sources/source/
+				</generated-asciidoc-sources.directory>
+				<generated-docs.directory>${project.build.directory}/generated-docs</generated-docs.directory>
+				<maven.main.skip>true</maven.main.skip>
+				<maven.test.skip>true</maven.test.skip>
+				<maven.kotlin.skip>true</maven.kotlin.skip>
 				<maven.install.skip>true</maven.install.skip>
+				<maven.deploy.skip>true</maven.deploy.skip>
 				<skipTests>true</skipTests>
 			</properties>
 
@@ -173,6 +179,13 @@
 					<groupId>io.spring.docresources</groupId>
 					<artifactId>spring-doc-resources</artifactId>
 					<version>${docs.resources.version}</version>
+					<type>zip</type>
+					<optional>true</optional>
+				</dependency>
+				<dependency>
+					<groupId>org.springframework.data.build</groupId>
+					<artifactId>spring-data-build-resources</artifactId>
+					<version>2.2.0.BUILD-SNAPSHOT</version>
 					<type>zip</type>
 					<optional>true</optional>
 				</dependency>
@@ -195,168 +208,122 @@
 								<goals>
 									<goal>unpack-dependencies</goal>
 								</goals>
-								<phase>prepare-package</phase>
+								<phase>generate-resources</phase>
 								<configuration>
 									<includeGroupIds>io.spring.docresources</includeGroupIds>
 									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
-									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${generated-asciidoc-sources.directory}</outputDirectory>
+								</configuration>
+							</execution>
+							<execution>
+								<id>unpack-shared-resources</id>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<includeGroupIds>${project.groupId}</includeGroupIds>
+									<includeArtifactIds>spring-data-build-resources</includeArtifactIds>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${shared.resources}</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>
-						<configuration>
-							<includeTypes>zip</includeTypes>
-							<excludeTransitive>true</excludeTransitive>
-						</configuration>
-					</plugin>
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-resources-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>copy-asciidoc-resources</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>copy-resources</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
-									<resources>
-										<resource>
-											<directory>src/main/asciidoc</directory>
-											<filtering>false</filtering>
-										</resource>
-									</resources>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>org.asciidoctor</groupId>
-						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.7.1</version>
-						<dependencies>
-							<dependency>
-								<groupId>org.asciidoctor</groupId>
-								<artifactId>asciidoctorj-pdf</artifactId>
-								<version>1.5.0-alpha.18</version>
-							</dependency>
-							<dependency>
-								<groupId>org.asciidoctor</groupId>
-								<artifactId>asciidoctorj-diagram</artifactId>
-								<version>1.5.18</version>
-							</dependency>
-						</dependencies>
-						<executions>
-
-							<execution>
-								<id>html</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>html5</backend>
-									<sourceHighlighter>highlight.js</sourceHighlighter>
-									<outputDirectory>${project.reporting.outputDirectory}/reference/html</outputDirectory>
-									<sectids>false</sectids>
-									<attributes>
-										<code-dir>${basedir}/src/docs/java/org/springframework/hateoas</code-dir>
-										<resource-dir>${basedir}/src/docs/resources/org/springframework/hateoas</resource-dir>
-										<docinfo>shared</docinfo>
-										<linkcss>true</linkcss>
-										<icons>font</icons>
-										<sectanchors>true</sectanchors>
-										<stylesdir>css/</stylesdir>
-										<stylesheet>spring.css</stylesheet>
-										<highlightjsdir>js/highlight</highlightjsdir>
-										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
-									</attributes>
-									<requires>
-										<require>asciidoctor-diagram</require>
-									</requires>
-								</configuration>
-							</execution>
-
-							<execution>
-								<id>pdf</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>process-asciidoc</goal>
-								</goals>
-								<configuration>
-									<backend>pdf</backend>
-									<sourceHighlighter>coderay</sourceHighlighter>
-									<attributes>
-										<code-dir>${basedir}/src/docs/java/org/springframework/hateoas</code-dir>
-									</attributes>
-								</configuration>
-							</execution>
-
-						</executions>
-
-						<configuration>
-							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
-							<sourceDocumentName>index.adoc</sourceDocumentName>
-							<doctype>book</doctype>
-							<attributes>
-								<version>${project.version}</version>
-								<projectName>${project.name}</projectName>
-								<projectVersion>${project.version}</projectVersion>
-								<allow-uri-read>true</allow-uri-read>
-								<toclevels>4</toclevels>
-								<numbered>true</numbered>
-								<baseDir>${project.basedir}</baseDir>
-							</attributes>
-						</configuration>
-
 					</plugin>
 
 					<!--
 						Configures JavaDoc generation.
 					-->
 
+					<!-- Delombok sources so that generated code shows up in JavaDoc -->
+
+					<plugin>
+						<groupId>org.projectlombok</groupId>
+						<artifactId>lombok-maven-plugin</artifactId>
+						<version>1.18.4.0</version>
+						<executions>
+							<execution>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>delombok</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.root}/target/generated-sources/delombok</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>javadoc</id>
-								<phase>prepare-package</phase>
+								<id>aggregate-javadoc</id>
 								<goals>
-									<goal>javadoc</goal>
+									<goal>aggregate</goal>
 								</goals>
+								<phase>package</phase>
+								<configuration>
+									<outputDirectory>${project.root}/target/site/apidocs</outputDirectory>
+								</configuration>
 							</execution>
 						</executions>
-						<configuration>
-							<reportOutputDirectory>${project.reporting.outputDirectory}/api</reportOutputDirectory>
-						</configuration>
 					</plugin>
 
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
 						<version>1.8</version>
 						<executions>
 
 							<execution>
 								<id>copy-documentation-resources</id>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
+								<phase>generate-resources</phase>
 								<configuration>
 									<target>
-										<copy todir="${project.reporting.outputDirectory}/reference/html/images">
+										<copy todir="target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
+												<include name="**/*.png"/>
+												<include name="**/*.gif"/>
+												<include name="**/*.jpg"/>
 											</fileset>
-											<flattenmapper />
+											<flattenmapper/>
 										</copy>
 									</target>
 								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+
+							<execution>
+								<id>create-generated-docs-resources</id>
+								<phase>process-resources</phase>
+								<configuration>
+									<target>
+										<copy failonerror="false" todir="${generated-asciidoc-sources.directory}/">
+											<fileset dir="src/main/asciidoc" includes="**/*.adoc"/>
+										</copy>
+										<copy failonerror="false"
+											  todir="${generated-asciidoc-sources.directory}/images/">
+											<fileset dir="src/main/asciidoc/images"/>
+										</copy>
+
+										<copy todir="${generated-docs.directory}">
+											<fileset dir="${generated-asciidoc-sources.directory}">
+												<include name="css/**"/>
+												<include name="js/**"/>
+											</fileset>
+										</copy>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
 							</execution>
 
 							<execution>
@@ -364,20 +331,40 @@
 								<phase>prepare-package</phase>
 								<configuration>
 									<target>
-										<copy file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.reporting.outputDirectory}/reference/pdf/${project.artifactId}-reference.pdf" />
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
 
-							<execution>
-								<id>copy-changelog</id>
-								<phase>prepare-package</phase>
-								<configuration>
-									<target>
-										<copy file="${basedir}/src/main/resources/changelog.txt" tofile="${project.reporting.outputDirectory}/changelog.txt" />
+										<!-- Copy files for the single-file HTML version -->
+										<copy failonerror="false"
+											  todir="target/site/reference/html/images">
+											<fileset dir="${generated-docs.directory}/images"/>
+										</copy>
+
+										<!-- Copy shared resources. Spring Data ones first to override the ones shared -->
+										<copy failonerror="false" todir="target/site/reference/html/">
+											<fileset dir="${shared.resources}">
+												<include name="css/**"/>
+												<include name="js/**"/>
+											</fileset>
+										</copy>
+
+										<copy failonerror="false" todir="target/site/reference/html/">
+											<fileset dir="${generated-asciidoc-sources.directory}">
+												<include name="css/**"/>
+												<include name="js/**"/>
+											</fileset>
+										</copy>
+
+										<copy failonerror="false" todir="target/site/reference/html/">
+											<fileset dir="${generated-docs.directory}" includes="*.html"/>
+										</copy>
+
+										<!-- Copy and rename the Epub file -->
+										<copy failonerror="false" file="${generated-docs.directory}/index.pdf"
+											  tofile="target/site/reference/pdf/spring-hateoas-reference.pdf"/>
+
+										<!-- Copy and rename the PDF file -->
+										<copy failonerror="false" file="${generated-docs.directory}/index.epub"
+											  tofile="target/site/reference/epub/spring-hateoas-reference.epub"/>
+
 									</target>
 								</configuration>
 								<goals>
@@ -387,92 +374,183 @@
 
 						</executions>
 
-					</plugin>
-
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>wagon-maven-plugin</artifactId>
-						<configuration>
-							<fromDir>${project.build.directory}</fromDir>
-							<serverId>static-dot-s2</serverId>
-							<url>scp://docs.af.pivotal.io</url>
-						</configuration>
-
-						<executions>
-
-							<!-- Distribute static resources -->
-
-							<execution>
-								<id>upload-static-resources</id>
-								<phase>deploy</phase>
-								<goals>
-									<goal>upload</goal>
-								</goals>
-								<configuration>
-									<fromDir>${project.reporting.outputDirectory}</fromDir>
-									<includes>**</includes>
-									<toDir>/var/www/domains/spring.io/www/htdocs/autorepo/docs/spring-hateoas/${project.version}</toDir>
-									<optimize>true</optimize>
-								</configuration>
-							</execution>
-
-							<!-- Makes sure resources can be overriden by others -->
-							<execution>
-								<id>make-resources-group-writable</id>
-								<phase>deploy</phase>
-								<goals>
-									<goal>sshexec</goal>
-								</goals>
-								<configuration> <!-- Prevent reformatting, wrap with CDATA -->
-									<commands>
-										<command>
-											<![CDATA[
-												 if [ -d /var/www/domains/spring.io/www/htdocs/autorepo/docs/spring-hateoas/${project.version}/ ]
-												 then
-													find /var/www/domains/spring.io/www/htdocs/autorepo/docs/spring-hateoas/${project.version}/ ! -perm -g=w -exec chmod g+w {} \;
-												 fi
-												]]>
-										</command>
-									</commands>
-								</configuration>
-							</execution>
-
-						</executions>
 					</plugin>
 
 					<!--
+						Asciidoctor
+					-->
+
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>build-helper-maven-plugin</artifactId>
-						<version>1.10</version>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctor-maven-plugin</artifactId>
+						<version>2.0.0-RC.1</version>
+						<dependencies>
+							<dependency>
+								<groupId>org.jruby</groupId>
+								<artifactId>jruby</artifactId>
+								<version>9.2.6.0</version>
+							</dependency>
+							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj</artifactId>
+								<version>2.0.0-RC.1</version>
+							</dependency>
+							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj-pdf</artifactId>
+								<version>1.5.0-alpha.16</version>
+							</dependency>
+							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj-epub3</artifactId>
+								<version>1.5.0-alpha.8.1</version>
+							</dependency>
+						</dependencies>
+						<executions>
+
+							<execution>
+								<id>html</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>process-asciidoc</goal>
+								</goals>
+								<configuration>
+									<sourceDirectory>${generated-asciidoc-sources.directory}</sourceDirectory>
+									<sourceDocumentName>index.adoc</sourceDocumentName>
+									<backend>html5</backend>
+									<outputDirectory>${generated-docs.directory}</outputDirectory>
+									<sourceHighlighter>highlight.js</sourceHighlighter>
+									<attributes>
+										<highlightjsdir>js/highlight</highlightjsdir>
+										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
+										<linkcss>true</linkcss>
+										<sectanchors>true</sectanchors>
+										<stylesdir>./css</stylesdir>
+										<stylesheet>spring.css</stylesheet>
+										<toc>left</toc>
+									</attributes>
+								</configuration>
+							</execution>
+
+							<!-- Requires a fix to Lombok/Javadoc generation first otherwise build duration explodes
+							<execution>
+								<id>epub</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>process-asciidoc</goal>
+								</goals>
+								<configuration>
+									<sourceDirectory>${generated-asciidoc-sources.directory}</sourceDirectory>
+									<sourceDocumentName>index.adoc</sourceDocumentName>
+									<backend>epub3</backend>
+									<outputDirectory>${generated-docs.directory}</outputDirectory>
+									<sourceHighlighter>coderay</sourceHighlighter>
+								</configuration>
+							</execution>
+
+							<execution>
+								<id>pdf</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>process-asciidoc</goal>
+								</goals>
+								<configuration>
+									<sourceDirectory>${generated-asciidoc-sources.directory}</sourceDirectory>
+									<sourceDocumentName>index.adoc</sourceDocumentName>
+									<backend>pdf</backend>
+									<outputDirectory>${generated-docs.directory}</outputDirectory>
+									<sourceHighlighter>coderay</sourceHighlighter>
+								</configuration>
+							</execution>
+
+							 -->
+
+						</executions>
+
+						<configuration>
+							<doctype>book</doctype>
+							<attributes>
+								<doctype>book</doctype>
+								<docinfo>shared</docinfo>
+								<icons>font</icons>
+								<sectids>false</sectids>
+								<imagesdir>images</imagesdir>
+								<version>${project.version}</version>
+								<projectName>${project.name}</projectName>
+								<projectVersion>${project.version}</projectVersion>
+								<springVersion>${spring.version}</springVersion>
+								<allow-uri-read>true</allow-uri-read>
+								<toclevels>4</toclevels>
+								<numbered>true</numbered>
+							</attributes>
+						</configuration>
+
+					</plugin>
+
+					<!--
+						Creates two zip files for download as well as API and reference documentation distribution.
+					-->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>attach-zip</id>
+								<id>docs</id>
 								<goals>
-									<goal>attach-artifact</goal>
+									<goal>single</goal>
 								</goals>
 								<phase>package</phase>
 								<configuration>
-									<artifacts>
-										<artifact>
-											<file>${project.build.directory}/${project.artifactId}-${project.version}.zip</file>
-											<type>zip</type>
-										</artifact>
-									</artifacts>
+									<descriptors>
+										<descriptor>src/docs/resources/assemblies/docs.xml</descriptor>
+									</descriptors>
+									<finalName>spring-hateoas-${project.version}</finalName>
+									<appendAssemblyId>true</appendAssemblyId>
 								</configuration>
 							</execution>
 						</executions>
 					</plugin>
-					-->
+
+					<!-- Deploy to Artifactory -->
 
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-deploy-plugin</artifactId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
+						<groupId>org.jfrog.buildinfo</groupId>
+						<artifactId>artifactory-maven-plugin</artifactId>
+						<version>2.6.1</version>
+						<executions>
+							<execution>
+								<id>deploy-docs</id>
+								<goals>
+									<goal>publish</goal>
+								</goals>
+								<phase>deploy</phase>
+								<configuration>
+									<artifactory>
+										<includeEnvVars>false</includeEnvVars>
+									</artifactory>
+									<deployProperties>
+										<zip.name>spring-hateoas-docs</zip.name>
+										<zip.displayname>spring-hateoas-docs</zip.displayname>
+										<zip.deployed>false</zip.deployed>
+										<zip.type>docs</zip.type>
+									</deployProperties>
+									<buildInfo>
+										<!-- Retain only a single build -->
+										<buildName>Spring Data Docs spring-hateoas ${project.version}</buildName>
+										<buildRetentionCount>1</buildRetentionCount>
+									</buildInfo>
+									<publisher>
+										<contextUrl>{{artifactory.server}}</contextUrl>
+										<username>{{artifactory.username}}</username>
+										<password>{{artifactory.password}}</password>
+										<repoKey>{{artifactory.distribution-repository}}</repoKey>
+										<snapshotRepoKey>{{artifactory.distribution-repository}}</snapshotRepoKey>
+										<includePatterns>*-docs.zip</includePatterns>
+									</publisher>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
-
 				</plugins>
 			</build>
 		</profile>
