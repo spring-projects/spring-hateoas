@@ -102,6 +102,36 @@ pipeline {
 				}
 			}
 		}
+		stage('Release documentation') {
+			when {
+				anyOf {
+					branch '0.25.x'
+					branch 'release-0.x'
+				}
+			}
+			agent {
+				docker {
+					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
+					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+				}
+			}
+			options { timeout(time: 20, unit: 'MINUTES') }
+
+			environment {
+				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
+			}
+
+			steps {
+				script {
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -Pci,distribute ' +
+							'-Dartifactory.server=https://repo.spring.io ' +
+							"-Dartifactory.username=${ARTIFACTORY_USR} " +
+							"-Dartifactory.password=${ARTIFACTORY_PSW} " +
+							"-Dartifactory.distribution-repository=temp-private-local " +
+							'-Dmaven.test.skip=true deploy -B'
+				}
+			}
+		}
 		stage('Promote to Bintray') {
 			when {
 				branch 'release-0.x'
