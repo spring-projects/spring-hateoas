@@ -29,13 +29,13 @@ import org.springframework.hateoas.server.core.DelegatingEntityLinks;
 /**
  * Enables the collection of {@link LinkBuilder} instances from the application context. All found ones will be exposed
  * through an instance of {@link DelegatingEntityLinks}.
- * 
+ *
  * @author Oliver Gierke
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Inherited
 @Documented
-@Import(EntityLinksConfiguration.class)
+@Import({ EntityLinksConfiguration.class, WebMvcEntityLinksConfiguration.class })
 public @interface EnableEntityLinks {
 }

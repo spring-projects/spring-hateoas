@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
@@ -44,6 +45,7 @@ import org.springframework.util.ClassUtils;
  * @since 0.19
  */
 @Configuration
+@Import(EntityLinksConfiguration.class)
 @EnablePluginRegistries({ LinkDiscoverer.class })
 class HateoasConfiguration {
 

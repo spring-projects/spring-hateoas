@@ -40,7 +40,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@EnableEntityLinks
 @Import({ HypermediaConfigurationImportSelector.class, HateoasConfiguration.class, WebStackImportSelector.class })
 public @interface EnableHypermediaSupport {
 
