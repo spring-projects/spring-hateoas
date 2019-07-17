@@ -7,6 +7,7 @@ pipeline {
 
 	options {
 		disableConcurrentBuilds()
+		buildDiscarder(logRotator(numToKeepStr: '14'))
 	}
 
 	stages {
@@ -30,7 +31,7 @@ pipeline {
 			agent {
 				docker {
 					image 'adoptopenjdk/openjdk8:latest'
-					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}
 			options { timeout(time: 30, unit: 'MINUTES') }
@@ -46,7 +47,7 @@ pipeline {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
@@ -59,7 +60,7 @@ pipeline {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk12:latest'
-							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
@@ -72,7 +73,7 @@ pipeline {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk8:latest'
-							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
@@ -85,7 +86,7 @@ pipeline {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
@@ -98,7 +99,7 @@ pipeline {
 					agent {
 						docker {
 							image 'adoptopenjdk/openjdk12:latest'
-							args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
@@ -114,7 +115,7 @@ pipeline {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}
 			options { timeout(time: 20, unit: 'MINUTES') }
@@ -128,21 +129,23 @@ pipeline {
 					sh 'rm -rf ?'
 
 					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
+					// Extract project's version number
 					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
+							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
 							returnStdout: true
 					).trim()
 
 					RELEASE_TYPE = 'milestone' // .RC? or .M?
 
-					if (PROJECT_VERSION.endsWith('BUILD-SNAPSHOT')) {
+					if (PROJECT_VERSION.endsWith('SNAPSHOT')) {
 						RELEASE_TYPE = 'snapshot'
 					} else if (PROJECT_VERSION.endsWith('RELEASE')) {
 						RELEASE_TYPE = 'release'
 					}
 
+					// Capture build output...
 					OUTPUT = sh(
 							script: "PROFILE=ci,${RELEASE_TYPE} ci/build.sh",
 							returnStdout: true
@@ -150,11 +153,13 @@ pipeline {
 
 					echo "$OUTPUT"
 
+					// ...to extract artifactory build info
 					build_info_path = OUTPUT.split('\n')
 							.find { it.contains('Artifactory Build Info Recorder') }
 							.split('Saving Build Info to ')[1]
 							.trim()[1..-2]
 
+					// Stash the JSON build info to support promotion to bintray
 					dir(build_info_path + '/..') {
 						stash name: 'build_info', includes: "*.json"
 					}
@@ -168,7 +173,7 @@ pipeline {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}
 			options { timeout(time: 20, unit: 'MINUTES') }
@@ -182,10 +187,10 @@ pipeline {
 					sh 'rm -rf ?'
 
 					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
 					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
+							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
 							returnStdout: true
 					).trim()
 
@@ -205,7 +210,7 @@ pipeline {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/tmp/spring-hateoas-maven-repository'
+					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}
 			options { timeout(time: 20, unit: 'MINUTES') }
@@ -220,10 +225,10 @@ pipeline {
 					sh 'rm -rf ?'
 
 					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
+					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
 					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/spring-hateoas-maven-repository" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
+							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
 							returnStdout: true
 					).trim()
 
