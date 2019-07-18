@@ -22,10 +22,10 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
@@ -48,7 +48,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final ObjectProvider<CurieProvider> curieProvider;
 	private final ObjectProvider<HalFormsConfiguration> halFormsConfiguration;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
-	private final MessageSourceAccessor messageSourceAccessor;
+	private final MessageResolver resolver;
 
 	@Bean
 	LinkDiscoverer halFormsLinkDiscoverer() {
@@ -77,7 +77,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), messageSourceAccessor, true, configuration));
+				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, true, configuration));
 
 		return mapper;
 	}

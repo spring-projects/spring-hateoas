@@ -18,13 +18,12 @@ package org.springframework.hateoas.mediatype.hal;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.http.MediaType;
 
@@ -43,22 +42,21 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final LinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
-	private final MessageSourceAccessor messageSourceAccessor;
+	private final MessageResolver resolver;
 
 	/**
 	 * @param relProvider
 	 * @param curieProvider
 	 * @param halConfiguration
-	 * @param messageSourceAccessor
+	 * @param resolver
 	 */
 	public HalMediaTypeConfiguration(LinkRelationProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
-			ObjectProvider<HalConfiguration> halConfiguration,
-			@Qualifier("linkRelationMessageSource") MessageSourceAccessor messageSourceAccessor) {
+			ObjectProvider<HalConfiguration> halConfiguration, MessageResolver resolver) {
 
 		this.relProvider = relProvider;
 		this.curieProvider = curieProvider;
 		this.halConfiguration = halConfiguration;
-		this.messageSourceAccessor = messageSourceAccessor;
+		this.resolver = resolver;
 	}
 
 	@Bean
@@ -85,7 +83,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), messageSourceAccessor,
+				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver,
 				halConfiguration.getIfAvailable(HalConfiguration::new)));
 
 		return mapper;

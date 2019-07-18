@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import lombok.Getter;
 
@@ -28,10 +27,10 @@ import javax.validation.constraints.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.Affordances;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.http.HttpMethod;
 
 /**
@@ -46,7 +45,7 @@ public class HalFormsTemplateBuilderUnitTest {
 		HalFormsConfiguration configuration = new HalFormsConfiguration();
 		configuration.registerPattern(CreditCardNumber.class, "[0-9]{16}");
 
-		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, mock(MessageSourceAccessor.class));
+		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, MessageResolver.NONE);
 
 		PatternExample resource = new PatternExample();
 		resource.add(Affordances.of(new Link("/examples")) //
@@ -80,8 +79,7 @@ public class HalFormsTemplateBuilderUnitTest {
 				.withName("post") //
 				.toLink());
 
-		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
-				mock(MessageSourceAccessor.class));
+		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.NONE);
 
 		Map<String, HalFormsTemplate> templates = builder.findTemplates(model);
 

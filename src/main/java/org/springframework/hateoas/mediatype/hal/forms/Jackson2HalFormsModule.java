@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
@@ -163,7 +163,7 @@ class Jackson2HalFormsModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections, HalFormsConfiguration configuration) {
+				MessageResolver accessor, boolean enforceEmbeddedCollections, HalFormsConfiguration configuration) {
 
 			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, configuration.getHalConfiguration());
 
@@ -180,10 +180,9 @@ class Jackson2HalFormsModule extends SimpleModule {
 		}
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,
-				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
-				AutowireCapableBeanFactory beanFactory) {
+				MessageResolver resolver, boolean enforceEmbeddedCollections, AutowireCapableBeanFactory beanFactory) {
 
-			this(relProvider, curieProvider, messageSource, enforceEmbeddedCollections,
+			this(relProvider, curieProvider, resolver, enforceEmbeddedCollections,
 					beanFactory.getBean(HalFormsConfiguration.class));
 		}
 

@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.vnderror;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,10 +25,9 @@ import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
@@ -67,8 +65,8 @@ class VndErrorsMarshallingTest {
 
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
-		jackson2Mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
-				new MessageSourceAccessor(mock(MessageSource.class))));
+		jackson2Mapper.setHandlerInstantiator(
+				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.NONE));
 		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
 		VndError error = new VndError("42", "Validation failed!", //

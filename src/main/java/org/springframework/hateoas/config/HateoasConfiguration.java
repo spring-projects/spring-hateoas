@@ -15,15 +15,17 @@
  */
 package org.springframework.hateoas.config;
 
-import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.context.support.AbstractResourceBasedMessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
@@ -31,6 +33,7 @@ import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.config.EnablePluginRegistries;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
@@ -49,24 +52,9 @@ import org.springframework.util.ClassUtils;
 @EnablePluginRegistries({ LinkDiscoverer.class })
 class HateoasConfiguration {
 
-	/**
-	 * The {@link MessageSourceAccessor} to provide messages for {@link ResourceDescription}s being rendered.
-	 *
-	 * @return
-	 */
 	@Bean
-	public MessageSourceAccessor linkRelationMessageSource() {
-
-		try {
-
-			ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-			messageSource.setBasename("classpath:rest-messages");
-
-			return new MessageSourceAccessor(messageSource);
-
-		} catch (Exception o_O) {
-			throw new BeanCreationException("resourceDescriptionMessageSourceAccessor", "", o_O);
-		}
+	public MessageResolver messageResolver() {
+		return MessageResolver.of(lookupMessageSource());
 	}
 
 	// RelProvider
@@ -107,5 +95,26 @@ class HateoasConfiguration {
 	@Bean
 	LinkDiscoverers linkDiscoverers(PluginRegistry<LinkDiscoverer, MediaType> discoverers) {
 		return new LinkDiscoverers(discoverers);
+	}
+
+	/**
+	 * Creates a message source for the {@code rest-messages} resource bundle if the file exists or a
+	 * {@link NoOpMessageSource} otherwise.
+	 *
+	 * @return will never be {@literal null}.
+	 */
+	@Nullable
+	private static final MessageSource lookupMessageSource() {
+
+		ClassPathResource resource = new ClassPathResource("rest-messages");
+
+		if (!resource.exists()) {
+			return null;
+		}
+
+		AbstractResourceBasedMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setBasename("classpath:rest-messages");
+
+		return messageSource;
 	}
 }

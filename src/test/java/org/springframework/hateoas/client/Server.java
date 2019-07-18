@@ -15,10 +15,15 @@
  */
 package org.springframework.hateoas.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceAccessor;
+import static net.jadler.Jadler.*;
+import static org.hamcrest.Matchers.*;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.UUID;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.CollectionModel;
@@ -26,6 +31,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.LinkRelationProvider;
@@ -35,18 +41,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.UUID;
-
-import static net.jadler.Jadler.closeJadler;
-import static net.jadler.Jadler.initJadler;
-import static net.jadler.Jadler.onRequest;
-import static net.jadler.Jadler.port;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.mock;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for integration tests.
@@ -68,8 +64,8 @@ public class Server implements Closeable {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
-				new MessageSourceAccessor(mock(MessageSource.class))));
+		this.mapper.setHandlerInstantiator(
+				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.NONE));
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //

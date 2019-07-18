@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import lombok.Getter;
 import net.minidev.json.JSONArray;
@@ -38,7 +37,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
@@ -51,6 +49,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.mediatype.Affordances;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalIntegrationTest;
@@ -64,6 +63,7 @@ import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.support.EmployeeResource;
 import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,7 +82,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 			new Link("bar", IanaLinkRelations.PREV) //
 	);
 
-	MessageSource messageSource = mock(MessageSource.class);
+	// MessageSource messageSource = mock(MessageSource.class);
 
 	@BeforeEach
 	void setUpModule() {
@@ -94,8 +94,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				provider, CurieProvider.NONE, new MessageSourceAccessor(messageSource, Locale.US), true,
-				new HalFormsConfiguration()));
+				provider, CurieProvider.NONE, MessageResolver.NONE, true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -378,7 +377,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 			}
 		};
 
-		assertThat(getCuriedObjectMapper(provider, messageSource).writeValueAsString(resources))
+		assertThat(getCuriedObjectMapper(provider).writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("multiple-curies-document.json", getClass())));
 	}
 
@@ -587,18 +586,20 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 	private ObjectMapper getCuriedObjectMapper() {
 
-		return getCuriedObjectMapper(new DefaultCurieProvider("foo", UriTemplate.of("http://localhost:8080/rels/{rel}")),
-				messageSource);
+		return getCuriedObjectMapper(new DefaultCurieProvider("foo", UriTemplate.of("http://localhost:8080/rels/{rel}")));
 	}
 
-	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
+	private ObjectMapper getCuriedObjectMapper(CurieProvider provider) {
+		return getCuriedObjectMapper(provider, null);
+	}
+
+	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, @Nullable MessageSource messageSource) {
 
 		ObjectMapper mapper = new ObjectMapper();
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
-				messageSource == null ? null : new MessageSourceAccessor(messageSource, Locale.US), true,
-				new HalFormsConfiguration()));
+				MessageResolver.of(messageSource), true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);
 

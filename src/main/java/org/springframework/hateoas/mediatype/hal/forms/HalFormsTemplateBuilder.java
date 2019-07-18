@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
@@ -35,17 +34,17 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 class HalFormsTemplateBuilder {
 
 	private final HalFormsConfiguration configuration;
-	private final MessageSourceAccessor accessor;
+	private final MessageResolver resolver;
 
 	/**
 	 * Extract template details from a {@link RepresentationModel}'s {@link Affordance}s.
@@ -96,8 +95,7 @@ class HalFormsTemplateBuilder {
 
 	public HalFormsTemplate applyTo(HalFormsTemplate template, HalFormsTemplateBuilder.TemplateTitle templateTitle) {
 
-		return Optional.ofNullable(accessor.getMessage(templateTitle)) //
-				.filter(StringUtils::hasText) //
+		return Optional.ofNullable(resolver.resolve(templateTitle)) //
 				.map(template::withTitle) //
 				.orElse(template);
 	}
@@ -109,8 +107,12 @@ class HalFormsTemplateBuilder {
 
 		private HalFormsProperty apply(HalFormsProperty property) {
 
-			String message = accessor.getMessage(PropertyPrompt.of(metadata, property));
-			HalFormsProperty withPrompt = property.withPrompt(message);
+			String message = resolver.resolve(PropertyPrompt.of(metadata, property));
+
+			HalFormsProperty withPrompt = Optional.ofNullable(message) //
+					.map(it -> property.withPrompt(it)) //
+					.orElse(property);
+
 			HalFormsProperty withConfig = metadata.getPropertyMetadata(withPrompt.getName()) //
 					.flatMap(it -> applyConfig(it, withPrompt)) //
 					.orElse(withPrompt);

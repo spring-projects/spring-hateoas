@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,12 +33,14 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.PagedModel.PageMetadata;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -80,18 +81,15 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	static final String SINGLE_WITH_ONE_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"title\":\"the title\"}}}";
 	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
 
-	MessageSource messageSource = mock(MessageSource.class);
-
 	@BeforeEach
 	void setUpModule() {
 
-		MessageSourceAccessor accessor = new MessageSourceAccessor(messageSource);
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				DefaultLinkRelationProvider.INSTANCE);
 
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(provider, CurieProvider.NONE, accessor, new HalConfiguration()));
+				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.NONE, new HalConfiguration()));
 	}
 
 	/**
@@ -410,8 +408,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 			}
 		};
 
-		assertThat(getCuriedObjectMapper(provider, messageSource).writeValueAsString(resources))
-				.isEqualTo(MULTIPLE_CURIES_DOCUMENT);
+		assertThat(getCuriedObjectMapper(provider).writeValueAsString(resources)).isEqualTo(MULTIPLE_CURIES_DOCUMENT);
 	}
 
 	/**
@@ -450,8 +447,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
 		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-				new MessageSourceAccessor(messageSource),
-				new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
+				MessageResolver.NONE, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
@@ -483,9 +479,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
 
 		AnnotationLinkRelationProvider provider = new AnnotationLinkRelationProvider();
-		MessageSourceAccessor accessor = new MessageSourceAccessor(messageSource);
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, accessor,
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.NONE,
 				new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
@@ -563,15 +558,15 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	private ObjectMapper getCuriedObjectMapper(CurieProvider provider) {
-		return getCuriedObjectMapper(provider, messageSource);
+		return getCuriedObjectMapper(provider, null);
 	}
 
-	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
+	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, @Nullable MessageSource messageSource) {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
-				new MessageSourceAccessor(messageSource)));
+		mapper.setHandlerInstantiator(
+				new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), provider, MessageResolver.of(messageSource)));
 
 		return mapper;
 	}
