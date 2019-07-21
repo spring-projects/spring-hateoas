@@ -45,7 +45,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * Creates a new {@link VndErrors} instance containing a single {@link VndError} with the given logref, message and
 	 * optional {@link Link}s.
 	 *
-	 * @param logref must not be {@literal null} or empty.
+	 * @param logref can be {@literal null} or empty.
 	 * @param message must not be {@literal null} or empty.
 	 * @param links
 	 */
@@ -166,13 +166,12 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		/**
 		 * Creates a new {@link VndError} with the given logref, a message as well as some {@link Link}s.
 		 *
-		 * @param logref must not be {@literal null} or empty.
+		 * @param logref can be null {@literal null} or empty.
 		 * @param message must not be {@literal null} or empty.
 		 * @param links
 		 */
 		public VndError(String logref, String message, Link... links) {
 
-			Assert.hasText(logref, "Logref must not be null or empty!");
 			Assert.hasText(message, "Message must not be null or empty!");
 
 			this.logref = logref;
