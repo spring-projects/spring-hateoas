@@ -166,7 +166,7 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 		/**
 		 * Creates a new {@link VndError} with the given logref, a message as well as some {@link Link}s.
 		 *
-		 * @param logref can be null {@literal null} or empty.
+		 * @param logref can be {@literal null} or empty.
 		 * @param message must not be {@literal null} or empty.
 		 * @param links
 		 */
