@@ -75,7 +75,7 @@
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.7.9</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson.version>2.9.9.20190727</jackson.version>
+		<jackson-bom.version>2.9.9.20190727</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<junit.version>5.5.0</junit.version>
@@ -699,7 +699,7 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson-bom.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
