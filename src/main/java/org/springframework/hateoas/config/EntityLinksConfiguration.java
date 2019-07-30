@@ -17,7 +17,6 @@ package org.springframework.hateoas.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.DelegatingEntityLinks;
@@ -45,7 +44,6 @@ class EntityLinksConfiguration {
 
 	@Primary
 	@Bean
-	@DependsOn("webMvcEntityLinks")
 	DelegatingEntityLinks delegatingEntityLinks(PluginRegistry<EntityLinks, Class<?>> entityLinksPluginRegistry) {
 		return new DelegatingEntityLinks(entityLinksPluginRegistry);
 	}
