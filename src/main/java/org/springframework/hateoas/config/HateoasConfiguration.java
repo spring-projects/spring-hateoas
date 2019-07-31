@@ -18,7 +18,6 @@ package org.springframework.hateoas.config;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -138,7 +137,7 @@ public class HateoasConfiguration {
 	}
 
 	@Nullable
-	private final Properties loadProperties(Collection<Resource> sources) {
+	private final Properties loadProperties(List<Resource> sources) {
 
 		Resource[] resources = loadProperties("rest-default-messages", false).stream().toArray(Resource[]::new);
 

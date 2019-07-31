@@ -18,7 +18,6 @@ package org.springframework.hateoas.config;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WebClientConfigurer {
 
 	private final ObjectMapper mapper;
-	private final Collection<HypermediaMappingInformation> hypermediaTypes;
+	private final List<HypermediaMappingInformation> hypermediaTypes;
 
 	/**
 	 * Return a set of {@link ExchangeStrategies} driven by registered {@link HypermediaType}s.

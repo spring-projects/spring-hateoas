@@ -17,7 +17,7 @@ package org.springframework.hateoas.config;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -50,7 +50,7 @@ class WebFluxHateoasConfiguration {
 
 	@Bean
 	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
-			Collection<HypermediaMappingInformation> hypermediaTypes) {
+			List<HypermediaMappingInformation> hypermediaTypes) {
 		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
@@ -62,7 +62,7 @@ class WebFluxHateoasConfiguration {
 
 	@Bean
 	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
-			Collection<HypermediaMappingInformation> hypermediaTypes) {
+			List<HypermediaMappingInformation> hypermediaTypes) {
 
 		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
@@ -112,7 +112,7 @@ class WebFluxHateoasConfiguration {
 	static class HypermediaWebFluxConfigurer implements WebFluxConfigurer {
 
 		private final ObjectMapper mapper;
-		private final Collection<HypermediaMappingInformation> hypermediaTypes;
+		private final List<HypermediaMappingInformation> hypermediaTypes;
 
 		/**
 		 * Configure custom HTTP message readers and writers or override built-in ones.

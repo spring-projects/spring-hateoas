@@ -17,7 +17,6 @@ package org.springframework.hateoas.config;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +55,7 @@ class WebMvcHateoasConfiguration {
 
 	@Bean
 	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(ObjectProvider<ObjectMapper> mapper,
-			Collection<HypermediaMappingInformation> hypermediaTypes) {
+			List<HypermediaMappingInformation> hypermediaTypes) {
 
 		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
@@ -97,7 +96,7 @@ class WebMvcHateoasConfiguration {
 	static class HypermediaWebMvcConfigurer implements WebMvcConfigurer {
 
 		private final ObjectMapper mapper;
-		private final Collection<HypermediaMappingInformation> hypermediaTypes;
+		private final List<HypermediaMappingInformation> hypermediaTypes;
 
 		/*
 		 * (non-Javadoc)
