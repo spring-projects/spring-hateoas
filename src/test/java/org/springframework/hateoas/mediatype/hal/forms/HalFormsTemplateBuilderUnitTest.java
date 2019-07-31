@@ -45,7 +45,7 @@ public class HalFormsTemplateBuilderUnitTest {
 		HalFormsConfiguration configuration = new HalFormsConfiguration();
 		configuration.registerPattern(CreditCardNumber.class, "[0-9]{16}");
 
-		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, MessageResolver.NONE);
+		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY);
 
 		PatternExample resource = new PatternExample();
 		resource.add(Affordances.of(new Link("/examples")) //
@@ -79,7 +79,7 @@ public class HalFormsTemplateBuilderUnitTest {
 				.withName("post") //
 				.toLink());
 
-		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.NONE);
+		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.DEFAULTS_ONLY);
 
 		Map<String, HalFormsTemplate> templates = builder.findTemplates(model);
 

@@ -89,7 +89,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.NONE, new HalConfiguration()));
+				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
 	}
 
 	/**
@@ -447,7 +447,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
 		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-				MessageResolver.NONE, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
+				MessageResolver.DEFAULTS_ONLY, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
@@ -480,7 +480,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		AnnotationLinkRelationProvider provider = new AnnotationLinkRelationProvider();
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.NONE,
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
 				new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();

@@ -18,7 +18,12 @@ package org.springframework.hateoas.mediatype;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.lang.Nullable;
 
-enum NoMessageResolver implements MessageResolver {
+/**
+ * {@link MessageResolver} to always resort to the {@link MessageSourceResolvable}'s default message.
+ *
+ * @author Oliver Drotbohm
+ */
+enum DefaultOnlyMessageResolver implements MessageResolver {
 
 	INSTANCE;
 
@@ -29,6 +34,6 @@ enum NoMessageResolver implements MessageResolver {
 	@Nullable
 	@Override
 	public String resolve(MessageSourceResolvable resolvable) {
-		return null;
+		return resolvable.getDefaultMessage();
 	}
 }

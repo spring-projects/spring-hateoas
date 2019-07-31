@@ -56,7 +56,7 @@ class HalFormsMessageConverterUnitTest {
 		this.mapper.registerModule(new Jackson2HalFormsModule());
 		this.mapper.setHandlerInstantiator(
 				new Jackson2HalFormsModule.HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-						MessageResolver.NONE, true, new HalFormsConfiguration()));
+						MessageResolver.DEFAULTS_ONLY, true, new HalFormsConfiguration()));
 
 		TypeConstrainedMappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);

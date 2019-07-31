@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
  */
 public interface MessageResolver {
 
-	public static final MessageResolver NONE = NoMessageResolver.INSTANCE;
+	public static final MessageResolver DEFAULTS_ONLY = DefaultOnlyMessageResolver.INSTANCE;
 
 	/**
 	 * Resolve the given {@link MessageSourceResolvable}. Return {@literal null} if no message was found.
@@ -46,6 +46,9 @@ public interface MessageResolver {
 	 * @return will never be {@literal null}.
 	 */
 	public static MessageResolver of(@Nullable MessageSource messageSource) {
-		return messageSource == null ? NoMessageResolver.INSTANCE : new MessageSourceResolver(messageSource);
+
+		return messageSource == null //
+				? DefaultOnlyMessageResolver.INSTANCE //
+				: new MessageSourceResolver(messageSource);
 	}
 }

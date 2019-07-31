@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.support;
 
+import java.util.function.Function;
+
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -24,7 +26,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 public class ContextTester {
 
 	public static <E extends Exception> void withContext(Class<?> configuration,
-		 	ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
 
 		try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
 
@@ -36,18 +38,26 @@ public class ContextTester {
 	}
 
 	public static <E extends Exception> void withServletContext(Class<?> configuration,
-			  ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
 
-		try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
+		withServletContext(configuration, Function.identity(), consumer);
+	}
 
-			context.register(configuration);
-			context.setServletContext(new MockServletContext());
-			context.refresh();
+	public static <E extends Exception> void withServletContext(Class<?> configuration,
+			Function<AnnotationConfigWebApplicationContext, AnnotationConfigWebApplicationContext> preparer,
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
 
-			consumer.accept(context);
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(configuration);
+		context.setServletContext(new MockServletContext());
+
+		try (AnnotationConfigWebApplicationContext prepared = preparer.apply(context)) {
+
+			prepared.refresh();
+			consumer.accept(prepared);
 		}
 	}
-	
+
 	public interface ConsumerWithException<T, E extends Exception> {
 
 		void accept(T element) throws E;

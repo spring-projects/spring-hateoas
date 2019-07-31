@@ -15,14 +15,26 @@
  */
 package org.springframework.hateoas.config;
 
-import org.springframework.context.MessageSource;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.context.support.AbstractResourceBasedMessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.mediatype.MessageResolver;
@@ -50,7 +62,9 @@ import org.springframework.util.ClassUtils;
 @Configuration
 @Import(EntityLinksConfiguration.class)
 @EnablePluginRegistries({ LinkDiscoverer.class })
-class HateoasConfiguration {
+public class HateoasConfiguration {
+
+	private @Autowired ApplicationContext context;
 
 	@Bean
 	public MessageResolver messageResolver() {
@@ -104,17 +118,53 @@ class HateoasConfiguration {
 	 * @return will never be {@literal null}.
 	 */
 	@Nullable
-	private static final MessageSource lookupMessageSource() {
+	private final AbstractMessageSource lookupMessageSource() {
 
-		ClassPathResource resource = new ClassPathResource("rest-messages");
+		List<Resource> candidates = loadProperties("rest-default-messages", false);
 
-		if (!resource.exists()) {
+		if (candidates.isEmpty() && loadProperties("rest-messages", true).isEmpty()) {
 			return null;
 		}
 
 		AbstractResourceBasedMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:rest-messages");
+		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.toString());
+
+		if (!candidates.isEmpty()) {
+			messageSource.setCommonMessages(loadProperties(candidates));
+		}
 
 		return messageSource;
+	}
+
+	@Nullable
+	private final Properties loadProperties(Collection<Resource> sources) {
+
+		Resource[] resources = loadProperties("rest-default-messages", false).stream().toArray(Resource[]::new);
+
+		PropertiesFactoryBean factory = new PropertiesFactoryBean();
+		factory.setLocations(resources);
+
+		try {
+
+			factory.afterPropertiesSet();
+			return factory.getObject();
+
+		} catch (IOException o_O) {
+			throw new IllegalStateException("Could not load default properties from resources!", o_O);
+		}
+	}
+
+	private final List<Resource> loadProperties(String baseName, boolean withWildcard) {
+
+		try {
+			return Arrays //
+					.stream(context.getResources(String.format("classpath:%s%s.properties", baseName, withWildcard ? "*" : ""))) //
+					.filter(Resource::exists) //
+					.collect(Collectors.toList());
+
+		} catch (IOException e) {
+			return Collections.emptyList();
+		}
 	}
 }

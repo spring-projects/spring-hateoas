@@ -121,14 +121,19 @@ public class Jackson2HalModule extends SimpleModule {
 		}
 
 		public HalLinkListSerializer(@Nullable BeanProperty property, CurieProvider curieProvider, EmbeddedMapper mapper,
-				MessageResolver accessor, HalConfiguration halConfiguration) {
+				MessageResolver resolver, HalConfiguration halConfiguration) {
 
 			super(TypeFactory.defaultInstance().constructType(Links.class));
+
+			Assert.notNull(curieProvider, "CurieProvider must not be null!");
+			Assert.notNull(mapper, "EmbeddedMapper must not be null!");
+			Assert.notNull(resolver, "MessageResolver must not be null!");
+			Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
 
 			this.property = property;
 			this.curieProvider = curieProvider;
 			this.mapper = mapper;
-			this.resolver = accessor;
+			this.resolver = resolver;
 			this.halConfiguration = halConfiguration;
 		}
 

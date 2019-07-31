@@ -65,7 +65,7 @@ public class Server implements Closeable {
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
 		this.mapper.setHandlerInstantiator(
-				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.NONE));
+				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //

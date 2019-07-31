@@ -16,9 +16,11 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -26,17 +28,21 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
@@ -54,6 +60,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -522,6 +529,37 @@ class EnableHypermediaSupportIntegrationTest {
 		);
 	}
 
+	@Test // #1019
+	void registersNoOpMessageResolverIfMessagesBundleMissing() {
+
+		withServletContext(HateoasConfiguration.class, //
+				context -> {
+					assertThat(context.getBean(MessageResolver.class)).isEqualTo(MessageResolver.of(null));
+				});
+	}
+
+	@Test // #1019
+	void registersMessageResolverIfMessagesBundleAvailable() {
+
+		withServletContext(HateoasConfiguration.class, simulateResourceBundle(), context -> {
+			assertThat(context.getBean(MessageResolver.class)).isNotEqualTo(MessageResolver.of(null));
+		});
+	}
+
+	@Test // #1019, DATAREST-686
+	void defaultsEncodingOfMessageSourceToUtf8() throws Exception {
+
+		withServletContext(HalConfig.class, simulateResourceBundle(), context -> {
+
+			MessageResolver resolver = context.getBean(MessageResolver.class);
+
+			Object accessor = ReflectionTestUtils.getField(resolver, "accessor");
+			Object messageSource = ReflectionTestUtils.getField(accessor, "messageSource");
+
+			assertThat((String) ReflectionTestUtils.getField(messageSource, "defaultEncoding")).isEqualTo("UTF-8");
+		});
+	}
+
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
 
 		assertThat(context.getBeansOfType(EntityLinks.class).values()) //
@@ -605,6 +643,29 @@ class EnableHypermediaSupportIntegrationTest {
 		}
 
 		throw new IllegalStateException("Unexpected result when looking up argument resolvers!");
+	}
+
+	private static <T extends AnnotationConfigWebApplicationContext> Function<T, T> simulateResourceBundle() {
+
+		return context -> {
+
+			T spy = Mockito.spy(context);
+
+			ClassPathResource resource = new ClassPathResource("rest-messages.properties",
+					EnableHypermediaSupportIntegrationTest.class);
+			assertThat(resource.exists()).isTrue();
+
+			try {
+
+				doReturn(new Resource[0]).when(spy).getResources("classpath:rest-default-messages.properties");
+				doReturn(new Resource[] { resource }).when(spy).getResources("classpath:rest-messages*.properties");
+
+			} catch (IOException o_O) {
+				fail("Couldn't mock resource lookup!", o_O);
+			}
+
+			return spy;
+		};
 	}
 
 	@Configuration

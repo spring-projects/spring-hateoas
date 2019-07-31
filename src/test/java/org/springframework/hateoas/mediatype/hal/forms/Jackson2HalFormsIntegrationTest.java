@@ -94,7 +94,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				provider, CurieProvider.NONE, MessageResolver.NONE, true, new HalFormsConfiguration()));
+				provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, true, new HalFormsConfiguration()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 

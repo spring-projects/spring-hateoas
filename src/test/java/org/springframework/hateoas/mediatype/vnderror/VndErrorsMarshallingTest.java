@@ -66,7 +66,7 @@ class VndErrorsMarshallingTest {
 		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
 		jackson2Mapper.registerModule(new Jackson2HalModule());
 		jackson2Mapper.setHandlerInstantiator(
-				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.NONE));
+				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
 		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 
 		VndError error = new VndError("42", "Validation failed!", //

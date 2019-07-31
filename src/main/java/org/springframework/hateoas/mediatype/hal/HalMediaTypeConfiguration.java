@@ -18,6 +18,7 @@ package org.springframework.hateoas.mediatype.hal;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
@@ -42,7 +43,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final LinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
-	private final MessageResolver resolver;
+	private final @Qualifier("messageResolver") MessageResolver resolver;
 
 	/**
 	 * @param relProvider
