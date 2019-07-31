@@ -469,6 +469,7 @@ class PersonModelAssembler extends RepresentationModelAssemblerSupport<Person, P
   }
 }
 ----
+NOTE: `createResource(...)` is code you write to instantiate a `PersonModel` object given a `Person` object. It should only focus on setting attributes, not populating `Links`.
 ====
 
 Setting the class up as we did in the preceding example gives you the following benefits:
