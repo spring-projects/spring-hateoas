@@ -1,6 +1,43 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.0.RC1 (2019-08-02)
+----------------------------------------
+- #1030 - Release 1.0.0.RC1.
+- #1029 - Update changelog for RC1.
+- #1027 - #857 - Use List instead of Collection in configuration classes.
+- #1026 - Upgrade to Jackson 2.9.9.20190727.
+- #1024 - Release documentation through CI.
+- #1023 - Update CI pipeline based on lessons learned.
+- #1022 - Deprecate @EnableEntityLinks.
+- #1021 - Make sure that EntityLinks bean is only activated for Spring MVC.
+- #1020 - Migration for BasicLinkBuilder in 1.0.0.M3.
+- #1019 - Performance issues with i18n of HAL link titles.
+- #1018 - Support customizing additional HAL-FORMS properties.
+- #1017 - Update document publication mechanism .
+- #1014 - RepresentationModel should allow adding links optionally.
+- #1013 - Upgrade to JUnit 5.5.
+- #1012 - Documentation for HAL-FORMS resource bundles for _templates is wrong.
+- #1011 - Add timeouts to the pipeline.
+- #1010 - #987 - Drop UTF8 HAL media type.
+- #1008 - Properly configure user.name and user.home for CI jobs.
+- #1006 - Upgrade Asciidoctor Maven plugin dependencies.
+- #1005 - Document internationalization options.
+- #1003 - IllegalArgumentException when calling linkTo(methodOn(...)) on controller method with optional @RequestParam.
+- #992 - HAL-FORMS implementation prevents mediatype usage as intended by the specification.
+- #987 - Deprecate _UTF8 media type variants.
+- #986 - Switch to Spring's ServerWebExchangeContextFilter.
+- #981 - Provide linkRelationBasedPolicy for HAL Forms.
+- #979 - Allow customization of HAL Forms property prompts.
+- #857 - Use List not Collection when asking for beans.
+- #849 - Support defining HAL Forms template titles via resource bundles.
+- #836 - Reference documentation mentions inexistant "createResource" method in class "ResourceAssemblerSupport".
+- #832 - Properly integrate configuration for HAL into HAL-FORMS configuration.
+- #777 - Rename UnitTest classes as ...UnitTests for consistency.
+- #729 - Serializing ResourceSupport types into HAL-FORMS doesn't work.
+- #445 - RepresentationModelAssemblerSupport does not expose controllerClass/resourceType to subclasses.
+- #153 - Readme does not match code.
+
 Changes in version 1.0.0.M3 (2019-06-14)
 ----------------------------------------
 - #1002 - Release 1.0 M3. 
