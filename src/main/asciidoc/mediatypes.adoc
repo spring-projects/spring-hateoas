@@ -271,7 +271,7 @@ The keys can be defined globally, locally or fully-qualified and need an `._prom
 [source]
 ----
 firstName._prompt=Firstname <1>
-Employee.firstName=Firstname <2>
+Employee.firstName._prompt=Firstname <2>
 com.acme.Employee.firstName._prompt=Firstname <3>
 ----
 <1> All properties named `email` will get "Firstname" rendered, independent of the type they're declared in.
