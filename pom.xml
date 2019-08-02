@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>0.25.2.RELEASE</version>
+	<version>0.25.3.BUILD-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
 	<url>https://github.com/SpringSource/spring-hateoas</url>
