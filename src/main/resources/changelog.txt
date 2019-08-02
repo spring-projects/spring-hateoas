@@ -1,6 +1,25 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 0.25.2.RELEASE (2019-08-02)
+----------------------------------------------
+- #1033 - Upgrade to Spring Framework 4.3.25.
+- #1031 - Release 0.25.2.RELEASE.
+- #975 - Backport link expansion inside Traverson to 0.25.x.
+- #868 - URL Cleanup.
+- #828 - Backport modernized docs.
+- #814 - Add ability to do releases through Concourse.
+- #749 - Performance optimization by extra caching.
+
+Changes in version 0.25.1.RELEASE (2019-02-12)
+----------------------------------------------
+- #810 - Release 0.25.1.
+- #809 - Upgrade to Spring Framework 4.3.22.
+- #769 - Migrate 0.25.x to Concourse CI.
+- #762 - Backport handling of "templated" properties to 0.25.x.
+- #757 - Migrate all Forward header handling to Spring MVC.
+- #755 - Upgrade to Jackson 2.8.11.2.
+
 Changes in version 0.25.0.RELEASE (2018-07-25)
 ----------------------------------------------
 - #730 - Release 0.25.

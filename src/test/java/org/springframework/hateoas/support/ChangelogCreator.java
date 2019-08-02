@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas.support;
 
-import net.minidev.json.JSONArray;
-
 import java.util.Iterator;
 
+import net.minidev.json.JSONArray;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.jsonpath.JsonPath;
@@ -30,7 +29,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 26;
+	private static final int MILESTONE_ID = 29;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) throws Exception {
