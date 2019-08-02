@@ -3,6 +3,7 @@ Spring HATEOAS Changelog
 
 Changes in version 1.0.0.RC1 (2019-08-02)
 ----------------------------------------
+- #1035 - Upgrade to Reactor Dysprosium M3.
 - #1030 - Release 1.0.0.RC1.
 - #1029 - Update changelog for RC1.
 - #1027 - #857 - Use List instead of Collection in configuration classes.
