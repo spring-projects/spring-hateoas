@@ -21,6 +21,7 @@ import lombok.Value;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Builder
 @AllArgsConstructor
 @JsonPropertyOrder({"format", "href", "value"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Doc {
 
 	private final String href, value;

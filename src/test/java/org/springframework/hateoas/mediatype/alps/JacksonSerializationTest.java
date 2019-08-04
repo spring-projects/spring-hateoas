@@ -45,7 +45,6 @@ class JacksonSerializationTest {
 	void setUp() {
 
 		mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(Include.NON_NULL);
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
