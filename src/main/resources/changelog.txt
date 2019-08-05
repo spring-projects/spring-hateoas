@@ -1,9 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
-Changes in version 1.0.0.RC1 (2019-08-02)
+Changes in version 1.0.0.RC1 (2019-08-05)
 ----------------------------------------
+- #1042 - Upgrade to AssertJ 3.13.2.
+- #1041 - Upgrade to JUnit 5.5.1.
+- #1039 - ALPS documents should not render null attributes.
 - #1035 - Upgrade to Reactor Dysprosium M3.
+- #1034 - Upgrade to Spring Framework 5.2.0.RC1.
 - #1030 - Release 1.0.0.RC1.
 - #1029 - Update changelog for RC1.
 - #1027 - #857 - Use List instead of Collection in configuration classes.
