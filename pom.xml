@@ -70,6 +70,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>1.8</source.level>
+		<assertj.version>3.13.2</assertj.version>
 		<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
@@ -872,7 +873,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.11.0</version>
+			<version>${assertj.version}</version>
 			<scope>test</scope>
 		</dependency>
 
