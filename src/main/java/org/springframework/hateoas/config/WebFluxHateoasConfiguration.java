@@ -17,7 +17,10 @@ package org.springframework.hateoas.config;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -27,6 +30,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsMediaTypeConfiguration;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -125,10 +132,10 @@ class WebFluxHateoasConfiguration {
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 
 			CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
-
+			
 			this.hypermediaTypes.forEach(hypermedia -> {
 
-				MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
+				MimeType[] mimeTypes = hypermedia.getRegisterableMediaTypes().toArray(new MimeType[0]);
 
 				ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
 				customCodecs.encoder(new Jackson2JsonEncoder(objectMapper, mimeTypes));

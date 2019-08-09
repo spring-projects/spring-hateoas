@@ -54,22 +54,27 @@ public class WebClientConfigurer {
 
 		List<Encoder<?>> encoders = new ArrayList<>();
 		List<Decoder<?>> decoders = new ArrayList<>();
-
+		
 		this.hypermediaTypes.forEach(hypermedia -> {
 
 			ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
-			MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
+
+			MimeType[] mimeTypes = hypermedia.getRegisterableMediaTypes().toArray(new MimeType[0]);
 
 			encoders.add(new Jackson2JsonEncoder(objectMapper, mimeTypes));
 			decoders.add(new Jackson2JsonDecoder(objectMapper, mimeTypes));
 		});
 
-		return ExchangeStrategies.builder().codecs(clientCodecConfigurer -> {
+		ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder().codecs(clientCodecConfigurer -> {
 
 			encoders.forEach(encoder -> clientCodecConfigurer.customCodecs().encoder(encoder));
 			decoders.forEach(decoder -> clientCodecConfigurer.customCodecs().decoder(decoder));
 
+			clientCodecConfigurer.registerDefaults(true);
+
 		}).build();
+
+		return exchangeStrategies;
 	}
 
 	/**

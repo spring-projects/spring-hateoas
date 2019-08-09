@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +41,10 @@ public interface HypermediaMappingInformation {
 	 */
 	List<MediaType> getMediaTypes();
 
+	default Collection<? extends MediaType> getRegisterableMediaTypes() {
+		return getMediaTypes();
+	}
+	
 	/**
 	 * Configure an {@link ObjectMapper} and register custom serializers and deserializers for the supported media types.
 	 * If all you want to do is register a Jackson {@link Module}, prefer implementing {@link #getJacksonModule()}.

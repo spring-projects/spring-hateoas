@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.hateoas.server.core.TypeReferences.CollectionModelType;
 import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.hateoas.support.Employee;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -262,9 +264,134 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalWebFluxConfig.class);
 
-		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON).exchange().expectStatus().is4xxClientError()
-				.returnResult(String.class).getResponseBody().as(StepVerifier::create).verifyComplete();
+		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON).exchange() //
+				.expectStatus().isEqualTo(HttpStatus.NOT_ACCEPTABLE) //
+				.returnResult(RepresentationModel.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.verifyComplete();
 	}
+
+	@Test
+	void callingForUnregisteredMediaTypeShouldFail2() {
+
+		setUp(HalFormsWebFluxConfig.class);
+
+		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON).exchange() //
+				.expectStatus().isEqualTo(HttpStatus.NOT_ACCEPTABLE) //
+				.returnResult(RepresentationModel.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.verifyComplete();
+	}
+
+	@Test
+	void callingForApplicationJsonWhenHalIsRegisteredShouldResultInHalAsApplicationJson() {
+
+		setUp(HalWebFluxConfig.class);
+
+		this.testClient.get().uri("/").accept(MediaType.APPLICATION_JSON).exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaType.APPLICATION_JSON) //
+				.returnResult(RepresentationModel.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNextMatches(s -> {
+					assertThat(s).isEqualTo(
+							new RepresentationModel<>(Arrays.asList(new Link("/", "self"), new Link("/employees", "employees"))));
+					return true;
+				}) //
+				.verifyComplete();
+
+		this.testClient.get().uri("/").accept(MediaType.APPLICATION_JSON).exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaType.APPLICATION_JSON) //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"_links\":{\"self\":{\"href\":\"/\"},\"employees\":{\"href\":\"/employees\"}}}") //
+				.verifyComplete();
+	}
+
+	@Test
+	void callingForDefaultWhenHalIsRegisteredShouldResultInHal() {
+
+		setUp(HalWebFluxConfig.class);
+
+		this.testClient.get().uri("/").exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.HAL_JSON) //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"_links\":{\"self\":{\"href\":\"/\"},\"employees\":{\"href\":\"/employees\"}}}") //
+				.verifyComplete();
+	}
+
+	@Test
+	void callingForApplicationJsonWhenHalFormsIsRegisteredShouldResultInHalFormsAsApplicationJson() {
+
+		setUp(HalFormsWebFluxConfig.class);
+
+		this.testClient.get().uri("/").accept(MediaType.APPLICATION_JSON).exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaType.APPLICATION_JSON) //
+				.returnResult(RepresentationModel.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNextMatches(s -> {
+					assertThat(s).isEqualTo(
+							new RepresentationModel<>(Arrays.asList(new Link("/", "self"), new Link("/employees", "employees"))));
+					return true;
+				}) //
+				.verifyComplete();
+
+		this.testClient.get().uri("/").accept(MediaType.APPLICATION_JSON).exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaType.APPLICATION_JSON) //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"_links\":{\"self\":{\"href\":\"/\"},\"employees\":{\"href\":\"/employees\"}}}") //
+				.verifyComplete();
+	}
+
+	@Test
+	void callingForDefaultWhenHalFormsIsRegisteredShouldResultInHalForms() {
+
+		setUp(HalFormsWebFluxConfig.class);
+
+		this.testClient.get().uri("/").exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.HAL_FORMS_JSON) //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"_links\":{\"self\":{\"href\":\"/\"},\"employees\":{\"href\":\"/employees\"}}}") //
+				.verifyComplete();
+	}
+
+	@Test
+	void callingForApplicationJsonWhenHalAndHalFormsAreRegisteredProducesHalAsApplicationJson() {
+
+		setUp(AllHalWebFluxConfig.class);
+
+		this.testClient.get().uri("/").accept(MediaType.APPLICATION_JSON).exchange() //
+			.expectStatus().isOk() //
+			.expectHeader().contentType(MediaType.APPLICATION_JSON) //
+			.returnResult(String.class).getResponseBody() //
+			.as(StepVerifier::create) //
+			.expectNext("{\"_links\":{\"self\":{\"href\":\"/\"},\"employees\":{\"href\":\"/employees\"}}}") //
+			.verifyComplete();
+
+	}
+
+	@Test
+	void callingForDefaultWhenHalAndHalFormsIsRegisteredShouldResultInHal() {
+
+		setUp(AllHalWebFluxConfig.class);
+
+		this.testClient.get().uri("/").exchange() //
+			.expectStatus().isOk() //
+			.expectHeader().contentType(MediaTypes.HAL_JSON) //
+			.returnResult(String.class).getResponseBody() //
+			.as(StepVerifier::create) //
+			.expectNext("{\"_links\":{\"self\":{\"href\":\"/\"},\"employees\":{\"href\":\"/employees\"}}}") //
+			.verifyComplete();
+	}
+
 
 	/**
 	 * @see #728
