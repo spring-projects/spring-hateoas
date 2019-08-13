@@ -216,7 +216,6 @@
 				<maven.install.skip>true</maven.install.skip>
 				<maven.deploy.skip>true</maven.deploy.skip>
 				<skipTests>true</skipTests>
-				<project.root>${basedir}</project.root>
 				<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
 			</properties>
 
@@ -545,9 +544,10 @@
 								<goals>
 									<goal>single</goal>
 								</goals>
+								<phase>package</phase>
 								<configuration>
 									<descriptors>
-										<descriptor>src/docs/resources/assemblies/docs.xml</descriptor>
+										<descriptor>src/main/resources/assemblies/docs.xml</descriptor>
 									</descriptors>
 									<finalName>spring-hateoas-${project.version}</finalName>
 									<appendAssemblyId>true</appendAssemblyId>
