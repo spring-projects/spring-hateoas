@@ -15,9 +15,13 @@
  */
 package org.springframework.hateoas.support;
 
+import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.mediatype.PropertyUtils.*;
+import static org.springframework.hateoas.mediatype.alps.Alps.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +33,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.alps.Alps;
+import org.springframework.hateoas.mediatype.alps.Descriptor;
+import org.springframework.hateoas.mediatype.alps.Ext;
+import org.springframework.hateoas.mediatype.alps.Format;
+import org.springframework.hateoas.mediatype.alps.Type;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -174,4 +183,32 @@ public class WebMvcEmployeeController {
 						.toUri()) //
 				.build();
 	}
+
+	// tag::alps-profile[]
+	@GetMapping(value = "/profile", produces = ALPS_JSON_VALUE)
+	Alps profile() {
+
+		return Alps.alps() //
+				.doc(doc() //
+						.href("https://example.org/samples/full/doc.html") //
+						.value("value goes here") //
+						.format(Format.TEXT) //
+						.build()) //
+				.descriptor(getExposedProperties(Employee.class).stream() //
+						.map(property -> Descriptor.builder() //
+								.id("class field [" + property.getName() + "]") //
+								.name(property.getName()) //
+								.type(Type.SEMANTIC) //
+								.ext(Ext.builder() //
+										.id("ext [" + property.getName() + "]") //
+										.href("https://example.org/samples/ext/" + property.getName()) //
+										.value("value goes here") //
+										.build()) //
+								.rt("rt for [" + property.getName() + "]") //
+								.descriptor(Collections.singletonList(Descriptor.builder().id("embedded").build())) //
+								.build()) //
+						.collect(Collectors.toList()))
+				.build();
+	}
+	// end::alps-profile[]
 }

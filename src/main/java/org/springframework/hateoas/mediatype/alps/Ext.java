@@ -18,6 +18,8 @@ package org.springframework.hateoas.mediatype.alps;
 import lombok.Builder;
 import lombok.Value;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -30,10 +32,18 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Value
 @Builder
-@JsonPropertyOrder({"id", "href", "value"})
+@JsonPropertyOrder({ "id", "href", "value" })
 public class Ext {
 
 	private final String id;
 	private final String href;
 	private final String value;
+
+	@JsonCreator
+	private Ext(@JsonProperty("id") String id, @JsonProperty("href") String href, @JsonProperty("value") String value) {
+
+		this.id = id;
+		this.href = href;
+		this.value = value;
+	}
 }

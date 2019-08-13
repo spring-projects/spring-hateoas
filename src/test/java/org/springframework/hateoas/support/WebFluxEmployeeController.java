@@ -15,12 +15,17 @@
  */
 package org.springframework.hateoas.support;
 
+import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.mediatype.PropertyUtils.*;
+import static org.springframework.hateoas.mediatype.alps.Alps.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static reactor.function.TupleUtils.*;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,6 +35,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
+import org.springframework.hateoas.mediatype.alps.Alps;
+import org.springframework.hateoas.mediatype.alps.Descriptor;
+import org.springframework.hateoas.mediatype.alps.Ext;
+import org.springframework.hateoas.mediatype.alps.Format;
+import org.springframework.hateoas.mediatype.alps.Type;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -173,5 +183,31 @@ public class WebFluxEmployeeController {
 						.location(findOne.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
 						.build() //
 				);
+	}
+
+	@GetMapping(value = "/profile", produces = ALPS_JSON_VALUE)
+	Alps profile() {
+
+		return Alps.alps() //
+				.doc(doc() //
+						.href("https://example.org/samples/full/doc.html") //
+						.value("value goes here") //
+						.format(Format.TEXT) //
+						.build()) //
+				.descriptor(getExposedProperties(Employee.class).stream() //
+						.map(property -> Descriptor.builder() //
+								.id("class field [" + property.getName() + "]") //
+								.name(property.getName()) //
+								.type(Type.SEMANTIC) //
+								.ext(Ext.builder() //
+										.id("ext [" + property.getName() + "]") //
+										.href("https://example.org/samples/ext/" + property.getName()) //
+										.value("value goes here") //
+										.build()) //
+								.rt("rt for [" + property.getName() + "]") //
+								.descriptor(Collections.singletonList(Descriptor.builder().id("embedded").build())) //
+								.build()) //
+						.collect(Collectors.toList()))
+				.build();
 	}
 }
