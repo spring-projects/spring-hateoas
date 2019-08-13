@@ -20,7 +20,9 @@ import lombok.Value;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -33,14 +35,32 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Value
 @Builder
-@JsonPropertyOrder({"id", "href", "name", "type", "doc", "descriptor", "ext"})
+@JsonPropertyOrder({ "id", "href", "name", "type", "doc", "descriptor", "ext" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Descriptor {
 
-	private final String id, href, name;
+	private final String id;
+	private final String href;
+	private final String name;
 	private final Doc doc;
 	private final Type type;
 	private final Ext ext;
 	private final String rt;
 	private final List<Descriptor> descriptor;
+
+	@JsonCreator
+	private Descriptor(@JsonProperty("id") String id, @JsonProperty("href") String href,
+			@JsonProperty("name") String name, @JsonProperty("doc") Doc doc, @JsonProperty("type") Type type,
+			@JsonProperty("ext") Ext ext, @JsonProperty("rt") String rt,
+			@JsonProperty("descriptor") List<Descriptor> descriptor) {
+
+		this.id = id;
+		this.href = href;
+		this.name = name;
+		this.doc = doc;
+		this.type = type;
+		this.ext = ext;
+		this.rt = rt;
+		this.descriptor = descriptor;
+	}
 }

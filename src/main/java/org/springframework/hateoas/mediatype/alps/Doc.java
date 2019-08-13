@@ -15,13 +15,14 @@
  */
 package org.springframework.hateoas.mediatype.alps;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -34,12 +35,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @Value
 @Builder
-@AllArgsConstructor
-@JsonPropertyOrder({"format", "href", "value"})
+@JsonPropertyOrder({ "format", "href", "value" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Doc {
 
-	private final String href, value;
+	private final String href;
+	private final String value;
 	private final Format format;
 
 	/**
@@ -54,6 +55,15 @@ public class Doc {
 		Assert.notNull(format, "Format must not be null!");
 
 		this.href = null;
+		this.value = value;
+		this.format = format;
+	}
+
+	@JsonCreator
+	private Doc(@JsonProperty("href") String href, @JsonProperty("value") String value,
+			@JsonProperty("format") Format format) {
+
+		this.href = href;
 		this.value = value;
 		this.format = format;
 	}

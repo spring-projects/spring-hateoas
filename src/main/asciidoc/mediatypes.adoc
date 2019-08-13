@@ -2,6 +2,7 @@
 = Media types
 :code-dir: ../../../src/docs/java/org/springframework/hateoas
 :resource-dir: ../../../src/docs/resources/org/springframework/hateoas
+:test-dir: ../../../src/test/java/org/springframework/hateoas
 :linkattrs:
 
 [[mediatypes.hal]]
@@ -407,6 +408,86 @@ This media type is still under development as is the spec itself. Feel free to
 https://github.com/spring-projects/spring-hateoas/issues[open a ticket, window="_blank"] if you run into issues using it.
 
 NOTE: *UBER media type* is not associated in any way with *Uber Technologies Inc.*, the ride sharing company.
+
+[[mediatypes.alps]]
+== ALPS - Application-Level Profile Semantics
+
+https://tools.ietf.org/html/draft-amundsen-richardson-foster-alps-01[ALPS, window="_blank"] is a media type for providing
+profile-based metadata about another resource.
+
+[quote, Mike Amundsen, ALPS spec]
+____
+An ALPS document can be used as a profile to
+explain the application semantics of a document with an application-
+agnostic media type (such as HTML, HAL, Collection+JSON, Siren,
+etc.).  This increases the reusability of profile documents across
+media types.
+____
+
+ALPS requires no special activation. Instead you "build" an `Alps` record and return it from either a Spring MVC or a Spring WebFlux web method as shown below:
+
+.Building an `Alps` record
+====
+[source, java, tabsize=2, indent=0]
+----
+include::{test-dir}/support/WebMvcEmployeeController.java[tag=alps-profile]
+----
+* This example leverages `PropertyUtils.getExposedProperties()` to extract metadata about the domain object's attributes.
+====
+
+This fragment has test data plugged in. It yields JSON like this:
+
+.ALPS JSON
+====
+----
+{
+  "version": "1.0",
+  "doc": {
+    "format": "TEXT",
+    "href": "https://example.org/samples/full/doc.html",
+    "value": "value goes here"
+  },
+  "descriptor": [
+    {
+      "id": "class field [name]",
+      "name": "name",
+      "type": "SEMANTIC",
+      "descriptor": [
+        {
+          "id": "embedded"
+        }
+      ],
+      "ext": {
+        "id": "ext [name]",
+        "href": "https://example.org/samples/ext/name",
+        "value": "value goes here"
+      },
+      "rt": "rt for [name]"
+    },
+    {
+      "id": "class field [role]",
+      "name": "role",
+      "type": "SEMANTIC",
+      "descriptor": [
+        {
+          "id": "embedded"
+        }
+      ],
+      "ext": {
+        "id": "ext [role]",
+        "href": "https://example.org/samples/ext/role",
+        "value": "value goes here"
+      },
+      "rt": "rt for [role]"
+    }
+  ]
+}
+----
+====
+
+Instead of linking each field "automatically" to a domain object's fields, you can write them by hand if you like. It's also possible
+to use Spring Framework's message bundles and the `MessageSource` interface. This gives you the ability to delegate these values to
+locale-specific message bundles and even internationalize the metadata.
 
 [[mediatypes.custom]]
 == Registering a custom media type
