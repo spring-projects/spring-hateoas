@@ -1,5 +1,6 @@
 [[client]]
 = Client-side Support
+:base-dir: ../../../
 
 This section describes Spring HATEOAS's support for clients.
 
@@ -10,15 +11,15 @@ Spring HATEOAS provides an API for client-side service traversal. It is inspired
 The following example shows how to use it:
 
 ====
-[source, java]
+[source, java, tabsize=2]
 ----
 Map<String, Object> parameters = new HashMap<>();
 parameters.put("user", 27);
 
 Traverson traverson = new Traverson(URI.create("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
 String name = traverson
-  .follow("movies", "movie", "actor").withTemplateParameters(parameters)
-  .toObject("$.name");
+		.follow("movies", "movie", "actor").withTemplateParameters(parameters)
+		.toObject("$.name");
 ----
 ====
 
@@ -31,9 +32,9 @@ The preceding example is the simplest version of traversal, where the `rel` valu
 There are more options to customize template parameters at each level.
 The following example shows these options.
 
-[source,java,indent=0]
+[source,java,indent=0, tabsize=2]
 ----
-include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
+include::{base-dir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
 ----
 
 The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI template variables.
@@ -42,9 +43,9 @@ NOTE: `.withParameter()` returns a new `Hop` object that is chainable. You can s
 The following example shows one way to do so:
 
 ====
-[source,java,indent=0]
+[source,java,indent=0, tabsize=2]
 ----
-include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
+include::{base-dir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
 ----
 ====
 
@@ -58,14 +59,14 @@ The examples shown so far demonstrate how to sidestep Java's type erasure and co
 You can do so with only one slight tweak, as the following example shows:
 
 ====
-[source,java]
+[source,java, tabsize=2]
 ----
 CollectionModelType<Item> collectionModelType =
-        TypeReferences.CollectionModelType<Item>() {};
+		TypeReferences.CollectionModelType<Item>() {};
 
 CollectionModel<Item> itemResource = traverson.//
-        follow(rel("items")).//
-        toObject(collectionModelType);
+		follow(rel("items")).//
+		toObject(collectionModelType);
 ----
 ====
 
