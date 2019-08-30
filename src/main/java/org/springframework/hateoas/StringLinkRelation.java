@@ -41,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 class StringLinkRelation implements LinkRelation, Serializable {
 
 	private static final long serialVersionUID = -3904935345545567957L;
-	private static final Map<String, StringLinkRelation> CACHE = new ConcurrentHashMap<String, StringLinkRelation>(256);
+	private static final Map<String, StringLinkRelation> CACHE = new ConcurrentHashMap<>(256);
 
 	@NonNull String relation;
 

@@ -202,8 +202,7 @@ public class Link implements Serializable {
 
 		Assert.notNull(affordance, "Affordance must not be null!");
 
-		List<Affordance> newAffordances = new ArrayList<>();
-		newAffordances.addAll(this.affordances);
+		List<Affordance> newAffordances = new ArrayList<>(this.affordances);
 		newAffordances.add(affordance);
 
 		return withAffordances(newAffordances);
@@ -281,7 +280,7 @@ public class Link implements Serializable {
 	 * @param arguments must not be {@literal null}.
 	 * @return
 	 */
-	public Link expand(Map<String, ? extends Object> arguments) {
+	public Link expand(Map<String, ?> arguments) {
 		return new Link(template.expand(arguments).toString(), getRel());
 	}
 

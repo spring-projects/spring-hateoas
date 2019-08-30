@@ -61,12 +61,12 @@ class UberWebFluxIntegrationTest {
 	@Test
 	void singleEmployee() {
 
-		this.testClient.get().uri("http://localhost/employees/0")
-				.accept(MediaTypes.UBER_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.UBER_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees/0") //
+				.accept(MediaTypes.UBER_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.UBER_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.uber.version", is("1.0")))
 
@@ -89,12 +89,10 @@ class UberWebFluxIntegrationTest {
 				.value(jsonPath("$.uber.data[2].model", is("name={name}&role={role}")))
 
 				.value(jsonPath("$.uber.data[3].name", is("employees")))
-				.value(jsonPath("$.uber.data[3].rel[0]", is("employees")))
-				.value(jsonPath("$.uber.data[3].rel[1]", is("all")))
+				.value(jsonPath("$.uber.data[3].rel[0]", is("employees"))).value(jsonPath("$.uber.data[3].rel[1]", is("all")))
 				.value(jsonPath("$.uber.data[3].url", is("http://localhost/employees")))
 
-				.value(jsonPath("$.uber.data[4].name", is("employee")))
-				.value(jsonPath("$.uber.data[4].data.*", hasSize(2)))
+				.value(jsonPath("$.uber.data[4].name", is("employee"))).value(jsonPath("$.uber.data[4].data.*", hasSize(2)))
 				.value(jsonPath("$.uber.data[4].data[0].name", is("role")))
 				.value(jsonPath("$.uber.data[4].data[0].value", is("ring bearer")))
 				.value(jsonPath("$.uber.data[4].data[1].name", is("name")))
@@ -107,20 +105,19 @@ class UberWebFluxIntegrationTest {
 	@Test
 	void collectionOfEmployees() {
 
-		this.testClient.get().uri("http://localhost/employees")
-				.accept(MediaTypes.UBER_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.UBER_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees") //
+				.accept(MediaTypes.UBER_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.UBER_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.uber.version", is("1.0")))
 
 				.value(jsonPath("$.uber.data.*", hasSize(4)))
 
 				.value(jsonPath("$.uber.data[0].name", is("self"))) //
-				.value(jsonPath("$.uber.data[0].rel[0]", is("self")))
-				.value(jsonPath("$.uber.data[0].rel[1]", is("all")))
+				.value(jsonPath("$.uber.data[0].rel[0]", is("self"))).value(jsonPath("$.uber.data[0].rel[1]", is("all")))
 				.value(jsonPath("$.uber.data[0].url", is("http://localhost/employees")))
 
 				.value(jsonPath("$.uber.data[1].name", is("newEmployee")))
@@ -192,19 +189,19 @@ class UberWebFluxIntegrationTest {
 
 		String input = read(new ClassPathResource("create-employee.json", getClass()));
 
-		this.testClient.post().uri("http://localhost/employees")
-				.contentType(MediaTypes.UBER_JSON)
-				.syncBody(input)
-				.exchange()
-				.expectStatus().isCreated()
+		this.testClient.post().uri("http://localhost/employees") //
+				.contentType(MediaTypes.UBER_JSON) //
+				.syncBody(input) //
+				.exchange() //
+				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
 
-		this.testClient.get().uri("http://localhost/employees/2")
-				.accept(MediaTypes.UBER_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.UBER_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees/2") //
+				.accept(MediaTypes.UBER_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.UBER_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.uber.version", is("1.0")))
 
@@ -252,10 +249,10 @@ class UberWebFluxIntegrationTest {
 		@Bean
 		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
 
-			return WebTestClient.bindToApplicationContext(ctx).build()
-				.mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies())
-				.build();
+			return WebTestClient.bindToApplicationContext(ctx).build() //
+					.mutate() //
+					.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()) //
+					.build();
 		}
 	}
 }

@@ -847,7 +847,7 @@ public class Jackson2UberModule extends SimpleModule {
 				List<LinkRelation> rel = item.getRel();
 
 				if (rel != null) {
-					item.getLinks().forEach(resourceLinks::add);
+					resourceLinks.addAll(item.getLinks());
 				} else {
 
 					// Primitive type

@@ -31,7 +31,7 @@ import org.springframework.hateoas.Links;
  */
 public interface CurieProvider {
 
-	public static CurieProvider NONE = new CurieProvider() {
+	CurieProvider NONE = new CurieProvider() {
 
 		@Override
 		public HalLinkRelation getNamespacedRelFrom(Link link) {
@@ -44,7 +44,7 @@ public interface CurieProvider {
 		}
 
 		@Override
-		public Collection<? extends Object> getCurieInformation(Links links) {
+		public Collection<?> getCurieInformation(Links links) {
 			throw new UnsupportedOperationException();
 		}
 	};
@@ -75,5 +75,5 @@ public interface CurieProvider {
 	 * @param links the {@link Links} that have been added to the response so far.
 	 * @return must not be {@literal null}.
 	 */
-	Collection<? extends Object> getCurieInformation(Links links);
+	Collection<?> getCurieInformation(Links links);
 }

@@ -206,7 +206,7 @@ class HalFormsTemplateBuilder {
 
 			codes.add(globalCode);
 
-			return codes.toArray(new String[codes.size()]);
+			return codes.toArray(new String[0]);
 		}
 	}
 }

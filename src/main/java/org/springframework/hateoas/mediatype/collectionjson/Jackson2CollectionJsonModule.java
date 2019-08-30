@@ -876,7 +876,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 			return collection.getItems().stream() //
 					.map(CollectionJsonItem::withOwnSelfLink) //
-					.<Object> map(it -> isResource //
+					.map(it -> isResource //
 							? new EntityModel<>(it.toRawData(rootType), it.getLinks()) //
 							: it.toRawData(rootType)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));

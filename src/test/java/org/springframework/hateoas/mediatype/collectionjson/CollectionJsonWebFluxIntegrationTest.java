@@ -61,12 +61,12 @@ class CollectionJsonWebFluxIntegrationTest {
 	@Test
 	void singleEmployee() {
 
-		this.testClient.get().uri("http://localhost/employees/0")
-				.accept(MediaTypes.COLLECTION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees/0") //
+				.accept(MediaTypes.COLLECTION_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+				.expectBody(String.class) //
 				.value(jsonPath("$.collection.version", is("1.0")))
 				.value(jsonPath("$.collection.href", is("http://localhost/employees/0")))
 				.value(jsonPath("$.collection.links.*", hasSize(1)))
@@ -96,12 +96,12 @@ class CollectionJsonWebFluxIntegrationTest {
 	@Test
 	void collectionOfEmployees() {
 
-		this.testClient.get().uri("http://localhost/employees")
-				.accept(MediaTypes.COLLECTION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees") //
+				.accept(MediaTypes.COLLECTION_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.collection.version", is("1.0")))
 				.value(jsonPath("$.collection.href", is("http://localhost/employees")))
@@ -140,19 +140,19 @@ class CollectionJsonWebFluxIntegrationTest {
 
 		String specBasedJson = read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 
-		this.testClient.post().uri("http://localhost/employees")
-				.contentType(MediaTypes.COLLECTION_JSON)
-				.syncBody(specBasedJson)
-				.exchange()
-				.expectStatus().isCreated()
+		this.testClient.post().uri("http://localhost/employees") //
+				.contentType(MediaTypes.COLLECTION_JSON) //
+				.syncBody(specBasedJson) //
+				.exchange() //
+				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
 
-		this.testClient.get().uri("http://localhost/employees/2")
-				.accept(MediaTypes.COLLECTION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees/2") //
+				.accept(MediaTypes.COLLECTION_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.collection.version", is("1.0")))
 				.value(jsonPath("$.collection.href", is("http://localhost/employees/2")))
@@ -190,11 +190,11 @@ class CollectionJsonWebFluxIntegrationTest {
 
 		@Bean
 		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
-			
-			return WebTestClient.bindToApplicationContext(ctx).build()
-				.mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies())
-				.build();
+
+			return WebTestClient.bindToApplicationContext(ctx).build() //
+					.mutate() //
+					.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()) //
+					.build();
 		}
 	}
 }

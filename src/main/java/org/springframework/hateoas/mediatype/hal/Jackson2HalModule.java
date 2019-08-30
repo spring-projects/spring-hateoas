@@ -182,8 +182,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
-				ArrayList<Object> curies = new ArrayList<>();
-				curies.addAll(curieProvider.getCurieInformation(Links.of(links)));
+				ArrayList<Object> curies = new ArrayList<>(curieProvider.getCurieInformation(Links.of(links)));
 
 				sortedLinks.put(HalLinkRelation.CURIES, curies);
 			}
@@ -525,7 +524,7 @@ public class Jackson2HalModule extends SimpleModule {
 		private JsonSerializer<Object> getOrLookupSerializerFor(Object value, SerializerProvider provider)
 				throws JsonMappingException {
 
-			Class<? extends Object> type = value.getClass();
+			Class<?> type = value.getClass();
 			JsonSerializer<Object> serializer = serializers.get(type);
 
 			if (serializer == null) {

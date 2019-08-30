@@ -142,7 +142,7 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 			return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(newBody) : newBody;
 		}
 
-		HttpEntity<RepresentationModel<?>> entity = null;
+		HttpEntity<RepresentationModel<?>> entity;
 
 		if (originalValue instanceof ResponseEntity) {
 			ResponseEntity<?> source = (ResponseEntity<?>) originalValue;

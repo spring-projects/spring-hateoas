@@ -98,7 +98,7 @@ public class DefaultCurieProvider implements CurieProvider {
 	 * @see org.springframework.hateoas.hal.CurieProvider#getCurieInformation()
 	 */
 	@Override
-	public Collection<? extends Object> getCurieInformation(Links links) {
+	public Collection<?> getCurieInformation(Links links) {
 
 		return curies.entrySet().stream() //
 				.map(it -> new Curie(it.getKey(), getCurieHref(it.getKey(), it.getValue()))) //

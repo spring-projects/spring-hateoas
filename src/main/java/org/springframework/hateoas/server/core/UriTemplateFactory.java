@@ -30,7 +30,7 @@ import org.springframework.web.util.UriTemplate;
  */
 public class UriTemplateFactory {
 
-	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<String, UriTemplate>();
+	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<>();
 
 	/**
 	 * Returns the the {@link UriTemplate} for the given mapping.

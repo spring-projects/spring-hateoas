@@ -73,10 +73,10 @@ public interface LinkRelationProvider extends Plugin<LookupContext> {
 	 */
 	@RequiredArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)
 	@EqualsAndHashCode
-	static class LookupContext {
+	class LookupContext {
 
 		private enum ResourceType {
-			ITEM, COLLECTION;
+			ITEM, COLLECTION
 		}
 
 		private final @NonNull @Getter Class<?> type;

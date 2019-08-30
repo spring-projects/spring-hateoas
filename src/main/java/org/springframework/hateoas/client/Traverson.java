@@ -126,7 +126,7 @@ public class Traverson {
 		return DEFAULTS.getHttpMessageConverters(Arrays.asList(mediaTypes));
 	}
 
-	private static final RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
+	private static RestOperations createDefaultTemplate(List<MediaType> mediaTypes) {
 
 		RestTemplate template = new RestTemplate();
 		template.setMessageConverters(DEFAULTS.getHttpMessageConverters(mediaTypes));

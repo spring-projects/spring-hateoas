@@ -457,7 +457,7 @@ public class Links implements Iterable<Link> {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	public static enum MergeMode {
+	public enum MergeMode {
 
 		/**
 		 * Skips to add the same links on merge. Multiple links with the same link relation might appear.
@@ -472,6 +472,6 @@ public class Links implements Iterable<Link> {
 		/**
 		 * Replaces existing links with the same link relation.
 		 */
-		REPLACE_BY_REL;
+		REPLACE_BY_REL
 	}
 }

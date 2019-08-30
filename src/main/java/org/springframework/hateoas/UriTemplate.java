@@ -267,7 +267,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
-	public URI expand(Map<String, ? extends Object> parameters) {
+	public URI expand(Map<String, ?> parameters) {
 
 		if (TemplateVariables.NONE.equals(variables)) {
 			return URI.create(baseUri);
@@ -373,8 +373,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		} else if (value instanceof Map) {
 
-			((Map<Object, Object>) value).entrySet() //
-					.forEach(it -> builder.queryParam(it.getKey().toString(), it.getValue()));
+			((Map<Object, Object>) value).forEach((key, value1) -> builder.queryParam(key.toString(), value1));
 
 		} else {
 

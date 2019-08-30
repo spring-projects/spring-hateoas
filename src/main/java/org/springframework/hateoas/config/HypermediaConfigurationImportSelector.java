@@ -53,11 +53,6 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 		List<MediaTypeConfigurationProvider> configurationProviders = SpringFactoriesLoader.loadFactories(
 				MediaTypeConfigurationProvider.class, HypermediaConfigurationImportSelector.class.getClassLoader());
 
-		// No additional filtering needed.
-		if (types.isEmpty()) {
-			return configurationProviders.toArray(new String[0]);
-		}
-
 		// Filter the ones supporting the given media types
 		return configurationProviders.stream() //
 				.filter(it -> it.supportsAny(types)) //

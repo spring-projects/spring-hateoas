@@ -114,7 +114,7 @@ public abstract class AffordanceModel {
 	 */
 	public interface PayloadMetadata {
 
-		public static PayloadMetadata NONE = NoPayloadMetadata.INSTANCE;
+		PayloadMetadata NONE = NoPayloadMetadata.INSTANCE;
 
 		/**
 		 * Returns all properties contained in a payload.
@@ -135,7 +135,7 @@ public abstract class AffordanceModel {
 	 */
 	public interface InputPayloadMetadata extends PayloadMetadata {
 
-		static InputPayloadMetadata NONE = from(PayloadMetadata.NONE);
+		InputPayloadMetadata NONE = from(PayloadMetadata.NONE);
 
 		static InputPayloadMetadata from(PayloadMetadata metadata) {
 
@@ -298,7 +298,7 @@ public abstract class AffordanceModel {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	private static enum NoPayloadMetadata implements PayloadMetadata {
+	private enum NoPayloadMetadata implements PayloadMetadata {
 
 		INSTANCE;
 

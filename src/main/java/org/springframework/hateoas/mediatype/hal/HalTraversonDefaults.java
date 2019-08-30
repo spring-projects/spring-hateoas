@@ -80,7 +80,7 @@ class HalTraversonDefaults implements TraversonDefaults {
 	 *
 	 * @return
 	 */
-	private static final HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
+	private static HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());

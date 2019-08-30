@@ -127,7 +127,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * @param extractor the extractor to use to derive an identifier from the given entity.
 	 * @return
 	 */
-	default <T> TypedEntityLinks<T> forType(Function<T, ? extends Object> extractor) {
+	default <T> TypedEntityLinks<T> forType(Function<T, ?> extractor) {
 		return new TypedEntityLinks<>(extractor, this);
 	}
 

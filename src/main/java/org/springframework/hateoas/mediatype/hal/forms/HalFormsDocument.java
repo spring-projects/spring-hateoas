@@ -171,11 +171,11 @@ public class HalFormsDocument<T> {
 	}
 
 	public HalFormsDocument<T> withPageMetadata(@Nullable PageMetadata metadata) {
-		return new HalFormsDocument<T>(attributes, entity, entities, embedded, metadata, links, templates);
+		return new HalFormsDocument<>(attributes, entity, entities, embedded, metadata, links, templates);
 	}
 
 	private HalFormsDocument<T> withEntity(@Nullable T entity) {
-		return new HalFormsDocument<T>(attributes, entity, entities, embedded, pageMetadata, links, templates);
+		return new HalFormsDocument<>(attributes, entity, entities, embedded, pageMetadata, links, templates);
 	}
 
 	/**
