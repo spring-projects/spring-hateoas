@@ -1,0 +1,12 @@
+{
+  "type": "https://example.net/validation-error",
+  "title": "Your request parameters didn't validate.",
+  "invalid-params": [ {
+    "name": "age",
+    "reason": "must be a positive integer"
+  },
+    {
+      "name": "color",
+      "reason": "must be 'green', 'red' or 'blue'"}
+  ]
+}

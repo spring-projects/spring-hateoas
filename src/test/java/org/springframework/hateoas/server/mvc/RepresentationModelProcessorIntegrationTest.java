@@ -16,6 +16,7 @@
 package org.springframework.hateoas.server.mvc;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.hateoas.MediaTypes.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,6 +43,7 @@ import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -103,6 +105,19 @@ public class RepresentationModelProcessorIntegrationTest {
 		assertThat(collectionModelProcessor.isTriggered()).isTrue();
 		assertThat(entityModelProcessor.isTriggered()).isTrue();
 		assertThat(wildcardProcessor.isTriggered()).isTrue();
+	}
+
+	@Test
+	public void problemReturningControllerMethod() throws Exception {
+
+		this.mockMvc.perform(get("/employees/problem").accept(PROBLEM_JSON)) //
+				.andExpect(content().contentType(PROBLEM_JSON)) //
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value())) //
+				.andExpect(jsonPath("$.type", is("http://example.com/problem"))) //
+				.andExpect(jsonPath("$.title", is("Employee-based problem"))) //
+				.andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value()))) //
+				.andExpect(jsonPath("$.detail", is("This is a test case")));
+
 	}
 
 	@Test

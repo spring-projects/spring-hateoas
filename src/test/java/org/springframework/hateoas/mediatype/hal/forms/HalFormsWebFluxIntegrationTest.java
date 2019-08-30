@@ -15,9 +15,12 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.support.JsonPathUtils.*;
+
+import java.net.URI;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +34,11 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.mediatype.problem.Problem;
 import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -126,6 +131,23 @@ class HalFormsWebFluxIntegrationTest {
 				.exchange() //
 				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
+	}
+
+	@Test
+	void problemReturningControllerMethod() {
+
+		Problem<?> problem = this.testClient.get().uri("http://localhost/employees/problem").accept(MediaTypes.PROBLEM_JSON) //
+				.exchange() //
+				.expectStatus().isBadRequest() //
+				.expectHeader().contentType(MediaTypes.PROBLEM_JSON) //
+				.expectBody(Problem.class) //
+				.returnResult().getResponseBody();
+
+		assertThat(problem).isNotNull();
+		assertThat(problem.getType()).isEqualTo(URI.create("http://example.com/problem"));
+		assertThat(problem.getTitle()).isEqualTo("Employee-based problem");
+		assertThat(problem.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(problem.getDetail()).isEqualTo("This is a test case");
 	}
 
 	@Configuration

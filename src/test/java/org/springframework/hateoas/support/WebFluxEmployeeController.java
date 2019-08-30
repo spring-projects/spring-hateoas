@@ -21,14 +21,16 @@ import static org.springframework.hateoas.mediatype.alps.Alps.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static reactor.function.TupleUtils.*;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -40,7 +42,9 @@ import org.springframework.hateoas.mediatype.alps.Descriptor;
 import org.springframework.hateoas.mediatype.alps.Ext;
 import org.springframework.hateoas.mediatype.alps.Format;
 import org.springframework.hateoas.mediatype.alps.Type;
+import org.springframework.hateoas.mediatype.problem.Problem;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -209,5 +213,15 @@ public class WebFluxEmployeeController {
 								.build()) //
 						.collect(Collectors.toList()))
 				.build();
+	}
+
+	@GetMapping("/employees/problem")
+	public ResponseEntity<?> problem() {
+
+		return ResponseEntity.badRequest().body(new Problem() //
+				.withType(URI.create("http://example.com/problem")) //
+				.withTitle("Employee-based problem") //
+				.withStatus(HttpStatus.BAD_REQUEST) //
+				.withDetail("This is a test case"));
 	}
 }

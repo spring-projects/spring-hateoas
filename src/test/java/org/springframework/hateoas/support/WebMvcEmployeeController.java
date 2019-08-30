@@ -20,6 +20,7 @@ import static org.springframework.hateoas.mediatype.PropertyUtils.*;
 import static org.springframework.hateoas.mediatype.alps.Alps.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,8 @@ import org.springframework.hateoas.mediatype.alps.Descriptor;
 import org.springframework.hateoas.mediatype.alps.Ext;
 import org.springframework.hateoas.mediatype.alps.Format;
 import org.springframework.hateoas.mediatype.alps.Type;
+import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -211,4 +214,14 @@ public class WebMvcEmployeeController {
 				.build();
 	}
 	// end::alps-profile[]
+
+	@GetMapping("/employees/problem")
+	public ResponseEntity<?> problem() {
+
+		return ResponseEntity.badRequest().body(new Problem<>() //
+				.withType(URI.create("http://example.com/problem")) //
+				.withTitle("Employee-based problem") //
+				.withStatus(HttpStatus.BAD_REQUEST) //
+				.withDetail("This is a test case"));
+	}
 }
