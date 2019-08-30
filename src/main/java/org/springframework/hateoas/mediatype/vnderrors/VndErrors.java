@@ -45,10 +45,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @see https://github.com/blongden/vnd.error
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @deprecated Use {@link org.springframework.hateoas.mediatype.problem.Problem} to form vendor neutral error messages.
  */
 @JsonPropertyOrder({ "message", "logref", "total", "_links", "_embedded" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EqualsAndHashCode
+@Deprecated
 public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
 	/**
@@ -212,10 +214,13 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	 *
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
+	 * 
+	 * @deprecated Use {@link org.springframework.hateoas.mediatype.problem.Problem} to form vendor neutral error messages.
 	 */
 	@JsonPropertyOrder({ "message", "path", "logref" })
 	@Relation(collectionRelation = "errors")
 	@EqualsAndHashCode
+	@Deprecated
 	public static class VndError extends RepresentationModel<VndError> {
 
 		@Getter //
