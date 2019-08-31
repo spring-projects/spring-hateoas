@@ -182,7 +182,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
-				ArrayList<Object> curies = new ArrayList<>(curieProvider.getCurieInformation(Links.of(links)));
+				List<Object> curies = new ArrayList<>(curieProvider.getCurieInformation(Links.of(links)));
 
 				sortedLinks.put(HalLinkRelation.CURIES, curies);
 			}
