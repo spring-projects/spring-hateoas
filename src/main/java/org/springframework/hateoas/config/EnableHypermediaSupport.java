@@ -44,11 +44,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 public @interface EnableHypermediaSupport {
 
 	/**
-	 * The hypermedia type to be supported.
+	 * The hypermedia type to be supported. By default, it is empty, thus activating all available
+	 * {@link MediaTypeConfigurationProvider}s.
 	 *
 	 * @return
 	 */
-	HypermediaType[] type();
+	HypermediaType[] type() default {};
 
 	/**
 	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
