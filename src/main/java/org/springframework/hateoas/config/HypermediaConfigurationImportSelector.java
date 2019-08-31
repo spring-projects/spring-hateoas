@@ -44,7 +44,7 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 
 		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
 
-		List<MediaType> types = attributes == null //
+		List<MediaType> mediaTypes = attributes == null //
 				? Collections.emptyList() //
 				: Arrays.stream((HypermediaType[]) attributes.get("type")) //
 						.flatMap(it -> it.getMediaTypes().stream()) //
@@ -53,10 +53,18 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 		List<MediaTypeConfigurationProvider> configurationProviders = SpringFactoriesLoader.loadFactories(
 				MediaTypeConfigurationProvider.class, HypermediaConfigurationImportSelector.class.getClassLoader());
 
-		// Filter the ones supporting the given media types
 		return configurationProviders.stream() //
-				.filter(it -> it.supportsAny(types)) //
-				.map(MediaTypeConfigurationProvider::getConfiguration) //
+				.filter(it -> {
+					// If there are no types, then let them all through
+					if (mediaTypes.isEmpty()) {
+						return true;
+					}
+					// Filter the ones supporting the given media types
+					return it.supportsAny(mediaTypes);
+				}) //
+				.map((MediaTypeConfigurationProvider mediaTypeConfigurationProvider) -> {
+					return mediaTypeConfigurationProvider.getConfiguration();
+				}) //
 				.map(Class::getName) //
 				.toArray(String[]::new);
 	}
