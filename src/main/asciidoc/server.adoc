@@ -283,7 +283,7 @@ Link link = links.linkToItemResource(Customer.class, 1L);
 ----
 ====
 
-`EntityLinks` is available via dependency injection by activating either `@EnableHypermediaSupprt` or `@EnableEntityLinks` in your Spring MVC configuration.
+`EntityLinks` is available via dependency injection by activating `@EnableHypermediaSupprt` in your Spring MVC configuration.
 This will cause a variety of default implementations of `EntityLinks` being registered.
 The most fundamental one is `ControllerEntityLinks` that inspects SpringMVC and Spring WebFlux controller classes.
 If you want to register your own implementation of `EntityLinks`, check out <<server.entity-links.spi, this section>>.
@@ -322,7 +322,7 @@ class OrderController {
 <4> An additional controller method to handle a subordinate resource taking a path variable to expose an item resource, i.e. a single `Order`.
 ====
 
-With this in place, when youy enable `EntityLinks` through `@EnableEntityLinks` or `@EnableHypermediaSupport` in your Spring MVC configuration, you can create links to the controller, as follows:
+With this in place, when you enable `EntityLinks` `@EnableHypermediaSupport` in your Spring MVC configuration, you can create links to the controller, as follows:
 
 ====
 [source, java]
@@ -344,7 +344,7 @@ class PaymentController {
   }
 }
 ----
-<1> Inject `EntityLinks` made available by `@EnableEntityLinks` or `@EnableHypermediaSupport` in you configuration.
+<1> Inject `EntityLinks` made available by `@EnableHypermediaSupport` in you configuration.
 <2> Use the APIs to build links by using the entity types instead of controller classes.
 ====
 
@@ -416,7 +416,7 @@ class OrderController {
 [[server.entity-links.spi]]
 === EntityLinks as SPI
 
-The `EntityLinks` instance created by `@EnableEntityLinks` / `@EnableHypermediaSupport` is of type `DelegatingEntityLinks` which will in turn pick up all other `EntityLinks` implementations available as beans in the `ApplicationContext`.
+The `EntityLinks` instance created by `@EnableHypermediaSupport` is of type `DelegatingEntityLinks` which will in turn pick up all other `EntityLinks` implementations available as beans in the `ApplicationContext`.
 It's registered as primary bean so that it's always the sole injection candidate when you inject `EntityLinks` in general.
 `ControllerEntityLinks` is the default implementation that will be included in the setup, but users are free to implement and register their own implementations.
 Making those available to the `EntityLinks` instance available for injection is a matter of registering your implementation as Spring bean.
