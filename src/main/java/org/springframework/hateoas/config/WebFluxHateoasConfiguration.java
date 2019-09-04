@@ -124,21 +124,14 @@ class WebFluxHateoasConfiguration {
 		@Override
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
 
-			CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
-
 			this.hypermediaTypes.forEach(hypermedia -> {
 
-				MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
-
 				ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
-				customCodecs.encoder(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-				customCodecs.decoder(new Jackson2JsonDecoder(objectMapper, mimeTypes));
+				MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
+				
+				configurer.customCodecs().encoder(new Jackson2JsonEncoder(objectMapper, mimeTypes));
+				configurer.customCodecs().decoder(new Jackson2JsonDecoder(objectMapper, mimeTypes));
 			});
-
-			customCodecs.encoder(CharSequenceEncoder.allMimeTypes());
-			customCodecs.decoder(StringDecoder.allMimeTypes());
-
-			configurer.registerDefaults(false);
 		}
 	}
 }

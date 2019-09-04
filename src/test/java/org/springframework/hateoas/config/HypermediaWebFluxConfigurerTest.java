@@ -255,15 +255,22 @@ class HypermediaWebFluxConfigurerTest {
 	}
 
 	/**
+	 * When requesting an unregistered media type, fallback to Spring Framework's default JSON handler.
+	 *
 	 * @see #728
 	 */
 	@Test
-	void callingForUnregisteredMediaTypeShouldFail() {
+	void callingForUnregisteredMediaTypeShouldFallBackToDefaultHandler() {
 
 		setUp(HalWebFluxConfig.class);
 
-		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON).exchange().expectStatus().is4xxClientError()
-				.returnResult(String.class).getResponseBody().as(StepVerifier::create).verifyComplete();
+		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"links\":[{\"rel\":\"self\",\"href\":\"/\"},{\"rel\":\"employees\",\"href\":\"/employees\"}]}")
+				.verifyComplete();
 	}
 
 	/**

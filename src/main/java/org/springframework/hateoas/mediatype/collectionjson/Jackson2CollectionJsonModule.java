@@ -65,7 +65,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-class Jackson2CollectionJsonModule extends SimpleModule {
+public class Jackson2CollectionJsonModule extends SimpleModule {
 
 	private static final long serialVersionUID = -6540574644565592709L;
 
