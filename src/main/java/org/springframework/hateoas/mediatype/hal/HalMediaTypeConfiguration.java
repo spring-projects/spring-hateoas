@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -72,6 +74,17 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public List<MediaType> getMediaTypes() {
 		return HypermediaType.HAL.getMediaTypes();
+	}
+
+	/**
+	 * {@code HAL} media type must also register as {@link MediaType#APPLICATION_JSON}.
+	 */
+	@Override
+	public Collection<? extends MediaType> getRegisterableMediaTypes() {
+
+		List<MediaType> mediaTypes = new ArrayList<>(getMediaTypes());
+		mediaTypes.add(MediaType.APPLICATION_JSON);
+		return mediaTypes;
 	}
 
 	/*

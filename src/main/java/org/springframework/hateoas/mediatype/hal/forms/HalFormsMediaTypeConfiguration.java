@@ -17,6 +17,8 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -42,7 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Configuration
 @RequiredArgsConstructor
-class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
+public class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final DelegatingLinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
@@ -62,6 +64,17 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public List<MediaType> getMediaTypes() {
 		return HypermediaType.HAL_FORMS.getMediaTypes();
+	}
+
+	/**
+	 * {@code HAL-FORMS} media type must also register as {@link MediaType#APPLICATION_JSON}.
+	 */
+	@Override
+	public Collection<? extends MediaType> getRegisterableMediaTypes() {
+
+		List<MediaType> mediaTypes = new ArrayList<>(getMediaTypes());
+		mediaTypes.add(MediaType.APPLICATION_JSON);
+		return mediaTypes;
 	}
 
 	/*
