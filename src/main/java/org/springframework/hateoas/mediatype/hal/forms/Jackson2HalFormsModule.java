@@ -73,7 +73,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-class Jackson2HalFormsModule extends SimpleModule {
+public class Jackson2HalFormsModule extends SimpleModule {
 
 	private static final long serialVersionUID = -4496351128468451196L;
 

@@ -50,6 +50,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * @author Greg Turnquist
@@ -258,12 +259,17 @@ class HypermediaWebFluxConfigurerTest {
 	 * @see #728
 	 */
 	@Test
-	void callingForUnregisteredMediaTypeShouldFail() {
+	void callingForUnregisteredMediaTypeShouldFallBackToJackson() {
 
 		setUp(HalWebFluxConfig.class);
 
-		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON).exchange().expectStatus().is4xxClientError()
-				.returnResult(String.class).getResponseBody().as(StepVerifier::create).verifyComplete();
+		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"links\":[{\"rel\":\"self\",\"href\":\"/\"},{\"rel\":\"employees\",\"href\":\"/employees\"}]}")
+				.verifyComplete();
 	}
 
 	/**
