@@ -1,6 +1,23 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.0.RC2 (2019-09-05)
+----------------------------------------
+- #1072 - Expose null handling configuration of HalFormsTemplate.title.
+- #1070 - Release 1.0.0.RC2.
+- #1069 - Upgrade to Reactor Dyprosium-RC1.
+- #1067 - Remove @EnableEntityLinks.
+- #1066 - Upgrade to Spring Framework 5.2.0.RC2.
+- #1064 - #1061 - Reenable default codecs for WebFlux configuration.
+- #1063 - Documentation describes using @EnableEntityLinks but it is deprecated and no longer necessary.
+- #1062 - @EnableHypermediaSupport does not provide a ContollerEntityLinks bean when using WebFlux.
+- #1061 - Enabling hypermedia disables all of WebFlux's default codecs.
+- #1059 - Code cleanup.
+- #1058 - Migrate off deprecated Spring APIs.
+- #1054 - Fix unresolved directive for Traverson section of ref docs.
+- #1047 - WebFlux configuration must properly handle application/json.
+- #1044 - Properly deprecate UriTemplate's constructors.
+
 Changes in version 1.0.0.RC1 (2019-08-05)
 ----------------------------------------
 - #1042 - Upgrade to AssertJ 3.13.2.
@@ -45,7 +62,7 @@ Changes in version 1.0.0.RC1 (2019-08-05)
 
 Changes in version 1.0.0.M3 (2019-06-14)
 ----------------------------------------
-- #1002 - Release 1.0 M3. 
+- #1002 - Release 1.0 M3.
 - #1001 - Upgrade to Reactor Dysprosium M2.
 - #1000 - Upgrade to Spring Framework 5.0 M3.
 - #999 - Introduce Jenkins CI.
