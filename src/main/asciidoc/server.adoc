@@ -421,6 +421,10 @@ It's registered as primary bean so that it's always the sole injection candidate
 `ControllerEntityLinks` is the default implementation that will be included in the setup, but users are free to implement and register their own implementations.
 Making those available to the `EntityLinks` instance available for injection is a matter of registering your implementation as Spring bean.
 
+IMPORTANT: `EntityLinks` and it's various implementations are NOT currently provided out-of-the-box for Spring WebFlux applications.
+The contract defined in the `EntityLinks` SPI was originally aimed at Spring Web MVC and doesn't consider Reactor types.
+Developing a comparable contract that supports reactive programming is still in progress.
+
 .Declaring a custom EntityLinks implementation
 ====
 [source, java]
