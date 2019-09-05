@@ -122,7 +122,7 @@ class HalFormsWebFluxIntegrationTest {
 		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
 
 		this.testClient.post().uri("http://localhost/employees").contentType(MediaTypes.HAL_FORMS_JSON)
-				.syncBody(specBasedJson) //
+				.bodyValue(specBasedJson) //
 				.exchange() //
 				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");

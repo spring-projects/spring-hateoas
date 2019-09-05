@@ -142,7 +142,7 @@ class CollectionJsonWebFluxIntegrationTest {
 
 		this.testClient.post().uri("http://localhost/employees") //
 				.contentType(MediaTypes.COLLECTION_JSON) //
-				.syncBody(specBasedJson) //
+				.bodyValue(specBasedJson) //
 				.exchange() //
 				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");

@@ -191,7 +191,7 @@ class UberWebFluxIntegrationTest {
 
 		this.testClient.post().uri("http://localhost/employees") //
 				.contentType(MediaTypes.UBER_JSON) //
-				.syncBody(input) //
+				.bodyValue(input) //
 				.exchange() //
 				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
