@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Wither;
@@ -63,7 +64,7 @@ public class HalFormsTemplate {
 
 	public static final String DEFAULT_KEY = "default";
 
-	private @JsonInclude(Include.NON_EMPTY) String title;
+	private @Getter(onMethod = @__(@JsonInclude(Include.NON_EMPTY))) String title;
 	private @Wither(AccessLevel.PRIVATE) HttpMethod httpMethod;
 	private List<HalFormsProperty> properties;
 	private List<MediaType> contentTypes;
