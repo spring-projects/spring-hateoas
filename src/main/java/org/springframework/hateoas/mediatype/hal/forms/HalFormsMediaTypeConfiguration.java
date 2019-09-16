@@ -17,6 +17,7 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -61,7 +62,10 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return HypermediaType.HAL_FORMS.getMediaTypes();
+
+		List<MediaType> mediaTypes = new ArrayList<>(HypermediaType.HAL_FORMS.getMediaTypes());
+		this.halFormsConfiguration.ifAvailable(halFormsConfig -> mediaTypes.addAll(halFormsConfig.getAdditionalMediaTypes()));
+		return mediaTypes;
 	}
 
 	/*
