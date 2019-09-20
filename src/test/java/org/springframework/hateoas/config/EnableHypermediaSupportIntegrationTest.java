@@ -16,6 +16,7 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks.*;
 import static org.springframework.hateoas.support.ContextTester.*;
@@ -537,9 +538,23 @@ class EnableHypermediaSupportIntegrationTest {
 	@Test // #1019
 	void registersMessageResolverIfMessagesBundleAvailable() {
 
-		withServletContext(HateoasConfiguration.class, simulateResourceBundle(), context -> {
-			assertThat(context.getBean(MessageResolver.class)).isNotEqualTo(MessageResolver.of(null));
-		});
+		String originalBaseName = HateoasConfiguration.I18N_BASE_NAME;
+
+		try {
+
+			HateoasConfiguration.I18N_BASE_NAME = "org/springframework/hateoas/config/rest-messages";
+
+			withServletContext(HateoasConfiguration.class, simulateResourceBundle(), context -> {
+
+				MessageResolver bean = context.getBean(MessageResolver.class);
+
+				assertThat(bean).isNotEqualTo(MessageResolver.of(null));
+				assertThat(bean.resolve(() -> new String[] { "key" })).isEqualTo("Schlüssel");
+			});
+
+		} finally {
+			HateoasConfiguration.I18N_BASE_NAME = originalBaseName;
+		}
 	}
 
 	@Test // #1019, DATAREST-686
@@ -654,7 +669,7 @@ class EnableHypermediaSupportIntegrationTest {
 			try {
 
 				doReturn(new Resource[0]).when(spy).getResources("classpath:rest-default-messages.properties");
-				doReturn(new Resource[] { resource }).when(spy).getResources("classpath:rest-messages*.properties");
+				doReturn(new Resource[] { resource }).when(spy).getResources(contains("rest-messages"));
 
 			} catch (IOException o_O) {
 				fail("Couldn't mock resource lookup!", o_O);

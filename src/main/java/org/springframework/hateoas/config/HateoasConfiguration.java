@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.context.support.AbstractResourceBasedMessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.hateoas.client.LinkDiscoverer;
@@ -62,6 +61,9 @@ import org.springframework.util.ClassUtils;
 @Import(EntityLinksConfiguration.class)
 @EnablePluginRegistries({ LinkDiscoverer.class })
 public class HateoasConfiguration {
+
+	static String I18N_BASE_NAME = "rest-messages";
+	static String I18N_DEFAULTS_BASE_NAME = "rest-default-messages";
 
 	private @Autowired ApplicationContext context;
 
@@ -119,14 +121,15 @@ public class HateoasConfiguration {
 	@Nullable
 	private final AbstractMessageSource lookupMessageSource() {
 
-		List<Resource> candidates = loadProperties("rest-default-messages", false);
+		List<Resource> candidates = loadResourceBundleResources(I18N_DEFAULTS_BASE_NAME, false);
 
-		if (candidates.isEmpty() && loadProperties("rest-messages", true).isEmpty()) {
+		if (candidates.isEmpty() && loadResourceBundleResources(I18N_BASE_NAME, true).isEmpty()) {
 			return null;
 		}
 
-		AbstractResourceBasedMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		messageSource.setBasename("classpath:rest-messages");
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setResourceLoader(context);
+		messageSource.setBasename(I18N_BASE_NAME);
 		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.toString());
 
 		if (!candidates.isEmpty()) {
@@ -139,10 +142,8 @@ public class HateoasConfiguration {
 	@Nullable
 	private final Properties loadProperties(List<Resource> sources) {
 
-		Resource[] resources = loadProperties("rest-default-messages", false).stream().toArray(Resource[]::new);
-
 		PropertiesFactoryBean factory = new PropertiesFactoryBean();
-		factory.setLocations(resources);
+		factory.setLocations(sources.toArray(new Resource[sources.size()]));
 
 		try {
 
@@ -154,7 +155,7 @@ public class HateoasConfiguration {
 		}
 	}
 
-	private final List<Resource> loadProperties(String baseName, boolean withWildcard) {
+	private final List<Resource> loadResourceBundleResources(String baseName, boolean withWildcard) {
 
 		try {
 			return Arrays //
