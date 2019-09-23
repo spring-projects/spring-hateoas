@@ -82,7 +82,7 @@
 		<junit.version>5.5.1</junit.version>
 		<reactor-bom.version>Dysprosium-RC1</reactor-bom.version>
 		<slf4j.version>1.7.26</slf4j.version>
-		<spring.version>5.2.0.RC2</spring.version>
+		<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
 		<spring-plugin.version>2.0.0.M2</spring-plugin.version>
 		<kotlin.version>1.3.31</kotlin.version>
 	</properties>
