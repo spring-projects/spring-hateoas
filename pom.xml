@@ -80,7 +80,7 @@
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<junit.version>5.5.1</junit.version>
-		<reactor-bom.version>Dysprosium-RC1</reactor-bom.version>
+		<reactor-bom.version>Dysprosium-RELEASE</reactor-bom.version>
 		<slf4j.version>1.7.26</slf4j.version>
 		<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
 		<spring-plugin.version>2.0.0.BUILD-SNAPSHOT</spring-plugin.version>
