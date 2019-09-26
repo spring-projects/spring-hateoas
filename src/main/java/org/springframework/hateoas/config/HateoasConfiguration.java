@@ -127,7 +127,7 @@ public class HateoasConfiguration {
 
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setResourceLoader(context);
-		messageSource.setBasename(I18N_BASE_NAME);
+		messageSource.setBasename("classpath:".concat(I18N_BASE_NAME));
 		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.toString());
 
 		if (!candidates.isEmpty()) {
