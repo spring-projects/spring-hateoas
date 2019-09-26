@@ -267,6 +267,10 @@ curl -v localhost:8080/employees \
 [[server.entity-links]]
 == [[fundamentals.obtaining-links.entity-links]] Using the EntityLinks interface
 
+IMPORTANT: `EntityLinks` and it's various implementations are NOT currently provided out-of-the-box for Spring WebFlux applications.
+The contract defined in the `EntityLinks` SPI was originally aimed at Spring Web MVC and doesn't consider Reactor types.
+Developing a comparable contract that supports reactive programming is still in progress.
+
 So far, we have created links by pointing to the web-framework implementations (that is, the Spring MVC controllers) and inspected the mapping.
 In many cases, these classes essentially read and write representations backed by a model class.
 
@@ -285,13 +289,13 @@ Link link = links.linkToItemResource(Customer.class, 1L);
 
 `EntityLinks` is available via dependency injection by activating `@EnableHypermediaSupprt` in your Spring MVC configuration.
 This will cause a variety of default implementations of `EntityLinks` being registered.
-The most fundamental one is `ControllerEntityLinks` that inspects SpringMVC and Spring WebFlux controller classes.
+The most fundamental one is `ControllerEntityLinks` that inspects SpringMVC controller classes.
 If you want to register your own implementation of `EntityLinks`, check out <<server.entity-links.spi, this section>>.
 
 [[server.entity-links.controller]]
-=== EntityLinks based on Spring MVC and WebFlux controllers
+=== EntityLinks based on Spring MVC controllers
 
-Activating entity links functionality causes all the Spring MVC and WebFlux controllers available in the current `ApplicationContext` to be inspected for the `@ExposesResourceFor(…)` annotation.
+Activating entity links functionality causes all the Spring MVC controllers available in the current `ApplicationContext` to be inspected for the `@ExposesResourceFor(…)` annotation.
 The annotation exposes which model type the controller manages.
 Beyond that, we assume that you adhere to following the URI mapping setup and conventions:
 
@@ -420,10 +424,6 @@ The `EntityLinks` instance created by `@EnableHypermediaSupport` is of type `Del
 It's registered as primary bean so that it's always the sole injection candidate when you inject `EntityLinks` in general.
 `ControllerEntityLinks` is the default implementation that will be included in the setup, but users are free to implement and register their own implementations.
 Making those available to the `EntityLinks` instance available for injection is a matter of registering your implementation as Spring bean.
-
-IMPORTANT: `EntityLinks` and it's various implementations are NOT currently provided out-of-the-box for Spring WebFlux applications.
-The contract defined in the `EntityLinks` SPI was originally aimed at Spring Web MVC and doesn't consider Reactor types.
-Developing a comparable contract that supports reactive programming is still in progress.
 
 .Declaring a custom EntityLinks implementation
 ====

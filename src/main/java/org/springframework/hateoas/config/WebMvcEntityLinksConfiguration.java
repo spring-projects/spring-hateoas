@@ -30,7 +30,7 @@ import org.springframework.stereotype.Controller;
  * @author Oliver Gierke
  */
 @Configuration
-class WebMvcEntityLinksConfiguration {
+class WebMvcEntityLinksConfiguration extends EntityLinksConfiguration {
 
 	@Bean
 	ControllerEntityLinksFactoryBean webMvcEntityLinks(ObjectProvider<WebMvcLinkBuilderFactory> linkBuilderFactory) {

@@ -18,9 +18,12 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.support.WebStack;
 
 /**
@@ -35,7 +38,7 @@ class WebStackImportSelectorUnitTest {
 	@Test // #973
 	void activatesAllWebStacksByDefault() {
 
-		AnnotationMetadata metadata = new StandardAnnotationMetadata(DefaultHypermedia.class);
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(DefaultHypermedia.class);
 
 		assertThat(selector.selectImports(metadata))
 				.containsExactlyInAnyOrderElementsOf(WebStackImportSelector.CONFIGS.values());
@@ -44,7 +47,7 @@ class WebStackImportSelectorUnitTest {
 	@Test // #973
 	void activatesWebMvcOnlyifConfigured() {
 
-		AnnotationMetadata metadata = new StandardAnnotationMetadata(WebMvcHypermedia.class);
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(WebMvcHypermedia.class);
 
 		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEBMVC));
 	}
@@ -52,7 +55,7 @@ class WebStackImportSelectorUnitTest {
 	@Test // #973
 	void activatesWebFluxOnlyIfConfigured() {
 
-		AnnotationMetadata metadata = new StandardAnnotationMetadata(WebFluxHypermedia.class);
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(WebFluxHypermedia.class);
 
 		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEBFLUX));
 	}
@@ -60,11 +63,21 @@ class WebStackImportSelectorUnitTest {
 	@Test // #973
 	void rejectsNoStacksSelected() {
 
-		AnnotationMetadata metadata = new StandardAnnotationMetadata(NoStacksHypermedia.class);
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(NoStacksHypermedia.class);
 
 		assertThatExceptionOfType(IllegalStateException.class) //
 				.isThrownBy(() -> selector.selectImports(metadata)) //
 				.withMessageContaining(NoStacksHypermedia.class.getName());
+	}
+
+	@Test // #1080
+	void noEntityLinksRegisteredForWebFluxBootstrap() throws Exception {
+
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(WebFluxHypermedia.class)) {
+
+			assertThatExceptionOfType(NoSuchBeanDefinitionException.class) //
+					.isThrownBy(() -> context.getBean(EntityLinks.class));
+		}
 	}
 
 	@EnableHypermediaSupport(type = HypermediaType.HAL)
