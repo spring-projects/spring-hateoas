@@ -93,8 +93,8 @@
 			<id>spring-next</id>
 			<properties>
 				<reactor-bom.version>Dysprosium-BUILD-SNAPSHOT</reactor-bom.version>
-				<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
-				<spring-plugin.version>2.0.0.BUILD-SNAPSHOT</spring-plugin.version>
+				<spring.version>5.2.1.BUILD-SNAPSHOT</spring.version>
+				<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 			</properties>
 		</profile>
 
