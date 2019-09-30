@@ -287,7 +287,7 @@ Link link = links.linkToItemResource(Customer.class, 1L);
 ----
 ====
 
-`EntityLinks` is available via dependency injection by activating `@EnableHypermediaSupprt` in your Spring MVC configuration.
+`EntityLinks` is available via dependency injection by activating `@EnableHypermediaSupport` in your Spring MVC configuration.
 This will cause a variety of default implementations of `EntityLinks` being registered.
 The most fundamental one is `ControllerEntityLinks` that inspects SpringMVC controller classes.
 If you want to register your own implementation of `EntityLinks`, check out <<server.entity-links.spi, this section>>.
