@@ -3,6 +3,7 @@ image:https://spring.io/badges/spring-hateoas/snapshot.svg[link=https://spring.i
 image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://gitter.im/spring-projects/spring-hateoas]
 
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2Fmaster&subject=master[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
+image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.0.x&subject=1.0.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F0.25.x&subject=0.25.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 
 
@@ -81,6 +82,5 @@ NOTE: Docker containers can eat up disk space fast! From time to time, run `dock
 
 == Resources
 
-* Reference documentation - https://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], https://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
-* https://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/[JavaDoc]
+* https://spring.io/projects/spring-hateoas#learn[Reference documentation]
 * https://spring.io/guides/gs/rest-hateoas/[Getting started guide]
