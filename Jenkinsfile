@@ -169,8 +169,8 @@ pipeline {
 		stage('Release documentation') {
 			when {
 				anyOf {
-					branch 'master'
-					branch 'release'
+					branch '1.0.x'
+					branch 'release-1.0.x'
 				}
 			}
 			agent {
@@ -198,7 +198,7 @@ pipeline {
 		}
 		stage('Promote to Bintray') {
 			when {
-				branch 'release'
+				branch 'release-1.0.x'
 			}
 			agent {
 				docker {
@@ -235,7 +235,7 @@ pipeline {
 		}
 		stage('Sync to Maven Central') {
 			when {
-				branch 'release'
+				branch 'release-1.0.x'
 			}
 			agent {
 				docker {

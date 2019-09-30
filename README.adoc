@@ -3,6 +3,7 @@ image:https://spring.io/badges/spring-hateoas/snapshot.svg[link=https://spring.i
 image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://gitter.im/spring-projects/spring-hateoas]
 
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2Fmaster&subject=master[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
+image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.0.x&subject=master[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F0.25.x&subject=0.25.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 
 
@@ -27,17 +28,17 @@ git config core.commentchar "/"
 % ci/create-release.sh <release version> <next snapshot version>
 ----
 +
-2. With the release tagged, push the tagged version to the release branch.
+2. With the release tagged, push the tagged version to the release-1.0.x branch.
 +
 ----
-% git checkout -b release
+% git checkout -b release-1.0.x
 % git reset --hard <tag>
-% git push -f origin release
+% git push -f origin release-1.0.x
 ----
 
 NOTE: You can chain the previous set of commands together using `&&`.
 
-The pipeline will build and release the "release" branch. It will also build a new a new snapshot and stage it on artifactory.
+The pipeline will build and release the "release-1.0.x" branch. It will also build a new a new snapshot and stage it on artifactory.
 And if it's a `.RELEASE`, the pipeline will push it out to Maven Central.
 
 === Running CI tasks locally
@@ -81,6 +82,5 @@ NOTE: Docker containers can eat up disk space fast! From time to time, run `dock
 
 == Resources
 
-* Reference documentation - https://docs.spring.io/spring-hateoas/docs/current/reference/html/[html], https://docs.spring.io/spring-hateoas/docs/current/reference/pdf/spring-hateoas-reference.pdf[pdf]
-* https://docs.spring.io/spring-hateoas/docs/current-SNAPSHOT/[JavaDoc]
+* https://spring.io/projects/spring-hateoas#learn[Reference documentation]
 * https://spring.io/guides/gs/rest-hateoas/[Getting started guide]
