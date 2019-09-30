@@ -1,6 +1,22 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.0.RELEASE (2019-09-30)
+----------------------------------------
+- #1090 - Release 1.0.0.RELEASE.
+- #1089 - Upgrade Reactor to Dysprosium-RELEASE.
+- #1088 - Upgrade to Jackson 2.10.
+- #1086 - Upgrade to Jackson BOM 2.9.9.20190807.
+- #1085 - Upgrade to Spring Plugin 2.0.
+- #1080 - Clarify expected behaviour around EntityLinks when using WebFlux.
+- #1079 - Upgrade to Spring Framework 5.2.0.RELEASE.
+- #1075 - i18n only working when rest-default-messages.properties is available.
+- #1038 - Update documentation to show how to create an ALPS serving controller for profile purposes.
+- #1028 - Fix example in docs to reflect requirement for _prompt for property I18N.
+- #966 - Application does not start due to two bean instances of org.springframework.plugin.core.PluginRegistry.
+- #965 - NPE when generating a link to POST method without RequestBody parameter.
+- #837 - Update reference docs to reflect new APIs, SPIs, and package structures.
+
 Changes in version 1.0.0.RC2 (2019-09-05)
 ----------------------------------------
 - #1072 - Expose null handling configuration of HalFormsTemplate.title.
