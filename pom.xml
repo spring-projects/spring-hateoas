@@ -8,13 +8,13 @@
 	<version>1.0.1.BUILD-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
-	<url>https://github.com/SpringSource/spring-hateoas</url>
+	<url>https://github.com/spring-projects/spring-hateoas</url>
 	<description>
 		Library to support implementing representations for
 		hyper-text driven REST web services.
 	</description>
 
-	<inceptionYear>2012-2019</inceptionYear>
+	<inceptionYear>2011</inceptionYear>
 
 	<organization>
 		<name>Pivotal, Inc.</name>
