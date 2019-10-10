@@ -57,10 +57,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * Creates a new {@link UriTemplate} using the given template string.
 	 *
 	 * @param template must not be {@literal null} or empty.
-	 * @deprecated Migrate to {@link UriTemplate#of(String)}.
 	 */
-	@Deprecated
-	public UriTemplate(String template) {
+	private UriTemplate(String template) {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
@@ -102,10 +100,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 *
 	 * @param baseUri must not be {@literal null} or empty.
 	 * @param variables must not be {@literal null}.
-	 * @deprecated Migrate to {@link UriTemplate#of(String, TemplateVariables)}.
 	 */
-	@Deprecated
-	public UriTemplate(String baseUri, TemplateVariables variables) {
+	UriTemplate(String baseUri, TemplateVariables variables) {
 
 		Assert.hasText(baseUri, "Base URI must not be null or empty!");
 		Assert.notNull(variables, "Template variables must not be null!");
