@@ -18,13 +18,12 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
-import reactor.test.StepVerifier;
-
 import java.net.URI;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.test.StepVerifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
@@ -40,7 +39,7 @@ import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Tests registration of proper decoders by the {@link HypermediaWebClientBeanPostProcessor}.
+ * Tests registration of proper decoders by the {@link org.springframework.hateoas.config.WebClientHateoasConfiguration.HypermediaWebClientBeanPostProcessor}.
  * 
  * @author Greg Turnquist
  */

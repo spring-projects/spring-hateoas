@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas.support;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.util.ClassUtils;
 
 /**
@@ -24,23 +27,61 @@ import org.springframework.util.ClassUtils;
  */
 public enum WebStack {
 
-	WEBMVC("org.springframework.web.servlet.DispatcherServlet"),
+	WEBMVC("org.springframework.web.servlet.DispatcherServlet", //
+			"org.springframework.hateoas.config.WebMvcHateoasConfiguration", //
+			"org.springframework.web.client.RestTemplate", //
+			"org.springframework.hateoas.config.RestTemplateHateoasConfiguration"),
 
-	WEBFLUX("org.springframework.web.reactive.DispatcherHandler");
+	WEBFLUX("org.springframework.web.reactive.DispatcherHandler", //
+			"org.springframework.hateoas.config.WebFluxHateoasConfiguration", //
+			"org.springframework.web.reactive.function.client.WebClient", //
+			"org.springframework.hateoas.config.WebClientHateoasConfiguration");
 
-	private final boolean isAvailable;
+	private final boolean isServerAvailable;
+	private final String serverConfiguration;
+
+	private final boolean isClientAvailable;
+	private final String clientConfiguration;
 
 	/**
 	 * Initialize the {@link #isAvailable} based upon a defined signature class.
 	 */
-	WebStack(String signatureClass) {
-		this.isAvailable = ClassUtils.isPresent(signatureClass, null);
+	WebStack(String serverAvailableClazz, String serverConfigurationClazz, String clientAvailableClazz,
+			String clientConfigurationClazz) {
+
+		this.isServerAvailable = ClassUtils.isPresent(serverAvailableClazz, null);
+		this.serverConfiguration = serverConfigurationClazz;
+
+		this.isClientAvailable = ClassUtils.isPresent(clientAvailableClazz, null);
+		this.clientConfiguration = clientConfigurationClazz;
+	}
+
+	/**
+	 * Based on what client/server components are on the classpath, return what configuration classes should be
+	 * registered.
+	 */
+	public List<String> getAvailableConfigurations() {
+
+		List<String> configurations = new ArrayList<>();
+
+		if (this.isServerAvailable) {
+			configurations.add(this.serverConfiguration);
+		}
+
+		if (this.isClientAvailable) {
+			configurations.add(this.clientConfiguration);
+		}
+
+		return configurations;
 	}
 
 	/**
 	 * Is this web stack on the classpath?
+	 *
+	 * @deprecated Will be removed in 1.2 in light of {@link #getAvailableConfigurations()}.
 	 */
+	@Deprecated
 	public boolean isAvailable() {
-		return this.isAvailable;
+		return this.isServerAvailable;
 	}
 }
