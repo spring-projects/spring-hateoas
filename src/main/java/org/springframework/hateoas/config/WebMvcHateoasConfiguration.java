@@ -36,7 +36,6 @@ import org.springframework.hateoas.server.mvc.UriComponentsContributor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.NonNull;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -71,12 +70,6 @@ class WebMvcHateoasConfiguration {
 			ObjectProvider<RepresentationModelProcessorInvoker> invoker) {
 
 		return new HypermediaRepresentationModelBeanProcessorPostProcessor(invoker);
-	}
-
-	@Bean
-	static HypermediaRestTemplateBeanPostProcessor restTemplateBeanPostProcessor(
-			ObjectProvider<HypermediaWebMvcConfigurer> configurer) {
-		return new HypermediaRestTemplateBeanPostProcessor(configurer);
 	}
 
 	@Bean
@@ -142,36 +135,6 @@ class WebMvcHateoasConfiguration {
 
 				adapter.setReturnValueHandlers(Collections.singletonList(handler));
 			}
-
-			return bean;
-		}
-	}
-
-	/**
-	 * {@link BeanPostProcessor} to register hypermedia support with {@link RestTemplate} instances found in the
-	 * application context.
-	 *
-	 * @author Oliver Gierke
-	 * @author Greg Turnquist
-	 */
-	@RequiredArgsConstructor
-	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
-
-		private final ObjectProvider<HypermediaWebMvcConfigurer> configurer;
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
-		 */
-		@NonNull
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-			if (!RestTemplate.class.isInstance(bean)) {
-				return bean;
-			}
-
-			configurer.getObject().extendMessageConverters(((RestTemplate) bean).getMessageConverters());
 
 			return bean;
 		}

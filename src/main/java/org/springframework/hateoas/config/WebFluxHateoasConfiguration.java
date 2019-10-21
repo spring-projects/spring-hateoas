@@ -19,20 +19,16 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.lang.NonNull;
 import org.springframework.util.MimeType;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,18 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class WebFluxHateoasConfiguration {
 
 	@Bean
-	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> hypermediaTypes) {
-		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
-	}
-
-	@Bean
-	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(
-			ObjectProvider<WebClientConfigurer> configurer) {
-		return new HypermediaWebClientBeanPostProcessor(configurer);
-	}
-
-	@Bean
 	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
 
@@ -68,34 +52,6 @@ class WebFluxHateoasConfiguration {
 	@Lazy
 	ServerWebExchangeContextFilter serverWebExchangeContextFilter() {
 		return new ServerWebExchangeContextFilter();
-	}
-
-	/**
-	 * {@link BeanPostProcessor} to register the proper handlers in {@link WebClient} instances found in the application
-	 * context.
-	 *
-	 * @author Greg Turnquist
-	 * @since 1.0
-	 */
-	@RequiredArgsConstructor
-	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
-
-		private final ObjectProvider<WebClientConfigurer> configurer;
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
-		 */
-		@NonNull
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-			if (bean instanceof WebClient) {
-				return this.configurer.getObject().registerHypermediaTypes((WebClient) bean);
-			}
-
-			return bean;
-		}
 	}
 
 	/**
