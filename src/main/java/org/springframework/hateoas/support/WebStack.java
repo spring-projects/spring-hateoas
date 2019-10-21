@@ -26,7 +26,11 @@ public enum WebStack {
 
 	WEBMVC("org.springframework.web.servlet.DispatcherServlet"),
 
-	WEBFLUX("org.springframework.web.reactive.DispatcherHandler");
+	WEBFLUX("org.springframework.web.reactive.DispatcherHandler"),
+
+	REST_TEMPLATE("org.springframework.web.client.RestTemplate"),
+
+	WEB_CLIENT("org.springframework.web.reactive.function.client.WebClient");
 
 	private final boolean isAvailable;
 

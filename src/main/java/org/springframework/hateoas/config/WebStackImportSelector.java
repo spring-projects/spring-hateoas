@@ -41,6 +41,8 @@ class WebStackImportSelector implements ImportSelector {
 
 		configs.put(WebStack.WEBMVC, "org.springframework.hateoas.config.WebMvcHateoasConfiguration");
 		configs.put(WebStack.WEBFLUX, "org.springframework.hateoas.config.WebFluxHateoasConfiguration");
+		configs.put(WebStack.REST_TEMPLATE, "org.springframework.hateoas.config.RestTemplateHateoasConfiguration");
+		configs.put(WebStack.WEB_CLIENT, "org.springframework.hateoas.config.WebClientHateoasConfiguration");
 
 		CONFIGS = Collections.unmodifiableMap(configs);
 	}

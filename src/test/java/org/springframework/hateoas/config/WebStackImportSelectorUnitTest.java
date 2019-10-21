@@ -60,6 +60,23 @@ class WebStackImportSelectorUnitTest {
 		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEBFLUX));
 	}
 
+	@Test // #1098
+	void activatesRestTemplateOnlyifConfigured() {
+
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(RestTemplateHypermedia.class);
+
+		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.REST_TEMPLATE));
+	}
+
+	@Test // #1098
+	void activatesWebClientOnlyIfConfigured() {
+
+		AnnotationMetadata metadata = AnnotationMetadata.introspect(WebClientHypermedia.class);
+
+		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEB_CLIENT));
+	}
+
+
 	@Test // #973
 	void rejectsNoStacksSelected() {
 
@@ -88,6 +105,12 @@ class WebStackImportSelectorUnitTest {
 
 	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = WebStack.WEBFLUX)
 	static class WebFluxHypermedia {}
+
+	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = WebStack.REST_TEMPLATE)
+	static class RestTemplateHypermedia {}
+
+	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = WebStack.WEB_CLIENT)
+	static class WebClientHypermedia {}
 
 	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = {})
 	static class NoStacksHypermedia {}
