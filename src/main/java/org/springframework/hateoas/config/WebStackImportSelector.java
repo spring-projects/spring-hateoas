@@ -16,8 +16,6 @@
 package org.springframework.hateoas.config;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.context.annotation.ImportSelector;
@@ -32,20 +30,6 @@ import org.springframework.hateoas.support.WebStack;
 class WebStackImportSelector implements ImportSelector {
 
 	private static final String WEB_STACK_MISSING = "At least one web stack has to be selected in @EnableHypermediaSupport on %s!";
-
-	static Map<WebStack, String> CONFIGS;
-
-	static {
-
-		Map<WebStack, String> configs = new HashMap<>();
-
-		configs.put(WebStack.WEBMVC, "org.springframework.hateoas.config.WebMvcHateoasConfiguration");
-		configs.put(WebStack.WEBFLUX, "org.springframework.hateoas.config.WebFluxHateoasConfiguration");
-		configs.put(WebStack.REST_TEMPLATE, "org.springframework.hateoas.config.RestTemplateHateoasConfiguration");
-		configs.put(WebStack.WEB_CLIENT, "org.springframework.hateoas.config.WebClientHateoasConfiguration");
-
-		CONFIGS = Collections.unmodifiableMap(configs);
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -69,8 +53,7 @@ class WebStackImportSelector implements ImportSelector {
 		}
 
 		return Arrays.stream(stacks) //
-				.filter(WebStack::isAvailable) //
-				.map(CONFIGS::get) //
+				.flatMap(webStack -> webStack.getAvailableConfigurations().stream()) //
 				.toArray(String[]::new);
 	}
 }

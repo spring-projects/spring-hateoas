@@ -17,6 +17,9 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -40,8 +43,11 @@ class WebStackImportSelectorUnitTest {
 
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(DefaultHypermedia.class);
 
-		assertThat(selector.selectImports(metadata))
-				.containsExactlyInAnyOrderElementsOf(WebStackImportSelector.CONFIGS.values());
+		List<String> configs = new ArrayList<>();
+		configs.addAll(WebStack.WEBMVC.getAvailableConfigurations());
+		configs.addAll(WebStack.WEBFLUX.getAvailableConfigurations());
+
+		assertThat(selector.selectImports(metadata)).containsExactlyInAnyOrderElementsOf(configs);
 	}
 
 	@Test // #973
@@ -49,7 +55,7 @@ class WebStackImportSelectorUnitTest {
 
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(WebMvcHypermedia.class);
 
-		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEBMVC));
+		assertThat(selector.selectImports(metadata)).containsExactlyInAnyOrderElementsOf(WebStack.WEBMVC.getAvailableConfigurations());
 	}
 
 	@Test // #973
@@ -57,25 +63,8 @@ class WebStackImportSelectorUnitTest {
 
 		AnnotationMetadata metadata = AnnotationMetadata.introspect(WebFluxHypermedia.class);
 
-		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEBFLUX));
+		assertThat(selector.selectImports(metadata)).containsExactlyInAnyOrderElementsOf(WebStack.WEBFLUX.getAvailableConfigurations());
 	}
-
-	@Test // #1098
-	void activatesRestTemplateOnlyifConfigured() {
-
-		AnnotationMetadata metadata = AnnotationMetadata.introspect(RestTemplateHypermedia.class);
-
-		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.REST_TEMPLATE));
-	}
-
-	@Test // #1098
-	void activatesWebClientOnlyIfConfigured() {
-
-		AnnotationMetadata metadata = AnnotationMetadata.introspect(WebClientHypermedia.class);
-
-		assertThat(selector.selectImports(metadata)).containsExactly(WebStackImportSelector.CONFIGS.get(WebStack.WEB_CLIENT));
-	}
-
 
 	@Test // #973
 	void rejectsNoStacksSelected() {
@@ -105,12 +94,6 @@ class WebStackImportSelectorUnitTest {
 
 	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = WebStack.WEBFLUX)
 	static class WebFluxHypermedia {}
-
-	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = WebStack.REST_TEMPLATE)
-	static class RestTemplateHypermedia {}
-
-	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = WebStack.WEB_CLIENT)
-	static class WebClientHypermedia {}
 
 	@EnableHypermediaSupport(type = HypermediaType.HAL, stacks = {})
 	static class NoStacksHypermedia {}

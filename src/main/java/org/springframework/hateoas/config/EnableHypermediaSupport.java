@@ -57,7 +57,7 @@ public @interface EnableHypermediaSupport {
 	 *
 	 * @return
 	 */
-	WebStack[] stacks() default { WebStack.WEBMVC, WebStack.WEBFLUX, WebStack.REST_TEMPLATE, WebStack.WEB_CLIENT};
+	WebStack[] stacks() default { WebStack.WEBMVC, WebStack.WEBFLUX };
 
 	/**
 	 * Hypermedia representation types supported.

@@ -36,7 +36,7 @@ import org.springframework.web.client.RestTemplate;
 class RestTemplateHateoasConfiguration {
 
 	@Bean
-	static HypermediaRestTemplateBeanPostProcessor restTemplateBeanPostProcessor(
+	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
 			ObjectProvider<HypermediaWebMvcConfigurer> configurer) {
 		return new HypermediaRestTemplateBeanPostProcessor(configurer);
 	}
