@@ -65,6 +65,7 @@ s/hateoas\.core\.MethodParameters/hateoas.server.core.MethodParameters/g;\
 s/hateoas\.core\.Relation/hateoas.server.core.Relation/g;\
 \
 s/hateoas\.hal/hateoas.mediatype.hal/g;\
+s/HAL_JSON_UTF8/HAL_JSON/g;\
 \
 s/hateoas\.mvc\.BasicLinkBuilder/hateoas.server.mvc.BasicLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilder/hateoas.server.mvc.WebMvcLinkBuilder/g;\
