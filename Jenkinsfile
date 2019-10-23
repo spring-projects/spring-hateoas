@@ -56,10 +56,10 @@ pipeline {
 						sh 'PROFILE=none ci/test.sh'
 					}
 				}
-				stage("test: baseline (jdk12)") {
+				stage("test: baseline (jdk13)") {
 					agent {
 						docker {
-							image 'adoptopenjdk/openjdk12:latest'
+							image 'adoptopenjdk/openjdk13:latest'
 							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
@@ -95,10 +95,10 @@ pipeline {
 						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
-				stage("test: spring-next (jdk12)") {
+				stage("test: spring-next (jdk13)") {
 					agent {
 						docker {
-							image 'adoptopenjdk/openjdk12:latest'
+							image 'adoptopenjdk/openjdk13:latest'
 							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
