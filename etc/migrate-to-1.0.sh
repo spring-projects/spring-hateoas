@@ -71,6 +71,7 @@ s/hateoas\.mvc\.BasicLinkBuilder/hateoas.server.mvc.BasicLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilder/hateoas.server.mvc.WebMvcLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilderFactory/hateoas.server.mvc.WebMvcLinkBuilderFactory/g;\
 s/hateoas\.mvc\.HeaderLinksResponseEntity/hateoas.server.core.HeaderLinksResponseEntity/g;\
+s/hateoas\.mvc\.ResourceAssemblerSupport/hateoas.server.mvc.RepresentationModelAssemblerSupport/g;\
 s/hateoas\.mvc\.ResourceProcessorInvoker/hateoas.server.mvc.ResourceProcessorInvoker/g;\
 s/hateoas\.mvc\.ResourceProcessorInvokingHandlerAdapter/hateoas.server.mvc.ResourceProcessorInvokingHandlerAdapter/g;\
 s/hateoas\.mvc\.TypeConstrainedMappingJackson2HttpMessageConverter/hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter/g;\
