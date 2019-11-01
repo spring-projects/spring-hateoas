@@ -67,7 +67,7 @@ public class WebMvcEmployeeController {
 		EMPLOYEES.put(1, new Employee("Bilbo Baggins", "burglar"));
 	}
 
-	@GetMapping("/employees")
+	@GetMapping(value = "/employees", produces = {HAL_JSON_VALUE, HAL_FORMS_JSON_VALUE, COLLECTION_JSON_VALUE, UBER_JSON_VALUE} )
 	public CollectionModel<EntityModel<Employee>> all() {
 
 		// Generate an "Affordance" based on this method (the "self" link)
@@ -83,7 +83,7 @@ public class WebMvcEmployeeController {
 				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> CollectionModel.of(it, selfLink)));
 	}
 
-	@GetMapping("/employees/search")
+	@GetMapping(value = "/employees/search", produces = {HAL_JSON_VALUE, HAL_FORMS_JSON_VALUE, COLLECTION_JSON_VALUE, UBER_JSON_VALUE} )
 	public CollectionModel<EntityModel<Employee>> search(@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "role", required = false) String role) {
 
@@ -120,7 +120,7 @@ public class WebMvcEmployeeController {
 		return CollectionModel.of(employees, selfLink);
 	}
 
-	@GetMapping("/employees/{id}")
+	@GetMapping(value = "/employees/{id}", produces = {HAL_JSON_VALUE, HAL_FORMS_JSON_VALUE, COLLECTION_JSON_VALUE, UBER_JSON_VALUE} )
 	public EntityModel<Employee> findOne(@PathVariable Integer id) {
 
 		// Start the affordance with the "self" link, i.e. this method.
@@ -139,7 +139,7 @@ public class WebMvcEmployeeController {
 				employeesLink);
 	}
 
-	@PostMapping("/employees")
+	@PostMapping(value = "/employees", consumes = {HAL_JSON_VALUE, HAL_FORMS_JSON_VALUE, COLLECTION_JSON_VALUE, UBER_JSON_VALUE} )
 	public ResponseEntity<?> newEmployee(@RequestBody EntityModel<Employee> employee) {
 
 		int newEmployeeId = EMPLOYEES.size();
@@ -151,7 +151,7 @@ public class WebMvcEmployeeController {
 		return ResponseEntity.created(link.toUri()).build();
 	}
 
-	@PutMapping("/employees/{id}")
+	@PutMapping(value = "/employees/{id}", consumes = {HAL_JSON_VALUE, HAL_FORMS_JSON_VALUE, COLLECTION_JSON_VALUE, UBER_JSON_VALUE} )
 	public ResponseEntity<?> updateEmployee(@RequestBody EntityModel<Employee> employee, @PathVariable Integer id) {
 
 		EMPLOYEES.put(id, employee.getContent());
@@ -163,7 +163,7 @@ public class WebMvcEmployeeController {
 				.build();
 	}
 
-	@PatchMapping("/employees/{id}")
+	@PatchMapping(value = "/employees/{id}", consumes = {HAL_JSON_VALUE, HAL_FORMS_JSON_VALUE, COLLECTION_JSON_VALUE, UBER_JSON_VALUE} )
 	public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EntityModel<Employee> employee,
 			@PathVariable Integer id) {
 

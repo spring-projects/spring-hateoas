@@ -85,6 +85,8 @@ class HalFormsWebMvcIntegrationTest {
 
 				.andExpect(jsonPath("$._templates.*", hasSize(2)))
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
+				.andExpect(jsonPath("$._templates['default'].contentType", is(
+						"application/hal+json, application/prs.hal-forms+json, application/vnd.collection+json, application/vnd.amundsen-uber+json")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
@@ -114,6 +116,8 @@ class HalFormsWebMvcIntegrationTest {
 
 				.andExpect(jsonPath("$._templates.*", hasSize(1)))
 				.andExpect(jsonPath("$._templates['default'].method", is("post")))
+				.andExpect(jsonPath("$._templates['default'].contentType", is(
+						"application/hal+json, application/prs.hal-forms+json, application/vnd.collection+json, application/vnd.amundsen-uber+json")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))

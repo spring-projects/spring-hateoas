@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
@@ -27,6 +29,7 @@ import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -63,13 +66,17 @@ public class SpringAffordanceBuilder {
 				.map(QueryParameter::of) //
 				.collect(Collectors.toList());
 
+		MergedAnnotation<RequestMapping> methodMappings = MergedAnnotations.from(method).get(RequestMapping.class);
+
 		ResolvableType outputType = ResolvableType.forMethodReturnType(method);
 		Affordances affordances = Affordances.of(affordanceLink);
 
 		return discoverer.getRequestMethod(type, method).stream() //
 				.flatMap(it -> affordances.afford(it) //
 						.withInput(inputType) //
+						.withInputMediatypes(methodMappings.getStringArray("consumes")) //
 						.withOutput(outputType) //
+						.withOutputMediatypes(methodMappings.getStringArray("produces")) //
 						.withParameters(queryMethodParameters) //
 						.withName(methodName) //
 						.build() //

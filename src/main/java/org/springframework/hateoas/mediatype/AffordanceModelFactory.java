@@ -18,10 +18,10 @@ package org.springframework.hateoas.mediatype;
 import java.util.List;
 
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -48,7 +48,28 @@ public interface AffordanceModelFactory {
 	 * @param queryMethodParameters
 	 * @param outputType
 	 * @return
+	 * @deprecated Migrate to {@link #getAffordanceModel(String, Link, HttpMethod, InputPayloadMetadata, List, PayloadMetadata, List, List)}.
 	 */
+	@Deprecated
 	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType);
+									   List<QueryParameter> queryMethodParameters, PayloadMetadata outputType);
+
+	/**
+	 * Look up the {@link AffordanceModel} for this factory.
+	 *
+	 * @param name
+	 * @param link
+	 * @param httpMethod
+	 * @param inputType
+	 * @param queryMethodParameters
+	 * @param outputType
+	 * @param inputMediaTypes
+	 * @param outputMediaTypes
+	 * @return
+	 */
+	default AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType, List<MediaType> inputMediaTypes,
+			List<MediaType> outputMediaTypes) {
+		return getAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	}
 }

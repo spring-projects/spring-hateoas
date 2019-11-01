@@ -37,6 +37,7 @@ import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -75,7 +76,7 @@ public class Affordances implements AffordanceOperations {
 		Assert.notNull(httpMethod, "HTTP method must not be null!");
 
 		return new AffordanceBuilder(this, httpMethod, link, InputPayloadMetadata.NONE, PayloadMetadata.NONE,
-				Collections.emptyList(), null);
+				Collections.emptyList(), null, Collections.emptyList(), Collections.emptyList());
 	}
 
 	/*
@@ -104,6 +105,8 @@ public class Affordances implements AffordanceOperations {
 
 		private List<QueryParameter> parameters = Collections.emptyList();
 		private @Nullable @Wither String name;
+		private List<MediaType> inputMediaTypes;
+		private List<MediaType> outputMediaTypes;
 
 		/**
 		 * Registers the given type as input and output model for the affordance.
@@ -171,7 +174,24 @@ public class Affordances implements AffordanceOperations {
 
 			InputPayloadMetadata inputMetadata = InputPayloadMetadata.from(metadata);
 
-			return new AffordanceBuilder(context, method, target, inputMetadata, outputMetadata, parameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetadata, outputMetadata, parameters, name,
+					inputMediaTypes, outputMediaTypes);
+		}
+
+		/**
+		 * Registers the collection of incoming media types.
+		 * 
+		 * @param mediaTypes
+		 * @return
+		 */
+		public AffordanceBuilder withInputMediatypes(@Nullable String[] mediaTypes) {
+
+			if (mediaTypes == null) {
+				return this;
+			}
+
+			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name,
+					MediaType.parseMediaTypes(Arrays.asList(mediaTypes)), outputMediaTypes);
 		}
 
 		/**
@@ -201,7 +221,24 @@ public class Affordances implements AffordanceOperations {
 		 * @return will never be {@literal null}.
 		 */
 		public AffordanceBuilder withOutput(PayloadMetadata metadata) {
-			return new AffordanceBuilder(context, method, target, inputMetdata, metadata, parameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetdata, metadata, parameters, name, inputMediaTypes,
+					outputMediaTypes);
+		}
+
+		/**
+		 * Registers the collection of outgoing media types.
+		 * 
+		 * @param mediaTypes
+		 * @return
+		 */
+		public AffordanceBuilder withOutputMediatypes(@Nullable String[] mediaTypes) {
+
+			if (mediaTypes == null) {
+				return this;
+			}
+
+			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name,
+					inputMediaTypes, MediaType.parseMediaTypes(Arrays.asList(mediaTypes)));
 		}
 
 		/**
@@ -221,7 +258,8 @@ public class Affordances implements AffordanceOperations {
 		 * @return will never be {@literal null}.
 		 */
 		public AffordanceBuilder withParameters(List<QueryParameter> parameters) {
-			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name,
+					inputMediaTypes, outputMediaTypes);
 		}
 
 		/**
@@ -236,7 +274,8 @@ public class Affordances implements AffordanceOperations {
 			newParameters.addAll(this.parameters);
 			newParameters.addAll(Arrays.asList(parameters));
 
-			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, newParameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, newParameters, name,
+					inputMediaTypes, outputMediaTypes);
 		}
 
 		/**
@@ -291,7 +330,7 @@ public class Affordances implements AffordanceOperations {
 		 * @return will never be {@literal null}.
 		 */
 		private AffordanceModel createModel(AffordanceModelFactory factory, List<QueryParameter> parameters) {
-			return factory.getAffordanceModel(getNameOrDefault(), target, method, inputMetdata, parameters, outputMetadata);
+			return factory.getAffordanceModel(getNameOrDefault(), target, method, inputMetdata, parameters, outputMetadata, inputMediaTypes, outputMediaTypes);
 		}
 
 		/**

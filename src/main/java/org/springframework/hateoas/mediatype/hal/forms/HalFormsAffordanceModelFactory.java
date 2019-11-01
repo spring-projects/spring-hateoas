@@ -17,15 +17,16 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import lombok.Getter;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
-import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -39,13 +40,36 @@ class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
 	private final @Getter MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
 
+	/**
+	 * Look up the {@link AffordanceModel} for this factory.
+	 *
+	 * @param name
+	 * @param link
+	 * @param httpMethod
+	 * @param inputType
+	 * @param parameters
+	 * @param outputType
+	 * @return
+	 * @deprecated Migrate to
+	 *             {@link #getAffordanceModel(String, Link, HttpMethod, InputPayloadMetadata, List, PayloadMetadata, List, List)}.
+	 */
+	@Deprecated
+	@Override
+	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
+			InputPayloadMetadata inputType, List<QueryParameter> parameters, PayloadMetadata outputType) {
+		return getAffordanceModel(name, link, httpMethod, inputType, parameters, outputType, Collections.emptyList(),
+				Collections.emptyList());
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.core.ResolvableType, java.util.List, org.springframework.core.ResolvableType)
 	 */
 	@Override
 	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
-			InputPayloadMetadata inputType, List<QueryParameter> parameters, PayloadMetadata outputType) {
-		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, parameters, outputType);
+			InputPayloadMetadata inputType, List<QueryParameter> parameters, PayloadMetadata outputType,
+			List<MediaType> inputMediaTypes, List<MediaType> outputMediaTypes) {
+		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, parameters, outputType, inputMediaTypes,
+				outputMediaTypes);
 	}
 }

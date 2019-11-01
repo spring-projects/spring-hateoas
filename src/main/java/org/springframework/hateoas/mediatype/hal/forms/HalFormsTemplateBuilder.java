@@ -82,6 +82,10 @@ class HalFormsTemplateBuilder {
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
 							.withProperties(propertiesWithPrompt);
 
+					if (!it.getInputMediaTypes().isEmpty()) {
+						template = template.withContentTypes(it.getInputMediaTypes());
+					}
+
 					template = applyTo(template, TemplateTitle.of(it, templates.isEmpty()));
 					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
 				});

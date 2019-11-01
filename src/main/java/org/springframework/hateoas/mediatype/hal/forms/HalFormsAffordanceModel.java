@@ -45,13 +45,18 @@ class HalFormsAffordanceModel extends AffordanceModel {
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
 
 	private final @Getter List<HalFormsProperty> inputProperties;
+	private final @Getter List<MediaType> inputMediaTypes;
+	private final @Getter List<MediaType> outputMediaTypes;
 
 	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType, List<MediaType> inputMediaTypes,
+			List<MediaType> outputMediaTypes) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
 		this.inputProperties = determineInputs();
+		this.inputMediaTypes = inputMediaTypes;
+		this.outputMediaTypes = outputMediaTypes;
 	}
 
 	/**
