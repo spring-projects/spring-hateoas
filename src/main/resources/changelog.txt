@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.1.RELEASE (2019-11-03)
+----------------------------------------
+- #1112 - Release 1.0.1.RELEASE.
+- #1111 - Add 1.0.1.RELEASE to the ChangeLog.
+- #1110 - Upgrade to Reactor Dysprosium-SR1.
+- #1108 - Upgrade to Spring Framework 5.2.1.RELEASE.
+- #1104 - Migration for ResourceAssemblerSupport -> RepresentationModelAssemblerSupport missing.
+
 Changes in version 1.0.0.RELEASE (2019-09-30)
 ----------------------------------------
 - #1090 - Release 1.0.0.RELEASE.
