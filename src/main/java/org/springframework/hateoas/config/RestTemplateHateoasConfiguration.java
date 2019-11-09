@@ -17,14 +17,19 @@ package org.springframework.hateoas.config;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.config.WebMvcHateoasConfiguration.HypermediaWebMvcConfigurer;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring MVC HATEOAS Configuration
@@ -37,10 +42,10 @@ class RestTemplateHateoasConfiguration {
 
 	@Bean
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
-			ObjectProvider<HypermediaWebMvcConfigurer> configurer) {
-		return new HypermediaRestTemplateBeanPostProcessor(configurer);
+			ObjectProvider<ObjectMapper> mapper, List<HypermediaMappingInformation> hypermediaTypes) {
+		return new HypermediaRestTemplateBeanPostProcessor(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
-	
+
 	/**
 	 * {@link BeanPostProcessor} to register hypermedia support with {@link RestTemplate} instances found in the
 	 * application context.
@@ -51,7 +56,8 @@ class RestTemplateHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-		private final ObjectProvider<HypermediaWebMvcConfigurer> configurer;
+		private final ObjectMapper mapper;
+		private final List<HypermediaMappingInformation> hypermediaTypes;
 
 		/*
 		 * (non-Javadoc)
@@ -65,7 +71,11 @@ class RestTemplateHateoasConfiguration {
 				return bean;
 			}
 
-			configurer.getObject().extendMessageConverters(((RestTemplate) bean).getMessageConverters());
+			this.hypermediaTypes.forEach(hypermedia -> {
+
+				((RestTemplate) bean).getMessageConverters().add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(
+						RepresentationModel.class, hypermedia.getMediaTypes(), hypermedia.configureObjectMapper(mapper.copy())));
+			});
 
 			return bean;
 		}
