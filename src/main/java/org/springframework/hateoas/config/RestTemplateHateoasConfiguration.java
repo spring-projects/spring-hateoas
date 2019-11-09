@@ -18,11 +18,9 @@ package org.springframework.hateoas.config;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.config.WebMvcHateoasConfiguration.HypermediaWebMvcConfigurer;
 import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,10 +35,10 @@ class RestTemplateHateoasConfiguration {
 
 	@Bean
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
-			ObjectProvider<HypermediaWebMvcConfigurer> configurer) {
-		return new HypermediaRestTemplateBeanPostProcessor(configurer);
+			WebMvcConverters converters) {
+		return new HypermediaRestTemplateBeanPostProcessor(converters);
 	}
-	
+
 	/**
 	 * {@link BeanPostProcessor} to register hypermedia support with {@link RestTemplate} instances found in the
 	 * application context.
@@ -51,7 +49,7 @@ class RestTemplateHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-		private final ObjectProvider<HypermediaWebMvcConfigurer> configurer;
+		private final WebMvcConverters converters;
 
 		/*
 		 * (non-Javadoc)
@@ -65,9 +63,10 @@ class RestTemplateHateoasConfiguration {
 				return bean;
 			}
 
-			configurer.getObject().extendMessageConverters(((RestTemplate) bean).getMessageConverters());
+			RestTemplate template = (RestTemplate) bean;
+			template.setMessageConverters(converters.and(template.getMessageConverters()));
 
-			return bean;
+			return template;
 		}
 	}
 }

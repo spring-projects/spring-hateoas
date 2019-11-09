@@ -27,11 +27,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorHandlerMethodReturnValueHandler;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.hateoas.server.mvc.UriComponentsContributor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -53,10 +51,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class WebMvcHateoasConfiguration {
 
 	@Bean
-	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> hypermediaTypes) {
+	WebMvcConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> information) {
+		return WebMvcConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
+	}
 
-		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+	@Bean
+	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(WebMvcConverters converters) {
+		return new HypermediaWebMvcConfigurer(converters);
 	}
 
 	@Bean
@@ -88,8 +90,7 @@ class WebMvcHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaWebMvcConfigurer implements WebMvcConfigurer {
 
-		private final ObjectMapper mapper;
-		private final List<HypermediaMappingInformation> hypermediaTypes;
+		private final @NonNull WebMvcConverters hypermediaConverters;
 
 		/*
 		 * (non-Javadoc)
@@ -97,12 +98,7 @@ class WebMvcHateoasConfiguration {
 		 */
 		@Override
 		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-
-			this.hypermediaTypes.forEach(hypermedia -> {
-
-				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(RepresentationModel.class,
-						hypermedia.getMediaTypes(), hypermedia.configureObjectMapper(mapper.copy())));
-			});
+			hypermediaConverters.augment(converters);
 		}
 	}
 
