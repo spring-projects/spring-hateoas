@@ -17,12 +17,17 @@ package org.springframework.hateoas.config;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -36,16 +41,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Spring WebFlux HATEOAS configuration.
  *
  * @author Greg Turnquist
- * @since 1.0 TODO: Inspect ApplicationContext -> WebApplicationContext -> WebMVC
+ * @author Oliver Drotbohm
+ * @since 1.0
  */
 @Configuration
 class WebFluxHateoasConfiguration {
 
 	@Bean
-	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> hypermediaTypes) {
+	WebFluxCodecs hypermediaConverters(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> mappingInformation) {
+		return new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
+	}
 
-		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+	@Bean
+	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> mappingInformation) {
+
+		WebFluxCodecs codecs = new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
+
+		return new HypermediaWebFluxConfigurer(codecs);
 	}
 
 	@Bean
@@ -64,27 +78,53 @@ class WebFluxHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaWebFluxConfigurer implements WebFluxConfigurer {
 
-		private final ObjectMapper mapper;
-		private final List<HypermediaMappingInformation> hypermediaTypes;
+		private final WebFluxCodecs codecs;
 
 		/**
 		 * Configure custom HTTP message readers and writers or override built-in ones.
 		 * <p>
 		 * The configured readers and writers will be used for both annotated controllers and functional endpoints.
 		 *
-		 * @param configurer the configurer to use
+		 * @param configurer the configurer to use, must not be {@literal null}.
 		 */
 		@Override
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+			codecs.registerCodecs(configurer.customCodecs());
+		}
+	}
 
-			this.hypermediaTypes.forEach(hypermedia -> {
+	private static class WebFluxCodecs {
 
-				ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
-				MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
-				
-				configurer.customCodecs().encoder(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-				configurer.customCodecs().decoder(new Jackson2JsonDecoder(objectMapper, mimeTypes));
-			});
+		private final List<Decoder<?>> decoders;
+		private final List<Encoder<?>> encoders;
+
+		private WebFluxCodecs(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
+
+			this.decoders = new ArrayList<>();
+			this.encoders = new ArrayList<>();
+
+			for (HypermediaMappingInformation information : mappingInformation) {
+
+				ObjectMapper objectMapper = information.configureObjectMapper(mapper.copy());
+				List<MediaType> mediaTypes = information.getMediaTypes();
+
+				this.decoders.add(getDecoder(objectMapper, mediaTypes));
+				this.encoders.add(getEncoder(objectMapper, mediaTypes));
+			}
+		}
+
+		public void registerCodecs(CustomCodecs codecs) {
+
+			decoders.forEach(codecs::decoder);
+			encoders.forEach(codecs::encoder);
+		}
+
+		private static Decoder<?> getDecoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
+			return new Jackson2JsonDecoder(mapper, mediaTypes.toArray(new MimeType[0]));
+		}
+
+		private static Encoder<?> getEncoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
+			return new Jackson2JsonEncoder(mapper, mediaTypes.toArray(new MimeType[0]));
 		}
 	}
 }
