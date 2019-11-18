@@ -161,7 +161,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public EntityModel<Employee> process(EntityModel<Employee> model) {
 
 			triggered = true;
-			model.add(new Link("/entity/link", ENTITY_LINK_RELATION));
+			model.add(Link.of("/entity/link", ENTITY_LINK_RELATION));
 			return model;
 		}
 	}
@@ -175,7 +175,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public CollectionModel<EntityModel<Employee>> process(CollectionModel<EntityModel<Employee>> model) {
 
 			triggered = true;
-			model.add(new Link("/collection/link", COLLECTION_LINK_RELATION));
+			model.add(Link.of("/collection/link", COLLECTION_LINK_RELATION));
 			return model;
 		}
 	}
@@ -188,7 +188,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public CollectionModel<?> process(CollectionModel<?> model) {
 
 			triggered = true;
-			model.add(new Link("/non-specific-collection/link", WILDCARD_LINK_RELATION));
+			model.add(Link.of("/non-specific-collection/link", WILDCARD_LINK_RELATION));
 			return model;
 		}
 	}

@@ -53,7 +53,7 @@ class CollectionJsonItem<T> {
 	private @Nullable String href;
 	private List<CollectionJsonData> data;
 	private @JsonInclude(Include.NON_EMPTY) Links links;
-	private @Nullable @Getter(onMethod = @__({ @JsonIgnore }), value = AccessLevel.PRIVATE) T rawData;
+	private @Nullable @Getter(onMethod = @__(@JsonIgnore)) T rawData;
 
 	@JsonCreator
 	CollectionJsonItem(@JsonProperty("href") @Nullable String href, //
@@ -89,6 +89,10 @@ class CollectionJsonItem<T> {
 
 		if (this.rawData != null && PRIMITIVE_TYPES.contains(this.rawData.getClass())) {
 			return Collections.singletonList(new CollectionJsonData().withValue(this.rawData));
+		}
+
+		if (rawData == null) {
+			return Collections.emptyList();
 		}
 
 		return PropertyUtils.extractPropertyValues(this.rawData).entrySet().stream() //
@@ -135,6 +139,6 @@ class CollectionJsonItem<T> {
 			return this;
 		}
 
-		return withLinks(Links.of(new Link(href)).merge(MergeMode.SKIP_BY_REL, links));
+		return withLinks(Links.of(Link.of(href)).merge(MergeMode.SKIP_BY_REL, links));
 	}
 }

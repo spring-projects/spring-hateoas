@@ -762,7 +762,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 				Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
-				return new EntityModel<>(obj, links);
+				return EntityModel.of(obj, links);
 
 			} else {
 
@@ -774,7 +774,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
-				return new EntityModel<>(firstItem.toRawData(rootType),
+				return EntityModel.of(firstItem.toRawData(rootType),
 						merged.merge(MergeMode.REPLACE_BY_REL, firstItem.getLinks()));
 			}
 		}
@@ -877,7 +877,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 			return collection.getItems().stream() //
 					.map(CollectionJsonItem::withOwnSelfLink) //
 					.map(it -> isResource //
-							? new EntityModel<>(it.toRawData(rootType), it.getLinks()) //
+							? RepresentationModel.of(it.toRawData(rootType), it.getLinks()) //
 							: it.toRawData(rootType)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));
 		}
@@ -902,7 +902,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		private static final long serialVersionUID = -7465448422501330790L;
 		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content,
-				links) -> new PagedModel<>(content, null, links);
+				links) -> PagedModel.of(content, null, links);
 		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {

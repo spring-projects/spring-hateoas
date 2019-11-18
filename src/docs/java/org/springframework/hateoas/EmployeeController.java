@@ -65,7 +65,7 @@ public class EmployeeController {
 		return IntStream.range(0, EMPLOYEES.size()) //
 				.mapToObj(this::findOne) //
 				.collect(Collectors.collectingAndThen(Collectors.toList(), //
-						it -> new CollectionModel<>(it, selfLink)));
+						it -> CollectionModel.of(it, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
@@ -100,7 +100,7 @@ public class EmployeeController {
 				.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
-		return new CollectionModel<>(employees, selfLink);
+		return CollectionModel.of(employees, selfLink);
 	}
 
 	// tag::get[]
@@ -113,7 +113,7 @@ public class EmployeeController {
 		Link findOneLink = linkTo(methodOn(controllerClass).findOne(id)).withSelfRel(); // <1>
 
 		// Return the affordance + a link back to the entire collection resource.
-		return new EntityModel<>(EMPLOYEES.get(id), //
+		return EntityModel.of(EMPLOYEES.get(id), //
 				findOneLink //
 						.andAffordance(afford(methodOn(controllerClass).updateEmployee(null, id))) // <2>
 						.andAffordance(afford(methodOn(controllerClass).partiallyUpdateEmployee(null, id)))); // <3>

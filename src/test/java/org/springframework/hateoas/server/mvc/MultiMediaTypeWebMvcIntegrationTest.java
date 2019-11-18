@@ -451,7 +451,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/search")
@@ -482,7 +482,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -495,7 +495,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new EntityModel<>(EMPLOYEES.get(id),
+			return EntityModel.of(EMPLOYEES.get(id),
 					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
 							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
 					employeesLink);

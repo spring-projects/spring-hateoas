@@ -68,7 +68,7 @@ class PropertyUtilsTest {
 	void simpleObjectWrappedAsResource() {
 
 		Employee employee = new Employee("Frodo Baggins", "ring bearer");
-		EntityModel<Employee> employeeResource = new EntityModel<>(employee);
+		EntityModel<Employee> employeeResource = EntityModel.of(employee);
 
 		Map<String, Object> properties = PropertyUtils.extractPropertyValues(employeeResource);
 

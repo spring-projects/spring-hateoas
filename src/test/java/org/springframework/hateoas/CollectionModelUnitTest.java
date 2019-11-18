@@ -29,21 +29,21 @@ import org.junit.jupiter.api.Test;
  */
 class CollectionModelUnitTest {
 
-	Set<EntityModel<String>> foo = Collections.singleton(new EntityModel<>("foo"));
-	Set<EntityModel<String>> bar = Collections.singleton(new EntityModel<>("bar"));
+	Set<EntityModel<String>> foo = Collections.singleton(EntityModel.of("foo"));
+	Set<EntityModel<String>> bar = Collections.singleton(EntityModel.of("bar"));
 
 	@Test
 	void equalsForSelfReference() {
 
-		CollectionModel<EntityModel<String>> resource = new CollectionModel<>(foo);
+		CollectionModel<EntityModel<String>> resource = CollectionModel.of(foo);
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
 	void equalsWithEqualContent() {
 
-		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
-		CollectionModel<EntityModel<String>> right = new CollectionModel<>(foo);
+		CollectionModel<EntityModel<String>> left = CollectionModel.of(foo);
+		CollectionModel<EntityModel<String>> right = CollectionModel.of(foo);
 
 		assertThat(left).isEqualTo(right);
 		assertThat(right).isEqualTo(left);
@@ -52,8 +52,8 @@ class CollectionModelUnitTest {
 	@Test
 	void notEqualForDifferentContent() {
 
-		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
-		CollectionModel<EntityModel<String>> right = new CollectionModel<>(bar);
+		CollectionModel<EntityModel<String>> left = CollectionModel.of(foo);
+		CollectionModel<EntityModel<String>> right = CollectionModel.of(bar);
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -62,9 +62,9 @@ class CollectionModelUnitTest {
 	@Test
 	void notEqualForDifferentLinks() {
 
-		CollectionModel<EntityModel<String>> left = new CollectionModel<>(foo);
-		CollectionModel<EntityModel<String>> right = new CollectionModel<>(bar);
-		right.add(new Link("localhost"));
+		CollectionModel<EntityModel<String>> left = CollectionModel.of(foo);
+		CollectionModel<EntityModel<String>> right = CollectionModel.of(bar);
+		right.add(Link.of("localhost"));
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);

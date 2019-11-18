@@ -30,6 +30,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -45,11 +46,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @see https://github.com/blongden/vnd.error
  * @author Oliver Gierke
  * @author Greg Turnquist
- * @deprecated Use {@link org.springframework.hateoas.mediatype.problem.Problem} to form vendor neutral error messages.
+ * @deprecated since 1.1, use {@link org.springframework.hateoas.mediatype.problem.Problem} to form vendor neutral error
+ *             messages.
  */
 @JsonPropertyOrder({ "message", "logref", "total", "_links", "_embedded" })
 @JsonIgnoreProperties(ignoreUnknown = true)
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 @Deprecated
 public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
@@ -177,8 +179,16 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	/**
 	 * Virtual attribute to generate JSON field of {@literal total}. Only generated when there are multiple errors.
 	 */
+	@Nullable
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	public Integer getTotal() {
+
+		List<VndError> errors = this.errors;
+
+		if (errors == null) {
+			return null;
+		}
+
 		return this.errors.size() > 1 //
 				? this.errors.size() //
 				: null; //
@@ -214,12 +224,12 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	 *
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
-	 * 
-	 * @deprecated Use {@link org.springframework.hateoas.mediatype.problem.Problem} to form vendor neutral error messages.
+	 * @deprecated Use {@link org.springframework.hateoas.mediatype.problem.Problem} to form vendor neutral error
+	 *             messages.
 	 */
 	@JsonPropertyOrder({ "message", "path", "logref" })
 	@Relation(collectionRelation = "errors")
-	@EqualsAndHashCode
+	@EqualsAndHashCode(callSuper = true)
 	@Deprecated
 	public static class VndError extends RepresentationModel<VndError> {
 

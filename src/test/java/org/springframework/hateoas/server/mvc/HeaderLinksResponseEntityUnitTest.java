@@ -35,9 +35,9 @@ import org.springframework.http.ResponseEntity;
 class HeaderLinksResponseEntityUnitTest {
 
 	static final Object CONTENT = new Object();
-	static final Link LINK = new Link("href", "rel");
+	static final Link LINK = Link.of("href", "rel");
 
-	EntityModel<Object> resource = new EntityModel<>(CONTENT, LINK);
+	EntityModel<Object> resource = EntityModel.of(CONTENT, LINK);
 	ResponseEntity<EntityModel<Object>> entity = new ResponseEntity<>(resource, HttpStatus.OK);
 
 	@Test

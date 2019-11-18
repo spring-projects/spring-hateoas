@@ -68,7 +68,7 @@ URI templates can be constructed manually and template variables added later on.
 ====
 [source, java]
 ----
-UriTemplate template = new UriTemplate("/{segment}/something")
+UriTemplate template = UriTemplate.of("/{segment}/something")
   .with(new TemplateVariable("parameter", VariableType.REQUEST_PARAM);
 
 assertThat(template.toString()).isEqualTo("/{segment}/something{?parameter}");
@@ -92,7 +92,7 @@ They can be referred to via `IanaLinkRelations`.
 ====
 [source, java]
 ----
-Link link = new Link("/some-resource"), IanaLinkRelations.NEXT);
+Link link = Link.of("/some-resource"), IanaLinkRelations.NEXT);
 
 assertThat(link.getRel()).isEqualTo(LinkRelation.of("next"));
 assertThat(IanaLinkRelation.isIanaRel(link.getRel())).isTrue();
@@ -145,7 +145,7 @@ The model type can now be used like this:
 PersonModel model = new PersonModel();
 model.firstname = "Dave";
 model.lastname = "Matthews";
-model.add(new Link("https://myhost/people/42"));
+model.add(Link.of("https://myhost/people/42"));
 ----
 ====
 
@@ -178,7 +178,7 @@ Instead of creating a custom model type for each concept, you can just reuse an 
 [source, java]
 ----
 Person person = new Person("Dave", "Matthews");
-EntityModel<Person> model = new EntityModel<>(person);
+EntityModel<Person> model = EntityModel.of(person);
 ----
 ====
 
@@ -192,6 +192,6 @@ Its elements can either be simple objects or `RepresentationModel` instances in 
 [source, java]
 ----
 Collection<Person> people = Collections.singleton(new Person("Dave", "Matthews"));
-CollectionModel<Person> model = new CollectionModel<>(people);
+CollectionModel<Person> model = CollectionModel.of(people);
 ----
 ====

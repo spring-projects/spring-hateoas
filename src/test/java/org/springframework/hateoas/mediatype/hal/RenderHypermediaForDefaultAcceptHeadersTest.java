@@ -119,7 +119,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel();
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -132,7 +132,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new EntityModel<>(EMPLOYEES.get(id), findOneLink, employeesLink);
+			return EntityModel.of(EMPLOYEES.get(id), findOneLink, employeesLink);
 		}
 	}
 

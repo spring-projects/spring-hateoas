@@ -53,12 +53,12 @@ class HypermediaWebClientBeanPostProcessorTest {
 
 		this.server = new Server();
 
-		EntityModel<Actor> actor = new EntityModel<>(new Actor("Keanu Reaves"));
+		EntityModel<Actor> actor = EntityModel.of(new Actor("Keanu Reaves"));
 		String actorUri = this.server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		EntityModel<Movie> resource = new EntityModel<>(movie);
-		resource.add(new Link(actorUri, "actor"));
+		EntityModel<Movie> resource = EntityModel.of(movie);
+		resource.add(Link.of(actorUri, "actor"));
 
 		this.server.mockResourceFor(resource);
 		this.server.finishMocking();
@@ -125,7 +125,7 @@ class HypermediaWebClientBeanPostProcessorTest {
 							.retrieve() //
 							.bodyToMono(typeReference)) //
 					.as(StepVerifier::create) //
-					.expectNext(new EntityModel<>(new Actor("Keanu Reaves"))) //
+					.expectNext(EntityModel.of(new Actor("Keanu Reaves"))) //
 					.verifyComplete();
 		});
 	}

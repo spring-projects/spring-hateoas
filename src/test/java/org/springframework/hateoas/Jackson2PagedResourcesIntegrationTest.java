@@ -65,7 +65,7 @@ class Jackson2PagedResourcesIntegrationTest {
 		user.lastname = "Matthews";
 
 		PageMetadata metadata = new PagedModel.PageMetadata(1, 0, 2);
-		PagedModel<User> resources = new PagedModel<>(Collections.singleton(user), metadata);
+		PagedModel<User> resources = PagedModel.of(Collections.singleton(user), metadata);
 
 		Method method = Sample.class.getMethod("someMethod");
 		StringWriter writer = new StringWriter();

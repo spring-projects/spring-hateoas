@@ -140,7 +140,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 * @return link
 	 */
 	protected Link extractLink(Object element, LinkRelation rel) {
-		return new Link(element.toString(), rel);
+		return Link.of(element.toString(), rel);
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 		return Links.of(Map.class.isInstance(parseResult) //
 				? extractLink(parseResult, rel) //
-				: new Link(parseResult.toString(), rel));
+				: Link.of(parseResult.toString(), rel));
 	}
 
 	private static <T> Optional<T> firstOrEmpty(Iterable<T> source) {

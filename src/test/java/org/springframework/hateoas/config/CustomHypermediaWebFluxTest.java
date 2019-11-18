@@ -96,7 +96,7 @@ class CustomHypermediaWebFluxTest {
 
 			return linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel() //
 					.toMono() //
-					.map(link -> new EntityModel<>(new Employee("Frodo Baggins", "ring bearer"), link)); //
+					.map(link -> EntityModel.of(new Employee("Frodo Baggins", "ring bearer"), link)); //
 		}
 	}
 }

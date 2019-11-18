@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link EntityModel}.
- * 
+ *
  * @author Oliver Gierke
  */
 class EntityModelUnitTest {
@@ -31,15 +31,15 @@ class EntityModelUnitTest {
 	@Test
 	void equalsForSelfReference() {
 
-		EntityModel<String> resource = new EntityModel<>("foo");
+		EntityModel<String> resource = EntityModel.of("foo");
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
 	void equalsWithEqualContent() {
 
-		EntityModel<String> left = new EntityModel<>("foo");
-		EntityModel<String> right = new EntityModel<>("foo");
+		EntityModel<String> left = EntityModel.of("foo");
+		EntityModel<String> right = EntityModel.of("foo");
 
 		assertThat(left).isEqualTo(right);
 		assertThat(right).isEqualTo(left);
@@ -48,8 +48,8 @@ class EntityModelUnitTest {
 	@Test
 	void notEqualForDifferentContent() {
 
-		EntityModel<String> left = new EntityModel<>("foo");
-		EntityModel<String> right = new EntityModel<>("bar");
+		EntityModel<String> left = EntityModel.of("foo");
+		EntityModel<String> right = EntityModel.of("bar");
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -58,9 +58,9 @@ class EntityModelUnitTest {
 	@Test
 	void notEqualForDifferentLinks() {
 
-		EntityModel<String> left = new EntityModel<>("foo");
-		EntityModel<String> right = new EntityModel<>("foo");
-		right.add(new Link("localhost"));
+		EntityModel<String> left = EntityModel.of("foo");
+		EntityModel<String> right = EntityModel.of("foo");
+		right.add(Link.of("localhost"));
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -70,7 +70,7 @@ class EntityModelUnitTest {
 	void rejectsCollectionContent() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new EntityModel<Object>(Collections.emptyList());
+			EntityModel.of(Collections.emptyList());
 		});
 	}
 }

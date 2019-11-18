@@ -15,9 +15,21 @@
  */
 package org.springframework.hateoas;
 
+import lombok.RequiredArgsConstructor;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
+import java.util.function.Consumer;
+
+import org.springframework.core.io.ClassPathResource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * @author Oliver Drotbohm
@@ -37,5 +49,94 @@ public class MappingTestUtils {
 				.disable(MapperFeature.AUTO_DETECT_SETTERS);
 
 		return mapper;
+	}
+
+	public static ContextualMapper createMapper(Class<?> context, Consumer<ObjectMapper> configurer) {
+
+		ObjectMapper mapper = defaultObjectMapper();
+		configurer.accept(mapper);
+
+		return ContextualMapper.of(context, mapper);
+	}
+
+	@RequiredArgsConstructor(staticName = "of")
+	public static class ContextualMapper {
+
+		private final Class<?> context;
+		private final ObjectMapper mapper;
+
+		public JavaType getGenericType(Class<?> type, Class<?>... elements) {
+			return mapper.getTypeFactory().constructParametricType(type, elements);
+		}
+
+		public JavaType getGenericType(Class<?> type, JavaType element) {
+			return mapper.getTypeFactory().constructParametricType(type, element);
+		}
+
+		public String writeObject(Object source) {
+
+			try {
+				return mapper.writeValueAsString(source);
+			} catch (JsonProcessingException o_O) {
+				throw new RuntimeException(o_O);
+			}
+		}
+
+		public RepresentationModel<?> readObject(String filename) {
+			return readObject(filename, RepresentationModel.class);
+		}
+
+		public <T> T readObject(String filename, Class<T> type) {
+
+			TypeFactory factory = mapper.getTypeFactory();
+			JavaType javaType = factory.constructType(type);
+
+			return readObject(filename, javaType);
+		}
+
+		public <S> S readObject(String filename, Class<?> type, Class<?> elementType) {
+
+			TypeFactory factory = mapper.getTypeFactory();
+			JavaType javaType = factory.constructParametricType(type, elementType);
+
+			return readObject(filename, javaType);
+		}
+
+		public <S> S readObject(String filename, JavaType type) {
+
+			ClassPathResource resource = new ClassPathResource(filename, context);
+
+			try (InputStream stream = resource.getInputStream()) {
+
+				return mapper.readValue(stream, type);
+
+			} catch (IOException o_O) {
+				throw new RuntimeException(o_O);
+			}
+		}
+
+		public String readFile(String filename) {
+
+			ClassPathResource resource = new ClassPathResource(filename, context);
+
+			try (Scanner scanner = new Scanner(resource.getInputStream())) {
+
+				StringBuilder builder = new StringBuilder();
+
+				while (scanner.hasNextLine()) {
+
+					builder.append(scanner.nextLine());
+
+					if (scanner.hasNextLine()) {
+						builder.append(System.lineSeparator());
+					}
+				}
+
+				return builder.toString();
+			} catch (IOException o_O) {
+				throw new RuntimeException(o_O);
+			}
+		}
+
 	}
 }

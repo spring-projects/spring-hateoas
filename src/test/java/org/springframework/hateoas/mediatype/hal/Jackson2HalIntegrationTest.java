@@ -84,8 +84,8 @@ class Jackson2HalIntegrationTest {
 
 	static final String ANNOTATED_PAGED_RESOURCES = "{\"_embedded\":{\"pojos\":[{\"text\":\"test1\",\"number\":1,\"_links\":{\"self\":{\"href\":\"localhost\"}}},{\"text\":\"test2\",\"number\":2,\"_links\":{\"self\":{\"href\":\"localhost\"}}}]},\"_links\":{\"next\":{\"href\":\"foo\"},\"prev\":{\"href\":\"bar\"}},\"page\":{\"size\":2,\"totalElements\":4,\"totalPages\":2,\"number\":0}}";
 
-	static final Links PAGINATION_LINKS = Links.of(new Link("foo", IanaLinkRelations.NEXT.value()),
-			new Link("bar", IanaLinkRelations.PREV.value()));
+	static final Links PAGINATION_LINKS = Links.of(Link.of("foo", IanaLinkRelations.NEXT.value()),
+			Link.of("bar", IanaLinkRelations.PREV.value()));
 
 	static final String CURIED_DOCUMENT = "{\"_links\":{\"self\":{\"href\":\"foo\"},\"foo:myrel\":{\"href\":\"bar\"},\"curies\":[{\"href\":\"http://localhost:8080/rels/{rel}\",\"name\":\"foo\",\"templated\":true}]}}";
 	static final String MULTIPLE_CURIES_DOCUMENT = "{\"_links\":{\"default:myrel\":{\"href\":\"foo\"},\"curies\":[{\"href\":\"bar\",\"name\":\"foo\"},{\"href\":\"foo\",\"name\":\"bar\"}]}}";
@@ -113,7 +113,7 @@ class Jackson2HalIntegrationTest {
 	void rendersSingleLinkAsObject() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost"));
+		resourceSupport.add(Link.of("localhost"));
 
 		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_LINK_REFERENCE);
 	}
@@ -125,7 +125,7 @@ class Jackson2HalIntegrationTest {
 	void rendersAllExtraRFC5988Attributes() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost", "self") //
+		resourceSupport.add(Link.of("localhost", "self") //
 				.withHreflang("en") //
 				.withTitle("the title") //
 				.withType("the type") //
@@ -144,7 +144,7 @@ class Jackson2HalIntegrationTest {
 	void deserializeAllExtraRFC5988Attributes() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost", "self") //
+		expected.add(Link.of("localhost", "self") //
 				.withHreflang("en") //
 				.withTitle("the title") //
 				.withType("the type") //
@@ -157,7 +157,7 @@ class Jackson2HalIntegrationTest {
 	void rendersWithOneExtraRFC5988Attribute() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
+		resourceSupport.add(Link.of("localhost", "self").withTitle("the title"));
 
 		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES);
 	}
@@ -169,7 +169,7 @@ class Jackson2HalIntegrationTest {
 	void deserializeOneExtraRFC5988Attribute() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost", "self").withTitle("the title"));
+		expected.add(Link.of("localhost", "self").withTitle("the title"));
 
 		assertThat(mapper.readValue(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES, RepresentationModel.class)).isEqualTo(expected);
 	}
@@ -177,7 +177,7 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void deserializeSingleLink() throws Exception {
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost"));
+		expected.add(Link.of("localhost"));
 		assertThat(mapper.readValue(SINGLE_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
 	}
 
@@ -188,8 +188,8 @@ class Jackson2HalIntegrationTest {
 	void rendersMultipleLinkAsArray() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost"));
-		resourceSupport.add(new Link("localhost2"));
+		resourceSupport.add(Link.of("localhost"));
+		resourceSupport.add(Link.of("localhost2"));
 
 		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(LIST_LINK_REFERENCE);
 	}
@@ -198,8 +198,8 @@ class Jackson2HalIntegrationTest {
 	void deserializeMultipleLinks() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost"));
-		expected.add(new Link("localhost2"));
+		expected.add(Link.of("localhost"));
+		expected.add(Link.of("localhost2"));
 
 		assertThat(mapper.readValue(LIST_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
 	}
@@ -211,8 +211,8 @@ class Jackson2HalIntegrationTest {
 		content.add("first");
 		content.add("second");
 
-		CollectionModel<String> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<String> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
 		assertThat(mapper.writeValueAsString(resources)).isEqualTo(SIMPLE_EMBEDDED_RESOURCE_REFERENCE);
 	}
@@ -224,8 +224,8 @@ class Jackson2HalIntegrationTest {
 		content.add("first");
 		content.add("second");
 
-		CollectionModel<String> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<String> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<String> result = mapper.readValue(SIMPLE_EMBEDDED_RESOURCE_REFERENCE,
 				mapper.getTypeFactory().constructParametricType(CollectionModel.class, String.class));
@@ -238,10 +238,10 @@ class Jackson2HalIntegrationTest {
 	void rendersSingleResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimplePojo>> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
 		assertThat(mapper.writeValueAsString(resources)).isEqualTo(SINGLE_EMBEDDED_RESOURCE_REFERENCE);
 	}
@@ -250,10 +250,10 @@ class Jackson2HalIntegrationTest {
 	void deserializesSingleResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimplePojo>> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
 		TypeFactory typeFactory = mapper.getTypeFactory();
 		CollectionModel<EntityModel<SimplePojo>> result = mapper.readValue(SINGLE_EMBEDDED_RESOURCE_REFERENCE,
@@ -268,7 +268,7 @@ class Jackson2HalIntegrationTest {
 	void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimplePojo>> resources = setupResources();
-		resources.add(new Link("localhost"));
+		resources.add(Link.of("localhost"));
 
 		assertThat(mapper.writeValueAsString(resources)).isEqualTo(LIST_EMBEDDED_RESOURCE_REFERENCE);
 	}
@@ -277,7 +277,7 @@ class Jackson2HalIntegrationTest {
 	void deserializesMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimplePojo>> expected = setupResources();
-		expected.add(new Link("localhost"));
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<EntityModel<SimplePojo>> result = mapper.readValue(LIST_EMBEDDED_RESOURCE_REFERENCE,
 				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
@@ -293,10 +293,10 @@ class Jackson2HalIntegrationTest {
 	void serializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
 		assertThat(mapper.writeValueAsString(resources)).isEqualTo(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE);
 	}
@@ -308,10 +308,10 @@ class Jackson2HalIntegrationTest {
 	void deserializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimpleAnnotatedPojo>> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE,
 				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
@@ -367,8 +367,8 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void rendersCuriesCorrectly() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet(), new Link("foo"),
-				new Link("bar", "myrel"));
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet(), Link.of("foo"),
+				Link.of("bar", "myrel"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources)).isEqualTo(CURIED_DOCUMENT);
 	}
@@ -379,7 +379,7 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void doesNotRenderCuriesIfNoLinkIsPresent() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet());
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources)).isEqualTo(EMPTY_DOCUMENT);
 	}
 
@@ -389,8 +389,8 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void doesNotRenderCuriesIfNoCurieLinkIsPresent() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
-		resources.add(new Link("foo"));
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet());
+		resources.add(Link.of("foo"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources)).isEqualTo(SINGLE_NON_CURIE_LINK);
 	}
@@ -402,7 +402,7 @@ class Jackson2HalIntegrationTest {
 	void rendersTemplate() throws Exception {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add(new Link("/foo{?bar}", "search"));
+		support.add(Link.of("/foo{?bar}", "search"));
 
 		assertThat(mapper.writeValueAsString(support)).isEqualTo(LINK_TEMPLATE);
 	}
@@ -413,8 +413,8 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void rendersMultipleCuries() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
-		resources.add(new Link("foo", "myrel"));
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet());
+		resources.add(Link.of("foo", "myrel"));
 
 		CurieProvider provider = new DefaultCurieProvider("default", UriTemplate.of("/doc{?rel}")) {
 			@Override
@@ -437,7 +437,7 @@ class Jackson2HalIntegrationTest {
 		List<Object> values = new ArrayList<>();
 		values.add(wrappers.emptyCollectionOf(SimpleAnnotatedPojo.class));
 
-		CollectionModel<Object> resources = new CollectionModel<>(values);
+		CollectionModel<Object> resources = CollectionModel.of(values);
 
 		assertThat(mapper.writeValueAsString(resources)).isEqualTo("{\"_embedded\":{\"pojos\":[]}}");
 	}
@@ -465,7 +465,7 @@ class Jackson2HalIntegrationTest {
 				.halObjectMapper(new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY));
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost").withSelfRel());
+		resourceSupport.add(Link.of("localhost").withSelfRel());
 
 		assertThat(mapper.writeValueAsString(resourceSupport))
 				.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
@@ -478,7 +478,7 @@ class Jackson2HalIntegrationTest {
 	void handleTemplatedLinksOnDeserialization() throws IOException {
 
 		RepresentationModel<?> original = new RepresentationModel<>();
-		original.add(new Link("/orders{?id}", "order"));
+		original.add(Link.of("/orders{?id}", "order"));
 
 		String serialized = mapper.writeValueAsString(original);
 
@@ -496,7 +496,7 @@ class Jackson2HalIntegrationTest {
 				.halObjectMapper(new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
-		resource.add(new Link("/some-href", "foo"));
+		resource.add(Link.of("/some-href", "foo"));
 
 		assertThat(mapper.writeValueAsString(resource)) //
 				.isEqualTo("{\"_links\":{\"foo\":[{\"href\":\"/some-href\"}]}}");
@@ -505,7 +505,7 @@ class Jackson2HalIntegrationTest {
 	@Test // #1019
 	void doesNotRenderTitleForEmptyString() throws Exception {
 
-		Link link = new Link("/some-href", "foo");
+		Link link = Link.of("/some-href", "foo");
 
 		assertThat(mapper.writeValueAsString(new Jackson2HalModule.HalLink(link, ""))) //
 				.isEqualTo("{\"href\":\"/some-href\"}");
@@ -526,9 +526,9 @@ class Jackson2HalIntegrationTest {
 	@Test // #1132
 	void forwardsPropertyNamingStrategyToNonIanaLinkRelations() throws JsonProcessingException {
 
-		CollectionModel<Object> model = new CollectionModel<>(Arrays.asList(new SomeSample()));
-		model.add(new Link("/foo", LinkRelation.of("someSample")));
-		model.add(new Link("/foo/form", IanaLinkRelations.EDIT_FORM));
+		CollectionModel<Object> model = CollectionModel.of(Arrays.asList(new SomeSample()));
+		model.add(Link.of("/foo", LinkRelation.of("someSample")));
+		model.add(Link.of("/foo/form", IanaLinkRelations.EDIT_FORM));
 
 		ObjectMapper objectMapper = mapper.copy() //
 				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
@@ -548,8 +548,8 @@ class Jackson2HalIntegrationTest {
 	@Test // #1132
 	void doesNotApplyPropertyNamingStrategyToLinkRelationsIfConfigurationOptsOut() throws Exception {
 
-		CollectionModel<Object> model = new CollectionModel<>(Arrays.asList(new SomeSample()));
-		model.add(new Link("/foo", LinkRelation.of("someSample")));
+		CollectionModel<Object> model = CollectionModel.of(Arrays.asList(new SomeSample()));
+		model.add(Link.of("/foo", LinkRelation.of("someSample")));
 
 		ObjectMapper mapper = HalTestUtils.halObjectMapper(new HalConfiguration() //
 				.withApplyPropertyNamingStrategy(false)) //
@@ -571,7 +571,7 @@ class Jackson2HalIntegrationTest {
 		map.put("key", "value");
 		map.put("anotherKey", "anotherValue");
 
-		EntityModel<?> model = new EntityModel<>(map, new Link("foo", IanaLinkRelations.SELF));
+		EntityModel<?> model = EntityModel.of(map, Link.of("foo", IanaLinkRelations.SELF));
 
 		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
 
@@ -621,7 +621,7 @@ class Jackson2HalIntegrationTest {
 		ObjectMapper objectMapper = getCuriedObjectMapper(CurieProvider.NONE, messageSource);
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
-		resource.add(new Link("target", "ns:foobar"));
+		resource.add(Link.of("target", "ns:foobar"));
 
 		assertThat(objectMapper.writeValueAsString(resource)).isEqualTo(LINK_WITH_TITLE);
 	}
@@ -629,28 +629,28 @@ class Jackson2HalIntegrationTest {
 	private static CollectionModel<EntityModel<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test2", 2), Link.of("localhost")));
 
-		return new PagedModel<>(content, new PageMetadata(2, 0, 4), PAGINATION_LINKS);
+		return PagedModel.of(content, new PageMetadata(2, 0, 4), PAGINATION_LINKS);
 	}
 
 	private static CollectionModel<EntityModel<SimpleAnnotatedPojo>> setupAnnotatedResources() {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test2", 2), Link.of("localhost")));
 
-		return new CollectionModel<>(content);
+		return CollectionModel.of(content);
 	}
 
 	private static CollectionModel<EntityModel<SimplePojo>> setupResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimplePojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test2", 2), Link.of("localhost")));
 
-		return new CollectionModel<>(content);
+		return CollectionModel.of(content);
 	}
 
 	private ObjectMapper getCuriedObjectMapper() {

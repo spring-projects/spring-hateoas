@@ -31,11 +31,11 @@ public class FundamentalsTest {
 	public void links() {
 
 		// tag::links[]
-		Link link = new Link("/something");
+		Link link = Link.of("/something");
 		assertThat(link.getHref()).isEqualTo("/something");
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
 
-		link = new Link("/something", "my-rel");
+		link = Link.of("/something", "my-rel");
 		assertThat(link.getHref()).isEqualTo("/something");
 		assertThat(link.getRel()).isEqualTo(LinkRelation.of("my-rel"));
 		// end::links[]
@@ -45,7 +45,7 @@ public class FundamentalsTest {
 	public void templatedLinks() {
 
 		// tag::templatedLinks[]
-		Link link = new Link("/{segment}/something{?parameter}");
+		Link link = Link.of("/{segment}/something{?parameter}");
 		assertThat(link.isTemplated()).isTrue(); // <1>
 		assertThat(link.getVariableNames()).contains("segment", "parameter"); // <2>
 

@@ -49,6 +49,6 @@ class ControllerLinkBuilderOutsideSpringMvcUnitTest {
 				methodOn(ControllerLinkBuilderUnitTest.PersonsAddressesController.class, 15).getAddressesForCountry("DE"))
 						.withSelfRel();
 
-		assertThat(link).isEqualTo(new Link("/people/15/addresses/DE").withSelfRel());
+		assertThat(link).isEqualTo(Link.of("/people/15/addresses/DE").withSelfRel());
 	}
 }

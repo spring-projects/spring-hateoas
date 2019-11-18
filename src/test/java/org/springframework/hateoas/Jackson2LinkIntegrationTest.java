@@ -34,7 +34,7 @@ class Jackson2LinkIntegrationTest extends AbstractJackson2MarshallingIntegration
 	 */
 	@Test
 	void writesLinkCorrectly() throws Exception {
-		assertThat(write(new Link("location", "something"))).isEqualTo(REFERENCE);
+		assertThat(write(Link.of("location", "something"))).isEqualTo(REFERENCE);
 	}
 
 	/**

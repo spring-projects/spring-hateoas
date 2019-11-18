@@ -80,7 +80,7 @@ public class WebMvcEmployeeController {
 		// Return the collection of employee resources along with the composite affordance
 		return IntStream.range(0, EMPLOYEES.size()) //
 				.mapToObj(this::findOne) //
-				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> new CollectionModel<>(it, selfLink)));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> CollectionModel.of(it, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
@@ -117,7 +117,7 @@ public class WebMvcEmployeeController {
 				.andAffordance(afford(controller.search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
-		return new CollectionModel<>(employees, selfLink);
+		return CollectionModel.of(employees, selfLink);
 	}
 
 	@GetMapping("/employees/{id}")
@@ -132,7 +132,7 @@ public class WebMvcEmployeeController {
 		Link employeesLink = linkTo(controller.all()).withRel("employees");
 
 		// Return the affordance + a link back to the entire collection resource.
-		return new EntityModel<>(EMPLOYEES.get(id), //
+		return EntityModel.of(EMPLOYEES.get(id), //
 				findOneLink //
 						.andAffordance(afford(controller.updateEmployee(null, id))) // //
 						.andAffordance(afford(controller.partiallyUpdateEmployee(null, id))), //

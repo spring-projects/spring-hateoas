@@ -155,6 +155,7 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		private final @Getter String name;
 
+		@SuppressWarnings("deprecation")
 		public Curie(String name, String href) {
 
 			super(href, "curies");

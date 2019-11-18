@@ -17,6 +17,8 @@ package org.springframework.hateoas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -50,12 +52,48 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 		this.links.add(initialLink);
 	}
 
-	public RepresentationModel(List<Link> initialLinks) {
+	public RepresentationModel(Iterable<Link> initialLinks) {
 
 		Assert.notNull(initialLinks, "initialLinks must not be null!");
 
 		this.links = new ArrayList<>();
-		this.links.addAll(initialLinks);
+
+		for (Link link : initialLinks) {
+			this.links.add(link);
+		}
+	}
+
+	/**
+	 * Creates a new {@link RepresentationModel} for the given content object and no links.
+	 *
+	 * @param object can be {@literal null}.
+	 * @return
+	 * @see #of(Object, Iterable)
+	 */
+	public static <T> RepresentationModel<?> of(@Nullable T object) {
+		return of(object, Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new {@link RepresentationModel} for the given content object and links. Will return a simple
+	 * {@link RepresentationModel} if the content is {@literal null}, a {@link CollectionModel} in case the given content
+	 * object is a {@link Collection} or an {@link EntityModel} otherwise.
+	 *
+	 * @param object can be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 */
+	public static <T> RepresentationModel<?> of(@Nullable T object, Iterable<Link> links) {
+
+		if (object == null) {
+			return new RepresentationModel<>(links);
+		}
+
+		if (Collection.class.isInstance(object)) {
+			return CollectionModel.of((Collection<?>) object, links);
+		}
+
+		return EntityModel.of(object, links);
 	}
 
 	/**

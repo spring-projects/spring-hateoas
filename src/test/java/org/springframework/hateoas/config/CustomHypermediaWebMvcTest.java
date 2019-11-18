@@ -95,7 +95,7 @@ class CustomHypermediaWebMvcTest {
 
 		@GetMapping("/employees/1")
 		public EntityModel<Employee> findOne() {
-			return new EntityModel<>(new Employee("Frodo Baggins", "ring bearer"),
+			return EntityModel.of(new Employee("Frodo Baggins", "ring bearer"),
 					linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel());
 		}
 	}

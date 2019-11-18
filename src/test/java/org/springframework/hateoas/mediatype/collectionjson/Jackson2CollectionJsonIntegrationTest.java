@@ -27,18 +27,17 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
-import org.springframework.hateoas.support.MappingUtils;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
@@ -47,96 +46,92 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2CollectionJsonIntegrationTest {
 
 	static final Links PAGINATION_LINKS = Links.of( //
-			new Link("localhost", IanaLinkRelations.SELF), //
-			new Link("foo", IanaLinkRelations.NEXT), //
-			new Link("bar", IanaLinkRelations.PREV));
+			Link.of("localhost", IanaLinkRelations.SELF), //
+			Link.of("foo", IanaLinkRelations.NEXT), //
+			Link.of("bar", IanaLinkRelations.PREV));
+
+	MappingTestUtils.ContextualMapper mapper;
 
 	@BeforeEach
 	void setUpModule() {
 
-		mapper.registerModule(new Jackson2CollectionJsonModule());
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		this.mapper = MappingTestUtils.createMapper(getClass(), mapper -> {
+
+			mapper.registerModule(new Jackson2CollectionJsonModule());
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		});
 	}
 
 	@Test
-	void rendersSingleLinkAsObject() throws Exception {
+	void rendersSingleLinkAsObject() {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost").withSelfRel());
+		resourceSupport.add(Link.of("localhost").withSelfRel());
 
-		assertThat(write(resourceSupport))
-				.isEqualTo(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())));
+		assertThat(mapper.writeObject(resourceSupport)).isEqualTo(mapper.readFile("resource-support.json"));
 	}
 
 	@Test
-	void deserializeSingleLink() throws Exception {
+	void deserializeSingleLink() {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost"));
+		expected.add(Link.of("localhost"));
 
-		assertThat(
-				read(MappingUtils.read(new ClassPathResource("resource-support.json", getClass())), RepresentationModel.class))
-						.isEqualTo(expected);
+		assertThat(mapper.readObject("resource-support.json")).isEqualTo(expected);
 	}
 
 	@Test
-	void rendersMultipleLinkAsArray() throws Exception {
+	void rendersMultipleLinkAsArray() {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost"));
-		resourceSupport.add(new Link("localhost2").withRel("orders"));
+		resourceSupport.add(Link.of("localhost"));
+		resourceSupport.add(Link.of("localhost2").withRel("orders"));
 
-		assertThat(write(resourceSupport))
-				.isEqualTo(MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass())));
+		assertThat(mapper.writeObject(resourceSupport)).isEqualTo(mapper.readFile("resource-support-2.json"));
 	}
 
 	@Test
-	void rendersResourceSupportBasedObject() throws Exception {
+	void rendersResourceSupportBasedObject() {
 
 		ResourceWithAttributes resource = new ResourceWithAttributes("test value");
-		resource.add(new Link("localhost").withSelfRel());
+		resource.add(Link.of("localhost").withSelfRel());
 
-		assertThat(write(resource))
-				.isEqualTo(MappingUtils.read(new ClassPathResource("resource-support-3.json", getClass())));
+		assertThat(mapper.writeObject(resource)).isEqualTo(mapper.readFile("resource-support-3.json"));
 	}
 
 	@Test
-	void deserializeResourceSupportBasedObject() throws Exception {
+	void deserializeResourceSupportBasedObject() {
 
 		ResourceWithAttributes expected = new ResourceWithAttributes("test value");
-		expected.add(new Link("localhost").withSelfRel());
+		expected.add(Link.of("localhost").withSelfRel());
 
-		assertThat(read(MappingUtils.read(new ClassPathResource("resource-support-3.json", getClass())),
-				ResourceWithAttributes.class)).isEqualTo(expected);
+		assertThat(mapper.readObject("resource-support-3.json", ResourceWithAttributes.class)).isEqualTo(expected);
 	}
 
 	@Test
-	void deserializeMultipleLinks() throws Exception {
+	void deserializeMultipleLinks() {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost"));
-		expected.add(new Link("localhost2").withRel("orders"));
+		expected.add(Link.of("localhost"));
+		expected.add(Link.of("localhost2").withRel("orders"));
 
-		String read = MappingUtils.read(new ClassPathResource("resource-support-2.json", getClass()));
-		RepresentationModel<?> readResourceSupport = read(read, RepresentationModel.class);
-
-		assertThat(readResourceSupport.getLinks()).containsAll(expected.getLinks());
+		assertThat(mapper.readObject("resource-support-2.json").getLinks()).containsAll(expected.getLinks());
 	}
 
 	@Test
-	void rendersSimpleResourcesAsEmbedded() throws Exception {
+	void rendersSimpleResourcesAsEmbedded() {
 
 		List<String> content = new ArrayList<>();
 		content.add("first");
 		content.add("second");
 
-		CollectionModel<String> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<String> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
-		assertThat(write(resources)).isEqualTo(MappingUtils.read(new ClassPathResource("resources.json", getClass())));
+		assertThat(mapper.writeObject(resources)).isEqualTo(mapper.readFile("resources.json"));
 	}
 
 	@Test
@@ -146,103 +141,92 @@ class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2MarshallingI
 		content.add("first");
 		content.add("second");
 
-		CollectionModel<String> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<String> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
-		CollectionModel<String> result = mapper.readValue(
-				MappingUtils.read(new ClassPathResource("resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class, String.class));
+		CollectionModel<String> result = mapper.readObject("resources.json", CollectionModel.class, String.class);
 
 		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
-	void renderResource() throws Exception {
+	void renderResource() {
 
-		EntityModel<String> data = new EntityModel<>("first", new Link("localhost"));
-
-		assertThat(write(data)).isEqualTo(MappingUtils.read(new ClassPathResource("resource.json", getClass())));
+		assertThat(mapper.writeObject(EntityModel.of("first", Link.of("localhost")))) //
+				.isEqualTo(mapper.readFile("resource.json"));
 	}
 
 	@Test
-	void deserializeResource() throws Exception {
+	void deserializeResource() {
 
-		EntityModel<?> expected = new EntityModel<>("first", new Link("localhost"));
+		EntityModel<String> actual = mapper.readObject("resource.json", EntityModel.class, String.class);
 
-		String source = MappingUtils.read(new ClassPathResource("resource.json", getClass()));
-		EntityModel<String> actual = mapper.readValue(source,
-				mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class));
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(actual).isEqualTo(EntityModel.of("first", Link.of("localhost")));
 	}
 
 	@Test
 	void renderComplexStructure() throws Exception {
 
 		List<EntityModel<String>> data = new ArrayList<>();
-		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		data.add(EntityModel.of("first", Link.of("localhost"), Link.of("orders").withRel("orders")));
+		data.add(EntityModel.of("second", Link.of("remotehost"), Link.of("order").withRel("orders")));
 
-		CollectionModel<EntityModel<String>> resources = new CollectionModel<>(
-				data);
-		resources.add(new Link("localhost"));
-		resources.add(new Link("/page/2").withRel("next"));
+		CollectionModel<EntityModel<String>> resources = CollectionModel.of(data);
+		resources.add(Link.of("localhost"));
+		resources.add(Link.of("/page/2").withRel("next"));
 
-		assertThat(write(resources))
-				.isEqualTo(MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())));
+		assertThat(mapper.writeObject(resources)).isEqualTo(mapper.readFile("resources-with-resource-objects.json"));
 	}
 
 	@Test
-	void deserializeResources() throws Exception {
+	void deserializeResources() {
 
 		List<EntityModel<String>> data = new ArrayList<>();
-		data.add(new EntityModel<>("first", new Link("localhost"), new Link("orders").withRel("orders")));
-		data.add(new EntityModel<>("second", new Link("remotehost"), new Link("order").withRel("orders")));
+		data.add(EntityModel.of("first", Link.of("localhost"), Link.of("orders").withRel("orders")));
+		data.add(EntityModel.of("second", Link.of("remotehost"), Link.of("order").withRel("orders")));
 
-		CollectionModel<?> expected = new CollectionModel<>(data);
-		expected.add(new Link("localhost"));
-		expected.add(new Link("/page/2").withRel("next"));
+		CollectionModel<?> expected = CollectionModel.of(data);
+		expected.add(Link.of("localhost"));
+		expected.add(Link.of("/page/2").withRel("next"));
 
-		CollectionModel<EntityModel<String>> actual = mapper.readValue(
-				MappingUtils.read(new ClassPathResource("resources-with-resource-objects.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, String.class)));
+		JavaType entityModel = mapper.getGenericType(EntityModel.class, String.class);
+		JavaType collectionModel = mapper.getGenericType(CollectionModel.class, entityModel);
+
+		CollectionModel<?> actual = mapper.readObject("resources-with-resource-objects.json", collectionModel);
 
 		assertThat(actual).isEqualTo(expected);
-
 	}
 
 	@Test
 	void renderSimplePojos() throws Exception {
 
 		List<EntityModel<SimplePojo>> data = new ArrayList<>();
-		data.add(new EntityModel<>(new SimplePojo("text", 1), new Link("localhost"),
-				new Link("orders").withRel("orders")));
-		data.add(new EntityModel<>(new SimplePojo("text2", 2), new Link("localhost")));
+		data.add(EntityModel.of(new SimplePojo("text", 1), Link.of("localhost"), Link.of("orders").withRel("orders")));
+		data.add(EntityModel.of(new SimplePojo("text2", 2), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(
-				data);
-		resources.add(new Link("localhost"));
-		resources.add(new Link("/page/2").withRel("next"));
+		CollectionModel<EntityModel<SimplePojo>> resources = CollectionModel.of(data);
+		resources.add(Link.of("localhost"));
+		resources.add(Link.of("/page/2").withRel("next"));
 
-		assertThat(write(resources))
-				.isEqualTo(MappingUtils.read(new ClassPathResource("resources-simple-pojos.json", getClass())));
+		assertThat(mapper.writeObject(resources)).isEqualTo(mapper.readFile("resources-simple-pojos.json"));
 	}
 
 	@Test
 	void serializesPagedResource() throws Exception {
 
-		String actual = write(setupAnnotatedPagedResources());
-		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())));
+		assertThat(mapper.writeObject(setupAnnotatedPagedResources())) //
+				.isEqualTo(mapper.readFile("paged-resources.json"));
 	}
 
 	@Test
 	void deserializesPagedResource() throws Exception {
 
-		PagedModel<EntityModel<SimplePojo>> result = mapper.readValue(
-				MappingUtils.read(new ClassPathResource("paged-resources.json", getClass())),
-				mapper.getTypeFactory().constructParametricType(PagedModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimplePojo.class)));
+		JavaType entityModel = mapper.getGenericType(EntityModel.class, SimplePojo.class);
+		JavaType pagedModel = mapper.getGenericType(PagedModel.class, entityModel);
+
+		mapper.readObject("paged-resources.json", pagedModel);
+
+		PagedModel<?> result = mapper.readObject("paged-resources.json", pagedModel);
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
@@ -250,10 +234,10 @@ class Jackson2CollectionJsonIntegrationTest extends AbstractJackson2MarshallingI
 	private static CollectionModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimplePojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test2", 2), Link.of("localhost")));
 
-		return new PagedModel<>(content, null, PAGINATION_LINKS);
+		return PagedModel.of(content, null, PAGINATION_LINKS);
 	}
 
 	@Data

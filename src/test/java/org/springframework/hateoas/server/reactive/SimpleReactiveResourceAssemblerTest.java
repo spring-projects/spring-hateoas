@@ -72,7 +72,7 @@ class SimpleReactiveResourceAssemblerTest {
 		this.testResourceAssembler.toCollectionModel(Flux.just(new Employee("Frodo")), this.exchange)
 				.as(StepVerifier::create).expectNextMatches(resources -> {
 
-					assertThat(resources.getContent()).containsExactly(new EntityModel<>(new Employee("Frodo")));
+					assertThat(resources.getContent()).containsExactly(EntityModel.of(new Employee("Frodo")));
 					assertThat(resources.getLinks()).isEmpty();
 
 					return true;
@@ -89,7 +89,7 @@ class SimpleReactiveResourceAssemblerTest {
 				.expectNextMatches(resource -> {
 
 					assertThat(resource.getContent().getName()).isEqualTo("Frodo");
-					assertThat(resource.getLinks()).containsExactly(new Link("/employees").withRel("employees"));
+					assertThat(resource.getLinks()).containsExactly(Link.of("/employees").withRel("employees"));
 
 					return true;
 				}).verifyComplete();
@@ -105,8 +105,8 @@ class SimpleReactiveResourceAssemblerTest {
 				.as(StepVerifier::create).expectNextMatches(resources -> {
 
 					assertThat(resources.getContent()).containsExactly(
-							new EntityModel<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
-					assertThat(resources.getLinks()).containsExactly(new Link("/", "root"));
+							EntityModel.of(new Employee("Frodo"), Link.of("/employees").withRel("employees")));
+					assertThat(resources.getLinks()).containsExactly(Link.of("/", "root"));
 
 					return true;
 				}).verifyComplete();
@@ -119,13 +119,13 @@ class SimpleReactiveResourceAssemblerTest {
 		@Override
 		public EntityModel<Employee> addLinks(EntityModel<Employee> resource,
 				ServerWebExchange exchange) {
-			return resource.add(new Link("/employees").withRel("employees"));
+			return resource.add(Link.of("/employees").withRel("employees"));
 		}
 
 		@Override
 		public CollectionModel<EntityModel<Employee>> addLinks(
 				CollectionModel<EntityModel<Employee>> resources, ServerWebExchange exchange) {
-			return resources.add(new Link("/").withRel("root"));
+			return resources.add(Link.of("/").withRel("root"));
 		}
 	}
 

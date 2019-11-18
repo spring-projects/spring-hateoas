@@ -82,7 +82,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 public class Jackson2HalModule extends SimpleModule {
 
 	private static final long serialVersionUID = 7806951456457932384L;
-	private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = new Link("__rel__", "¯\\_(ツ)_/¯");
+	private static final Link CURIES_REQUIRED_DUE_TO_EMBEDS = Link.of("__rel__", "¯\\_(ツ)_/¯");
 
 	public Jackson2HalModule() {
 
@@ -606,12 +606,12 @@ public class Jackson2HalModule extends SimpleModule {
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
 						link = jp.readValueAs(Link.class);
-						result.add(new Link(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
+						result.add(Link.of(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
 								.withType(link.getType()).withDeprecation(link.getDeprecation()));
 					}
 				} else {
 					link = jp.readValueAs(Link.class);
-					result.add(new Link(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
+					result.add(Link.of(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
 							.withType(link.getType()).withDeprecation(link.getDeprecation()));
 				}
 			}

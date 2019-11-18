@@ -48,7 +48,9 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @deprecated since 1.1, use {@link #of(Iterable, Link...)} instead.
 	 */
+	@Deprecated
 	public CollectionModel(Iterable<T> content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
@@ -58,7 +60,9 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @deprecated since 1.1, use {@link #of(Iterable, Iterable)} instead.
 	 */
+	@Deprecated
 	public CollectionModel(Iterable<T> content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
@@ -68,7 +72,54 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 		for (T element : content) {
 			this.content.add(element);
 		}
+
 		this.add(links);
+	}
+
+	/**
+	 * Creates a new empty collection model.
+	 *
+	 * @param <T>
+	 * @return
+	 */
+	public static <T> CollectionModel<T> empty() {
+		return of(Collections.emptyList());
+	}
+
+	/**
+	 * Creates a {@link CollectionModel} instance with the given content.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> of(Iterable<T> content) {
+		return of(content, Collections.emptyList());
+	}
+
+	/**
+	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s (optional).
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> of(Iterable<T> content, Link... links) {
+		return of(content, Arrays.asList(links));
+	}
+
+	/**
+	 * s Creates a {@link CollectionModel} instance with the given content and {@link Link}s.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> of(Iterable<T> content, Iterable<Link> links) {
+		return new CollectionModel<>(content, links);
 	}
 
 	/**
@@ -86,10 +137,10 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new EntityModel<>(element));
+			resources.add((T) EntityModel.of(element));
 		}
 
-		return new CollectionModel<>(resources);
+		return CollectionModel.of(resources);
 	}
 
 	/**

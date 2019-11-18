@@ -50,7 +50,7 @@ public class SpringAffordanceBuilder {
 	public static List<Affordance> create(Class<?> type, Method method, String href, MappingDiscoverer discoverer) {
 
 		String methodName = method.getName();
-		Link affordanceLink = new Link(href, LinkRelation.of(methodName));
+		Link affordanceLink = Link.of(href, LinkRelation.of(methodName));
 
 		MethodParameters parameters = MethodParameters.of(method);
 

@@ -498,7 +498,7 @@ class EnableHypermediaSupportIntegrationTest {
 			assertThat(mapper).hasValueSatisfying(it -> {
 
 				RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-				resourceSupport.add(new Link("localhost").withSelfRel());
+				resourceSupport.add(Link.of("localhost").withSelfRel());
 
 				assertThatCode(() -> {
 					assertThat(it.writeValueAsString(resourceSupport)) //
@@ -518,7 +518,7 @@ class EnableHypermediaSupportIntegrationTest {
 						MediaTypes.HAL_JSON, //
 						mapper -> { //
 							RepresentationModel<?> resourceSupport = new RepresentationModel<>(); //
-							resourceSupport.add(new Link("localhost").withSelfRel()); //
+							resourceSupport.add(Link.of("localhost").withSelfRel()); //
 							assertThat(mapper.writeValueAsString(resourceSupport)) //
 									.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"); //
 						} //

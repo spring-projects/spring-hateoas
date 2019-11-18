@@ -54,6 +54,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Sample controller using {@link WebFluxLinkBuilder} to create {@link Affordance}s.
@@ -86,7 +87,7 @@ public class WebFluxEmployeeController {
 						.andAffordance(controller.newEmployee(null)) //
 						.andAffordance(controller.search(null, null)) //
 						.toMono() //
-						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
+						.map(selfLink -> CollectionModel.of(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
@@ -113,13 +114,19 @@ public class WebFluxEmployeeController {
 						.andAffordance(controller.newEmployee(null)) //
 						.andAffordance(controller.search(null, null)) //
 						.toMono() //
-						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
+						.map(selfLink -> CollectionModel.of(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/{id}")
 	public Mono<EntityModel<Employee>> findOne(@PathVariable Integer id) {
 
 		WebFluxEmployeeController controller = methodOn(WebFluxEmployeeController.class);
+
+		Employee employee = EMPLOYEES.get(id);
+
+		if (employee == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
 
 		Mono<Link> selfLink = linkTo(controller.findOne(id)).withSelfRel() //
 				.andAffordance(controller.updateEmployee(null, id)) //
@@ -131,7 +138,7 @@ public class WebFluxEmployeeController {
 
 		return selfLink.zipWith(employeesLink) //
 				.map(function((left, right) -> Links.of(left, right))) //
-				.map(links -> new EntityModel<>(EMPLOYEES.get(id), links));
+				.map(links -> EntityModel.of(employee, links));
 	}
 
 	@PostMapping("/employees")

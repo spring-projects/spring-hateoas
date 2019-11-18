@@ -54,12 +54,12 @@ class VndErrorsUnitTest {
 	@Test
 	public void vndErrorsUsingSingleErrorArguments() {
 
-		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, Link.of("/link").withSelfRel()));
 
 		assertThat(errors.getTotal()).isNull();
 		assertThat(errors.getContent()).hasSize(1);
 		assertThat(errors.getContent())
-				.containsExactly(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+				.containsExactly(new VndError("message", "/path", 50, Link.of("/link").withSelfRel()));
 	}
 
 	/**
@@ -68,17 +68,17 @@ class VndErrorsUnitTest {
 	@Test
 	public void appendingVndErrorsShouldWork() {
 
-		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, Link.of("/link").withSelfRel()));
 		assertThat(errors.getContent()).hasSize(1);
 
-		errors.getContent().add(new VndError("message2", "/path2", 51, new Link("/link2", "link2")));
+		errors.getContent().add(new VndError("message2", "/path2", 51, Link.of("/link2", "link2")));
 		assertThat(errors.getContent()).hasSize(2);
 	}
 
 	@Test
 	void vndErrorRendersToStringCorrectly() {
 
-		VndError error = new VndError("message", "path", 42, new Link("foo", "bar"));
+		VndError error = new VndError("message", "path", 42, Link.of("foo", "bar"));
 		assertThat(error.toString()).isEqualTo("VndError[logref: 42, message: message, links: [<foo>;rel=\"bar\"]]");
 
 	}
@@ -86,7 +86,7 @@ class VndErrorsUnitTest {
 	@Test
 	void vndErrorsRendersToStringCorrectly() {
 
-		VndErrors errors = new VndErrors(new VndError("message", "path", 42, new Link("foo", "bar")));
+		VndErrors errors = new VndErrors(new VndError("message", "path", 42, Link.of("foo", "bar")));
 		assertThat(errors.toString())
 				.isEqualTo("VndErrors[VndError[logref: 42, message: message, links: [<foo>;rel=\"bar\"]]]");
 	}

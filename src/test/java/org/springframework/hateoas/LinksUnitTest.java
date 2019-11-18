@@ -43,9 +43,9 @@ class LinksUnitTest {
 
 	static final String LINKS2 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(THIRD, FOURTH));
 
-	static final Links reference = Links.of(new Link("/something", "foo"), new Link("/somethingElse", "bar"));
-	static final Links reference2 = Links.of(new Link("/something", "foo").withHreflang("en"),
-			new Link("/somethingElse", "bar").withHreflang("de"));
+	static final Links reference = Links.of(Link.of("/something", "foo"), Link.of("/somethingElse", "bar"));
+	static final Links reference2 = Links.of(Link.of("/something", "foo").withHreflang("en"),
+			Link.of("/somethingElse", "bar").withHreflang("de"));
 
 	@Test
 	void parsesLinkHeaderLinks() {
@@ -75,8 +75,8 @@ class LinksUnitTest {
 	 */
 	@Test
 	void getSingleLinkByRel() {
-		assertThat(reference.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
-		assertThat(reference2.getLink("bar")).hasValue(new Link("/somethingElse", "bar").withHreflang("de"));
+		assertThat(reference.getLink("bar")).hasValue(Link.of("/somethingElse", "bar"));
+		assertThat(reference2.getLink("bar")).hasValue(Link.of("/somethingElse", "bar").withHreflang("de"));
 	}
 
 	/**
@@ -85,14 +85,14 @@ class LinksUnitTest {
 	@Test
 	void parsesLinkWithComma() {
 
-		Link withComma = new Link("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
+		Link withComma = Link.of("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
 
 		assertThat(Links.parse(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
 
 		Links twoWithCommaInFirst = Links.parse(WITH_COMMA.concat(",").concat(SECOND));
 
 		assertThat(twoWithCommaInFirst.getLink("foo")).hasValue(withComma);
-		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(new Link("/somethingElse", "bar"));
+		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(Link.of("/somethingElse", "bar"));
 	}
 
 	/**
@@ -106,7 +106,7 @@ class LinksUnitTest {
 	@Test // #805
 	void returnsRequiredLink() {
 
-		Link reference = new Link("http://localhost", "someRel");
+		Link reference = Link.of("http://localhost", "someRel");
 		Links links = Links.of(reference);
 
 		assertThat(links.getRequiredLink("someRel")).isEqualTo(reference);
@@ -125,8 +125,8 @@ class LinksUnitTest {
 	@Test
 	void detectsContainedLinks() {
 
-		Link first = new Link("http://localhost", "someRel");
-		Link second = new Link("http://localhost", "someOtherRel");
+		Link first = Link.of("http://localhost", "someRel");
+		Link second = Link.of("http://localhost", "someOtherRel");
 
 		assertThat(Links.of(first).contains(first)).isTrue();
 		assertThat(Links.of(first).contains(second)).isFalse();

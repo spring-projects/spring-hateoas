@@ -35,7 +35,7 @@ class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Marshalling
 	void doesNotRenderId() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost"));
+		resourceSupport.add(Link.of("localhost"));
 
 		assertThat(write(resourceSupport)).isEqualTo(REFERENCE);
 	}
@@ -49,6 +49,6 @@ class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Marshalling
 		RepresentationModel<?> result = read(REFERENCE, RepresentationModel.class);
 
 		assertThat(result.getLinks()).hasSize(1);
-		assertThat(result.getLinks()).contains(new Link("localhost"));
+		assertThat(result.getLinks()).contains(Link.of("localhost"));
 	}
 }

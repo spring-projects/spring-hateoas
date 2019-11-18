@@ -17,6 +17,7 @@ package org.springframework.hateoas;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -49,7 +50,9 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to add to the {@link EntityModel}.
+	 * @deprecated since 1.1, use {@link #of(Object, Link...)} instead.
 	 */
+	@Deprecated
 	public EntityModel(T content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
@@ -59,13 +62,52 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to add to the {@link EntityModel}.
+	 * @deprecated since 1.1, use {@link #of(Object, Iterable)} instead.
 	 */
-	public EntityModel(@Nullable T content, Iterable<Link> links) {
+	@Deprecated
+	public EntityModel(T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
-		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use Resources instead!");
+		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use CollectionModel instead!");
+
 		this.content = content;
 		this.add(links);
+	}
+
+	/**
+	 * Creates a new {@link EntityModel} with the given content.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link EntityModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> EntityModel<T> of(T content) {
+		return of(content, Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new {@link EntityModel} with the given content and {@link Link}s (optional).
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link EntityModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> EntityModel<T> of(T content, Link... links) {
+		return of(content, Arrays.asList(links));
+	}
+
+	/**
+	 * Creates a new {@link EntityModel} with the given content and {@link Link}s.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to add to the {@link EntityModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> EntityModel<T> of(T content, Iterable<Link> links) {
+		return new EntityModel<>(content, links);
 	}
 
 	/**
@@ -81,7 +123,9 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
 	// Hacks to allow deserialization into an EntityModel<Map<String, Object>>
 
+	@Nullable
 	@JsonAnyGetter
+	@SuppressWarnings("unchecked")
 	private Map<String, Object> getMapContent() {
 		return Map.class.isInstance(content) ? (Map<String, Object>) content : null;
 	}

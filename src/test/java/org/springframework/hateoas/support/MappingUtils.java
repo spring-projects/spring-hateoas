@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import org.springframework.core.io.Resource;
+import org.springframework.hateoas.MappingTestUtils;
 
 /**
  * @author Greg Turnquist
@@ -31,7 +32,9 @@ public final class MappingUtils {
 	 * @param resource as a {@link Resource}
 	 * @return
 	 * @throws IOException
+	 * @deprecated 1.1, use {@link MappingTestUtils} instead.
 	 */
+	@Deprecated
 	public static String read(Resource resource) throws IOException {
 
 		try (Scanner scanner = new Scanner(resource.getInputStream())) {

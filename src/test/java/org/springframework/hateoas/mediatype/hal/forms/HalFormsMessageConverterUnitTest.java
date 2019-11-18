@@ -115,8 +115,8 @@ class HalFormsMessageConverterUnitTest {
 				.andProperty(property); //
 
 		HalFormsDocument expected = HalFormsDocument.empty() //
-				.andLink(new Link("/employees").withRel("collection")) //
-				.andLink(new Link("/employees/1").withSelfRel())//
+				.andLink(Link.of("/employees").withRel("collection")) //
+				.andLink(Link.of("/employees/1").withSelfRel())//
 				.andTemplate("foo", template);
 
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();

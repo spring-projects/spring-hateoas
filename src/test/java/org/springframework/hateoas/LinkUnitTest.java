@@ -38,13 +38,13 @@ class LinkUnitTest {
 
 	@Test
 	void linkWithHrefOnlyBecomesSelfLink() {
-		assertThat(new Link("foo").hasRel(IanaLinkRelations.SELF)).isTrue();
+		assertThat(Link.of("foo").hasRel(IanaLinkRelations.SELF)).isTrue();
 	}
 
 	@Test
 	void createsLinkFromRelAndHref() {
 
-		Link link = new Link("foo", IanaLinkRelations.SELF);
+		Link link = Link.of("foo", IanaLinkRelations.SELF);
 
 		assertSoftly(softly -> {
 
@@ -58,7 +58,7 @@ class LinkUnitTest {
 	void rejectsNullHref() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new Link(null);
+			Link.of(null);
 		});
 	}
 
@@ -67,7 +67,7 @@ class LinkUnitTest {
 	void rejectsNullRel() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new Link("foo", (String) null);
+			Link.of("foo", (String) null);
 		});
 	}
 
@@ -75,7 +75,7 @@ class LinkUnitTest {
 	void rejectsEmptyHref() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new Link("");
+			Link.of("");
 		});
 	}
 
@@ -83,15 +83,15 @@ class LinkUnitTest {
 	void rejectsEmptyRel() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new Link("foo", "");
+			Link.of("foo", "");
 		});
 	}
 
 	@Test
 	void sameRelAndHrefMakeSameLink() {
 
-		Link left = new Link("foo", IanaLinkRelations.SELF);
-		Link right = new Link("foo", IanaLinkRelations.SELF);
+		Link left = Link.of("foo", IanaLinkRelations.SELF);
+		Link right = Link.of("foo", IanaLinkRelations.SELF);
 
 		TestUtils.assertEqualAndSameHashCode(left, right);
 	}
@@ -99,8 +99,8 @@ class LinkUnitTest {
 	@Test
 	void differentRelMakesDifferentLink() {
 
-		Link left = new Link("foo", IanaLinkRelations.PREV);
-		Link right = new Link("foo", IanaLinkRelations.NEXT);
+		Link left = Link.of("foo", IanaLinkRelations.PREV);
+		Link right = Link.of("foo", IanaLinkRelations.NEXT);
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
@@ -108,15 +108,15 @@ class LinkUnitTest {
 	@Test
 	void differentHrefMakesDifferentLink() {
 
-		Link left = new Link("foo", IanaLinkRelations.SELF);
-		Link right = new Link("bar", IanaLinkRelations.SELF);
+		Link left = Link.of("foo", IanaLinkRelations.SELF);
+		Link right = Link.of("bar", IanaLinkRelations.SELF);
 
 		TestUtils.assertNotEqualAndDifferentHashCode(left, right);
 	}
 
 	@Test
 	void differentTypeDoesNotEqual() {
-		assertThat(new Link("foo")).isNotEqualTo(new RepresentationModel<>());
+		assertThat(Link.of("foo")).isNotEqualTo(new RepresentationModel<>());
 	}
 
 	/**
@@ -129,9 +129,9 @@ class LinkUnitTest {
 
 		assertSoftly(softly -> {
 
-			softly.assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(new Link("/something", "foo"));
+			softly.assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(Link.of("/something", "foo"));
 			softly.assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""))
-					.isEqualTo(new Link("/something", "foo"));
+					.isEqualTo(Link.of("/something", "foo"));
 			softly.assertThat(Link.valueOf("</customer/1>;" //
 					+ "rel=\"self\";" //
 					+ "hreflang=\"en\";" //
@@ -141,7 +141,7 @@ class LinkUnitTest {
 					+ "deprecation=\"https://example.com/customers/deprecated\";" //
 					+ "profile=\"my-profile\";" //
 					+ "name=\"my-name\";")) //
-					.isEqualTo(new Link("/customer/1") //
+					.isEqualTo(Link.of("/customer/1") //
 							.withHreflang("en") //
 							.withMedia("pdf") //
 							.withTitle("pdf customer copy") //
@@ -197,14 +197,14 @@ class LinkUnitTest {
 	@Test
 	void isTemplatedIfSourceContainsTemplateVariables() {
 
-		Link link = new Link("/foo{?page}");
+		Link link = Link.of("/foo{?page}");
 
 		assertSoftly(softly -> {
 
 			softly.assertThat(link.isTemplated()).isTrue();
 			softly.assertThat(link.getVariableNames()).hasSize(1);
 			softly.assertThat(link.getVariableNames()).contains("page");
-			softly.assertThat(link.expand("2")).isEqualTo(new Link("/foo?page=2"));
+			softly.assertThat(link.expand("2")).isEqualTo(Link.of("/foo?page=2"));
 		});
 	}
 
@@ -214,7 +214,7 @@ class LinkUnitTest {
 	@Test
 	void isntTemplatedIfSourceDoesNotContainTemplateVariables() {
 
-		Link link = new Link("/foo");
+		Link link = Link.of("/foo");
 
 		assertSoftly(softly -> {
 
@@ -229,7 +229,7 @@ class LinkUnitTest {
 	@Test
 	void serializesCorrectly() throws IOException {
 
-		Link link = new Link("https://foobar{?foo,bar}");
+		Link link = Link.of("https://foobar{?foo,bar}");
 
 		ObjectOutputStream stream = new ObjectOutputStream(new ByteArrayOutputStream());
 		stream.writeObject(link);
@@ -242,7 +242,7 @@ class LinkUnitTest {
 	@Test
 	void keepsCompleteBaseUri() {
 
-		Link link = new Link("/customer/{customerId}/programs", "programs");
+		Link link = Link.of("/customer/{customerId}/programs", "programs");
 		assertThat(link.getHref()).isEqualTo("/customer/{customerId}/programs");
 	}
 
@@ -272,7 +272,7 @@ class LinkUnitTest {
 	@Test
 	void linkWithAffordancesShouldWorkProperly() {
 
-		Link originalLink = new Link("/foo");
+		Link originalLink = Link.of("/foo");
 
 		Link linkWithAffordance = Affordances.of(originalLink).afford(HttpMethod.GET).toLink();
 		Link linkWithTwoAffordances = Affordances.of(linkWithAffordance).afford(HttpMethod.GET).toLink();
@@ -297,7 +297,7 @@ class LinkUnitTest {
 	@Test
 	void exposesLinkRelation() {
 
-		Link link = new Link("/", "foo");
+		Link link = Link.of("/", "foo");
 
 		assertThat(link.hasRel("foo")).isTrue();
 		assertThat(link.hasRel("bar")).isFalse();
@@ -309,7 +309,7 @@ class LinkUnitTest {
 	@Test
 	void rejectsInvalidRelationsOnHasRel() {
 
-		Link link = new Link("/");
+		Link link = Link.of("/");
 
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel((String) null));
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> link.hasRel(""));
@@ -317,16 +317,16 @@ class LinkUnitTest {
 
 	@Test
 	void createsUriForSimpleLink() {
-		assertThat(new Link("/something").toUri()).isEqualTo(URI.create("/something"));
+		assertThat(Link.of("/something").toUri()).isEqualTo(URI.create("/something"));
 	}
 
 	@Test
 	void createsUriForTemplateWithOptionalParameters() {
-		assertThat(new Link("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
+		assertThat(Link.of("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
 	}
 
 	@Test
 	void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
-		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new Link("/{segment}/path").toUri());
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> Link.of("/{segment}/path").toUri());
 	}
 }

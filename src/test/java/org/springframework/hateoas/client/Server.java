@@ -189,7 +189,7 @@ public class Server implements Closeable {
 		String baseResourceUri = String.format("%s/%s", rootResource(), collectionRel.value());
 		String resourceUri = String.format("%s/%s", baseResourceUri, UUID.randomUUID().toString());
 
-		baseResources.add(new Link(baseResourceUri, collectionRel), new Link(resourceUri, singleRel));
+		baseResources.add(Link.of(baseResourceUri, collectionRel), Link.of(resourceUri, singleRel));
 
 		register(resourceUri, resource);
 
@@ -198,13 +198,13 @@ public class Server implements Closeable {
 
 	public void finishMocking() {
 
-		CollectionModel<String> resources = new CollectionModel<>(Collections.emptyList());
+		CollectionModel<String> resources = CollectionModel.of(Collections.emptyList());
 
 		for (Link link : baseResources.keySet()) {
 
 			resources.add(link);
 
-			CollectionModel<String> nested = new CollectionModel<>(Collections.emptyList());
+			CollectionModel<String> nested = CollectionModel.of(Collections.emptyList());
 			nested.add(baseResources.get(link));
 
 			register(link.getHref(), nested);

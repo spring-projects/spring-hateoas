@@ -287,8 +287,8 @@ class HypermediaWebFluxConfigurerTest {
 				.returnResult(RepresentationModel.class).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resourceSupport -> {
 
-					assertThat(resourceSupport.getLinks()).containsExactlyInAnyOrder(new Link("/", IanaLinkRelations.SELF),
-							new Link("/employees", "employees"));
+					assertThat(resourceSupport.getLinks()).containsExactlyInAnyOrder(Link.of("/", IanaLinkRelations.SELF),
+							Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -298,14 +298,14 @@ class HypermediaWebFluxConfigurerTest {
 				.returnResult(this.resourcesEmployeeType).getResponseBody() //
 				.as(StepVerifier::create).expectNextMatches(resources -> {
 
-					assertThat(resources.getLinks()).containsExactlyInAnyOrder(new Link("/employees", IanaLinkRelations.SELF));
+					assertThat(resources.getLinks()).containsExactlyInAnyOrder(Link.of("/employees", IanaLinkRelations.SELF));
 
 					EntityModel<Employee> content = resources.getContent().iterator().next();
 
 					assertThat(content.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(content.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -317,8 +317,8 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(employee.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(employee.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 					return true;
 				}).verifyComplete();
 	}
@@ -336,7 +336,7 @@ class HypermediaWebFluxConfigurerTest {
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/", IanaLinkRelations.SELF), new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/", IanaLinkRelations.SELF), Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -352,7 +352,7 @@ class HypermediaWebFluxConfigurerTest {
 				.contentType(responseType).returnResult(this.resourcesEmployeeType).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resources -> {
 
-					assertThat(resources.getLinks()).containsExactlyInAnyOrder(new Link("/employees", IanaLinkRelations.SELF));
+					assertThat(resources.getLinks()).containsExactlyInAnyOrder(Link.of("/employees", IanaLinkRelations.SELF));
 
 					Collection<EntityModel<Employee>> content = resources.getContent();
 					assertThat(content).hasSize(1);
@@ -361,8 +361,8 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(resource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(resource.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -383,7 +383,7 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(employeeResource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(employeeResource.getLinks()).containsExactlyInAnyOrder(
-							new Link("/employees/1", IanaLinkRelations.SELF), new Link("/employees", "employees"));
+							Link.of("/employees/1", IanaLinkRelations.SELF), Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -417,8 +417,8 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(resource.getContent()).isEqualTo(new Employee("Samwise Gamgee", "gardener"));
 					assertThat(resource.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -472,8 +472,8 @@ class HypermediaWebFluxConfigurerTest {
 
 			RepresentationModel<?> root = new RepresentationModel<>();
 
-			root.add(new Link("/").withSelfRel());
-			root.add(new Link("/employees").withRel("employees"));
+			root.add(Link.of("/").withSelfRel());
+			root.add(Link.of("/employees").withRel("employees"));
 
 			return root;
 		}
@@ -546,13 +546,13 @@ class HypermediaWebFluxConfigurerTest {
 		@Override
 		public void addLinks(EntityModel<Employee> resource) {
 
-			resource.add(new Link("/employees/1").withSelfRel());
-			resource.add(new Link("/employees").withRel("employees"));
+			resource.add(Link.of("/employees/1").withSelfRel());
+			resource.add(Link.of("/employees").withRel("employees"));
 		}
 
 		@Override
 		public void addLinks(CollectionModel<EntityModel<Employee>> resources) {
-			resources.add(new Link("/employees").withSelfRel());
+			resources.add(Link.of("/employees").withSelfRel());
 		}
 	}
 

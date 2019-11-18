@@ -100,7 +100,7 @@ class CollectionJson<T> {
 			return this;
 		}
 
-		return withLinks(Links.of(new Link(href)).merge(MergeMode.SKIP_BY_REL, links));
+		return withLinks(Links.of(Link.of(href)).merge(MergeMode.SKIP_BY_REL, links));
 	}
 
 	boolean hasItems() {

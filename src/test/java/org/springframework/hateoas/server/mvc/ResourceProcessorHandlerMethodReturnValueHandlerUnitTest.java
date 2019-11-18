@@ -61,21 +61,21 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 @ExtendWith(MockitoExtension.class)
 class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
-	static final EntityModel<String> FOO = new EntityModel<>("foo");
-	static final CollectionModel<EntityModel<String>> FOOS = new CollectionModel<>(Collections.singletonList(FOO));
-	static final PagedModel<EntityModel<String>> FOO_PAGE = new PagedModel<>(singleton(FOO), new PageMetadata(1, 0, 10));
+	static final EntityModel<String> FOO = EntityModel.of("foo");
+	static final CollectionModel<EntityModel<String>> FOOS = CollectionModel.of(Collections.singletonList(FOO));
+	static final PagedModel<EntityModel<String>> FOO_PAGE = PagedModel.of(singleton(FOO), new PageMetadata(1, 0, 10));
 	static final StringResource FOO_RES = new StringResource("foo");
 	static final HttpEntity<EntityModel<String>> FOO_ENTITY = new HttpEntity<>(FOO);
 	static final ResponseEntity<EntityModel<String>> FOO_RESP_ENTITY = new ResponseEntity<>(FOO, HttpStatus.OK);
 	static final HttpEntity<StringResource> FOO_RES_ENTITY = new HttpEntity<>(FOO_RES);
-	static final EntityModel<String> BAR = new EntityModel<>("bar");
-	static final CollectionModel<EntityModel<String>> BARS = new CollectionModel<>(Collections.singletonList(BAR));
+	static final EntityModel<String> BAR = EntityModel.of("bar");
+	static final CollectionModel<EntityModel<String>> BARS = CollectionModel.of(Collections.singletonList(BAR));
 	static final StringResource BAR_RES = new StringResource("bar");
 	static final HttpEntity<EntityModel<String>> BAR_ENTITY = new HttpEntity<>(BAR);
 	static final ResponseEntity<EntityModel<String>> BAR_RESP_ENTITY = new ResponseEntity<>(BAR, HttpStatus.OK);
 	static final HttpEntity<StringResource> BAR_RES_ENTITY = new HttpEntity<>(BAR_RES);
-	static final EntityModel<Long> LONG_10 = new EntityModel<>(10L);
-	static final EntityModel<Long> LONG_20 = new EntityModel<>(20L);
+	static final EntityModel<Long> LONG_10 = EntityModel.of(10L);
+	static final EntityModel<Long> LONG_20 = EntityModel.of(20L);
 	static final LongResource LONG_10_RES = new LongResource(10L);
 	static final LongResource LONG_20_RES = new LongResource(20L);
 	static final HttpEntity<EntityModel<Long>> LONG_10_ENTITY = new HttpEntity<>(LONG_10);
@@ -250,7 +250,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 	private void usesHeaderLinksResponseEntityIfConfigured(Function<Object, Object> mapper) throws Exception {
 
-		EntityModel<String> resource = new EntityModel<>("foo", new Link("href", "rel"));
+		EntityModel<String> resource = EntityModel.of("foo", Link.of("href", "rel"));
 		MethodParameter parameter = METHOD_PARAMS.get("resource");
 
 		RepresentationModelProcessorHandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(
@@ -280,7 +280,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	void doesNotInvokeAProcessorForASpecializedType() throws Exception {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
-		CollectionModel<Object> value = new CollectionModel<>(singleton(wrappers.emptyCollectionOf(Object.class)));
+		CollectionModel<Object> value = CollectionModel.of(singleton(wrappers.emptyCollectionOf(Object.class)));
 		CollectionModelProcessorWrapper wrapper = new CollectionModelProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));

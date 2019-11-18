@@ -32,7 +32,7 @@ class RepresentationModelIntegrationTest extends AbstractJackson2MarshallingInte
 	void doesNotRenderId() throws Exception {
 
 		RepresentationModel<?> model = new RepresentationModel<>();
-		model.add(new Link("localhost"));
+		model.add(Link.of("localhost"));
 
 		assertThat(write(model)).isEqualTo(REFERENCE);
 	}
@@ -43,6 +43,6 @@ class RepresentationModelIntegrationTest extends AbstractJackson2MarshallingInte
 		RepresentationModel<?> model = read(REFERENCE, RepresentationModel.class);
 
 		assertThat(model.getLinks()).hasSize(1);
-		assertThat(model.getLinks()).contains(new Link("localhost"));
+		assertThat(model.getLinks()).contains(Link.of("localhost"));
 	}
 }

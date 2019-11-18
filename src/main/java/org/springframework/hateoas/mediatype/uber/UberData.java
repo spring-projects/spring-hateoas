@@ -148,7 +148,7 @@ class UberData {
 
 		return Optional.ofNullable(this.rel) //
 				.map(rels -> rels.stream() //
-						.map(rel -> new Link(url, rel)) //
+						.map(rel -> Link.of(url, rel)) //
 						.collect(Collectors.toList())) //
 				.orElse(Collections.emptyList());
 	}
@@ -296,7 +296,7 @@ class UberData {
 			return extractLinksAndContent((RepresentationModel<?>) item);
 		}
 
-		return extractLinksAndContent(new EntityModel<>(item));
+		return extractLinksAndContent(EntityModel.of(item));
 	}
 
 	/**
@@ -374,11 +374,11 @@ class UberData {
 		return affordanceBasedLinks.stream() //
 				.flatMap(affordance -> links.stream() //
 						.filter(data -> data.hasUrl(affordance.getUrl())) //
-						.map(link -> {
+						.map(data -> {
 
-							if (link.getAction() == affordance.getAction()) {
+							if (data.getAction() == affordance.getAction()) {
 
-								List<LinkRelation> rels = new ArrayList<>(link.getRel());
+								List<LinkRelation> rels = new ArrayList<>(data.getRel());
 								rels.addAll(affordance.getRel());
 
 								return affordance.withName(rels.get(0).value()) //

@@ -36,13 +36,13 @@ class PagedModelUnitTest {
 
 	@BeforeEach
 	void setUp() {
-		resources = new PagedModel<>(Collections.emptyList(), metadata);
+		resources = PagedModel.of(Collections.emptyList(), metadata);
 	}
 
 	@Test
 	void discoversNextLink() {
 
-		resources.add(new Link("foo", IanaLinkRelations.NEXT.value()));
+		resources.add(Link.of("foo", IanaLinkRelations.NEXT.value()));
 
 		assertThat(resources.getNextLink()).isNotNull();
 	}
@@ -50,7 +50,7 @@ class PagedModelUnitTest {
 	@Test
 	void discoversPreviousLink() {
 
-		resources.add(new Link("custom", IanaLinkRelations.PREV.value()));
+		resources.add(Link.of("custom", IanaLinkRelations.PREV.value()));
 
 		assertThat(resources.getPreviousLink()).isNotNull();
 	}

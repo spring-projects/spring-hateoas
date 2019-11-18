@@ -57,7 +57,7 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 
 		Map<String, String> json = (Map<String, String>) element;
 
-		return new Link(json.get("href"), rel) //
+		return Link.of(json.get("href"), rel) //
 				.withHreflang(json.get("hreflang")) //
 				.withMedia(json.get("media")) //
 				.withTitle(json.get("title")) //

@@ -161,7 +161,7 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		 * @return
 		 */
 		public CollectionModel<D> toResources() {
-			return new CollectionModel<>(toListOfResources());
+			return CollectionModel.of(toListOfResources());
 		}
 	}
 }

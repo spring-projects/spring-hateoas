@@ -42,7 +42,7 @@ class RepresentationModelUnitTest {
 	@Test
 	void addsLinkCorrectly() {
 
-		Link link = new Link("foo", IanaLinkRelations.NEXT.value());
+		Link link = Link.of("foo", IanaLinkRelations.NEXT.value());
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(link);
 
@@ -55,8 +55,8 @@ class RepresentationModelUnitTest {
 	@Test
 	void addsMultipleLinkRelationsCorrectly() {
 
-		Link link = new Link("/customers/1", "customers");
-		Link link2 = new Link("/orders/1/customer", "customers");
+		Link link = Link.of("/customers/1", "customers");
+		Link link2 = Link.of("/orders/1/customer", "customers");
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(link, link2);
 
@@ -69,8 +69,8 @@ class RepresentationModelUnitTest {
 	@Test
 	void addsLinksCorrectly() {
 
-		Link first = new Link("foo", IanaLinkRelations.PREV.value());
-		Link second = new Link("bar", IanaLinkRelations.NEXT.value());
+		Link first = Link.of("foo", IanaLinkRelations.PREV.value());
+		Link second = Link.of("bar", IanaLinkRelations.NEXT.value());
 
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(Arrays.asList(first, second));
@@ -110,7 +110,7 @@ class RepresentationModelUnitTest {
 
 		TestUtils.assertEqualAndSameHashCode(first, second);
 
-		Link link = new Link("foo");
+		Link link = Link.of("foo");
 		first.add(link);
 		second.add(link);
 
@@ -122,7 +122,7 @@ class RepresentationModelUnitTest {
 
 		RepresentationModel<?> first = new RepresentationModel<>();
 		RepresentationModel<?> second = new RepresentationModel<>();
-		second.add(new Link("foo"));
+		second.add(Link.of("foo"));
 
 		TestUtils.assertNotEqualAndDifferentHashCode(first, second);
 	}
@@ -165,7 +165,7 @@ class RepresentationModelUnitTest {
 	void addsLinksViaVarargs() {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add(new Link("/self", "self"), new Link("/another", "another"));
+		support.add(Link.of("/self", "self"), Link.of("/another", "another"));
 
 		assertThat(support.hasLink("self")).isTrue();
 		assertThat(support.hasLink("another")).isTrue();
@@ -176,10 +176,10 @@ class RepresentationModelUnitTest {
 
 		RepresentationModel<?> model = new RepresentationModel<>();
 
-		model.addIf(true, () -> new Link("added", "foo"));
+		model.addIf(true, () -> Link.of("added", "foo"));
 		assertThat(model.hasLink("foo")).isTrue();
 
-		model.addIf(false, () -> new Link("not-added", "bar"));
+		model.addIf(false, () -> Link.of("not-added", "bar"));
 		assertThat(model.hasLink("bar")).isFalse();
 	}
 
@@ -188,10 +188,10 @@ class RepresentationModelUnitTest {
 
 		RepresentationModel<?> model = new RepresentationModel<>();
 
-		model.addAllIf(true, () -> Links.of(new Link("added", "foo")));
+		model.addAllIf(true, () -> Links.of(Link.of("added", "foo")));
 		assertThat(model.hasLink("foo")).isTrue();
 
-		model.addAllIf(false, () -> Links.of(new Link("not-added", "bar")));
+		model.addAllIf(false, () -> Links.of(Link.of("not-added", "bar")));
 		assertThat(model.hasLink("bar")).isFalse();
 	}
 }

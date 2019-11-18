@@ -78,7 +78,7 @@ class HypermediaWebFilterTest {
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks())//
-							.containsExactly(new Link("https://example.com/api", IanaLinkRelations.SELF));
+							.containsExactly(Link.of("https://example.com/api", IanaLinkRelations.SELF));
 
 					return true;
 				}).verifyComplete();

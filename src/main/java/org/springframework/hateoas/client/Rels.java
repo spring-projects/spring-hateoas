@@ -143,7 +143,7 @@ class Rels {
 		 */
 		@Override
 		public Optional<Link> findInResponse(@Nullable String representation, @Nullable MediaType mediaType) {
-			return Optional.of(new Link(JsonPath.read(representation, jsonPath).toString(), rel));
+			return Optional.of(Link.of(JsonPath.read(representation, jsonPath).toString(), rel));
 		}
 	}
 }

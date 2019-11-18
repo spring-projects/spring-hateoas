@@ -442,12 +442,12 @@ class TraversonTest {
 
 	private static void setUpActors() {
 
-		EntityModel<Actor> actor = new EntityModel<>(new Actor("Keanu Reaves"));
+		EntityModel<Actor> actor = EntityModel.of(new Actor("Keanu Reaves"));
 		String actorUri = server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		EntityModel<Movie> resource = new EntityModel<>(movie);
-		resource.add(new Link(actorUri, "actor"));
+		EntityModel<Movie> resource = EntityModel.of(movie);
+		resource.add(Link.of(actorUri, "actor"));
 
 		server.mockResourceFor(resource);
 		server.finishMocking();

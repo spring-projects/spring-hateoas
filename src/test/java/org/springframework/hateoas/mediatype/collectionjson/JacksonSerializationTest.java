@@ -48,15 +48,15 @@ class JacksonSerializationTest {
 	void createSimpleCollection() throws IOException {
 
 		CollectionJson<?> collection = new CollectionJson<>().withVersion("1.0").withHref("localhost")
-				.withLinks(Links.of(new Link("foo").withSelfRel())) //
+				.withLinks(Links.of(Link.of("foo").withSelfRel())) //
 				.withItems(new CollectionJsonItem<>() //
 						.withHref("localhost") //
 						.withRawData("Greetings programs") //
-						.withLinks(new Link("localhost").withSelfRel()), //
+						.withLinks(Link.of("localhost").withSelfRel()), //
 						new CollectionJsonItem<>() //
 								.withHref("localhost") //
 								.withRawData("Yo") //
-								.withLinks(new Link("localhost/orders").withRel("orders")));
+								.withLinks(Link.of("localhost/orders").withRel("orders")));
 
 		String actual = mapper.writeValueAsString(collection);
 

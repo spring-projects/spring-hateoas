@@ -42,7 +42,7 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	@Override
 	default Mono<EntityModel<T>> toModel(T entity, ServerWebExchange exchange) {
 
-		EntityModel<T> resource = new EntityModel<>(entity);
+		EntityModel<T> resource = EntityModel.of(entity);
 		return Mono.just(addLinks(resource, exchange));
 	}
 

@@ -48,7 +48,7 @@ class HalFormsTemplateBuilderUnitTest {
 		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY);
 
 		PatternExample resource = new PatternExample();
-		resource.add(Affordances.of(new Link("/examples")) //
+		resource.add(Affordances.of(Link.of("/examples")) //
 				.afford(HttpMethod.POST) //
 				.withInput(PatternExample.class) //
 				.toLink());
@@ -66,12 +66,12 @@ class HalFormsTemplateBuilderUnitTest {
 	@Test
 	void allPropertiesAreOptionalForPatchRequests() throws Exception {
 
-		Affordances.of(new Link("/example")) //
+		Affordances.of(Link.of("/example")) //
 				.afford(HttpMethod.PATCH) //
 				.withInput(RequiredProperty.class);
 
 		RequiredProperty model = new RequiredProperty();
-		model.add(Affordances.of(new Link("/example")) //
+		model.add(Affordances.of(Link.of("/example")) //
 				.afford(HttpMethod.PATCH) //
 				.withInput(RequiredProperty.class) //
 				.andAfford(HttpMethod.POST) //

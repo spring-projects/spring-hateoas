@@ -41,7 +41,7 @@ public class AffordancesUnitTests {
 	@Test
 	void affordanceConvenienceMethodChainsExistingLink() {
 
-		Link link = Affordances.of(new Link("/")) //
+		Link link = Affordances.of(Link.of("/")) //
 				.afford(HttpMethod.POST) //
 				.withInputAndOutput(Employee.class) //
 				.withName("name") //
@@ -63,7 +63,7 @@ public class AffordancesUnitTests {
 	@Test
 	void affordanceConvenienceMethodDefaultsNameBasedOnHttpVerb() {
 
-		Link link = Affordances.of(new Link("/")) //
+		Link link = Affordances.of(Link.of("/")) //
 				.afford(HttpMethod.POST) //
 				.withInputAndOutput(Employee.class) //
 				.toLink();

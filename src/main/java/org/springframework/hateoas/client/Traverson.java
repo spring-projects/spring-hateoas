@@ -377,7 +377,7 @@ public class Traverson {
 
 			Assert.isTrue(rels.size() > 0, "At least one rel needs to be provided!");
 
-			return new Link(expandFinalUrl ? traverseToExpandedFinalUrl().getUri().toString() : traverseToFinalUrl().getUri(),
+			return Link.of(expandFinalUrl ? traverseToExpandedFinalUrl().getUri().toString() : traverseToFinalUrl().getUri(),
 					rels.get(rels.size() - 1).getRel());
 		}
 

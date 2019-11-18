@@ -105,7 +105,9 @@ public class Link implements Serializable {
 	 *
 	 * @see IanaLinkRelations#SELF
 	 * @param href must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(String)}
 	 */
+	@Deprecated
 	public Link(String href) {
 		this(href, IanaLinkRelations.SELF);
 	}
@@ -115,7 +117,9 @@ public class Link implements Serializable {
 	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(String, String)}.
 	 */
+	@Deprecated
 	public Link(String href, String rel) {
 		this(UriTemplate.of(href), LinkRelation.of(rel));
 	}
@@ -125,7 +129,9 @@ public class Link implements Serializable {
 	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(String, LinkRelation)}.
 	 */
+	@Deprecated
 	public Link(String href, LinkRelation rel) {
 		this(UriTemplate.of(href), rel);
 	}
@@ -135,7 +141,9 @@ public class Link implements Serializable {
 	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(UriTemplate, String)}.
 	 */
+	@Deprecated
 	public Link(UriTemplate template, String rel) {
 		this(template, LinkRelation.of(rel));
 	}
@@ -145,7 +153,9 @@ public class Link implements Serializable {
 	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(UriTemplate, LinkRelation)}.
 	 */
+	@Deprecated
 	public Link(UriTemplate template, LinkRelation rel) {
 		this(template, rel, Collections.emptyList());
 	}
@@ -166,6 +176,67 @@ public class Link implements Serializable {
 		this.rel = rel;
 		this.href = template.toString();
 		this.affordances = affordances;
+	}
+
+	/**
+	 * Creates a new link to the given URI with the self relation.
+	 *
+	 * @see IanaLinkRelations#SELF
+	 * @param href must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(String href) {
+		return new Link(href);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given href with the given relation.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	@Deprecated
+	public static Link of(String href, String relation) {
+		return new Link(href, relation);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given href and {@link LinkRelation}.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(String href, LinkRelation relation) {
+		return new Link(href, relation);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given {@link UriTemplate} and link relation.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(UriTemplate template, String relation) {
+		return new Link(template, relation);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given {@link UriTemplate} and {@link LinkRelation}.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(UriTemplate template, LinkRelation relation) {
+		return new Link(template, relation);
 	}
 
 	/**
@@ -272,7 +343,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Object... arguments) {
-		return new Link(template.expand(arguments).toString(), getRel());
+		return of(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -282,7 +353,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Map<String, ?> arguments) {
-		return new Link(template.expand(arguments).toString(), getRel());
+		return of(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -416,7 +487,7 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			Link link = new Link(matcher.group(1), attributes.get("rel"));
+			Link link = of(matcher.group(1), attributes.get("rel"));
 
 			if (attributes.containsKey("hreflang")) {
 				link = link.withHreflang(attributes.get("hreflang"));
