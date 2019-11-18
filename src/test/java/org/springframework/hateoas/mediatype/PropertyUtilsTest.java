@@ -156,6 +156,14 @@ class PropertyUtilsTest {
 		});
 	}
 
+	@Test // #1121
+	void considersPropertyWithoutReader() throws Exception {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(WithoutReaderMethod.class);
+
+		assertThat(metadata.getPropertyMetadata("firstname")).isPresent();
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -217,6 +225,15 @@ class PropertyUtilsTest {
 		@GetMapping("/")
 		public Employee newEmployee(@RequestBody EntityModel<Employee> employee) {
 			return employee.getContent();
+		}
+	}
+
+	static class WithoutReaderMethod {
+
+		private String firstname;
+
+		public void setFirstname(String firstname) {
+			this.firstname = firstname;
 		}
 	}
 }
