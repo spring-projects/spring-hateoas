@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -47,7 +47,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
 
-	private static final Map<String, UriTemplate> CACHE = new ConcurrentHashMap<>();
+	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<>();
 
 	private final TemplateVariables variables;
 	private String toString;
