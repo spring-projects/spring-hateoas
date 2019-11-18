@@ -204,7 +204,7 @@ public class PropertyUtils {
 				.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
 				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
 				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
-				.filter(descriptor -> !readerIsNotToBeIgnoredByJackson(descriptor));
+				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor));
 	}
 
 	/**
@@ -229,8 +229,11 @@ public class PropertyUtils {
 	 * @param descriptor
 	 * @return
 	 */
-	private static boolean readerIsNotToBeIgnoredByJackson(PropertyDescriptor descriptor) {
-		return toBeIgnoredByJackson(MergedAnnotations.from(descriptor.getReadMethod()));
+	private static boolean readerIsToBeIgnoredByJackson(PropertyDescriptor descriptor) {
+
+		Method reader = descriptor.getReadMethod();
+
+		return reader == null ? false : toBeIgnoredByJackson(MergedAnnotations.from(reader));
 	}
 
 	/**
