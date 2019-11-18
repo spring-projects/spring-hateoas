@@ -19,7 +19,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
@@ -60,7 +59,6 @@ public class AlpsWebMvcIntegrationTest {
 	void profileEndpointReturnsAlps() throws Exception {
 
 		this.mockMvc.perform(get("/profile").accept(MediaTypes.ALPS_JSON_VALUE)) //
-				.andDo(print()) //
 				.andExpect(status().isOk()) //
 				.andExpect(jsonPath("$.version", is("1.0"))) //
 				.andExpect(jsonPath("$.doc.format", is("TEXT")))
