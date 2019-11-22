@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public abstract class RepresentationModelAssemblerSupport<T, D extends RepresentationModel<D>>
+public abstract class RepresentationModelAssemblerSupport<T, D extends RepresentationModel<?>>
 		implements RepresentationModelAssembler<T, D> {
 
 	private final Class<?> controllerClass;
@@ -109,7 +109,7 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		return BeanUtils.instantiateClass(this.resourceType);
 	}
 
-	static class Builder<T, D extends RepresentationModel<D>> {
+	static class Builder<T, D extends RepresentationModel<?>> {
 
 		private final Iterable<? extends T> entities;
 		private final RepresentationModelAssemblerSupport<T, D> resourceAssembler;
