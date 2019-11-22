@@ -64,7 +64,17 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		return this.map(entities).toResources();
 	}
 
+	/**
+	 * Maps the given {@link Iterable} of entities to either a {@link CollectionModel} or simple List of
+	 * {@link RepresentationModel}s.
+	 *
+	 * @param entities must not be {@literal null}.
+	 * @return
+	 */
 	public Builder<T, D> map(Iterable<? extends T> entities) {
+
+		Assert.notNull(entities, "Entities must not be null!");
+
 		return new Builder<>(entities, this);
 	}
 
@@ -109,6 +119,13 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		return BeanUtils.instantiateClass(this.resourceType);
 	}
 
+	/**
+	 * Intermediate type to allow the creation of either a {@link CollectionModel} or List of
+	 * {@link RepresentationModel}s.
+	 *
+	 * @author Greg Turnquist
+	 * @author Oliver Drotbohm
+	 */
 	static class Builder<T, D extends RepresentationModel<?>> {
 
 		private final Iterable<? extends T> entities;
@@ -138,8 +155,7 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		}
 
 		/**
-		 * Converts all given entities into resources and wraps the result in a {@link CollectionModel}
-		 * instance.
+		 * Converts all given entities into resources and wraps the result in a {@link CollectionModel} instance.
 		 *
 		 * @see #toListOfResources() and {@link RepresentationModelAssembler#toModel(Object)}
 		 * @return
