@@ -98,6 +98,8 @@ s/\([^a-z]\)RelProvider\([ ><,#();:\.]\)/\1LinkRelationProvider\2/g;\
 \
 s/linkForSingleResource/linkForItemResource/g;\
 s/linkToSingleResource/linkToItemResource/g;\
+s/ResourceAssemblerSupport/RepresentationModelAssemblerSupport/g;\
+s/public[[:space:]]class[[:space:]]\(.*\)[[:space:]]extends[[:space:]]RepresentationModel[[:space:]]{$/public class \1 extends RepresentationModel<\1> {/g;\
 "
 
 #EXPRESSION="s/[\s\.]PagedResources\([;<]\)/.PagedRepresentationModel\1/g;"
