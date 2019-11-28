@@ -15,8 +15,11 @@
  */
 package org.springframework.hateoas;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -31,8 +34,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Custom URI template to support qualified URI template variables.
@@ -52,6 +60,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	private final TemplateVariables variables;
 	private String toString;
 	private String baseUri;
+	private transient UriBuilderFactory factory;
 
 	/**
 	 * Creates a new {@link UriTemplate} using the given template string.
@@ -93,6 +102,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		this.variables = variables.isEmpty() ? TemplateVariables.NONE : new TemplateVariables(variables);
 		this.baseUri = template.substring(0, baseUriEndIndex);
+		this.factory = createFactory(baseUri);
 	}
 
 	/**
@@ -244,8 +254,13 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
+		UriBuilder builder = factory.uriString(baseUri);
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
+
+		variables.asList().stream() //
+				.filter(TemplateVariable::isRequired)//
+				.filter(__ -> iterator.hasNext()) //
+				.forEach(__ -> iterator.next());
 
 		for (TemplateVariable variable : getOptionalVariables()) {
 
@@ -253,7 +268,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			appendToBuilder(builder, variable, value);
 		}
 
-		return builder.buildAndExpand(parameters).toUri();
+		return builder.build(parameters);
 	}
 
 	/**
@@ -270,13 +285,13 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
+		UriBuilder builder = factory.uriString(baseUri);
 
 		for (TemplateVariable variable : getOptionalVariables()) {
 			appendToBuilder(builder, variable, parameters.get(variable.getName()));
 		}
 
-		return builder.buildAndExpand(parameters).toUri();
+		return builder.build(parameters);
 	}
 
 	/*
@@ -314,13 +329,32 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
+	 * Creates a {@link UriBuilderFactory} that might optionally encode the given base URI if it still needs to be
+	 * encoded.
+	 *
+	 * @param baseUri must not be {@literal null} or empty.
+	 * @return
+	 */
+	private static UriBuilderFactory createFactory(String baseUri) {
+
+		EncodingMode mode = UriUtils.decode(baseUri, StandardCharsets.UTF_8).length() < baseUri.length() //
+				? EncodingMode.VALUES_ONLY //
+				: EncodingMode.TEMPLATE_AND_VALUES;
+
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setEncodingMode(mode);
+
+		return factory;
+	}
+
+	/**
 	 * Appends the value for the given {@link TemplateVariable} to the given {@link UriComponentsBuilder}.
 	 *
 	 * @param builder must not be {@literal null}.
 	 * @param variable must not be {@literal null}.
 	 * @param value can be {@literal null}.
 	 */
-	private static void appendToBuilder(UriComponentsBuilder builder, TemplateVariable variable, @Nullable Object value) {
+	private static void appendToBuilder(UriBuilder builder, TemplateVariable variable, @Nullable Object value) {
 
 		if (value == null) {
 
@@ -359,7 +393,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @see https://tools.ietf.org/html/rfc6570#section-2.4.2
 	 */
 	@SuppressWarnings("unchecked")
-	private static void appendComposite(UriComponentsBuilder builder, String name, Object value) {
+	private static void appendComposite(UriBuilder builder, String name, Object value) {
 
 		if (value instanceof Iterable) {
 
@@ -373,5 +407,19 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 			builder.queryParam(name, value);
 		}
+	}
+
+	/**
+	 * Recreate {@link UriBuilderFactory} on deserialization.
+	 *
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+		in.defaultReadObject();
+
+		this.factory = createFactory(baseUri);
 	}
 }

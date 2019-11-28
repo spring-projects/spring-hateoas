@@ -16,17 +16,28 @@
 package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.UriTemplateUnitTest.EncodingFixture.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
@@ -344,9 +355,37 @@ class UriTemplateUnitTest {
 
 	@Test // #1127
 	void escapesBaseUriProperly() {
+		of("https://example.org/foo and bar/{baz}", "https://example.org/foo%20and%20bar/xyzzy") //
+				.param("baz", "xyzzy") //
+				.verify();
+	}
 
-		assertThat(UriTemplate.of("https://example.org/foo and bar/{baz}").expand("xyzzy"))
-				.hasToString("https://example.org/foo%20and%20bar/xyzzy");
+	@ParameterizedTest // #593
+	@MethodSource("getEncodingFixtures")
+	public void uriTemplateExpansionsShouldWork(EncodingFixture fixture) {
+		fixture.verify();
+	}
+
+	@Test // #593
+	void deserializesProperly() throws IOException, ClassNotFoundException {
+
+		UriTemplate template = UriTemplate.of("/{foo}");
+
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream();
+				ObjectOutputStream stream = new ObjectOutputStream(output)) {
+
+			stream.writeObject(template);
+
+			try (InputStream input = new ByteArrayInputStream(output.toByteArray());
+					ObjectInputStream object = new ObjectInputStream(input)) {
+
+				Object result = object.readObject();
+
+				assertThat(result).isInstanceOfSatisfying(UriTemplate.class, it -> {
+					assertThat(it.expand("bar")).hasToString("/bar");
+				});
+			}
+		}
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
@@ -362,6 +401,85 @@ class UriTemplateUnitTest {
 
 			assertThat(template).contains(variable);
 			assertThat(template.getVariableNames()).contains(variable.getName());
+		}
+	}
+
+	private static Stream<EncodingFixture> getEncodingFixtures() {
+
+		return Stream.of(//
+				of("/foo/bar/{?x}", "/foo/bar/?x=1").param("x", 1), //
+				of("/foo/bar/{?x,y}", "/foo/bar/?x=1&y=2").param("x", 1).param("y", 2),
+				of("/foo/bar{?x}{&y}", "/foo/bar?x=1&y=2").param("x", 1).param("y", 2),
+				of("/foo/bar?x=1{&y}", "/foo/bar?x=1&y=2").param("y", 2), //
+				of("/foo/bar?x=1{&y,z}", "/foo/bar?x=1&y=2&z=3").param("y", 2).param("z", 3L),
+				of("/foo{/x}", "/foo/1").param("x", 1), //
+				of("/foo{/x,y}", "/foo/1/2").param("x", 1).param("y", "2"),
+				of("/foo{/x}{/y}", "/foo/1/2").param("x", 1).param("y", "2"),
+				of("/foo{/x}{/y}{?z}", "/foo/1/2?z=3").param("x", 1).param("y", "2").param("z", 3L),
+				of("/foo/{x}", "/foo/1").param("x", 1), //
+				of("/foo/{x}/bar", "/foo/1/bar").param("x", 1), //
+				of("/services/foo/{x}/bar/{y}/gaz", "/services/foo/1/bar/2/gaz").param("x", 1).param("y", "2"),
+				of("/foo/{x}/bar/{y}/bar{?z}", "/foo/1/bar/2/bar?z=3").param("x", 1).param("y", "2").param("z", 3),
+				of("/foo/{x}/bar/{y}/bar{?z}", "/foo/1/bar/2/bar").param("x", 1).param("y", "2"),
+				of("/foo/{x}/bar/{y}/bar{?z}", "/foo/1/bar/2/bar").param("x", 1).param("y", "2"),
+				of("/foo/bar{?x,y,z}", "/foo/bar?x=1").param("x", 1), //
+				of("/foo/bar{?x,y,z}", "/foo/bar?x=1&y=2").param("x", 1).param("y", "2"),
+				of("/foo/bar{?x,y,z}", "/foo/bar?x=1&z=3").param("x", 1).param("z", 3L).skipVarArgsVerification(),
+				of("/foo/{x}/bar{/y}{?z}", "/foo/1/bar/2?z=3").param("x", 1).param("y", "2").param("z", 3L),
+				of("/foo/{x}/bar{/y}{?z}", "/foo/1/bar?z=3").param("x", 1).param("z", 3L).skipVarArgsVerification(),
+				of("/foo/{x}/bar{?y}{#z}", "/foo/1/bar?y=2").param("x", 1).param("y", "2"),
+				of("/foo/{x}/bar{?y}{#z}", "/foo/1/bar?y=2#3").param("x", 1).param("y", "2").param("z", 3L),
+				of("/foo/{x}/bar{?y}{#z}", "/foo/1/bar#3").param("x", 1).param("z", 3L).skipVarArgsVerification(),
+				of("/foo/b%20ar{?x}", "/foo/b%20ar?x=1").param("x", 1), //
+				of("/foo/b\"ar{?x}", "/foo/b%22ar?x=1").param("x", 1), //
+				of("/foo/b%22ar{?x}", "/foo/b%22ar?x=1").param("x", 1));
+	}
+
+	static class EncodingFixture {
+
+		private final String template;
+		private final URI uri;
+		private final Map<String, Object> parameters;
+		private final boolean varArgsVerification;
+
+		private EncodingFixture(String template, URI uri, Map<String, Object> parameters, boolean varArgsVerification) {
+
+			this.template = template;
+			this.uri = uri;
+			this.parameters = parameters;
+			this.varArgsVerification = varArgsVerification;
+		}
+
+		public static EncodingFixture of(String template, String uri) {
+			return new EncodingFixture(template, URI.create(uri), new LinkedHashMap<>(), true);
+		}
+
+		public EncodingFixture param(String key, Object value) {
+
+			Map<String, Object> newParameters = new LinkedHashMap<>(parameters);
+			newParameters.put(key, value);
+
+			return new EncodingFixture(template, uri, newParameters, varArgsVerification);
+		}
+
+		public EncodingFixture skipVarArgsVerification() {
+			return new EncodingFixture(template, uri, parameters, false);
+		}
+
+		public void verify() {
+
+			UriTemplate uriTemplate = UriTemplate.of(template);
+
+			assertThat(uriTemplate.expand(parameters)).isEqualTo(uri);
+
+			if (varArgsVerification) {
+				assertThat(uriTemplate.expand(parameters.values().toArray())).isEqualTo(uri);
+			}
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Expanding %s using parameters %s results in %s.", template, parameters, uri);
 		}
 	}
 }
