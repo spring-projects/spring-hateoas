@@ -48,10 +48,8 @@ import org.springframework.hateoas.TemplateVariable.VariableType;
  */
 class UriTemplateUnitTest {
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
+	@SuppressWarnings("null")
 	void discoversTemplate() {
 
 		assertThat(UriTemplate.isTemplate("/foo{?bar}")).isTrue();
@@ -60,10 +58,7 @@ class UriTemplateUnitTest {
 		assertThat(UriTemplate.isTemplate("")).isFalse();
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversRequestParam() {
 
 		UriTemplate template = UriTemplate.of("/foo{?bar}");
@@ -71,10 +66,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.REQUEST_PARAM));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversRequestParamCntinued() {
 
 		UriTemplate template = UriTemplate.of("/foo?bar{&foobar}");
@@ -82,10 +74,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("foobar", VariableType.REQUEST_PARAM_CONTINUED));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversOptionalPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/foo{/bar}");
@@ -93,10 +82,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.SEGMENT));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/foo/{bar}");
@@ -104,10 +90,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.PATH_VARIABLE));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversFragment() {
 
 		UriTemplate template = UriTemplate.of("/foo{#bar}");
@@ -115,10 +98,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.FRAGMENT));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversMultipleRequestParam() {
 
 		UriTemplate template = UriTemplate.of("/foo{?bar,foobar}");
@@ -127,10 +107,7 @@ class UriTemplateUnitTest {
 				new TemplateVariable("foobar", VariableType.REQUEST_PARAM));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsRequestParameter() {
 
 		UriTemplate template = UriTemplate.of("/foo{?bar}");
@@ -139,10 +116,7 @@ class UriTemplateUnitTest {
 		assertThat(uri.toString()).isEqualTo("/foo?bar=myBar");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsMultipleRequestParameters() {
 
 		Map<String, Object> parameters = new HashMap<>();
@@ -155,10 +129,7 @@ class UriTemplateUnitTest {
 		assertThat(uri.toString()).isEqualTo("/foo?bar=myBar&fooBar=myFooBar");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void rejectsMissingRequiredPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/foo/{bar}");
@@ -168,10 +139,7 @@ class UriTemplateUnitTest {
 		});
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsMultipleVariablesViaArray() {
 
 		UriTemplate template = UriTemplate.of("/foo{/bar}{?firstname,lastname}{#anchor}");
@@ -179,37 +147,25 @@ class UriTemplateUnitTest {
 		assertThat(uri.toString()).isEqualTo("/foo/path?firstname=Dave&lastname=Matthews#discography");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsTemplateWithoutVariablesCorrectly() {
 		assertThat(UriTemplate.of("/foo").expand().toString()).isEqualTo("/foo");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void correctlyExpandsFullUri() {
 		assertThat(UriTemplate.of("http://localhost:8080/foo{?bar}").expand().toString())
 				.isEqualTo("http://localhost:8080/foo");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void rendersUriTempalteWithPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/{foo}/bar{?page}");
 		assertThat(template.toString()).isEqualTo("/{foo}/bar{?page}");
 	}
 
-	/**
-	 * #@see 137
-	 */
-	@Test
+	@Test // #137
 	void addsTemplateVariables() {
 
 		UriTemplate source = UriTemplate.of("/{foo}/bar{?page}");
@@ -222,10 +178,7 @@ class UriTemplateUnitTest {
 		assertVariables(source.with(new TemplateVariables(toAdd)), expected);
 	}
 
-	/**
-	 * @see #217
-	 */
-	@Test
+	@Test // #217
 	void doesNotAddVariablesForAlreadyExistingRequestParameters() {
 
 		UriTemplate template = UriTemplate.of("/?page=2");
@@ -236,10 +189,7 @@ class UriTemplateUnitTest {
 		assertThat(result.getVariableNames()).isEmpty();
 	}
 
-	/**
-	 * @see #217
-	 */
-	@Test
+	@Test // #217
 	void doesNotAddVariablesForAlreadyExistingFragment() {
 
 		UriTemplate template = UriTemplate.of("/#fragment");
@@ -247,31 +197,16 @@ class UriTemplateUnitTest {
 		assertThat(result.getVariableNames()).isEmpty();
 	}
 
-	/**
-	 * @see #271
-	 */
-	@Test
-	void expandASimplePathVariable() {
-
-		UriTemplate template = UriTemplate.of("/foo/{id}");
-		assertThat(template.expand(2).toString()).isEqualTo("/foo/2");
-	}
-
-	/**
-	 * @see #273
-	 */
-	@Test
+	@Test // #273
+	@SuppressWarnings("null")
 	void rejectsEmptyBaseUri() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new UriTemplate(null, TemplateVariables.NONE);
+			UriTemplate.of(null, TemplateVariables.NONE);
 		});
 	}
 
-	/**
-	 * @see #281
-	 */
-	@Test
+	@Test // #281
 	void allowsAddingTemplateVariable() {
 
 		UriTemplate template = UriTemplate.of("/").with("q", VariableType.REQUEST_PARAM);
@@ -279,10 +214,7 @@ class UriTemplateUnitTest {
 		assertThat(template.toString()).isEqualTo("/{?q}");
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
+	@Test // #483
 	void compositveValuesAreRecognisedAsVariableType() {
 
 		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
@@ -291,66 +223,37 @@ class UriTemplateUnitTest {
 				new TemplateVariable("foobar", VariableType.COMPOSITE_PARAM));
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
+	@Test // #483
 	@SuppressWarnings("serial")
 	void expandsCompositeValueAsAssociativeArray() {
 
-		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
-
-		String expandedTemplate = template.expand(new HashMap<String, Object>() {
-			{
-				put("bar", "barExpanded");
-				put("foobar", new HashMap<String, String>() {
+		of("/foo{&bar,foobar*}", "/foo?bar=barExpanded&city=Clarksville&state=TN") //
+				.param("bar", "barExpanded") //
+				.param("foobar", new HashMap<String, String>() {
 					{
 						put("city", "Clarksville");
 						put("state", "TN");
 					}
-				});
-			}
-		}).toString();
-
-		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&city=Clarksville&state=TN");
+				}) //
+				.verify();
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
-	@SuppressWarnings("serial")
+	@Test // #483
 	void expandsCompositeValueAsList() {
 
-		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
-
-		String expandedTemplate = template.expand(new HashMap<String, Object>() {
-			{
-				put("bar", "barExpanded");
-				put("foobar", Arrays.asList("foo1", "foo2"));
-			}
-		}).toString();
-
-		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&foobar=foo1&foobar=foo2");
+		of("/foo{&bar,foobar*}", "/foo?bar=barExpanded&foobar=foo1&foobar=foo2") //
+				.param("bar", "barExpanded") //
+				.param("foobar", Arrays.asList("foo1", "foo2")) //
+				.verify();
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
-	@SuppressWarnings("serial")
+	@Test // #483
 	void handlesCompositeValueAsSingleValue() {
 
-		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
-
-		String expandedTemplate = template.expand(new HashMap<String, Object>() {
-			{
-				put("bar", "barExpanded");
-				put("foobar", "singleValue");
-			}
-		}).toString();
-
-		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&foobar=singleValue");
+		of("/foo{&bar,foobar*}", "/foo?bar=barExpanded&foobar=singleValue") //
+				.param("bar", "barExpanded") //
+				.param("foobar", "singleValue") //
+				.verify();
 	}
 
 	@Test // #1127
