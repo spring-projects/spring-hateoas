@@ -248,8 +248,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
 
 		for (TemplateVariable variable : getOptionalVariables()) {
@@ -258,7 +257,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			appendToBuilder(builder, variable, value);
 		}
 
-		return builder.build().toUri();
+		return builder.buildAndExpand(parameters).toUri();
 	}
 
 	/**
@@ -269,20 +268,19 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	public URI expand(Map<String, ?> parameters) {
 
+		Assert.notNull(parameters, "Parameters must not be null!");
+
 		if (TemplateVariables.NONE.equals(variables)) {
 			return URI.create(baseUri);
 		}
 
-		Assert.notNull(parameters, "Parameters must not be null!");
-
-		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUri);
 
 		for (TemplateVariable variable : getOptionalVariables()) {
 			appendToBuilder(builder, variable, parameters.get(variable.getName()));
 		}
 
-		return builder.build().toUri();
+		return builder.buildAndExpand(parameters).toUri();
 	}
 
 	/*

@@ -342,6 +342,13 @@ class UriTemplateUnitTest {
 		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&foobar=singleValue");
 	}
 
+	@Test // #1127
+	void escapesBaseUriProperly() {
+
+		assertThat(UriTemplate.of("https://example.org/foo and bar/{baz}").expand("xyzzy"))
+				.hasToString("https://example.org/foo%20and%20bar/xyzzy");
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}
