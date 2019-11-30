@@ -48,8 +48,8 @@ s/hateoas\.MethodLinkBuilderFactory/hateoas.server.MethodLinkBuilderFactory/g;\
 s/hateoas\.RelProvider/hateoas.server.LinkRelationProvider/g;\
 s/hateoas\.ResourceAssembler/hateoas.server.ResourceAssembler/g;\
 s/hateoas\.ResourceProcessor/hateoas.server.ResourceProcessor/g;\
-s/hateoas\.VndErrors/hateoas.mediatype.vnderror.VndErrors/g;\
-s/hateoas\.VndErrors.VndError/hateoas.mediatype.vnderror.VndErrors.VndError/g;\
+s/hateoas\.VndErrors/hateoas.mediatype.vnderrors.VndErrors/g;\
+s/hateoas\.VndErrors.VndError/hateoas.mediatype.vnderrors.VndErrors.VndError/g;\
 \
 s/hateoas\.alps/hateoas.mediatype.alps/g;\
 \
