@@ -48,6 +48,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class WebFluxHateoasConfiguration {
 
 	@Bean
+	WebMvcConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> information) {
+		return WebMvcConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
+	}
+
+	@Bean
 	WebFluxCodecs hypermediaConverters(ObjectProvider<ObjectMapper> mapper,
 			List<HypermediaMappingInformation> mappingInformation) {
 		return new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
