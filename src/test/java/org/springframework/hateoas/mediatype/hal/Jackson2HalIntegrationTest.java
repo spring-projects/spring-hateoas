@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,8 @@ import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -88,8 +92,8 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 				DefaultLinkRelationProvider.INSTANCE);
 
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE,
+				MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
 	}
 
 	/**
@@ -480,8 +484,9 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		AnnotationLinkRelationProvider provider = new AnnotationLinkRelationProvider();
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
-				new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
+		mapper
+				.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
+						new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
 		resource.add(new Link("/some-href", "foo"));
@@ -509,6 +514,21 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 		assertThatCode(() -> {
 			assertThat(accessor.getMessage(relation)).isEqualTo("");
 		}).doesNotThrowAnyException();
+	}
+
+	@Test // #1157
+	void rendersMapContentCorrectly() throws Exception {
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("key", "value");
+		map.put("anotherKey", "anotherValue");
+
+		EntityModel<?> model = new EntityModel<>(map, new Link("foo", IanaLinkRelations.SELF));
+
+		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
+
+		assertThat(context.read("$.key", String.class)).isEqualTo("value");
+		assertThat(context.read("$.anotherKey", String.class)).isEqualTo("anotherValue");
 	}
 
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
