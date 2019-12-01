@@ -33,18 +33,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Oliver Drotbohm
  */
-class WebMvcConverters {
+class WebConverters {
 
 	private final List<HttpMessageConverter<?>> converters;
 
 	/**
-	 * Creates a new {@link WebMvcConverters} from the given {@link ObjectMapper} and
+	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and
 	 * {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param mappingInformation must not be {@literal null}.
 	 */
-	private WebMvcConverters(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
+	private WebConverters(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
 
 		this.converters = mappingInformation.stream() //
 				.map(it -> createMessageConverter(it, it.configureObjectMapper(mapper.copy()))) //
@@ -52,19 +52,19 @@ class WebMvcConverters {
 	}
 
 	/**
-	 * Creates a new {@link WebMvcConverters} from the given {@link ObjectMapper} and
+	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and
 	 * {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param mappingInformations must not be {@literal null}.
 	 * @return
 	 */
-	public static WebMvcConverters of(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformations) {
+	public static WebConverters of(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformations) {
 
 		Assert.notNull(mapper, "ObjectMapper must not be null!");
 		Assert.notNull(mappingInformations, "Mapping information must not be null!");
 
-		return new WebMvcConverters(mapper, mappingInformations);
+		return new WebConverters(mapper, mappingInformations);
 	}
 
 	/**

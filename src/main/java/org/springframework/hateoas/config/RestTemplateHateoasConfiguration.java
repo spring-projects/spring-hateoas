@@ -35,7 +35,7 @@ class RestTemplateHateoasConfiguration {
 
 	@Bean
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
-			WebMvcConverters converters) {
+			WebConverters converters) {
 		return new HypermediaRestTemplateBeanPostProcessor(converters);
 	}
 
@@ -49,7 +49,7 @@ class RestTemplateHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-		private final WebMvcConverters converters;
+		private final WebConverters converters;
 
 		/*
 		 * (non-Javadoc)
