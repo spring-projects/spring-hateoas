@@ -38,8 +38,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Spring MVC HATEOAS Configuration
  *
@@ -51,13 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class WebMvcHateoasConfiguration {
 
 	@Bean
-	WebMvcConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> information) {
-		return WebMvcConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
-	}
-
-	@Bean
-	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(WebMvcConverters converters) {
+	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(WebConverters converters) {
 		return new HypermediaWebMvcConfigurer(converters);
 	}
 
@@ -90,7 +82,7 @@ class WebMvcHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaWebMvcConfigurer implements WebMvcConfigurer {
 
-		private final @NonNull WebMvcConverters hypermediaConverters;
+		private final @NonNull WebConverters hypermediaConverters;
 
 		/*
 		 * (non-Javadoc)

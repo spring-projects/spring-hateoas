@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
@@ -48,6 +49,8 @@ import org.springframework.plugin.core.config.EnablePluginRegistries;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Common HATEOAS specific configuration.
  *
@@ -68,6 +71,12 @@ public class HateoasConfiguration {
 	@Bean
 	public MessageResolver messageResolver() {
 		return MessageResolver.of(lookupMessageSource());
+	}
+
+	@Bean
+	WebConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> information) {
+		return WebConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
 	}
 
 	// RelProvider
