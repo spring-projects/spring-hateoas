@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 /**
@@ -550,6 +552,21 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 				.map(JsonPath::compile) //
 				.map(it -> it.<Map<String, Object>> read(result)) //
 				.forEach(it -> assertThat(it).containsKey("someSample"));
+	}
+
+	@Test // #1157
+	void rendersMapContentCorrectly() throws Exception {
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("key", "value");
+		map.put("anotherKey", "anotherValue");
+
+		EntityModel<?> model = new EntityModel<>(map, new Link("foo", IanaLinkRelations.SELF));
+
+		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
+
+		assertThat(context.read("$.key", String.class)).isEqualTo("value");
+		assertThat(context.read("$.anotherKey", String.class)).isEqualTo("anotherValue");
 	}
 
 	@Relation(collectionRelation = "someSample")
