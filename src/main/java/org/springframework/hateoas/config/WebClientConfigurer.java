@@ -15,17 +15,19 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,14 +38,46 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Assembles {@link ExchangeStrategies} needed to wire a {@link WebClient} with hypermedia support.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  * @since 1.0
  */
 @Configuration
-@RequiredArgsConstructor
 public class WebClientConfigurer {
 
-	private final ObjectMapper mapper;
-	private final List<HypermediaMappingInformation> hypermediaTypes;
+	Consumer<ClientCodecConfigurer> configurer;
+
+	/**
+	 * Creates a new {@link WebClientConfigurer} for the given {@link ObjectMapper} and
+	 * {@link HypermediaMappingInformation}s.
+	 *
+	 * @param mapper must not be {@literal null}.
+	 * @param hypermediaTypes must not be {@literal null}.
+	 */
+	public WebClientConfigurer(ObjectMapper mapper, List<HypermediaMappingInformation> hypermediaTypes) {
+
+		Assert.notNull(mapper, "ObjectMapper must not be null!");
+		Assert.notNull(hypermediaTypes, "HypermediaMappingInformations must not be null!");
+
+		List<Encoder<?>> encoders = new ArrayList<>();
+		List<Decoder<?>> decoders = new ArrayList<>();
+
+		hypermediaTypes.forEach(hypermedia -> {
+
+			ObjectMapper objectMapper = hypermedia.configureObjectMapper(mapper.copy());
+			MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
+
+			encoders.add(new Jackson2JsonEncoder(objectMapper, mimeTypes));
+			decoders.add(new Jackson2JsonDecoder(objectMapper, mimeTypes));
+		});
+
+		this.configurer = it -> {
+
+			CustomCodecs codecs = it.customCodecs();
+
+			encoders.forEach(codecs::encoder);
+			decoders.forEach(codecs::decoder);
+		};
+	}
 
 	/**
 	 * Return a set of {@link ExchangeStrategies} driven by registered {@link HypermediaType}s.
@@ -52,24 +86,9 @@ public class WebClientConfigurer {
 	 */
 	public ExchangeStrategies hypermediaExchangeStrategies() {
 
-		List<Encoder<?>> encoders = new ArrayList<>();
-		List<Decoder<?>> decoders = new ArrayList<>();
-
-		this.hypermediaTypes.forEach(hypermedia -> {
-
-			ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
-			MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
-
-			encoders.add(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-			decoders.add(new Jackson2JsonDecoder(objectMapper, mimeTypes));
-		});
-
-		return ExchangeStrategies.builder().codecs(clientCodecConfigurer -> {
-
-			encoders.forEach(encoder -> clientCodecConfigurer.customCodecs().encoder(encoder));
-			decoders.forEach(decoder -> clientCodecConfigurer.customCodecs().decoder(decoder));
-
-		}).build();
+		return ExchangeStrategies.builder() //
+				.codecs(configurer) //
+				.build();
 	}
 
 	/**
@@ -79,6 +98,9 @@ public class WebClientConfigurer {
 	 * @return mutated webClient with hypermedia support.
 	 */
 	public WebClient registerHypermediaTypes(WebClient webClient) {
-		return webClient.mutate().exchangeStrategies(hypermediaExchangeStrategies()).build();
+
+		return webClient.mutate() //
+				.exchangeStrategies(it -> it.codecs(configurer)) //
+				.build();
 	}
 }
