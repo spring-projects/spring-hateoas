@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.2.RELEASE (2019-12-03)
+----------------------------------------
+- #1142 - Release 1.0.2.RELEASE.
+- #1140 - WebClientConfigurer "drops" ObjectMapper customizations from WebClients.
+- #1139 - Upgrade to Spring Framework 5.2.2.
+- #1137 - Fix package name 'vnderror' to 'vnderrors' in migration script.
+- #1131 - UriTemplate handles encoded variables improperly on expand call.
+- #1130 - UriTemplate redundantly percent encodes literal part.
+- #1128 - Configuring RestTemplate breaks in a pure Spring WebFlux application.
+- #1126 - Generics bounds too strict in RepresentationModelAssemblerSupport.
+- #1124 - Bean class without reader method producing NullPointerException.
+- #1123 - MemoryLeak caused by UriTemplate cache.
+
 Changes in version 1.0.1.RELEASE (2019-11-03)
 ----------------------------------------
 - #1112 - Release 1.0.1.RELEASE.
