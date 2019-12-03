@@ -25,6 +25,7 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
+import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.Assert;
@@ -59,7 +60,7 @@ public class WebClientConfigurer {
 		Assert.notNull(hypermediaTypes, "HypermediaMappingInformations must not be null!");
 
 		List<Encoder<?>> encoders = new ArrayList<>();
-		List<Decoder<?>> decoders = new ArrayList<>();
+		List<AbstractJackson2Decoder> decoders = new ArrayList<>();
 
 		hypermediaTypes.forEach(hypermedia -> {
 
@@ -75,7 +76,9 @@ public class WebClientConfigurer {
 			CustomCodecs codecs = it.customCodecs();
 
 			encoders.forEach(codecs::encoder);
-			decoders.forEach(codecs::decoder);
+			decoders.stream() //
+					.peek(applyDefaultConfiguration(codecs)) //
+					.forEach(codecs::decoder);
 		};
 	}
 
@@ -102,5 +105,24 @@ public class WebClientConfigurer {
 		return webClient.mutate() //
 				.exchangeStrategies(it -> it.codecs(configurer)) //
 				.build();
+	}
+
+	/**
+	 * Returns a {@link Consumer} of {@link AbstractJackson2Decoder} that will copy the default configuration of the given
+	 * {@link CustomCodecs} to a decoder.
+	 *
+	 * @param codecs must not be {@literal null}.
+	 * @return
+	 */
+	private static Consumer<AbstractJackson2Decoder> applyDefaultConfiguration(CustomCodecs codecs) {
+
+		return decoder -> codecs.withDefaultCodecConfig(config -> {
+
+			Integer maxInMemorySize = config.maxInMemorySize();
+
+			if (maxInMemorySize != null) {
+				decoder.setMaxInMemorySize(maxInMemorySize);
+			}
+		});
 	}
 }
