@@ -29,6 +29,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListDeserializer;
@@ -169,14 +170,15 @@ public class Jackson2HalFormsModule extends SimpleModule {
 
 			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
 			HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, accessor);
+			HalConfiguration halConfiguration = configuration.getHalConfiguration();
 
 			this.serializers.put(HalFormsRepresentationModelSerializer.class,
 					new HalFormsRepresentationModelSerializer(builder));
 			this.serializers.put(HalFormsEntityModelSerializer.class, new HalFormsEntityModelSerializer(builder));
 			this.serializers.put(HalFormsCollectionModelSerializer.class,
-					new HalFormsCollectionModelSerializer(builder, mapper));
+					new HalFormsCollectionModelSerializer(builder, mapper, halConfiguration));
 			this.serializers.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, accessor, configuration.getHalConfiguration()));
+					new HalLinkListSerializer(curieProvider, mapper, accessor, halConfiguration));
 		}
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,

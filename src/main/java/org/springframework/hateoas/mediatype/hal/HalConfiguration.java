@@ -49,12 +49,19 @@ public class HalConfiguration {
 	private final @Wither(AccessLevel.PRIVATE) Map<String, RenderSingleLinks> singleLinksPerPattern;
 
 	/**
+	 * Configures whether the Jackson property naming strategy is applied to link relations and within {@code _embedded}
+	 * clauses.
+	 */
+	private final @Wither @Getter boolean applyPropertyNamingStrategy;
+
+	/**
 	 * Creates a new default {@link HalConfiguration} rendering single links as immediate sub-document.
 	 */
 	public HalConfiguration() {
 
 		this.renderSingleLinks = RenderSingleLinks.AS_SINGLE;
 		this.singleLinksPerPattern = new LinkedHashMap<>();
+		this.applyPropertyNamingStrategy = true;
 	}
 
 	/**

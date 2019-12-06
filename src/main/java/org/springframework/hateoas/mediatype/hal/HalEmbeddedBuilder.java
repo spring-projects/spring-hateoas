@@ -15,12 +15,17 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.experimental.Wither;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
@@ -37,14 +42,21 @@ import org.springframework.util.Assert;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  */
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 class HalEmbeddedBuilder {
 
 	private static final String INVALID_EMBEDDED_WRAPPER = "Embedded wrapper %s returned null for both the static rel and the rel target type! Make sure one of the two returns a non-null value!";
+	private static final Function<String, String> NO_TRANSFORMER = Function.identity();
 
 	private final Map<HalLinkRelation, Object> embeddeds = new HashMap<>();
 	private final LinkRelationProvider provider;
 	private final CurieProvider curieProvider;
 	private final EmbeddedWrappers wrappers;
+
+	/**
+	 * Returns a {@link HalEmbeddedBuilder} with the given transformer
+	 */
+	private final @Wither Function<String, String> relationTransformer;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels
@@ -61,6 +73,7 @@ class HalEmbeddedBuilder {
 		this.provider = provider;
 		this.curieProvider = curieProvider;
 		this.wrappers = new EmbeddedWrappers(preferCollectionRels);
+		this.relationTransformer = NO_TRANSFORMER;
 	}
 
 	/**
@@ -123,6 +136,8 @@ class HalEmbeddedBuilder {
 					LinkRelation rel = forCollection //
 							? provider.getCollectionResourceRelFor(type) //
 							: provider.getItemResourceRelFor(type);
+
+					rel = relationTransformer == NO_TRANSFORMER ? rel : rel.map(relationTransformer);
 
 					return curieProvider != CurieProvider.NONE //
 							? curieProvider.getNamespacedRelFor(rel) //

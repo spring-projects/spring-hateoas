@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -149,6 +150,20 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	 */
 	public boolean isCuried() {
 		return curie != null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkRelation#map(java.util.function.Function)
+	 */
+	@Override
+	public HalLinkRelation map(Function<String, String> mapper) {
+
+		String mappedLocalPart = mapper.apply(localPart);
+
+		return localPart.equals(mappedLocalPart) //
+				? this //
+				: new HalLinkRelation(curie, mappedLocalPart);
 	}
 
 	/*

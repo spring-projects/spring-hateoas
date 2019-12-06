@@ -22,8 +22,10 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -215,20 +217,23 @@ class HalFormsSerializers {
 		private final BeanProperty property;
 		private final Jackson2HalModule.EmbeddedMapper embeddedMapper;
 		private final HalFormsTemplateBuilder customizations;
+		private final HalConfiguration configuration;
 
-		HalFormsCollectionModelSerializer(HalFormsTemplateBuilder customizations, @Nullable BeanProperty property,
-				Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsCollectionModelSerializer(HalFormsTemplateBuilder customizations,
+				Jackson2HalModule.EmbeddedMapper embeddedMapper, HalConfiguration configuration,
+				@Nullable BeanProperty property) {
 
 			super(CollectionModel.class, false);
 
 			this.property = property;
 			this.embeddedMapper = embeddedMapper;
 			this.customizations = customizations;
+			this.configuration = configuration;
 		}
 
 		HalFormsCollectionModelSerializer(HalFormsTemplateBuilder customizations,
-				Jackson2HalModule.EmbeddedMapper embeddedMapper) {
-			this(customizations, null, embeddedMapper);
+				Jackson2HalModule.EmbeddedMapper embeddedMapper, HalConfiguration configuration) {
+			this(customizations, embeddedMapper, configuration, null);
 		}
 
 		/*
@@ -239,7 +244,11 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
-			Map<HalLinkRelation, Object> embeddeds = embeddedMapper.map(value);
+			EmbeddedMapper mapper = configuration.isApplyPropertyNamingStrategy() //
+					? embeddedMapper.with(provider.getConfig().getPropertyNamingStrategy()) //
+					: embeddedMapper;
+
+			Map<HalLinkRelation, Object> embeddeds = mapper.map(value);
 
 			HalFormsDocument<?> doc;
 
@@ -311,7 +320,7 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsCollectionModelSerializer(customizations, property, embeddedMapper);
+			return new HalFormsCollectionModelSerializer(customizations, embeddedMapper, configuration, property);
 		}
 	}
 }

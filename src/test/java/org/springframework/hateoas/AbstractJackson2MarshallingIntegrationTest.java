@@ -19,6 +19,11 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +47,16 @@ public abstract class AbstractJackson2MarshallingIntegrationTest {
 				.disable(MapperFeature.AUTO_DETECT_GETTERS) //
 				.disable(MapperFeature.AUTO_DETECT_IS_GETTERS) //
 				.disable(MapperFeature.AUTO_DETECT_SETTERS);
+	}
+
+	protected ObjectMapper with(HalConfiguration configuration) {
+
+		ObjectMapper copy = mapper.copy();
+
+		copy.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
+				MessageResolver.DEFAULTS_ONLY, configuration));
+
+		return copy;
 	}
 
 	protected String write(Object object) throws Exception {

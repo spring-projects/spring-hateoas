@@ -106,4 +106,11 @@ class HalLinkRelationUnitTest {
 
 		assertThat(relation.getCodes()).containsExactly("_links.curie:relation.title", "_links.relation.title");
 	}
+
+	@Test // #1132
+	void mapsLocalPartOnly() {
+
+		assertThat(HalLinkRelation.curied("CURIE", "someRelation").map(String::toLowerCase)) //
+				.isEqualTo(HalLinkRelation.curied("CURIE", "somerelation"));
+	}
 }

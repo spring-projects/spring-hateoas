@@ -15,6 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -24,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -49,6 +54,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
@@ -155,10 +161,15 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Object currentValue = jgen.getCurrentValue();
 
-			if (currentValue instanceof CollectionModel) {
-				if (mapper.hasCuriedEmbed((CollectionModel<?>) currentValue)) {
-					curiedLinkPresent = true;
-				}
+			PropertyNamingStrategy propertyNamingStrategy = provider.getConfig().getPropertyNamingStrategy();
+			EmbeddedMapper transformingMapper = halConfiguration.isApplyPropertyNamingStrategy() //
+					? mapper.with(propertyNamingStrategy)
+					: mapper;
+
+			if (currentValue instanceof CollectionModel
+					&& transformingMapper.hasCuriedEmbed((CollectionModel<?>) currentValue)) {
+
+				curiedLinkPresent = true;
 			}
 
 			for (Link link : value) {
@@ -173,9 +184,11 @@ public class Jackson2HalModule extends SimpleModule {
 					curiedLinkPresent = true;
 				}
 
+				HalLinkRelation relation = transformingMapper.map(rel);
+
 				sortedLinks //
-						.computeIfAbsent(rel, key -> new ArrayList<>())//
-						.add(toHalLink(link));
+						.computeIfAbsent(relation, key -> new ArrayList<>())//
+						.add(toHalLink(link, relation));
 
 				links.add(link);
 			}
@@ -205,10 +218,7 @@ public class Jackson2HalModule extends SimpleModule {
 		 * @param link must not be {@literal null}.
 		 * @return
 		 */
-		private HalLink toHalLink(Link link) {
-
-			HalLinkRelation rel = HalLinkRelation.of(link.getRel());
-
+		private HalLink toHalLink(Link link, HalLinkRelation rel) {
 			return new HalLink(link, resolver.resolve(rel));
 		}
 
@@ -287,19 +297,22 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private static final long serialVersionUID = 8030706944344625390L;
 
-		private final BeanProperty property;
 		private final EmbeddedMapper embeddedMapper;
+		private final HalConfiguration configuration;
+		private final BeanProperty property;
 
-		public HalResourcesSerializer(EmbeddedMapper embeddedMapper) {
-			this(null, embeddedMapper);
+		public HalResourcesSerializer(EmbeddedMapper embeddedMapper, HalConfiguration configuration) {
+			this(embeddedMapper, configuration, null);
 		}
 
-		public HalResourcesSerializer(@Nullable BeanProperty property, EmbeddedMapper embeddedMapper) {
+		public HalResourcesSerializer(EmbeddedMapper embeddedMapper, HalConfiguration configuration,
+				@Nullable BeanProperty property) {
 
 			super(TypeFactory.defaultInstance().constructType(Collection.class));
 
-			this.property = property;
 			this.embeddedMapper = embeddedMapper;
+			this.configuration = configuration;
+			this.property = property;
 		}
 
 		/*
@@ -312,13 +325,17 @@ public class Jackson2HalModule extends SimpleModule {
 		@SuppressWarnings("null")
 		public void serialize(Collection<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
-			Map<HalLinkRelation, Object> embeddeds = embeddedMapper.map(value);
+			EmbeddedMapper mapper = configuration.isApplyPropertyNamingStrategy() //
+					? embeddedMapper.with(provider.getConfig().getPropertyNamingStrategy()) //
+					: embeddedMapper;
+
+			Map<HalLinkRelation, Object> embeddeds = mapper.map(value);
 
 			Object currentValue = jgen.getCurrentValue();
 
 			if (currentValue instanceof RepresentationModel) {
 
-				if (embeddedMapper.hasCuriedEmbed(value)) {
+				if (mapper.hasCuriedEmbed(value)) {
 					((RepresentationModel<?>) currentValue).add(CURIES_REQUIRED_DUE_TO_EMBEDS);
 				}
 			}
@@ -334,7 +351,7 @@ public class Jackson2HalModule extends SimpleModule {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalResourcesSerializer(property, embeddedMapper);
+			return new HalResourcesSerializer(embeddedMapper, configuration, property);
 		}
 
 		/*
@@ -748,7 +765,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			this.delegate = delegate;
 
-			this.serializers.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper));
+			this.serializers.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper, halConfiguration));
 			this.serializers.put(HalLinkListSerializer.class,
 					new HalLinkListSerializer(curieProvider, mapper, resolver, halConfiguration));
 		}
@@ -880,27 +897,34 @@ public class Jackson2HalModule extends SimpleModule {
 	 *
 	 * @author Oliver Gierke
 	 */
+	@RequiredArgsConstructor
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class EmbeddedMapper {
 
-		private LinkRelationProvider relProvider;
-		private CurieProvider curieProvider;
-		private boolean preferCollectionRels;
+		private static final Function<String, String> NO_OP = Function.identity();
+
+		private final @lombok.NonNull LinkRelationProvider relProvider;
+		private final CurieProvider curieProvider;
+		private final boolean preferCollectionRels;
+
+		private Function<String, String> relationTransformer = Function.identity();
 
 		/**
-		 * Creates a new {@link EmbeddedMapper} for the given {@link LinkRelationProvider}, {@link CurieProvider} and flag
-		 * whether to prefer collection relations.
+		 * Registers the given {@link PropertyNamingStrategy} with the current mapper to forward that strategy as relation
+		 * transformer, so that {@link LinkRelation}s used as key for the embedding will be transformed using the given
+		 * strategy.
 		 *
-		 * @param relProvider must not be {@literal null}.
-		 * @param curieProvider must not be {@literal null}.
-		 * @param preferCollectionRels
+		 * @param strategy must not be {@literal null}.
+		 * @return an {@link EmbeddedMapper} applying the given strategy when mapping embedded objects.
 		 */
-		public EmbeddedMapper(LinkRelationProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
+		public EmbeddedMapper with(@Nullable PropertyNamingStrategy strategy) {
 
-			Assert.notNull(relProvider, "RelProvider must not be null!");
+			if (!(strategy instanceof PropertyNamingStrategyBase)) {
+				return this;
+			}
 
-			this.relProvider = relProvider;
-			this.curieProvider = curieProvider;
-			this.preferCollectionRels = preferCollectionRels;
+			return new EmbeddedMapper(relProvider, curieProvider, preferCollectionRels,
+					((PropertyNamingStrategyBase) strategy)::translate);
 		}
 
 		/**
@@ -913,11 +937,25 @@ public class Jackson2HalModule extends SimpleModule {
 
 			Assert.notNull(source, "Elements must not be null!");
 
-			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, preferCollectionRels);
+			HalEmbeddedBuilder builder = new HalEmbeddedBuilder(relProvider, curieProvider, preferCollectionRels) //
+					.withRelationTransformer(relationTransformer);
 
 			source.forEach(builder::add);
 
 			return builder.asMap();
+		}
+
+		/**
+		 * Maps the given {@link HalLinkRelation} using the underlying relation transformer.
+		 *
+		 * @param source must not be {@literal null}.
+		 * @return
+		 */
+		public HalLinkRelation map(LinkRelation source) {
+
+			Assert.notNull(source, "Link relation must not be null!");
+
+			return HalLinkRelation.of(relationTransformer == NO_OP ? source : source.map(relationTransformer));
 		}
 
 		/**

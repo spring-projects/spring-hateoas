@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,9 +42,14 @@ import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
+import org.springframework.hateoas.server.core.Relation;
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jayway.jsonpath.JsonPath;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -446,13 +453,13 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	@Test
 	void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-				MessageResolver.DEFAULTS_ONLY, new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY)));
+		ObjectMapper mapper = with(new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY));
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
 
-		assertThat(write(resourceSupport)).isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
+		assertThat(mapper.writeValueAsString(resourceSupport))
+				.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}");
 	}
 
 	/**
@@ -465,10 +472,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		original.add(new Link("/orders{?id}", "order"));
 
 		String serialized = mapper.writeValueAsString(original);
-
-		String expected = "{\"_links\":{\"order\":{\"href\":\"/orders{?id}\",\"templated\":true}}}";
-
-		assertThat(serialized).isEqualTo(expected);
+		assertThat(serialized).isEqualTo("{\"_links\":{\"order\":{\"href\":\"/orders{?id}\",\"templated\":true}}}");
 
 		RepresentationModel<?> deserialized = mapper.readValue(serialized, RepresentationModel.class);
 
@@ -478,11 +482,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	@Test // #811
 	void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
 
-		AnnotationLinkRelationProvider provider = new AnnotationLinkRelationProvider();
-
-		mapper
-				.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
-						new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
+		ObjectMapper mapper = with(new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
 		resource.add(new Link("/some-href", "foo"));
@@ -510,6 +510,51 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		assertThatCode(() -> {
 			assertThat(accessor.getMessage(relation)).isEqualTo("");
 		}).doesNotThrowAnyException();
+	}
+
+	@Test // #1132
+	void forwardsPropertyNamingStrategyToNonIanaLinkRelations() throws JsonProcessingException {
+
+		CollectionModel<Object> model = new CollectionModel<>(Arrays.asList(new SomeSample()));
+		model.add(new Link("/foo", LinkRelation.of("someSample")));
+		model.add(new Link("/foo/form", IanaLinkRelations.EDIT_FORM));
+
+		ObjectMapper objectMapper = mapper.copy() //
+				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
+				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+		String result = objectMapper.writeValueAsString(model);
+
+		Stream.of("$._embedded", "$._links") //
+				.map(JsonPath::compile) //
+				.map(it -> it.<Map<String, Object>> read(result)) //
+				.forEach(it -> assertThat(it).containsKey("some_sample"));
+
+		assertThat(JsonPath.compile("$._links").<Map<String, Object>> read(result)) //
+				.containsKey(IanaLinkRelations.EDIT_FORM.value());
+	}
+
+	@Test // #1132
+	void doesNotApplyPropertyNamingStrategyToLinkRelationsIfConfigurationOptsOut() throws Exception {
+
+		CollectionModel<Object> model = new CollectionModel<>(Arrays.asList(new SomeSample()));
+		model.add(new Link("/foo", LinkRelation.of("someSample")));
+
+		ObjectMapper mapper = with(new HalConfiguration().withApplyPropertyNamingStrategy(false)) //
+				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
+				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+		String result = mapper.writeValueAsString(model);
+
+		Stream.of("$._embedded", "$._links") //
+				.map(JsonPath::compile) //
+				.map(it -> it.<Map<String, Object>> read(result)) //
+				.forEach(it -> assertThat(it).containsKey("someSample"));
+	}
+
+	@Relation(collectionRelation = "someSample")
+	static class SomeSample {
+		String name;
 	}
 
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
