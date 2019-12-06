@@ -115,14 +115,16 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 				Object parameterValue = parameterValues.next();
 
-				uriComponentsContributors.stream() //
-						.filter(it -> it.supportsParameter(parameter)) //
-						.forEach(it -> it.enhance(builder, parameter, parameterValue));
+				for (UriComponentsContributor contributor : uriComponentsContributors) {
+					if (contributor.supportsParameter(parameter)) {
+						contributor.enhance(builder, parameter, parameterValue);
+					}
+				}
 			}
 
 			return builder;
 
-		}).apply(builderFactory);
+		}, builderFactory);
 	}
 
 	/*

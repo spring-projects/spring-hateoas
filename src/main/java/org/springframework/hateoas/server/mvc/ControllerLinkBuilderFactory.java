@@ -120,7 +120,7 @@ public class ControllerLinkBuilderFactory implements MethodLinkBuilderFactory<Co
 			}
 
 			return builder;
-		}).apply(mapping -> ControllerLinkBuilder.getBuilder().path(mapping));
+		}, mapping -> ControllerLinkBuilder.getBuilder().path(mapping));
 	}
 
 	/*

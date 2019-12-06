@@ -16,7 +16,6 @@
 package org.springframework.hateoas.server.core;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -25,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Simply helper to reference a dedicated attribute of an {@link Annotation}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class AnnotationAttribute {
@@ -35,7 +34,7 @@ public class AnnotationAttribute {
 
 	/**
 	 * Creates a new {@link AnnotationAttribute} to the {@code value} attribute of the given {@link Annotation} type.
-	 * 
+	 *
 	 * @param annotationType must not be {@literal null}.
 	 */
 	public AnnotationAttribute(Class<? extends Annotation> annotationType) {
@@ -44,7 +43,7 @@ public class AnnotationAttribute {
 
 	/**
 	 * Creates a new {@link AnnotationAttribute} for the given {@link Annotation} type and annotation attribute name.
-	 * 
+	 *
 	 * @param annotationType must not be {@literal null}.
 	 * @param attributeName can be {@literal null}, defaults to {@code value}.
 	 */
@@ -58,7 +57,7 @@ public class AnnotationAttribute {
 
 	/**
 	 * Returns the annotation type.
-	 * 
+	 *
 	 * @return the annotationType
 	 */
 	public Class<? extends Annotation> getAnnotationType() {
@@ -67,7 +66,7 @@ public class AnnotationAttribute {
 
 	/**
 	 * Reads the {@link Annotation} attribute's value from the given {@link MethodParameter}.
-	 * 
+	 *
 	 * @param parameter must not be {@literal null}.
 	 * @return
 	 */
@@ -75,27 +74,15 @@ public class AnnotationAttribute {
 	public String getValueFrom(MethodParameter parameter) {
 
 		Assert.notNull(parameter, "MethodParameter must not be null!");
+
 		Annotation annotation = parameter.getParameterAnnotation(annotationType);
-		return annotation == null ? null : getValueFrom(annotation);
-	}
 
-	/**
-	 * Reads the {@link Annotation} attribute's value from the given {@link AnnotatedElement}.
-	 * 
-	 * @param annotatedElement must not be {@literal null}.
-	 * @return
-	 */
-	@Nullable
-	public String getValueFrom(AnnotatedElement annotatedElement) {
-
-		Assert.notNull(annotatedElement, "Annotated element must not be null!");
-		Annotation annotation = annotatedElement.getAnnotation(annotationType);
 		return annotation == null ? null : getValueFrom(annotation);
 	}
 
 	/**
 	 * Returns the {@link Annotation} attribute's value from the given {@link Annotation}.
-	 * 
+	 *
 	 * @param annotation must not be {@literal null}.
 	 * @return
 	 */
@@ -103,7 +90,9 @@ public class AnnotationAttribute {
 	public String getValueFrom(Annotation annotation) {
 
 		Assert.notNull(annotation, "Annotation must not be null!");
-		return (String) (attributeName == null ? AnnotationUtils.getValue(annotation) : AnnotationUtils.getValue(
-				annotation, attributeName));
+
+		return (String) (attributeName == null //
+				? AnnotationUtils.getValue(annotation) //
+				: AnnotationUtils.getValue(annotation, attributeName));
 	}
 }

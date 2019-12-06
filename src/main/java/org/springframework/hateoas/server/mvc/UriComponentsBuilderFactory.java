@@ -23,6 +23,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -54,6 +55,10 @@ class UriComponentsBuilderFactory {
 		return baseUri != null //
 				? UriComponentsBuilder.fromUri(baseUri) //
 				: cacheBaseUri(ServletUriComponentsBuilder.fromCurrentServletMapping());
+	}
+
+	public static UriComponents getComponents() {
+		return getBuilder().build();
 	}
 
 	private static RequestAttributes getRequestAttributes() {

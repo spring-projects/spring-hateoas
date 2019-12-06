@@ -20,9 +20,12 @@ import lombok.Value;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.lang.Nullable;
@@ -36,6 +39,8 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DummyInvocationUtils {
 
+	private static final ThreadLocal<Map<CacheKey<?>, Object>> CACHE = ThreadLocal.withInitial(HashMap::new);
+
 	/**
 	 * Method interceptor that records the last method invocation and creates a proxy for the return value that exposes
 	 * the method invocation.
@@ -44,17 +49,9 @@ public class DummyInvocationUtils {
 	 */
 	private static class InvocationRecordingMethodInterceptor implements MethodInterceptor, LastInvocationAware {
 
-		private static final Method GET_INVOCATIONS;
-		private static final Method GET_OBJECT_PARAMETERS;
-
 		private final Class<?> targetType;
 		private final Object[] objectParameters;
 		private MethodInvocation invocation;
-
-		static {
-			GET_INVOCATIONS = ReflectionUtils.findMethod(LastInvocationAware.class, "getLastInvocation");
-			GET_OBJECT_PARAMETERS = ReflectionUtils.findMethod(LastInvocationAware.class, "getObjectParameters");
-		}
 
 		/**
 		 * Creates a new {@link InvocationRecordingMethodInterceptor} carrying the given parameters forward that might be
@@ -83,11 +80,7 @@ public class DummyInvocationUtils {
 
 			Method method = invocation.getMethod();
 
-			if (GET_INVOCATIONS.equals(method)) {
-				return getLastInvocation();
-			} else if (GET_OBJECT_PARAMETERS.equals(method)) {
-				return getObjectParameters();
-			} else if (ReflectionUtils.isObjectMethod(method)) {
+			if (ReflectionUtils.isObjectMethod(method)) {
 				return ReflectionUtils.invokeMethod(method, invocation.getThis(), invocation.getArguments());
 			}
 
@@ -131,12 +124,29 @@ public class DummyInvocationUtils {
 	 * @param parameters parameters to extend template variables in the type level mapping.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T methodOn(Class<T> type, Object... parameters) {
 
 		Assert.notNull(type, "Given type must not be null!");
 
-		InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(type, parameters);
-		return getProxyWithInterceptor(type, interceptor, type.getClassLoader());
+		return (T) CACHE.get().computeIfAbsent(CacheKey.of(type, parameters), it -> {
+
+			InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(it.type,
+					it.arguments);
+			return getProxyWithInterceptor(it.type, interceptor, type.getClassLoader());
+		});
+	}
+
+	/**
+	 * Returns the {@link LastInvocationAware} instance from the given source, that essentially has to be a proxy created
+	 * via {@link #methodOn(Class, Object...)} and subsequent {@code linkTo(…)} calls.
+	 *
+	 * @param source must not be {@literal null}.
+	 * @return
+	 */
+	@Nullable
+	public static LastInvocationAware getLastInvocationAware(Object source) {
+		return (LastInvocationAware) ((Advised) source).getAdvisors()[0].getAdvice();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,6 +165,12 @@ public class DummyInvocationUtils {
 		}
 
 		return (T) factory.getProxy(classLoader);
+	}
+
+	@Value(staticConstructor = "of")
+	private static class CacheKey<T> {
+		Class<T> type;
+		Object[] arguments;
 	}
 
 	@Value
