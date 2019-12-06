@@ -63,16 +63,12 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 *
 	 * @param builder must not be {@literal null}.
 	 */
-	ControllerLinkBuilder(UriComponentsBuilder builder) {
-		this(builder, TemplateVariables.NONE, Collections.emptyList());
+	ControllerLinkBuilder(UriComponents components) {
+		this(components, TemplateVariables.NONE, Collections.emptyList());
 	}
 
-	ControllerLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
-		super(builder, variables, affordances);
-	}
-
-	ControllerLinkBuilder(UriComponents uriComponents, TemplateVariables variables, List<Affordance> affordances) {
-		super(uriComponents, variables, affordances);
+	ControllerLinkBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances) {
+		super(components, variables, affordances);
 	}
 
 	/**
@@ -104,7 +100,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new ControllerLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
 
 	/**
@@ -126,7 +122,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uriComponents, true);
+		return new ControllerLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
 
 	/*
@@ -147,7 +143,7 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 		UriTemplate template = UriTemplateFactory.templateFor(DISCOVERER.getMapping(controller, method));
 		URI uri = template.expand(parameters);
 
-		return new ControllerLinkBuilder(getBuilder()).slash(uri);
+		return new ControllerLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uri);
 	}
 
 	/**
@@ -225,9 +221,9 @@ public class ControllerLinkBuilder extends TemplateVariableAwareLinkBuilderSuppo
 	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected ControllerLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected ControllerLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances,
 			TemplateVariables variables) {
-		return new ControllerLinkBuilder(builder, variables, affordances);
+		return new ControllerLinkBuilder(components, variables, affordances);
 	}
 
 	/**

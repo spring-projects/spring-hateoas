@@ -17,6 +17,9 @@ package org.springframework.hateoas.server.core;
 
 import lombok.experimental.UtilityClass;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriUtils;
 
@@ -31,7 +34,7 @@ import org.springframework.web.util.UriUtils;
 @UtilityClass
 class EncodingUtils {
 
-	private static final String ENCODING = "UTF-8";
+	private static final Charset ENCODING = StandardCharsets.UTF_8;
 
 	/**
 	 * Encodes the given path value.

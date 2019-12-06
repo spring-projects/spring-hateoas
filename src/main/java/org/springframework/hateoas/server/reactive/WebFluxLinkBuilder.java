@@ -18,11 +18,11 @@ package org.springframework.hateoas.server.reactive;
 import static org.springframework.web.filter.reactive.ServerWebExchangeContextFilter.*;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.function.Function;
 
-import reactor.core.publisher.Mono;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -31,6 +31,7 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.hateoas.server.core.WebHandler;
+import org.springframework.hateoas.server.core.WebHandler.PreparedWebHandler;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
@@ -45,10 +46,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @since 1.0
  */
 public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebFluxLinkBuilder> {
-
-	private WebFluxLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
-		super(builder, variables, affordances);
-	}
 
 	private WebFluxLinkBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances) {
 		super(components, variables, affordances);
@@ -89,17 +86,18 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 * @return
 	 */
 	public static <T> T methodOn(Class<T> controller, Object... parameters) {
+
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
+	 * @see org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponents, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected WebFluxLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected WebFluxLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances,
 			TemplateVariables variables) {
-		return new WebFluxLinkBuilder(builder, variables, affordances);
+		return new WebFluxLinkBuilder(components, variables, affordances);
 	}
 
 	/*
@@ -246,11 +244,9 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> exchange) {
 
-		Function<Function<String, UriComponentsBuilder>, WebFluxLinkBuilder> linkTo = //
-				WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
+		PreparedWebHandler<WebFluxLinkBuilder> handler = WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
 
-		return exchange.map(WebFluxLinkBuilder::getBuilderCreator) //
-				.map(linkTo);
+		return exchange.map(WebFluxLinkBuilder::getBuilderCreator).map(handler::conclude);
 	}
 
 	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder exchange) {

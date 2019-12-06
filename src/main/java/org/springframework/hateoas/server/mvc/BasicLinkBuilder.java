@@ -21,6 +21,7 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.core.LinkBuilderSupport;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -35,12 +36,12 @@ public class BasicLinkBuilder extends LinkBuilderSupport<BasicLinkBuilder> {
 	 *
 	 * @param builder must not be {@literal null}.
 	 */
-	private BasicLinkBuilder(UriComponentsBuilder builder) {
-		super(builder);
+	private BasicLinkBuilder(UriComponents components) {
+		super(components);
 	}
 
-	private BasicLinkBuilder(UriComponentsBuilder builder, List<Affordance> affordances) {
-		super(builder, affordances);
+	private BasicLinkBuilder(UriComponents components, List<Affordance> affordances) {
+		super(components, affordances);
 	}
 
 	/**
@@ -49,16 +50,16 @@ public class BasicLinkBuilder extends LinkBuilderSupport<BasicLinkBuilder> {
 	 * @return
 	 */
 	public static BasicLinkBuilder linkToCurrentMapping() {
-		return new BasicLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping());
+		return new BasicLinkBuilder(ServletUriComponentsBuilder.fromCurrentServletMapping().build());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.server.core.LinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List)
+	 * @see org.springframework.hateoas.server.core.LinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponents, java.util.List)
 	 */
 	@Override
-	protected BasicLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances) {
-		return new BasicLinkBuilder(builder, affordances);
+	protected BasicLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances) {
+		return new BasicLinkBuilder(components, affordances);
 	}
 
 	/*

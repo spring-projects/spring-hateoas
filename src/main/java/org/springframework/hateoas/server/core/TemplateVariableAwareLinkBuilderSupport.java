@@ -20,7 +20,6 @@ import java.util.List;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A {@link LinkBuilderSupport} extension that can keep a list of {@link TemplateVariables} around.
@@ -32,14 +31,6 @@ public abstract class TemplateVariableAwareLinkBuilderSupport<T extends Template
 
 	private final TemplateVariables variables;
 
-	protected TemplateVariableAwareLinkBuilderSupport(UriComponentsBuilder builder, TemplateVariables variables,
-			List<Affordance> affordances) {
-
-		super(builder, affordances);
-
-		this.variables = variables;
-	}
-
 	protected TemplateVariableAwareLinkBuilderSupport(UriComponents components, TemplateVariables variables,
 			List<Affordance> affordances) {
 
@@ -50,14 +41,14 @@ public abstract class TemplateVariableAwareLinkBuilderSupport<T extends Template
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.LinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List)
+	 * @see org.springframework.hateoas.server.core.LinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponents, java.util.List)
 	 */
 	@Override
-	protected final T createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances) {
-		return createNewInstance(builder, affordances, variables);
+	protected final T createNewInstance(UriComponents components, List<Affordance> affordances) {
+		return createNewInstance(components, affordances, variables);
 	}
 
-	protected abstract T createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected abstract T createNewInstance(UriComponents components, List<Affordance> affordances,
 			TemplateVariables variables);
 
 	/*

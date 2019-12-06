@@ -61,12 +61,8 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 	 *
 	 * @param builder must not be {@literal null}.
 	 */
-	WebMvcLinkBuilder(UriComponentsBuilder builder) {
-		this(builder, TemplateVariables.NONE, Collections.emptyList());
-	}
-
-	WebMvcLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
-		super(builder, variables, affordances);
+	WebMvcLinkBuilder(UriComponents components) {
+		this(components, TemplateVariables.NONE, Collections.emptyList());
 	}
 
 	WebMvcLinkBuilder(UriComponents uriComponents, TemplateVariables variables, List<Affordance> affordances) {
@@ -102,7 +98,7 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
 
 	/**
@@ -124,7 +120,7 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
 
 	/*
@@ -146,7 +142,7 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		UriTemplate template = UriTemplateFactory.templateFor(mapping);
 		URI uri = template.expand(parameters);
 
-		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uri);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uri);
 	}
 
 	/**
@@ -221,12 +217,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
+	 * @see org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponents, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected WebMvcLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected WebMvcLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances,
 			TemplateVariables variables) {
-		return new WebMvcLinkBuilder(builder, variables, affordances);
+		return new WebMvcLinkBuilder(components, variables, affordances);
 	}
 
 	/**
