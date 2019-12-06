@@ -20,12 +20,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Wither;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
@@ -47,6 +50,7 @@ public class HalConfiguration {
 	 */
 	private final @Wither @Getter RenderSingleLinks renderSingleLinks;
 	private final @Wither(AccessLevel.PRIVATE) Map<String, RenderSingleLinks> singleLinksPerPattern;
+	private final @Getter List<MediaType> additionalMediaTypes = new ArrayList<>();
 
 	/**
 	 * Creates a new default {@link HalConfiguration} rendering single links as immediate sub-document.
@@ -121,5 +125,17 @@ public class HalConfiguration {
 		 * A single {@link Link} is rendered as a JSON Array.
 		 */
 		AS_ARRAY
+	}
+
+	/**
+	 * Register other {@link MediaType}s this one should response to.
+	 *
+	 * @param mediatype
+	 * @return HalFormsConfiguration with new {@link MediaType} added
+	 */
+	public HalConfiguration withAdditionalMediatype(MediaType mediatype) {
+
+		this.additionalMediaTypes.add(mediatype);
+		return this;
 	}
 }

@@ -18,12 +18,14 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.http.MediaType;
 
 /**
  * HAL-FORMS specific configuration extension of {@link HalConfiguration}.
@@ -59,5 +61,21 @@ public class HalFormsConfiguration {
 	 */
 	Optional<String> getTypePatternFor(ResolvableType type) {
 		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
+	}
+
+	/**
+	 * Register other {@link MediaType}s this one should response to.
+	 * 
+	 * @param mediatype
+	 * @return HalFormsConfiguration
+	 */
+	public HalFormsConfiguration withAdditionalMediatype(MediaType mediatype) {
+		
+		this.halConfiguration.getAdditionalMediaTypes().add(mediatype);
+		return this;
+	}
+
+	public Collection<? extends MediaType> getAdditionalMediaTypes() {
+		return this.halConfiguration.getAdditionalMediaTypes();
 	}
 }
