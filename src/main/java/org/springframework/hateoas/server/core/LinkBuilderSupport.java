@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,15 +61,32 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 		this(builder, Collections.emptyList());
 	}
 
+	/**
+	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponentsBuilder} and {@link Affordance}s.
+	 *
+	 * @param builder must not be {@literal null}.
+	 * @param affordances must not be {@literal null}.
+	 * @deprecated since 1.0.3, for removal in 1.1. Use {@link LinkBuilderSupport#LinkBuilderSupport(UriComponents, List)}
+	 *             instead.
+	 */
+	@Deprecated
+	protected LinkBuilderSupport(UriComponentsBuilder builder, List<Affordance> affordances) {
+		this(builder.build(), affordances);
+	}
+
+	/**
+	 * Creates a new {@link LinkBuilderSupport} using the given {@link UriComponents} and {@link Affordance}s.
+	 *
+	 * @param components must not be {@literal null}.
+	 * @param affordances must not be {@literal null}.
+	 */
 	protected LinkBuilderSupport(UriComponents components, List<Affordance> affordances) {
 
 		Assert.notNull(components, "UriComponents must not be null!");
 		Assert.notNull(affordances, "Affordances must not be null!");
 
-		// this.builder = UriComponentsBuilder.newInstance().uriComponents(components);
-		this.affordances = affordances;
-
 		this.components = components;
+		this.affordances = affordances;
 	}
 
 	/*
@@ -151,6 +168,20 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 		return withRel(IanaLinkRelations.SELF);
 	}
 
+	/**
+	 * Creates a new concrete {@link LinkBuilder}.
+	 *
+	 * @param builder must not be {@literal null}.
+	 * @param affordances must not be {@literal null}.
+	 * @return
+	 * @deprecated since 1.0.3, for removal in 1.1. override {@link #createNewInstance(UriComponents, List)} instead
+	 */
+	@Deprecated
+	protected T createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances) {
+		throw new UnsupportedOperationException(
+				"Override createNewInstance(UriComponents, List) to avoid this method being called!");
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -173,5 +204,10 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @param builder will never be {@literal null}.
 	 * @return
 	 */
-	protected abstract T createNewInstance(UriComponents components, List<Affordance> affordances);
+	protected T createNewInstance(UriComponents components, List<Affordance> affordances) {
+
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uriComponents(components);
+
+		return createNewInstance(builder, affordances);
+	}
 }
