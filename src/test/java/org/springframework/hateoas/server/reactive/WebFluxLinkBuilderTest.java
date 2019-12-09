@@ -187,7 +187,7 @@ class WebFluxLinkBuilderTest {
 		});
 	}
 
-	@Test
+	@Test // #1150
 	void considersContextPath() {
 
 		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/context/api") //
@@ -198,6 +198,19 @@ class WebFluxLinkBuilderTest {
 
 		verify(request, link, result -> {
 			assertThat(result.getHref()).endsWith("/context/api/employees");
+		});
+	}
+
+	@Test // #1152
+	void allowsAppendingPathSegments() {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api") //
+				.build();
+
+		WebFluxLink link = linkTo(methodOn(TestController.class).deep()).slash("foo").withSelfRel();
+
+		verify(request, link, result -> {
+			assertThat(result.getHref()).endsWith("/api/employees/foo");
 		});
 	}
 

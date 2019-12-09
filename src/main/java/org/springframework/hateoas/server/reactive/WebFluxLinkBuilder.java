@@ -117,6 +117,20 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 		private final Mono<WebFluxLinkBuilder> builder;
 
 		/**
+		 * Creates a new {@link WebFluxBuilder} appending the given path to the currently to be built link.
+		 *
+		 * @param path must not be {@literal null}.
+		 * @return
+		 * @since 1.1
+		 */
+		public WebFluxBuilder slash(String path) {
+
+			Assert.notNull(path, "Path must not be null!");
+
+			return new WebFluxBuilder(builder.map(it -> it.slash(path)));
+		}
+
+		/**
 		 * Creates a new {@link WebFluxLink} for the {@link Link} with the given {@link LinkRelation}
 		 *
 		 * @param relation must not be {@literal null}.
