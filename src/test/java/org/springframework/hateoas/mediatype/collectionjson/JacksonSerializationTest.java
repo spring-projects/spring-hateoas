@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 

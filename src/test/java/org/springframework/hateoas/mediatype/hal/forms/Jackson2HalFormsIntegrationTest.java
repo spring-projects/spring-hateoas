@@ -52,7 +52,7 @@ import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalIntegrationTest;
+import org.springframework.hateoas.mediatype.hal.HalTestUtils;
 import org.springframework.hateoas.mediatype.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
@@ -82,15 +82,11 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 			new Link("bar", IanaLinkRelations.PREV) //
 	);
 
-	// MessageSource messageSource = mock(MessageSource.class);
-
 	@BeforeEach
 	void setUpModule() {
 
-		// TestAffordances.enableMediaTypes(MediaTypes.HAL_FORMS_JSON);
-
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
-				Jackson2HalIntegrationTest.DefaultLinkRelationProvider.INSTANCE);
+				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //

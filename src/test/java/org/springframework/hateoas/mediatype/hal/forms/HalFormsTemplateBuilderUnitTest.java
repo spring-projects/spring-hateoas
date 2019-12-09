@@ -36,7 +36,7 @@ import org.springframework.http.HttpMethod;
 /**
  * @author Oliver Drotbohm
  */
-public class HalFormsTemplateBuilderUnitTest {
+class HalFormsTemplateBuilderUnitTest {
 
 	@ParameterizedTest(name = "Detects regex pattern ''{1}'' for property ''{0}''")
 	@CsvSource({ "number, [0-9]{16}", "overridden, foo", "annotated, bar" })
@@ -79,7 +79,8 @@ public class HalFormsTemplateBuilderUnitTest {
 				.withName("post") //
 				.toLink());
 
-		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.DEFAULTS_ONLY);
+		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY);
 
 		Map<String, HalFormsTemplate> templates = builder.findTemplates(model);
 

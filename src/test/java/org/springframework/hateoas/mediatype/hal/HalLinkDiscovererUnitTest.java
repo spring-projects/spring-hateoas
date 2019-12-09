@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 

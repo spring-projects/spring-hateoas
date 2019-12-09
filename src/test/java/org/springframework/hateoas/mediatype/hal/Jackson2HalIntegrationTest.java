@@ -52,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Greg Turnquist
  * @author Jeffrey Walraven
  */
-public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
@@ -85,11 +85,11 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	void setUpModule() {
 
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
-				DefaultLinkRelationProvider.INSTANCE);
+				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
 
 		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE,
+				MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
 	}
 
 	/**
@@ -480,8 +480,9 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		AnnotationLinkRelationProvider provider = new AnnotationLinkRelationProvider();
 
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
-				new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
+		mapper
+				.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
+						new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY)));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
 		resource.add(new Link("/some-href", "foo"));
@@ -569,37 +570,5 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 				new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), provider, MessageResolver.of(messageSource)));
 
 		return mapper;
-	}
-
-	public enum DefaultLinkRelationProvider implements LinkRelationProvider {
-
-		INSTANCE;
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.server.LinkRelationProvider#getItemResourceRelFor(java.lang.Class)
-		 */
-		@Override
-		public LinkRelation getItemResourceRelFor(Class<?> type) {
-			throw new UnsupportedOperationException();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.server.LinkRelationProvider#getCollectionResourceRelFor(java.lang.Class)
-		 */
-		@Override
-		public LinkRelation getCollectionResourceRelFor(Class<?> type) {
-			return LinkRelation.of("content");
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
-		 */
-		@Override
-		public boolean supports(LookupContext delimiter) {
-			return delimiter.isCollectionRelationLookup();
-		}
 	}
 }
