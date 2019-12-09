@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Value object for links.
@@ -46,9 +47,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author Jens Schauder
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
+@JsonIgnoreProperties(value = { "templated", "template" }, ignoreUnknown = true)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Getter
+@Getter(onMethod = @__(@JsonProperty))
 @EqualsAndHashCode(
 		of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
 public class Link implements Serializable {

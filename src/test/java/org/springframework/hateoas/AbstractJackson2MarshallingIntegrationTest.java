@@ -20,11 +20,12 @@ import java.io.Writer;
 
 import org.junit.jupiter.api.BeforeEach;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base class to test objects against the Jackson 2.0 {@link ObjectMapper}.
- * 
+ *
  * @author Oliver Gierke
  * @author Jon Brisbin
  * @author Greg Turnquist
@@ -36,6 +37,11 @@ public abstract class AbstractJackson2MarshallingIntegrationTest {
 	@BeforeEach
 	void setUp() {
 		mapper = new ObjectMapper();
+		mapper.disable(MapperFeature.AUTO_DETECT_CREATORS) //
+				.disable(MapperFeature.AUTO_DETECT_FIELDS) //
+				.disable(MapperFeature.AUTO_DETECT_GETTERS) //
+				.disable(MapperFeature.AUTO_DETECT_IS_GETTERS) //
+				.disable(MapperFeature.AUTO_DETECT_SETTERS);
 	}
 
 	protected String write(Object object) throws Exception {
