@@ -24,15 +24,17 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
-import java.net.URI;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.WebFluxLink;
+import org.springframework.lang.Nullable;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +50,6 @@ import org.springframework.web.server.ServerWebExchange;
 class WebFluxLinkBuilderTest {
 
 	@Mock ServerWebExchange exchange;
-	@Mock ServerHttpRequest request;
 
 	/**
 	 * @see #728
@@ -56,19 +57,13 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void linkAtSameLevelAsExplicitServerExchangeShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api").build();
+		WebFluxLink link = linkTo(methodOn(TestController.class).root()).withSelfRel();
 
-		linkTo(methodOn(TestController.class).root(), this.exchange).withSelfRel().toMono() //
-				.as(StepVerifier::create).expectNextMatches(link -> {
-
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
-
-					return true;
-
-				}).verifyComplete();
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/api");
+		});
 	}
 
 	/**
@@ -77,19 +72,13 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void linkAtSameLevelAsContextProvidedServerExchangeShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api").build();
+		WebFluxLink link = linkTo(methodOn(TestController.class).root()).withSelfRel();
 
-		linkTo(methodOn(TestController.class).root()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
-				.as(StepVerifier::create).expectNextMatches(link -> {
-
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
-
-					return true;
-				}).verifyComplete();
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/api");
+		});
 	}
 
 	/**
@@ -98,21 +87,13 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void shallowLinkFromDeepExplicitServerExchangeShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api/employees").build();
+		WebFluxLink link = linkTo(methodOn(TestController.class).root()).withSelfRel();
 
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api/employees"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
-
-		linkTo(methodOn(TestController.class).root(), this.exchange).withSelfRel().toMono() //
-				.as(StepVerifier::create).expectNextMatches(link -> {
-
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
-
-					return true;
-
-				}).verifyComplete();
-
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/api");
+		});
 	}
 
 	/**
@@ -121,20 +102,14 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void shallowLinkFromDeepContextProvidedServerExchangeShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api/employees"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api/employees").build();
 
-		linkTo(methodOn(TestController.class).root()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
-				.as(StepVerifier::create).expectNextMatches(link -> {
+		WebFluxLink link = linkTo(methodOn(TestController.class).root()).withSelfRel();
 
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api");
-
-					return true;
-
-				}).verifyComplete();
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/api");
+		});
 	}
 
 	/**
@@ -143,19 +118,13 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void deepLinkFromShallowExplicitServerExchangeShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api").build();
+		WebFluxLink link = linkTo(methodOn(TestController.class).deep()).withSelfRel();
 
-		linkTo(methodOn(TestController.class).deep(), this.exchange).withSelfRel().toMono() //
-				.as(StepVerifier::create).expectNextMatches(link -> {
-
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api/employees");
-
-					return true;
-
-				}).verifyComplete();
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/api/employees");
+		});
 	}
 
 	/**
@@ -164,20 +133,13 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void deepLinkFromShallowContextProvidedServerExchangeShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/api"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api").build();
+		WebFluxLink link = linkTo(methodOn(TestController.class).deep()).withSelfRel();
 
-		linkTo(methodOn(TestController.class).deep()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
-				.as(StepVerifier::create).expectNextMatches(link -> {
-
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/api/employees");
-
-					return true;
-
-				}).verifyComplete();
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/api/employees");
+		});
 	}
 
 	/**
@@ -186,20 +148,13 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void linkToRouteWithNoMappingShouldWork() {
 
-		when(this.exchange.getRequest()).thenReturn(this.request);
-		when(this.request.getURI()).thenReturn(URI.create("http://localhost:8080/"));
-		when(this.request.getHeaders()).thenReturn(new HttpHeaders());
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080").build();
+		WebFluxLink link = linkTo(methodOn(TestController2.class).root()).withSelfRel();
 
-		linkTo(methodOn(TestController2.class).root()).withSelfRel().toMono() //
-				.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange)) //
-				.as(StepVerifier::create).expectNextMatches(link -> {
-
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("http://localhost:8080/");
-
-					return true;
-
-				}).verifyComplete();
+		verify(request, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080");
+		});
 	}
 
 	/**
@@ -208,33 +163,59 @@ class WebFluxLinkBuilderTest {
 	@Test
 	void linkToRouteWithNoExchangeInTheContextShouldFallbackToRelativeUris() {
 
-		linkTo(methodOn(TestController2.class).root()).withSelfRel().toMono() //
-				.as(StepVerifier::create).expectNextMatches(link -> {
+		WebFluxLink link = linkTo(methodOn(TestController2.class).root()).withSelfRel();
 
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("/");
-
-					return true;
-
-				}).verifyComplete();
+		verify(null, link, result -> {
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("/");
+		});
 	}
 
 	/**
 	 * @see #728
 	 */
 	@Test
+	@SuppressWarnings("null")
 	void linkToRouteWithExplictExchangeBeingNullShouldFallbackToRelativeUris() {
 
-		linkTo(methodOn(TestController2.class).root(), null).withSelfRel().toMono() //
-				.as(StepVerifier::create).expectNextMatches(link -> {
+		WebFluxLink link = linkTo(methodOn(TestController2.class).root(), null).withSelfRel();
 
-					assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
-					assertThat(link.getHref()).isEqualTo("/");
+		verify(null, link, result -> {
 
-					return true;
+			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
+			assertThat(result.getHref()).isEqualTo("/");
+		});
+	}
 
-				}).verifyComplete();
+	@Test
+	void considersContextPath() {
 
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/context/api") //
+				.contextPath("/context") //
+				.build();
+
+		WebFluxLink link = linkTo(methodOn(TestController.class).deep()).withSelfRel();
+
+		verify(request, link, result -> {
+			assertThat(result.getHref()).endsWith("/context/api/employees");
+		});
+	}
+
+	private void verify(@Nullable MockServerHttpRequest request, WebFluxLink link, Consumer<Link> verifications) {
+
+		Mono<Link> mono = link.toMono();
+
+		if (request != null) {
+
+			when(this.exchange.getRequest()).thenReturn(request);
+			mono = mono.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange));
+		}
+		mono.as(StepVerifier::create).expectNextMatches(signal -> {
+
+			verifications.accept(signal);
+			return true;
+
+		}).verifyComplete();
 	}
 
 	@RestController
