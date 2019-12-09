@@ -32,6 +32,8 @@ import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.hateoas.server.core.WebHandler.PreparedWebHandler;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
@@ -231,9 +233,15 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 */
 	private static UriComponentsBuilder getBuilder(@Nullable ServerWebExchange exchange) {
 
-		return exchange == null //
-				? UriComponentsBuilder.fromPath("/") //
-				: UriComponentsBuilder.fromHttpRequest(exchange.getRequest());
+		if (exchange == null) {
+			return UriComponentsBuilder.fromPath("/");
+		}
+
+		ServerHttpRequest request = exchange.getRequest();
+		PathContainer contextPath = request.getPath().contextPath();
+
+		return UriComponentsBuilder.fromHttpRequest(request) //
+				.replacePath(contextPath.toString());
 	}
 
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation) {
@@ -242,14 +250,15 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(EXCHANGE_CONTEXT_ATTRIBUTE, null))));
 	}
 
-	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> exchange) {
+	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> builder) {
 
 		PreparedWebHandler<WebFluxLinkBuilder> handler = WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
 
-		return exchange.map(WebFluxLinkBuilder::getBuilderCreator).map(handler::conclude);
+		return builder.map(WebFluxLinkBuilder::getBuilderCreator) //
+				.map(handler::conclude);
 	}
 
-	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder exchange) {
-		return path -> exchange.replacePath(path == null ? "/" : path);
+	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder builder) {
+		return path -> builder.path(path);
 	}
 }
