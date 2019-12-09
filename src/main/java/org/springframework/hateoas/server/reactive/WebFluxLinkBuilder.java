@@ -255,7 +255,8 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 		PathContainer contextPath = request.getPath().contextPath();
 
 		return UriComponentsBuilder.fromHttpRequest(request) //
-				.replacePath(contextPath.toString());
+				.replacePath(contextPath.toString()) //
+				.replaceQuery("");
 	}
 
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation) {

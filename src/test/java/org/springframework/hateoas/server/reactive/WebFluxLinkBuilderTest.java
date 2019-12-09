@@ -214,6 +214,19 @@ class WebFluxLinkBuilderTest {
 		});
 	}
 
+	@Test // #1152
+	void removesIncomingQueryParameters() {
+
+		MockServerHttpRequest request = MockServerHttpRequest.get("http://localhost:8080/api?some=parameter") //
+				.build();
+
+		WebFluxLink link = linkTo(methodOn(TestController.class).deep()).withSelfRel();
+
+		verify(request, link, result -> {
+			assertThat(result.getHref()).endsWith("/api/employees");
+		});
+	}
+
 	private void verify(@Nullable MockServerHttpRequest request, WebFluxLink link, Consumer<Link> verifications) {
 
 		Mono<Link> mono = link.toMono();
