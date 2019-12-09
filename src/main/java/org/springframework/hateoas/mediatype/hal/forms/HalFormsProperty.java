@@ -17,6 +17,7 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
@@ -29,6 +30,7 @@ import org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link HalFormsTemplate} may
@@ -39,6 +41,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_DEFAULT)
 @Value
 @Wither
+@Getter(onMethod = @__(@JsonProperty))
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(force = true)
 @ToString

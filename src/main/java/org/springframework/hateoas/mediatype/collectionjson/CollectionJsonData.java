@@ -15,13 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.Wither;
 
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,17 +30,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  */
 @Value
+@Getter(onMethod = @__(@JsonProperty))
+@JsonInclude(Include.NON_NULL)
 @Wither
-@JsonIgnoreProperties()
 class CollectionJsonData {
 
-	@JsonInclude(Include.NON_NULL) //
 	private @Nullable String name;
-
-	@JsonInclude(Include.NON_NULL) //
 	private @Nullable Object value;
-
-	@JsonInclude(Include.NON_NULL) //
 	private @Nullable String prompt;
 
 	@JsonCreator

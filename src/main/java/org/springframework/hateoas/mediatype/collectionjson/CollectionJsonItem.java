@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.JavaType;
  * @author Greg Turnquist
  */
 @Value
+@Getter(onMethod = @__(@JsonProperty))
 @Wither(AccessLevel.PACKAGE)
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class CollectionJsonItem<T> {
@@ -79,6 +80,7 @@ class CollectionJsonItem<T> {
 	 *
 	 * @return
 	 */
+	@JsonProperty
 	public List<CollectionJsonData> getData() {
 
 		if (!this.data.isEmpty()) {

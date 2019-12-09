@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mediatype.uber;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.Wither;
 
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @since 1.0
  */
 @Value
+@Getter(onMethod = @__(@JsonProperty))
 @Wither(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
 class Uber {
@@ -74,5 +76,4 @@ class Uber {
 				.flatMap(uberData -> uberData.getLinks().stream()) //
 				.collect(Links.collector());
 	}
-
 }

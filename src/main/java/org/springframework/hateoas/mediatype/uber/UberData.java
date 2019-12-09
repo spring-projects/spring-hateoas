@@ -17,6 +17,7 @@ package org.springframework.hateoas.mediatype.uber;
 
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.Wither;
 
@@ -42,6 +43,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -58,6 +60,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @since 1.0
  */
 @Value
+@Getter(onMethod = @__(@JsonProperty))
 @Wither(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -105,6 +108,7 @@ class UberData {
 	 * Don't render if it's {@link UberAction#READ}.
 	 */
 	@Nullable
+	@JsonProperty
 	public UberAction getAction() {
 		return action == UberAction.READ ? null : action;
 	}
@@ -113,6 +117,7 @@ class UberData {
 	 * Use a {@link Boolean} to support returning {@literal null}, and if it is {@literal null}, don't render.
 	 */
 	@Nullable
+	@JsonProperty
 	public Boolean isTemplated() {
 
 		return Optional.ofNullable(this.url) //
@@ -124,6 +129,7 @@ class UberData {
 	 * Use a {@link Boolean} to support returning {@literal null}, and if it is {@literal null}, don't render.
 	 */
 	@Nullable
+	@JsonProperty
 	public Boolean isTransclude() {
 		return this.transclude ? true : null;
 	}
@@ -145,6 +151,10 @@ class UberData {
 						.map(rel -> new Link(url, rel)) //
 						.collect(Collectors.toList())) //
 				.orElse(Collections.emptyList());
+	}
+
+	private boolean hasUrl(@Nullable String url) {
+		return ObjectUtils.nullSafeEquals(this.url, url);
 	}
 
 	/**
@@ -363,7 +373,7 @@ class UberData {
 
 		return affordanceBasedLinks.stream() //
 				.flatMap(affordance -> links.stream() //
-						.filter(link -> link.getUrl().equals(affordance.getUrl())) //
+						.filter(data -> data.hasUrl(affordance.getUrl())) //
 						.map(link -> {
 
 							if (link.getAction() == affordance.getAction()) {
