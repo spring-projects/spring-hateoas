@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.server.core;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.Ordered;
@@ -24,6 +23,7 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * {@link LinkRelationProvider} that evaluates the {@link Relation} annotation on entity types.
@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  */
 public class AnnotationLinkRelationProvider implements LinkRelationProvider, Ordered {
 
-	private final Map<Class<?>, Relation> annotationCache = new HashMap<>();
+	private final Map<Class<?>, Relation> annotationCache = new ConcurrentReferenceHashMap<>(128);
 
 	/*
 	 * (non-Javadoc)
