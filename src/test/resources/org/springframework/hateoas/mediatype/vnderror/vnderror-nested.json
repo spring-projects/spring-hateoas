@@ -1,0 +1,28 @@
+{
+  "message": "Validation failed",
+  "logref": 42,
+  "_links": {
+    "describes": {
+      "href": "http://path.to/describes"
+    },
+    "help": {
+      "href": "http://path.to/help"
+    },
+    "about": {
+      "href": "http://path.to/user/resource/1"
+    }
+  },
+  "_embedded": {
+    "errors": [
+      {
+        "message": "Username must contain at least three characters",
+        "path": "/username",
+        "_links": {
+          "about": {
+            "href": "http://path.to/user/resource/1"
+          }
+        }
+      }
+    ]
+  }
+}

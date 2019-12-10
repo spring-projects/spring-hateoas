@@ -17,6 +17,8 @@ package org.springframework.hateoas.mediatype.vnderror;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
@@ -26,17 +28,66 @@ import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
  * Unit tests for {@link VndErrors}.
  * 
  * @author Oliver Gierke
+ * @author Greg Turnquist
  */
 class VndErrorsUnitTest {
 
+	/**
+	 * @see #775
+	 */
 	@Test
-	void rendersToStringCorrectly() {
+	void vndErrorsDoesntTakeNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new VndErrors().withErrors(null));
+	}
 
-		VndError error = new VndErrors.VndError("logref", "message", new Link("foo", "bar"));
-		assertThat(error.toString()).isEqualTo("VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]");
+	/**
+	 * @see #775
+	 */
+	@Test
+	public void vndErrorsDoesntTakeEmptyCollection() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new VndErrors().withErrors(new ArrayList<>()));
+	}
 
-		VndErrors errors = new VndErrors(error);
-		assertThat(errors.toString()) //
-				.isEqualTo("VndErrors[VndError[logref: logref, message: message, links: [<foo>;rel=\"bar\"]]]");
+	/**
+	 * @see #775
+	 */
+	@Test
+	public void vndErrorsUsingSingleErrorArguments() {
+
+		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+
+		assertThat(errors.getTotal()).isNull();
+		assertThat(errors.getContent()).hasSize(1);
+		assertThat(errors.getContent())
+				.containsExactly(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+	}
+
+	/**
+	 * @see #775
+	 */
+	@Test
+	public void appendingVndErrorsShouldWork() {
+
+		VndErrors errors = new VndErrors().withError(new VndError("message", "/path", 50, new Link("/link").withSelfRel()));
+		assertThat(errors.getContent()).hasSize(1);
+
+		errors.getContent().add(new VndError("message2", "/path2", 51, new Link("/link2", "link2")));
+		assertThat(errors.getContent()).hasSize(2);
+	}
+
+	@Test
+	void vndErrorRendersToStringCorrectly() {
+
+		VndError error = new VndError("message", "path", 42, new Link("foo", "bar"));
+		assertThat(error.toString()).isEqualTo("VndError[logref: 42, message: message, links: [<foo>;rel=\"bar\"]]");
+
+	}
+
+	@Test
+	void vndErrorsRendersToStringCorrectly() {
+
+		VndErrors errors = new VndErrors(new VndError("message", "path", 42, new Link("foo", "bar")));
+		assertThat(errors.toString())
+				.isEqualTo("VndErrors[VndError[logref: 42, message: message, links: [<foo>;rel=\"bar\"]]]");
 	}
 }

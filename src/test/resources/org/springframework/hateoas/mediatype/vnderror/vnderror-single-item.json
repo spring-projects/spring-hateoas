@@ -1,0 +1,16 @@
+{
+  "message": "Validation failed",
+  "path": "/username",
+  "logref": 42,
+  "_links": {
+    "about": {
+      "href": "http://path.to/user/resource/1"
+    },
+    "describes": {
+      "href": "http://path.to/describes"
+    },
+    "help": {
+      "href": "http://path.to/help"
+    }
+  }
+}

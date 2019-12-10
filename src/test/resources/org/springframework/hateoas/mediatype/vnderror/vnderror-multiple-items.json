@@ -1,0 +1,25 @@
+{
+  "total": 2,
+  "_embedded": {
+    "errors": [
+      {
+        "message": "\"username\" field validation failed",
+        "logref": 50,
+        "_links": {
+          "help": {
+            "href": "http://.../"
+          }
+        }
+      },
+      {
+        "message": "\"postcode\" field validation failed",
+        "logref": 55,
+        "_links": {
+          "help": {
+            "href": "http://.../"
+          }
+        }
+      }
+    ]
+  }
+}

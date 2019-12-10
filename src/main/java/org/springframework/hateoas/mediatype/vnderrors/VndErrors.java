@@ -15,42 +15,80 @@
  */
 package org.springframework.hateoas.mediatype.vnderrors;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.lang.Nullable;
+import org.springframework.hateoas.server.core.Relation;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
- * A representation model class to be rendered as specified for the media type {@code application/vnd.error}.
+ * A representation model class to be rendered as specified for the media type {@code application/vnd.error+json}.
  *
  * @see https://github.com/blongden/vnd.error
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class VndErrors implements Iterable<VndErrors.VndError> {
+@JsonPropertyOrder({ "message", "logref", "total", "_links", "_embedded" })
+@JsonIgnoreProperties(ignoreUnknown = true)
+@EqualsAndHashCode
+public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
-	private final List<VndError> vndErrors;
+	/**
+	 * @deprecated Use {@link org.springframework.hateoas.IanaLinkRelations#HELP}
+	 */
+	@Deprecated public static final String REL_HELP = "help";
+
+	/**
+	 * @deprecated Use {@link org.springframework.hateoas.IanaLinkRelations#DESCRIBES}
+	 */
+	@Deprecated public static final String REL_DESCRIBES = "describes";
+
+	/**
+	 * @deprecated Use {@link org.springframework.hateoas.IanaLinkRelations#ABOUT}
+	 */
+	@Deprecated public static final String REL_ABOUT = "about";
+
+	private final List<VndError> errors;
+
+	@Getter //
+	@JsonInclude(value = JsonInclude.Include.NON_EMPTY) //
+	private final String message;
+
+	@Getter //
+	@JsonInclude(value = JsonInclude.Include.NON_EMPTY) //
+	private final Integer logref;
+
+	public VndErrors() {
+
+		this.errors = new ArrayList<>();
+		this.message = null;
+		this.logref = null;
+	}
 
 	/**
 	 * Creates a new {@link VndErrors} instance containing a single {@link VndError} with the given logref, message and
 	 * optional {@link Link}s.
-	 *
-	 * @param logref must not be {@literal null} or empty.
-	 * @param message must not be {@literal null} or empty.
-	 * @param links
 	 */
 	public VndErrors(String logref, String message, Link... links) {
-		this(new VndError(logref, message, links));
+		this(new VndError(message, null, Integer.parseInt(logref), links));
 	}
 
 	/**
@@ -62,9 +100,11 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 
 		Assert.notNull(error, "Error must not be null");
 
-		this.vndErrors = new ArrayList<>(errors.length + 1);
-		this.vndErrors.add(error);
-		this.vndErrors.addAll(Arrays.asList(errors));
+		this.errors = new ArrayList<>();
+		this.errors.add(error);
+		Collections.addAll(this.errors, errors);
+		this.message = null;
+		this.logref = null;
 	}
 
 	/**
@@ -73,38 +113,84 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 * @param errors must not be {@literal null} or empty.
 	 */
 	@JsonCreator
-	public VndErrors(List<VndError> errors) {
+	public VndErrors(@JsonProperty("_embedded") List<VndError> errors, @JsonProperty("message") String message,
+			@JsonProperty("logref") Integer logref, @JsonProperty("_links") Links links) {
 
-		Assert.notNull(errors, "Errors must not be null!");
-		Assert.isTrue(!errors.isEmpty(), "Errors must not be empty!");
-		this.vndErrors = errors;
+		Assert.notNull(errors, "Errors must not be null!"); // Retain for compatibility
+		Assert.notEmpty(errors, "Errors must not be empty!");
+
+		this.errors = errors;
+		this.message = message;
+		this.logref = logref;
+
+		if (links != null && !links.isEmpty()) {
+			add(links);
+		}
+	}
+
+	public VndErrors withMessage(String message) {
+		return new VndErrors(this.errors, message, this.logref, this.getLinks());
+	}
+
+	public VndErrors withLogref(Integer logref) {
+		return new VndErrors(this.errors, this.message, logref, this.getLinks());
+	}
+
+	public VndErrors withErrors(List<VndError> errors) {
+
+		Assert.notNull(errors, "errors must not be null!");
+		Assert.notEmpty(errors, "errors must not empty!");
+
+		return new VndErrors(errors, this.message, this.logref, this.getLinks());
+	}
+
+	public VndErrors withError(VndError error) {
+
+		this.errors.add(error);
+		return new VndErrors(this.errors, this.message, this.logref, this.getLinks());
+	}
+
+	public VndErrors withLink(Link link) {
+
+		add(link);
+		return new VndErrors(this.errors, this.message, this.logref, this.getLinks());
+	}
+
+	public VndErrors withLinks(Link... links) {
+
+		add(links);
+		return new VndErrors(this.errors, this.message, this.logref, this.getLinks());
 	}
 
 	/**
-	 * Protected default constructor to allow JAXB marshalling.
+	 * Returns the underlying elements.
+	 *
+	 * @return the content will never be {@literal null}.
 	 */
-	protected VndErrors() {
-		this.vndErrors = new ArrayList<>();
+	@Override
+	public Collection<VndError> getContent() {
+		return this.errors;
+	}
+
+	/**
+	 * Virtual attribute to generate JSON field of {@literal total}. Only generated when there are multiple errors.
+	 */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	public Integer getTotal() {
+		return this.errors.size() > 1 //
+				? this.errors.size() //
+				: null; //
 	}
 
 	/**
 	 * Adds an additional {@link VndError} to the wrapper.
 	 *
 	 * @param error
+	 * @deprecated Use {{@link #withError(VndError)}}
 	 */
+	@Deprecated
 	public VndErrors add(VndError error) {
-		this.vndErrors.add(error);
-		return this;
-	}
-
-	/**
-	 * Dummy method to allow {@link JsonValue} to be configured.
-	 *
-	 * @return the vndErrors
-	 */
-	@JsonValue
-	private List<VndError> getErrors() {
-		return vndErrors;
+		return withError(error);
 	}
 
 	/*
@@ -113,142 +199,70 @@ public class VndErrors implements Iterable<VndErrors.VndError> {
 	 */
 	@Override
 	public Iterator<VndErrors.VndError> iterator() {
-		return this.vndErrors.iterator();
+		return this.errors.iterator();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
-		return String.format("VndErrors[%s]", StringUtils.collectionToCommaDelimitedString(vndErrors));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return vndErrors.hashCode();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(@Nullable Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof VndErrors)) {
-			return false;
-		}
-
-		VndErrors that = (VndErrors) obj;
-		return this.vndErrors.equals(that.vndErrors);
+		return String.format("VndErrors[%s]", StringUtils.collectionToCommaDelimitedString(this.errors));
 	}
 
 	/**
 	 * A single {@link VndError}.
 	 *
 	 * @author Oliver Gierke
+	 * @author Greg Turnquist
 	 */
+	@JsonPropertyOrder({ "message", "path", "logref" })
+	@Relation(collectionRelation = "errors")
+	@EqualsAndHashCode
 	public static class VndError extends RepresentationModel<VndError> {
 
-		@JsonProperty private final String logref;
-		@JsonProperty private final String message;
+		@Getter //
+		private final String message;
+
+		@Getter(onMethod = @__(@JsonInclude(JsonInclude.Include.NON_EMPTY))) //
+		private final String path;
+
+		@Getter(onMethod = @__(@JsonInclude(JsonInclude.Include.NON_EMPTY))) //
+		private final Integer logref;
 
 		/**
-		 * Creates a new {@link VndError} with the given logref, a message as well as some {@link Link}s.
+		 * Creates a new {@link VndError} with a message and optional a path and a logref.
 		 *
-		 * @param logref must not be {@literal null} or empty.
 		 * @param message must not be {@literal null} or empty.
+		 * @param path
+		 * @param logref must not be {@literal null} or empty.
 		 * @param links
 		 */
-		public VndError(String logref, String message, Link... links) {
+		@JsonCreator
+		public VndError(@JsonProperty("message") String message, @JsonProperty("path") String path,
+				@JsonProperty("logref") Integer logref, @JsonProperty("_links") List<Link> links) {
 
-			Assert.hasText(logref, "Logref must not be null or empty!");
 			Assert.hasText(message, "Message must not be null or empty!");
 
-			this.logref = logref;
 			this.message = message;
-			this.add(Arrays.asList(links));
+			this.path = path;
+			this.logref = logref;
+			this.add(links);
+		}
+
+		public VndError(String message, String path, Integer logref, Link... link) {
+			this(message, path, logref, Arrays.asList(link));
 		}
 
 		/**
-		 * Protected default constructor to allow JAXB marshalling.
+		 * @deprecated Use {@link #VndError(String, String, Integer, Link...)} (with proper ordering of arguments)
 		 */
-		protected VndError() {
-
-			this.logref = null;
-			this.message = null;
+		@Deprecated
+		public VndError(String logref, String message, Link... links) {
+			this(message, null, Integer.parseInt(logref), Arrays.asList(links));
 		}
 
-		/**
-		 * Returns the logref of the error.
-		 *
-		 * @return the logref
-		 */
-		public String getLogref() {
-			return logref;
-		}
-
-		/**
-		 * Returns the message of the error.
-		 *
-		 * @return the message
-		 */
-		public String getMessage() {
-			return message;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.ResourceSupport#toString()
-		 */
 		@Override
 		public String toString() {
-			return String.format("VndError[logref: %s, message: %s, links: [%s]]", logref, message, getLinks().toString());
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.ResourceSupport#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-
-			int result = 17;
-
-			result += 31 * logref.hashCode();
-			result += 31 * message.hashCode();
-
-			return result;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(@Nullable Object obj) {
-
-			if (obj == this) {
-				return true;
-			}
-
-			if (!(obj instanceof VndError)) {
-				return false;
-			}
-
-			VndError that = (VndError) obj;
-
-			return this.logref.equals(that.logref) && this.message.equals(that.message);
+			return String.format("VndError[logref: %s, message: %s, links: [%s]]", this.logref, this.message,
+					getLinks().toString());
 		}
 	}
 }

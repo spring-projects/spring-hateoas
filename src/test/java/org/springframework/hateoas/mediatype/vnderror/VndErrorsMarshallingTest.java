@@ -16,24 +16,23 @@
 package org.springframework.hateoas.mediatype.vnderror;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.support.MappingUtils.*;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -46,58 +45,92 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 class VndErrorsMarshallingTest {
 
-	ObjectMapper jackson2Mapper;
-
-	LinkRelationProvider relProvider = new EvoInflectorLinkRelationProvider();
-
-	VndErrors errors;
-	String jsonReference;
-	String json2Reference;
-
-	public VndErrorsMarshallingTest() throws IOException {
-
-		jsonReference = readFile(new ClassPathResource("vnderror.json"));
-		json2Reference = readFile(new ClassPathResource("vnderror2.json"));
-	}
+	ObjectMapper mapper;
 
 	@BeforeEach
 	void setUp() {
 
-		jackson2Mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-		jackson2Mapper.registerModule(new Jackson2HalModule());
-		jackson2Mapper.setHandlerInstantiator(
-				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
-		jackson2Mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		LinkRelationProvider relProvider = new AnnotationLinkRelationProvider();
 
-		VndError error = new VndError("42", "Validation failed!", //
-				new Link("http://...", "describes"), new Link("http://...", "help"));
-		errors = new VndErrors(error, error, error);
+		this.mapper = new ObjectMapper();
+		this.mapper.registerModule(new Jackson2HalModule());
+		this.mapper.setHandlerInstantiator(
+				new HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
+		this.mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
-	/**
-	 * @see #62
-	 */
-	@Test
-	void jackson2Marshalling() throws Exception {
+	@Test // #93, #94, #775
+	void singleItemVndErrorShouldDeserialize() throws IOException {
 
-		assertThat(jackson2Mapper.writeValueAsString(errors)) //
-				.isEqualToIgnoringWhitespace(json2Reference);
+		String expected = read(new ClassPathResource("vnderror-single-item.json", getClass()));
+
+		VndError actual = new VndError("Validation failed", "/username", 42,
+				new Link("http://path.to/user/resource/1", IanaLinkRelations.ABOUT),
+				new Link("http://path.to/describes", IanaLinkRelations.DESCRIBES),
+				new Link("http://path.to/help", IanaLinkRelations.HELP));
+
+		assertThat(this.mapper.readValue(expected, VndError.class)).isEqualTo(actual);
 	}
 
-	/**
-	 * @see #93, #94
-	 */
-	@Test
-	void jackson2UnMarshalling() throws Exception {
-		assertThat(jackson2Mapper.readValue(jsonReference, VndErrors.class)).isEqualTo(errors);
+	@Test // #62, #775
+	public void singleItemVndErrorShouldSerialize() throws IOException {
+
+		VndError error = new VndError("Validation failed", "/username", 42, //
+				new Link("http://path.to/user/resource/1", IanaLinkRelations.ABOUT),
+				new Link("http://path.to/describes", IanaLinkRelations.DESCRIBES),
+				new Link("http://path.to/help", IanaLinkRelations.HELP));
+
+		String json = read(new ClassPathResource("vnderror-single-item.json", getClass()));
+
+		assertThat(mapper.writeValueAsString(error)).isEqualToIgnoringWhitespace(json);
 	}
 
-	private static String readFile(org.springframework.core.io.Resource resource) throws IOException {
+	@Test // #62, #775
+	public void multipleItemVndErrorsShouldDeserialize() throws IOException {
 
-		try (FileInputStream stream = new FileInputStream(resource.getFile())) {
-			FileChannel fc = stream.getChannel();
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-			return Charset.defaultCharset().decode(bb).toString();
-		}
+		String json = read(new ClassPathResource("vnderror-multiple-items.json", getClass()));
+
+		VndError error1 = new VndError("\"username\" field validation failed", null, 50, //
+				new Link("http://.../", IanaLinkRelations.HELP));
+
+		VndError error2 = new VndError("\"postcode\" field validation failed", null, 55, //
+				new Link("http://.../", IanaLinkRelations.HELP));
+
+		VndErrors vndErrors = new VndErrors().withError(error1).withError(error2);
+
+		assertThat(this.mapper.readValue(json, VndErrors.class)).isEqualTo(vndErrors);
+	}
+
+	@Test // #775
+	public void multipleItemVndErrorsShouldSerialize() throws IOException {
+
+		VndError error1 = new VndError("\"username\" field validation failed", null, 50, //
+				new Link("http://.../", IanaLinkRelations.HELP));
+
+		VndError error2 = new VndError("\"postcode\" field validation failed", null, 55, //
+				new Link("http://.../", IanaLinkRelations.HELP));
+
+		VndErrors vndErrors = new VndErrors().withError(error1).withError(error2);
+
+		String json = read(new ClassPathResource("vnderror-multiple-items.json", getClass()));
+
+		assertThat(this.mapper.writeValueAsString(vndErrors)).isEqualToIgnoringWhitespace(json);
+	}
+
+	@Test // #775
+	public void nestedVndErrorsShouldSerialize() throws IOException {
+
+		VndError error = new VndError("Username must contain at least three characters", "/username", (Integer) null, //
+				new Link("http://path.to/user/resource/1", IanaLinkRelations.ABOUT));
+
+		VndErrors vndErrors = new VndErrors().withError(error)
+				.withLink(new Link("http://path.to/describes").withRel(IanaLinkRelations.DESCRIBES))
+				.withLink(new Link("http://path.to/help").withRel(IanaLinkRelations.HELP))
+				.withLink(new Link("http://path.to/user/resource/1").withRel(IanaLinkRelations.ABOUT))
+				.withMessage("Validation failed").withLogref(42);
+
+		String json = read(new ClassPathResource("vnderror-nested.json", getClass()));
+
+		assertThat(mapper.writeValueAsString(vndErrors)).isEqualToIgnoringWhitespace(json);
 	}
 }
