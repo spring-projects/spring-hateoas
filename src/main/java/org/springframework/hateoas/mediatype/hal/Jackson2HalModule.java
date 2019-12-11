@@ -52,7 +52,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
@@ -809,33 +808,17 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
 				HalConfiguration halConfiguration) {
-			this(provider, curieProvider, resolver, true, halConfiguration);
+			this(provider, curieProvider, resolver, halConfiguration, null);
 		}
 
-		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
-		 * and {@link MessageResolver} and whether to enforce embedded collections. Registers a prepared
-		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to instantiation expecting a
-		 * default constructor.
-		 *
-		 * @param provider must not be {@literal null}.
-		 * @param curieProvider can be {@literal null}
-		 * @param resolver must not be {@literal null}..
-		 * @param enforceEmbeddedCollections
-		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
-				boolean enforceEmbeddedCollections, HalConfiguration halConfiguration) {
-			this(provider, curieProvider, resolver, enforceEmbeddedCollections, null, halConfiguration);
-		}
-
-		private HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
-				boolean enforceEmbeddedCollections, @Nullable AutowireCapableBeanFactory delegate,
-				HalConfiguration halConfiguration) {
+				HalConfiguration halConfiguration, @Nullable AutowireCapableBeanFactory delegate) {
 
 			Assert.notNull(provider, "RelProvider must not be null!");
 			Assert.notNull(curieProvider, "CurieProvider must not be null!");
 
-			EmbeddedMapper mapper = new EmbeddedMapper(provider, curieProvider, enforceEmbeddedCollections);
+			EmbeddedMapper mapper = new EmbeddedMapper(provider, curieProvider,
+					halConfiguration.isEnforceEmbeddedCollections());
 
 			this.delegate = delegate;
 

@@ -55,6 +55,12 @@ public class HalConfiguration {
 	private final @Wither @Getter boolean applyPropertyNamingStrategy;
 
 	/**
+	 * Configures whether to always use collections for embeddeds, even if there's only one entry for a link relation.
+	 * Defaults to {@literal true}.
+	 */
+	private final @Wither @Getter boolean enforceEmbeddedCollections;
+
+	/**
 	 * Creates a new default {@link HalConfiguration} rendering single links as immediate sub-document.
 	 */
 	public HalConfiguration() {
@@ -62,6 +68,7 @@ public class HalConfiguration {
 		this.renderSingleLinks = RenderSingleLinks.AS_SINGLE;
 		this.singleLinksPerPattern = new LinkedHashMap<>();
 		this.applyPropertyNamingStrategy = true;
+		this.enforceEmbeddedCollections = true;
 	}
 
 	/**

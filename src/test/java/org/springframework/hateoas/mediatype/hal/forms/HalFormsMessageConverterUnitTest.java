@@ -24,6 +24,7 @@ import java.io.OutputStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -56,7 +57,7 @@ class HalFormsMessageConverterUnitTest {
 		this.mapper.registerModule(new Jackson2HalFormsModule());
 		this.mapper.setHandlerInstantiator(
 				new Jackson2HalFormsModule.HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-						MessageResolver.DEFAULTS_ONLY, true, new HalFormsConfiguration()));
+						MessageResolver.DEFAULTS_ONLY, new HalFormsConfiguration(), new DefaultListableBeanFactory()));
 
 		TypeConstrainedMappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);

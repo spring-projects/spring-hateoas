@@ -164,13 +164,14 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
-				MessageResolver accessor, boolean enforceEmbeddedCollections, HalFormsConfiguration configuration) {
+				MessageResolver accessor, HalFormsConfiguration configuration, AutowireCapableBeanFactory beanFactory) {
 
-			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, configuration.getHalConfiguration());
+			super(resolver, curieProvider, accessor, configuration.getHalConfiguration(), beanFactory);
 
-			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
-			HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, accessor);
 			HalConfiguration halConfiguration = configuration.getHalConfiguration();
+			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider,
+					halConfiguration.isEnforceEmbeddedCollections());
+			HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, accessor);
 
 			this.serializers.put(HalFormsRepresentationModelSerializer.class,
 					new HalFormsRepresentationModelSerializer(builder));
@@ -182,10 +183,9 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		}
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,
-				MessageResolver resolver, boolean enforceEmbeddedCollections, AutowireCapableBeanFactory beanFactory) {
+				MessageResolver resolver, AutowireCapableBeanFactory beanFactory) {
 
-			this(relProvider, curieProvider, resolver, enforceEmbeddedCollections,
-					beanFactory.getBean(HalFormsConfiguration.class));
+			this(relProvider, curieProvider, resolver, beanFactory.getBean(HalFormsConfiguration.class), beanFactory);
 		}
 
 		@Nullable

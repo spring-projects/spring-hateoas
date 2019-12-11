@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
@@ -49,6 +50,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final ObjectProvider<HalFormsConfiguration> halFormsConfiguration;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
 	private final MessageResolver resolver;
+	private final AbstractAutowireCapableBeanFactory beanFactory;
 
 	@Bean
 	LinkDiscoverer halFormsLinkDiscoverer() {
@@ -77,7 +79,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, true, configuration));
+				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, configuration, beanFactory));
 
 		return mapper;
 	}

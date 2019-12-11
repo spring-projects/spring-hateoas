@@ -15,10 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
@@ -38,27 +41,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Drotbohm
  */
 @Configuration
+@RequiredArgsConstructor
 public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final LinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
 	private final ObjectProvider<HalConfiguration> halConfiguration;
 	private final @Qualifier("messageResolver") MessageResolver resolver;
-
-	/**
-	 * @param relProvider
-	 * @param curieProvider
-	 * @param halConfiguration
-	 * @param resolver
-	 */
-	public HalMediaTypeConfiguration(LinkRelationProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
-			ObjectProvider<HalConfiguration> halConfiguration, MessageResolver resolver) {
-
-		this.relProvider = relProvider;
-		this.curieProvider = curieProvider;
-		this.halConfiguration = halConfiguration;
-		this.resolver = resolver;
-	}
+	private final AutowireCapableBeanFactory beanFactory;
 
 	@Bean
 	LinkDiscoverer halLinkDisocoverer() {
@@ -85,7 +75,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
 				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver,
-				halConfiguration.getIfAvailable(HalConfiguration::new)));
+				halConfiguration.getIfAvailable(HalConfiguration::new), beanFactory));
 
 		return mapper;
 	}

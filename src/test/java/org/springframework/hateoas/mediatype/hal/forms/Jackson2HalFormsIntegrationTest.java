@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
@@ -90,7 +91,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, true, new HalFormsConfiguration()));
+				provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalFormsConfiguration(),
+				new DefaultListableBeanFactory()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -595,7 +597,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
-				MessageResolver.of(messageSource), true, new HalFormsConfiguration()));
+				MessageResolver.of(messageSource), new HalFormsConfiguration(), new DefaultListableBeanFactory()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);
 
