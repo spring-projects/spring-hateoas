@@ -42,9 +42,13 @@ import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
+import org.springframework.hateoas.server.core.Relation;
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
@@ -529,6 +533,38 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 
 		assertThat(context.read("$.key", String.class)).isEqualTo("value");
 		assertThat(context.read("$.anotherKey", String.class)).isEqualTo("anotherValue");
+	}
+
+	@Test // #1157
+	void deserializesEntityModelForMapCorrectly() throws Exception {
+
+		TypeFactory typeFactory = mapper.getTypeFactory();
+
+		JavaType mapType = typeFactory.constructParametricType(Map.class, String.class, Object.class);
+		JavaType modelType = typeFactory.constructParametricType(EntityModel.class, mapType);
+
+		String source = "{ \"key\" : \"value\" }";
+
+		EntityModel<Map<String, Object>> result = mapper.readValue(source, modelType);
+
+		assertThat(result.getContent()).containsEntry("key", "value");
+	}
+
+	@Test // #1157
+	void doesNotSetSuperflousPropertiesAsMapIfSpecialContentTypeIsRequested() throws Exception {
+
+		JavaType modelType = mapper.getTypeFactory().constructParametricType(EntityModel.class, SomeSample.class);
+
+		String source = "{ \"name\" : \"Dave\", \"instrument\" : \"Guitar\" }";
+
+		EntityModel<SomeSample> result = mapper.readValue(source, modelType);
+
+		assertThat(result.getContent().name).isEqualTo("Dave");
+	}
+
+	@Relation(collectionRelation = "someSample")
+	static class SomeSample {
+		@JsonProperty String name;
 	}
 
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {

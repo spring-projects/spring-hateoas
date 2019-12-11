@@ -17,10 +17,13 @@ package org.springframework.hateoas;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
@@ -31,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
-	private final T content;
+	private T content;
 
 	/**
 	 * Creates an empty {@link EntityModel}.
@@ -73,6 +76,25 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	@Nullable
 	public T getContent() {
 		return content;
+	}
+
+	// Hacks to allow deserialization into an EntityModel<Map<String, Object>>
+
+	@JsonAnySetter
+	private void setPropertiesAsMap(String key, Object value) {
+		getOrInitAsMap().put(key, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> getOrInitAsMap() {
+
+		if (this.content == null) {
+			this.content = (T) new LinkedHashMap<>();
+		} else {
+			Assert.state(Map.class.isInstance(this.content), "Content is not a Map!");
+		}
+
+		return (Map<String, Object>) this.content;
 	}
 
 	/*
