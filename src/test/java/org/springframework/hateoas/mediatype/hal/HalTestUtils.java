@@ -16,12 +16,53 @@
 package org.springframework.hateoas.mediatype.hal;
 
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.server.LinkRelationProvider;
+import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
+import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
+import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
+ * Test utilities for HAL.
+ *
  * @author Oliver Drotbohm
  */
 public class HalTestUtils {
+
+	/**
+	 * Returns a default HAL {@link ObjectMapper} using a default {@link HalConfiguration}.
+	 *
+	 * @return
+	 */
+	public static ObjectMapper halObjectMapper() {
+		return halObjectMapper(new HalConfiguration());
+	}
+
+	/**
+	 * Returns a default HAL {@link ObjectMapper} using the given {@link HalConfiguration}.
+	 *
+	 * @param configuration must not be {@literal null}.
+	 * @return
+	 */
+	public static ObjectMapper halObjectMapper(HalConfiguration configuration) {
+
+		Assert.notNull(configuration, "HalConfiguration must not be null!");
+
+		ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
+
+		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
+				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
+
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.setHandlerInstantiator(
+				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, configuration));
+
+		return mapper;
+	}
 
 	public enum DefaultLinkRelationProvider implements LinkRelationProvider {
 
@@ -54,5 +95,4 @@ public class HalTestUtils {
 			return delimiter.isCollectionRelationLookup();
 		}
 	}
-
 }

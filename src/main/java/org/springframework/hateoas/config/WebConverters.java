@@ -38,8 +38,7 @@ class WebConverters {
 	private final List<HttpMessageConverter<?>> converters;
 
 	/**
-	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and
-	 * {@link HypermediaMappingInformation}s.
+	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param mappingInformation must not be {@literal null}.
@@ -52,8 +51,7 @@ class WebConverters {
 	}
 
 	/**
-	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and
-	 * {@link HypermediaMappingInformation}s.
+	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param mappingInformations must not be {@literal null}.
@@ -106,7 +104,7 @@ class WebConverters {
 	private static AbstractJackson2HttpMessageConverter createMessageConverter(HypermediaMappingInformation type,
 			ObjectMapper mapper) {
 
-		return new TypeConstrainedMappingJackson2HttpMessageConverter(RepresentationModel.class, type.getMediaTypes(),
+		return new TypeConstrainedMappingJackson2HttpMessageConverter(type.getRootType(), type.getMediaTypes(),
 				type.configureObjectMapper(mapper));
 	}
 }

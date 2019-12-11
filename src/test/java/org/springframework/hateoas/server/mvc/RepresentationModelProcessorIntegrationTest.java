@@ -110,8 +110,8 @@ public class RepresentationModelProcessorIntegrationTest {
 	@Test
 	public void problemReturningControllerMethod() throws Exception {
 
-		this.mockMvc.perform(get("/employees/problem").accept(PROBLEM_JSON)) //
-				.andExpect(content().contentType(PROBLEM_JSON)) //
+		this.mockMvc.perform(get("/employees/problem").accept(HTTP_PROBLEM_DETAILS_JSON)) //
+				.andExpect(content().contentType(HTTP_PROBLEM_DETAILS_JSON)) //
 				.andExpect(status().is(HttpStatus.BAD_REQUEST.value())) //
 				.andExpect(jsonPath("$.type", is("http://example.com/problem"))) //
 				.andExpect(jsonPath("$.title", is("Employee-based problem"))) //

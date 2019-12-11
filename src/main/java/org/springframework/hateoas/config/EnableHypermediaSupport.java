@@ -82,6 +82,8 @@ public @interface EnableHypermediaSupport {
 		 */
 		HAL_FORMS(MediaTypes.HAL_FORMS_JSON),
 
+		HTTP_PROBLEM_DETAILS(MediaTypes.HTTP_PROBLEM_DETAILS_JSON),
+
 		/**
 		 * Collection+JSON
 		 *

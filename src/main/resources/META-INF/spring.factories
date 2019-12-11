@@ -7,7 +7,8 @@ org.springframework.hateoas.config.MediaTypeConfigurationProvider=\
  org.springframework.hateoas.mediatype.collectionjson.CollectionJsonMediaTypeConfigurationProvider,\
  org.springframework.hateoas.mediatype.hal.HalMediaTypeConfigurationProvider,\
  org.springframework.hateoas.mediatype.hal.forms.HalFormsMediaTypeConfigurationProvider,\
- org.springframework.hateoas.mediatype.uber.UberMediaTypeConfigurationProvider
+ org.springframework.hateoas.mediatype.uber.UberMediaTypeConfigurationProvider,\
+ org.springframework.hateoas.mediatype.problem.HttpProblemDetailsConfigurationProvider
  
 org.springframework.hateoas.client.TraversonDefaults=\
  org.springframework.hateoas.mediatype.hal.HalTraversonDefaults

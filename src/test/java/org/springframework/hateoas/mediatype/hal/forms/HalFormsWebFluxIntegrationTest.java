@@ -133,20 +133,20 @@ class HalFormsWebFluxIntegrationTest {
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
 	}
 
-	@Test
+	@Test // #786
 	void problemReturningControllerMethod() {
 
-		Problem<?> problem = this.testClient.get().uri("http://localhost/employees/problem").accept(MediaTypes.PROBLEM_JSON) //
+		Problem problem = this.testClient.get().uri("http://localhost/employees/problem").accept(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
 				.exchange() //
 				.expectStatus().isBadRequest() //
-				.expectHeader().contentType(MediaTypes.PROBLEM_JSON) //
+				.expectHeader().contentType(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
 				.expectBody(Problem.class) //
 				.returnResult().getResponseBody();
 
 		assertThat(problem).isNotNull();
 		assertThat(problem.getType()).isEqualTo(URI.create("http://example.com/problem"));
 		assertThat(problem.getTitle()).isEqualTo("Employee-based problem");
-		assertThat(problem.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+		assertThat(problem.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(problem.getDetail()).isEqualTo("This is a test case");
 	}
 

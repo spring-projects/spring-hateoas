@@ -88,12 +88,12 @@ public class MediaTypes {
 	public static final MediaType VND_ERROR_JSON = MediaType.valueOf(VND_ERROR_JSON_VALUE);
 
 	/**
-	 * A String equivalent of {@link MediaTypes#PROBLEM_JSON_VALUE}.
+	 * A String equivalent of {@link MediaTypes#HTTP_PROBLEM_DETAILS_JSON_VALUE}.
 	 */
-	public static final String PROBLEM_JSON_VALUE = "application/problem+json";
+	public static final String HTTP_PROBLEM_DETAILS_JSON_VALUE = "application/problem+json";
 
 	/**
 	 * Public constant media type for {@code application/problem+json}.
 	 */
-	public static final MediaType PROBLEM_JSON = MediaType.parseMediaType(PROBLEM_JSON_VALUE);
+	public static final MediaType HTTP_PROBLEM_DETAILS_JSON = MediaType.parseMediaType(HTTP_PROBLEM_DETAILS_JSON_VALUE);
 }

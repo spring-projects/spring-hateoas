@@ -25,7 +25,6 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -35,18 +34,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Jon Brisbin
  * @author Greg Turnquist
  */
+@Deprecated
 public abstract class AbstractJackson2MarshallingIntegrationTest {
 
 	protected ObjectMapper mapper;
 
 	@BeforeEach
 	void setUp() {
-		mapper = new ObjectMapper();
-		mapper.disable(MapperFeature.AUTO_DETECT_CREATORS) //
-				.disable(MapperFeature.AUTO_DETECT_FIELDS) //
-				.disable(MapperFeature.AUTO_DETECT_GETTERS) //
-				.disable(MapperFeature.AUTO_DETECT_IS_GETTERS) //
-				.disable(MapperFeature.AUTO_DETECT_SETTERS);
+		mapper = MappingTestUtils.defaultObjectMapper();
 	}
 
 	protected ObjectMapper with(HalConfiguration configuration) {

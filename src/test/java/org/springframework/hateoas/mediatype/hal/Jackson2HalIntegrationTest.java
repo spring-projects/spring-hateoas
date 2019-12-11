@@ -34,14 +34,20 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.Links;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
-import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
-import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.Relation;
 import org.springframework.lang.Nullable;
@@ -64,7 +70,7 @@ import com.jayway.jsonpath.JsonPath;
  * @author Greg Turnquist
  * @author Jeffrey Walraven
  */
-class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2HalIntegrationTest {
 
 	static final String SINGLE_LINK_REFERENCE = "{\"_links\":{\"self\":{\"href\":\"localhost\"}}}";
 	static final String LIST_LINK_REFERENCE = "{\"_links\":{\"self\":[{\"href\":\"localhost\"},{\"href\":\"localhost2\"}]}}";
@@ -93,15 +99,11 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	static final String SINGLE_WITH_ONE_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"title\":\"the title\"}}}";
 	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
 
+	private ObjectMapper mapper;
+
 	@BeforeEach
 	void setUpModule() {
-
-		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
-				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
-
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new HalHandlerInstantiator(provider, CurieProvider.NONE,
-				MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
+		this.mapper = HalTestUtils.halObjectMapper();
 	}
 
 	/**
@@ -113,7 +115,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost"));
 
-		assertThat(write(resourceSupport)).isEqualTo(SINGLE_LINK_REFERENCE);
+		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_LINK_REFERENCE);
 	}
 
 	/**
@@ -130,7 +132,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 				.withMedia("the media") //
 				.withDeprecation("/customers/deprecated"));
 
-		assertThat(write(resourceSupport)).isEqualTo(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES);
+		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES);
 	}
 
 	/**
@@ -148,7 +150,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 				.withType("the type") //
 				.withDeprecation("/customers/deprecated"));
 
-		assertThat(read(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, RepresentationModel.class)).isEqualTo(expected);
+		assertThat(mapper.readValue(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, RepresentationModel.class)).isEqualTo(expected);
 	}
 
 	@Test
@@ -157,7 +159,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
 
-		assertThat(write(resourceSupport)).isEqualTo(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES);
+		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES);
 	}
 
 	/**
@@ -169,14 +171,14 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost", "self").withTitle("the title"));
 
-		assertThat(read(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES, RepresentationModel.class)).isEqualTo(expected);
+		assertThat(mapper.readValue(SINGLE_WITH_ONE_EXTRA_ATTRIBUTES, RepresentationModel.class)).isEqualTo(expected);
 	}
 
 	@Test
 	void deserializeSingleLink() throws Exception {
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost"));
-		assertThat(read(SINGLE_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
+		assertThat(mapper.readValue(SINGLE_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
 	}
 
 	/**
@@ -189,7 +191,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		resourceSupport.add(new Link("localhost"));
 		resourceSupport.add(new Link("localhost2"));
 
-		assertThat(write(resourceSupport)).isEqualTo(LIST_LINK_REFERENCE);
+		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(LIST_LINK_REFERENCE);
 	}
 
 	@Test
@@ -199,7 +201,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		expected.add(new Link("localhost"));
 		expected.add(new Link("localhost2"));
 
-		assertThat(read(LIST_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
+		assertThat(mapper.readValue(LIST_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
 	}
 
 	@Test
@@ -212,7 +214,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		CollectionModel<String> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources)).isEqualTo(SIMPLE_EMBEDDED_RESOURCE_REFERENCE);
+		assertThat(mapper.writeValueAsString(resources)).isEqualTo(SIMPLE_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	@Test
@@ -241,7 +243,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources)).isEqualTo(SINGLE_EMBEDDED_RESOURCE_REFERENCE);
+		assertThat(mapper.writeValueAsString(resources)).isEqualTo(SINGLE_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	@Test
@@ -253,9 +255,10 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		CollectionModel<EntityModel<SimplePojo>> expected = new CollectionModel<>(content);
 		expected.add(new Link("localhost"));
 
+		TypeFactory typeFactory = mapper.getTypeFactory();
 		CollectionModel<EntityModel<SimplePojo>> result = mapper.readValue(SINGLE_EMBEDDED_RESOURCE_REFERENCE,
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, SimplePojo.class)));
+				typeFactory.constructParametricType(CollectionModel.class,
+						typeFactory.constructParametricType(EntityModel.class, SimplePojo.class)));
 
 		assertThat(result).isEqualTo(expected);
 
@@ -267,7 +270,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		CollectionModel<EntityModel<SimplePojo>> resources = setupResources();
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources)).isEqualTo(LIST_EMBEDDED_RESOURCE_REFERENCE);
+		assertThat(mapper.writeValueAsString(resources)).isEqualTo(LIST_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	@Test
@@ -295,7 +298,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = new CollectionModel<>(content);
 		resources.add(new Link("localhost"));
 
-		assertThat(write(resources)).isEqualTo(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE);
+		assertThat(mapper.writeValueAsString(resources)).isEqualTo(ANNOTATED_EMBEDDED_RESOURCE_REFERENCE);
 	}
 
 	/**
@@ -322,7 +325,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	 */
 	@Test
 	void serializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
-		assertThat(write(setupAnnotatedResources())).isEqualTo(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE);
+		assertThat(mapper.writeValueAsString(setupAnnotatedResources())).isEqualTo(ANNOTATED_EMBEDDED_RESOURCES_REFERENCE);
 	}
 
 	/**
@@ -343,7 +346,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	 */
 	@Test
 	void serializesPagedResource() throws Exception {
-		assertThat(write(setupAnnotatedPagedResources())).isEqualTo(ANNOTATED_PAGED_RESOURCES);
+		assertThat(mapper.writeValueAsString(setupAnnotatedPagedResources())).isEqualTo(ANNOTATED_PAGED_RESOURCES);
 	}
 
 	/**
@@ -401,7 +404,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		RepresentationModel<?> support = new RepresentationModel<>();
 		support.add(new Link("/foo{?bar}", "search"));
 
-		assertThat(write(support)).isEqualTo(LINK_TEMPLATE);
+		assertThat(mapper.writeValueAsString(support)).isEqualTo(LINK_TEMPLATE);
 	}
 
 	/**
@@ -436,7 +439,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 
 		CollectionModel<Object> resources = new CollectionModel<>(values);
 
-		assertThat(write(resources)).isEqualTo("{\"_embedded\":{\"pojos\":[]}}");
+		assertThat(mapper.writeValueAsString(resources)).isEqualTo("{\"_embedded\":{\"pojos\":[]}}");
 	}
 
 	/**
@@ -458,7 +461,8 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	@Test
 	void rendersSingleLinkAsArrayWhenConfigured() throws Exception {
 
-		ObjectMapper mapper = with(new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY));
+		ObjectMapper mapper = HalTestUtils
+				.halObjectMapper(new HalConfiguration().withRenderSingleLinks(RenderSingleLinks.AS_ARRAY));
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost").withSelfRel());
@@ -477,6 +481,7 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		original.add(new Link("/orders{?id}", "order"));
 
 		String serialized = mapper.writeValueAsString(original);
+
 		assertThat(serialized).isEqualTo("{\"_links\":{\"order\":{\"href\":\"/orders{?id}\",\"templated\":true}}}");
 
 		RepresentationModel<?> deserialized = mapper.readValue(serialized, RepresentationModel.class);
@@ -487,7 +492,8 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	@Test // #811
 	void rendersSpecificRelWithSingleLinkAsArrayIfConfigured() throws Exception {
 
-		ObjectMapper mapper = with(new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY));
+		ObjectMapper mapper = HalTestUtils
+				.halObjectMapper(new HalConfiguration().withRenderSingleLinksFor("foo", RenderSingleLinks.AS_ARRAY));
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
 		resource.add(new Link("/some-href", "foo"));
@@ -545,7 +551,8 @@ class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		CollectionModel<Object> model = new CollectionModel<>(Arrays.asList(new SomeSample()));
 		model.add(new Link("/foo", LinkRelation.of("someSample")));
 
-		ObjectMapper mapper = with(new HalConfiguration().withApplyPropertyNamingStrategy(false)) //
+		ObjectMapper mapper = HalTestUtils.halObjectMapper(new HalConfiguration() //
+				.withApplyPropertyNamingStrategy(false)) //
 				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
 				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 

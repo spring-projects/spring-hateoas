@@ -218,7 +218,7 @@ public class WebMvcEmployeeController {
 	@GetMapping("/employees/problem")
 	public ResponseEntity<?> problem() {
 
-		return ResponseEntity.badRequest().body(new Problem<>() //
+		return ResponseEntity.badRequest().body(Problem.create() //
 				.withType(URI.create("http://example.com/problem")) //
 				.withTitle("Employee-based problem") //
 				.withStatus(HttpStatus.BAD_REQUEST) //
