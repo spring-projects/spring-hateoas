@@ -23,6 +23,7 @@ import java.util.Map;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
@@ -79,6 +80,11 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	}
 
 	// Hacks to allow deserialization into an EntityModel<Map<String, Object>>
+
+	@JsonAnyGetter
+	private Map<String, Object> getMapContent() {
+		return Map.class.isInstance(content) ? (Map<String, Object>) content : null;
+	}
 
 	@JsonAnySetter
 	private void setPropertiesAsMap(String key, Object value) {
