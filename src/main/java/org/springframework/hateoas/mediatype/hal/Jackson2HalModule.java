@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -65,7 +64,6 @@ import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
@@ -88,8 +86,6 @@ public class Jackson2HalModule extends SimpleModule {
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
 		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
-
-		addSerializer(EntityModel.class, new EntityModelSerializer());
 	}
 
 	/**
@@ -102,75 +98,6 @@ public class Jackson2HalModule extends SimpleModule {
 
 		Assert.notNull(mapper, "ObjectMapper must not be null!");
 		return LinkMixin.class.equals(mapper.findMixInClassFor(Link.class));
-	}
-
-	/**
-	 * Custom serializer for {@link EntityModel} to make sure we get {@link Map} instances properly unwrapped. The
-	 * serializer wraps the model instance into a dedicated classes that apply the proper Jackson configuration that's
-	 * needed to achieve this and serializes those.
-	 *
-	 * @author Oliver Drotbohm
-	 * @see https://github.com/FasterXML/jackson-databind/issues/171
-	 */
-	@SuppressWarnings("rawtypes")
-	static class EntityModelSerializer extends StdSerializer<EntityModel> {
-
-		private static final long serialVersionUID = -5933309398043585183L;
-
-		public EntityModelSerializer() {
-			super(EntityModel.class, false);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
-		 */
-		@Override
-		@SuppressWarnings("null")
-		public void serialize(EntityModel value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-
-			Object content = value.getContent();
-
-			RepresentationModel<?> wrapped = Map.class.isInstance(content) //
-					? new MapModel(value) //
-					: new NonMapModel(value);
-
-			provider.defaultSerializeValue(wrapped, gen);
-		}
-
-		static class MapModel extends RepresentationModel<MapModel> {
-
-			private final @Nullable Map<?, ?> map;
-
-			public MapModel(EntityModel<?> model) {
-
-				super(model.getLinks().toList());
-
-				this.map = (Map<?, ?>) model.getContent();
-			}
-
-			@Nullable
-			@JsonAnyGetter
-			public Map<?, ?> getContent() {
-				return map;
-			}
-		}
-
-		static class NonMapModel extends RepresentationModel<NonMapModel> {
-
-			private final EntityModel<?> model;
-
-			public NonMapModel(EntityModel<?> model) {
-				super(model.getLinks().toList());
-				this.model = model;
-			}
-
-			@Nullable
-			@JsonUnwrapped
-			public Object getContent() {
-				return model.getContent();
-			}
-		}
 	}
 
 	/**
