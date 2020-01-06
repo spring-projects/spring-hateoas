@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +36,7 @@ class RestTemplateHateoasConfiguration {
 
 	@Bean
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
-			WebConverters converters) {
+			ObjectProvider<WebConverters> converters) {
 		return new HypermediaRestTemplateBeanPostProcessor(converters);
 	}
 
@@ -49,7 +50,7 @@ class RestTemplateHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-		private final WebConverters converters;
+		private final ObjectProvider<WebConverters> converters;
 
 		/*
 		 * (non-Javadoc)
@@ -64,7 +65,7 @@ class RestTemplateHateoasConfiguration {
 			}
 
 			RestTemplate template = (RestTemplate) bean;
-			template.setMessageConverters(converters.and(template.getMessageConverters()));
+			template.setMessageConverters(converters.getObject().and(template.getMessageConverters()));
 
 			return template;
 		}
