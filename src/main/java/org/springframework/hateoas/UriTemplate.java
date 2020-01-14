@@ -58,9 +58,10 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<>();
 
 	private final TemplateVariables variables;
-	private String toString;
 	private String baseUri;
 	private transient UriBuilderFactory factory;
+
+	private String toString;
 
 	/**
 	 * Creates a new {@link UriTemplate} using the given template string.
@@ -108,7 +109,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
-	 * Creates a new {@link UriTemplate} from the given base URI and {@link TemplateVariables}.
+	 * Creates a new {@link UriTemplate} from the given base URI, {@link TemplateVariables} and {@link UriBuilderFactory}.
 	 *
 	 * @param baseUri must not be {@literal null} or empty.
 	 * @param variables must not be {@literal null}.
@@ -122,6 +123,25 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		this.baseUri = baseUri;
 		this.variables = variables;
+		this.factory = createFactory(baseUri);
+	}
+
+	/**
+	 * Creates a new {@link UriTemplate} from the given base URI, {@link TemplateVariables} and {@link UriBuilderFactory}.
+	 *
+	 * @param baseUri must not be {@literal null} or empty.
+	 * @param variables must not be {@literal null}.
+	 * @param factory must not be {@literal null}.
+	 */
+	private UriTemplate(String baseUri, TemplateVariables variables, UriBuilderFactory factory) {
+
+		Assert.hasText(baseUri, "Base URI must not be null or empty!");
+		Assert.notNull(variables, "Template variables must not be null!");
+		Assert.notNull(factory, "UriBuilderFactory must not be null!");
+
+		this.baseUri = baseUri;
+		this.variables = variables;
+		this.factory = factory;
 	}
 
 	/**
@@ -183,7 +203,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			result.add(variable);
 		}
 
-		return new UriTemplate(baseUri, this.variables.concat(result));
+		return new UriTemplate(baseUri, this.variables.concat(result), this.factory);
 	}
 
 	/**

@@ -291,6 +291,15 @@ class UriTemplateUnitTest {
 		}
 	}
 
+	@Test // #1165
+	void expandsTemplateWithAddedVariable() {
+
+		UriTemplate template = UriTemplate.of("/foo") //
+				.with(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
+
+		assertThat(template.expand("value").toString()).isEqualTo("/foo?bar=value");
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}
