@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.3.RELEASE (2020-01-15)
+----------------------------------------
+- #1184 - Back-port dependency upgrades from 1.1.
+- #1171 - Potential NullPointerException in UriTemplate.
+- #1170 - Update license headers to extend copyright to 2020.
+- #1167 - Premature initialization of downstream beans caused by RestTemplateHateoasConfiguration's reference to WebConverters.
+- #1158 - Map content in an EntityModel is not properly unwrapped.
+- #1156 - Thread-safety issues in AnnotationLinkRelationProvider's cache.
+- #1154 - Query parameters are not removed from generated WebFlux links.
+- #1153 - WebFluxLinkBuilder disregards path set in exchange.
+- #1151 - Disabling Jackson's auto-detection mode breaks rendering of hypermedia elements.
+- #1149 - Further performance improvements in link creation.
+
 Changes in version 1.0.2.RELEASE (2019-12-03)
 ----------------------------------------
 - #1142 - Release 1.0.2.RELEASE.
