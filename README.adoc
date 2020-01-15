@@ -25,7 +25,7 @@ git config core.commentchar "/"
 1. Create a new release (on the main branch).
 +
 ----
-% ci/create-release.sh <release version> <next snapshot version>
+% ci/create-release.sh <release ticket without hash> <release version> <next snapshot version>
 ----
 +
 2. With the release tagged, push the tagged version to the release branch.
