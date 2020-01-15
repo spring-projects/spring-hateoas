@@ -1,6 +1,55 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.1.0.M1 (2020-01-15)
+----------------------------------------
+- #1182 - Upgrade to JUnit 5.5.2.
+- #1181 - Upgrade to Reactor Dysprosium SR3.
+- #1180 - Upgrade to Slf4J 1.7.30.
+- #1179 - Upgrade to Kotlin 1.3.61.
+- #1178 - Upgrade to Jackson 2.10.2.
+- #1177 - Upgrade to JaCoCO 0.8.5.
+- #1176 - Upgrade to AssertJ 3.14.
+- #1174 - Upgrade to Spring Framework 5.2.3.
+- #1169 - Update license headers to extend copyright to 2020.
+- #1166 - Premature initialization of downstream beans caused by RestTemplateHateoasConfiguration's reference to WebConverters.
+- #1165 - Potential NullPointerException in UriTemplate.
+- #1159 - Fold HalHandlerInstantiator.enforceEmbeddedCollections into HalConfiguration.
+- #1157 - Map content in an EntityModel is not properly unwrapped.
+- #1155 - Thread-safety issues in AnnotationLinkRelationProvider's cache.
+- #1152 - Allow appending path segments in WebFluxLinkBuilder.
+- #1148 - Further performance improvements in link creation.
+- #1145 - Query parameters are not removed from generated WebFlux links.
+- #1138 - Upgrade to Spring Framework 5.2.2.
+- #1134 - WebClientConfigurer "drops" ObjectMapper customizations from WebClients.
+- #1133 - Fix package name 'vnderror' to 'vnderrors' in migration script.
+- #1132 - Keys for HAL's _embedded document and link relations do not follow the Jackson PropertyNamingStrategy configured.
+- #1127 - UriTemplate redundantly percent encodes literal part.
+- #1122 - Generics bounds too strict in RepresentationModelAssemblerSupport.
+- #1121 - Bean class without reader method producing NullPointerException.
+- #1119 - Configuring RestTemplate breaks in a pure Spring WebFlux application.
+- #1118 - MemoryLeak caused by UriTemplate cache.
+- #1116 - Refine factory methods and nullability checks for RepresentationModel types.
+- #1109 - Upgrade to Reactor Dysprosium-SR1.
+- #1107 - Upgrade to Spring Framework 5.2.1.RELEASE.
+- #1103 - Migration for ResourceAssemblerSupport -> RepresentationModelAssemblerSupport missing.
+- #1101 - Fix also HAL_JSON_UTF8 media type.
+- #1100 - Upgrade CI to use JDK 13 for edge testing.
+- #1098 - WebMvcHateoasConfiguration not applied for plain client application.
+- #1097 - Fixed some grammatical and spelling errors.
+- #1091 - Fix single char typo.
+- #1057 - Migrate to vendor neutral error handling mechanism (RFC-7807).
+- #1045 - Reduce visibility of UriTemplate constructor calls.
+- #1025 - logref property should be optional.
+- #786 - Introduce comprehensive error handling strategy.
+- #776 - #775 - Overhaul VndErrors to match spec.
+- #775 - Update VndErrors to match latest details of the spec.
+- #651 - Allow VndError  to have children. .
+- #593 - UriTemplate handles encoded variables improperly on expand call.
+- #546 - vnd.error path attribute.
+- #478 - VndErrors.VndError#logRef is not optional.
+- #345 - Vnd.error links key on json response.
+
 Changes in version 1.0.2.RELEASE (2019-12-03)
 ----------------------------------------
 - #1142 - Release 1.0.2.RELEASE.
