@@ -11,7 +11,7 @@
 https://tools.ietf.org/html/draft-kelly-json-hal-08[JSON Hypertext Application Language] or HAL is one of the simplest
 and most widely adopted hypermedia media types adopted when not discussing specific web stacks.
 
-It was the first spec-based media type adopted by Spring HATEAOS.
+It was the first spec-based media type adopted by Spring HATEOAS.
 
 [[mediatypes.hal.configuration]]
 === Configuring link rendering
@@ -30,7 +30,7 @@ include::{resource-dir}/docs/mediatype/hal/hal-multiple-entry-link-relation.json
 ====
 
 But if there is only one link for a given relation, the spec is ambiguous. You could render that as either a single object
-or as 1-item array.
+or as a single-item array.
 
 By default, Spring HATEOAS uses the most terse approach and renders a single-link relation like this:
 
@@ -77,7 +77,7 @@ include::{code-dir}/SampleAppConfiguration.java[tag=2]
 <2> Render `prev` link relations as an object when there is only one link.
 ====
 
-If neither of these match your needs, you can use an Ant-style path patterns:
+If neither of these match your needs, you can use an Ant-style path pattern:
 
 .Pattern-based HAL single-link rendering policy
 ====
@@ -200,7 +200,7 @@ include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample.json[]
 ----
 ====
 
-Checkout the https://rwcbook.github.io/hal-forms/[HAL-FORMS spec] to understand the details of the *_templates* attribute.
+Check out the https://rwcbook.github.io/hal-forms/[HAL-FORMS spec] to understand the details of the *_templates* attribute.
 Read about the <<server.affordances,Affordances API>> to augment your controllers with this extra metadata.
 
 As for single-item (`EntityModel`) and aggregate root collections (`CollectionModel`), Spring HATEOAS renders them
@@ -216,7 +216,7 @@ Spring HATEOAS allows to customize those by shaping the model type for the input
 |Attribute|Description
 |`readOnly`| Set to `true` if there's no setter method for the property. If that is present, use Jackson's `@JsonProperty(Access.READ_ONLY)` on the accessors or field explicitly. Not rendered by default, thus defaulting to `false`.
 |`regex`| Can be customized by using JSR-303's `@Pattern` annotation either on the field or a type. In case of the latter the pattern will be used for every property declared as that particular type. Not rendered by default.
-|`required`| Can be customized by using JSR-303's `@NotNull`. Not rendered by default and thus defaulting to `false`. Templates using `PATCH` as method will automatically have set all properties to not required.
+|`required`| Can be customized by using JSR-303's `@NotNull`. Not rendered by default and thus defaulting to `false`. Templates using `PATCH` as method will automatically have all properties set to not required.
 |===============
 
 For types that you cannot annotate manually, you can register a custom pattern via a `HalFormsConfiguration` bean present in the application context.
@@ -243,7 +243,7 @@ HAL-FORMS contains attributes that are intended for human interpretation, like a
 These can be defined and internationalized using Spring's resource bundle support and the `rest-messages` resource bundle configured by Spring HATEOAS by default.
 
 ==== Template titles
-To define a template title use the following pattern: `_templates.$affordanceName.title`. Note, that in HAL-FORMS, the name of a template is `default` if it is the only one.
+To define a template title use the following pattern: `_templates.$affordanceName.title`. Note that in HAL-FORMS, the name of a template is `default` if it is the only one.
 This means that you'll usually have to qualify the key with the local or fully qualified input type name that affordance describes.
 
 .Defining HAL-FORMS template titles
@@ -275,7 +275,7 @@ firstName._prompt=Firstname <1>
 Employee.firstName._prompt=Firstname <2>
 com.acme.Employee.firstName._prompt=Firstname <3>
 ----
-<1> All properties named `email` will get "Firstname" rendered, independent of the type they're declared in.
+<1> All properties named `firstName` will get "Firstname" rendered, independent of the type they're declared in.
 <2> The `firstName` property in types named `Employee` will be prompted "Firstname".
 <3> The `firstName` property of `com.acme.Employee` will get a prompt of "Firstname" assigned.
 ====
@@ -358,7 +358,7 @@ The previous fragment was lifted from the spec. When Spring HATEOAS renders an `
 
 * Put the `self` link into both the document's `href` attribute and the item-level `href` attribute.
 * Put the rest of the model's links into both the top-level `links` as well as the item-level `links`.
-* Extract the properties from the `EntityModel` and turn them into
+* Extract the properties from the `EntityModel` and turn them into ...
 ====
 
 When rendering a collection of resources, the document is almost the same, except there will be multiple entries inside
@@ -493,10 +493,10 @@ locale-specific message bundles and even internationalize the metadata.
 == Registering a custom media type
 
 Spring HATEOAS allows to integrate support for custom media types through a set of SPIs, that third parties can implement.
-The building blocks of an such an implementations are:
+The building blocks of an such an implementation are:
 
 1. Some form of Jackson ObjectMapper customization. In its most simple case that's a Jackson `Module` implementation.
-2. A `LinkDiscoverer` implementation so that the client side support is able to detect links in representations generated.
+2. A `LinkDiscoverer` implementation so that the client-side support is able to detect links in representations generated.
 3. Some configuration infrastructure that will allow Spring HATEOAS to find the custom implementation and pick up its configuration.
 
 [[mediatypes.custom.configuration]]
@@ -535,7 +535,7 @@ class MyMediaTypeConfigurationProvider
 The configuration class needs to have a default constructor and expose two methods:
 
 <1> A method returning a Spring configuration class that will be included in the application bootstrap when Spring HATEOAS is activated (either implicitly via Spring Boot auto-configuration or via `@EnableHypermediaSupport`).
-<2> A callback method that will get the application selected media types to activate passed. This allows the media type implementation to control, when it it will be activated.
+<2> A callback method that will get passed the application selected media types to activate. This allows the media type implementation to control, when it will be activated.
 ====
 
 The configuration class has to implement `HypermediaMappingInformation`. It could look as simple as this:
@@ -564,7 +564,7 @@ class MyMediaTypeConfiguration implements HypermediaMappingInformation {
 ----
 <1> The configuration class returns the media type it wants to get Spring MVC / Spring WebFlux support set up.
 <2> It overrides `getJacksonModule()` to provide custom serializers to create the media type specific representations.
-<3> It also declares a custom `LinkDiscoverer` implementation for client side support.
+<3> It also declares a custom `LinkDiscoverer` implementation for client-side support.
 ====
 
 The Jackson module usually declares `Serializer` and `Deserializer` implementations for the representation model types `RepresentationModel`, `EntityModel`, `CollectionModel` and `PagedModel`.
@@ -574,7 +574,7 @@ In case you need further customization of the Jackson `ObjectMapper` (like a cus
 === Recommendations
 
 The preferred way to implement media type representations is by providing a type hierarchy that matches the expected format and can be serialized by Jackson as is.
-In the `Serializer` and `Deserializer` implementations registered for `RepresentationModel`, convert the instances into the media type specific model types and then lookup the Jackson serializer for those.
+In the `Serializer` and `Deserializer` implementations registered for `RepresentationModel`, convert the instances into the media type-specific model types and then lookup the Jackson serializer for those.
 
-The media types supported by default use the same configuration mechanism as third party implementations would.
+The media types supported by default use the same configuration mechanism as third-party implementations would do.
 So it's worth studying the implementations in https://github.com/spring-projects/spring-hateoas/tree/master/src/main/java/org/springframework/hateoas/mediatype[the `mediatype` package].
