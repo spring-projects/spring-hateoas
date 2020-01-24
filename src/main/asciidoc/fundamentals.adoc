@@ -42,7 +42,7 @@ include::{code-dir}/FundamentalsTest.java[tags=links]
 `Link` exposes other attributes as defined in https://tools.ietf.org/html/rfc5988[RFC-5988].
 You can set them by calling the corresponding wither method on a `Link` instance.
 
-Find more information on how to create links pointing to Spring MVC and Spring WebFlux controllers in <<server.link-builder>>.
+Find more information on how to create links pointing to Spring MVC and Spring WebFlux controllers in <<server.link-builder.webmvc>> and <<server.link-builder.webflux>>.
 
 [[fundamentals.uri-templates]]
 == URI templates
@@ -105,7 +105,7 @@ assertThat(IanaLinkRelation.isIanaRel(link.getRel())).isTrue();
 To easily create hypermedia enriched representations, Spring HATEOAS provides a set of classes with `RepresentationModel` at their root.
 It's basically a container for a collection of ``Link``s and has convenient methods to add those to the model.
 The models can later be rendered into various media type formats that will define how the hypermedia elements look in the representation.
-For more information on this, have a look at <<mediatypes>>
+For more information on this, have a look at <<mediatypes>>.
 
 .The `RepresentationModel` class hierarchy
 ====
@@ -187,7 +187,7 @@ EntityModel<Person> model = EntityModel.of(person);
 For resources that are conceptually collections, a `CollectionModel` is available.
 Its elements can either be simple objects or `RepresentationModel` instances in turn.
 
-.Using `EntityModel` to wrap existing objects
+.Using `CollectionModel` to wrap a collection of existing objects
 ====
 [source, java]
 ----

@@ -6,7 +6,7 @@ This section describes how to configure Spring HATEOAS.
 [[configuration.at-enable]]
 == Using `@EnableHypermediaSupport`
 
-To let the `RepresentationModel` subtypes be rendered according to the specification of various hypermedia representations types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support https://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
+To let the `RepresentationModel` subtypes be rendered according to the specification of various hypermedia representation types, you can activate support for a particular hypermedia representation format through `@EnableHypermediaSupport`. The annotation takes a `HypermediaType` enumeration as its argument. Currently, we support https://tools.ietf.org/html/draft-kelly-json-hal[HAL] as well as a default rendering. Using the annotation triggers the following:
 
 * It registers necessary Jackson modules to render `EntityModel` and `CollectionModel` in the hypermedia specific format.
 * If JSONPath is on the classpath, it automatically registers a `LinkDiscoverer` instance to look up links by their `rel` in plain JSON representations (see <<client.link-discoverer>>).
@@ -18,7 +18,7 @@ To let the `RepresentationModel` subtypes be rendered according to the specifica
 
 By default, `@EnableHypermediaSupport` will reflectively detect the web application stack you're using and hook into the Spring components registered for those to enable support for hypermedia representations.
 However, there are situations in which you'd only explicitly want to activate support for a particular stack.
-E.g. if your Spring WebMVC based application uses WebFlux' `WebClient` to make outgoing requests and that one is not supposed to work with hypermedia elements, you can restrict the functionality to be enabled by explicitly declaring WebMvc in the configuration:
+E.g. if your Spring WebMVC based application uses WebFlux' `WebClient` to make outgoing requests and that one is not supposed to work with hypermedia elements, you can restrict the functionality to be enabled by explicitly declaring WebMVC in the configuration:
 
 .Explicitly activating hypermedia support for a particular web stack
 ====
