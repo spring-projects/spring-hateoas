@@ -77,7 +77,7 @@ Instead of fetching a single resource, this one deserializes a collection into `
 
 When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in it. Spring HATEOAS provides https://code.google.com/p/json-path[JSONPath]-based implementations of the `LinkDiscoverer` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport`, we automatically expose an instance supporting the configured hypermedia type as a Spring bean.
 
-Alternatively, you can setup and use an instance as follows:
+Alternatively, you can set up and use an instance as follows:
 
 ====
 [source, java]
