@@ -40,6 +40,7 @@ s/Link\.REL_PREV/IanaLinkRelations.PREV/g;\
 s/Link\.REL_NEXT/IanaLinkRelations.NEXT/g;\
 \
 s/hateoas\.EntityLinks/hateoas.server.EntityLinks/g;\
+s/hateoas\.ExposesResourceFor/hateoas.server.ExposesResourceFor/g;\
 s/hateoas\.JsonPathLinkDiscoverer/hateoas.client.JsonPathLinkDiscoverer/g;\
 s/hateoas\.LinkBuilder/hateoas.server.LinkBuilder/g;\
 s/hateoas\.LinkDiscoverer/hateoas.client.LinkDiscoverer/g;\
