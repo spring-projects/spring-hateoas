@@ -72,6 +72,66 @@ public final class TemplateVariable implements Serializable {
 	}
 
 	/**
+	 * Static helper to fashion {@link VariableType#PATH_VARIABLE} variables.
+	 *
+	 * @param pathVariable
+	 * @return
+	 */
+	public static TemplateVariable pathVariable(String pathVariable) {
+		return new TemplateVariable(pathVariable, VariableType.PATH_VARIABLE);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#REQUEST_PARAM} variables.
+	 *
+	 * @param requestParam
+	 * @return
+	 */
+	public static TemplateVariable requestParam(String requestParam) {
+		return new TemplateVariable(requestParam, VariableType.REQUEST_PARAM);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#REQUEST_PARAM_CONTINUED} variables.
+	 *
+	 * @param requestParam
+	 * @return
+	 */
+	public static TemplateVariable requestParamContinued(String requestParam) {
+		return new TemplateVariable(requestParam, VariableType.REQUEST_PARAM_CONTINUED);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#SEGMENT} variables.
+	 *
+	 * @param segment
+	 * @return
+	 */
+	public static TemplateVariable segment(String segment) {
+		return new TemplateVariable(segment, VariableType.SEGMENT);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#FRAGMENT} variables.
+	 *
+	 * @param fragment
+	 * @return
+	 */
+	public static TemplateVariable fragment(String fragment) {
+		return new TemplateVariable(fragment, VariableType.FRAGMENT);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#COMPOSITE_PARAM} variables.
+	 *
+	 * @param compositeParam
+	 * @return
+	 */
+	public static TemplateVariable compositeParam(String compositeParam) {
+		return new TemplateVariable(compositeParam, VariableType.COMPOSITE_PARAM);
+	}
+	
+	/**
 	 * Returns whether the variable has a description.
 	 * 
 	 * @return
@@ -192,7 +252,7 @@ public final class TemplateVariable implements Serializable {
 					.orElseThrow(() -> new IllegalArgumentException("Unsupported variable type " + key + "!"));
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Enum#toString()
 		 */
