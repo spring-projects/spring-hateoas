@@ -16,6 +16,7 @@
 package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.TemplateVariable.*;
 import static org.springframework.hateoas.UriTemplateUnitTest.EncodingFixture.*;
 
 import java.io.ByteArrayInputStream;
@@ -38,7 +39,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.hateoas.TemplateVariable.VariableType;
+import org.springframework.hateoas.TemplateVariable.*;
 
 /**
  * Unit tests for {@link UriTemplate}.
@@ -298,6 +299,25 @@ class UriTemplateUnitTest {
 				.with(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
 
 		assertThat(template.expand("value").toString()).isEqualTo("/foo?bar=value");
+	}
+
+	@Test // 1172
+	void useHelperMethodsToBuildUriTemplates() {
+
+		assertThat(UriTemplate.of("/foo").with(pathVariable("var")).getVariableNames()).containsExactly("var");
+
+		assertThat(UriTemplate.of("/foo").with(requestParam("var")).with(requestParamContinued("var2")).toString())
+				.isEqualTo("/foo{?var,var2}");
+		assertThat(UriTemplate.of("/foo").with(requestParam("var")).with(requestParam("var2")).toString())
+				.isEqualTo("/foo{?var,var2}");
+
+		assertThat(UriTemplate.of("/foo").with(requestParamContinued("var2")).toString()).isEqualTo("/foo{&var2}");
+
+		assertThat(UriTemplate.of("/foo").with(segment("var")).toString()).isEqualTo("/foo{/var}");
+
+		assertThat(UriTemplate.of("/foo").with(fragment("var")).toString()).isEqualTo("/foo{#var}");
+
+		assertThat(UriTemplate.of("/foo").with(compositeParam("var")).toString()).isEqualTo("/foo{*var}");
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
