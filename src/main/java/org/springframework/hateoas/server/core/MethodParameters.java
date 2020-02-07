@@ -17,6 +17,8 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,6 +155,9 @@ public class MethodParameters {
 		private final AnnotationAttribute attribute;
 		private String name;
 
+		@Nullable
+		private volatile Annotation[] combinedAnnotations;
+
 		/**
 		 * Creates a new {@link AnnotationNamingMethodParameter} for the given {@link Method}'s parameter with the given
 		 * index.
@@ -189,6 +194,44 @@ public class MethodParameters {
 			}
 
 			return super.getParameterName();
+		}
+
+		/**
+		 * Return the annotations associated with the specific method/constructor parameter and any parent interfaces.
+		 */
+		@Override
+		public Annotation[] getParameterAnnotations() {
+			Annotation[] anns = this.combinedAnnotations;
+			if (anns == null) {
+				anns = super.getParameterAnnotations();
+				Class<?>[] interfaces = getDeclaringClass().getInterfaces();
+				for (Class<?> iface : interfaces) {
+					try {
+						Method method = iface.getMethod(getExecutable().getName(), getExecutable().getParameterTypes());
+						Annotation[] paramAnns = method.getParameterAnnotations()[getParameterIndex()];
+						if (paramAnns.length > 0) {
+							List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
+							merged.addAll(Arrays.asList(anns));
+							for (Annotation fieldAnn : paramAnns) {
+								boolean existingType = false;
+								for (Annotation ann : anns) {
+									if (ann.annotationType() == fieldAnn.annotationType()) {
+										existingType = true;
+										break;
+									}
+								}
+								if (!existingType) {
+									merged.add(fieldAnn);
+								}
+							}
+							anns = merged.toArray(new Annotation[]{});
+						}
+					} catch (NoSuchMethodException ex) {
+					}
+				}
+				this.combinedAnnotations = anns;
+			}
+			return anns;
 		}
 	}
 }
