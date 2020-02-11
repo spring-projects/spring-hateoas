@@ -48,6 +48,6 @@ public interface RepresentationModelAssembler<T, D extends RepresentationModel<?
 
 		return StreamSupport.stream(entities.spliterator(), false) //
 				.map(this::toModel) //
-				.collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::new));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));
 	}
 }

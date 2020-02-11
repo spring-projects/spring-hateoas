@@ -886,7 +886,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<CollectionModel<?>> {
 
 		private static final long serialVersionUID = 6406522912020578141L;
-		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::new;
+		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::of;
 		private static final Function<JavaType, CollectionJsonDeserializerBase<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
 
 		CollectionJsonResourcesDeserializer() {

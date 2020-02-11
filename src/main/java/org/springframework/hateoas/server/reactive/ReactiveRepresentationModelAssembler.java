@@ -52,6 +52,6 @@ public interface ReactiveRepresentationModelAssembler<T, D extends Representatio
 
 		return entities.flatMap(entity -> toModel(entity, exchange)) //
 				.collectList() //
-				.map(CollectionModel::new);
+				.map(CollectionModel::of);
 	}
 }

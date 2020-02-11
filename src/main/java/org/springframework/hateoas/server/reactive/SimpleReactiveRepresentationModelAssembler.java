@@ -68,7 +68,7 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 		return entities //
 				.flatMap(entity -> toModel(entity, exchange)) //
 				.collectList() //
-				.map(CollectionModel::new) //
+				.map(CollectionModel::of) //
 				.map(it -> addLinks(it, exchange));
 	}
 
