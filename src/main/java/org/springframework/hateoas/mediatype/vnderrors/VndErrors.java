@@ -237,7 +237,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		private final String message;
 
 		@Getter(onMethod = @__(@JsonInclude(JsonInclude.Include.NON_EMPTY))) //
-		private final String path;
+		private final @Nullable String path;
 
 		@Getter(onMethod = @__(@JsonInclude(JsonInclude.Include.NON_EMPTY))) //
 		private final Integer logref;
@@ -251,7 +251,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		 * @param links
 		 */
 		@JsonCreator
-		public VndError(@JsonProperty("message") String message, @JsonProperty("path") String path,
+		public VndError(@JsonProperty("message") String message, @JsonProperty("path") @Nullable String path,
 				@JsonProperty("logref") Integer logref, @JsonProperty("_links") List<Link> links) {
 
 			Assert.hasText(message, "Message must not be null or empty!");
@@ -262,7 +262,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 			this.add(links);
 		}
 
-		public VndError(String message, String path, Integer logref, Link... link) {
+		public VndError(String message, @Nullable String path, Integer logref, Link... link) {
 			this(message, path, logref, Arrays.asList(link));
 		}
 
