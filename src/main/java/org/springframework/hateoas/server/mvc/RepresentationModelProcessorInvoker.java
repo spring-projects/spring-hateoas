@@ -310,7 +310,7 @@ public class RepresentationModelProcessorInvoker {
 		 */
 		private static boolean isValueTypeMatch(@Nullable EntityModel<?> entityModel, @Nullable ResolvableType target) {
 
-			if (entityModel == null || !isRawTypeAssignable(target, entityModel.getClass())) {
+			if (target == null || entityModel == null || !isRawTypeAssignable(target, entityModel.getClass())) {
 				return false;
 			}
 
@@ -323,7 +323,7 @@ public class RepresentationModelProcessorInvoker {
 			ResolvableType type = findGenericType(target, EntityModel.class);
 
 			return target.isAssignableFrom(content.getClass()) || //
-					(type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass())));
+					type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass()));
 		}
 
 		@Nullable
