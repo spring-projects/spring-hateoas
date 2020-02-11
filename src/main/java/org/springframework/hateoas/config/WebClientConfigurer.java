@@ -75,15 +75,8 @@ public class WebClientConfigurer {
 
 			CustomCodecs codecs = it.customCodecs();
 
-			encoders.forEach(encoder -> codecs.register(encoder));
-			decoders.forEach(decoder -> codecs.registerWithDefaultConfig(decoder, config -> {
-
-				Integer maxInMemorySize = config.maxInMemorySize();
-
-				if (maxInMemorySize != null) {
-					decoder.setMaxInMemorySize(maxInMemorySize);
-				}
-			}));
+			encoders.forEach(codecs::registerWithDefaultConfig);
+			decoders.forEach(codecs::registerWithDefaultConfig);
 		};
 	}
 

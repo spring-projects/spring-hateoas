@@ -115,8 +115,8 @@ class WebFluxHateoasConfiguration {
 
 		public void registerCodecs(CustomCodecs codecs) {
 
-			decoders.forEach(codecs::decoder);
-			encoders.forEach(codecs::encoder);
+			decoders.forEach(codecs::registerWithDefaultConfig);
+			encoders.forEach(codecs::registerWithDefaultConfig);
 		}
 
 		private static Decoder<?> getDecoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
