@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.*;
-
 import lombok.Value;
 import lombok.With;
 
@@ -26,6 +24,7 @@ import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**

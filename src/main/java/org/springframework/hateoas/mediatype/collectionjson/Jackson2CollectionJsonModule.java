@@ -901,8 +901,8 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedModel<?>> {
 
 		private static final long serialVersionUID = -7465448422501330790L;
-		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content,
-				links) -> PagedModel.of(content, null, links);
+		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content, links) -> PagedModel
+				.of(content, null, links);
 		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {

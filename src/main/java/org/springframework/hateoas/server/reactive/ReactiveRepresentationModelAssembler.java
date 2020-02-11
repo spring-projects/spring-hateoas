@@ -47,8 +47,7 @@ public interface ReactiveRepresentationModelAssembler<T, D extends Representatio
 	 * @param entities must not be {@literal null}.
 	 * @return {@link CollectionModel} containing {@code D}.
 	 */
-	default Mono<CollectionModel<D>> toCollectionModel(Flux<? extends T> entities,
-			ServerWebExchange exchange) {
+	default Mono<CollectionModel<D>> toCollectionModel(Flux<? extends T> entities, ServerWebExchange exchange) {
 
 		return entities.flatMap(entity -> toModel(entity, exchange)) //
 				.collectList() //

@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas.mediatype;
 
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 
 import com.fasterxml.jackson.databind.JavaType;
 

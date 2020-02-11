@@ -62,8 +62,8 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	 * @param entities must not be {@literal null}.
 	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}.
 	 */
-	default Mono<CollectionModel<EntityModel<T>>> toCollectionModel(
-			Flux<? extends T> entities, ServerWebExchange exchange) {
+	default Mono<CollectionModel<EntityModel<T>>> toCollectionModel(Flux<? extends T> entities,
+			ServerWebExchange exchange) {
 
 		return entities //
 				.flatMap(entity -> toModel(entity, exchange)) //
@@ -77,8 +77,8 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	 *
 	 * @param resources
 	 */
-	default CollectionModel<EntityModel<T>> addLinks(
-			CollectionModel<EntityModel<T>> resources, ServerWebExchange exchange) {
+	default CollectionModel<EntityModel<T>> addLinks(CollectionModel<EntityModel<T>> resources,
+			ServerWebExchange exchange) {
 		return resources;
 	}
 }

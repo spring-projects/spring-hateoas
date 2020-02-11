@@ -15,9 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import static org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.*;
-
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.CollectionJsonResourceDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

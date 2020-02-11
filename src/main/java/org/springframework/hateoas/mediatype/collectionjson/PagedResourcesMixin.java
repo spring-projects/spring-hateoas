@@ -15,9 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import static org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.*;
-
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.CollectionJsonPagedResourcesDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

@@ -18,10 +18,10 @@ package org.springframework.hateoas.mediatype;
 import java.util.List;
 
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
