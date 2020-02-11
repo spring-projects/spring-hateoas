@@ -75,10 +75,15 @@ public class WebClientConfigurer {
 
 			CustomCodecs codecs = it.customCodecs();
 
-			encoders.forEach(codecs::encoder);
-			decoders.stream() //
-					.peek(applyDefaultConfiguration(codecs)) //
-					.forEach(codecs::decoder);
+			encoders.forEach(encoder -> codecs.register(encoder));
+			decoders.forEach(decoder -> codecs.registerWithDefaultConfig(decoder, config -> {
+
+				Integer maxInMemorySize = config.maxInMemorySize();
+
+				if (maxInMemorySize != null) {
+					decoder.setMaxInMemorySize(maxInMemorySize);
+				}
+			}));
 		};
 	}
 
@@ -103,26 +108,7 @@ public class WebClientConfigurer {
 	public WebClient registerHypermediaTypes(WebClient webClient) {
 
 		return webClient.mutate() //
-				.exchangeStrategies(it -> it.codecs(configurer)) //
+				.codecs(configurer) //
 				.build();
-	}
-
-	/**
-	 * Returns a {@link Consumer} of {@link AbstractJackson2Decoder} that will copy the default configuration of the given
-	 * {@link CustomCodecs} to a decoder.
-	 *
-	 * @param codecs must not be {@literal null}.
-	 * @return
-	 */
-	private static Consumer<AbstractJackson2Decoder> applyDefaultConfiguration(CustomCodecs codecs) {
-
-		return decoder -> codecs.withDefaultCodecConfig(config -> {
-
-			Integer maxInMemorySize = config.maxInMemorySize();
-
-			if (maxInMemorySize != null) {
-				decoder.setMaxInMemorySize(maxInMemorySize);
-			}
-		});
 	}
 }
