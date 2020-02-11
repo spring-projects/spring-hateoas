@@ -1,6 +1,21 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.1.0.M2 (2020-02-12)
+----------------------------------------
+- #1205 - Fix nullability warnings in EntityModelProcessorWrapper.isValueTypeMatch(…).
+- #1204 - Fix nullability warnings in VndErrors.
+- #1203 - Migrate off deprecated Link APIs.
+- #1202 - Polish imports and formatting.
+- #1201 - Switch to new EntityModel factory methods where possible.
+- #1200 - Link.of(String, String) should not be deprecated.
+- #1198 - Upgrade to Lombok 1.18.12.
+- #1195 - Upgrade to Jackson BOM 2.10.2.20200130.
+- #1193 - Revise usage of Encoder registration APIs.
+- #1189 - Link building does not consider method parameters declared in interfaces.
+- #1183 - Migration script doesn't cover @ExposesResourceFor.
+- #1172 - Add helper methods for creating template variables.
+
 Changes in version 1.1.0.M1 (2020-01-15)
 ----------------------------------------
 - #1182 - Upgrade to JUnit 5.5.2.
