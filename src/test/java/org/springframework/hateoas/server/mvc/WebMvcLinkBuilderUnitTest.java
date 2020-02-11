@@ -30,11 +30,14 @@ import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -614,6 +617,14 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.expand().getHref()).endsWith("/foo?offset=1");
 	}
 
+	@Test // #1189
+	void parentInterfaceCanHoldSpringWebAnnotations() {
+
+		Link link = linkTo(methodOn(WebMvcClass.class).root("short")).withSelfRel();
+
+		assertThat(link.getHref()).endsWith("/api?view=short");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -723,5 +734,22 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	@RequestMapping("/root")
 	interface ChildControllerWithRootMapping extends ParentControllerWithoutRootMapping {
 
+	}
+
+	// #1189
+
+	interface WebMvcInterface {
+
+		@GetMapping("/api")
+		HttpEntity<?> root(@RequestParam String view);
+	}
+
+	@RestController
+	static class WebMvcClass implements WebMvcInterface {
+
+		@Override
+		public HttpEntity<?> root(String view) {
+			return ResponseEntity.noContent().build();
+		}
 	}
 }

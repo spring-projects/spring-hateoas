@@ -33,10 +33,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.WebFluxLink;
+import org.springframework.http.HttpEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -214,6 +216,16 @@ class WebFluxLinkBuilderTest {
 		});
 	}
 
+	@Test // #1189
+	void detectsParameterAnnotationOnInterfaceDeclarations() throws Exception {
+
+		WebFluxLink link = linkTo(methodOn(WebFluxClass.class).root("any")).withSelfRel();
+
+		verify(null, link, it -> {
+			assertThat(it.getHref()).endsWith("/api?view=any");
+		});
+	}
+
 	private void verify(@Nullable MockServerHttpRequest request, WebFluxLink link, Consumer<Link> verifications) {
 
 		Mono<Link> mono = link.toMono();
@@ -251,6 +263,23 @@ class WebFluxLinkBuilderTest {
 
 		@GetMapping
 		Mono<Object> root() {
+			return Mono.empty();
+		}
+	}
+
+	// #1189
+
+	interface WebFluxInterface {
+
+		@GetMapping("/api")
+		Mono<HttpEntity<?>> root(@RequestParam String view);
+	}
+
+	@RestController
+	static class WebFluxClass implements WebFluxInterface {
+
+		@Override
+		public Mono<HttpEntity<?>> root(String view) {
 			return Mono.empty();
 		}
 	}

@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,6 +32,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -149,14 +151,14 @@ public class MethodParameters {
 	 * set over discovering it.
 	 *
 	 * @author Oliver Gierke
+	 * @author Greg Turnquist
 	 */
 	private static class AnnotationNamingMethodParameter extends SynthesizingMethodParameter {
 
 		private final AnnotationAttribute attribute;
-		private String name;
 
-		@Nullable
-		private volatile Annotation[] combinedAnnotations;
+		private String name;
+		private @Nullable Annotation[] combinedAnnotations;
 
 		/**
 		 * Creates a new {@link AnnotationNamingMethodParameter} for the given {@link Method}'s parameter with the given
@@ -197,41 +199,54 @@ public class MethodParameters {
 		}
 
 		/**
-		 * Return the annotations associated with the specific method/constructor parameter and any parent interfaces.
+		 * Overriding the original behavior to also include parameter annotations declared on original interface method
+		 * declaration for which the parameter is a member of the implementation method.
 		 */
 		@Override
 		public Annotation[] getParameterAnnotations() {
-			Annotation[] anns = this.combinedAnnotations;
-			if (anns == null) {
-				anns = super.getParameterAnnotations();
-				Class<?>[] interfaces = getDeclaringClass().getInterfaces();
-				for (Class<?> iface : interfaces) {
-					try {
-						Method method = iface.getMethod(getExecutable().getName(), getExecutable().getParameterTypes());
-						Annotation[] paramAnns = method.getParameterAnnotations()[getParameterIndex()];
-						if (paramAnns.length > 0) {
-							List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);
-							merged.addAll(Arrays.asList(anns));
-							for (Annotation fieldAnn : paramAnns) {
-								boolean existingType = false;
-								for (Annotation ann : anns) {
-									if (ann.annotationType() == fieldAnn.annotationType()) {
-										existingType = true;
-										break;
-									}
-								}
-								if (!existingType) {
-									merged.add(fieldAnn);
-								}
-							}
-							anns = merged.toArray(new Annotation[]{});
-						}
-					} catch (NoSuchMethodException ex) {
-					}
-				}
-				this.combinedAnnotations = anns;
+
+			if (combinedAnnotations != null) {
+				return combinedAnnotations;
 			}
-			return anns;
+
+			Method method = getMethod();
+
+			if (method == null) {
+				throw new IllegalStateException("No method available for " + this.toString() + "!");
+			}
+
+			Annotation[] original = super.getParameterAnnotations();
+			Method interfaceMethod = ClassUtils.getInterfaceMethodIfPossible(method);
+
+			// No interface or method not declared in interface
+			if (method.equals(interfaceMethod)) {
+				return cacheAndReturn(original);
+			}
+
+			// Lookup annotations and their types of the interface method parameter
+			MethodParameter interfaceParameter = new MethodParameter(interfaceMethod, getParameterIndex());
+			List<Annotation> originalAnnotations = new ArrayList<>(Arrays.asList(original));
+			Set<Class<?>> originalAnnotationTypes = originalAnnotations.stream() //
+					.map(Object::getClass) //
+					.collect(Collectors.toSet());
+
+			// Add annotations which have not been declared on the target method
+			Arrays.stream(interfaceParameter.getParameterAnnotations()) //
+					.filter(it -> !originalAnnotationTypes.contains(it.annotationType())) //
+					.forEach(originalAnnotations::add);
+
+			return cacheAndReturn(originalAnnotations);
+		}
+
+		private Annotation[] cacheAndReturn(List<Annotation> annotations) {
+			return cacheAndReturn(annotations.toArray(new Annotation[annotations.size()]));
+		}
+
+		private Annotation[] cacheAndReturn(Annotation[] annotations) {
+
+			this.combinedAnnotations = annotations;
+
+			return annotations;
 		}
 	}
 }
