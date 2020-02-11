@@ -24,6 +24,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -75,10 +76,8 @@ public class WebClientConfigurer {
 
 			CustomCodecs codecs = it.customCodecs();
 
-			encoders.forEach(codecs::encoder);
-			decoders.stream() //
-					.peek(applyDefaultConfiguration(codecs)) //
-					.forEach(codecs::decoder);
+			encoders.forEach(encoder -> codecs.register(encoder));
+			decoders.forEach(decoder -> codecs.registerWithDefaultConfig(decoder, applyDefaultConfiguration(decoder)));
 		};
 	}
 
@@ -103,26 +102,27 @@ public class WebClientConfigurer {
 	public WebClient registerHypermediaTypes(WebClient webClient) {
 
 		return webClient.mutate() //
-				.exchangeStrategies(it -> it.codecs(configurer)) //
+				.codecs(configurer) //
 				.build();
 	}
 
 	/**
-	 * Returns a {@link Consumer} of {@link AbstractJackson2Decoder} that will copy the default configuration of the given
-	 * {@link CustomCodecs} to a decoder.
+	 * Returns a {@link Consumer} of {@link CodecConfigurer.DefaultCodecConfig} that will copy the default configuration
+	 * into a decoder.
 	 *
-	 * @param codecs must not be {@literal null}.
+	 * @param decoder must not be {@literal null}.
 	 * @return
 	 */
-	private static Consumer<AbstractJackson2Decoder> applyDefaultConfiguration(CustomCodecs codecs) {
+	private static Consumer<CodecConfigurer.DefaultCodecConfig> applyDefaultConfiguration(
+			AbstractJackson2Decoder decoder) {
 
-		return decoder -> codecs.withDefaultCodecConfig(config -> {
+		return config -> {
 
 			Integer maxInMemorySize = config.maxInMemorySize();
 
 			if (maxInMemorySize != null) {
 				decoder.setMaxInMemorySize(maxInMemorySize);
 			}
-		});
+		};
 	}
 }
