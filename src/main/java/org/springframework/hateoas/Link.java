@@ -198,7 +198,6 @@ public class Link implements Serializable {
 	 * @return
 	 * @since 1.1
 	 */
-	@Deprecated
 	public static Link of(String href, String relation) {
 		return new Link(href, relation);
 	}
