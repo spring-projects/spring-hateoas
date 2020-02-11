@@ -18,7 +18,7 @@ package org.springframework.hateoas;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class QueryParameter {
 
 	private final String name;
-	private final @Nullable @Wither String value;
+	private final @Nullable @With String value;
 	private final boolean required;
 
 	/**

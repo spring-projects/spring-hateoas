@@ -19,7 +19,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -89,14 +89,14 @@ public class Link implements Serializable {
 	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
 
 	private LinkRelation rel;
-	private @Wither String href;
-	private @Wither String hreflang;
-	private @Wither String media;
-	private @Wither String title;
-	private @Wither String type;
-	private @Wither String deprecation;
-	private @Wither String profile;
-	private @Wither String name;
+	private @With String href;
+	private @With String hreflang;
+	private @With String media;
+	private @With String title;
+	private @With String type;
+	private @With String deprecation;
+	private @With String profile;
+	private @With String name;
 	private @JsonIgnore UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 

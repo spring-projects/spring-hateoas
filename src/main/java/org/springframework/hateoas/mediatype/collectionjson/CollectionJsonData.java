@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import lombok.Getter;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import org.springframework.lang.Nullable;
 
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Value
 @Getter(onMethod = @__(@JsonProperty))
 @JsonInclude(Include.NON_NULL)
-@Wither
+@With
 class CollectionJsonData {
 
 	private @Nullable String name;

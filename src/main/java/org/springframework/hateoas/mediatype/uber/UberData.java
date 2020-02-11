@@ -19,7 +19,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +61,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Value
 @Getter(onMethod = @__(@JsonProperty))
-@Wither(AccessLevel.PACKAGE)
+@With(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 class UberData {

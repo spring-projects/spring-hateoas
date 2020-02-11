@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
@@ -40,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_DEFAULT)
 @Value
-@Wither
+@With
 @Getter(onMethod = @__(@JsonProperty))
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(force = true)

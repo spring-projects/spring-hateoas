@@ -19,7 +19,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +46,7 @@ import com.fasterxml.jackson.databind.JavaType;
  */
 @Value
 @Getter(onMethod = @__(@JsonProperty))
-@Wither(AccessLevel.PACKAGE)
+@With(AccessLevel.PACKAGE)
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class CollectionJsonItem<T> {
 

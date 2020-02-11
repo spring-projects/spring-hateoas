@@ -18,7 +18,7 @@ package org.springframework.hateoas.mediatype.hal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,20 +45,20 @@ public class HalConfiguration {
 	 * Configures how to render links in case there is exactly one defined for a given link relation in general. By
 	 * default, this single link will be rendered as nested document.
 	 */
-	private final @Wither @Getter RenderSingleLinks renderSingleLinks;
-	private final @Wither(AccessLevel.PRIVATE) Map<String, RenderSingleLinks> singleLinksPerPattern;
+	private final @With @Getter RenderSingleLinks renderSingleLinks;
+	private final @With(AccessLevel.PRIVATE) Map<String, RenderSingleLinks> singleLinksPerPattern;
 
 	/**
 	 * Configures whether the Jackson property naming strategy is applied to link relations and within {@code _embedded}
 	 * clauses.
 	 */
-	private final @Wither @Getter boolean applyPropertyNamingStrategy;
+	private final @With @Getter boolean applyPropertyNamingStrategy;
 
 	/**
 	 * Configures whether to always use collections for embeddeds, even if there's only one entry for a link relation.
 	 * Defaults to {@literal true}.
 	 */
-	private final @Wither @Getter boolean enforceEmbeddedCollections;
+	private final @With @Getter boolean enforceEmbeddedCollections;
 
 	/**
 	 * Creates a new default {@link HalConfiguration} rendering single links as immediate sub-document.

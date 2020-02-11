@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import lombok.AccessLevel;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import org.springframework.lang.Nullable;
 
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  */
 @Value
-@Wither(AccessLevel.PACKAGE)
+@With(AccessLevel.PACKAGE)
 class CollectionJsonError {
 
 	private String title;

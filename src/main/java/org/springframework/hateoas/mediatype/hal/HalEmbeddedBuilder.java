@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.hal;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,7 +56,7 @@ class HalEmbeddedBuilder {
 	/**
 	 * Returns a {@link HalEmbeddedBuilder} with the given transformer
 	 */
-	private final @Wither Function<String, String> relationTransformer;
+	private final @With Function<String, String> relationTransformer;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels

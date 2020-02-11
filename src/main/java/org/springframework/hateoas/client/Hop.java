@@ -19,7 +19,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,12 +49,12 @@ public class Hop {
 	/**
 	 * Collection of URI Template parameters.
 	 */
-	private final @Wither Map<String, Object> parameters;
+	private final @With Map<String, Object> parameters;
 
 	/**
 	 * Extra {@link HttpHeaders} to apply to this hop.
 	 */
-	private final @Wither HttpHeaders headers;
+	private final @With HttpHeaders headers;
 
 	/**
 	 * Creates a new {@link Hop} for the given relation name.

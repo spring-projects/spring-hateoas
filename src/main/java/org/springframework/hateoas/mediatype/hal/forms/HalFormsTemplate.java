@@ -22,7 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @Data
 @Setter(AccessLevel.NONE)
-@Wither
+@With
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 @ToString
@@ -65,7 +65,7 @@ public class HalFormsTemplate {
 	public static final String DEFAULT_KEY = "default";
 
 	private @Getter(onMethod = @__(@JsonInclude(Include.NON_EMPTY))) String title;
-	private @Wither(AccessLevel.PRIVATE) HttpMethod httpMethod;
+	private @With(AccessLevel.PRIVATE) HttpMethod httpMethod;
 	private List<HalFormsProperty> properties;
 	private List<MediaType> contentTypes;
 

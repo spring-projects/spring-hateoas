@@ -16,7 +16,7 @@
 package org.springframework.hateoas.mediatype.collectionjson;
 
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  */
 @Value
-@Wither
+@With
 class CollectionJsonTemplate {
 
 	private List<CollectionJsonData> data;

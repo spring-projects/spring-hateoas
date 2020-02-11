@@ -18,7 +18,7 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import static com.fasterxml.jackson.annotation.JsonInclude.*;
 
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  */
 @Value
-@Wither
+@With
 class CollectionJsonQuery {
 
 	@JsonInclude(Include.NON_NULL) private String rel;

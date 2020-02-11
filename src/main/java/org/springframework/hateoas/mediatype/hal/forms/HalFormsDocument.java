@@ -19,7 +19,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -56,14 +56,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * @author Oliver Gierke
  */
 @Value
-@Wither
+@With
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @JsonPropertyOrder({ "attributes", "entity", "entities", "embedded", "links", "templates", "metadata" })
 public class HalFormsDocument<T> {
 
 	@Nullable //
 	@Getter(onMethod = @__(@JsonAnyGetter)) @JsonInclude(Include.NON_EMPTY) //
-	@Wither(AccessLevel.PRIVATE) //
+	@With(AccessLevel.PRIVATE) //
 	private Map<String, Object> attributes;
 
 	@Nullable //
@@ -74,7 +74,7 @@ public class HalFormsDocument<T> {
 	@Nullable //
 	@JsonInclude(Include.NON_EMPTY) //
 	@JsonIgnore //
-	@Wither(AccessLevel.PRIVATE) //
+	@With(AccessLevel.PRIVATE) //
 	private Collection<T> entities;
 
 	@JsonProperty("_embedded") //

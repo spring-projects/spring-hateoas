@@ -18,7 +18,7 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,7 +41,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Value
 @Getter(onMethod = @__(@JsonProperty))
-@Wither(AccessLevel.PACKAGE)
+@With(AccessLevel.PACKAGE)
 class CollectionJson<T> {
 
 	private String version;

@@ -22,8 +22,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.Value;
+import lombok.With;
 import lombok.experimental.NonFinal;
-import lombok.experimental.Wither;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Oliver Drotbohm
  */
 @Getter(onMethod = @__(@JsonProperty))
-@Wither
+@With
 @ToString
 @EqualsAndHashCode
 @JsonInclude(Include.NON_NULL)

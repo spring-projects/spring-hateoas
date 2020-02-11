@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,12 +98,12 @@ public class Affordances implements AffordanceOperations {
 		private final Affordances context;
 
 		private final HttpMethod method;
-		private final @Wither Link target;
+		private final @With Link target;
 		private final InputPayloadMetadata inputMetdata;
 		private final PayloadMetadata outputMetadata;
 
 		private List<QueryParameter> parameters = Collections.emptyList();
-		private @Nullable @Wither String name;
+		private @Nullable @With String name;
 
 		/**
 		 * Registers the given type as input and output model for the affordance.

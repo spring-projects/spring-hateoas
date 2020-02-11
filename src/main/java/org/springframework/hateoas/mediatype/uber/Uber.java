@@ -18,7 +18,7 @@ package org.springframework.hateoas.mediatype.uber;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Value
 @Getter(onMethod = @__(@JsonProperty))
-@Wither(AccessLevel.PACKAGE)
+@With(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
 class Uber {
 
