@@ -17,7 +17,7 @@ package org.springframework.hateoas.support;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Greg Turnquist
  */
 @Data
-@Wither
+@With
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Employee {

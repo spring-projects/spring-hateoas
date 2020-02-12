@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import lombok.Data;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +148,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 	}
 
 	@Data
-	@Wither
+	@With
 	static class Employee {
 
 		private final String name;
