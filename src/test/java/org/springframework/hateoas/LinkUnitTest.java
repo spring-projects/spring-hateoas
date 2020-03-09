@@ -125,7 +125,7 @@ class LinkUnitTest {
 	 * @see #678
 	 */
 	@Test
-	void parsesRFC5988HeaderIntoLink() {
+	void parsesRFC8288HeaderIntoLink() {
 
 		assertSoftly(softly -> {
 
@@ -184,7 +184,7 @@ class LinkUnitTest {
 	}
 
 	@Test
-	void rejectsNonRFC5988String() {
+	void rejectsNonRFC8288String() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			Link.valueOf("foo");

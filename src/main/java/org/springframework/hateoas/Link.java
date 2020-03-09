@@ -462,11 +462,11 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
+	 * Factory method to easily create {@link Link} instances from RFC-8288 compatible {@link String} representations of a
 	 * link.
 	 *
-	 * @param element an RFC-5899 compatible representation of a link.
-	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-5899.
+	 * @param element an RFC-8288 compatible representation of a link.
+	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-8288.
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
 	 * @return
 	 */
