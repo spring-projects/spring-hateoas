@@ -39,7 +39,7 @@ include::{code-dir}/FundamentalsTest.java[tags=links]
 ----
 ====
 
-`Link` exposes other attributes as defined in https://tools.ietf.org/html/rfc5988[RFC-5988].
+`Link` exposes other attributes as defined in https://tools.ietf.org/html/rfc8288[RFC-8288].
 You can set them by calling the corresponding wither method on a `Link` instance.
 
 Find more information on how to create links pointing to Spring MVC and Spring WebFlux controllers in <<server.link-builder.webmvc>> and <<server.link-builder.webflux>>.
