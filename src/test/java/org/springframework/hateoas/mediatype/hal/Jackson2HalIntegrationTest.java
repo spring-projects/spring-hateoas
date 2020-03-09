@@ -122,7 +122,7 @@ class Jackson2HalIntegrationTest {
 	 * @see #100
 	 */
 	@Test
-	void rendersAllExtraRFC5988Attributes() throws Exception {
+	void rendersAllExtraRFC8288Attributes() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(Link.of("localhost", "self") //
@@ -141,7 +141,7 @@ class Jackson2HalIntegrationTest {
 	 * @see #699
 	 */
 	@Test
-	void deserializeAllExtraRFC5988Attributes() throws Exception {
+	void deserializeAllExtraRFC8288Attributes() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(Link.of("localhost", "self") //
@@ -154,7 +154,7 @@ class Jackson2HalIntegrationTest {
 	}
 
 	@Test
-	void rendersWithOneExtraRFC5988Attribute() throws Exception {
+	void rendersWithOneExtraRFC8288Attribute() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(Link.of("localhost", "self").withTitle("the title"));
@@ -166,7 +166,7 @@ class Jackson2HalIntegrationTest {
 	 * @see #699
 	 */
 	@Test
-	void deserializeOneExtraRFC5988Attribute() throws Exception {
+	void deserializeOneExtraRFC8288Attribute() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(Link.of("localhost", "self").withTitle("the title"));
