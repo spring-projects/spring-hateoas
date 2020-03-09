@@ -96,7 +96,7 @@ class LinksUnitTest {
 	}
 
 	/**
-	 * @see https://tools.ietf.org/html/rfc5988#section-5.5
+	 * @see https://tools.ietf.org/html/rfc8288#section-3.5
 	 */
 	@Test
 	void parsesLinksWithWhitespace() {

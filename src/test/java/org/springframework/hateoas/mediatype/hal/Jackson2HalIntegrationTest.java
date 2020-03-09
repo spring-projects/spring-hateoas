@@ -116,7 +116,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #100
 	 */
 	@Test
-	void rendersAllExtraRFC5988Attributes() throws Exception {
+	void rendersAllExtraRFC8288Attributes() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost", "self") //
@@ -135,7 +135,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #699
 	 */
 	@Test
-	void deserializeAllExtraRFC5988Attributes() throws Exception {
+	void deserializeAllExtraRFC8288Attributes() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost", "self") //
@@ -148,7 +148,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	}
 
 	@Test
-	void rendersWithOneExtraRFC5988Attribute() throws Exception {
+	void rendersWithOneExtraRFC8288Attribute() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(new Link("localhost", "self").withTitle("the title"));
@@ -160,7 +160,7 @@ public class Jackson2HalIntegrationTest extends AbstractJackson2MarshallingInteg
 	 * @see #699
 	 */
 	@Test
-	void deserializeOneExtraRFC5988Attribute() throws Exception {
+	void deserializeOneExtraRFC8288Attribute() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(new Link("localhost", "self").withTitle("the title"));
