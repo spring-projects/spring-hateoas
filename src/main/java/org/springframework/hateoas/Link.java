@@ -473,7 +473,7 @@ public class Link implements Serializable {
 	public static Link valueOf(String element) {
 
 		if (!StringUtils.hasText(element)) {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
 		}
 
 		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);
@@ -519,7 +519,7 @@ public class Link implements Serializable {
 			return link;
 
 		} else {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
 		}
 	}
 

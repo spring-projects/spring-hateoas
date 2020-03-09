@@ -111,7 +111,7 @@ class DefaultCurieProviderUnitTest {
 	 * @see #100
 	 */
 	@Test
-	void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
+	void prefixesNormalRelsThatHaveExtraRFC8288Attributes() {
 
 		Link link = Link.of("https://amazon.com", "custom:rel") //
 				.withHreflang("en") //
