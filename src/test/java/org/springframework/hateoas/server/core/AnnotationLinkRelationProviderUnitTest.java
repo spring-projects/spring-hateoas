@@ -15,13 +15,11 @@
  */
 package org.springframework.hateoas.server.core;
 
+import static org.assertj.core.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Vedran Pavic
@@ -34,7 +32,8 @@ class AnnotationLinkRelationProviderUnitTest {
 		LinkRelationProvider linkRelationProvider = new AnnotationLinkRelationProvider();
 
 		assertThat(linkRelationProvider.getItemResourceRelFor(Resource.class)).isEqualTo(IanaLinkRelations.ITEM);
-		assertThat(linkRelationProvider.getCollectionResourceRelFor(Resource.class)).isEqualTo(IanaLinkRelations.COLLECTION);
+		assertThat(linkRelationProvider.getCollectionResourceRelFor(Resource.class))
+				.isEqualTo(IanaLinkRelations.COLLECTION);
 	}
 
 	@Relation(itemRelation = IanaLinkRelations.ITEM_VALUE, collectionRelation = IanaLinkRelations.COLLECTION_VALUE)

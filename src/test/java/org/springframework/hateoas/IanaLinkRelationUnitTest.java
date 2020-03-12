@@ -19,14 +19,13 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.Value;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Greg Turnquist
@@ -102,7 +101,7 @@ class IanaLinkRelationUnitTest {
 
 		Set<String> stringConstants = Arrays.stream(IanaLinkRelations.class.getDeclaredFields()) //
 				.filter(ReflectionUtils::isPublicStaticFinal) //
-				.filter(field -> String.class.equals(field.getType()))
+				.filter(field -> String.class.equals(field.getType())) //
 				.map(it -> ReflectionUtils.getField(it, null)) //
 				.filter(Objects::nonNull) //
 				.map(String.class::cast) //
@@ -124,6 +123,5 @@ class IanaLinkRelationUnitTest {
 			return this.value;
 		}
 	}
-
 
 }
