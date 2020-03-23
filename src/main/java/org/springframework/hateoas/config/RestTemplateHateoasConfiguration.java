@@ -22,6 +22,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 
@@ -38,6 +39,12 @@ class RestTemplateHateoasConfiguration {
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
 			ObjectProvider<WebConverters> converters) {
 		return new HypermediaRestTemplateBeanPostProcessor(converters);
+	}
+
+	@Bean
+	@Lazy
+	HypermediaRestTemplateConfigurer hypermediaRestTemplateConfigurer(ObjectProvider<WebConverters> converter) {
+		return new HypermediaRestTemplateConfigurer(converter);
 	}
 
 	/**
