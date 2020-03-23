@@ -146,4 +146,77 @@ Again, you can use similar assertions as the earlier example.
 
 There are many other ways to fashion test cases. `WebTestClient` can be bound to controllers, functions, and URLs. This section isn't meant to show all that. Instead, this gives you some examples to get started. The important thing is that by applying `HypermediaWebTestClientConfigurer`, any instance of `WebTestClient` can be altered to handle hypermedia.
 
+[[client.rest-template]]
+== Configuring RestTemplate instances
 
+If you want to create your own copy of `RestTemplate`, configured to speak hypermedia, you can use the `HypermediaRestTemplateConfigurer`:
+
+.Configuring a `RestTemplate` yourself
+====
+[source, java]
+----
+include::{base-dir}/src/docs/java/org/springframework/hateoas/client/HypermediaConfiguration.java[tag=code]
+----
+<1> Inside your `@Configuration` class, get a copy of the `HypermediaRestTemplateConfigurer` bean Spring HATEOAS registers.
+<2> After creating a `RestTemplate`, use the configurer to apply hypermedia types.
+====
+
+You are free to apply this pattern to any instance of `RestTemplate` that you need, whether is to create a registered bean, or inside a service you define.
+
+If you're using Spring Boot, there is another approach.
+
+In general, Spring Boot has moved away from the concept of registering a `RestTemplate` bean in the application context.
+
+* When talking to different services, you often need different credentials.
+* When `RestTemplate` uses an underlying connection pool, you run into additional issues.
+* Users often need different instances rather than a single bean.
+
+To compensate for this, Spring Boot provides a `RestTemplateBuilder`. This autoconfigured bean lets you define various beans used to fashion
+a `RestTemplate` instance. You ask for a `RestTemplateBuilder` bean, execute its `build()` method, and then apply final settings (like credentials, etc.).
+
+To register hypermedia-based message converters, add the following to your code:
+
+.Letting Spring Boot configure things
+====
+[source,java]
+----
+@Bean // <4>
+RestTemplateCustomizer hypermediaRestTemplatCustomizer(HypermediaRestTemplateConfigurer configurer) { // <1>
+    return restTemplate -> { // <2>
+        configurer.registerHypermediaTypes(restTemplate); // <3>
+    };
+}
+----
+<1> When creating a Spring bean, request a copy of Spring HATEOAS's `HypermediaRestTemplateConfigurer` bean.
+<2> Use a Java 8 lambda expression to define a `RestTemplateCustomizer`.
+<3> Inside the function call, apply the `registerHypermediaTypes` method.
+<4> Return the whole thing as a Spring bean so Spring Boot can pick it up and apply it to its autoconfigured `RestTemplateBuilder`.
+====
+
+Assuming you added that `RestTemplateCustomizer` bean definition, this is all you must do to get a `RestTemplate` with hypermedia support:
+
+.Injecting `RestTemplateBuilder` into your service
+====
+[source,java]
+----
+@Service
+public class SampleService {
+
+    private RestTemplateBuilder restTemplateBuilder;
+
+    public SampleService(RestTemplateBuilder restTemplateBuilder) { // <1>
+        this.restTemplateBuilder = restTemplateBuilder;
+    }
+
+    void doSomething() {
+        RestTemplate template = restTemplateBuilder.build(); // <2>
+
+        // Your template is now configured to speak hypermedia!
+    }
+}
+----
+<1> Use *constructor injection* to get a hold of Spring Boot's `RestTemplateBuilder`.
+<2> When you need a `RestTemplate`, invoke `build()`. The instance will have tapped your `RestTemplateCustomizer` code and registered support.
+====
+
+That's all it takes to get `RestTemplate` hypermedia support.
