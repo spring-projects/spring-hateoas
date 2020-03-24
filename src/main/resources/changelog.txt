@@ -1,6 +1,21 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.0.4.RELEASE (2020-03-24)
+----------------------------------------
+- #1236 - Release 1.0.4.RELEASE.
+- #1235 - Upgrade to Jackson 2.10.3.
+- #1234 - Upgrade to Reactor Dysprosium-SR6.
+- #1233 - Fix CI scripts so they use maven caching.
+- #1232 - Upgrade to JUnit 5.6.1.
+- #1231 - Upgrade to Spring Framework 5.2.5.RELEASE.
+- #1220 - Backport IanaLinkRelations String constants to 1.0.
+- #1217 - Backport migration from RFC-5988 to RFC-8288.
+- #1207 - Fix nullability warnings in EntityModelProcessorWrapper.isValueTypeMatch(…).
+- #1197 - Link building does not consider method parameters declared in interfaces.
+- #1196 - Upgrade to Jackson BOM 2.10.2.20200130.
+- #1191 - Backport migration support for @ExposesResourceFor.
+
 Changes in version 1.0.3.RELEASE (2020-01-15)
 ----------------------------------------
 - #1184 - Back-port dependency upgrades from 1.1.
