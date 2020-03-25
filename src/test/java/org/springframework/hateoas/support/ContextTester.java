@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.support;
 
-import java.util.function.Function;
-
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+
+import java.util.function.Function;
 
 /**
  * @author Greg Turnquist

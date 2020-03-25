@@ -15,11 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.alps;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
-
-import reactor.test.StepVerifier;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +23,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 
 /**
  * @author Greg Turnquist
@@ -97,12 +96,8 @@ public class AlpsWebFluxIntegrationTest {
 		}
 
 		@Bean
-		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
-
-			return WebTestClient.bindToApplicationContext(ctx).build() //
-					.mutate() //
-					.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()) //
-					.build();
+		WebTestClient webTestClient(HypermediaWebTestClientConfigurer configurer, ApplicationContext ctx) {
+			return WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 		}
 	}
 

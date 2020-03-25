@@ -15,11 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.support.JsonPathUtils.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +34,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.springframework.hateoas.support.JsonPathUtils.*;
+import static org.springframework.hateoas.support.MappingUtils.*;
 
 /**
  * @author Greg Turnquist
@@ -189,12 +189,8 @@ class CollectionJsonWebFluxIntegrationTest {
 		}
 
 		@Bean
-		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
-
-			return WebTestClient.bindToApplicationContext(ctx).build() //
-					.mutate() //
-					.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()) //
-					.build();
+		WebTestClient webTestClient(HypermediaWebTestClientConfigurer configurer, ApplicationContext ctx) {
+			return WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 		}
 	}
 }

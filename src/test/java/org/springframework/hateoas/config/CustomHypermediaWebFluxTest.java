@@ -52,7 +52,7 @@ class CustomHypermediaWebFluxTest {
 		ctx.register(TestConfig.class);
 		ctx.refresh();
 
-		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
+		HypermediaWebClientConfigurer webClientConfigurer = ctx.getBean(HypermediaWebClientConfigurer.class);
 
 		this.testClient = WebTestClient.bindToApplicationContext(ctx).build() //
 				.mutate() //

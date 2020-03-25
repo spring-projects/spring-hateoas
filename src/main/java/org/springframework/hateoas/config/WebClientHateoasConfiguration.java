@@ -38,21 +38,20 @@ import java.util.List;
 class WebClientHateoasConfiguration {
 
 	@Bean
-	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
+	HypermediaWebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
-		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+		return new HypermediaWebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	@Bean
 	@Lazy
-    HypermediaWebTestClientConfigurer webTestClientConfigurer(ObjectProvider<ObjectMapper> mapper,
-                                                              List<HypermediaMappingInformation> hypermediaTypes) {
+	HypermediaWebTestClientConfigurer webTestClientConfigurer(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> hypermediaTypes) {
 		return new HypermediaWebTestClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	@Bean
-	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(
-			ObjectProvider<WebClientConfigurer> configurer) {
+	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(HypermediaWebClientConfigurer configurer) {
 		return new HypermediaWebClientBeanPostProcessor(configurer);
 	}
 
@@ -66,7 +65,7 @@ class WebClientHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
 
-		private final ObjectProvider<WebClientConfigurer> configurer;
+		private final HypermediaWebClientConfigurer configurer;
 
 		/*
 		 * (non-Javadoc)
@@ -76,8 +75,8 @@ class WebClientHateoasConfiguration {
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-			if (bean instanceof WebClient) {
-				return this.configurer.getObject().registerHypermediaTypes((WebClient) bean);
+			if (WebClient.class.isInstance(bean)) {
+				return this.configurer.registerHypermediaTypes(((WebClient) bean).mutate()).build();
 			}
 
 			return bean;
