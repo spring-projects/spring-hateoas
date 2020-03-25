@@ -15,18 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -50,6 +38,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 
 /**
  * @author Greg Turnquist
@@ -67,10 +66,9 @@ class HypermediaWebFluxConfigurerTest {
 		ctx.register(context);
 		ctx.refresh();
 
-		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
+        HypermediaWebTestClientConfigurer configurer = ctx.getBean(HypermediaWebTestClientConfigurer.class);
 
-		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
+		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 	}
 
 	/**

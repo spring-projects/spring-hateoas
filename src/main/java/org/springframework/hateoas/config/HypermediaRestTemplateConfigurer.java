@@ -12,6 +12,11 @@ public class HypermediaRestTemplateConfigurer {
 
 	private final WebConverters converters;
 
+    /**
+     * Creates a new {@link HypermediaRestTemplateConfigurer} using the {@link WebConverters}.
+     *
+     * @param converters
+     */
 	HypermediaRestTemplateConfigurer(WebConverters converters) {
 		this.converters = converters;
 	}
@@ -20,7 +25,7 @@ public class HypermediaRestTemplateConfigurer {
 	 * Insert hypermedia-aware message converters in front of any other existing message converters.
 	 *
 	 * @param template
-	 * @return
+	 * @return {@link RestTemplate} capable of speaking hypermedia.
 	 */
 	public RestTemplate registerHypermediaTypes(RestTemplate template) {
 

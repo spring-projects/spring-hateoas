@@ -15,13 +15,6 @@
  */
 package org.springframework.hateoas.server.reactive;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
-import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
-
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -32,12 +25,18 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 
 /**
  * Verify WebFlux properly activates the {@link org.springframework.web.filter.reactive.ServerWebExchangeContextFilter}.
@@ -55,10 +54,9 @@ class HypermediaWebFilterTest {
 		ctx.register(WebFluxConfig.class);
 		ctx.refresh();
 
-		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
+		HypermediaWebTestClientConfigurer configurer = ctx.getBean(HypermediaWebTestClientConfigurer.class);
 
-		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
+		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 	}
 
 	/**
@@ -67,7 +65,15 @@ class HypermediaWebFilterTest {
 	@Test
 	void webFilterShouldEmbedExchangeIntoContext() {
 
-		this.testClient.get().uri("https://example.com/api") //
+	    String results = this.testClient.get().uri("https://example.com/api") //
+        .exchange() //
+        .expectStatus().isOk() //
+        .expectBody(String.class) //
+        .returnResult().getResponseBody();
+
+        System.out.println("results = " + results);
+
+        this.testClient.get().uri("https://example.com/api") //
 				.accept(MediaTypes.HAL_JSON) //
 				.exchange() //
 				.expectStatus().isOk() //
@@ -81,7 +87,8 @@ class HypermediaWebFilterTest {
 							.containsExactly(Link.of("https://example.com/api", IanaLinkRelations.SELF));
 
 					return true;
-				}).verifyComplete();
+				}) //
+				.verifyComplete();
 	}
 
 	@RestController

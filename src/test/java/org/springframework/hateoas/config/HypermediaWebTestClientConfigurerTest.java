@@ -97,7 +97,7 @@ public class HypermediaWebTestClientConfigurerTest {
 		WebTestClient client = WebTestClient.bindToApplicationContext(context).build().mutateWith(configurer); // <2>
 
 		// Exercise the controller.
-		client.get().uri("http://localhost/employees") //
+		client.get().uri("http://localhost/employees").accept(HAL_JSON) //
 				.exchange() //
 				.expectStatus().isOk() //
 				.expectBody(new TypeReferences.CollectionModelType<EntityModel<Employee>>() {}) // <3>

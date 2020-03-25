@@ -15,13 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.support.JsonPathUtils.*;
-
-import java.net.URI;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.mediatype.problem.Problem;
 import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
@@ -44,6 +37,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
+
+import java.net.URI;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.springframework.hateoas.support.JsonPathUtils.*;
 
 /**
  * @author Greg Turnquist
@@ -136,7 +136,8 @@ class HalFormsWebFluxIntegrationTest {
 	@Test // #786
 	void problemReturningControllerMethod() {
 
-		Problem problem = this.testClient.get().uri("http://localhost/employees/problem").accept(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
+		Problem problem = this.testClient.get().uri("http://localhost/employees/problem")
+				.accept(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
 				.exchange() //
 				.expectStatus().isBadRequest() //
 				.expectHeader().contentType(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
@@ -161,10 +162,8 @@ class HalFormsWebFluxIntegrationTest {
 		}
 
 		@Bean
-		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
-
-			return WebTestClient.bindToApplicationContext(ctx).build().mutate()
-					.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
+		WebTestClient webTestClient(HypermediaWebTestClientConfigurer configurer, ApplicationContext ctx) {
+			return WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 		}
 	}
 }
