@@ -81,9 +81,34 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 *
 	 * @param <T>
 	 * @return
+	 * @since 1.1
 	 */
 	public static <T> CollectionModel<T> empty() {
 		return of(Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new empty collection model with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> empty(Link... links) {
+		return of(Collections.emptyList(), links);
+	}
+
+	/**
+	 * Creates a new empty collection model with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> empty(Iterable<Link> links) {
+		return of(Collections.emptyList(), links);
 	}
 
 	/**

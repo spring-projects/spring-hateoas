@@ -83,7 +83,31 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @since 1.1
 	 */
 	public static <T> PagedModel<T> empty() {
-		return empty(null);
+		return empty(Collections.emptyList());
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(Link... links) {
+		return empty((PageMetadata) null, links);
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(Iterable<Link> links) {
+		return empty((PageMetadata) null, links);
 	}
 
 	/**
@@ -95,7 +119,33 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @since 1.1
 	 */
 	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata) {
-		return of(Collections.emptyList(), metadata);
+		return empty(metadata, Collections.emptyList());
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and links.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, Link... links) {
+		return empty(Arrays.asList(links));
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and links.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, Iterable<Link> links) {
+		return of(Collections.emptyList(), metadata, links);
 	}
 
 	/**
