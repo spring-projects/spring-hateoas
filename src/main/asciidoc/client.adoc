@@ -90,3 +90,60 @@ assertThat(link.getRel(), is("foo"));
 assertThat(link.getHref(), is("/foo/bar"));
 ----
 ====
+
+[[client.web-test-client]]
+== Configuring `WebTestClient` Instances
+
+When working with hypermedia-enabled representations, a common task is to execute various tests using `WebTestClient`.
+
+To configure an instance of `WebTestClient` in a test case, check out this example:
+
+.Configuring `WebTestClient` when using Spring HATEOAS
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{base-dir}/src/test/java/org/springframework/hateoas/config/HypermediaWebTestClientConfigurerTest.java[tag=web-test-client]
+----
+<1> Register your configuration class that uses `@EnableHypermediaSupport` to enable HAL support.
+<2> Use `HypermediaWebTestClientConfigurer` to apply hypermedia support.
+<3> Ask for a response of `CollectionModel<EntityModel<Employee>>` using Spring HATEOAS's `TypeReferences.CollectionModelType` helper.
+<4> After getting the "body" in Spring HATEOAS format, assert against it!
+====
+
+IMPORTANT: `WebTestClient` is an immutable value type, so you can't alter it in place. `WebClientConfigurer` returns a mutated
+variant that you must then capture to use it.
+
+If you are using Spring Boot, there are additional options, like this:
+
+.Configuring `WebTestClient` when using Spring Boot
+====
+[source,java,tabsize=2]
+----
+@SpringBootTest
+@AutoConfigureWebTestClient // <1>
+class WebClientBasedTests {
+
+    @Test
+    void exampleTest(@Autowired WebTestClient.Builder builder, @Autowired HypermediaWebTestClientConfigurer configurer) { // <2>
+        client = builder.apply(configurer).build(); // <3>
+
+        client.get().uri("/") //
+                .exchange() //
+                .expectBody(new TypeReferences.EntityModelType<Employee>() {}) // <4>
+                .consumeWith(result -> {
+                    // assert against this EntityModel<Employee>!
+                });
+    }
+}
+----
+<1> This is Spring Boot's test annotation that will configure a `WebTestClient.Builder` for this test class.
+<2> Autowire Spring Boot's `WebTestClient.Builder` into `builder` and Spring HATEOAS's configurer as method parameters.
+<3> Use `HypermediaWebTestClientConfigurer` to register support for hypermedia.
+<4> Signal you want an `EntityModel<Employee>` returned using `TypeReferences`.
+
+Again, you can use similar assertions as the earlier example.
+====
+
+There are many other ways to fashion test cases. `WebTestClient` can be bound to controllers, functions, and URLs. This section isn't meant to show all that. Instead, this gives you some examples to get started. The important thing is that by applying `HypermediaWebTestClientConfigurer`, any instance of `WebTestClient` can be altered to handle hypermedia.
+
+
