@@ -15,19 +15,18 @@
  */
 package org.springframework.hateoas.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 
 /**
  * Spring WebFlux HATEOAS configuration.
@@ -42,6 +41,13 @@ class WebClientHateoasConfiguration {
 	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
 		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+	}
+
+	@Bean
+	@Lazy
+    HypermediaWebTestClientConfigurer webTestClientConfigurer(ObjectProvider<ObjectMapper> mapper,
+                                                              List<HypermediaMappingInformation> hypermediaTypes) {
+		return new HypermediaWebTestClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	@Bean
