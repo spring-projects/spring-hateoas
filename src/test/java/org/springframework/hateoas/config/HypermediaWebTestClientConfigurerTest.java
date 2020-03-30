@@ -3,6 +3,7 @@ package org.springframework.hateoas.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -85,14 +87,14 @@ public class HypermediaWebTestClientConfigurerTest {
 		context.refresh();
 
 		// Create an instance of a controller for testing
-		WebFluxEmployeeController controller = new WebFluxEmployeeController();
+		WebFluxEmployeeController controller = context.getBean(WebFluxEmployeeController.class);
 		controller.reset();
 
 		// Extract the WebTestClientConfigurer from the app context.
 		HypermediaWebTestClientConfigurer configurer = context.getBean(HypermediaWebTestClientConfigurer.class);
 
 		// Create a WebTestClient by binding to the controller and applying the hypermedia configurer.
-		WebTestClient client = WebTestClient.bindToController(controller).apply(configurer).build(); // <2>
+		WebTestClient client = WebTestClient.bindToApplicationContext(context).build().mutateWith(configurer); // <2>
 
 		// Exercise the controller.
 		client.get().uri("http://localhost/employees") //
@@ -103,7 +105,7 @@ public class HypermediaWebTestClientConfigurerTest {
 					CollectionModel<EntityModel<Employee>> model = result.getResponseBody(); // <4>
 
 					// Assert against the hypermedia model.
-					assertThat(model.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("/employees"));
+					assertThat(model.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("http://localhost/employees"));
 					assertThat(model.getContent()).hasSize(2);
 				});
 	}
@@ -124,9 +126,15 @@ public class HypermediaWebTestClientConfigurerTest {
 				.getField(ReflectionTestUtils.getField(webClient, "exchangeFunction"), "strategies");
 	}
 
+	@Configuration
+	@EnableWebFlux
 	@EnableHypermediaSupport(type = HypermediaType.HAL)
 	static class HalConfig {
 
+		@Bean
+		WebFluxEmployeeController controller() {
+			return new WebFluxEmployeeController();
+		}
 	}
 
 	@EnableHypermediaSupport(

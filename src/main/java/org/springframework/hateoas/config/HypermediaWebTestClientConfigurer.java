@@ -20,7 +20,6 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.test.web.reactive.server.MockServerConfigurer;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.util.Assert;
@@ -37,7 +36,7 @@ import java.util.function.Consumer;
  * @author Greg Turnquist
  * @since 1.1
  */
-public class HypermediaWebTestClientConfigurer implements WebTestClientConfigurer, MockServerConfigurer {
+public class HypermediaWebTestClientConfigurer implements WebTestClientConfigurer {
 
 	private Consumer<ClientCodecConfigurer> configurer;
 
