@@ -15,19 +15,21 @@
  */
 package org.springframework.hateoas.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.function.Consumer;
+
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import java.util.List;
-import java.util.function.Consumer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Assembles {@link Jackson2JsonEncoder}s and {@link Jackson2JsonDecoder}s needed to wire a {@link WebTestClient} with
@@ -67,8 +69,9 @@ public class HypermediaWebTestClientConfigurer implements WebTestClientConfigure
 	 * {@link WebTestClient}.
 	 */
 	@Override
-	public void afterConfigurerAdded(WebTestClient.Builder builder, WebHttpHandlerBuilder webHttpHandlerBuilder,
-			ClientHttpConnector clientHttpConnector) {
+	public void afterConfigurerAdded(WebTestClient.Builder builder, //
+			@Nullable WebHttpHandlerBuilder webHttpHandlerBuilder, //
+			@Nullable ClientHttpConnector clientHttpConnector) {
 		builder.codecs(this.configurer);
 	}
 }
