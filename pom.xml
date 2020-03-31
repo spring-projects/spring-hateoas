@@ -71,7 +71,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>1.8</source.level>
 		<assertj.version>3.15.0</assertj.version>
-		<docs.resources.version>0.1.0.RELEASE</docs.resources.version>
+		<docs.resources.version>0.2.0.RELEASE</docs.resources.version>
 		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.8.5</jacoco>
@@ -426,7 +426,7 @@
 									<sourceHighlighter>highlight.js</sourceHighlighter>
 									<attributes>
 										<highlightjsdir>js/highlight</highlightjsdir>
-										<highlightjs-theme>atom-one-dark-reasonable</highlightjs-theme>
+										<highlightjs-theme>github</highlightjs-theme>
 										<linkcss>true</linkcss>
 										<sectanchors>true</sectanchors>
 										<stylesdir>./css</stylesdir>
