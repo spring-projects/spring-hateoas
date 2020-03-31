@@ -122,7 +122,7 @@ WebClientCustomizer hypermediaWebClientCustomizer(HypermediaWebClientConfigurer 
     };
 }
 ----
-<1> When creating a Spring bean, request a copy of Spring HATEOAS's `HypermediaRestTemplateConfigurer` bean.
+<1> When creating a Spring bean, request a copy of Spring HATEOAS's `HypermediaWebClientConfigurer` bean.
 <2> Use a Java 8 lambda expression to define a `WebClientCustomizer`.
 <3> Inside the function call, apply the `registerHypermediaTypes` method.
 <4> Return the whole thing as a Spring bean so Spring Boot can pick it up and apply it to its autoconfigured `WebClient.Builder` bean.
