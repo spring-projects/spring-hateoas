@@ -51,6 +51,7 @@ class WebClientHateoasConfiguration {
 	}
 
 	@Bean
+    @Deprecated
 	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(HypermediaWebClientConfigurer configurer) {
 		return new HypermediaWebClientBeanPostProcessor(configurer);
 	}
@@ -61,7 +62,9 @@ class WebClientHateoasConfiguration {
 	 *
 	 * @author Greg Turnquist
 	 * @since 1.0
+     * @deprecated Create your own @{@link Bean} definition that applies {@link HypermediaWebClientConfigurer}. See ref docs.
 	 */
+	@Deprecated
 	@RequiredArgsConstructor
 	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
 
