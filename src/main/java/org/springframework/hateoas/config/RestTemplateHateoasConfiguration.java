@@ -33,6 +33,7 @@ import org.springframework.web.client.RestTemplate;
 class RestTemplateHateoasConfiguration {
 
 	@Bean
+	@Deprecated
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
 			HypermediaRestTemplateConfigurer configurer) {
 		return new HypermediaRestTemplateBeanPostProcessor(configurer);
@@ -49,7 +50,10 @@ class RestTemplateHateoasConfiguration {
 	 *
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
+	 * @deprecated Create your own @{@link Bean} definition that applies {@link HypermediaRestTemplateConfigurer}. See ref
+	 *             docs.
 	 */
+	@Deprecated
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
