@@ -15,6 +15,11 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.springframework.hateoas.support.JsonPathUtils.*;
+import static org.springframework.hateoas.support.MappingUtils.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,11 +39,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.support.JsonPathUtils.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 /**
  * @author Greg Turnquist

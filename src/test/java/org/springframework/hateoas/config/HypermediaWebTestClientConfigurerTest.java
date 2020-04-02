@@ -1,5 +1,11 @@
 package org.springframework.hateoas.config;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.support.ContextTester.*;
+
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -19,12 +25,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.MediaTypes.*;
-import static org.springframework.hateoas.support.ContextTester.*;
 
 public class HypermediaWebTestClientConfigurerTest {
 

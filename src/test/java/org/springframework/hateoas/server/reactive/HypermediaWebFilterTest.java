@@ -15,6 +15,13 @@
  */
 package org.springframework.hateoas.server.reactive;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
+
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -31,12 +38,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
-import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 
 /**
  * Verify WebFlux properly activates the {@link org.springframework.web.filter.reactive.ServerWebExchangeContextFilter}.

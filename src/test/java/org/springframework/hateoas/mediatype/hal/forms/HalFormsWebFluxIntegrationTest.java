@@ -15,6 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.springframework.hateoas.support.JsonPathUtils.*;
+
+import java.net.URI;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,13 +44,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
-
-import java.net.URI;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.support.JsonPathUtils.*;
 
 /**
  * @author Greg Turnquist
