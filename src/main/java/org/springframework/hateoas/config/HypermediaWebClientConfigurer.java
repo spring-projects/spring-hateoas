@@ -15,7 +15,9 @@
  */
 package org.springframework.hateoas.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.function.Consumer;
+
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
@@ -23,8 +25,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
-import java.util.function.Consumer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Assembles {@link Jackson2JsonEncoder}s and {@link Jackson2JsonDecoder}s needed to wire a {@link WebClient} with

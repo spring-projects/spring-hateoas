@@ -15,8 +15,10 @@
  */
 package org.springframework.hateoas.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -26,7 +28,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring WebFlux HATEOAS configuration.
