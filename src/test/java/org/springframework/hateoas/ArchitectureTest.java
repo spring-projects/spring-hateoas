@@ -15,6 +15,14 @@
  */
 package org.springframework.hateoas;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.*;
+import static org.springframework.hateoas.ArchitectureTest.Architecture.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springframework.lang.Nullable;
+
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -25,13 +33,6 @@ import com.tngtech.archunit.core.importer.ImportOptions;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 import com.tngtech.archunit.library.dependencies.SliceRule;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.springframework.lang.Nullable;
-
-import static com.tngtech.archunit.core.domain.JavaClass.Predicates.*;
-import static org.springframework.hateoas.ArchitectureTest.Architecture.*;
 
 /**
  * Tests to verify certain architectural assumptions.
