@@ -22,6 +22,8 @@ import static org.springframework.hateoas.support.ContextTester.*;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
@@ -89,6 +91,20 @@ class HypermediaConfigurationImportSelectorUnitTest {
 		});
 	}
 
+	@Test // #1252
+	void testSpringTestImportConfigurations() {
+
+		withContext(NoHypermediaConfig.class, context -> {
+			assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+					.isThrownBy(() -> context.getBean(WebTestHateoasConfiguration.class));
+		});
+
+		withContext(HalConfig.class, context -> {
+			assertThat(context.getBean(WebTestHateoasConfiguration.class)).isNotNull();
+			assertThat(context.getBean(HypermediaWebTestClientConfigurer.class)).isNotNull();
+		});
+	}
+
 	@EnableHypermediaSupport(type = HAL)
 	static class HalConfig {
 
@@ -106,6 +122,11 @@ class HypermediaConfigurationImportSelectorUnitTest {
 
 	@EnableHypermediaSupport(type = { HAL, HAL_FORMS, UBER, COLLECTION_JSON })
 	static class AllConfig {
+
+	}
+
+	@Configuration
+	static class NoHypermediaConfig {
 
 	}
 }

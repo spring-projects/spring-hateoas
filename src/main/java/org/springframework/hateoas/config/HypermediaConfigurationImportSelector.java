@@ -26,6 +26,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.MediaType;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link ImportSelector} that looks up configuration classes from all {@link MediaTypeConfigurationProvider}
@@ -35,10 +36,12 @@ import org.springframework.http.MediaType;
  */
 class HypermediaConfigurationImportSelector implements ImportSelector {
 
+	public static final String SPRING_TEST = "org.springframework.test.web.reactive.server.WebTestClientConfigurer";
+
 	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.context.annotation.ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)
-	 */
+	* (non-Javadoc)
+	* @see org.springframework.context.annotation.ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)
+	*/
 	@Override
 	public String[] selectImports(AnnotationMetadata metadata) {
 
@@ -54,11 +57,19 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 				MediaTypeConfigurationProvider.class, HypermediaConfigurationImportSelector.class.getClassLoader());
 
 		// Filter the ones supporting the given media types
-		return configurationProviders.stream() //
+
+		List<String> hypermediaImportClasses = configurationProviders.stream() //
 				.filter(it -> it.supportsAny(types)) //
 				.map(MediaTypeConfigurationProvider::getConfiguration) //
-				.map(Class::getName) //
-				.toArray(String[]::new);
+				.map(Class::getName).collect(Collectors.toList());
+
+		// Conditionally apply other configurations
+
+		if (ClassUtils.isPresent(SPRING_TEST, getClass().getClassLoader())) {
+			hypermediaImportClasses.add("org.springframework.hateoas.config.WebTestHateoasConfiguration");
+		}
+
+		return hypermediaImportClasses.toArray(new String[0]);
 	}
 
 	public String[] selectImports(List<MediaType> mediaType) {
