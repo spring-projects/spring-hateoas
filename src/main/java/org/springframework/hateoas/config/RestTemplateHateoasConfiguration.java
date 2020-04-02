@@ -16,6 +16,7 @@
 package org.springframework.hateoas.config;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;

@@ -1,17 +1,17 @@
 package org.springframework.hateoas.config;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
+import static org.springframework.hateoas.support.ContextTester.*;
+
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
-import static org.springframework.hateoas.support.ContextTester.*;
 
 public class HypermediaRestTemplateConfigurerTest {
 

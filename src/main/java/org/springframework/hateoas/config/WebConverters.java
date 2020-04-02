@@ -15,17 +15,18 @@
  */
 package org.springframework.hateoas.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Value type to handle registration of hypermedia related {@link HttpMessageConverter}s.
