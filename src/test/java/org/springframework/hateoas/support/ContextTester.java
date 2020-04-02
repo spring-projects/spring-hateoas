@@ -15,26 +15,38 @@
  */
 package org.springframework.hateoas.support;
 
+import java.util.function.Function;
+
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
-import java.util.function.Function;
-
 /**
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class ContextTester {
 
-	public static <E extends Exception> void withContext(Class<?> configuration,
-			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+	public static <E extends Exception> void withContext(Class<?> configuration, //
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer, //
+			@Nullable ClassLoader classLoader) throws E {
 
 		try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
+
+			if (classLoader != null) {
+				context.setClassLoader(classLoader);
+			}
 
 			context.register(configuration);
 			context.refresh();
 
 			consumer.accept(context);
 		}
+	}
+
+	public static <E extends Exception> void withContext(Class<?> configuration,
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+		withContext(configuration, consumer, null);
 	}
 
 	public static <E extends Exception> void withServletContext(Class<?> configuration,

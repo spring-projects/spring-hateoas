@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class HypermediaWebClientConfigurer {
 
-	Consumer<ClientCodecConfigurer> configurer;
+	final Consumer<ClientCodecConfigurer> configurer;
 
 	/**
 	 * Creates a new {@link HypermediaWebClientConfigurer} for the given {@link ObjectMapper} and

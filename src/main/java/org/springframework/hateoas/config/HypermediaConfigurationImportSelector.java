@@ -20,25 +20,43 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportSelector;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.MediaType;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link ImportSelector} that looks up configuration classes from all {@link MediaTypeConfigurationProvider}
  * implementations listed in {@code META-INF/spring.factories}.
  *
  * @author Oliver Drotbohm
+ * @author Greg Turnquist
  */
-class HypermediaConfigurationImportSelector implements ImportSelector {
+class HypermediaConfigurationImportSelector implements ImportSelector, ResourceLoaderAware {
+
+	public static final String SPRING_TEST = "org.springframework.test.web.reactive.server.WebTestClient";
+
+	private ResourceLoader resourceLoader;
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.context.annotation.ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)
+	 * @see org.springframework.context.ResourceLoaderAware#setResourceLoader(org.springframework.core.io.ResourceLoader)
 	 */
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+
+	/*
+	* (non-Javadoc)
+	* @see org.springframework.context.annotation.ImportSelector#selectImports(org.springframework.core.type.AnnotationMetadata)
+	*/
 	@Override
 	public String[] selectImports(AnnotationMetadata metadata) {
 
@@ -54,11 +72,17 @@ class HypermediaConfigurationImportSelector implements ImportSelector {
 				MediaTypeConfigurationProvider.class, HypermediaConfigurationImportSelector.class.getClassLoader());
 
 		// Filter the ones supporting the given media types
-		return configurationProviders.stream() //
+		Stream<String> imports = configurationProviders.stream() //
 				.filter(it -> it.supportsAny(types)) //
 				.map(MediaTypeConfigurationProvider::getConfiguration) //
-				.map(Class::getName) //
-				.toArray(String[]::new);
+				.map(Class::getName);
+
+		// Conditionally apply other configurations
+		if (ClassUtils.isPresent(SPRING_TEST, resourceLoader.getClassLoader())) {
+			imports = Stream.concat(imports, Stream.of(WebTestHateoasConfiguration.class.getName()));
+		}
+
+		return imports.toArray(String[]::new);
 	}
 
 	public String[] selectImports(List<MediaType> mediaType) {

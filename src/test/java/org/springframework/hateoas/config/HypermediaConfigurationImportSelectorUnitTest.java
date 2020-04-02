@@ -15,18 +15,24 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
 import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
+import org.springframework.hateoas.support.HidingClassLoader;
+import org.springframework.instrument.classloading.ShadowingClassLoader;
+import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 
 /**
  * Unit tests for {@link HypermediaConfigurationImportSelector}.
@@ -87,6 +93,29 @@ class HypermediaConfigurationImportSelectorUnitTest {
 							UberLinkDiscoverer.class, //
 							CollectionJsonLinkDiscoverer.class);
 		});
+	}
+
+	@Test // #1252
+	void includesWebTestHateoasConfigurationIfWebTestClientIsOnTheClasspath() {
+
+		withContext(HalConfig.class, context -> {
+			assertThat(context.getBean(WebTestHateoasConfiguration.class)).isNotNull();
+		});
+	}
+
+	@Test // #1252
+	void doesNotIncludeWebTestHateoasConfigurationIfWebTestClientIsNotOnTheClasspath() {
+
+		HidingClassLoader delegate = HidingClassLoader.hide(WebTestClientConfigurer.class);
+		ShadowingClassLoader loader = new ShadowingClassLoader(delegate);
+		loader.excludePackage("org.springframework");
+
+		withContext(HalConfig.class, context -> {
+
+			assertThatExceptionOfType(NoSuchBeanDefinitionException.class)
+					.isThrownBy(() -> context.getBean(WebTestHateoasConfiguration.class));
+
+		}, loader);
 	}
 
 	@EnableHypermediaSupport(type = HAL)
