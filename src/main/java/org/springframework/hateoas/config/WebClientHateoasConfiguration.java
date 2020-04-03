@@ -20,10 +20,12 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -33,19 +35,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Spring WebFlux HATEOAS configuration.
  *
  * @author Greg Turnquist
- * @since 1.0 TODO: Inspect ApplicationContext -> WebApplicationContext -> WebMVC
+ * @since 1.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class WebClientHateoasConfiguration {
 
 	@Bean
+	@Lazy
 	HypermediaWebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
 		return new HypermediaWebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
 	}
 
 	@Bean
-	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(HypermediaWebClientConfigurer configurer) {
+	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(
+			ObjectFactory<HypermediaWebClientConfigurer> configurer) {
 		return new HypermediaWebClientBeanPostProcessor(configurer);
 	}
 
@@ -59,7 +63,7 @@ class WebClientHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
 
-		private final HypermediaWebClientConfigurer configurer;
+		private final ObjectFactory<HypermediaWebClientConfigurer> configurer;
 
 		/*
 		 * (non-Javadoc)
@@ -69,11 +73,9 @@ class WebClientHateoasConfiguration {
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-			if (WebClient.class.isInstance(bean)) {
-				return this.configurer.registerHypermediaTypes(((WebClient) bean).mutate()).build();
-			}
-
-			return bean;
+			return !WebClient.class.isInstance(bean) //
+					? bean //
+					: this.configurer.getObject().registerHypermediaTypes(((WebClient) bean).mutate()).build();
 		}
 	}
 }

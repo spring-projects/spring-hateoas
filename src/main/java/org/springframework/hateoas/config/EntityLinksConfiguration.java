@@ -29,7 +29,7 @@ import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class EntityLinksConfiguration {
 
 	@Bean

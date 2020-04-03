@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
 public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 

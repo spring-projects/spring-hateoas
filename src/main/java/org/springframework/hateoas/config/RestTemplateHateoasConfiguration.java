@@ -18,9 +18,11 @@ package org.springframework.hateoas.config;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,16 +32,17 @@ import org.springframework.web.client.RestTemplate;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class RestTemplateHateoasConfiguration {
 
 	@Bean
 	static HypermediaRestTemplateBeanPostProcessor hypermediaRestTemplateBeanPostProcessor(
-			HypermediaRestTemplateConfigurer configurer) {
+			ObjectFactory<HypermediaRestTemplateConfigurer> configurer) {
 		return new HypermediaRestTemplateBeanPostProcessor(configurer);
 	}
 
 	@Bean
+	@Lazy
 	HypermediaRestTemplateConfigurer hypermediaRestTemplateConfigurer(WebConverters converters) {
 		return new HypermediaRestTemplateConfigurer(converters);
 	}
@@ -54,7 +57,7 @@ class RestTemplateHateoasConfiguration {
 	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
-		private final HypermediaRestTemplateConfigurer configurer;
+		private final ObjectFactory<HypermediaRestTemplateConfigurer> configurer;
 
 		/*
 		 * (non-Javadoc)
@@ -64,11 +67,9 @@ class RestTemplateHateoasConfiguration {
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
-			if (!RestTemplate.class.isInstance(bean)) {
-				return bean;
-			}
-
-			return this.configurer.registerHypermediaTypes((RestTemplate) bean);
+			return !RestTemplate.class.isInstance(bean) //
+					? bean
+					: this.configurer.getObject().registerHypermediaTypes((RestTemplate) bean);
 		}
 	}
 }

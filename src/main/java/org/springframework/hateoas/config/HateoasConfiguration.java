@@ -59,7 +59,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @soundtrack Elephants Crossing - Wait (Live at Stadtfest Dresden)
  * @since 0.19
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnablePluginRegistries({ LinkDiscoverer.class })
 public class HateoasConfiguration {
 

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Controller;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class WebMvcEntityLinksConfiguration extends EntityLinksConfiguration {
 
 	@Bean

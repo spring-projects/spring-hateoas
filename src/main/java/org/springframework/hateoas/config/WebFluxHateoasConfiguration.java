@@ -44,7 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Drotbohm
  * @since 1.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class WebFluxHateoasConfiguration {
 
 	@Bean

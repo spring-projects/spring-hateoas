@@ -44,7 +44,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Import(WebMvcEntityLinksConfiguration.class)
 class WebMvcHateoasConfiguration {
 
