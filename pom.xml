@@ -85,6 +85,8 @@
 		<spring.version>5.2.5.RELEASE</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<kotlin.version>1.3.71</kotlin.version>
+        <kotlinx-coroutines.version>1.3.5</kotlinx-coroutines.version>
+        <mockk.version>1.9.3</mockk.version>
 	</properties>
 
 	<profiles>
@@ -704,6 +706,20 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>${kotlin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-bom</artifactId>
+                <version>${kotlinx-coroutines.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -713,21 +729,30 @@
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-stdlib</artifactId>
-			<version>${kotlin.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-reflect</artifactId>
-			<version>${kotlin.version}</version>
 			<optional>true</optional>
 		</dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactor</artifactId>
+            <optional>true</optional>
+        </dependency>
 		<dependency>
 			<groupId>org.jetbrains.kotlin</groupId>
 			<artifactId>kotlin-test</artifactId>
 			<version>${kotlin.version}</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>io.mockk</groupId>
+            <artifactId>mockk</artifactId>
+            <version>${mockk.version}</version>
+            <scope>test</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
