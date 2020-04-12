@@ -108,7 +108,7 @@ public class HalFormsDocument<T> {
 	 */
 	public static HalFormsDocument<?> forRepresentationModel(RepresentationModel<?> model) {
 
-		Map<String, Object> attributes = PropertyUtils.extractPropertyValues(model);
+		Map<String, Object> attributes = PropertyUtils.extractPropertyValues(model, true);
 		attributes.remove("links");
 
 		return new HalFormsDocument<>().withAttributes(attributes);
