@@ -17,6 +17,7 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Getter;
 import net.minidev.json.JSONArray;
 
@@ -516,6 +517,18 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		assertValueForPath(model, "$._templates.default.properties[0].required", true);
 	}
 
+	/**
+	 * @see #968
+	 */
+	@Test
+	void considerJsonUnwrapped() throws Exception {
+		UnwrappedExample unwrappedExample = new UnwrappedExample();
+		unwrappedExample.element = new UnwrappedExampleElement();
+		unwrappedExample.element.firstname = "john";
+		
+		assertValueForPath(unwrappedExample, "$.firstname", "john");
+	}
+
 	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {
 
 		ObjectMapper mapper = getCuriedObjectMapper();
@@ -620,5 +633,19 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		public String getFirstname() {
 			return firstname;
 		}
+	}
+	
+	public static class UnwrappedExample extends RepresentationModel<UnwrappedExample> {
+		
+		private UnwrappedExampleElement element;
+
+		@JsonUnwrapped
+		public UnwrappedExampleElement getElement(){
+			return element;
+		}
+	}
+	
+	public static class UnwrappedExampleElement {
+		private @Getter String firstname;
 	}
 }

@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -85,6 +86,10 @@ public class PropertyUtils {
 	}
 
 	public static Map<String, Object> extractPropertyValues(@Nullable Object object) {
+		return extractPropertyValues(object, false);
+	}
+
+	public static Map<String, Object> extractPropertyValues(@Nullable Object object, boolean unwrapEligibleProperties) {
 
 		if (object == null) {
 			return Collections.emptyMap();
@@ -98,7 +103,10 @@ public class PropertyUtils {
 
 		return getExposedProperties(object.getClass()).stream() //
 				.map(PropertyMetadata::getName)
-				.collect(HashMap::new, (map, name) -> map.put(name, wrapper.getPropertyValue(name)), HashMap::putAll);
+				.map(name -> unwrapEligibleProperties ? unwrapPropertyIfNeeded(name, wrapper) :
+						Collections.singletonMap(name, wrapper.getPropertyValue(name)))
+				.flatMap(it -> it.entrySet().stream())
+				.collect(HashMap::new, (map, it) -> map.put(it.getKey(), it.getValue()), HashMap::putAll);
 	}
 
 	public static <T> T createObjectFromProperties(Class<T> clazz, Map<String, Object> properties) {
@@ -113,7 +121,6 @@ public class PropertyUtils {
 							Method writeMethod = property.getWriteMethod();
 							ReflectionUtils.makeAccessible(writeMethod);
 							writeMethod.invoke(obj, value);
-
 						} catch (IllegalAccessException | InvocationTargetException e) {
 
 							throw new RuntimeException(e);
@@ -151,6 +158,33 @@ public class PropertyUtils {
 		});
 	}
 
+	private static Map<String, Object> unwrapPropertyIfNeeded(String propertyName, BeanWrapper wrapper) {
+		Field descriptorField = ReflectionUtils.findField(wrapper.getWrappedClass(), propertyName);
+		Method readMethod = wrapper.getPropertyDescriptor(propertyName).getReadMethod();
+
+		MergedAnnotation<JsonUnwrapped> unwrappedAnnotation =
+				Stream.of(descriptorField, readMethod)
+						.filter(Objects::nonNull)
+						.map(MergedAnnotations::from)
+						.flatMap(mergedAnnotations -> mergedAnnotations.stream(JsonUnwrapped.class))
+						.filter(it -> it.getBoolean("enabled"))
+						.findFirst()
+						.orElse(null);
+
+		Object propertyValue = wrapper.getPropertyValue(propertyName);
+		if (unwrappedAnnotation == null) {
+			return Collections.singletonMap(propertyName, propertyValue);
+		}
+
+		String prefix = unwrappedAnnotation.getString("prefix");
+		String suffix = unwrappedAnnotation.getString("suffix");
+
+		Map<String, Object> properties = new HashMap<>();
+		extractPropertyValues(propertyValue, true)
+				.forEach((name, value) -> properties.put(prefix + name + suffix, value));
+		return properties;
+	}
+
 	private static ResolvableType unwrapDomainType(ResolvableType type) {
 
 		if (!type.hasGenerics()) {
@@ -169,7 +203,7 @@ public class PropertyUtils {
 	 * Replaces the given {@link ResolvableType} with the one produced by the given {@link Supplier} if the former is
 	 * assignable from one of the types to be unwrapped.
 	 *
-	 * @param type must not be {@literal null}.
+	 * @param type   must not be {@literal null}.
 	 * @param mapper must not be {@literal null}.
 	 * @return
 	 * @see #TYPES_TO_UNWRAP
@@ -188,8 +222,8 @@ public class PropertyUtils {
 		return type == null //
 				? Stream.empty() //
 				: getPropertyDescriptors(type) //
-						.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod())))
-						.map(it -> JSR_303_PRESENT ? new Jsr303AwarePropertyMetadata(it) : new DefaultPropertyMetadata(it));
+				.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod())))
+				.map(it -> JSR_303_PRESENT ? new Jsr303AwarePropertyMetadata(it) : new DefaultPropertyMetadata(it));
 	}
 
 	/**
@@ -359,7 +393,7 @@ public class PropertyUtils {
 		/**
 		 * Returns the {@link MergedAnnotation} of the given type.
 		 *
-		 * @param <T> the annotation type.
+		 * @param <T>  the annotation type.
 		 * @param type must not be {@literal null}.
 		 * @return the {@link MergedAnnotation} if available or {@link MergedAnnotation#missing()} if not.
 		 */
@@ -457,7 +491,6 @@ public class PropertyUtils {
 		public int compareTo(DefaultPropertyMetadata that) {
 			return BY_NAME.compare(this, that);
 		}
-
 	}
 
 	/**
