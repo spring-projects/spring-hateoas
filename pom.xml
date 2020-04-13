@@ -996,6 +996,18 @@
 							</resources>
 						</configuration>
 					</execution>
+					<execution>
+						<id>add-kotlin-sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/src/main/kotlin</source>
+							</sources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
