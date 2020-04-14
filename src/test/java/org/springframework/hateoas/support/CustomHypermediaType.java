@@ -19,6 +19,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
+import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -47,6 +52,9 @@ public class CustomHypermediaType implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.setHandlerInstantiator(new HalHandlerInstantiator(new EvoInflectorLinkRelationProvider(),
+				CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
