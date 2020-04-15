@@ -341,6 +341,13 @@ class UriTemplateUnitTest {
 						.isEqualTo("/foo{*var}");
 	}
 
+	@Test // #227
+	void variableParameterIsTemplated() {
+
+		assertThat(Link.of("http://localhost/api/rest/v1/userGroups/50/functions/{?id*}").isTemplated()).isTrue();
+		assertThat(UriTemplate.isTemplate("http://localhost/api/rest/v1/userGroups/50/functions/{?id*}")).isTrue();
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}
