@@ -26,10 +26,35 @@ import org.springframework.web.server.ServerWebExchange
 /**
  * Add support for Kotlin co-routines.
  *
+ * @author Greg Turnquist
+ * @since 1.1
+ */
+suspend fun <T : Any> SimpleReactiveRepresentationModelAssembler<T>.toModelAndAwait(
+    entity: T,
+    exchange: ServerWebExchange): EntityModel<T> = toModel(entity, exchange).awaitFirst()
+
+/**
+ * Add support for Kotlin co-routines.
+ *
+ * @author Juergen Zimmerman
+ * @author Greg Turnquist
+ * @since 1.1
+ *
+ */
+@Deprecated("use toCollectionModelAndAwait(entites, exchange)",
+    replaceWith = ReplaceWith("toCollectionModelAndAwait(entities, exchange)"))
+suspend fun <T : Any> SimpleReactiveRepresentationModelAssembler<T>.toCollectionModel(
+    entities: Flow<T>,
+    exchange: ServerWebExchange): CollectionModel<EntityModel<T>> = toCollectionModelAndAwait(entities, exchange)
+
+/**
+ * Add support for Kotlin co-routines.
+ *
  * @author Juergen Zimmerman
  * @author Greg Turnquist
  * @since 1.1
  */
-suspend fun <T : Any> SimpleReactiveRepresentationModelAssembler<T>.toCollectionModel(
+suspend fun <T : Any> SimpleReactiveRepresentationModelAssembler<T>.toCollectionModelAndAwait(
     entities: Flow<T>,
     exchange: ServerWebExchange): CollectionModel<EntityModel<T>> = toCollectionModel(entities.asFlux(), exchange).awaitFirst()
+

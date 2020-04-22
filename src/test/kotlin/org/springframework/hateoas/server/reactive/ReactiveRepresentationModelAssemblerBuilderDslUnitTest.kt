@@ -31,23 +31,38 @@ import reactor.core.publisher.Mono
  * @author Greg Turnquist
  * @since 1.1
  */
+
 class ReactiveRepresentationModelAssemblerBuilderDslUnitTest : TestUtils() {
 
-    private val EMPLOYEES_RELATION = LinkRelation.of("employees")
+    val EMPLOYEES_RELATION = LinkRelation.of("employees")
 
     private val employees = flow {
         emit(Employee("Frodo"))
         emit(Employee("Bilbo"))
     }
 
-    @Test // #1213
-    fun `Kotlin Flows should render as CollectionModels`() {
+    @Test // #1275
+    fun `Kotlin co-routine should render as a RepresentationModel`() {
 
         val testResourceAssembler = TestResourceAssembler()
         val exchange = mockk<ServerWebExchange>()
 
         runBlocking {
-            val collectionModel = testResourceAssembler.toCollectionModel(employees, exchange)
+            val model = testResourceAssembler.toModelAndAwait(Employee("Frodo"), exchange)
+
+            assertThat(model.content.name).isEqualTo("Frodo")
+            assertThat(model.links).containsExactlyInAnyOrder(Link.of("/employees", EMPLOYEES_RELATION))
+        }
+    }
+
+    @Test // #1213
+    fun `Kotlin co-routine should render as CollectionModels`() {
+
+        val testResourceAssembler = TestResourceAssembler()
+        val exchange = mockk<ServerWebExchange>()
+
+        runBlocking {
+            val collectionModel = testResourceAssembler.toCollectionModelAndAwait(employees, exchange)
 
             assertThat(collectionModel.content.flatMap { entityModel -> entityModel.links })
                 .containsExactlyInAnyOrder(Link.of("/employees", EMPLOYEES_RELATION), Link.of("/employees", EMPLOYEES_RELATION))
@@ -55,6 +70,7 @@ class ReactiveRepresentationModelAssemblerBuilderDslUnitTest : TestUtils() {
     }
 
     class TestResourceAssembler : ReactiveRepresentationModelAssembler<Employee, EntityModel<Employee>> {
+
         override fun toModel(entity: Employee, exchange: ServerWebExchange): Mono<EntityModel<Employee>> {
             return Mono.just(EntityModel.of(entity, Link.of("/employees", LinkRelation.of("employees"))))
         }

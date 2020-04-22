@@ -20,8 +20,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.hateoas.CollectionModel
+import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Mono
+
+/**
+ * Add support for Kotlin co-routines.
+ *
+ * @author Greg Turnquist
+ * @since 1.1
+ */
+suspend fun <T : Any, D : RepresentationModel<D>> ReactiveRepresentationModelAssembler<T, D>.toModelAndAwait(
+    entity: T,
+    exchange: ServerWebExchange): D = toModel(entity, exchange).awaitFirst()
 
 /**
  * Add support for Kotlin co-routines.
@@ -30,6 +42,19 @@ import org.springframework.web.server.ServerWebExchange
  * @author Greg Turnquist
  * @since 1.1
  */
+@Deprecated("use toCollectionModelAndAwait(entites, exchange)",
+    replaceWith = ReplaceWith("toCollectionModelAndAwait(entities, exchange)"))
 suspend fun <T : Any, D : RepresentationModel<D>> ReactiveRepresentationModelAssembler<T, D>.toCollectionModel(
+    entities: Flow<T>,
+    exchange: ServerWebExchange): CollectionModel<D> = toCollectionModelAndAwait(entities, exchange)
+
+/**
+ * Add support for Kotlin co-routines.
+ *
+ * @author Juergen Zimmerman
+ * @author Greg Turnquist
+ * @since 1.1
+ */
+suspend fun <T : Any, D : RepresentationModel<D>> ReactiveRepresentationModelAssembler<T, D>.toCollectionModelAndAwait(
     entities: Flow<T>,
     exchange: ServerWebExchange): CollectionModel<D> = toCollectionModel(entities.asFlux(), exchange).awaitFirst()

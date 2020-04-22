@@ -34,21 +34,43 @@ class SimpleReactiveRexpresentationModelAssemblerBuilderDslUnitTest : TestUtils(
         emit(Employee("Bilbo"))
     }
 
-    @Test // #1213
-    fun `Kotlin Flows should render as CollectionModels`() {
+    @Test // #1275
+    fun `Kotlin co-routine should render as a RepresentationModel`() {
 
         val testResourceAssembler = SimpleTestResourceAssembler()
         val exchange = mockk<ServerWebExchange>()
 
         runBlocking {
-            val collectionModel = testResourceAssembler.toCollectionModel(employees, exchange)
+            val model = testResourceAssembler.toModelAndAwait(Employee("Frodo"), exchange)
+
+            assertThat(model.content.name).isEqualTo("Frodo")
+            assertThat(model.links).containsExactlyInAnyOrder(Link.of("/employees", LinkRelation.of("employees")))
+        }
+    }
+
+    @Test // #1213
+    fun `Kotlin co-routine should render as CollectionModels`() {
+
+        val testResourceAssembler = SimpleTestResourceAssembler()
+        val exchange = mockk<ServerWebExchange>()
+
+        runBlocking {
+            val collectionModel = testResourceAssembler.toCollectionModelAndAwait(employees, exchange)
 
             assertThat(collectionModel.links).containsExactly(Link.of("/employees"))
         }
     }
 
     class SimpleTestResourceAssembler : SimpleReactiveRepresentationModelAssembler<Employee> {
+
+        override fun addLinks(resource: EntityModel<Employee>, exchange: ServerWebExchange): EntityModel<Employee> {
+
+            resource.add(Link.of("/employees", LinkRelation.of("employees")))
+            return resource
+        }
+
         override fun addLinks(resources: CollectionModel<EntityModel<Employee>>, exchange: ServerWebExchange): CollectionModel<EntityModel<Employee>> {
+
             resources.add(Link.of("/employees"))
             return resources
         }
