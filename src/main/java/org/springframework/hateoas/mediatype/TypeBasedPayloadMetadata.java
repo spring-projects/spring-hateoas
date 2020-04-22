@@ -46,7 +46,7 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
 		this.type = type;
 		this.properties = new TreeMap<>(
-				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity())));
+				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity(), (existing, replacement) -> existing)));
 	}
 
 	/*

@@ -15,11 +15,13 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -185,11 +187,28 @@ public class PropertyUtils {
 
 	private static Stream<PropertyMetadata> lookupExposedProperties(@Nullable Class<?> type) {
 
-		return type == null //
+		Stream<PropertyMetadata> visibleProperties = type == null //
 				? Stream.empty() //
 				: getPropertyDescriptors(type) //
 						.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod())))
 						.map(it -> JSR_303_PRESENT ? new Jsr303AwarePropertyMetadata(it) : new DefaultPropertyMetadata(it));
+
+		Stream<PropertyMetadata> jsonCreatorProperties = lookupJsonCreatorProperties(type);
+
+		return Stream.concat(visibleProperties, jsonCreatorProperties);
+	}
+
+	private static Stream<PropertyMetadata> lookupJsonCreatorProperties(@Nullable Class<?> type) {
+
+		return type == null //
+				? Stream.empty() //
+				: Arrays.stream(type.getDeclaredConstructors())
+						.filter(constructor -> constructor.isAnnotationPresent(JsonCreator.class))
+						.flatMap(constructor -> Arrays.stream(constructor.getParameters()))
+						.filter(parameter -> parameter.isAnnotationPresent(JsonProperty.class))
+						.map(parameter -> createPropertyDescriptor(parameter.getAnnotation(JsonProperty.class).value(),
+								parameter.getName(), parameter.getType()));
+
 	}
 
 	/**
@@ -205,6 +224,18 @@ public class PropertyUtils {
 				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
 				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
 				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor));
+	}
+
+	/**
+	 * Create a new {@link PropertyDescriptor}, but wrap potential exception as {@link RuntimeException} to ease usage in
+	 * Streams.
+	 *
+	 * @param name
+	 * @param clazz
+	 * @return
+	 */
+	private static JsonCreatorPropertyMetadata createPropertyDescriptor(String name, String realName, Class<?> clazz) {
+		return new JsonCreatorPropertyMetadata(name, realName, clazz);
 	}
 
 	/**
@@ -514,6 +545,54 @@ public class PropertyUtils {
 
 			return Optional.of(annotation.getString("regexp")) //
 					.filter(StringUtils::hasText);
+		}
+	}
+
+	/**
+	 * Concrete {@link PropertyMetadata} to enclose a constructor argument used in a {@link JsonCreator}.
+	 *
+	 * @author Greg Turnquist
+	 */
+	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+	private static class JsonCreatorPropertyMetadata
+			implements PropertyMetadata, Comparable<JsonCreatorPropertyMetadata> {
+
+		private static Comparator<PropertyMetadata> BY_NAME = Comparator.comparing(PropertyMetadata::getName);
+
+		private final String jsonName;
+
+		private final String propertyName;
+
+		private final Class<?> type;
+
+		@Override
+		public String getName() {
+			return this.jsonName;
+		}
+
+		@Override
+		public boolean isRequired() {
+			return true;
+		}
+
+		@Override
+		public boolean isReadOnly() {
+			return false;
+		}
+
+		@Override
+		public Optional<String> getPattern() {
+			return Optional.empty();
+		}
+
+		@Override
+		public ResolvableType getType() {
+			return ResolvableType.forClass(this.type);
+		}
+
+		@Override
+		public int compareTo(JsonCreatorPropertyMetadata that) {
+			return BY_NAME.compare(this, that);
 		}
 	}
 }
