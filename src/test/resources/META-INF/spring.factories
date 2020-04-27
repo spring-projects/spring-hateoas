@@ -1,0 +1,2 @@
+org.springframework.hateoas.config.MediaTypeConfigurationProvider=\
+ org.springframework.hateoas.support.CustomHypermediaConfigurationProvider

@@ -118,6 +118,22 @@ class HypermediaConfigurationImportSelectorUnitTest {
 		}, loader);
 	}
 
+	@Test // #1060
+	void testEmptyHypermediaTypes() {
+
+		withContext(NoConfig.class, context -> {
+
+			Map<String, LinkDiscoverer> linkDiscoverers = context.getBeansOfType(LinkDiscoverer.class);
+
+			assertThat(linkDiscoverers.values()).extracting("class") //
+					.containsExactlyInAnyOrder( //
+							HalLinkDiscoverer.class, //
+							HalFormsLinkDiscoverer.class, //
+							UberLinkDiscoverer.class, //
+							CollectionJsonLinkDiscoverer.class);
+		});
+	}
+
 	@EnableHypermediaSupport(type = HAL)
 	static class HalConfig {
 
@@ -135,6 +151,11 @@ class HypermediaConfigurationImportSelectorUnitTest {
 
 	@EnableHypermediaSupport(type = { HAL, HAL_FORMS, UBER, COLLECTION_JSON })
 	static class AllConfig {
+
+	}
+
+	@EnableHypermediaSupport
+	static class NoConfig {
 
 	}
 }
