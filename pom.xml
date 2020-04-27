@@ -76,7 +76,7 @@
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.8.5</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson-bom.version>2.10.3</jackson-bom.version>
+		<jackson-bom.version>2.11.0</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<junit.version>5.6.1</junit.version>
@@ -94,7 +94,6 @@
 		<profile>
 			<id>spring-next</id>
 			<properties>
-				<jackson-bom.version>2.11.0.rc1</jackson-bom.version>
 				<reactor-bom.version>Dysprosium-BUILD-SNAPSHOT</reactor-bom.version>
 				<spring.version>5.2.6.BUILD-SNAPSHOT</spring.version>
 				<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
