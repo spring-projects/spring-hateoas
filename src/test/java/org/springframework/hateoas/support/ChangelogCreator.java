@@ -15,18 +15,20 @@
  */
 package org.springframework.hateoas.support;
 
-import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Links;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.Iterator;
-import java.util.List;
+import com.jayway.jsonpath.JsonPath;
 
 /**
  * Little helper to build a changelog from the tickets of a particular milestone.
@@ -36,7 +38,7 @@ import java.util.List;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 42;
+	private static final int MILESTONE_ID = 44;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {
