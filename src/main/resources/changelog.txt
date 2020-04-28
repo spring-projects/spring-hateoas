@@ -1,6 +1,20 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.1.0.RC1 (2020-04-28)
+----------------------------------------
+- #1277 - Upgrade to Jackson 2.11.0.
+- #1275 - Align Naming for Kotlin Extension Functions with Spring.
+- #1270 - Add Kotlin source to released artifacts.
+- #1266 - Use JDK 14 for Java.next CI testing.
+- #1264 - Remove .factorypath.
+- #1255 - Introduce ability to alter classpath for test purposes.
+- #1252 - HypermediaWebTestClientConfigurer must not be registered if spring-test is not on the classpath.
+- #1250 - Start testing against Jackson 2.11.
+- #1247 - Update spring-doc-resources and highlight.
+- #1213 - Add support for Kotlin co-routines.
+-  #227 - Uri Template {?value*} does not generate templated:true.
+
 Changes in version 1.1.0.M3 (2020-03-31)
 ----------------------------------------
 - #1246 - Upgrade to AssertJ 3.15.0.
