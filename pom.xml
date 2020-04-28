@@ -71,7 +71,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>1.8</source.level>
 		<assertj.version>3.15.0</assertj.version>
-		<docs.resources.version>0.2.1.RELEASE</docs.resources.version>
+		<docs.resources.version>0.2.2.RELEASE</docs.resources.version>
 		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
 		<jacoco>0.8.5</jacoco>
@@ -79,14 +79,14 @@
 		<jackson-bom.version>2.11.0</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.4.0</jsonpath.version>
-		<junit.version>5.6.1</junit.version>
-		<reactor-bom.version>Dysprosium-SR6</reactor-bom.version>
+		<junit.version>5.6.2</junit.version>
+		<reactor-bom.version>Dysprosium-SR7</reactor-bom.version>
 		<slf4j.version>1.7.30</slf4j.version>
-		<spring.version>5.2.5.RELEASE</spring.version>
+		<spring.version>5.2.6.RELEASE</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<kotlin.version>1.3.71</kotlin.version>
 		<kotlinx-coroutines.version>1.3.5</kotlinx-coroutines.version>
-		<mockk.version>1.9.3</mockk.version>
+		<mockk.version>1.10.0</mockk.version>
 	</properties>
 
 	<profiles>
@@ -95,8 +95,7 @@
 			<id>spring-next</id>
 			<properties>
 				<reactor-bom.version>Dysprosium-BUILD-SNAPSHOT</reactor-bom.version>
-				<spring.version>5.2.6.BUILD-SNAPSHOT</spring.version>
-				<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
+				<spring.version>5.2.7.BUILD-SNAPSHOT</spring.version>
 			</properties>
 		</profile>
 
