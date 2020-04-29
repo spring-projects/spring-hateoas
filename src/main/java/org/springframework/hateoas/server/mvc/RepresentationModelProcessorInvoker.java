@@ -171,13 +171,7 @@ public class RepresentationModelProcessorInvoker {
 	}
 
 	private static Class<?> getRawType(@Nullable ResolvableType type) {
-
-		if (type == null) {
-			return Object.class;
-		}
-
-		Class<?> rawType = type.getRawClass();
-		return rawType == null ? Object.class : rawType;
+		return type == null ? Object.class : type.resolve(Object.class);
 	}
 
 	/**
