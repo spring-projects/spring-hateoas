@@ -79,6 +79,8 @@ class HalFormsTemplateBuilder {
 							.map(property -> it.hasHttpMethod(HttpMethod.PATCH) ? property.withRequired(false) : property)
 							.collect(Collectors.toList());
 
+					propertiesWithPrompt = sorted(propertiesWithPrompt, it.getInput());
+
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
 							.withProperties(propertiesWithPrompt);
 
@@ -87,6 +89,33 @@ class HalFormsTemplateBuilder {
 				});
 
 		return templates;
+	}
+
+	private List<HalFormsProperty> sorted(List<HalFormsProperty> properties, InputPayloadMetadata input) {
+
+		return input.getType() //
+				.flatMap(configuration::getFieldOrderFor) //
+				.map(fieldsToSortBy -> {
+
+					List<HalFormsProperty> propertiesToSort = new ArrayList<>(properties);
+					List<HalFormsProperty> sortedProperties = new ArrayList<>();
+
+					for (String propertyName : fieldsToSortBy) {
+						properties.stream() //
+								.filter(halFormsProperty -> halFormsProperty.getName().equals(propertyName)) //
+								.findFirst() //
+								.ifPresent(halFormsProperty -> {
+									sortedProperties.add(halFormsProperty);
+									propertiesToSort.remove(halFormsProperty);
+								});
+					}
+
+					// Whatever properties weren't listed, add them at the end.
+					sortedProperties.addAll(propertiesToSort);
+
+					return sortedProperties;
+				}) //
+				.orElse(properties);
 	}
 
 	public PropertyCustomizations forMetadata(InputPayloadMetadata metadata) {

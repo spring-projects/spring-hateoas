@@ -18,7 +18,9 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,6 +38,7 @@ public class HalFormsConfiguration {
 
 	private final @Getter HalConfiguration halConfiguration;
 	private final Map<Class<?>, String> patterns = new HashMap<>();
+	private final Map<Class<?>, List<String>> fieldOrder = new HashMap<>();
 
 	/**
 	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
@@ -59,5 +62,16 @@ public class HalFormsConfiguration {
 	 */
 	Optional<String> getTypePatternFor(ResolvableType type) {
 		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
+	}
+
+	public HalFormsConfiguration withFieldOrderFor(Class<?> type, String... fieldNames) {
+
+		this.fieldOrder.put(type, Arrays.asList(fieldNames));
+
+		return this;
+	}
+
+	Optional<List<String>> getFieldOrderFor(ResolvableType type) {
+		return Optional.ofNullable(fieldOrder.get(type.resolve(Object.class)));
 	}
 }
