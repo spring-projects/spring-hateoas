@@ -233,7 +233,7 @@ curl -v localhost:8080/employees \
 
 .The corresponding response with the links generated to consider those headers
 ====
-[source, json]
+[source, javascript]
 ----
 {
   "_embedded": {

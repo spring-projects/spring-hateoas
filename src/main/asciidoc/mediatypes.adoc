@@ -54,7 +54,7 @@ var model = HalModelBuilder.halModel(order)
 <5> Other objects can be added to show up under `_embedded`.
 The key under which they're listed is derived from the objects relation settings. They're customizable via `@Relation` or a dedicated `LinkRelationProvider` (see <<server.rel-provider>> for details).
 
-[source, json]
+[source, javascript]
 ----
 {
   "_links" : {
@@ -76,7 +76,7 @@ In HAL `_embedded` is also used to represent top collections.
 They're usually grouped under the link relation derived from the object's type.
 I.e. a list of orders would look like this in HAL:
 
-[source, json]
+[source, javascript]
 ----
 {
   "_embedded" : {
@@ -113,7 +113,7 @@ HalModelBuilder.emptyHalModel()
 
 will create the following, more explicit representation. 
 
-[source, json]
+[source, javascript]
 ----
 {
   "_embedded" : {
@@ -132,7 +132,7 @@ For a given link relation that has two or more links, the spec is clear on repre
 
 .HAL document with two links associated with one relation
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/hal/hal-multiple-entry-link-relation.json[]
 ----
@@ -145,7 +145,7 @@ By default, Spring HATEOAS uses the most terse approach and renders a single-lin
 
 .HAL document with single link rendered as an object
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/hal/hal-single-entry-link-relation-object.json[]
 ----
@@ -155,7 +155,7 @@ Some users prefer to not switch between arrays and objects when consuming HAL. T
 
 .HAL with single link rendered as an array
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/hal/hal-single-entry-link-relation-array.json[]
 ----
@@ -270,7 +270,7 @@ Note that now the `ex:` prefix automatically appears before all rel values that 
 The following example shows how to do so:
 
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/hal/hal-with-curies.json[]
 ----
@@ -303,7 +303,7 @@ Anytime a client supplies an `Accept` header with `application/prs.hal-forms+jso
 
 .HAL-FORMS sample document
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample.json[]
 ----
@@ -485,7 +485,7 @@ The following example from the spec shows a single item:
 
 .Collection+JSON single item example
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/collectionjson/spec-part3.json[]
 ----
@@ -542,7 +542,7 @@ as show below:
 
 .UBER sample document
 ====
-[source, json]
+[source, javascript]
 ----
 include::{resource-dir}/docs/mediatype/uber/uber-sample.json[]
 ----
