@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Getter;
 import net.minidev.json.JSONArray;
 
@@ -68,6 +67,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.jsonpath.JsonPath;
@@ -517,15 +517,14 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		assertValueForPath(model, "$._templates.default.properties[0].required", true);
 	}
 
-	/**
-	 * @see #968
-	 */
-	@Test
+	@Test // #968
 	void considerJsonUnwrapped() throws Exception {
+
 		UnwrappedExample unwrappedExample = new UnwrappedExample();
+
 		unwrappedExample.element = new UnwrappedExampleElement();
 		unwrappedExample.element.firstname = "john";
-		
+
 		assertValueForPath(unwrappedExample, "$.firstname", "john");
 	}
 
@@ -634,17 +633,17 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 			return firstname;
 		}
 	}
-	
+
 	public static class UnwrappedExample extends RepresentationModel<UnwrappedExample> {
-		
+
 		private UnwrappedExampleElement element;
 
 		@JsonUnwrapped
-		public UnwrappedExampleElement getElement(){
+		public UnwrappedExampleElement getElement() {
 			return element;
 		}
 	}
-	
+
 	public static class UnwrappedExampleElement {
 		private @Getter String firstname;
 	}
