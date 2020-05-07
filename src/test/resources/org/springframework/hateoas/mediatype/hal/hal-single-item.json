@@ -1,0 +1,10 @@
+{
+  "name" : "Alan Watts",
+  "born" : "January 6, 1915",
+  "died" : "November 16, 1973",
+  "_links" : {
+    "self" : {
+      "href" : "/people/alan-watts"
+    }
+  }
+}

@@ -14,6 +14,114 @@ and most widely adopted hypermedia media types adopted when not discussing speci
 
 It was the first spec-based media type adopted by Spring HATEOAS.
 
+[[mediatypes.hal.models]]
+=== Building HAL representation models
+
+As of Spring HATEOAS 1.1, we ship a dedicated `HalModelBuilder` that allows to create `RepresentationModel` instances through a HAL-idiomatic API.
+These are its fundamental assumptions:
+
+1. A HAL representation can be backed by an arbitrary object (an entity) that builds up the domain fields contained in the representation.
+2. The representation can be enriched by a variety of embedded documents, which can be either arbitrary objects or HAL representations themselves (i.e. containing nested embeddeds and links).
+3. Certain HAL specific patterns (e.g. previews) can be directly used in the API so that the code setting up the representation reads like you'd describe a HAL representation following those idioms.
+
+Here's an example of the API used:
+
+[source, java]
+----
+// An order
+var order = new Order(…); <1>
+
+// The customer who placed the order
+var customer = customer.findById(order.getCustomerId());
+
+var customerLink = Link.of("/orders/{id}/customer") <2>
+  .expand(order.getId())
+  .withRel("customer");
+  
+var additional = …
+
+var model = HalModelBuilder.halModel(order)
+  .preview(new CustomerSummary(customer)) <3>
+  .forLink(customerLink) <4>
+  .embed(additional) <5>
+  .link(Link.of(…, IanaLinkRelations.SELF));
+  .build();
+---- 
+<1> We set up some domain type. In this case, an order that has a relationship to the customer that placed it.
+<2> We prepare a link pointing to a resource that will expose customer details
+<3> We start building a preview by providing the payload that's supposed to be rendered inside the `_embeddable` clause.
+<4> We conclude that preview by providing the target link. It transparently gets added to the `_links` object and its link relation is used as the key for the object provided in the previous step.
+<5> Other objects can be added to show up under `_embedded`.
+The key under which they're listed is derived from the objects relation settings. They're customizable via `@Relation` or a dedicated `LinkRelationProvider` (see <<server.rel-provider>> for details).
+
+[source, json]
+----
+{
+  "_links" : {
+    "self" : { "href" : "…" }, <1>
+    "customer" : { "href" : "/orders/4711/customer" } <2>
+  },
+  "_embedded" : {
+    "customer" : { … }, <3>
+    "additional" : { … } <4>
+  }
+}
+----
+<1> The `self` link as explicitly provided.
+<2> The `customer` link transparently added through `….preview(…).forLink(…)`.
+<3> The preview object provided.
+<4> Additional elements added via explicit `….embed(…)`.
+
+In HAL `_embedded` is also used to represent top collections.
+They're usually grouped under the link relation derived from the object's type.
+I.e. a list of orders would look like this in HAL:
+
+[source, json]
+----
+{
+  "_embedded" : {
+    "orders : [
+      … <1>
+    ]
+  }
+}
+----
+<1> Individual order documents go here.
+
+Creating such a representation is as easy as this:
+
+[source, java]
+----
+Collection<Order> orders = …;
+
+HalModelBuilder.emptyHalDocument()
+  .embed(orders);
+----
+
+That said, if the order is empty, there's no way to derive the link relation to appear inside `_embedded`, so that the document will stay empty if the collection is empty.
+
+If you prefer to explicitly communicate an empty collection, a type can be handed into the overload of the `….embed(…)` method taking a `Collection`.
+If the collection handed into the method is empty, this will cause a field rendered with its link relation derived from the given type.
+
+[source, java]
+----
+HalModelBuilder.emptyHalModel()
+  .embed(Collections.emptyList(), Order.class);
+  // or 
+  .embed(Collections.emptyList(), LinkRelation.of("orders"));
+----
+
+will create the following, more explicit representation. 
+
+[source, json]
+----
+{
+  "_embedded" : {
+    "orders" : []
+  }
+}
+----  
+
 [[mediatypes.hal.configuration]]
 === Configuring link rendering
 

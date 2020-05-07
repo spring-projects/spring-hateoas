@@ -377,6 +377,10 @@ public class WebHandler {
 
 			value = ObjectUtils.unwrapOptional(value);
 
+			// Try to lookup ConversionService from the request's context
+
+			// Guard with ….canConvert(…)
+			// if not, fall back to ….toString();
 			Object result = CONVERSION_SERVICE.convert(value, typeDescriptor, STRING_DESCRIPTOR);
 
 			if (result == null) {

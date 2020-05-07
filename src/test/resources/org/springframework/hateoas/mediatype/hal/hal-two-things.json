@@ -1,0 +1,17 @@
+{
+  "name" : "Greg L. Turnquist",
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost/author/1"
+    },
+    "authors" : {
+      "href" : "http://localhost/authors"
+    }
+  },
+  "_embedded" : {
+    "product" : {
+      "name" : "Alf alarm clock",
+      "price" : 19.99
+    }
+  }
+}

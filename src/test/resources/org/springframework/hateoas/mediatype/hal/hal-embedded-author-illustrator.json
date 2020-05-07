@@ -1,0 +1,33 @@
+{
+  "_embedded" : {
+    "author" : {
+      "name" : "Alan Watts",
+      "born" : "January 6, 1915",
+      "died" : "November 16, 1973",
+      "_links" : {
+        "self" : {
+          "href" : "/people/alan-watts"
+        }
+      }
+    },
+    "illustrator" : {
+      "name" : "John Smith",
+      "_links" : {
+        "self" : {
+          "href" : "/people/john-smith"
+        }
+      }
+    }
+  },
+  "_links" : {
+    "self" : {
+      "href" : "/books/the-way-of-zen"
+    },
+    "author" : {
+      "href" : "/people/alan-watts"
+    },
+    "illustrator" : {
+      "href" : "/people/john-smith"
+    }
+  }
+}
