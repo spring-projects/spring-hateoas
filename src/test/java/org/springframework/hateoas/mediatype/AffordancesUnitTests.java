@@ -17,6 +17,7 @@ package org.springframework.hateoas.mediatype;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -113,8 +114,8 @@ public class AffordancesUnitTests {
 
 		public PayloadMetadataAssert isBackedBy(Class<?> type) {
 
-			Assertions.assertThat(actual).isInstanceOfSatisfying(TypeBasedPayloadMetadata.class, it -> {
-				Assertions.assertThat(it.getType()).isEqualTo(ResolvableType.forClass(type));
+			assertThat(actual).isInstanceOfSatisfying(TypeBasedPayloadMetadata.class, it -> {
+				assertThat(it.getType()).isEqualTo(Optional.of(ResolvableType.forClass(type)));
 			});
 
 			return this;

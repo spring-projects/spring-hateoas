@@ -161,6 +161,8 @@ public abstract class AffordanceModel {
 		 * @return
 		 */
 		List<String> getI18nCodes();
+
+		Optional<ResolvableType> getType();
 	}
 
 	/**
@@ -210,7 +212,17 @@ public abstract class AffordanceModel {
 		public List<String> getI18nCodes() {
 			return Collections.emptyList();
 		}
-	}
+
+        @Override
+        public Optional<ResolvableType> getType() {
+
+            if (metadata instanceof InputPayloadMetadata) {
+                ((InputPayloadMetadata) metadata).getType();
+            }
+
+            return Optional.empty();
+        }
+    }
 
 	/**
 	 * Metadata about the property model of a representation.

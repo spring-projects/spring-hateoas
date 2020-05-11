@@ -330,6 +330,8 @@ Spring HATEOAS allows to customize those by shaping the model type for the input
 
 For types that you cannot annotate manually, you can register a custom pattern via a `HalFormsConfiguration` bean present in the application context.
 
+.Registering regex patterns for types
+====
 [source, java]
 ----
 @Configuration
@@ -343,8 +345,34 @@ class CustomConfiguration {
   }
 }
 ----
+====
 
 This setup will cause the HAL-FORMS template properties for representation model properties of type `CreditCardNumber` to declare a `regex` field with value `[0-9]{16}`.
+
+[[mediatypes.hal-forms.property-order]]
+=== Ordering template properties
+
+By default, HAL-FORMS properties are gleaned from the related domain object using Spring Framework's `BeanUtils`. There is no defined ordering. If you wish to enforce a
+particular order on these properties, you can specify that through `HalFormsConfiguration`.
+
+.Registering order of template properties for types
+====
+[source,java]
+----
+@Configuration
+class CustomConfiguration {
+
+  @Bean
+  HalFormsConfiguration halFormsConfiguration() {
+
+    HalFormsConfiguration configuration = new HalFormsConfiguration();
+    configuration.withFieldOrderFor(Employee.class, "employeeId", "name", "role");
+  }
+}
+----
+====
+
+The listed properties will be rendered first, followed by any not cited.
 
 [[mediatypes.hal-forms.i18n]]
 === Internationalization of form attributes
