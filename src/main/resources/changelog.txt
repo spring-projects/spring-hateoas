@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.1.0.RELEASE (2020-05-11)
+----------------------------------------
+- #1292 - Release 1.1.0.RELEASE.
+- #1280 - RepresentationModelProcessorInvoker incorrectly invokes generic processors.
+- #968 - @JsonUnwrapped ignored with (embedded) CollectionModel and HAL Forms.
+- #864 - Create a dedicated builder for HAL representations.
+- #270 - Sample for embedding HAL Resources of different types with root resource.
+- #193 - Support for Resources in a Resource to be added to _embedded.
+
 Changes in version 1.1.0.RC1 (2020-04-28)
 ----------------------------------------
 - #1277 - Upgrade to Jackson 2.11.0.
