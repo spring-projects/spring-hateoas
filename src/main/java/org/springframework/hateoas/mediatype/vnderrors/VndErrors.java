@@ -73,7 +73,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	private final String message;
 
 	@JsonInclude(value = JsonInclude.Include.NON_EMPTY) //
-	private final Integer logref;
+	private final Object logref;
 
 	public VndErrors() {
 
@@ -86,8 +86,8 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	 * Creates a new {@link VndErrors} instance containing a single {@link VndError} with the given logref, message and
 	 * optional {@link Link}s.
 	 */
-	public VndErrors(String logref, String message, Link... links) {
-		this(new VndError(message, null, Integer.parseInt(logref), links));
+	public VndErrors(Object logref, String message, Link... links) {
+		this(new VndError(message, null, logref, links));
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	 */
 	@JsonCreator
 	public VndErrors(@JsonProperty("_embedded") List<VndError> errors, @JsonProperty("message") String message,
-			@JsonProperty("logref") Integer logref, @JsonProperty("_links") Links links) {
+			@JsonProperty("logref") Object logref, @JsonProperty("_links") Links links) {
 
 		Assert.notNull(errors, "Errors must not be null!"); // Retain for compatibility
 		Assert.notEmpty(errors, "Errors must not be empty!");
@@ -218,7 +218,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		return this.message;
 	}
 
-	public Integer getLogref() {
+	public Object getLogref() {
 		return this.logref;
 	}
 
@@ -258,7 +258,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
 		private final @Nullable String path;
 
-		private final Integer logref;
+		private final Object logref;
 
 		/**
 		 * Creates a new {@link VndError} with a message and optional a path and a logref.
@@ -270,7 +270,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		 */
 		@JsonCreator
 		public VndError(@JsonProperty("message") String message, @JsonProperty("path") @Nullable String path,
-				@JsonProperty("logref") Integer logref, @JsonProperty("_links") List<Link> links) {
+				@JsonProperty("logref") Object logref, @JsonProperty("_links") List<Link> links) {
 
 			Assert.hasText(message, "Message must not be null or empty!");
 
@@ -280,16 +280,16 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 			this.add(links);
 		}
 
-		public VndError(String message, @Nullable String path, Integer logref, Link... link) {
+		public VndError(String message, @Nullable String path, Object logref, Link... link) {
 			this(message, path, logref, Arrays.asList(link));
 		}
 
 		/**
-		 * @deprecated Use {@link #VndError(String, String, Integer, Link...)} (with proper ordering of arguments)
+		 * @deprecated Use {@link #VndError(String, String, Object, Link...)} (with proper ordering of arguments)
 		 */
 		@Deprecated
 		public VndError(String logref, String message, Link... links) {
-			this(message, null, Integer.parseInt(logref), Arrays.asList(links));
+			this(message, null, logref, Arrays.asList(links));
 		}
 
 		public String getMessage() {
@@ -303,7 +303,7 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		}
 
 		@JsonInclude(JsonInclude.Include.NON_EMPTY)
-		public Integer getLogref() {
+		public Object getLogref() {
 			return this.logref;
 		}
 

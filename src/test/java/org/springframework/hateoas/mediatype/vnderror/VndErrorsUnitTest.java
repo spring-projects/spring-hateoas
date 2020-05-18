@@ -90,4 +90,14 @@ class VndErrorsUnitTest {
 		assertThat(errors.toString())
 				.isEqualTo("VndErrors[VndError[logref: 42, message: message, links: [<foo>;rel=\"bar\"]]]");
 	}
+
+	@Test // #1291
+	void logRefCanBeAlphabeticalThroughMainConstructor() {
+		new VndErrors().withError(new VndError("message", "path", "alphaLogref", Link.of("foo", "bar")));
+	}
+
+	@Test // #1291
+	void logRefCanBeAlphabeticalThroughDeprecatedConstructor() {
+		new VndErrors().withError(new VndError("alphaLogref", "message", Link.of("/link").withSelfRel()));
+	}
 }
