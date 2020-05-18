@@ -20,6 +20,7 @@ import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -132,5 +133,15 @@ class VndErrorsMarshallingTest {
 		String json = read(new ClassPathResource("vnderror-nested.json", getClass()));
 
 		assertThat(mapper.writeValueAsString(vndErrors)).isEqualToIgnoringWhitespace(json);
+	}
+
+	@Test // #1291
+	void basicVndErrorShouldSerialize() throws IOException {
+
+		VndError error = new VndError("message", "path", "alphaLogref", Link.of("foo", "bar"));
+
+		String json = read(new ClassPathResource("vnderror-string-logref.json", getClass()));
+
+		assertThat(mapper.writeValueAsString(error)).isEqualToIgnoringWhitespace(json);
 	}
 }

@@ -1,0 +1,10 @@
+{
+  "message" : "message",
+  "path" : "path",
+  "logref" : "alphaLogref",
+  "_links" : {
+    "bar" : {
+      "href" : "foo"
+    }
+  }
+}
