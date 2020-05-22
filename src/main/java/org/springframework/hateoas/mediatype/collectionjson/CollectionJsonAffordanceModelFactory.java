@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.Getter;
-
 import java.util.List;
 
 import org.springframework.hateoas.AffordanceModel;
@@ -36,11 +34,15 @@ import org.springframework.http.MediaType;
  */
 class CollectionJsonAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final @Getter MediaType mediaType = MediaTypes.COLLECTION_JSON;
+	private final MediaType mediaType = MediaTypes.COLLECTION_JSON;
 
 	@Override
 	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
 			InputPayloadMetadata inputType, List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 		return new CollectionJsonAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	}
+
+	public MediaType getMediaType() {
+		return this.mediaType;
 	}
 }

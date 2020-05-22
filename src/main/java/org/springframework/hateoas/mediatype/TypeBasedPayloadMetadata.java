@@ -15,9 +15,6 @@
  */
 package org.springframework.hateoas.mediatype;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
@@ -39,7 +36,7 @@ import org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured;
  */
 class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
-	private final @Getter(AccessLevel.PACKAGE) ResolvableType type;
+	private final ResolvableType type;
 	private final SortedMap<String, PropertyMetadata> properties;
 
 	TypeBasedPayloadMetadata(ResolvableType type, Stream<PropertyMetadata> properties) {
@@ -92,5 +89,9 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 		Class<?> type = this.type.resolve(Object.class);
 
 		return Arrays.asList(type.getName(), type.getSimpleName());
+	}
+
+	ResolvableType getType() {
+		return this.type;
 	}
 }

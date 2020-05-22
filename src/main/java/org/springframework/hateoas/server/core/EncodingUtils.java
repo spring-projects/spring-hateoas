@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.server.core;
 
-import lombok.experimental.UtilityClass;
-
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -31,10 +29,13 @@ import org.springframework.web.util.UriUtils;
  * @since 0.22
  * @soundtrack Don Philippe - Between Now And Now (Between Now And Now)
  */
-@UtilityClass
-class EncodingUtils {
+final class EncodingUtils {
 
 	private static final Charset ENCODING = StandardCharsets.UTF_8;
+
+	private EncodingUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 
 	/**
 	 * Encodes the given path value.

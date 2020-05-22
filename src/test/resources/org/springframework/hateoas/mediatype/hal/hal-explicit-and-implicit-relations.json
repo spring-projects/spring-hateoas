@@ -1,9 +1,5 @@
 {
   "_embedded" : {
-    "burglars" : {
-      "name" : "Bilbo Baggins",
-      "role" : "burglar"
-    },
     "staffs" : [ {
       "name" : "Frodo Baggins",
       "role" : "ring bearer"
@@ -11,17 +7,21 @@
       "name" : "Bilbo Baggins",
       "role" : "burglar"
     } ],
-    "ring bearers" : {
-      "name" : "Frodo Baggins",
-      "role" : "ring bearer"
-    },
     "products" : [ {
       "name" : "ring of power",
       "price" : 999.99
     }, {
       "name" : "Saruman's staff",
       "price" : 9.99
-    } ]
+    } ],
+    "ring bearers" : {
+      "name" : "Frodo Baggins",
+      "role" : "ring bearer"
+    },
+    "burglars" : {
+      "name" : "Bilbo Baggins",
+      "role" : "burglar"
+    }
   },
   "_links" : {
     "self" : {

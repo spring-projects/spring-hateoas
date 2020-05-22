@@ -15,9 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.Getter;
-import lombok.Value;
-import lombok.With;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 
@@ -29,15 +27,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author Greg Turnquist
  */
-@Value
-@Getter(onMethod = @__(@JsonProperty))
 @JsonInclude(Include.NON_NULL)
-@With
-class CollectionJsonData {
+final class CollectionJsonData {
 
-	private @Nullable String name;
-	private @Nullable Object value;
-	private @Nullable String prompt;
+	private @Nullable final String name;
+	private @Nullable final Object value;
+	private @Nullable final String prompt;
 
 	@JsonCreator
 	CollectionJsonData(@JsonProperty("name") @Nullable String name, //
@@ -51,5 +46,57 @@ class CollectionJsonData {
 
 	CollectionJsonData() {
 		this(null, null, null);
+	}
+
+	public CollectionJsonData withName(@Nullable String name) {
+		return this.name == name ? this : new CollectionJsonData(name, this.value, this.prompt);
+	}
+
+	public CollectionJsonData withValue(@Nullable Object value) {
+		return this.value == value ? this : new CollectionJsonData(this.name, value, this.prompt);
+	}
+
+	public CollectionJsonData withPrompt(@Nullable String prompt) {
+		return this.prompt == prompt ? this : new CollectionJsonData(this.name, this.value, prompt);
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getName() {
+		return this.name;
+	}
+
+	@JsonProperty
+	@Nullable
+	public Object getValue() {
+		return this.value;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getPrompt() {
+		return this.prompt;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CollectionJsonData that = (CollectionJsonData) o;
+		return Objects.equals(this.name, that.name) && Objects.equals(this.value, that.value)
+				&& Objects.equals(this.prompt, that.prompt);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.name, this.value, this.prompt);
+	}
+
+	@Override
+	public String toString() {
+		return "CollectionJsonData(name=" + this.name + ", value=" + this.value + ", prompt=" + this.prompt + ")";
 	}
 }

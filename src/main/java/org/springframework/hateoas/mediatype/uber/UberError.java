@@ -15,11 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.AccessLevel;
-import lombok.Value;
-import lombok.With;
-
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 
@@ -32,11 +29,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  * @since 1.0
  */
-@Value
-@With(AccessLevel.PACKAGE)
-class UberError {
+final class UberError {
 
-	private List<UberData> data;
+	private final List<UberData> data;
 
 	@JsonCreator
 	UberError(@JsonProperty("data") @Nullable List<UberData> data) {
@@ -45,5 +40,33 @@ class UberError {
 
 	UberError() {
 		this(null);
+	}
+
+	UberError withData(List<UberData> data) {
+		return this.data == data ? this : new UberError(data);
+	}
+
+	public List<UberData> getData() {
+		return this.data;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof UberError))
+			return false;
+		UberError uberError = (UberError) o;
+		return Objects.equals(this.data, uberError.data);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.data);
+	}
+
+	public String toString() {
+		return "UberError(data=" + this.data + ")";
 	}
 }

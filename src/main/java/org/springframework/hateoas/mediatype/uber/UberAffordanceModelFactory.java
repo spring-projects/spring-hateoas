@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.Getter;
-
 import java.util.List;
 
 import org.springframework.hateoas.AffordanceModel;
@@ -37,7 +35,7 @@ import org.springframework.http.MediaType;
  */
 class UberAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final @Getter MediaType mediaType = MediaTypes.UBER_JSON;
+	private final MediaType mediaType = MediaTypes.UBER_JSON;
 
 	/*
 	 * (non-Javadoc)
@@ -47,5 +45,9 @@ class UberAffordanceModelFactory implements AffordanceModelFactory {
 	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
 			InputPayloadMetadata inputType, List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 		return new UberAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	}
+
+	public MediaType getMediaType() {
+		return this.mediaType;
 	}
 }

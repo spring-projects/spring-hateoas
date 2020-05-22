@@ -17,11 +17,6 @@ package org.springframework.hateoas.mediatype;
 
 import static java.util.stream.Collectors.*;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.With;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,13 +41,20 @@ import org.springframework.util.Assert;
  * @author Oliver Drotbohm
  * @see #afford(HttpMethod)
  */
-@RequiredArgsConstructor(staticName = "of")
 public class Affordances implements AffordanceOperations {
 
 	private static List<AffordanceModelFactory> factories = SpringFactoriesLoader
 			.loadFactories(AffordanceModelFactory.class, Affordance.class.getClassLoader());
 
 	private final Link link;
+
+	public static Affordances of(Link link) {
+		return new Affordances(link);
+	}
+
+	private Affordances(Link link) {
+		this.link = link;
+	}
 
 	/**
 	 * Returns all {@link Affordance}s created.
@@ -91,19 +93,39 @@ public class Affordances implements AffordanceOperations {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class AffordanceBuilder implements AffordanceOperations {
 
 		private final Affordances context;
 
 		private final HttpMethod method;
-		private final @With Link target;
+		private final Link target;
 		private final InputPayloadMetadata inputMetdata;
 		private final PayloadMetadata outputMetadata;
 
 		private List<QueryParameter> parameters = Collections.emptyList();
-		private @Nullable @With String name;
+		private @Nullable String name;
+
+		private AffordanceBuilder(Affordances context, HttpMethod method, Link target, InputPayloadMetadata inputMetdata,
+				PayloadMetadata outputMetadata) {
+
+			this.context = context;
+			this.method = method;
+			this.target = target;
+			this.inputMetdata = inputMetdata;
+			this.outputMetadata = outputMetadata;
+		}
+
+		private AffordanceBuilder(Affordances context, HttpMethod method, Link target, InputPayloadMetadata inputMetdata,
+				PayloadMetadata outputMetadata, List<QueryParameter> parameters, String name) {
+
+			this.context = context;
+			this.method = method;
+			this.target = target;
+			this.inputMetdata = inputMetdata;
+			this.outputMetadata = outputMetadata;
+			this.parameters = parameters;
+			this.name = name;
+		}
 
 		/**
 		 * Registers the given type as input and output model for the affordance.
@@ -205,7 +227,7 @@ public class Affordances implements AffordanceOperations {
 		}
 
 		/**
-		 * Replaces the current {@link QueryParameters} with the given ones.
+		 * Replaces the current {@link QueryParameter} list with the given ones.
 		 *
 		 * @param parameters must not be {@literal null}.
 		 * @return will never be {@literal null}.
@@ -215,7 +237,7 @@ public class Affordances implements AffordanceOperations {
 		}
 
 		/**
-		 * Replaces the current {@link QueryParameters} with the given ones.
+		 * Replaces the current {@link QueryParameter} list with the given ones.
 		 *
 		 * @param parameters must not be {@literal null}.
 		 * @return will never be {@literal null}.
@@ -319,6 +341,32 @@ public class Affordances implements AffordanceOperations {
 			Class<?> resolvedType = type.resolve();
 
 			return resolvedType == null ? name : name.concat(resolvedType.getSimpleName());
+		}
+
+		/**
+		 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal target}.
+		 * 
+		 * @param target
+		 * @return
+		 */
+		public AffordanceBuilder withTarget(Link target) {
+
+			return this.target == target ? this
+					: new AffordanceBuilder(this.context, this.method, target, this.inputMetdata, this.outputMetadata,
+							this.parameters, this.name);
+		}
+
+		/**
+		 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal name}.
+		 * 
+		 * @param name
+		 * @return
+		 */
+		public AffordanceBuilder withName(@Nullable String name) {
+
+			return this.name == name ? this
+					: new AffordanceBuilder(this.context, this.method, this.target, this.inputMetdata, this.outputMetadata,
+							this.parameters, name);
 		}
 	}
 }

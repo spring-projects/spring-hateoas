@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import lombok.experimental.UtilityClass;
-
 /**
  * Static class to find out whether a relation type is defined by the IANA.
  *
@@ -25,9 +23,12 @@ import lombok.experimental.UtilityClass;
  * @author Roland Kulcsár
  * @author Greg Turnquist
  */
-@UtilityClass
 @Deprecated
-public class IanaRels {
+public final class IanaRels {
+
+	private IanaRels() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 
 	/**
 	 * Returns whether the given relation type is defined by the IANA.

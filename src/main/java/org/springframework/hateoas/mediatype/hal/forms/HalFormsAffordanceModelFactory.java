@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.Getter;
-
 import java.util.List;
 
 import org.springframework.hateoas.AffordanceModel;
@@ -37,7 +35,7 @@ import org.springframework.http.MediaType;
  */
 class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final @Getter MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
+	private final MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
 
 	/*
 	 * (non-Javadoc)
@@ -47,5 +45,9 @@ class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
 			InputPayloadMetadata inputType, List<QueryParameter> parameters, PayloadMetadata outputType) {
 		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, parameters, outputType);
+	}
+
+	public MediaType getMediaType() {
+		return this.mediaType;
 	}
 }

@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,10 +77,13 @@ class WebMvcHateoasConfiguration {
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaWebMvcConfigurer implements WebMvcConfigurer {
 
 		private final @NonNull WebConverters hypermediaConverters;
+
+		public HypermediaWebMvcConfigurer(WebConverters hypermediaConverters) {
+			this.hypermediaConverters = hypermediaConverters;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -98,10 +99,14 @@ class WebMvcHateoasConfiguration {
 	 * @author Greg Turnquist
 	 * @author Oliver Drotbohm
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaRepresentationModelBeanProcessorPostProcessor implements BeanPostProcessor {
 
 		private final ObjectProvider<RepresentationModelProcessorInvoker> invoker;
+
+		public HypermediaRepresentationModelBeanProcessorPostProcessor(
+				ObjectProvider<RepresentationModelProcessorInvoker> invoker) {
+			this.invoker = invoker;
+		}
 
 		/*
 		 * (non-Javadoc)

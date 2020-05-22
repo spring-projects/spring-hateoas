@@ -17,7 +17,6 @@ package org.springframework.hateoas.server.reactive;
 
 import static org.springframework.web.filter.reactive.ServerWebExchangeContextFilter.*;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -111,10 +110,13 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 		return this;
 	}
 
-	@RequiredArgsConstructor
 	public static class WebFluxBuilder {
 
 		private final Mono<WebFluxLinkBuilder> builder;
+
+		public WebFluxBuilder(Mono<WebFluxLinkBuilder> builder) {
+			this.builder = builder;
+		}
 
 		/**
 		 * Creates a new {@link WebFluxBuilder} appending the given path to the currently to be built link.
@@ -179,10 +181,13 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 *
 	 * @author Oliver Gierke
 	 */
-	@RequiredArgsConstructor
 	public static class WebFluxLink {
 
 		private final Mono<Link> link;
+
+		public WebFluxLink(Mono<Link> link) {
+			this.link = link;
+		}
 
 		/**
 		 * Adds the affordance created by the given virtual method invocation.

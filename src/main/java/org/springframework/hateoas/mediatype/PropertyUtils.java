@@ -15,15 +15,22 @@
  */
 package org.springframework.hateoas.mediatype;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -140,6 +147,7 @@ public class PropertyUtils {
 	}
 
 	private static Map<String, Object> unwrapPropertyIfNeeded(String propertyName, BeanWrapper wrapper) {
+
 		Field descriptorField = ReflectionUtils.findField(wrapper.getWrappedClass(), propertyName);
 		Method readMethod = wrapper.getPropertyDescriptor(propertyName).getReadMethod();
 
@@ -422,12 +430,15 @@ public class PropertyUtils {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 	private static class DefaultPropertyMetadata implements PropertyMetadata, Comparable<DefaultPropertyMetadata> {
 
 		private static Comparator<PropertyMetadata> BY_NAME = Comparator.comparing(PropertyMetadata::getName);
 
 		private final AnnotatedProperty property;
+
+		private DefaultPropertyMetadata(AnnotatedProperty property) {
+			this.property = property;
+		}
 
 		/*
 		 * (non-Javadoc)
