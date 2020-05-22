@@ -15,20 +15,17 @@
  */
 package org.springframework.hateoas.server.core;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.plugin.core.PluginRegistry;
+import org.springframework.util.Assert;
 
 /**
  * @author Oliver Gierke
  */
-@RequiredArgsConstructor
 public class DelegatingLinkRelationProvider implements LinkRelationProvider {
 
-	private final @NonNull PluginRegistry<LinkRelationProvider, LookupContext> providers;
+	private final PluginRegistry<LinkRelationProvider, LookupContext> providers;
 
 	/**
 	 * Creates a new {@link DefaultLinkRelationProvider} for the given {@link LinkRelationProvider}s.
@@ -37,6 +34,13 @@ public class DelegatingLinkRelationProvider implements LinkRelationProvider {
 	 */
 	public DelegatingLinkRelationProvider(LinkRelationProvider... providers) {
 		this(PluginRegistry.of(providers));
+	}
+
+	public DelegatingLinkRelationProvider(PluginRegistry<LinkRelationProvider, LookupContext> providers) {
+
+		Assert.notNull(providers, "providers must not be null!");
+
+		this.providers = providers;
 	}
 
 	/*

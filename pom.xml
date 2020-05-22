@@ -240,25 +240,6 @@
 						Configures JavaDoc generation.
 					-->
 
-					<!-- Delombok sources so that generated code shows up in JavaDoc -->
-
-					<plugin>
-						<groupId>org.projectlombok</groupId>
-						<artifactId>lombok-maven-plugin</artifactId>
-						<version>1.18.10.0</version>
-						<executions>
-							<execution>
-								<phase>generate-sources</phase>
-								<goals>
-									<goal>delombok</goal>
-								</goals>
-								<configuration>
-									<outputDirectory>${project.root}/target/generated-sources/delombok</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
@@ -434,7 +415,7 @@
 								</configuration>
 							</execution>
 
-							<!-- Requires a fix to Lombok/Javadoc generation first otherwise build duration explodes
+							<!-- Requires a fix to Javadoc generation first otherwise build duration explodes
 							<execution>
 								<id>epub</id>
 								<phase>compile</phase>
@@ -839,7 +820,7 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.12</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>

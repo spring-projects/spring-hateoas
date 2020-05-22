@@ -15,10 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -53,8 +49,20 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
@@ -881,17 +889,35 @@ public class Jackson2HalModule extends SimpleModule {
 	 *
 	 * @author Oliver Gierke
 	 */
-	@RequiredArgsConstructor
-	@AllArgsConstructor(access = AccessLevel.PRIVATE)
 	public static class EmbeddedMapper {
 
 		private static final Function<String, String> NO_OP = Function.identity();
 
-		private final @lombok.NonNull LinkRelationProvider relProvider;
+		private final LinkRelationProvider relProvider;
 		private final CurieProvider curieProvider;
 		private final boolean preferCollectionRels;
 
 		private Function<String, String> relationTransformer = Function.identity();
+
+		public EmbeddedMapper(LinkRelationProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels) {
+
+			Assert.notNull(relProvider, "relProvider must not be null!");
+
+			this.relProvider = relProvider;
+			this.curieProvider = curieProvider;
+			this.preferCollectionRels = preferCollectionRels;
+		}
+
+		private EmbeddedMapper(LinkRelationProvider relProvider, CurieProvider curieProvider, boolean preferCollectionRels,
+				Function<String, String> relationTransformer) {
+
+			Assert.notNull(relProvider, "relProvider must not be null!");
+
+			this.relProvider = relProvider;
+			this.curieProvider = curieProvider;
+			this.preferCollectionRels = preferCollectionRels;
+			this.relationTransformer = relationTransformer;
+		}
 
 		/**
 		 * Registers the given {@link PropertyNamingStrategy} with the current mapper to forward that strategy as relation

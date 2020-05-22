@@ -15,15 +15,10 @@
  */
 package org.springframework.hateoas.client;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.With;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -36,10 +31,7 @@ import org.springframework.util.Assert;
  * @author Manish Misra
  * @since 0.18
  */
-@Value
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-@Getter(AccessLevel.PACKAGE)
-public class Hop {
+public final class Hop {
 
 	/**
 	 * Name of this hop.
@@ -49,12 +41,19 @@ public class Hop {
 	/**
 	 * Collection of URI Template parameters.
 	 */
-	private final @With Map<String, Object> parameters;
+	private final Map<String, Object> parameters;
 
 	/**
 	 * Extra {@link HttpHeaders} to apply to this hop.
 	 */
-	private final @With HttpHeaders headers;
+	private final HttpHeaders headers;
+
+	private Hop(String rel, Map<String, Object> parameters, HttpHeaders headers) {
+
+		this.rel = rel;
+		this.parameters = parameters;
+		this.headers = headers;
+	}
 
 	/**
 	 * Creates a new {@link Hop} for the given relation name.
@@ -135,5 +134,58 @@ public class Hop {
 		mergedParameters.putAll(this.parameters);
 
 		return mergedParameters;
+	}
+
+	String getRel() {
+		return this.rel;
+	}
+
+	Map<String, Object> getParameters() {
+		return this.parameters;
+	}
+
+	HttpHeaders getHeaders() {
+		return this.headers;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Hop hop = (Hop) o;
+		return Objects.equals(this.rel, hop.rel) && Objects.equals(this.parameters, hop.parameters)
+				&& Objects.equals(this.headers, hop.headers);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.rel, this.parameters, this.headers);
+	}
+
+	public String toString() {
+		return "Hop(rel=" + this.rel + ", parameters=" + this.parameters + ", headers=" + this.headers + ")";
+	}
+
+	/**
+	 * Create a new {@link Hop} by copying all the attributes and replacing the {@literal parameters}.
+	 * 
+	 * @param parameters
+	 * @return
+	 */
+	public Hop withParameters(Map<String, Object> parameters) {
+		return this.parameters == parameters ? this : new Hop(this.rel, parameters, this.headers);
+	}
+
+	/**
+	 * Create a new {@link Hop} by copying all the attributes and replacing the {@literal headers}.
+	 *
+	 * @param headers
+	 * @return
+	 */
+	public Hop withHeaders(HttpHeaders headers) {
+		return this.headers == headers ? this : new Hop(this.rel, this.parameters, headers);
 	}
 }

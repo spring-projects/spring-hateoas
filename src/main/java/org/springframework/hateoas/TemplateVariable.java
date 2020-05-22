@@ -17,12 +17,10 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -33,15 +31,13 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  * @author JamesE Richardson
  */
-@Value
-@EqualsAndHashCode
 public final class TemplateVariable implements Serializable {
 
 	private static final long serialVersionUID = -2731446749851863774L;
 
-	String name;
-	TemplateVariable.VariableType type;
-	String description;
+	private final String name;
+	private final TemplateVariable.VariableType type;
+	private final String description;
 
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name and type.
@@ -204,6 +200,35 @@ public final class TemplateVariable implements Serializable {
 
 		String base = String.format("{%s%s}", type.toString(), name);
 		return StringUtils.hasText(description) ? String.format("%s - %s", base, description) : base;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public VariableType getType() {
+		return this.type;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TemplateVariable that = (TemplateVariable) o;
+		return Objects.equals(this.name, that.name) && this.type == that.type
+				&& Objects.equals(this.description, that.description);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.name, this.type, this.description);
 	}
 
 	/**

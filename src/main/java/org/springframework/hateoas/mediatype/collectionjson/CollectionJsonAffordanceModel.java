@@ -15,12 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,14 +34,13 @@ import org.springframework.http.HttpMethod;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@EqualsAndHashCode(callSuper = true)
 class CollectionJsonAffordanceModel extends AffordanceModel {
 
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT,
 			HttpMethod.PATCH);
 
-	private final @Getter List<CollectionJsonData> inputProperties;
-	private final @Getter List<CollectionJsonData> queryProperties;
+	private final List<CollectionJsonData> inputProperties;
+	private final List<CollectionJsonData> queryProperties;
 
 	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
 			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
@@ -87,5 +84,32 @@ class CollectionJsonAffordanceModel extends AffordanceModel {
 						.withName(queryProperty.getName()) //
 						.withValue("")) //
 				.collect(Collectors.toList());
+	}
+
+	public List<CollectionJsonData> getInputProperties() {
+		return this.inputProperties;
+	}
+
+	public List<CollectionJsonData> getQueryProperties() {
+		return this.queryProperties;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof CollectionJsonAffordanceModel))
+			return false;
+		if (!super.equals(o))
+			return false;
+		CollectionJsonAffordanceModel that = (CollectionJsonAffordanceModel) o;
+		return Objects.equals(this.inputProperties, that.inputProperties)
+				&& Objects.equals(this.queryProperties, that.queryProperties);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), this.inputProperties, this.queryProperties);
 	}
 }

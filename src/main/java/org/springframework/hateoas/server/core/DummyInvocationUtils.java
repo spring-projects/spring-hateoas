@@ -15,14 +15,12 @@
  */
 package org.springframework.hateoas.server.core;
 
-import lombok.NonNull;
-import lombok.Value;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.Advised;
@@ -167,17 +165,107 @@ public class DummyInvocationUtils {
 		return (T) factory.getProxy(classLoader);
 	}
 
-	@Value(staticConstructor = "of")
-	private static class CacheKey<T> {
-		Class<T> type;
-		Object[] arguments;
+	private static final class CacheKey<T> {
+
+		private final Class<T> type;
+		private final Object[] arguments;
+
+		private CacheKey(Class<T> type, Object[] arguments) {
+
+			this.type = type;
+			this.arguments = arguments;
+		}
+
+		public static <T> CacheKey<T> of(Class<T> type, Object[] arguments) {
+			return new CacheKey<T>(type, arguments);
+		}
+
+		public Class<T> getType() {
+			return this.type;
+		}
+
+		public Object[] getArguments() {
+			return this.arguments;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof CacheKey))
+				return false;
+			CacheKey<?> cacheKey = (CacheKey<?>) o;
+			return Objects.equals(this.type, cacheKey.type) && Arrays.equals(this.arguments, cacheKey.arguments);
+		}
+
+		@Override
+		public int hashCode() {
+
+			int result = Objects.hash(this.type);
+			result = 31 * result + Arrays.hashCode(this.arguments);
+			return result;
+		}
+
+		public String toString() {
+			return "DummyInvocationUtils.CacheKey(type=" + this.type + ", arguments=" + Arrays.deepToString(this.arguments)
+					+ ")";
+		}
 	}
 
-	@Value
-	private static class SimpleMethodInvocation implements MethodInvocation {
+	private static final class SimpleMethodInvocation implements MethodInvocation {
 
-		@NonNull Class<?> targetType;
-		@NonNull Method method;
-		@NonNull Object[] arguments;
+		private final Class<?> targetType;
+		private final Method method;
+		private final Object[] arguments;
+
+		public SimpleMethodInvocation(Class<?> targetType, Method method, Object[] arguments) {
+
+			Assert.notNull(targetType, "targetType must not be null!");
+			Assert.notNull(method, "method must not be null!");
+			Assert.notNull(arguments, "arguments must not be null!");
+
+			this.targetType = targetType;
+			this.method = method;
+			this.arguments = arguments;
+		}
+
+		public Class<?> getTargetType() {
+			return this.targetType;
+		}
+
+		public Method getMethod() {
+			return this.method;
+		}
+
+		public Object[] getArguments() {
+			return this.arguments;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof SimpleMethodInvocation))
+				return false;
+			SimpleMethodInvocation that = (SimpleMethodInvocation) o;
+			return Objects.equals(this.targetType, that.targetType) && Objects.equals(this.method, that.method)
+					&& Arrays.equals(this.arguments, that.arguments);
+		}
+
+		@Override
+		public int hashCode() {
+
+			int result = Objects.hash(this.targetType, this.method);
+			result = 31 * result + Arrays.hashCode(this.arguments);
+			return result;
+		}
+
+		public String toString() {
+
+			return "DummyInvocationUtils.SimpleMethodInvocation(targetType=" + this.targetType + ", method=" + this.method
+					+ ", arguments=" + Arrays.deepToString(this.arguments) + ")";
+		}
 	}
 }

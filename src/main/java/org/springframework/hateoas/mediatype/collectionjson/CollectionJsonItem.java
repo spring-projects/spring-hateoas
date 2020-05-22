@@ -15,14 +15,9 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.With;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,16 +39,17 @@ import com.fasterxml.jackson.databind.JavaType;
  *
  * @author Greg Turnquist
  */
-@Value
-@Getter(onMethod = @__(@JsonProperty))
-@With(AccessLevel.PACKAGE)
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-class CollectionJsonItem<T> {
+final class CollectionJsonItem<T> {
 
-	private @Nullable String href;
-	private List<CollectionJsonData> data;
-	private @JsonInclude(Include.NON_EMPTY) Links links;
-	private @Nullable @Getter(onMethod = @__(@JsonIgnore)) T rawData;
+	private @Nullable final String href;
+	private final List<CollectionJsonData> data;
+	private @JsonInclude(Include.NON_EMPTY) final Links links;
+	private @Nullable final T rawData;
+
+	/**
+	 * Simple scalar types that can be encoded by value, not type.
+	 */
+	private final static Set<Class<?>> PRIMITIVE_TYPES = Collections.singleton(String.class);
 
 	@JsonCreator
 	CollectionJsonItem(@JsonProperty("href") @Nullable String href, //
@@ -70,10 +66,86 @@ class CollectionJsonItem<T> {
 		this(null, null, null);
 	}
 
+	CollectionJsonItem(String href, List<CollectionJsonData> data, Links links, T rawData) {
+
+		this.href = href;
+		this.data = data;
+		this.links = links;
+		this.rawData = rawData;
+	}
+
 	/**
-	 * Simple scalar types that can be encoded by value, not type.
+	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@link Link}s.
+	 *
+	 * @param links
+	 * @return
 	 */
-	private final static Set<Class<?>> PRIMITIVE_TYPES = Collections.singleton(String.class);
+	CollectionJsonItem<T> withLinks(Link... links) {
+		return new CollectionJsonItem<>(this.href, this.data, Links.of(links), this.rawData);
+	}
+
+	/**
+	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@link Links}.
+	 * 
+	 * @param links
+	 * @return
+	 */
+	CollectionJsonItem<T> withLinks(Links links) {
+		return this.links == links ? this : new CollectionJsonItem<T>(this.href, this.data, links, this.rawData);
+	}
+
+	/**
+	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@literal links} with a
+	 * {@literal self} link.
+	 * 
+	 * @return
+	 */
+	CollectionJsonItem<T> withOwnSelfLink() {
+
+		String href = this.href;
+
+		if (href == null) {
+			return this;
+		}
+
+		return withLinks(Links.of(Link.of(href)).merge(MergeMode.SKIP_BY_REL, links));
+	}
+
+	/**
+	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@literal href}.
+	 *
+	 * @param href
+	 * @return
+	 */
+	CollectionJsonItem<T> withHref(@Nullable String href) {
+		return this.href == href ? this : new CollectionJsonItem<T>(href, this.data, this.links, this.rawData);
+	}
+
+	/**
+	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@literal data}.
+	 *
+	 * @param data
+	 * @return
+	 */
+	CollectionJsonItem<T> withData(List<CollectionJsonData> data) {
+		return this.data == data ? this : new CollectionJsonItem<T>(this.href, data, this.links, this.rawData);
+	}
+
+	/**
+	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@literal rawData}.
+	 *
+	 * @param rawData
+	 * @return
+	 */
+	CollectionJsonItem<T> withRawData(@Nullable T rawData) {
+		return this.rawData == rawData ? this : new CollectionJsonItem<T>(this.href, this.data, this.links, rawData);
+	}
+
+	@JsonProperty
+	@Nullable
+	String getHref() {
+		return this.href;
+	}
 
 	/**
 	 * Transform a domain object into a collection of {@link CollectionJsonData} objects to serialize properly.
@@ -81,7 +153,7 @@ class CollectionJsonItem<T> {
 	 * @return
 	 */
 	@JsonProperty
-	public List<CollectionJsonData> getData() {
+	List<CollectionJsonData> getData() {
 
 		if (!this.data.isEmpty()) {
 			return this.data;
@@ -91,7 +163,7 @@ class CollectionJsonItem<T> {
 			return Collections.singletonList(new CollectionJsonData().withValue(this.rawData));
 		}
 
-		if (rawData == null) {
+		if (this.rawData == null) {
 			return Collections.emptyList();
 		}
 
@@ -102,14 +174,25 @@ class CollectionJsonItem<T> {
 				.collect(Collectors.toList());
 	}
 
+	@JsonProperty
+	Links getLinks() {
+		return this.links;
+	}
+
+	@Nullable
+	@JsonIgnore
+	T getRawData() {
+		return this.rawData;
+	}
+
 	/**
-	 * Generate an object used the deserialized properties and the provided type from the deserializer.
+	 * Generate an object using the deserialized properties and the provided type from the deserializer.
 	 *
 	 * @param javaType - type of the object to create
 	 * @return
 	 */
 	@Nullable
-	public Object toRawData(JavaType javaType) {
+	Object toRawData(JavaType javaType) {
 
 		if (this.data.isEmpty()) {
 			return null;
@@ -120,25 +203,30 @@ class CollectionJsonItem<T> {
 		}
 
 		return PropertyUtils.createObjectFromProperties(javaType.getRawClass(), //
-				this.data.stream().collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue)));
+				this.data.stream() //
+						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue)));
 	}
 
-	public CollectionJsonItem<T> withLinks(Link... links) {
-		return new CollectionJsonItem<>(href, data, Links.of(links), rawData);
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CollectionJsonItem<?> that = (CollectionJsonItem<?>) o;
+		return Objects.equals(this.href, that.href) && Objects.equals(this.data, that.data)
+				&& Objects.equals(this.links, that.links) && Objects.equals(this.rawData, that.rawData);
 	}
 
-	public CollectionJsonItem<T> withLinks(Links links) {
-		return new CollectionJsonItem<>(href, data, links, rawData);
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.href, this.data, this.links, this.rawData);
 	}
 
-	public CollectionJsonItem<T> withOwnSelfLink() {
-
-		String href = this.href;
-
-		if (href == null) {
-			return this;
-		}
-
-		return withLinks(Links.of(Link.of(href)).merge(MergeMode.SKIP_BY_REL, links));
+	public String toString() {
+		return "CollectionJsonItem(href=" + this.href + ", data=" + this.data + ", links=" + this.links + ", rawData="
+				+ this.rawData + ")";
 	}
+
 }

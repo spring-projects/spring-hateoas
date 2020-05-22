@@ -15,12 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Value;
-import lombok.With;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +22,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -59,23 +54,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  * @since 1.0
  */
-@Value
-@Getter(onMethod = @__(@JsonProperty))
-@With(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-class UberData {
+final class UberData {
 
-	private @Nullable String id, name, label;
-	private @Nullable List<LinkRelation> rel;
-	private @Nullable String url;
-	private @Nullable UberAction action;
-	private boolean transclude;
-	private @Nullable String model;
-	private @Nullable List<String> sending;
-	private @Nullable List<String> accepting;
-	private @Nullable Object value;
-	private @Nullable List<UberData> data;
+	private @Nullable final String id, name, label;
+	private @Nullable final List<LinkRelation> rel;
+	private @Nullable final String url;
+	private @Nullable final UberAction action;
+	private final boolean transclude;
+	private @Nullable final String model;
+	private @Nullable final List<String> sending;
+	private @Nullable final List<String> accepting;
+	private @Nullable final Object value;
+	private @Nullable final List<UberData> data;
+
+	/**
+	 * Simple scalar types that can be encoded by value, not type.
+	 */
+	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<>(Collections.singletonList(String.class));
+
+	/**
+	 * Set of all Spring HATEOAS resource types.
+	 */
+	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(
+			Arrays.asList(RepresentationModel.class, EntityModel.class, CollectionModel.class, PagedModel.class));
 
 	@JsonCreator
 	UberData(@JsonProperty("id") @Nullable String id, @JsonProperty("name") @Nullable String name,
@@ -156,17 +159,6 @@ class UberData {
 	private boolean hasUrl(@Nullable String url) {
 		return ObjectUtils.nullSafeEquals(this.url, url);
 	}
-
-	/**
-	 * Simple scalar types that can be encoded by value, not type.
-	 */
-	private final static HashSet<Class<?>> PRIMITIVE_TYPES = new HashSet<>(Collections.singletonList(String.class));
-
-	/**
-	 * Set of all Spring HATEOAS resource types.
-	 */
-	private static final HashSet<Class<?>> RESOURCE_TYPES = new HashSet<>(
-			Arrays.asList(RepresentationModel.class, EntityModel.class, CollectionModel.class, PagedModel.class));
 
 	/**
 	 * Convert a {@link RepresentationModel} into a list of {@link UberData}s, containing links and content.
@@ -407,12 +399,293 @@ class UberData {
 	}
 
 	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal id}.
+	 *
+	 * @param id
+	 * @return
+	 */
+	UberData withId(@Nullable String id) {
+
+		return this.id == id ? this
+				: new UberData(id, this.name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal name}.
+	 *
+	 * @param name
+	 * @return
+	 */
+	UberData withName(@Nullable String name) {
+		return this.name == name ? this
+				: new UberData(this.id, name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal label}.
+	 *
+	 * @param label
+	 * @return
+	 */
+	UberData withLabel(@Nullable String label) {
+
+		return this.label == label ? this
+				: new UberData(this.id, this.name, label, this.rel, this.url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal rel}.
+	 *
+	 * @param rel
+	 * @return
+	 */
+	UberData withRel(@Nullable List<LinkRelation> rel) {
+
+		return this.rel == rel ? this
+				: new UberData(this.id, this.name, this.label, rel, this.url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal url}.
+	 *
+	 * @param url
+	 * @return
+	 */
+	UberData withUrl(@Nullable String url) {
+		return this.url == url ? this
+				: new UberData(this.id, this.name, this.label, this.rel, url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal action}.
+	 *
+	 * @param action
+	 * @return
+	 */
+	UberData withAction(@Nullable UberAction action) {
+		return this.action == action ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal transclude}.
+	 *
+	 * @param transclude
+	 * @return
+	 */
+	UberData withTransclude(boolean transclude) {
+
+		return this.transclude == transclude ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, this.action, transclude, this.model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal model}.
+	 *
+	 * @param model
+	 * @return
+	 */
+	UberData withModel(@Nullable String model) {
+
+		return this.model == model ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, this.action, this.transclude, model,
+						this.sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal sending}.
+	 *
+	 * @param sending
+	 * @return
+	 */
+	UberData withSending(@Nullable List<String> sending) {
+		return this.sending == sending ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+						sending, this.accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal accepting}.
+	 * 
+	 * @param accepting
+	 * @return
+	 */
+	UberData withAccepting(@Nullable List<String> accepting) {
+
+		return this.accepting == accepting ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+						this.sending, accepting, this.value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal value}.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	UberData withValue(@Nullable Object value) {
+
+		return this.value == value ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, value, this.data);
+	}
+
+	/**
+	 * Create new {@link UberData} by copying attributes and replacing {@literal data}.
+	 * 
+	 * @param data
+	 * @return
+	 */
+	UberData withData(@Nullable List<UberData> data) {
+
+		return this.data == data ? this
+				: new UberData(this.id, this.name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+						this.sending, this.accepting, this.value, data);
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getId() {
+		return this.id;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getName() {
+		return this.name;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getLabel() {
+		return this.label;
+	}
+
+	@JsonProperty
+	@Nullable
+	public List<LinkRelation> getRel() {
+		return this.rel;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getUrl() {
+		return this.url;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getModel() {
+		return this.model;
+	}
+
+	@JsonProperty
+	@Nullable
+	public List<String> getSending() {
+		return this.sending;
+	}
+
+	@JsonProperty
+	@Nullable
+	public List<String> getAccepting() {
+		return this.accepting;
+	}
+
+	@JsonProperty
+	@Nullable
+	public Object getValue() {
+		return this.value;
+	}
+
+	@JsonProperty
+	@Nullable
+	public List<UberData> getData() {
+		return this.data;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof UberData))
+			return false;
+		UberData uberData = (UberData) o;
+		return this.transclude == uberData.transclude && Objects.equals(this.id, uberData.id)
+				&& Objects.equals(this.name, uberData.name) && Objects.equals(this.label, uberData.label)
+				&& Objects.equals(this.rel, uberData.rel) && Objects.equals(this.url, uberData.url)
+				&& this.action == uberData.action && Objects.equals(this.model, uberData.model)
+				&& Objects.equals(this.sending, uberData.sending) && Objects.equals(this.accepting, uberData.accepting)
+				&& Objects.equals(this.value, uberData.value) && Objects.equals(this.data, uberData.data);
+	}
+
+	@Override
+	public int hashCode() {
+
+		return Objects.hash(this.id, this.name, this.label, this.rel, this.url, this.action, this.transclude, this.model,
+				this.sending, this.accepting, this.value, this.data);
+	}
+
+	@Override
+	public String toString() {
+
+		return "UberData(id='" + this.id + '\'' + ", name='" + this.name + '\'' + ", label='" + this.label + '\'' + ", rel="
+				+ this.rel + ", url='" + this.url + '\'' + ", action=" + this.action + ", transclude=" + this.transclude
+				+ ", model='" + this.model + '\'' + ", sending=" + this.sending + ", accepting=" + this.accepting + ", value="
+				+ this.value + ", data=" + this.data + ')';
+	}
+
+	/**
 	 * Holds both a {@link Link} and related {@literal rels}.
 	 */
-	@Data
 	private static class LinkAndRels {
 
 		private Link link;
 		private List<LinkRelation> rels = new ArrayList<>();
+
+		public LinkAndRels() {}
+
+		public Link getLink() {
+			return this.link;
+		}
+
+		public List<LinkRelation> getRels() {
+			return this.rels;
+		}
+
+		public void setLink(Link link) {
+			this.link = link;
+		}
+
+		public void setRels(List<LinkRelation> rels) {
+			this.rels = rels;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof LinkAndRels))
+				return false;
+			LinkAndRels that = (LinkAndRels) o;
+			return Objects.equals(this.link, that.link) && Objects.equals(this.rels, that.rels);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.link, this.rels);
+		}
+
+		public String toString() {
+			return "UberData.LinkAndRels(link=" + this.link + ", rels=" + this.rels + ")";
+		}
 	}
 }

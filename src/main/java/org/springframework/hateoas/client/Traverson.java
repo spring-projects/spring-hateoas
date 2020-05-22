@@ -17,9 +17,6 @@ package org.springframework.hateoas.client;
 
 import static org.springframework.http.HttpMethod.*;
 
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -448,22 +446,86 @@ public class Traverson {
 	/**
 	 * Temporary container for a string-base {@literal URI} and {@link HttpHeaders}.
 	 */
-	@Value
-	@RequiredArgsConstructor
-	private static class UriStringAndHeaders {
+	private static final class UriStringAndHeaders {
 
 		private final String uri;
 		private final HttpHeaders httpHeaders;
+
+		UriStringAndHeaders(String uri, HttpHeaders httpHeaders) {
+
+			this.uri = uri;
+			this.httpHeaders = httpHeaders;
+		}
+
+		String getUri() {
+			return this.uri;
+		}
+
+		HttpHeaders getHttpHeaders() {
+			return this.httpHeaders;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			UriStringAndHeaders that = (UriStringAndHeaders) o;
+			return Objects.equals(this.uri, that.uri) && Objects.equals(this.httpHeaders, that.httpHeaders);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.uri, this.httpHeaders);
+		}
+
+		public String toString() {
+			return "Traverson.UriStringAndHeaders(uri=" + this.uri + ", httpHeaders=" + this.httpHeaders + ")";
+		}
 	}
 
 	/**
 	 * Temporary container for a {@link URI}-based {@literal URI} and {@link HttpHeaders}.
 	 */
-	@Value
-	@RequiredArgsConstructor
-	private static class URIAndHeaders {
+	private static final class URIAndHeaders {
 
 		private final URI uri;
 		private final HttpHeaders httpHeaders;
+
+		URIAndHeaders(URI uri, HttpHeaders httpHeaders) {
+
+			this.uri = uri;
+			this.httpHeaders = httpHeaders;
+		}
+
+		URI getUri() {
+			return this.uri;
+		}
+
+		HttpHeaders getHttpHeaders() {
+			return this.httpHeaders;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			URIAndHeaders that = (URIAndHeaders) o;
+			return Objects.equals(this.uri, that.uri) && Objects.equals(this.httpHeaders, that.httpHeaders);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.uri, this.httpHeaders);
+		}
+
+		public String toString() {
+			return "Traverson.URIAndHeaders(uri=" + this.uri + ", httpHeaders=" + this.httpHeaders + ")";
+		}
 	}
 }

@@ -15,12 +15,9 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Value;
-
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -31,14 +28,16 @@ import org.springframework.lang.Nullable;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@Value
-public class Affordance implements Iterable<AffordanceModel> {
+public final class Affordance implements Iterable<AffordanceModel> {
 
 	/**
 	 * Collection of {@link AffordanceModel}s related to this affordance.
 	 */
-	@Getter(AccessLevel.PACKAGE) //
 	private final Map<MediaType, AffordanceModel> models;
+
+	public Affordance(Map<MediaType, AffordanceModel> models) {
+		this.models = models;
+	}
 
 	/**
 	 * Look up the {@link AffordanceModel} for the requested {@link MediaType}.
@@ -58,6 +57,30 @@ public class Affordance implements Iterable<AffordanceModel> {
 	 */
 	@Override
 	public Iterator<AffordanceModel> iterator() {
-		return models.values().iterator();
+		return this.models.values().iterator();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Affordance that = (Affordance) o;
+		return Objects.equals(this.models, that.models);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.models);
+	}
+
+	public String toString() {
+		return "Affordance(models=" + this.models + ")";
+	}
+
+	Map<MediaType, AffordanceModel> getModels() {
+		return this.models;
 	}
 }

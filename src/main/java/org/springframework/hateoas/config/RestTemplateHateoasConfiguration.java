@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -54,10 +52,13 @@ class RestTemplateHateoasConfiguration {
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
 
 		private final ObjectFactory<HypermediaRestTemplateConfigurer> configurer;
+
+		public HypermediaRestTemplateBeanPostProcessor(ObjectFactory<HypermediaRestTemplateConfigurer> configurer) {
+			this.configurer = configurer;
+		}
 
 		/*
 		 * (non-Javadoc)

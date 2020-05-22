@@ -15,14 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Value;
-import lombok.With;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
@@ -39,19 +35,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author Greg Turnquist
  */
-@Value
-@Getter(onMethod = @__(@JsonProperty))
-@With(AccessLevel.PACKAGE)
-class CollectionJson<T> {
+final class CollectionJson<T> {
 
-	private String version;
-	private @Nullable String href;
+	private final String version;
+	private @Nullable final String href;
 
-	private @JsonInclude(Include.NON_EMPTY) Links links;
-	private @JsonInclude(Include.NON_EMPTY) List<CollectionJsonItem<T>> items;
-	private @JsonInclude(Include.NON_EMPTY) List<CollectionJsonQuery> queries;
-	private @JsonInclude(Include.NON_NULL) @Nullable CollectionJsonTemplate template;
-	private @JsonInclude(Include.NON_NULL) @Nullable CollectionJsonError error;
+	private @JsonInclude(Include.NON_EMPTY) final Links links;
+	private @JsonInclude(Include.NON_EMPTY) final List<CollectionJsonItem<T>> items;
+	private @JsonInclude(Include.NON_EMPTY) final List<CollectionJsonQuery> queries;
+	private @JsonInclude(Include.NON_NULL) @Nullable final CollectionJsonTemplate template;
+	private @JsonInclude(Include.NON_NULL) @Nullable final CollectionJsonError error;
 
 	@JsonCreator
 	CollectionJson(@JsonProperty("version") String version, //
@@ -75,23 +68,58 @@ class CollectionJson<T> {
 		this("1.0", null, Links.NONE, Collections.emptyList(), null, null, null);
 	}
 
-	@SafeVarargs
-	final CollectionJson<T> withItems(CollectionJsonItem<T>... items) {
-		return withItems(Arrays.asList(items));
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal version}.
+	 *
+	 * @param version
+	 * @return
+	 */
+	CollectionJson<T> withVersion(String version) {
+
+		return this.version == version ? this
+				: new CollectionJson<T>(version, this.href, this.links, this.items, this.queries, this.template, this.error);
 	}
 
-	CollectionJson<T> withItems(List<CollectionJsonItem<T>> items) {
-		return new CollectionJson<>(version, href, links, items, queries, template, error);
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal href}.
+	 *
+	 * @param href
+	 * @return
+	 */
+	CollectionJson<T> withHref(@Nullable String href) {
+
+		return this.href == href ? this
+				: new CollectionJson<T>(this.version, href, this.links, this.items, this.queries, this.template, this.error);
 	}
 
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@link Link}s .
+	 * 
+	 * @param links
+	 * @return
+	 */
 	CollectionJson<T> withLinks(Link... links) {
 		return withLinks(Links.of(links));
 	}
 
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@link Links}.
+	 *
+	 * @param links
+	 * @return
+	 */
 	CollectionJson<T> withLinks(Links links) {
-		return new CollectionJson<>(version, href, links, items, queries, template, error);
+
+		return this.links == links ? this
+				: new CollectionJson<T>(this.version, this.href, links, this.items, this.queries, this.template, this.error);
 	}
 
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@link Links} with a {@literal self}
+	 * {@link Link}.
+	 *
+	 * @return
+	 */
 	CollectionJson<T> withOwnSelfLink() {
 
 		String href = this.href;
@@ -103,7 +131,134 @@ class CollectionJson<T> {
 		return withLinks(Links.of(Link.of(href)).merge(MergeMode.SKIP_BY_REL, links));
 	}
 
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal items}.
+	 *
+	 * @param items
+	 * @return
+	 */
+	@SafeVarargs
+	final CollectionJson<T> withItems(CollectionJsonItem<T>... items) {
+		return withItems(Arrays.asList(items));
+	}
+
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal items}.
+	 *
+	 * @param items
+	 * @return
+	 */
+	CollectionJson<T> withItems(List<CollectionJsonItem<T>> items) {
+
+		return this.items == items ? this
+				: new CollectionJson<T>(this.version, this.href, this.links, items, this.queries, this.template, this.error);
+	}
+
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal queries}.
+	 *
+	 * @param queries
+	 * @return
+	 */
+	CollectionJson<T> withQueries(List<CollectionJsonQuery> queries) {
+
+		return this.queries == queries ? this
+				: new CollectionJson<T>(this.version, this.href, this.links, this.items, queries, this.template, this.error);
+	}
+
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal template}.
+	 *
+	 * @param template
+	 * @return
+	 */
+	CollectionJson<T> withTemplate(@Nullable CollectionJsonTemplate template) {
+
+		return this.template == template ? this
+				: new CollectionJson<T>(this.version, this.href, this.links, this.items, this.queries, template, this.error);
+	}
+
+	/**
+	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@literal error}.
+	 *
+	 * @param error
+	 * @return
+	 */
+	CollectionJson<T> withError(@Nullable CollectionJsonError error) {
+
+		return this.error == error ? this
+				: new CollectionJson<T>(this.version, this.href, this.links, this.items, this.queries, this.template, error);
+	}
+
+	/**
+	 * Check if there are any {@literal items}.
+	 * @return
+	 */
 	boolean hasItems() {
 		return !items.isEmpty();
+	}
+
+	@JsonProperty
+	public String getVersion() {
+		return this.version;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getHref() {
+		return this.href;
+	}
+
+	@JsonProperty
+	public Links getLinks() {
+		return this.links;
+	}
+
+	@JsonProperty
+	public List<CollectionJsonItem<T>> getItems() {
+		return this.items;
+	}
+
+	@JsonProperty
+	public List<CollectionJsonQuery> getQueries() {
+		return this.queries;
+	}
+
+	@JsonProperty
+	@Nullable
+	public CollectionJsonTemplate getTemplate() {
+		return this.template;
+	}
+
+	@JsonProperty
+	@Nullable
+	public CollectionJsonError getError() {
+		return this.error;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CollectionJson<?> that = (CollectionJson<?>) o;
+		return Objects.equals(this.version, that.version) && Objects.equals(this.href, that.href)
+				&& Objects.equals(this.links, that.links) && Objects.equals(this.items, that.items)
+				&& Objects.equals(this.queries, that.queries) && Objects.equals(this.template, that.template)
+				&& Objects.equals(this.error, that.error);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.version, this.href, this.links, this.items, this.queries, this.template, this.error);
+	}
+
+	@Override
+	public String toString() {
+		return "CollectionJson{" + "version='" + this.version + '\'' + ", href='" + this.href + '\'' + ", links="
+				+ this.links + ", items=" + this.items + ", queries=" + this.queries + ", template=" + this.template
+				+ ", error=" + this.error + '}';
 	}
 }

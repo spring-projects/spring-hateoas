@@ -15,11 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
@@ -36,14 +31,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author Oliver Drotbohm
  */
-@Value
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-class StringLinkRelation implements LinkRelation, Serializable {
+final class StringLinkRelation implements LinkRelation, Serializable {
 
 	private static final long serialVersionUID = -3904935345545567957L;
 	private static final Map<String, StringLinkRelation> CACHE = new ConcurrentHashMap<>(256);
 
-	@NonNull String relation;
+	private final String relation;
 
 	/**
 	 * Returns a (potentially cached) {@link LinkRelation} for the given value.
@@ -57,6 +50,13 @@ class StringLinkRelation implements LinkRelation, Serializable {
 		Assert.hasText(relation, "Relation must not be null or empty!");
 
 		return CACHE.computeIfAbsent(relation, StringLinkRelation::new);
+	}
+
+	private StringLinkRelation(String relation) {
+
+		Assert.notNull(relation, "relation cannot be null!");
+
+		this.relation = relation;
 	}
 
 	/*
@@ -105,5 +105,9 @@ class StringLinkRelation implements LinkRelation, Serializable {
 		StringLinkRelation that = (StringLinkRelation) o;
 
 		return this.relation.equalsIgnoreCase(that.relation);
+	}
+
+	public String getRelation() {
+		return this.relation;
 	}
 }

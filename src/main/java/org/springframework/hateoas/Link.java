@@ -15,12 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.With;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
@@ -28,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,10 +43,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(value = { "templated", "template" }, ignoreUnknown = true)
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Getter(onMethod = @__(@JsonProperty))
-@EqualsAndHashCode(
-		of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -89,14 +80,14 @@ public class Link implements Serializable {
 	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
 
 	private LinkRelation rel;
-	private @With String href;
-	private @With String hreflang;
-	private @With String media;
-	private @With String title;
-	private @With String type;
-	private @With String deprecation;
-	private @With String profile;
-	private @With String name;
+	private String href;
+	private String hreflang;
+	private String media;
+	private String title;
+	private String type;
+	private String deprecation;
+	private String profile;
+	private String name;
 	private @JsonIgnore UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 
@@ -175,6 +166,22 @@ public class Link implements Serializable {
 		this.template = template;
 		this.rel = rel;
 		this.href = template.toString();
+		this.affordances = affordances;
+	}
+
+	private Link(LinkRelation rel, String href, String hreflang, String media, String title, String type, String deprecation,
+			String profile, String name, UriTemplate template, List<Affordance> affordances) {
+
+		this.rel = rel;
+		this.href = href;
+		this.hreflang = hreflang;
+		this.media = media;
+		this.title = title;
+		this.type = type;
+		this.deprecation = deprecation;
+		this.profile = profile;
+		this.name = name;
+		this.template = template;
 		this.affordances = affordances;
 	}
 
@@ -543,5 +550,181 @@ public class Link implements Serializable {
 		}
 
 		return attributes;
+	}
+
+	@JsonProperty
+	public LinkRelation getRel() {
+		return this.rel;
+	}
+
+	@JsonProperty
+	public String getHref() {
+		return this.href;
+	}
+
+	@JsonProperty
+	public String getHreflang() {
+		return this.hreflang;
+	}
+
+	@JsonProperty
+	public String getMedia() {
+		return this.media;
+	}
+
+	@JsonProperty
+	public String getTitle() {
+		return this.title;
+	}
+
+	@JsonProperty
+	public String getType() {
+		return this.type;
+	}
+
+	@JsonProperty
+	public String getDeprecation() {
+		return this.deprecation;
+	}
+
+	@JsonProperty
+	public String getProfile() {
+		return this.profile;
+	}
+
+	@JsonProperty
+	public String getName() {
+		return this.name;
+	}
+
+	@JsonProperty
+	public UriTemplate getTemplate() {
+		return this.template;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Link link = (Link) o;
+		return Objects.equals(this.rel, link.rel) && Objects.equals(this.href, link.href)
+				&& Objects.equals(this.hreflang, link.hreflang) && Objects.equals(this.media, link.media)
+				&& Objects.equals(this.title, link.title) && Objects.equals(this.type, link.type)
+				&& Objects.equals(this.deprecation, link.deprecation) && Objects.equals(this.profile, link.profile)
+				&& Objects.equals(this.name, link.name) && Objects.equals(this.affordances, link.affordances);
+	}
+
+	@Override
+	public int hashCode() {
+
+		return Objects.hash(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
+				this.profile, this.name, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal href}.
+	 *
+	 * @param href
+	 * @return
+	 */
+	public Link withHref(String href) {
+
+		return this.href == href ? this
+				: new Link(this.rel, href, this.hreflang, this.media, this.title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal hrefleng}.
+	 *
+	 * @param hreflang
+	 * @return
+	 */
+	public Link withHreflang(String hreflang) {
+
+		return this.hreflang == hreflang ? this
+				: new Link(this.rel, this.href, hreflang, this.media, this.title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal media}.
+	 *
+	 * @param media
+	 * @return
+	 */
+	public Link withMedia(String media) {
+
+		return this.media == media ? this
+				: new Link(this.rel, this.href, this.hreflang, media, this.title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal title}.
+	 *
+	 * @param title
+	 * @return
+	 */
+	public Link withTitle(String title) {
+
+		return this.title == title ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal type}.
+	 *
+	 * @param type
+	 * @return
+	 */
+	public Link withType(String type) {
+
+		return this.type == type ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal deprecation}.
+	 *
+	 * @param deprecation
+	 * @return
+	 */
+	public Link withDeprecation(String deprecation) {
+
+		return this.deprecation == deprecation ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal profile}.
+	 *
+	 * @param profile
+	 * @return
+	 */
+	public Link withProfile(String profile) {
+
+		return this.profile == profile ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation, profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal name}.
+	 *
+	 * @param name
+	 * @return
+	 */
+	public Link withName(String name) {
+
+		return this.name == name ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
+						this.profile, name, this.template, this.affordances);
 	}
 }
