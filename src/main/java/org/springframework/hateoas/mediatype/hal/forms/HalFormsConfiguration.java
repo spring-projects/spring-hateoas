@@ -15,9 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,10 +28,9 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@RequiredArgsConstructor
 public class HalFormsConfiguration {
 
-	private final @Getter HalConfiguration halConfiguration;
+	private final HalConfiguration halConfiguration;
 	private final Map<Class<?>, String> patterns = new HashMap<>();
 
 	/**
@@ -42,6 +38,10 @@ public class HalFormsConfiguration {
 	 */
 	public HalFormsConfiguration() {
 		this.halConfiguration = new HalConfiguration();
+	}
+
+	public HalFormsConfiguration(HalConfiguration halConfiguration) {
+		this.halConfiguration = halConfiguration;
 	}
 
 	public HalFormsConfiguration registerPattern(Class<?> type, String pattern) {
@@ -59,5 +59,9 @@ public class HalFormsConfiguration {
 	 */
 	Optional<String> getTypePatternFor(ResolvableType type) {
 		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
+	}
+
+	public HalConfiguration getHalConfiguration() {
+		return this.halConfiguration;
 	}
 }

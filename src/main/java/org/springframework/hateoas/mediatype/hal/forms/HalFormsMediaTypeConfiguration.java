@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -42,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Drotbohm
  */
 @Configuration
-@RequiredArgsConstructor
 class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final DelegatingLinkRelationProvider relProvider;
@@ -52,18 +49,22 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final MessageResolver resolver;
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
+	public HalFormsMediaTypeConfiguration(DelegatingLinkRelationProvider relProvider,
+			ObjectProvider<CurieProvider> curieProvider, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
+			ObjectProvider<HalConfiguration> halConfiguration, MessageResolver resolver,
+			AbstractAutowireCapableBeanFactory beanFactory) {
+
+		this.relProvider = relProvider;
+		this.curieProvider = curieProvider;
+		this.halFormsConfiguration = halFormsConfiguration;
+		this.halConfiguration = halConfiguration;
+		this.resolver = resolver;
+		this.beanFactory = beanFactory;
+	}
+
 	@Bean
 	LinkDiscoverer halFormsLinkDiscoverer() {
 		return new HalFormsLinkDiscoverer();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getMediaTypes()
-	 */
-	@Override
-	public List<MediaType> getMediaTypes() {
-		return HypermediaType.HAL_FORMS.getMediaTypes();
 	}
 
 	/*
@@ -82,5 +83,14 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, configuration, beanFactory));
 
 		return mapper;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#getMediaTypes()
+	 */
+	@Override
+	public List<MediaType> getMediaTypes() {
+		return HypermediaType.HAL_FORMS.getMediaTypes();
 	}
 }

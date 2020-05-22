@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.Getter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -153,13 +151,17 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		private static final long serialVersionUID = 1L;
 
-		private final @Getter String name;
+		private final String name;
 
 		@SuppressWarnings("deprecation")
 		public Curie(String name, String href) {
 
 			super(href, "curies");
 			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 }

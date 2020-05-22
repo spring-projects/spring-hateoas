@@ -15,12 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -38,8 +33,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author Oliver Drotbohm
  */
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 
 	public static final HalLinkRelation CURIES = HalLinkRelation.uncuried("curies");
@@ -47,7 +40,15 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	private static final String RELATION_MESSAGE_TEMPLATE = "_links.%s.title";
 
 	private final @Nullable String curie;
-	private final @NonNull @Getter String localPart;
+	private final String localPart;
+
+	private HalLinkRelation(String curie, String localPart) {
+
+		Assert.notNull(localPart, "localPart must not be null!");
+
+		this.curie = curie;
+		this.localPart = localPart;
+	}
 
 	/**
 	 * Returns a {@link HalLinkRelation} for the given general {@link LinkRelation}.
@@ -199,6 +200,10 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 		return "";
 	}
 
+	public String getLocalPart() {
+		return this.localPart;
+	}
+
 	/**
 	 * Simple builder interface to easily create multiple {@link HalLinkRelation}s for a single curie.
 	 *
@@ -213,6 +218,22 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 		 * @return will never be {@literal null}.
 		 */
 		HalLinkRelation relation(String relation);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof HalLinkRelation))
+			return false;
+		HalLinkRelation that = (HalLinkRelation) o;
+		return Objects.equals(this.curie, that.curie) && Objects.equals(this.localPart, that.localPart);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.curie, this.localPart);
 	}
 
 	/*

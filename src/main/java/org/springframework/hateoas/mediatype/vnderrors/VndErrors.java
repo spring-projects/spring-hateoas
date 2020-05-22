@@ -15,15 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.vnderrors;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
@@ -51,7 +49,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({ "message", "logref", "total", "_links", "_embedded" })
 @JsonIgnoreProperties(ignoreUnknown = true)
-@EqualsAndHashCode(callSuper = true)
 @Deprecated
 public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
@@ -72,11 +69,9 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
 	private final List<VndError> errors;
 
-	@Getter //
 	@JsonInclude(value = JsonInclude.Include.NON_EMPTY) //
 	private final String message;
 
-	@Getter //
 	@JsonInclude(value = JsonInclude.Include.NON_EMPTY) //
 	private final Integer logref;
 
@@ -219,6 +214,33 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		return String.format("VndErrors[%s]", StringUtils.collectionToCommaDelimitedString(this.errors));
 	}
 
+	public String getMessage() {
+		return this.message;
+	}
+
+	public Integer getLogref() {
+		return this.logref;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof VndErrors))
+			return false;
+		if (!super.equals(o))
+			return false;
+		VndErrors vndErrors = (VndErrors) o;
+		return Objects.equals(this.errors, vndErrors.errors) && Objects.equals(this.message, vndErrors.message)
+				&& Objects.equals(this.logref, vndErrors.logref);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), this.errors, this.message, this.logref);
+	}
+
 	/**
 	 * A single {@link VndError}.
 	 *
@@ -229,17 +251,13 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	 */
 	@JsonPropertyOrder({ "message", "path", "logref" })
 	@Relation(collectionRelation = "errors")
-	@EqualsAndHashCode(callSuper = true)
 	@Deprecated
 	public static class VndError extends RepresentationModel<VndError> {
 
-		@Getter //
 		private final String message;
 
-		@Getter(onMethod = @__(@JsonInclude(JsonInclude.Include.NON_EMPTY))) //
 		private final @Nullable String path;
 
-		@Getter(onMethod = @__(@JsonInclude(JsonInclude.Include.NON_EMPTY))) //
 		private final Integer logref;
 
 		/**
@@ -274,8 +292,43 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 			this(message, null, Integer.parseInt(logref), Arrays.asList(links));
 		}
 
+		public String getMessage() {
+			return this.message;
+		}
+
+		@Nullable
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		public String getPath() {
+			return this.path;
+		}
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		public Integer getLogref() {
+			return this.logref;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof VndError))
+				return false;
+			if (!super.equals(o))
+				return false;
+			VndError vndError = (VndError) o;
+			return Objects.equals(this.message, vndError.message) && Objects.equals(this.path, vndError.path)
+					&& Objects.equals(this.logref, vndError.logref);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(super.hashCode(), this.message, this.path, this.logref);
+		}
+
 		@Override
 		public String toString() {
+
 			return String.format("VndError[logref: %s, message: %s, links: [%s]]", this.logref, this.message,
 					getLinks().toString());
 		}

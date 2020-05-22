@@ -15,9 +15,6 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
@@ -32,6 +29,7 @@ import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -45,7 +43,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @since 0.20
  * @soundtrack Doppelkopf - Balance (Von Abseits)
  */
-@RequiredArgsConstructor
 public class RepresentationModelProcessorHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	static final ResolvableType ENTITY_MODEL_TYPE = ResolvableType.forRawClass(EntityModel.class);
@@ -60,10 +57,20 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 		}
 	}
 
-	private final @NonNull HandlerMethodReturnValueHandler delegate;
-	private final @NonNull Supplier<RepresentationModelProcessorInvoker> invoker;
+	private final HandlerMethodReturnValueHandler delegate;
+	private final Supplier<RepresentationModelProcessorInvoker> invoker;
 
 	private boolean rootLinksAsHeaders = false;
+
+	public RepresentationModelProcessorHandlerMethodReturnValueHandler(HandlerMethodReturnValueHandler delegate,
+			Supplier<RepresentationModelProcessorInvoker> invoker) {
+
+		Assert.notNull(delegate, "delegate must not be null!");
+		Assert.notNull(invoker, "invoker must not be null!");
+
+		this.delegate = delegate;
+		this.invoker = invoker;
+	}
 
 	/**
 	 * @param rootLinksAsHeaders the rootLinksAsHeaders to set

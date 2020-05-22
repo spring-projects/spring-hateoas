@@ -15,20 +15,11 @@
  */
 package org.springframework.hateoas.mediatype.problem;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.Value;
-import lombok.With;
-import lombok.experimental.NonFinal;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.springframework.http.HttpStatus;
@@ -51,20 +42,14 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Getter(onMethod = @__(@JsonProperty))
-@With
-@ToString
-@EqualsAndHashCode
 @JsonInclude(Include.NON_NULL)
-@NoArgsConstructor(force = true, access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Problem {
 
 	private static Problem EMPTY = new Problem();
 
 	private final @Nullable URI type;
 	private final @Nullable String title;
-	private final @Nullable @Getter(onMethod = @__(@JsonIgnore)) HttpStatus status;
+	private final @Nullable HttpStatus status;
 	private final @Nullable String detail;
 	private final @Nullable URI instance;
 
@@ -74,6 +59,19 @@ public class Problem {
 			@JsonProperty("instance") URI instance) {
 
 		this(type, title, HttpStatus.resolve(status), detail, instance);
+	}
+
+	private Problem(URI type, String title, HttpStatus status, String detail, URI instance) {
+
+		this.type = type;
+		this.title = title;
+		this.status = status;
+		this.detail = detail;
+		this.instance = instance;
+	}
+
+	protected Problem() {
+		this(null, null, null, null, null);
 	}
 
 	/**
@@ -112,6 +110,56 @@ public class Problem {
 		Assert.notNull(status, "HttpStatus must not be null!");
 
 		return new Problem(URI.create("about:blank"), status.getReasonPhrase(), status, null, null);
+	}
+
+	/**
+	 * Create a new {@link Problem} by copying its attributes and replacing the {@literal type}.
+	 *
+	 * @param type
+	 * @return
+	 */
+	public Problem withType(@Nullable URI type) {
+		return this.type == type ? this : new Problem(type, this.title, this.status, this.detail, this.instance);
+	}
+
+	/**
+	 * Create a new {@link Problem} by copying its attributes and replacing the {@literal title}.
+	 *
+	 * @param title
+	 * @return
+	 */
+	public Problem withTitle(@Nullable String title) {
+		return this.title == title ? this : new Problem(this.type, title, this.status, this.detail, this.instance);
+	}
+
+	/**
+	 * Create a new {@link Problem} by copying its attributes and replacing the {@literal status}.
+	 *
+	 * @param status
+	 * @return
+	 */
+	public Problem withStatus(@Nullable HttpStatus status) {
+		return this.status == status ? this : new Problem(this.type, this.title, status, this.detail, this.instance);
+	}
+
+	/**
+	 * Create a new {@link Problem} by copying its attributes and replacing the {@literal detail}.
+	 *
+	 * @param detail
+	 * @return
+	 */
+	public Problem withDetail(@Nullable String detail) {
+		return this.detail == detail ? this : new Problem(this.type, this.title, this.status, detail, this.instance);
+	}
+
+	/**
+	 * Create a new {@link Problem} by copying its attributes and replacing the {@literal instance}.
+	 *
+	 * @param instance
+	 * @return
+	 */
+	public Problem withInstance(@Nullable URI instance) {
+		return this.instance == instance ? this : new Problem(this.type, this.title, this.status, this.detail, instance);
 	}
 
 	/**
@@ -154,6 +202,18 @@ public class Problem {
 		return new ExtendedProblem<>(type, title, status, detail, instance, properties);
 	}
 
+	@JsonProperty
+	@Nullable
+	public URI getType() {
+		return this.type;
+	}
+
+	@JsonProperty
+	@Nullable
+	public String getTitle() {
+		return this.title;
+	}
+
 	@Nullable
 	@JsonProperty("status")
 	@JsonInclude(Include.NON_NULL)
@@ -161,13 +221,50 @@ public class Problem {
 		return status != null ? status.value() : null;
 	}
 
-	@Value
-	@Getter(onMethod = @__(@JsonIgnore))
-	@EqualsAndHashCode(callSuper = true)
-	@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
-	public static class ExtendedProblem<T> extends Problem {
+	@JsonIgnore
+	@Nullable
+	public HttpStatus getStatus() {
+		return this.status;
+	}
 
-		private @NonFinal T extendedProperties;
+	@JsonProperty
+	@Nullable
+	public String getDetail() {
+		return this.detail;
+	}
+
+	@JsonProperty
+	@Nullable
+	public URI getInstance() {
+		return this.instance;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof Problem))
+			return false;
+		Problem problem = (Problem) o;
+		return Objects.equals(this.type, problem.type) && Objects.equals(this.title, problem.title)
+				&& this.status == problem.status && Objects.equals(this.detail, problem.detail)
+				&& Objects.equals(this.instance, problem.instance);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.type, this.title, this.status, this.detail, this.instance);
+	}
+
+	public String toString() {
+		return "Problem(type=" + this.type + ", title=" + this.title + ", status=" + this.status + ", detail=" + this.detail
+				+ ", instance=" + this.instance + ")";
+	}
+
+	public static final class ExtendedProblem<T> extends Problem {
+
+		private T extendedProperties;
 
 		ExtendedProblem(@Nullable URI type, @Nullable String title, @Nullable HttpStatus status, @Nullable String detail,
 				@Nullable URI instance, @Nullable T properties) {
@@ -175,6 +272,17 @@ public class Problem {
 			super(type, title, status, detail, instance);
 
 			this.extendedProperties = properties;
+		}
+
+		private ExtendedProblem() {
+
+			super(null, null, null, null, null);
+
+			this.extendedProperties = null;
+		}
+
+		public ExtendedProblem(T extendedProperties) {
+			this.extendedProperties = extendedProperties;
 		}
 
 		/*
@@ -274,5 +382,28 @@ public class Problem {
 
 			return (Map<String, Object>) this.extendedProperties;
 		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof ExtendedProblem))
+				return false;
+			if (!super.equals(o))
+				return false;
+			ExtendedProblem<?> that = (ExtendedProblem<?>) o;
+			return Objects.equals(this.extendedProperties, that.extendedProperties);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(super.hashCode(), extendedProperties);
+		}
+
+		public String toString() {
+			return "Problem.ExtendedProblem(extendedProperties=" + this.extendedProperties + ")";
+		}
+
 	}
 }

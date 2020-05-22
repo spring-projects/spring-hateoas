@@ -20,8 +20,6 @@ import static org.springframework.hateoas.TemplateVariables.*;
 import static org.springframework.hateoas.server.core.EncodingUtils.*;
 import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
-import lombok.Value;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -32,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -237,12 +236,55 @@ public class WebHandler {
 		}
 	}
 
-	@Value(staticConstructor = "of")
-	private static class AffordanceKey {
+	private static final class AffordanceKey {
 
-		Class<?> type;
-		Method method;
-		UriComponents href;
+		private final Class<?> type;
+		private final Method method;
+		private final UriComponents href;
+
+		private AffordanceKey(Class<?> type, Method method, UriComponents href) {
+
+			this.type = type;
+			this.method = method;
+			this.href = href;
+		}
+
+		public static AffordanceKey of(Class<?> type, Method method, UriComponents href) {
+			return new AffordanceKey(type, method, href);
+		}
+
+		public Class<?> getType() {
+			return this.type;
+		}
+
+		public Method getMethod() {
+			return this.method;
+		}
+
+		public UriComponents getHref() {
+			return this.href;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof AffordanceKey))
+				return false;
+			AffordanceKey that = (AffordanceKey) o;
+			return Objects.equals(this.type, that.type) && Objects.equals(this.method, that.method)
+					&& Objects.equals(this.href, that.href);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.type, this.method, this.href);
+		}
+
+		public String toString() {
+			return "WebHandler.AffordanceKey(type=" + this.type + ", method=" + this.method + ", href=" + this.href + ")";
+		}
 	}
 
 	private static class HandlerMethodParameters {

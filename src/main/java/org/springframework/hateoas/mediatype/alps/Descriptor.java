@@ -15,10 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.alps;
 
-import lombok.Builder;
-import lombok.Value;
-
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -33,11 +31,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @since 0.15
  * @see http://alps.io/spec/#prop-descriptor
  */
-@Value
-@Builder
 @JsonPropertyOrder({ "id", "href", "name", "type", "doc", "descriptor", "ext" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Descriptor {
+public final class Descriptor {
 
 	private final String id;
 	private final String href;
@@ -62,5 +58,139 @@ public class Descriptor {
 		this.ext = ext;
 		this.rt = rt;
 		this.descriptor = descriptor;
+	}
+
+	public static DescriptorBuilder builder() {
+		return new DescriptorBuilder();
+	}
+
+	public String getId() {
+		return this.id;
+	}
+
+	public String getHref() {
+		return this.href;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public Doc getDoc() {
+		return this.doc;
+	}
+
+	public Type getType() {
+		return this.type;
+	}
+
+	public Ext getExt() {
+		return this.ext;
+	}
+
+	public String getRt() {
+		return this.rt;
+	}
+
+	public List<Descriptor> getDescriptor() {
+		return this.descriptor;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Descriptor that = (Descriptor) o;
+		return Objects.equals(this.id, that.id) && Objects.equals(this.href, that.href)
+				&& Objects.equals(this.name, that.name) && Objects.equals(this.doc, that.doc) && this.type == that.type
+				&& Objects.equals(this.ext, that.ext) && Objects.equals(this.rt, that.rt)
+				&& Objects.equals(this.descriptor, that.descriptor);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.id, this.href, this.name, this.doc, this.type, this.ext, this.rt, this.descriptor);
+	}
+
+	public String toString() {
+
+		return "Descriptor(id=" + this.id + ", href=" + this.href + ", name=" + this.name + ", doc=" + this.doc + ", type="
+				+ this.type + ", ext=" + this.ext + ", rt=" + this.rt + ", descriptor=" + this.descriptor + ")";
+	}
+
+	public static class DescriptorBuilder {
+
+		private String id;
+		private String href;
+		private String name;
+		private Doc doc;
+		private Type type;
+		private Ext ext;
+		private String rt;
+		private List<Descriptor> descriptor;
+
+		DescriptorBuilder() {}
+
+		public Descriptor.DescriptorBuilder id(String id) {
+
+			this.id = id;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder href(String href) {
+
+			this.href = href;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder name(String name) {
+
+			this.name = name;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder doc(Doc doc) {
+
+			this.doc = doc;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder type(Type type) {
+
+			this.type = type;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder ext(Ext ext) {
+
+			this.ext = ext;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder rt(String rt) {
+
+			this.rt = rt;
+			return this;
+		}
+
+		public Descriptor.DescriptorBuilder descriptor(List<Descriptor> descriptor) {
+
+			this.descriptor = descriptor;
+			return this;
+		}
+
+		public Descriptor build() {
+			return new Descriptor(this.id, this.href, this.name, this.doc, this.type, this.ext, this.rt, this.descriptor);
+		}
+
+		public String toString() {
+
+			return "Descriptor.DescriptorBuilder(id=" + this.id + ", href=" + this.href + ", name=" + this.name + ", doc="
+					+ this.doc + ", type=" + this.type + ", ext=" + this.ext + ", rt=" + this.rt + ", descriptor="
+					+ this.descriptor + ")";
+		}
 	}
 }

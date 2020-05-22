@@ -15,10 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.Value;
-import lombok.With;
-
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 
@@ -28,11 +26,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author Greg Turnquist
  */
-@Value
-@With
-class CollectionJsonTemplate {
+final class CollectionJsonTemplate {
 
-	private List<CollectionJsonData> data;
+	private final List<CollectionJsonData> data;
 
 	@JsonCreator
 	CollectionJsonTemplate(@JsonProperty("data") @Nullable List<CollectionJsonData> data) {
@@ -41,5 +37,33 @@ class CollectionJsonTemplate {
 
 	CollectionJsonTemplate() {
 		this(null);
+	}
+
+	public CollectionJsonTemplate withData(List<CollectionJsonData> data) {
+		return this.data == data ? this : new CollectionJsonTemplate(data);
+	}
+
+	public List<CollectionJsonData> getData() {
+		return this.data;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CollectionJsonTemplate that = (CollectionJsonTemplate) o;
+		return Objects.equals(this.data, that.data);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.data);
+	}
+
+	public String toString() {
+		return "CollectionJsonTemplate(data=" + this.data + ")";
 	}
 }

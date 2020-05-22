@@ -17,8 +17,6 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
-import lombok.EqualsAndHashCode;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
@@ -36,7 +35,6 @@ import org.springframework.util.Assert;
  *
  * @author Oliver Gierke
  */
-@EqualsAndHashCode
 public final class TemplateVariables implements Iterable<TemplateVariable>, Serializable {
 
 	public static final TemplateVariables NONE = new TemplateVariables();
@@ -171,5 +169,21 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		}
 
 		return builder.append("}").toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TemplateVariables that = (TemplateVariables) o;
+		return Objects.equals(this.variables, that.variables);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.variables);
 	}
 }

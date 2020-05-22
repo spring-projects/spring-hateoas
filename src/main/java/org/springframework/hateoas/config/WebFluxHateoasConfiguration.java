@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,10 +73,13 @@ class WebFluxHateoasConfiguration {
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaWebFluxConfigurer implements WebFluxConfigurer {
 
 		private final WebFluxCodecs codecs;
+
+		public HypermediaWebFluxConfigurer(WebFluxCodecs codecs) {
+			this.codecs = codecs;
+		}
 
 		/**
 		 * Configure custom HTTP message readers and writers or override built-in ones.
