@@ -15,14 +15,9 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -37,9 +32,6 @@ import org.springframework.util.Assert;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@EqualsAndHashCode
-@AllArgsConstructor
-@Getter
 public abstract class AffordanceModel {
 
 	/**
@@ -71,6 +63,17 @@ public abstract class AffordanceModel {
 	 * Response body domain type.
 	 */
 	private PayloadMetadata output;
+
+	public AffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata input,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata output) {
+
+		this.name = name;
+		this.link = link;
+		this.httpMethod = httpMethod;
+		this.input = input;
+		this.queryMethodParameters = queryMethodParameters;
+		this.output = output;
+	}
 
 	/**
 	 * Expand the {@link Link} into an {@literal href} with no parameters.
@@ -105,6 +108,49 @@ public abstract class AffordanceModel {
 		Assert.notNull(link, "Link must not be null!");
 
 		return getURI().equals(link.expand().getHref());
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public Link getLink() {
+		return this.link;
+	}
+
+	public HttpMethod getHttpMethod() {
+		return this.httpMethod;
+	}
+
+	public InputPayloadMetadata getInput() {
+		return this.input;
+	}
+
+	public List<QueryParameter> getQueryMethodParameters() {
+		return this.queryMethodParameters;
+	}
+
+	public PayloadMetadata getOutput() {
+		return this.output;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		AffordanceModel that = (AffordanceModel) o;
+		return Objects.equals(this.name, that.name) && Objects.equals(this.link, that.link)
+				&& this.httpMethod == that.httpMethod && Objects.equals(this.input, that.input)
+				&& Objects.equals(this.queryMethodParameters, that.queryMethodParameters)
+				&& Objects.equals(this.output, that.output);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.name, this.link, this.httpMethod, this.input, this.queryMethodParameters, this.output);
 	}
 
 	/**
@@ -168,12 +214,17 @@ public abstract class AffordanceModel {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	@ToString
-	@EqualsAndHashCode
-	@RequiredArgsConstructor(staticName = "of")
 	private static class DelegatingInputPayloadMetadata implements InputPayloadMetadata {
 
 		private final PayloadMetadata metadata;
+
+		public static DelegatingInputPayloadMetadata of(PayloadMetadata metadata) {
+			return new DelegatingInputPayloadMetadata(metadata);
+		}
+
+		private DelegatingInputPayloadMetadata(PayloadMetadata metadata) {
+			this.metadata = metadata;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -209,6 +260,26 @@ public abstract class AffordanceModel {
 		@Override
 		public List<String> getI18nCodes() {
 			return Collections.emptyList();
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
+			DelegatingInputPayloadMetadata that = (DelegatingInputPayloadMetadata) o;
+			return Objects.equals(this.metadata, that.metadata);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.metadata);
+		}
+
+		public String toString() {
+			return "AffordanceModel.DelegatingInputPayloadMetadata(metadata=" + this.metadata + ")";
 		}
 	}
 

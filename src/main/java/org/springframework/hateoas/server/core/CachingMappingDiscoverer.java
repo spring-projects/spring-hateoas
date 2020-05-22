@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.server.core;
 
-import lombok.RequiredArgsConstructor;
-
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
@@ -32,13 +30,20 @@ import org.springframework.util.StringUtils;
  * @author Michal Stochmialek
  * @author Oliver Drotbohm
  */
-@RequiredArgsConstructor(staticName = "of")
 public class CachingMappingDiscoverer implements MappingDiscoverer {
 
 	private static final Map<String, String> MAPPINGS = new ConcurrentReferenceHashMap<>();
 	private static final Map<String, Collection<HttpMethod>> METHODS = new ConcurrentReferenceHashMap<>();
 
 	private final MappingDiscoverer delegate;
+
+	private CachingMappingDiscoverer(MappingDiscoverer delegate) {
+		this.delegate = delegate;
+	}
+
+	public static CachingMappingDiscoverer of(MappingDiscoverer delegate) {
+		return new CachingMappingDiscoverer(delegate);
+	}
 
 	/*
 	 * (non-Javadoc)

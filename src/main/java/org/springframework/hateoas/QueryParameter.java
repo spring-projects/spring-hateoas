@@ -15,11 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.With;
-
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
@@ -36,13 +32,18 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Value
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class QueryParameter {
+public final class QueryParameter {
 
 	private final String name;
-	private final @Nullable @With String value;
+	private final @Nullable String value;
 	private final boolean required;
+
+	private QueryParameter(String name, String value, boolean required) {
+
+		this.name = name;
+		this.value = value;
+		this.required = required;
+	}
 
 	/**
 	 * Creates a new {@link QueryParameter} from the given {@link MethodParameter}.
@@ -92,5 +93,49 @@ public class QueryParameter {
 	 */
 	public static QueryParameter optional(String name) {
 		return new QueryParameter(name, null, false);
+	}
+
+	/**
+	 * Create a new {@link QueryParameter} by copying all attributes and applying the new {@literal value}.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public QueryParameter withValue(@Nullable String value) {
+		return this.value == value ? this : new QueryParameter(this.name, value, this.required);
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	@Nullable
+	public String getValue() {
+		return this.value;
+	}
+
+	public boolean isRequired() {
+		return this.required;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		QueryParameter that = (QueryParameter) o;
+		return this.required == that.required && Objects.equals(this.name, that.name)
+				&& Objects.equals(this.value, that.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.name, this.value, this.required);
+	}
+
+	public String toString() {
+		return "QueryParameter(name=" + this.name + ", value=" + this.value + ", required=" + this.required + ")";
 	}
 }

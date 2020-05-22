@@ -17,8 +17,6 @@ package org.springframework.hateoas.server.core;
 
 import static org.springframework.hateoas.server.core.EncodingUtils.*;
 
-import lombok.Getter;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +46,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkBuilder {
 
-	private final @Getter List<Affordance> affordances;
+	private final List<Affordance> affordances;
 
 	private UriComponents components;
 
@@ -169,9 +167,10 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 
 	/**
 	 * Creates a new instance of the sub-class.
-	 *
-	 * @param builder will never be {@literal null}.
-	 * @return
 	 */
 	protected abstract T createNewInstance(UriComponents components, List<Affordance> affordances);
+
+	public List<Affordance> getAffordances() {
+		return this.affordances;
+	}
 }

@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -41,7 +39,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Drotbohm
  */
 @Configuration(proxyBeanMethods = false)
-@RequiredArgsConstructor
 public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final LinkRelationProvider relProvider;
@@ -49,6 +46,17 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final ObjectProvider<HalConfiguration> halConfiguration;
 	private final @Qualifier("messageResolver") MessageResolver resolver;
 	private final AutowireCapableBeanFactory beanFactory;
+
+	public HalMediaTypeConfiguration(LinkRelationProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
+			ObjectProvider<HalConfiguration> halConfiguration, MessageResolver resolver,
+			AutowireCapableBeanFactory beanFactory) {
+
+		this.relProvider = relProvider;
+		this.curieProvider = curieProvider;
+		this.halConfiguration = halConfiguration;
+		this.resolver = resolver;
+		this.beanFactory = beanFactory;
+	}
 
 	@Bean
 	LinkDiscoverer halLinkDisocoverer() {

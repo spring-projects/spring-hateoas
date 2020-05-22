@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -319,7 +317,6 @@ public class HalModelBuilder {
 		return this;
 	}
 
-	@RequiredArgsConstructor
 	private static class HalRepresentationModel<T> extends EntityModel<T> {
 
 		private final T entity;
@@ -327,10 +324,15 @@ public class HalModelBuilder {
 
 		public HalRepresentationModel(@Nullable T entity, CollectionModel<T> embeddeds, Links links) {
 
-			this.entity = entity;
-			this.embeddeds = embeddeds;
+			this(entity, embeddeds);
 
 			add(links);
+		}
+
+		public HalRepresentationModel(T entity, CollectionModel<?> embeddeds) {
+
+			this.entity = entity;
+			this.embeddeds = embeddeds;
 		}
 
 		/*

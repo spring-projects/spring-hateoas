@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,11 +38,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-@RequiredArgsConstructor
 class HalFormsTemplateBuilder {
 
 	private final HalFormsConfiguration configuration;
 	private final MessageResolver resolver;
+
+	public HalFormsTemplateBuilder(HalFormsConfiguration configuration, MessageResolver resolver) {
+
+		this.configuration = configuration;
+		this.resolver = resolver;
+	}
 
 	/**
 	 * Extract template details from a {@link RepresentationModel}'s {@link Affordance}s.
@@ -100,10 +103,13 @@ class HalFormsTemplateBuilder {
 				.orElse(template);
 	}
 
-	@RequiredArgsConstructor
 	class PropertyCustomizations {
 
 		private final InputPayloadMetadata metadata;
+
+		public PropertyCustomizations(InputPayloadMetadata metadata) {
+			this.metadata = metadata;
+		}
 
 		private HalFormsProperty apply(HalFormsProperty property) {
 
@@ -125,13 +131,22 @@ class HalFormsTemplateBuilder {
 		}
 	}
 
-	@RequiredArgsConstructor(staticName = "of")
 	static class TemplateTitle implements MessageSourceResolvable {
 
 		private static final String TEMPLATE_TEMPLATE = "_templates.%s.title";
 
 		private final HalFormsAffordanceModel affordance;
 		private final boolean soleTemplate;
+
+		private TemplateTitle(HalFormsAffordanceModel affordance, boolean soleTemplate) {
+
+			this.affordance = affordance;
+			this.soleTemplate = soleTemplate;
+		}
+
+		public static TemplateTitle of(HalFormsAffordanceModel affordance, boolean soleTemplate) {
+			return new TemplateTitle(affordance, soleTemplate);
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -170,13 +185,22 @@ class HalFormsTemplateBuilder {
 		}
 	}
 
-	@RequiredArgsConstructor(staticName = "of")
 	static class PropertyPrompt implements MessageSourceResolvable {
 
 		private static final String PROMPT_TEMPLATE = "%s._prompt";
 
 		private final InputPayloadMetadata metadata;
 		private final HalFormsProperty property;
+
+		private PropertyPrompt(InputPayloadMetadata metadata, HalFormsProperty property) {
+
+			this.metadata = metadata;
+			this.property = property;
+		}
+
+		public static PropertyPrompt of(InputPayloadMetadata metadata, HalFormsProperty property) {
+			return new PropertyPrompt(metadata, property);
+		}
 
 		/*
 		 * (non-Javadoc)

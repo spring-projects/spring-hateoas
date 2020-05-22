@@ -15,12 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Value;
-import lombok.With;
-
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.hateoas.Links;
 import org.springframework.lang.Nullable;
@@ -37,15 +33,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  * @since 1.0
  */
-@Value
-@Getter(onMethod = @__(@JsonProperty))
-@With(AccessLevel.PACKAGE)
 @JsonInclude(Include.NON_NULL)
-class Uber {
+final class Uber {
 
-	private String version;
-	private List<UberData> data;
-	private UberError error;
+	private final String version;
+	private final List<UberData> data;
+	private final UberError error;
 
 	@JsonCreator
 	Uber(@JsonProperty("version") String version, @JsonProperty("data") @Nullable List<UberData> data,
@@ -58,6 +51,36 @@ class Uber {
 
 	Uber() {
 		this("1.0", null, null);
+	}
+
+	/**
+	 * Create a new {@link Uber} by copying attributes and replacing the {@literal version}.
+	 *
+	 * @param version
+	 * @return
+	 */
+	Uber withVersion(String version) {
+		return this.version == version ? this : new Uber(version, this.data, this.error);
+	}
+
+	/**
+	 * Create a new {@link Uber} by copying attributes and replacing the {@literal data}.
+	 *
+	 * @param data
+	 * @return
+	 */
+	Uber withData(List<UberData> data) {
+		return this.data == data ? this : new Uber(this.version, data, this.error);
+	}
+
+	/**
+	 * Create a new {@link Uber} by copying attributes and replacing the {@literal error}.
+	 *
+	 * @param error
+	 * @return
+	 */
+	Uber withError(UberError error) {
+		return this.error == error ? this : new Uber(this.version, this.data, error);
 	}
 
 	/**
@@ -75,5 +98,37 @@ class Uber {
 		return data.stream() //
 				.flatMap(uberData -> uberData.getLinks().stream()) //
 				.collect(Links.collector());
+	}
+
+	@JsonProperty
+	public String getVersion() {
+		return this.version;
+	}
+
+	@JsonProperty
+	public List<UberData> getData() {
+		return this.data;
+	}
+
+	@JsonProperty
+	public UberError getError() {
+		return this.error;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof Uber))
+			return false;
+		Uber uber = (Uber) o;
+		return Objects.equals(this.version, uber.version) && Objects.equals(this.data, uber.data)
+				&& Objects.equals(this.error, uber.error);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.version, this.data, this.error);
 	}
 }

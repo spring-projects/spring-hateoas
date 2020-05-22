@@ -17,12 +17,10 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.springframework.http.HttpMethod.*;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,12 +37,11 @@ import org.springframework.http.MediaType;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@EqualsAndHashCode(callSuper = true)
 class HalFormsAffordanceModel extends AffordanceModel {
 
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
 
-	private final @Getter List<HalFormsProperty> inputProperties;
+	private final List<HalFormsProperty> inputProperties;
 
 	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
 			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
@@ -69,5 +66,27 @@ class HalFormsAffordanceModel extends AffordanceModel {
 				.map(it -> new HalFormsProperty() //
 						.withName(it)) //
 				.collect(Collectors.toList());
+	}
+
+	public List<HalFormsProperty> getInputProperties() {
+		return this.inputProperties;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof HalFormsAffordanceModel))
+			return false;
+		if (!super.equals(o))
+			return false;
+		HalFormsAffordanceModel that = (HalFormsAffordanceModel) o;
+		return Objects.equals(this.inputProperties, that.inputProperties);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), inputProperties);
 	}
 }

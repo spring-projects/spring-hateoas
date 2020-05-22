@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 import org.springframework.beans.BeansException;
@@ -60,10 +58,13 @@ class WebClientHateoasConfiguration {
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
 
 		private final ObjectFactory<HypermediaWebClientConfigurer> configurer;
+
+		public HypermediaWebClientBeanPostProcessor(ObjectFactory<HypermediaWebClientConfigurer> configurer) {
+			this.configurer = configurer;
+		}
 
 		/*
 		 * (non-Javadoc)

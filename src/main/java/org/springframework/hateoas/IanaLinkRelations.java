@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,8 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Vedran Pavic
  * @since 1.0
  */
-@UtilityClass
-public class IanaLinkRelations {
+public final class IanaLinkRelations {
 
 	/**
 	 * A String equivalent of {@link IanaLinkRelations#ABOUT}.
@@ -1227,7 +1224,7 @@ public class IanaLinkRelations {
 	/**
 	 * Consolidated collection of {@link IanaLinkRelations}s.
 	 */
-	private final Set<LinkRelation> LINK_RELATIONS;
+	private static final Set<LinkRelation> LINK_RELATIONS;
 
 	static {
 
@@ -1237,6 +1234,10 @@ public class IanaLinkRelations {
 				.map(it -> ReflectionUtils.getField(it, null)) //
 				.map(LinkRelation.class::cast) //
 				.collect(Collectors.toSet());
+	}
+
+	private IanaLinkRelations() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 
 	/**

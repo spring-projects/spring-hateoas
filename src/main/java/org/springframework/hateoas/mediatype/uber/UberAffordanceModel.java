@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.Getter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -43,10 +41,10 @@ class UberAffordanceModel extends AffordanceModel {
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT,
 			HttpMethod.PATCH);
 
-	private final @Getter Collection<MediaType> mediaTypes = Collections.singleton(MediaTypes.UBER_JSON);
+	private final Collection<MediaType> mediaTypes = Collections.singleton(MediaTypes.UBER_JSON);
 
-	private final @Getter List<UberData> inputProperties;
-	private final @Getter List<UberData> queryProperties;
+	private final List<UberData> inputProperties;
+	private final List<UberData> queryProperties;
 
 	UberAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
 			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
@@ -91,5 +89,17 @@ class UberAffordanceModel extends AffordanceModel {
 	@Nullable
 	UberAction getAction() {
 		return UberAction.forRequestMethod(getHttpMethod());
+	}
+
+	public Collection<MediaType> getMediaTypes() {
+		return this.mediaTypes;
+	}
+
+	public List<UberData> getInputProperties() {
+		return this.inputProperties;
+	}
+
+	public List<UberData> getQueryProperties() {
+		return this.queryProperties;
 	}
 }
