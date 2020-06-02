@@ -46,7 +46,7 @@ import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
-import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.CollectionModelProcessorWrapper;
+import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker.AbstractCollectionModelProcessorWrapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -270,7 +270,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 		ResolvableType type = ResolvableType.forClass(PagedStringResources.class);
 
-		assertThat(CollectionModelProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
+		assertThat(AbstractCollectionModelProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
 	}
 
 	/**
@@ -281,7 +281,7 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 
 		EmbeddedWrappers wrappers = new EmbeddedWrappers(false);
 		CollectionModel<Object> value = CollectionModel.of(singleton(wrappers.emptyCollectionOf(Object.class)));
-		CollectionModelProcessorWrapper wrapper = new CollectionModelProcessorWrapper(new SpecialResourcesProcessor());
+		AbstractCollectionModelProcessorWrapper wrapper = new AbstractCollectionModelProcessorWrapper(new SpecialResourcesProcessor());
 
 		ResolvableType type = ResolvableType.forMethodReturnType(Controller.class.getMethod("resourcesOfObject"));
 

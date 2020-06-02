@@ -78,7 +78,6 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 * Creates a new {@link EntityModel} with the given content.
 	 *
 	 * @param content must not be {@literal null}.
-	 * @param links the links to add to the {@link EntityModel}.
 	 * @return
 	 * @since 1.1
 	 */

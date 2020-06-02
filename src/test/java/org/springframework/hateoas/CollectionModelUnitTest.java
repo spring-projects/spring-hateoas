@@ -63,8 +63,7 @@ class CollectionModelUnitTest {
 	void notEqualForDifferentLinks() {
 
 		CollectionModel<EntityModel<String>> left = CollectionModel.of(foo);
-		CollectionModel<EntityModel<String>> right = CollectionModel.of(bar);
-		right.add(Link.of("localhost"));
+		CollectionModel<EntityModel<String>> right = CollectionModel.of(bar).add(Link.of("localhost"));
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);

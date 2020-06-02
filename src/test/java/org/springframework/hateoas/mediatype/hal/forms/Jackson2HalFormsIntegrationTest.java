@@ -585,7 +585,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		return CollectionModel.of(content);
 	}
 
-	private static CollectionModel<EntityModel<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
+	private static PagedModel<EntityModel<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
 		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));

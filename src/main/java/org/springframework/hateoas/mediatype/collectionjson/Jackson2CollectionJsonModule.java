@@ -23,6 +23,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.hateoas.AbstractCollectionModel;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -793,22 +794,22 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static abstract class CollectionJsonDeserializerBase<T extends CollectionModel<?>>
+	static abstract class AbstractCollectionJsonDeserializer<T extends AbstractCollectionModel<?, ?>>
 			extends ContainerDeserializerBase<T> implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 1007769482339850545L;
 
 		private final JavaType contentType;
 		private final BiFunction<List<Object>, Links, T> finalizer;
-		private final Function<JavaType, CollectionJsonDeserializerBase<T>> creator;
+		private final Function<JavaType, AbstractCollectionJsonDeserializer<T>> creator;
 
-		CollectionJsonDeserializerBase(BiFunction<List<Object>, Links, T> finalizer,
-				Function<JavaType, CollectionJsonDeserializerBase<T>> creator) {
+		AbstractCollectionJsonDeserializer(BiFunction<List<Object>, Links, T> finalizer,
+				Function<JavaType, AbstractCollectionJsonDeserializer<T>> creator) {
 			this(TypeFactory.defaultInstance().constructType(CollectionJson.class), finalizer, creator);
 		}
 
-		private CollectionJsonDeserializerBase(JavaType contentType, BiFunction<List<Object>, Links, T> finalizer,
-				Function<JavaType, CollectionJsonDeserializerBase<T>> creator) {
+		private AbstractCollectionJsonDeserializer(JavaType contentType, BiFunction<List<Object>, Links, T> finalizer,
+				Function<JavaType, AbstractCollectionJsonDeserializer<T>> creator) {
 
 			super(contentType);
 
@@ -883,11 +884,11 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<CollectionModel<?>> {
+	static class CollectionJsonResourcesDeserializer extends AbstractCollectionJsonDeserializer<CollectionModel<?>> {
 
 		private static final long serialVersionUID = 6406522912020578141L;
 		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::of;
-		private static final Function<JavaType, CollectionJsonDeserializerBase<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
+		private static final Function<JavaType, AbstractCollectionJsonDeserializer<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
 
 		CollectionJsonResourcesDeserializer() {
 			super(FINISHER, CONTEXTUAL_CREATOR);
@@ -898,12 +899,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedModel<?>> {
+	static class CollectionJsonPagedResourcesDeserializer extends AbstractCollectionJsonDeserializer<PagedModel<?>> {
 
 		private static final long serialVersionUID = -7465448422501330790L;
 		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content, links) -> PagedModel
 				.of(content, null, links);
-		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
+		private static final Function<JavaType, AbstractCollectionJsonDeserializer<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {
 			super(FINISHER, CONTEXTUAL_CREATOR);
@@ -914,7 +915,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(CollectionModel<?> resources) {
+	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(AbstractCollectionModel<?,?> resources) {
 
 		return resources.getContent().stream().map(content -> {
 

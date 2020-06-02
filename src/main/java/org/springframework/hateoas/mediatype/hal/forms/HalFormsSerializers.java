@@ -18,6 +18,7 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import java.io.IOException;
 import java.util.Map;
 
+import org.springframework.hateoas.AbstractCollectionModel;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -209,7 +210,7 @@ class HalFormsSerializers {
 	/**
 	 * Serializer for {@link CollectionModel}
 	 */
-	static class HalFormsCollectionModelSerializer extends ContainerSerializer<CollectionModel<?>>
+	static class HalFormsCollectionModelSerializer extends ContainerSerializer<AbstractCollectionModel<?,?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -3601146866067500734L;
@@ -242,7 +243,7 @@ class HalFormsSerializers {
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(AbstractCollectionModel<?,?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			EmbeddedMapper mapper = configuration.isApplyPropertyNamingStrategy() //
 					? embeddedMapper.with(provider.getConfig().getPropertyNamingStrategy()) //
@@ -297,7 +298,7 @@ class HalFormsSerializers {
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public boolean hasSingleElement(CollectionModel<?> resources) {
+		public boolean hasSingleElement(AbstractCollectionModel<?,?> resources) {
 			return resources.getContent().size() == 1;
 		}
 

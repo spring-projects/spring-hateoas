@@ -114,4 +114,14 @@ class PagedModelUnitTest {
 	void calculatesTotalPagesCorrectly() {
 		assertThat(new PageMetadata(5, 0, 16).getTotalPages()).isEqualTo(4L);
 	}
+
+
+	/**
+	 * @see #1300
+	 */
+	@Test
+	void returnSelfTypeForFluentApi() {
+		final PagedModel<Object> foo = resources.add(Link.of("foo", IanaLinkRelations.NEXT.value()));
+		assertThat(foo).isSameAs(resources);
+	}
 }
