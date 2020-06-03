@@ -915,7 +915,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(AbstractCollectionModel<?,?> resources) {
+	private static List<CollectionJsonItem<Object>> resourcesToCollectionJsonItems(AbstractCollectionModel<?, ?> resources) {
 
 		return resources.getContent().stream().map(content -> {
 

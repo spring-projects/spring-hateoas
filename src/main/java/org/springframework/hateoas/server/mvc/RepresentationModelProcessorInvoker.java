@@ -385,7 +385,7 @@ public class RepresentationModelProcessorInvoker {
 		 * @return
 		 */
 
-		static boolean isValueTypeMatch(@Nullable AbstractCollectionModel<?,?> collectionModel, ResolvableType target) {
+		static boolean isValueTypeMatch(@Nullable AbstractCollectionModel<?, ?> collectionModel, ResolvableType target) {
 
 			if (collectionModel == null) {
 				return false;
@@ -413,7 +413,7 @@ public class RepresentationModelProcessorInvoker {
 			}
 
 			Object element = content.iterator().next();
-			ResolvableType resourceType = superType.getGeneric(1);
+			ResolvableType resourceType = superType.getGeneric(0);
 
 			if (element instanceof EntityModel) {
 				return EntityModelProcessorWrapper.isValueTypeMatch((EntityModel<?>) element, resourceType);

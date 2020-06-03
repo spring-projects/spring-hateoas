@@ -204,7 +204,7 @@ class UberData {
 	 * @param resources
 	 * @return
 	 */
-	private static List<UberData> extractLinksAndCollectionContent(AbstractCollectionModel<?,?> resources) {
+	private static List<UberData> extractLinksAndCollectionContent(AbstractCollectionModel<?, ?> resources) {
 
 		List<UberData> data = extractLinks(resources);
 

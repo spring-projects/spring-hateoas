@@ -20,12 +20,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * General helper to easily create a wrapper for a collection of entities.
@@ -33,7 +31,7 @@ import java.util.function.Supplier;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class AbstractCollectionModel<S extends AbstractCollectionModel<S,T>, T> extends RepresentationModel<S> implements Iterable<T> {
+public class AbstractCollectionModel<T, S extends AbstractCollectionModel<T, S>> extends RepresentationModel<S> implements Iterable<T> {
 
 	private final Collection<T> content;
 
@@ -98,7 +96,7 @@ public class AbstractCollectionModel<S extends AbstractCollectionModel<S,T>, T> 
 			return false;
 		}
 
-		AbstractCollectionModel<?, ?> that = (AbstractCollectionModel<?,?>) obj;
+		AbstractCollectionModel<?, ?> that = (AbstractCollectionModel<?, ?>) obj;
 		return Objects.equals(this.content, that.content);
 	}
 

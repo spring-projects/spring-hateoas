@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class PagedModel<T> extends AbstractCollectionModel<PagedModel<T>, T> {
+public class PagedModel<T> extends AbstractCollectionModel<T, PagedModel<T>> {
 
 	public static PagedModel<?> NO_PAGE = new PagedModel<>();
 

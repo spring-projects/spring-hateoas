@@ -17,14 +17,9 @@ package org.springframework.hateoas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * General helper to easily create a wrapper for a collection of entities.
@@ -32,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class CollectionModel<T> extends AbstractCollectionModel<CollectionModel<T>, T> implements Iterable<T> {
+public class CollectionModel<T> extends AbstractCollectionModel<T, CollectionModel<T>> implements Iterable<T> {
 
 	/**
 	 * Creates an empty {@link CollectionModel} instance.

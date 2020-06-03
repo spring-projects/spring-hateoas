@@ -210,7 +210,7 @@ class HalFormsSerializers {
 	/**
 	 * Serializer for {@link CollectionModel}
 	 */
-	static class HalFormsCollectionModelSerializer extends ContainerSerializer<AbstractCollectionModel<?,?>>
+	static class HalFormsCollectionModelSerializer extends ContainerSerializer<AbstractCollectionModel<?, ?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -3601146866067500734L;
@@ -243,7 +243,7 @@ class HalFormsSerializers {
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public void serialize(AbstractCollectionModel<?,?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		public void serialize(AbstractCollectionModel<?, ?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 			EmbeddedMapper mapper = configuration.isApplyPropertyNamingStrategy() //
 					? embeddedMapper.with(provider.getConfig().getPropertyNamingStrategy()) //
@@ -298,7 +298,7 @@ class HalFormsSerializers {
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public boolean hasSingleElement(AbstractCollectionModel<?,?> resources) {
+		public boolean hasSingleElement(AbstractCollectionModel<?, ?> resources) {
 			return resources.getContent().size() == 1;
 		}
 

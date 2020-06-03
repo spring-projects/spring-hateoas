@@ -538,13 +538,13 @@ class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegration
 		assertThat(deserialized).isEqualTo(original);
 	}
 
-	private static AbstractCollectionModel<?, EntityModel<Employee>> setupAnnotatedPagedResources() {
+	private static AbstractCollectionModel<EntityModel<Employee>, ?> setupAnnotatedPagedResources() {
 
 		return setupAnnotatedPagedResources(2, 4);
 	}
 
 	@NotNull
-	private static AbstractCollectionModel<?, EntityModel<Employee>> setupAnnotatedPagedResources(int size, int totalElements) {
+	private static AbstractCollectionModel<EntityModel<Employee>, ?> setupAnnotatedPagedResources(int size, int totalElements) {
 
 		List<EntityModel<Employee>> content = new ArrayList<>();
 		Employee employee = new Employee("Frodo", "ring bearer");
