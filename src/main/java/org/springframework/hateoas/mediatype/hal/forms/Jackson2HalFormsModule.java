@@ -110,7 +110,14 @@ public class Jackson2HalFormsModule extends SimpleModule {
 		public abstract Collection<T> getContent();
 	}
 
+	@JsonSerialize(using = HalFormsCollectionModelSerializer.class)
 	abstract class PagedModelMixin<T> extends PagedModel<T> {
+
+		@Override
+		@JsonProperty("_embedded")
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonDeserialize(using = HalFormsCollectionModelDeserializer.class)
+		public abstract Collection<T> getContent();
 
 		@Nullable
 		@Override

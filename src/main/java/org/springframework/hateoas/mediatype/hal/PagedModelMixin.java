@@ -17,7 +17,7 @@ package org.springframework.hateoas.mediatype.hal;
 
 import java.util.Collection;
 
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -26,15 +26,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+
 /**
- * Custom mixin to render collection content as {@literal _embedded}.
+ * Custom mixin to render collection content under {@literal _embedded} element.
  *
- * @author Alexander Baetz
- * @author Oliver Gierke
- * @author Greg Turnquist
+ * @author Patrick ALLAIN
  */
 @JsonPropertyOrder({ "content", "links" })
-abstract class CollectionModelMixin<T> extends CollectionModel<T> {
+abstract class PagedModelMixin<T> extends PagedModel<T> {
 
 	@Override
 	@JsonProperty("_embedded")

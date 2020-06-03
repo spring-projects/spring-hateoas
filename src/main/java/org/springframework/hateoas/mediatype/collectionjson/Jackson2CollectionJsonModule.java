@@ -461,8 +461,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 
 		CollectionJsonPagedResourcesSerializer(@Nullable BeanProperty property) {
-
-			super(CollectionModel.class, false);
+			super(PagedModel.class, false);
 			this.property = property;
 		}
 
