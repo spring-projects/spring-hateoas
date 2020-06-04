@@ -35,11 +35,11 @@ public interface MediaTypeConfigurationProvider {
 	Class<? extends HypermediaMappingInformation> getConfiguration();
 
 	/**
-	 * Returns whether the provider supports any of the given {@link MediaType}s. Used to select the providers to be
+	 * Returns whether the provider supports any of the provided {@link MediaType}s. Used to select the providers to be
 	 * included into a configuration setup in case the media types to be enabled are explicitly defined.
 	 *
-	 * @param mediaTypes will never be {@literal null}.
+	 * @param providedMediaTypes will never be {@literal null}.
 	 * @return
 	 */
-	boolean supportsAny(Collection<MediaType> mediaTypes);
+	boolean supportsAny(Collection<MediaType> providedMediaTypes);
 }

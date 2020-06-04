@@ -28,6 +28,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.mediatype.ProvidedMediatype;
 import org.springframework.http.MediaType;
 import org.springframework.util.ClassUtils;
 
@@ -73,7 +74,7 @@ class HypermediaConfigurationImportSelector implements ImportSelector, ResourceL
 
 		// Filter the ones supporting the given media types
 		Stream<String> imports = configurationProviders.stream() //
-				.filter(it -> it.supportsAny(types)) //
+				.filter(it -> it.supportsAny(types) || !ProvidedMediatype.class.isInstance(it)) //
 				.map(MediaTypeConfigurationProvider::getConfiguration) //
 				.map(Class::getName);
 

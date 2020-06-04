@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
+import org.springframework.hateoas.support.SpringFactoriesCustomMediatype;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
@@ -53,6 +54,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
 							MediaType.APPLICATION_JSON, //
+							SpringFactoriesCustomMediatype.BILBO_MEDIATYPE, //
 							MediaType.parseMediaType("application/*+json"));
 		});
 	}
@@ -70,6 +72,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 							MediaTypes.HAL_JSON, //
 							MediaTypes.COLLECTION_JSON, //
 							MediaType.APPLICATION_JSON, //
+							SpringFactoriesCustomMediatype.BILBO_MEDIATYPE, //
 							MediaType.parseMediaType("application/*+json"));
 		});
 	}
@@ -89,6 +92,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 							MediaTypes.COLLECTION_JSON, //
 							MediaTypes.UBER_JSON, //
 							MediaType.APPLICATION_JSON, //
+							SpringFactoriesCustomMediatype.BILBO_MEDIATYPE, //
 							MediaType.parseMediaType("application/*+json"));
 		});
 	}
@@ -101,7 +105,8 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
-							MediaType.parseMediaType("application/frodo+json"), //
+							CustomHypermediaType.FRODO_MEDIATYPE, //
+							SpringFactoriesCustomMediatype.BILBO_MEDIATYPE, //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json") //
 			);

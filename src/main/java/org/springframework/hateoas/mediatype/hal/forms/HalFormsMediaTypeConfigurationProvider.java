@@ -20,6 +20,7 @@ import java.util.Collection;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.hateoas.config.MediaTypeConfigurationProvider;
+import org.springframework.hateoas.mediatype.ProvidedMediatype;
 import org.springframework.http.MediaType;
 
 /**
@@ -27,7 +28,7 @@ import org.springframework.http.MediaType;
  *
  * @author Oliver Drotbohm
  */
-class HalFormsMediaTypeConfigurationProvider implements MediaTypeConfigurationProvider {
+class HalFormsMediaTypeConfigurationProvider implements MediaTypeConfigurationProvider, ProvidedMediatype {
 
 	/*
 	 * (non-Javadoc)
@@ -43,7 +44,7 @@ class HalFormsMediaTypeConfigurationProvider implements MediaTypeConfigurationPr
 	 * @see org.springframework.hateoas.config.MediaTypeConfigurationProvider#supportsAny(java.util.Collection)
 	 */
 	@Override
-	public boolean supportsAny(Collection<MediaType> mediaTypes) {
-		return mediaTypes.contains(MediaTypes.HAL_FORMS_JSON);
+	public boolean supportsAny(Collection<MediaType> providedMediaTypes) {
+		return providedMediaTypes.contains(MediaTypes.HAL_FORMS_JSON);
 	}
 }

@@ -339,8 +339,9 @@ class EnableHypermediaSupportIntegrationTest {
 
 			RestTemplate template = context.getBean(RestTemplate.class);
 
-			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
-					.contains(MediaTypes.HAL_JSON);
+			assertThat(template.getMessageConverters()).flatExtracting(HttpMessageConverter::getSupportedMediaTypes)
+					.contains(MediaTypes.HAL_JSON)
+					.doesNotContain(MediaTypes.HAL_FORMS_JSON, MediaTypes.COLLECTION_JSON, MediaTypes.UBER_JSON);
 		});
 	}
 
@@ -352,7 +353,7 @@ class EnableHypermediaSupportIntegrationTest {
 				context -> foo( //
 						context, //
 						RestTemplate.class, //
-						it -> it.getMessageConverters().get(0), //
+						it -> it.getMessageConverters().get(1), //
 						converter -> assertThat(converter.getSupportedMediaTypes()) // //
 								.hasSize(1) //
 								.contains(MediaTypes.HAL_FORMS_JSON) //
@@ -403,8 +404,9 @@ class EnableHypermediaSupportIntegrationTest {
 		withServletContext(CollectionJsonConfig.class, context -> {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
-			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()).hasSize(1)
-					.contains(MediaTypes.COLLECTION_JSON);
+			assertThat(template.getMessageConverters()).flatExtracting(HttpMessageConverter::getSupportedMediaTypes)
+					.contains(MediaTypes.COLLECTION_JSON) //
+					.doesNotContain(MediaTypes.HAL_JSON, MediaTypes.HAL_FORMS_JSON, MediaTypes.UBER_JSON);
 		});
 	}
 
@@ -414,9 +416,9 @@ class EnableHypermediaSupportIntegrationTest {
 		withServletContext(UberConfig.class, context -> {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
-			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
-					.hasSize(1) //
-					.contains(MediaTypes.UBER_JSON);
+			assertThat(template.getMessageConverters()).flatExtracting(HttpMessageConverter::getSupportedMediaTypes)
+					.contains(MediaTypes.UBER_JSON)
+					.doesNotContain(MediaTypes.HAL_JSON, MediaTypes.HAL_FORMS_JSON, MediaTypes.COLLECTION_JSON);
 		});
 	}
 

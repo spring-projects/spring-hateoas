@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.hateoas.config.MediaTypeConfigurationProvider;
+import org.springframework.hateoas.mediatype.ProvidedMediatype;
 import org.springframework.http.MediaType;
 
 /**
@@ -12,7 +13,7 @@ import org.springframework.http.MediaType;
  *
  * @author Oliver Drotbohm
  */
-class HttpProblemDetailsConfigurationProvider implements MediaTypeConfigurationProvider {
+class HttpProblemDetailsConfigurationProvider implements MediaTypeConfigurationProvider, ProvidedMediatype {
 
 	/*
 	 * (non-Javadoc)
@@ -28,7 +29,7 @@ class HttpProblemDetailsConfigurationProvider implements MediaTypeConfigurationP
 	 * @see org.springframework.hateoas.config.HyperMediaTypeProvider#supportsAny(java.util.Collection)
 	 */
 	@Override
-	public boolean supportsAny(Collection<MediaType> mediaTypes) {
-		return mediaTypes.contains(MediaTypes.HTTP_PROBLEM_DETAILS_JSON);
+	public boolean supportsAny(Collection<MediaType> providedMediaTypes) {
+		return providedMediaTypes.contains(MediaTypes.HTTP_PROBLEM_DETAILS_JSON);
 	}
 }
