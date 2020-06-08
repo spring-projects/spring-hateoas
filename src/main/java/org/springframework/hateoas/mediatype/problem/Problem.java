@@ -213,6 +213,15 @@ public class Problem {
 			return new ExtendedProblem<>(getType(), getTitle(), getStatus(), getDetail(), instance, extendedProperties);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.problem.Problem#withStatus(org.springframework.http.HttpStatus)
+		 */
+		@Override
+		public ExtendedProblem<T> withStatus(@Nullable HttpStatus status) {
+			return new ExtendedProblem<>(getType(), getTitle(), status, getDetail(), getInstance(), extendedProperties);
+		}
+
 		/**
 		 * Returns the additional properties.
 		 *
