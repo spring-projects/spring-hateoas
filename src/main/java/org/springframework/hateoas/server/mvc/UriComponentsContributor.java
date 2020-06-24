@@ -15,10 +15,16 @@
  */
 package org.springframework.hateoas.server.mvc;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.core.MethodParameter;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.MethodLinkBuilderFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -28,6 +34,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @see MethodLinkBuilderFactory#linkTo(Object)
  * @author Oliver Gierke
+ * @author Réda Housni Alaoui
  */
 public interface UriComponentsContributor {
 
@@ -47,4 +54,15 @@ public interface UriComponentsContributor {
 	 * @param value can be {@literal null}.
 	 */
 	void enhance(UriComponentsBuilder builder, @Nullable MethodParameter parameter, @Nullable Object value);
+
+	/**
+	 * Enhance the given {@link TemplateVariables}
+	 *
+	 * @param templateVariables will never be {@literal null}.
+	 * @param uriComponents will never be {@literal null}.
+	 * @param parameter can be {@literal null}.
+	 */
+	default TemplateVariables enhance(TemplateVariables templateVariables, UriComponents uriComponents, @Nullable MethodParameter parameter){
+		return templateVariables;
+	}
 }

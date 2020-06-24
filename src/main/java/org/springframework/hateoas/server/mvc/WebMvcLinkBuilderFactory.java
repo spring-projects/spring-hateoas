@@ -26,10 +26,14 @@ import java.util.function.Function;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.MethodLinkBuilderFactory;
+import org.springframework.hateoas.server.core.AdditionalUriHandler;
 import org.springframework.hateoas.server.core.LinkBuilderSupport;
+import org.springframework.hateoas.server.core.MethodInvocation;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.server.core.WebHandler;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -44,6 +48,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kevin Conaway
  * @author Andrew Naydyonock
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvcLinkBuilder> {
 
@@ -106,8 +111,29 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 		Function<String, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory.getBuilder()
 				.path(mapping);
 
-		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new, (builder, invocation) -> {
+		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new,
+				new UriComponentsContributorsAdditionalUriHandler(uriComponentsContributors), builderFactory);
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(method, parameters);
+	}
+
+	private static class UriComponentsContributorsAdditionalUriHandler implements AdditionalUriHandler {
+
+		private final List<UriComponentsContributor> uriComponentsContributors;
+
+		private UriComponentsContributorsAdditionalUriHandler(List<UriComponentsContributor> uriComponentsContributors) {
+			this.uriComponentsContributors = uriComponentsContributors;
+		}
+
+		@Override
+		public UriComponentsBuilder apply(UriComponentsBuilder builder, MethodInvocation invocation) {
 			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
 			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
 
@@ -123,16 +149,22 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 			}
 
 			return builder;
+		}
 
-		}, builderFactory);
-	}
+		@Override
+		public TemplateVariables apply(TemplateVariables templateVariables, UriComponents uriComponents, MethodInvocation invocation) {
+			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
-		return WebMvcLinkBuilder.linkTo(method, parameters);
+			for (MethodParameter parameter : parameters.getParameters()) {
+
+				for (UriComponentsContributor contributor : uriComponentsContributors) {
+					if (contributor.supportsParameter(parameter)) {
+						templateVariables = contributor.enhance(templateVariables, uriComponents, parameter);
+					}
+				}
+			}
+
+			return templateVariables;
+		}
 	}
 }
