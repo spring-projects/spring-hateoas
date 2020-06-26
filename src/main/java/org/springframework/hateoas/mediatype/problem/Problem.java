@@ -197,6 +197,15 @@ public class Problem {
 
 		/*
 		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.problem.Problem#withStatus(org.springframework.http.HttpStatus)
+		 */
+		@Override
+		public ExtendedProblem<T> withStatus(@Nullable HttpStatus status) {
+			return new ExtendedProblem<>(getType(), getTitle(), status, getDetail(), getInstance(), extendedProperties);
+		}
+
+		/*
+		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.mediatype.problem.Problem#withDetail(java.lang.String)
 		 */
 		@Override
