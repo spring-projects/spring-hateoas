@@ -219,6 +219,7 @@ class JacksonSerializationTest {
 		ExtendedProblem<AccountProblemDetails> problem = Problem.create(details)
 				.withType(URI.create("https://example.com/probs/out-of-credit")) //
 				.withTitle("You do not have enough credit.") //
+				.withStatus(HttpStatus.BAD_REQUEST) //
 				.withDetail("Your current balance is 30, but that costs 50.") //
 				.withInstance(URI.create("/account/12345/msgs/abc"));
 
