@@ -151,7 +151,7 @@ public class Problem {
 
 		Assert.notNull(properties, "Properties must not be null!");
 
-		return new ExtendedProblem<Map<String, Object>>(type, title, status, detail, instance, properties);
+		return new ExtendedProblem<>(type, title, status, detail, instance, properties);
 	}
 
 	@Nullable
