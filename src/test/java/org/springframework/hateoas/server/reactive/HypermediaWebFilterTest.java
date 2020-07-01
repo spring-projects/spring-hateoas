@@ -66,15 +66,7 @@ class HypermediaWebFilterTest {
 	@Test
 	void webFilterShouldEmbedExchangeIntoContext() {
 
-	    String results = this.testClient.get().uri("https://example.com/api") //
-        .exchange() //
-        .expectStatus().isOk() //
-        .expectBody(String.class) //
-        .returnResult().getResponseBody();
-
-        System.out.println("results = " + results);
-
-        this.testClient.get().uri("https://example.com/api") //
+		this.testClient.get().uri("https://example.com/api") //
 				.accept(MediaTypes.HAL_JSON) //
 				.exchange() //
 				.expectStatus().isOk() //
