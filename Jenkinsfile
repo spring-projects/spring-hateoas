@@ -169,7 +169,7 @@ pipeline {
 		stage('Release documentation') {
 			when {
 				anyOf {
-					branch 'master'
+					branch '1.1.x'
 					branch 'release'
 				}
 			}
