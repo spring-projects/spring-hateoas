@@ -25,7 +25,7 @@ String name = traverson
 
 You can set up a `Traverson` instance by pointing it to a REST server and configuring the media types you want to set as `Accept` headers. You can then define the relation names you want to discover and follow. Relation names can either be simple names or JSONPath expressions (starting with an `$`).
 
-The sample then hands a parameter map into the execution. The parameters are used to expand URIs (which are templated) found during the traversal. The traversal is concluded by accessing the representation of the final traversal. In the preceding example, we evaluate a JSONPath expression to access the actor's name.
+The sample then hands a parameter map into the `Traverson` instance. The parameters are used to expand URIs (which are templated) found during the traversal. The traversal is concluded by accessing the representation of the final traversal. In the preceding example, we evaluate a JSONPath expression to access the actor's name.
 
 The preceding example is the simplest version of traversal, where the `rel` values are strings and, at each hop, the same template parameters are applied.
 
@@ -134,7 +134,7 @@ will be able to interact using hypermedia.
 [[client.web-test-client]]
 == Configuring `WebTestClient` Instances
 
-When working with hypermedia-enabled representations, a common task is to execute various tests using `WebTestClient`.
+When working with hypermedia-enabled representations, a common task is to run various tests by using `WebTestClient`.
 
 To configure an instance of `WebTestClient` in a test case, check out this example:
 
@@ -212,7 +212,7 @@ In general, Spring Boot has moved away from the concept of registering a `RestTe
 * Users often need different instances rather than a single bean.
 
 To compensate for this, Spring Boot provides a `RestTemplateBuilder`. This autoconfigured bean lets you define various beans used to fashion
-a `RestTemplate` instance. You ask for a `RestTemplateBuilder` bean, execute its `build()` method, and then apply final settings (like credentials, etc.).
+a `RestTemplate` instance. You ask for a `RestTemplateBuilder` bean, call its `build()` method, and then apply final settings (such as credentials and other details).
 
 To register hypermedia-based message converters, add the following to your code:
 
