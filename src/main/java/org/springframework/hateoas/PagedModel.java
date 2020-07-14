@@ -234,16 +234,16 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#toString()
+	 * @see org.springframework.hateoas.RepresentationModel#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("PagedResource { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
+		return String.format("PagedModel { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.Resources#equals(java.lang.Object)
+	 * @see org.springframework.hateoas.CollectionModel#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(@Nullable Object obj) {
@@ -264,7 +264,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.Resources#hashCode()
+	 * @see org.springframework.hateoas.CollectionModel#hashCode()
 	 */
 	@Override
 	public int hashCode() {
