@@ -115,7 +115,6 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 * Creates a {@link CollectionModel} instance with the given content.
 	 *
 	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link CollectionModel}.
 	 * @return
 	 * @since 1.1
 	 */
@@ -189,16 +188,16 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#toString()
+	 * @see org.springframework.hateoas.RepresentationModel#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("Resources { content: %s, %s }", getContent(), super.toString());
+		return String.format("CollectionModel { content: %s, %s }", getContent(), super.toString());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
+	 * @see org.springframework.hateoas.RepresentationModel#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(@Nullable Object obj) {
@@ -219,7 +218,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#hashCode()
+	 * @see org.springframework.hateoas.RepresentationModel#hashCode()
 	 */
 	@Override
 	public int hashCode() {
