@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
@@ -131,6 +132,35 @@ public class Links implements Iterable<Link> {
 		Assert.notNull(links, "Links must not be null!");
 
 		return and(Arrays.asList(links));
+	}
+
+	/**
+	 * Adds the given links if the given condition is {@literal true}. The given {@link Supplier}s will only be resolved
+	 * if the given condition is true. Essentially syntactic sugar to write:<br />
+	 * <code>
+	 * if (a > 3) {
+	 *   links = links.and(…);
+	 * }
+	 * </code> as <code>
+	 * links = link.and(a > 3, …);
+	 * </code>
+	 *
+	 * @param condition
+	 * @param links must not be {@literal null}.
+	 * @return
+	 */
+	@SafeVarargs
+	public final Links and(boolean condition, Supplier<Link>... links) {
+
+		Assert.notNull(links, "Links must not be null!");
+
+		if (!condition) {
+			return this;
+		}
+
+		return and(Arrays.stream(links) //
+				.map(Supplier::get) //
+				.collect(Collectors.toList()));
 	}
 
 	/**

@@ -135,4 +135,20 @@ class LinksUnitTest {
 		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first))).isFalse();
 		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first, second))).isTrue();
 	}
+
+	@Test // #1322
+	void conditionallyAddsLink() {
+
+		Links links = Links.NONE.and(true, () -> Link.of("/foo"));
+
+		assertThat(links.getRequiredLink(IanaLinkRelations.SELF).getHref()).isEqualTo("/foo");
+	}
+
+	@Test // #1322
+	void doesNotEvaluateSupplierIfAddConditionIsFalse() {
+
+		assertThatCode(() -> Links.NONE.and(false, () -> {
+			throw new IllegalStateException();
+		})).doesNotThrowAnyException();
+	}
 }
