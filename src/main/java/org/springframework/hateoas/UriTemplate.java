@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
@@ -54,8 +53,6 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
-
-	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<>();
 
 	private final TemplateVariables variables;
 	private String baseUri;
@@ -134,7 +131,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
-		return CACHE.computeIfAbsent(template, UriTemplate::new);
+		return new UriTemplate(template);
 	}
 
 	/**
@@ -147,7 +144,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
-		return CACHE.computeIfAbsent(template, UriTemplate::new).with(variables);
+		return new UriTemplate(template).with(variables);
 	}
 
 	/**
