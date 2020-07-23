@@ -45,8 +45,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public class HalModelBuilder {
 
-	private static final LinkRelation NO_RELATION = LinkRelation.of("___norel___");
-
 	private final EmbeddedWrappers wrappers;
 
 	private Object model;
