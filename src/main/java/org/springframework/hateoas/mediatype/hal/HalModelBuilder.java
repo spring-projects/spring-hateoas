@@ -297,8 +297,8 @@ public class HalModelBuilder {
 	 *
 	 * @return will never be {@literal null}.
 	 */
-	public RepresentationModel<?> build() {
-		return new HalRepresentationModel<>(model, CollectionModel.of(embeddeds), links);
+	public <T extends RepresentationModel<T>> RepresentationModel<T> build() {
+		return (T) new HalRepresentationModel<>(model, CollectionModel.of(embeddeds), links);
 	}
 
 	/**
