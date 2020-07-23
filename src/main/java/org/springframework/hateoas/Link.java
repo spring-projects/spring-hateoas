@@ -679,13 +679,19 @@ public class Link implements Serializable {
 		return template == null ? UriTemplate.of(href) : this.template;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		Link link = (Link) o;
 		return Objects.equals(this.rel, link.rel) && Objects.equals(this.href, link.href)
 				&& Objects.equals(this.hreflang, link.hreflang) && Objects.equals(this.media, link.media)
@@ -694,6 +700,10 @@ public class Link implements Serializable {
 				&& Objects.equals(this.name, link.name) && Objects.equals(this.affordances, link.affordances);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 
