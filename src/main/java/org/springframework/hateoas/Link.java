@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -88,7 +89,7 @@ public class Link implements Serializable {
 	private String deprecation;
 	private String profile;
 	private String name;
-	private @JsonIgnore UriTemplate template;
+	private @JsonIgnore @Nullable UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 
 	/**
@@ -112,7 +113,7 @@ public class Link implements Serializable {
 	 */
 	@Deprecated
 	public Link(String href, String rel) {
-		this(UriTemplate.of(href), LinkRelation.of(rel));
+		this(href, LinkRelation.of(rel));
 	}
 
 	/**
@@ -124,7 +125,7 @@ public class Link implements Serializable {
 	 */
 	@Deprecated
 	public Link(String href, LinkRelation rel) {
-		this(UriTemplate.of(href), rel);
+		this(href, templateOrNull(href), rel, Collections.emptyList());
 	}
 
 	/**
@@ -169,8 +170,20 @@ public class Link implements Serializable {
 		this.affordances = affordances;
 	}
 
+	private Link(String href, @Nullable UriTemplate template, LinkRelation rel, List<Affordance> affordances) {
+
+		Assert.hasText(href, "Href must not be null or empty!");
+		Assert.notNull(rel, "LinkRelation must not be null!");
+		Assert.notNull(affordances, "Affordances must not be null!");
+
+		this.href = href;
+		this.template = template;
+		this.rel = rel;
+		this.affordances = affordances;
+	}
+
 	private Link(LinkRelation rel, String href, String hreflang, String media, String title, String type,
-			String deprecation, String profile, String name, UriTemplate template, List<Affordance> affordances) {
+			String deprecation, String profile, String name, @Nullable UriTemplate template, List<Affordance> affordances) {
 
 		this.rel = rel;
 		this.href = href;
@@ -320,7 +333,7 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<String> getVariableNames() {
-		return template.getVariableNames();
+		return template == null ? Collections.emptyList() : template.getVariableNames();
 	}
 
 	/**
@@ -330,7 +343,7 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
-		return template.getVariables();
+		return template == null ? Collections.emptyList() : template.getVariables();
 	}
 
 	/**
@@ -339,7 +352,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public boolean isTemplated() {
-		return !template.getVariables().isEmpty();
+		return template == null ? false : !template.getVariables().isEmpty();
 	}
 
 	/**
@@ -349,7 +362,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Object... arguments) {
-		return of(template.expand(arguments).toString(), getRel());
+		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -359,7 +372,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Map<String, ?> arguments) {
-		return of(template.expand(arguments).toString(), getRel());
+		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -663,7 +676,7 @@ public class Link implements Serializable {
 
 	@JsonProperty
 	public UriTemplate getTemplate() {
-		return this.template;
+		return template == null ? UriTemplate.of(href) : this.template;
 	}
 
 	@Override
@@ -726,5 +739,13 @@ public class Link implements Serializable {
 		}
 
 		return linkString;
+	}
+
+	@Nullable
+	private static UriTemplate templateOrNull(String href) {
+
+		Assert.notNull(href, "Href must not be null!");
+
+		return href.contains("{") ? UriTemplate.of(href) : null;
 	}
 }
