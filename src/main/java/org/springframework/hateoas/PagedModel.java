@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.lang.Nullable;
@@ -33,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class PagedModel<T> extends CollectionModel<T> {
+public class PagedModel<T> extends AbstractCollectionModel<T, PagedModel<T>> {
 
 	public static PagedModel<?> NO_PAGE = new PagedModel<>();
 
@@ -153,7 +154,6 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata can be {@literal null}.
-	 * @param links
 	 */
 	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata) {
 		return new PagedModel<>(content, metadata);
@@ -256,10 +256,12 @@ public class PagedModel<T> extends CollectionModel<T> {
 			return false;
 		}
 
-		PagedModel<?> that = (PagedModel<?>) obj;
-		boolean metadataEquals = this.metadata == null ? that.metadata == null : this.metadata.equals(that.metadata);
+		if (!super.equals(obj)) {
+			return false;
+		}
 
-		return metadataEquals && super.equals(obj);
+		PagedModel<?> that = (PagedModel<?>) obj;
+		return Objects.equals(this.metadata, that.metadata);
 	}
 
 	/*
@@ -270,7 +272,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	public int hashCode() {
 
 		int result = super.hashCode();
-		result += this.metadata == null ? 0 : 31 * this.metadata.hashCode();
+		result += 31 * Objects.hashCode(this.metadata);
 		return result;
 	}
 

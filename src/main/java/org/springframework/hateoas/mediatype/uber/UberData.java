@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.hateoas.AbstractCollectionModel;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -189,14 +190,13 @@ final class UberData {
 
 		return data;
 	}
-
 	/**
 	 * Convert {@link CollectionModel} into a list of {@link UberData}, with each item nested in a sub-UberData.
 	 *
 	 * @param resources
 	 * @return
 	 */
-	static List<UberData> extractLinksAndContent(CollectionModel<?> resources) {
+	private static List<UberData> extractLinksAndCollectionContent(AbstractCollectionModel<?, ?> resources) {
 
 		List<UberData> data = extractLinks(resources);
 
@@ -205,11 +205,20 @@ final class UberData {
 
 		return data;
 	}
+	/**
+	 * Convert {@link CollectionModel} into a list of {@link UberData}, with each item nested in a sub-UberData.
+	 *
+	 * @param resources
+	 * @return
+	 */
+	static List<UberData> extractLinksAndContent(CollectionModel<?> resources) {
+		return extractLinksAndCollectionContent(resources);
+	}
 
 	@SuppressWarnings("null")
 	static List<UberData> extractLinksAndContent(PagedModel<?> resources) {
 
-		List<UberData> collectionOfResources = extractLinksAndContent((CollectionModel<?>) resources);
+		List<UberData> collectionOfResources = extractLinksAndCollectionContent(resources);
 
 		if (resources.getMetadata() != null) {
 

@@ -33,6 +33,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
@@ -99,6 +100,7 @@ public class Jackson2HalModule extends SimpleModule {
 		setMixInAnnotation(Link.class, LinkMixin.class);
 		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
 		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
+		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 	}
 
 	/**

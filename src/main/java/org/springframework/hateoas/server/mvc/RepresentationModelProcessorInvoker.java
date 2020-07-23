@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.hateoas.AbstractCollectionModel;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -66,8 +67,8 @@ public class RepresentationModelProcessorInvoker {
 			if (rawType != null) {
 				if (EntityModel.class.isAssignableFrom(rawType)) {
 					this.processors.add(new EntityModelProcessorWrapper(processor));
-				} else if (CollectionModel.class.isAssignableFrom(rawType)) {
-					this.processors.add(new CollectionModelProcessorWrapper(processor));
+				} else if (AbstractCollectionModel.class.isAssignableFrom(rawType)) {
+					this.processors.add(new AbstractCollectionModelProcessorWrapper(processor));
 				} else {
 					this.processors.add(new DefaultProcessorWrapper(processor));
 				}
@@ -347,15 +348,15 @@ public class RepresentationModelProcessorInvoker {
 	 *
 	 * @author Oliver Gierke
 	 */
-	public static class CollectionModelProcessorWrapper
+	public static class AbstractCollectionModelProcessorWrapper
 			extends RepresentationModelProcessorInvoker.DefaultProcessorWrapper {
 
 		/**
-		 * Creates a new {@link CollectionModelProcessorWrapper} for the given {@link RepresentationModelProcessor}.
+		 * Creates a new {@link AbstractCollectionModelProcessorWrapper} for the given {@link RepresentationModelProcessor}.
 		 *
 		 * @param processor must not be {@literal null}.
 		 */
-		public CollectionModelProcessorWrapper(RepresentationModelProcessor<?> processor) {
+		public AbstractCollectionModelProcessorWrapper(RepresentationModelProcessor<?> processor) {
 			super(processor);
 		}
 
@@ -384,7 +385,7 @@ public class RepresentationModelProcessorInvoker {
 		 * @return
 		 */
 
-		static boolean isValueTypeMatch(@Nullable CollectionModel<?> collectionModel, ResolvableType target) {
+		static boolean isValueTypeMatch(@Nullable AbstractCollectionModel<?, ?> collectionModel, ResolvableType target) {
 
 			if (collectionModel == null) {
 				return false;
@@ -398,7 +399,7 @@ public class RepresentationModelProcessorInvoker {
 
 			ResolvableType superType = null;
 
-			for (Class<?> collectionModelType : Arrays.<Class<?>> asList(collectionModel.getClass(), CollectionModel.class)) {
+			for (Class<?> collectionModelType : Arrays.<Class<?>> asList(collectionModel.getClass(), AbstractCollectionModel.class)) {
 
 				superType = getSuperType(target, collectionModelType);
 

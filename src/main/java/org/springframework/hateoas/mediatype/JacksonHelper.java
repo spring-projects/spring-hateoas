@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import org.springframework.hateoas.AbstractCollectionModel;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 
@@ -49,7 +50,7 @@ public final class JacksonHelper {
 	public static boolean isResourcesOfResource(JavaType type) {
 
 		return
-			CollectionModel.class.isAssignableFrom(type.getRawClass())
+			AbstractCollectionModel.class.isAssignableFrom(type.getRawClass())
 			&&
 			EntityModel.class.isAssignableFrom(type.containedType(0).getRawClass());
 	}

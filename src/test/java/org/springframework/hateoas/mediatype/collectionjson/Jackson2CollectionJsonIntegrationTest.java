@@ -231,7 +231,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
 
-	private static CollectionModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
+	private static PagedModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
 		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));

@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.AbstractCollectionModel;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -537,13 +538,13 @@ class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegration
 		assertThat(deserialized).isEqualTo(original);
 	}
 
-	private static CollectionModel<EntityModel<Employee>> setupAnnotatedPagedResources() {
+	private static AbstractCollectionModel<EntityModel<Employee>, ?> setupAnnotatedPagedResources() {
 
 		return setupAnnotatedPagedResources(2, 4);
 	}
 
 	@NotNull
-	private static CollectionModel<EntityModel<Employee>> setupAnnotatedPagedResources(int size, int totalElements) {
+	private static AbstractCollectionModel<EntityModel<Employee>, ?> setupAnnotatedPagedResources(int size, int totalElements) {
 
 		List<EntityModel<Employee>> content = new ArrayList<>();
 		Employee employee = new Employee("Frodo", "ring bearer");
