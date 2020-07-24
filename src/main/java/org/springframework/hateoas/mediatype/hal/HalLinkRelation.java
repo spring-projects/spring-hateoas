@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.IanaUriSchemes;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -76,12 +77,13 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	@JsonCreator
 	private static HalLinkRelation of(String relation) {
 
-		String[] split = relation.split(":");
+		int firstColonIndex = relation.indexOf(':');
 
-		String curie = split.length == 1 ? null : split[0];
-		String localPart = split.length == 1 ? split[0] : split[1];
+		String curie = firstColonIndex == -1 ? null : relation.substring(0, firstColonIndex);
 
-		return new HalLinkRelation(curie, localPart);
+		return curie == null || IanaUriSchemes.isIanaUriScheme(curie)
+				? new HalLinkRelation(null, relation)
+				: new HalLinkRelation(curie, relation.substring(firstColonIndex + 1));
 	}
 
 	/**
