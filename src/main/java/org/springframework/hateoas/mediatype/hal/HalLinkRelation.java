@@ -43,9 +43,9 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	private final @Nullable String curie;
 	private final String localPart;
 
-	private HalLinkRelation(String curie, String localPart) {
+	private HalLinkRelation(@Nullable String curie, String localPart) {
 
-		Assert.notNull(localPart, "localPart must not be null!");
+		Assert.notNull(localPart, "Local part must not be null!");
 
 		this.curie = curie;
 		this.localPart = localPart;
@@ -222,17 +222,31 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 		HalLinkRelation relation(String relation);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof HalLinkRelation))
+		}
+
+		if (!(o instanceof HalLinkRelation)) {
 			return false;
+		}
+
 		HalLinkRelation that = (HalLinkRelation) o;
-		return Objects.equals(this.curie, that.curie) && Objects.equals(this.localPart, that.localPart);
+
+		return Objects.equals(this.curie, that.curie) //
+				&& Objects.equals(this.localPart, that.localPart);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.curie, this.localPart);
