@@ -17,7 +17,12 @@ package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation.HalLinkRelationBuilder;
@@ -112,5 +117,20 @@ class HalLinkRelationUnitTest {
 
 		assertThat(HalLinkRelation.curied("CURIE", "someRelation").map(String::toLowerCase)) //
 				.isEqualTo(HalLinkRelation.curied("CURIE", "somerelation"));
+	}
+
+	@TestFactory // #1314
+	Stream<DynamicTest> supportsMultipleColons() {
+
+		return DynamicTest.stream(Arrays.asList("urn:ietf:rfc", "http://example.com/?test=foo:bar").iterator(), //
+				it -> it + " should be returned as link relation as is.", //
+				it -> {
+
+					HalLinkRelation relation = HalLinkRelation.of(LinkRelation.of(it));
+
+					assertThat(relation.value()).isEqualTo(it);
+					assertThat(relation.getLocalPart()).isEqualTo(it);
+					assertThat(relation.isCuried()).isFalse();
+				});
 	}
 }
