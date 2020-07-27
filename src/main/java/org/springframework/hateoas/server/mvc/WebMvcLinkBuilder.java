@@ -47,12 +47,13 @@ import org.springframework.web.util.UriTemplate;
  * @author Andrew Naydyonock
  * @author Oliver Trosien
  * @author Greg Turnquist
+ * @author Lars Michele
  */
 @SuppressWarnings("deprecation")
 public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebMvcLinkBuilder> {
 
 	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
-			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
+			.of(PropertyResolvingMappingDiscoverer.of(new AnnotationMappingDiscoverer(RequestMapping.class)));
 	private static final WebMvcLinkBuilderFactory FACTORY = new WebMvcLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 

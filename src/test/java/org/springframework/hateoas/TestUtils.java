@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -86,4 +87,7 @@ public class TestUtils {
 		assertThat(left.hashCode()).isNotEqualTo(right.hashCode());
 		assertThat(left.toString()).isNotEqualTo(right.toString());
 	}
+
+	@Configuration
+	public static class Config {}
 }
