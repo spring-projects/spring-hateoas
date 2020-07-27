@@ -225,12 +225,15 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof VndErrors))
+		}
+		if (!(o instanceof VndErrors)) {
 			return false;
-		if (!super.equals(o))
+		}
+		if (!super.equals(o)) {
 			return false;
+		}
 		VndErrors vndErrors = (VndErrors) o;
 		return Objects.equals(this.errors, vndErrors.errors) && Objects.equals(this.message, vndErrors.message)
 				&& Objects.equals(this.logref, vndErrors.logref);
@@ -310,12 +313,15 @@ public class VndErrors extends CollectionModel<VndErrors.VndError> {
 		@Override
 		public boolean equals(Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (!(o instanceof VndError))
+			}
+			if (!(o instanceof VndError)) {
 				return false;
-			if (!super.equals(o))
+			}
+			if (!super.equals(o)) {
 				return false;
+			}
 			VndError vndError = (VndError) o;
 			return Objects.equals(this.message, vndError.message) && Objects.equals(this.path, vndError.path)
 					&& Objects.equals(this.logref, vndError.logref);
