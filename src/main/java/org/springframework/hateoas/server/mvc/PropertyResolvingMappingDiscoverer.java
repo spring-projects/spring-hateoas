@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,31 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import static java.util.Optional.ofNullable;
+import java.lang.reflect.Method;
+import java.util.Collection;
 
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.hateoas.server.core.MappingDiscoverer;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.context.ContextLoader;
-
-import java.lang.reflect.Method;
-import java.util.Collection;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Property resolving adapter of {@link MappingDiscoverer}.
  *
  * @author Lars Michele
+ * @author Oliver Drotbohm
  */
-public class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
+class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 
 	private final MappingDiscoverer delegate;
 
-	private PropertyResolvingMappingDiscoverer(MappingDiscoverer delegate) {
-		this.delegate = delegate;
-	}
+	PropertyResolvingMappingDiscoverer(MappingDiscoverer delegate) {
 
-	public static PropertyResolvingMappingDiscoverer of(MappingDiscoverer delegate) {
-		return new PropertyResolvingMappingDiscoverer(delegate);
+		Assert.notNull(delegate, "Delegate MappingDiscoverer must not be null!");
+
+		this.delegate = delegate;
 	}
 
 	/*
@@ -50,7 +49,7 @@ public class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 	@Nullable
 	@Override
 	public String getMapping(Class<?> type) {
-		return ofNullable(delegate.getMapping(type)).map(getPropertyResolver()::resolvePlaceholders).orElse(null);
+		return resolveProperties(delegate.getMapping(type));
 	}
 
 	/*
@@ -60,7 +59,7 @@ public class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 	@Nullable
 	@Override
 	public String getMapping(Method method) {
-		return ofNullable(delegate.getMapping(method)).map(getPropertyResolver()::resolvePlaceholders).orElse(null);
+		return resolveProperties(delegate.getMapping(method));
 	}
 
 	/*
@@ -70,7 +69,7 @@ public class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 	@Nullable
 	@Override
 	public String getMapping(Class<?> type, Method method) {
-		return ofNullable(delegate.getMapping(type, method)).map(getPropertyResolver()::resolvePlaceholders).orElse(null);
+		return resolveProperties(delegate.getMapping(type, method));
 	}
 
 	/*
@@ -82,7 +81,17 @@ public class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 		return delegate.getRequestMethod(type, method);
 	}
 
-	private static PropertyResolver getPropertyResolver() {
-		return ContextLoader.getCurrentWebApplicationContext().getEnvironment();
+	@Nullable
+	private static String resolveProperties(@Nullable String mapping) {
+
+		if (mapping == null) {
+			return mapping;
+		}
+
+		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+
+		return context == null //
+				? mapping //
+				: context.getEnvironment().resolvePlaceholders(mapping);
 	}
 }

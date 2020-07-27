@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.core.AnnotationMappingDiscoverer;
 import org.springframework.mock.web.MockServletContext;
@@ -35,18 +36,17 @@ import org.springframework.web.context.WebApplicationContext;
  * Unit tests for {@link PropertyResolvingMappingDiscoverer}.
  *
  * @author Lars Michele
+ * @author Oliver Drotbohm
  */
-@SpringJUnitWebConfig(classes = TestUtils.Config.class)
-@TestPropertySource(properties = {"test.parent=resolvedparent", "test.child=resolvedchild"})
+@SpringJUnitWebConfig(classes = PropertyResolvingMappingDiscovererUnitTest.Config.class)
+@TestPropertySource(properties = { "test.parent=resolvedparent", "test.child=resolvedchild" })
 class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 
-	@Autowired
-	WebApplicationContext context;
+	@Autowired WebApplicationContext context;
 
 	@BeforeEach
 	void contextLoading() {
-		ContextLoader contextLoader = new ContextLoader(context);
-		contextLoader.initWebApplicationContext(new MockServletContext());
+		new ContextLoader(context).initWebApplicationContext(new MockServletContext());
 	}
 
 	/**
@@ -54,6 +54,7 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 	 */
 	@Test
 	void resolvesVariablesInMappings() throws NoSuchMethodException {
+
 		Method method = ResolveMethodEndpointController.class.getMethod("method");
 		AnnotationMappingDiscoverer annotationMappingDiscoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
 
@@ -62,10 +63,11 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 		assertThat(annotationMappingDiscoverer.getMapping(ResolveMethodEndpointController.class, method))
 				.isEqualTo("/${test.parent}/${test.child}");
 
-		PropertyResolvingMappingDiscoverer propertyResolvingMappingDiscoverer = PropertyResolvingMappingDiscoverer
-				.of(annotationMappingDiscoverer);
+		PropertyResolvingMappingDiscoverer propertyResolvingMappingDiscoverer = new PropertyResolvingMappingDiscoverer(
+				annotationMappingDiscoverer);
 
-		assertThat(propertyResolvingMappingDiscoverer.getMapping(ResolveEndpointController.class)).isEqualTo("/resolvedparent");
+		assertThat(propertyResolvingMappingDiscoverer.getMapping(ResolveEndpointController.class))
+				.isEqualTo("/resolvedparent");
 		assertThat(propertyResolvingMappingDiscoverer.getMapping(method)).isEqualTo("/resolvedparent/resolvedchild");
 		assertThat(propertyResolvingMappingDiscoverer.getMapping(ResolveMethodEndpointController.class, method))
 				.isEqualTo("/resolvedparent/resolvedchild");
@@ -80,4 +82,7 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 		@RequestMapping("/${test.child}")
 		void method();
 	}
+
+	@Configuration
+	public static class Config {}
 }

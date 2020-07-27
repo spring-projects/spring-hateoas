@@ -25,9 +25,7 @@ import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -38,15 +36,11 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.Controll
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.PersonControllerImpl;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.PersonsAddressesController;
 import org.springframework.http.HttpEntity;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -57,17 +51,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kamill Sokol
  * @author Ross Turner
  */
-@SpringJUnitWebConfig(classes = TestUtils.Config.class)
 class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
-
-	@Autowired
-	WebApplicationContext context;
-
-	@BeforeEach
-	void contextLoading() {
-		ContextLoader contextLoader = new ContextLoader(context);
-		contextLoader.initWebApplicationContext(new MockServletContext());
-	}
 
 	WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 

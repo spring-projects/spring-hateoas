@@ -17,7 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -26,12 +26,10 @@ import lombok.Value;
 
 import java.util.Arrays;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
@@ -39,12 +37,8 @@ import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.LinkBuilderFactory;
 import org.springframework.hateoas.server.TypedEntityLinks;
 import org.springframework.hateoas.server.TypedEntityLinks.ExtendedTypedEntityLinks;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Unit tests for {@link ControllerEntityLinks}.
@@ -52,19 +46,9 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Oliver Gierke
  */
 @ExtendWith(MockitoExtension.class)
-@SpringJUnitWebConfig(classes = TestUtils.Config.class)
 class ControllerEntityLinksUnitTest extends TestUtils {
 
 	@Mock LinkBuilderFactory<LinkBuilder> linkBuilderFactory;
-
-	@Autowired
-	WebApplicationContext context;
-
-	@BeforeEach
-	void contextLoading() {
-		ContextLoader contextLoader = new ContextLoader(context);
-		contextLoader.initWebApplicationContext(new MockServletContext());
-	}
 
 	@Test
 	void rejectsUnannotatedController() {

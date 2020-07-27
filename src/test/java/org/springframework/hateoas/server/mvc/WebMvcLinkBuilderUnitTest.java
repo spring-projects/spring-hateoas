@@ -23,9 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
@@ -33,8 +31,6 @@ import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -59,17 +53,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Trosien
  * @author Greg Turnquist
  */
-@SpringJUnitWebConfig(classes = TestUtils.Config.class)
 class WebMvcLinkBuilderUnitTest extends TestUtils {
-
-	@Autowired
-	WebApplicationContext context;
-
-	@BeforeEach
-	void contextLoading() {
-		ContextLoader contextLoader = new ContextLoader(context);
-		contextLoader.initWebApplicationContext(new MockServletContext());
-	}
 
 	@Test
 	void createsLinkToControllerRoot() {
