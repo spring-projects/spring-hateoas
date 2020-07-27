@@ -22,16 +22,7 @@ import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -68,8 +59,9 @@ import org.springframework.web.util.UriTemplate;
  */
 public class WebHandler {
 
-	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
-			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
+	@SuppressWarnings("deprecation") //
+	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
 
 	private static final Map<AffordanceKey, List<Affordance>> AFFORDANCES_CACHE = new ConcurrentReferenceHashMap<>();
 
@@ -169,7 +161,7 @@ public class WebHandler {
 			}
 
 			List<Affordance> affordances = AFFORDANCES_CACHE.computeIfAbsent(
-					AffordanceKey.of(invocation.getTargetType(), invocation.getMethod(), components),
+					new AffordanceKey(invocation.getTargetType(), invocation.getMethod(), components),
 					key -> SpringAffordanceBuilder.create(key.type, key.method, key.href.toUriString(), DISCOVERER));
 
 			return creator.createBuilder(components, variables, affordances);
@@ -242,46 +234,49 @@ public class WebHandler {
 		private final Method method;
 		private final UriComponents href;
 
-		private AffordanceKey(Class<?> type, Method method, UriComponents href) {
+		AffordanceKey(Class<?> type, Method method, UriComponents href) {
 
 			this.type = type;
 			this.method = method;
 			this.href = href;
 		}
 
-		public static AffordanceKey of(Class<?> type, Method method, UriComponents href) {
-			return new AffordanceKey(type, method, href);
-		}
-
-		public Class<?> getType() {
-			return this.type;
-		}
-
-		public Method getMethod() {
-			return this.method;
-		}
-
-		public UriComponents getHref() {
-			return this.href;
-		}
-
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (!(o instanceof AffordanceKey))
+			}
+
+			if (!(o instanceof AffordanceKey)) {
 				return false;
+			}
+
 			AffordanceKey that = (AffordanceKey) o;
-			return Objects.equals(this.type, that.type) && Objects.equals(this.method, that.method)
+
+			return Objects.equals(this.type, that.type) //
+					&& Objects.equals(this.method, that.method) //
 					&& Objects.equals(this.href, that.href);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
 		@Override
 		public int hashCode() {
 			return Objects.hash(this.type, this.method, this.href);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
 		public String toString() {
 			return "WebHandler.AffordanceKey(type=" + this.type + ", method=" + this.method + ", href=" + this.href + ")";
 		}

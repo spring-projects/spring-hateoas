@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.server.mvc;
+package org.springframework.hateoas.server.core;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import org.springframework.hateoas.server.core.MappingDiscoverer;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
