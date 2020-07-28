@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.IanaLinkRelations.*;
 import static org.springframework.hateoas.MappingTestUtils.*;
 import static org.springframework.hateoas.mediatype.hal.HalModelBuilder.*;
@@ -26,11 +26,13 @@ import lombok.Getter;
 import lombok.Value;
 import net.minidev.json.JSONArray;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -179,20 +181,17 @@ public class HalModelBuilderUnitTest {
 
 		RepresentationModel<?> model = halModel() //
 				.embed( //
-						halModel() //
-								.entity(new Author("Greg L. Turnquist", null, null)) //
+						halModelOf(new Author("Greg L. Turnquist", null, null))
 								.link(Link.of("http://localhost/author/1")) //
 								.link(Link.of("http://localhost/authors", LinkRelation.of("authors"))) //
 								.build())
 				.embed( //
-						halModel() //
-								.entity(new Author("Craig Walls", null, null)) //
-								.link(Link.of("http://localhost/author/2")) //
-								.link(Link.of("http://localhost/authors", LinkRelation.of("authors"))) //
+						halModelOf(new Author("Craig Walls", null, null)) //
+								.links(Arrays.asList(Link.of("http://localhost/author/2"), //
+										Link.of("http://localhost/authors", LinkRelation.of("authors")))) //
 								.build())
 				.embed( //
-						halModel() //
-								.entity(new Author("Oliver Drotbohm", null, null)) //
+						halModelOf(new Author("Oliver Drotbohm", null, null)) //
 								.link(Link.of("http://localhost/author/3")) //
 								.link(Link.of("http://localhost/authors", LinkRelation.of("authors"))) //
 								.build())
@@ -310,28 +309,62 @@ public class HalModelBuilderUnitTest {
 				.isEqualTo(contextualMapper.readFile("zoom-hypermedia.json"));
 	}
 
-	@Test
+	@Test // #864
 	void addsTypedEmptyCollection() throws Exception {
 
 		RepresentationModel<?> model = halModel() //
 				.embed(Collections.emptyList(), Author.class) //
 				.build();
 
-		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
-
-		assertThat(context.read("$._embedded.authors", JSONArray.class).isEmpty()).isTrue();
+		assertEmptyEmbed(model, "authors");
 	}
 
-	@Test
+	@Test // #864
 	void addsEmptyCollectionForLinkRelation() throws Exception {
 
 		RepresentationModel<?> model = halModel() //
 				.embed(Collections.emptyList(), LinkRelation.of("authors")) //
 				.build();
 
+		assertEmptyEmbed(model, "authors");
+	}
+
+	@Test // #864
+	@SuppressWarnings("unchecked")
+	void doesNotAddEmbeddForSimpleEmptyCollection() throws Exception {
+
+		RepresentationModel<?> model = halModel()
+				.embed(Stream.of(new Product("iPad", 699.0)))
+				.embed(Collections.emptyList())
+				.build();
+
 		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
 
-		assertThat(context.read("$._embedded.authors", JSONArray.class).isEmpty()).isTrue();
+		assertThat(context.read("$._embedded", Map.class)).containsOnlyKeys("products");
+	}
+
+	@Test // #1335
+	void embedsStream() throws Exception {
+
+		RepresentationModel<?> model = halModel().embed(Stream.of(new Product("iPad", 699.0))).build();
+
+		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
+
+		assertThat(context.read("$._embedded.products[0].name", String.class)).isEqualTo("iPad");
+	}
+
+	@Test // #1335
+	void embedsEmptyStream() throws Exception {
+
+		assertEmptyEmbed(halModel().embed(Stream.empty(), Product.class).build(), "products");
+		assertEmptyEmbed(halModel().embed(Stream.empty(), LinkRelation.of("products")).build(), "products");
+	}
+
+	private void assertEmptyEmbed(RepresentationModel<?> model, String name) throws Exception {
+
+		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
+
+		assertThat(context.read("$._embedded." + name, JSONArray.class).isEmpty()).isTrue();
 	}
 
 	@Value

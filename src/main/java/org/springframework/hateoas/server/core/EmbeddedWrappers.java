@@ -15,9 +15,12 @@
  */
 package org.springframework.hateoas.server.core;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.hateoas.EntityModel;
@@ -47,11 +50,10 @@ public class EmbeddedWrappers {
 	/**
 	 * Creates a new {@link EmbeddedWrapper} that
 	 *
-	 * @param source
-	 * @return
+	 * @param source must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
-	@Nullable
-	public EmbeddedWrapper wrap(@Nullable Object source) {
+	public EmbeddedWrapper wrap(Object source) {
 		return wrap(source, AbstractEmbeddedWrapper.NO_REL);
 	}
 
@@ -68,31 +70,44 @@ public class EmbeddedWrappers {
 	/**
 	 * Creates a new {@link EmbeddedWrapper} with the given rel.
 	 *
-	 * @param source can be {@literal null}, will return {@literal null} if so.
+	 * @param source must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
-	@SuppressWarnings("unchecked")
-	@Nullable
-	public EmbeddedWrapper wrap(@Nullable Object source, LinkRelation rel) {
+	public EmbeddedWrapper wrap(Object source, LinkRelation rel) {
 
-		if (source == null) {
-			return null;
-		}
+		Assert.notNull(source, "Source must not be null!");
+		Assert.notNull(rel, "Link relation must not be null!");
 
 		if (source instanceof EmbeddedWrapper) {
 			return (EmbeddedWrapper) source;
 		}
 
-		if (source instanceof Collection) {
-			return new EmbeddedCollection((Collection<Object>) source, rel);
+		return source instanceof Collection || source instanceof Stream || preferCollections
+				? new EmbeddedCollection(asCollection(source), rel)
+				: new EmbeddedElement(source, rel);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Collection<Object> asCollection(@Nullable Object source) {
+
+		if (source == null) {
+			return Collections.emptyList();
 		}
 
-		if (preferCollections) {
-			return new EmbeddedCollection(Collections.singleton(source), rel);
+		if (Collection.class.isInstance(source)) {
+			return Collection.class.cast(source);
 		}
 
-		return new EmbeddedElement(source, rel);
+		if (Stream.class.isInstance(source)) {
+			return (Collection<Object>) Stream.class.cast(source).collect(Collectors.toList());
+		}
+
+		if (source.getClass().isArray()) {
+			return Arrays.asList((Object[]) source);
+		}
+
+		return Collections.singleton(source);
 	}
 
 	private static abstract class AbstractEmbeddedWrapper implements EmbeddedWrapper {

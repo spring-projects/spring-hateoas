@@ -18,6 +18,8 @@ package org.springframework.hateoas.mediatype.hal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -26,7 +28,6 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
@@ -147,44 +148,105 @@ public class HalModelBuilder {
 		return this;
 	}
 
+	/**
+	 * Embeds the given collection in the {@link RepresentationModel}. If the collection is empty nothing will be added to
+	 * the {@link RepresentationModel}.
+	 *
+	 * @param collection must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
 	public HalModelBuilder embed(Collection<?> collection) {
-
 		return embed(collection, Void.class);
 	}
 
+	/**
+	 * Embeds the given collection in the {@link RepresentationModel} and the {@link LinkRelation} derived from the given
+	 * type. If the collection is empty nothing will be added to the {@link RepresentationModel} an empty embed for the
+	 * derived {@link LinkRelation} will be added.
+	 *
+	 * @param collection must not be {@literal null}.
+	 * @param type the type to derive the {@link LinkRelation} to be used, must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @see #embed(Collection, LinkRelation)
+	 */
 	public HalModelBuilder embed(Collection<?> collection, Class<?> type) {
 
+		Assert.notNull(collection, "Collection must not be null!");
+		Assert.notNull(type, "Type must not be null!");
+
 		if (!collection.isEmpty()) {
-
-			EmbeddedWrapper wrapper = wrappers.wrap(collection);
-
-			return wrapper == null ? this : embed(wrapper);
+			return embed(wrappers.wrap(collection));
 		}
 
-		if (Void.class.equals(type)) {
-			return this;
-		}
-
-		return embed(wrappers.emptyCollectionOf(type));
+		return Void.class.equals(type) ? this : embed(wrappers.emptyCollectionOf(type));
 	}
 
 	/**
 	 * Embeds the given collection in the {@link RepresentationModel} for the given {@link LinkRelation}. If the
-	 * collection is empty nothing will be added to the {@link RepresentationModel}.
+	 * collection is empty nothing will be added to the {@link RepresentationModel} an empty embed for the derived
+	 * {@link LinkRelation} will be added.
 	 *
 	 * @param collection must not be {@literal null}.
 	 * @param relation must not be {@literal null}.
 	 * @return will never be {@literal null}.
-	 * @see #embed(Collection, LinkRelation, Class)
 	 */
 	public HalModelBuilder embed(Collection<?> collection, LinkRelation relation) {
 
 		Assert.notNull(collection, "Collection must not be null!");
 		Assert.notNull(relation, "Link relation must not be null!");
 
-		EmbeddedWrapper wrapper = wrappers.wrap(collection, relation);
+		return embed(wrappers.wrap(collection, relation));
+	}
 
-		return wrapper == null ? this : embed(wrapper);
+	/**
+	 * Embeds the given {@link Stream} in the {@link RepresentationModel}. The given {@link Stream} will be resolved
+	 * immediately, i.e. the method acts as mere syntactic sugar to avoid clients having to collect the {@link Stream}
+	 * into a {@link Collection} beforehand. If the {@link Stream} is empty nothing will be added to the
+	 * {@link RepresentationModel}.
+	 *
+	 * @param stream must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public HalModelBuilder embed(Stream<?> stream) {
+		return embed(stream, Void.class);
+	}
+
+	/**
+	 * Embeds the given {@link Stream} in the {@link RepresentationModel} and the {@link LinkRelation} derived from the
+	 * given type. The given {@link Stream} will be resolved immediately, i.e. the method acts as mere syntactic sugar to
+	 * avoid clients having to collect the {@link Stream} into a {@link Collection} beforehand. If the {@link Stream} is
+	 * empty nothing will be added to the {@link RepresentationModel} an empty embed for the derived {@link LinkRelation}
+	 * will be added.
+	 *
+	 * @param stream must not be {@literal null}.
+	 * @param type the type to derive the {@link LinkRelation} to be used, must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @see #embed(Collection, LinkRelation)
+	 */
+	public HalModelBuilder embed(Stream<?> stream, Class<?> type) {
+
+		Assert.notNull(stream, "Stream must not be null!");
+		Assert.notNull(type, "Type must not be null!");
+
+		return embed(stream.collect(Collectors.toList()), type);
+	}
+
+	/**
+	 * Embeds the given {@link Stream} in the {@link RepresentationModel} for the given {@link LinkRelation}. The given
+	 * {@link Stream} will be resolved immediately, i.e. the method acts as mere syntactic sugar to avoid clients having
+	 * to collect the {@link Stream} into a {@link Collection} beforehand. If the {@link Stream} is empty nothing will be
+	 * added to the {@link RepresentationModel} an empty embed for the derived {@link LinkRelation} will be added.
+	 *
+	 * @param stream must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public HalModelBuilder embed(Stream<?> stream, LinkRelation relation) {
+
+		Assert.notNull(stream, "Stream must not be null!");
+		Assert.notNull(relation, "Link relation must not be null!");
+
+		return embed(stream.collect(Collectors.toList()), relation);
 	}
 
 	/**
@@ -295,6 +357,7 @@ public class HalModelBuilder {
 	 *
 	 * @return will never be {@literal null}.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T extends RepresentationModel<T>> RepresentationModel<T> build() {
 		return (T) new HalRepresentationModel<>(model, CollectionModel.of(embeddeds), links);
 	}
@@ -317,7 +380,7 @@ public class HalModelBuilder {
 
 	private static class HalRepresentationModel<T> extends EntityModel<T> {
 
-		private final T entity;
+		private final @Nullable T entity;
 		private final CollectionModel<?> embeddeds;
 
 		public HalRepresentationModel(@Nullable T entity, CollectionModel<T> embeddeds, Links links) {
@@ -327,7 +390,9 @@ public class HalModelBuilder {
 			add(links);
 		}
 
-		public HalRepresentationModel(T entity, CollectionModel<?> embeddeds) {
+		private HalRepresentationModel(@Nullable T entity, CollectionModel<?> embeddeds) {
+
+			Assert.notNull(embeddeds, "Embedds must not be null!");
 
 			this.entity = entity;
 			this.embeddeds = embeddeds;
