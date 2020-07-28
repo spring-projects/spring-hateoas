@@ -19,10 +19,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.lang.NonNull;
@@ -35,6 +37,8 @@ import org.springframework.util.Assert;
  * @author Oliver Gierke
  */
 public class EmbeddedWrappers {
+
+	private static ResolvableType SUPPLIER_OF_STREAM = ResolvableType.forClassWithGenerics(Supplier.class, Stream.class);
 
 	private final boolean preferCollections;
 
@@ -83,9 +87,12 @@ public class EmbeddedWrappers {
 			return (EmbeddedWrapper) source;
 		}
 
-		return source instanceof Collection || source instanceof Stream || preferCollections
-				? new EmbeddedCollection(asCollection(source), rel)
-				: new EmbeddedElement(source, rel);
+		return source instanceof Collection //
+				|| source instanceof Stream //
+				|| preferCollections //
+				|| SUPPLIER_OF_STREAM.isAssignableFrom(source.getClass()) //
+						? new EmbeddedCollection(asCollection(source), rel) //
+						: new EmbeddedElement(source, rel);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -105,6 +112,10 @@ public class EmbeddedWrappers {
 
 		if (source.getClass().isArray()) {
 			return Arrays.asList((Object[]) source);
+		}
+
+		if (SUPPLIER_OF_STREAM.isInstance(source)) {
+			return asCollection(((Supplier<Stream<?>>) source).get());
 		}
 
 		return Collections.singleton(source);

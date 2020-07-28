@@ -17,8 +17,12 @@ package org.springframework.hateoas.server.core;
 
 import static org.assertj.core.api.Assertions.*;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
@@ -69,10 +73,36 @@ class EmbeddedWrappersUnitTest {
 		});
 	}
 
+	@Test // #1335
+	@SuppressWarnings("unchecked")
+	void addsSupplierOfStreamByResolvingIt() {
+
+		EmbeddedWrapper wrap = wrappers.wrap(new Streamable<>(Stream.of(1, 2, 3)));
+
+		assertThat(wrap.getValue()).isInstanceOfSatisfying(Collection.class, it -> {
+			assertThat(it).containsExactly(1, 2, 3);
+		});
+	}
+
 	@SuppressWarnings("unchecked")
 	private static void assertEmptyCollectionValue(EmbeddedWrapper wrapper) {
 
 		assertThat(wrapper.getValue()) //
 				.isInstanceOfSatisfying(Collection.class, it -> assertThat(it).isEmpty());
+	}
+
+	@RequiredArgsConstructor
+	static class Streamable<T> implements Supplier<Stream<T>> {
+
+		private final Stream<T> stream;
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.util.function.Supplier#get()
+		 */
+		@Override
+		public Stream<T> get() {
+			return stream;
+		}
 	}
 }
