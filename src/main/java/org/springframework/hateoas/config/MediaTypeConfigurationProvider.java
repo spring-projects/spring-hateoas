@@ -20,9 +20,12 @@ import java.util.Collection;
 import org.springframework.http.MediaType;
 
 /**
- * SPI to register a media type configuration provider.
+ * SPI used to register internal media types through spring.factories.
+ *
+ * WARNING: Do NOT implement this interface if you are coding a custom media type. See "Custom media type configuration" in the reference docs.
  *
  * @author Oliver Drotbohm
+ * @author Greg Turnquist
  * @see HypermediaMappingInformation
  */
 public interface MediaTypeConfigurationProvider {

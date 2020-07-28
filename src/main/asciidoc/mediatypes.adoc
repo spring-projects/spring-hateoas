@@ -636,53 +636,23 @@ locale-specific message bundles and even internationalize the metadata.
 [[mediatypes.custom]]
 == Registering a custom media type
 
-Spring HATEOAS allows to integrate support for custom media types through a set of SPIs, that third parties can implement.
-The building blocks of an such an implementation are:
+Spring HATEOAS allows you to integrate custom media types through an SPI.
+The building blocks of such an implementation are:
 
-1. Some form of Jackson ObjectMapper customization. In its most simple case that's a Jackson `Module` implementation.
-2. A `LinkDiscoverer` implementation so that the client-side support is able to detect links in representations generated.
-3. Some configuration infrastructure that will allow Spring HATEOAS to find the custom implementation and pick up its configuration.
+1. Some form of Jackson `ObjectMapper` customization. In its most simple case that's a Jackson `Module` implementation.
+2. A `LinkDiscoverer` implementation so that the client-side support is able to detect links in representations.
+3. A small bit of infrastructure configuration that will allow Spring HATEOAS to find the custom implementation and pick it up.
 
 [[mediatypes.custom.configuration]]
 === Custom media type configuration
 
-Custom media type implementations are picked up through Spring's `SpringFactories` mechanism, similar to the Java `ServiceLoader` API.
-Each media type implementation needs to ship with a `spring.factories` in `META-INF` containing an implementation class entry for the `org.springframework.hateoas.config.MediaTypeConfigurationProvider` key:
+Custom media type implementations are picked up by Spring HATEOAS by scanning the application context for any implementations of the `HypermediaMappingInformation` interface.
+Each media type must implement this interface in order to:
 
-.An example `MediaTypeConfigurationProvider` declaration
-====
-[source]
-org.springframework.hateoas.config.MediaTypeConfigurationProvider=\
-  com.acme.mymediatype.MyMediaTypeConfigurationProvider
-====
+* Be applied to <<client.web-client, `WebClient`>>, <<client.web-test-client, `WebTestClient`>>, or <<client.rest-template, `RestTemplate`>> instances.
+* Support serving that media type from Spring Web MVC and Spring WebFlux controllers.
 
-That implementation class could then look as follows:
-
-.An example `MediaTypeConfigurationProvider` implementation in `META-INF/spring.factories`
-====
-[source, java]
-----
-class MyMediaTypeConfigurationProvider
-  implements MediaTypeConfigurationProvider {
-
-  @Override
-  public Class<? extends HypermediaMappingInformation> getConfiguration() {
-    return MyMediaTypeConfiguration.class; <1>
-  }
-
-  @Override
-  public boolean supportsAny(Collection<MediaType> mediaTypes) {
-    return mediaTypes.contains(MediaTypes.HAL_JSON); <2>
-  }
-}
-----
-The configuration class needs to have a default constructor and expose two methods:
-
-<1> A method returning a Spring configuration class that will be included in the application bootstrap when Spring HATEOAS is activated (either implicitly via Spring Boot auto-configuration or via `@EnableHypermediaSupport`).
-<2> A callback method that will get passed the application selected media types to activate. This allows the media type implementation to control, when it will be activated.
-====
-
-The configuration class has to implement `HypermediaMappingInformation`. It could look as simple as this:
+To define your own media type could look as simple as this:
 
 ====
 [source, java]
@@ -697,7 +667,7 @@ class MyMediaTypeConfiguration implements HypermediaMappingInformation {
 
   @Override
   public Module getJacksonModule() {
-    return new Jackson2MediaTypeModule(); <2>
+    return new Jackson2MyMediaTypeModule(); <2>
   }
 
   @Bean
@@ -706,13 +676,21 @@ class MyMediaTypeConfiguration implements HypermediaMappingInformation {
   }
 }
 ----
-<1> The configuration class returns the media type it wants to get Spring MVC / Spring WebFlux support set up.
+<1> The configuration class returns the media type it supports. This applies to both server-side and client-side scenarios.
 <2> It overrides `getJacksonModule()` to provide custom serializers to create the media type specific representations.
-<3> It also declares a custom `LinkDiscoverer` implementation for client-side support.
+<3> It also declares a custom `LinkDiscoverer` implementation for further client-side support.
 ====
 
 The Jackson module usually declares `Serializer` and `Deserializer` implementations for the representation model types `RepresentationModel`, `EntityModel`, `CollectionModel` and `PagedModel`.
 In case you need further customization of the Jackson `ObjectMapper` (like a custom `HandlerInstantiator`), you can alternatively override `configureObjectMapper(…)`.
+
+[IMPORTANT]
+====
+Prior versions of reference documentation has mentioned implementing the `MediaTypeConfigurationProvider` interface and registering it with `spring.factories`.
+This is NOT necessary.
+This SPI is ONLY used for out-of-the-box media types provided by Spring HATEOAS.
+Merely implementing the `HypermediaMappingInformation` interface and registering it as a Spring bean is all that's needed.
+====
 
 [[mediatypes.custom.recommendation]]
 === Recommendations
