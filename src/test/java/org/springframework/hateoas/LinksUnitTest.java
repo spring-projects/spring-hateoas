@@ -143,12 +143,31 @@ class LinksUnitTest {
 		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first, second))).isTrue();
 	}
 
-	@Test // #1322
-	void conditionallyAddsLink() {
+	@TestFactory // #1322, #1341
+	Stream<DynamicTest> conditionallyAddsLink() {
 
-		Links links = Links.NONE.andIf(true, () -> Link.of("/foo"));
+		Links links = Links.NONE;
+		Link link = Link.of("/foo");
 
-		assertThat(links.getRequiredLink(IanaLinkRelations.SELF).getHref()).isEqualTo("/foo");
+		List<NamedLinks> adders = Arrays.asList(//
+				NamedLinks.of("adds via varargs", links.andIf(true, link)), //
+				NamedLinks.of("adds via Supplier", links.andIf(true, () -> link)), //
+				NamedLinks.of("adds via Stream", links.andIf(true, Stream.of(link))));
+
+		Stream<DynamicTest> adderTests = DynamicTest.stream(adders.iterator(), NamedLinks::getName, it -> {
+			assertThat(it.links.getRequiredLink(IanaLinkRelations.SELF).getHref()).isEqualTo("/foo");
+		});
+
+		List<NamedLinks> nonAdders = Arrays.asList(//
+				NamedLinks.of("does not add via varargs", links.andIf(false, link)), //
+				NamedLinks.of("does not add via Supplier", links.andIf(false, () -> link)), //
+				NamedLinks.of("does not add via Stream", links.andIf(false, Stream.of(link))));
+
+		Stream<DynamicTest> nonAdderTests = DynamicTest.stream(nonAdders.iterator(), NamedLinks::getName, it -> {
+			assertThat(it.links).isEmpty();
+		});
+
+		return Stream.concat(adderTests, nonAdderTests);
 	}
 
 	@Test // #1322
@@ -190,6 +209,52 @@ class LinksUnitTest {
 		return DynamicTest.stream(sources.iterator(), NamedLinks::getName,
 				it -> assertThat(it.links).hasSize(1) //
 						.element(0).extracting(Link::getHref).isEqualTo("/foo"));
+	}
+
+	@TestFactory // #1340
+	Stream<DynamicTest> replacesLinksViaMerge() {
+
+		Links links = Links.of(Link.of("/foo"));
+		Link sameRel = Link.of("/bar");
+
+		List<NamedLinks> sources = Arrays.asList(//
+				NamedLinks.of("replace same rel via varargs", links.merge(MergeMode.REPLACE_BY_REL, sameRel)),
+				NamedLinks.of("replace same rel via Stream", links.merge(MergeMode.REPLACE_BY_REL, Stream.of(sameRel))));
+
+		return DynamicTest.stream(sources.iterator(), NamedLinks::getName,
+				it -> assertThat(it.links).hasSize(1) //
+						.element(0).extracting(Link::getHref).isEqualTo("/bar"));
+	}
+
+	@Test
+	void removesLinkByRel() {
+		assertThat(Links.of(Link.of("/foo")).without(IanaLinkRelations.SELF)).isEmpty();
+	}
+
+	@Test
+	void basics() {
+
+		Links none = Links.NONE;
+
+		assertThat(none.isEmpty()).isTrue();
+		assertThat(none.stream()).isEmpty();
+		assertThat(none.hasSingleLink()).isFalse();
+		assertThat(none.hasSize(0)).isTrue();
+		assertThat(none.hasLink("self")).isFalse();
+
+		Links one = none.and(Link.of("/foo"));
+
+		assertThat(one.isEmpty()).isFalse();
+		assertThat(one.stream()).isNotEmpty();
+		assertThat(one.hasSingleLink()).isTrue();
+		assertThat(one.hasSize(1)).isTrue();
+		assertThat(one.hasLink("self")).isTrue();
+
+		Links anotherOne = none.and(Link.of("/foo"));
+
+		assertThat(anotherOne).isEqualTo(one);
+		assertThat(one).isEqualTo(anotherOne);
+		assertThat(one.hashCode()).isEqualTo(anotherOne.hashCode());
 	}
 
 	@Value(staticConstructor = "of")

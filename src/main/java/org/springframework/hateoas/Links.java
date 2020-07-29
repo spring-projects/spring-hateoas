@@ -76,7 +76,7 @@ public class Links implements Iterable<Link> {
 	 * @param links
 	 */
 	public static Links of(Iterable<Link> links) {
-		return new Links(links);
+		return Links.class.isInstance(links) ? Links.class.cast(links) : new Links(links);
 	}
 
 	/**
@@ -132,6 +132,26 @@ public class Links implements Iterable<Link> {
 		Assert.notNull(links, "Links must not be null!");
 
 		return and(Arrays.asList(links));
+	}
+
+	/**
+	 * Adds the given links if the given condition is {@literal true}. The given {@link Link}s will only be resolved if
+	 * the given condition is {@literal true}. Essentially syntactic sugar to write:<br />
+	 * <code>
+	 * if (a > 3) {
+	 *   links = links.and(…);
+	 * }
+	 * </code> as <code>
+	 * links = link.andIf(a > 3, …);
+	 * </code>
+	 *
+	 * @param condition
+	 * @param links must not be {@literal null}.
+	 * @return
+	 */
+	@SafeVarargs
+	public final Links andIf(boolean condition, Link... links) {
+		return condition ? and(links) : this;
 	}
 
 	/**
