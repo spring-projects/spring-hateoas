@@ -136,7 +136,7 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Adds the given links if the given condition is {@literal true}. The given {@link Supplier}s will only be resolved
-	 * if the given condition is true. Essentially syntactic sugar to write:<br />
+	 * if the given condition is {@literal true}. Essentially syntactic sugar to write:<br />
 	 * <code>
 	 * if (a > 3) {
 	 *   links = links.and(…);
@@ -154,9 +154,29 @@ public class Links implements Iterable<Link> {
 
 		Assert.notNull(links, "Links must not be null!");
 
-		return condition //
-				? and(Arrays.stream(links).map(Supplier::get).collect(Collectors.toList())) //
-				: this;
+		return andIf(condition, Stream.of(links).map(Supplier::get));
+	}
+
+	/**
+	 * Adds the given links if the given condition is {@literal true}. The given {@link Stream} will only be resolved if
+	 * the given condition is {@literal true}. Essentially syntactic sugar to write:<br />
+	 * <code>
+	 * if (a > 3) {
+	 *   links = links.and(…);
+	 * }
+	 * </code> as <code>
+	 * links = link.andIf(a > 3, …);
+	 * </code>
+	 *
+	 * @param condition
+	 * @param links must not be {@literal null}.
+	 * @return
+	 */
+	public final Links andIf(boolean condition, Stream<Link> links) {
+
+		Assert.notNull(links, "Links must not be null!");
+
+		return condition ? and(links.collect(Collectors.toList())) : this;
 	}
 
 	/**
@@ -177,6 +197,19 @@ public class Links implements Iterable<Link> {
 	}
 
 	/**
+	 * Creates a new {@link Links} instance with all given {@link Link}s added. For conditional adding see
+	 * {@link #merge(Iterable)}.
+	 *
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @see #merge(Iterable)
+	 * @see #merge(MergeMode, Iterable)
+	 */
+	public Links and(Stream<Link> links) {
+		return and(links.collect(Collectors.toList()));
+	}
+
+	/**
 	 * Merges the current {@link Links} with the given ones, skipping {@link Link}s already contained in the current
 	 * instance. For unconditional combination see {@link #and(Link...)}.
 	 *
@@ -191,12 +224,25 @@ public class Links implements Iterable<Link> {
 
 	/**
 	 * Merges the current {@link Links} with the given ones, skipping {@link Link}s already contained in the current
-	 * instance. For unconditional combination see {@link #and(Link...)}.
+	 * instance. For unconditional combination see {@link #and(Stream)}.
 	 *
 	 * @param links the {@link Link}s to be merged, must not be {@literal null}.
 	 * @return
 	 * @see MergeMode#SKIP_BY_EQUALITY
-	 * @see #and(Link...)
+	 * @see #and(Stream)
+	 */
+	public Links merge(Stream<Link> links) {
+		return merge(links.collect(Collectors.toList()));
+	}
+
+	/**
+	 * Merges the current {@link Links} with the given ones, skipping {@link Link}s already contained in the current
+	 * instance. For unconditional combination see {@link #and(Iterable)}.
+	 *
+	 * @param links the {@link Link}s to be merged, must not be {@literal null}.
+	 * @return
+	 * @see MergeMode#SKIP_BY_EQUALITY
+	 * @see #and(Iterable)
 	 */
 	public Links merge(Iterable<Link> links) {
 		return merge(MergeMode.SKIP_BY_EQUALITY, links);
@@ -211,6 +257,17 @@ public class Links implements Iterable<Link> {
 	 */
 	public Links merge(MergeMode mode, Link... links) {
 		return merge(mode, Arrays.asList(links));
+	}
+
+	/**
+	 * Merges the current {@link Links} with the given ones applying the given {@link MergeMode}.
+	 *
+	 * @param mode must not be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 */
+	public Links merge(MergeMode mode, Stream<Link> links) {
+		return merge(mode, links.collect(Collectors.toList()));
 	}
 
 	/**

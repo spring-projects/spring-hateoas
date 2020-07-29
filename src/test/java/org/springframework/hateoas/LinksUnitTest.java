@@ -17,10 +17,17 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Arrays;
-import java.util.Optional;
+import lombok.Value;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.springframework.hateoas.Links.MergeMode;
 import org.springframework.util.StringUtils;
 
 /**
@@ -150,5 +157,44 @@ class LinksUnitTest {
 		assertThatCode(() -> Links.NONE.andIf(false, () -> {
 			throw new IllegalStateException();
 		})).doesNotThrowAnyException();
+	}
+
+	@TestFactory // #1340
+	Stream<DynamicTest> addsStreamOfLinks() {
+
+		Links links = Links.NONE;
+		Link link = Link.of("/foo");
+
+		List<NamedLinks> sources = Arrays.asList(//
+				NamedLinks.of("via varargs", links.and(link)), //
+				NamedLinks.of("via Iterable", links.and(Arrays.asList(link))), //
+				NamedLinks.of("via Stream", links.and(Stream.of(link))));
+
+		return DynamicTest.stream(sources.iterator(), NamedLinks::getName,
+				it -> assertThat(it.links.getRequiredLink(IanaLinkRelations.SELF)).isNotNull());
+	}
+
+	@TestFactory // #1340
+	Stream<DynamicTest> mergesStreamOfLinks() {
+
+		Links links = Links.NONE.and(Link.of("/foo"));
+		Link same = Link.of("/foo");
+		Link sameRel = Link.of("/bar");
+
+		List<NamedLinks> sources = Arrays.asList(//
+				NamedLinks.of("merge same via varargs", links.merge(same)),
+				NamedLinks.of("merge same rel via varargs", links.merge(MergeMode.SKIP_BY_REL, sameRel)),
+				NamedLinks.of("merge same via Stream", links.merge(Stream.of(same))),
+				NamedLinks.of("merge same rel via Stream", links.merge(MergeMode.SKIP_BY_REL, Stream.of(sameRel))));
+
+		return DynamicTest.stream(sources.iterator(), NamedLinks::getName,
+				it -> assertThat(it.links).hasSize(1) //
+						.element(0).extracting(Link::getHref).isEqualTo("/foo"));
+	}
+
+	@Value(staticConstructor = "of")
+	static class NamedLinks {
+		String name;
+		Links links;
 	}
 }
