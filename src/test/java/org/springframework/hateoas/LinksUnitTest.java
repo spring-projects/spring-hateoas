@@ -139,7 +139,7 @@ class LinksUnitTest {
 	@Test // #1322
 	void conditionallyAddsLink() {
 
-		Links links = Links.NONE.and(true, () -> Link.of("/foo"));
+		Links links = Links.NONE.andIf(true, () -> Link.of("/foo"));
 
 		assertThat(links.getRequiredLink(IanaLinkRelations.SELF).getHref()).isEqualTo("/foo");
 	}
@@ -147,7 +147,7 @@ class LinksUnitTest {
 	@Test // #1322
 	void doesNotEvaluateSupplierIfAddConditionIsFalse() {
 
-		assertThatCode(() -> Links.NONE.and(false, () -> {
+		assertThatCode(() -> Links.NONE.andIf(false, () -> {
 			throw new IllegalStateException();
 		})).doesNotThrowAnyException();
 	}

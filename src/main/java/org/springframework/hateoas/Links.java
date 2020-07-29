@@ -142,7 +142,7 @@ public class Links implements Iterable<Link> {
 	 *   links = links.and(…);
 	 * }
 	 * </code> as <code>
-	 * links = link.and(a > 3, …);
+	 * links = link.andIf(a > 3, …);
 	 * </code>
 	 *
 	 * @param condition
@@ -150,17 +150,13 @@ public class Links implements Iterable<Link> {
 	 * @return
 	 */
 	@SafeVarargs
-	public final Links and(boolean condition, Supplier<Link>... links) {
+	public final Links andIf(boolean condition, Supplier<Link>... links) {
 
 		Assert.notNull(links, "Links must not be null!");
 
-		if (!condition) {
-			return this;
-		}
-
-		return and(Arrays.stream(links) //
-				.map(Supplier::get) //
-				.collect(Collectors.toList()));
+		return condition //
+				? and(Arrays.stream(links).map(Supplier::get).collect(Collectors.toList())) //
+				: this;
 	}
 
 	/**
