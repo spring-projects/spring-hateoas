@@ -633,6 +633,66 @@ Instead of linking each field "automatically" to a domain object's fields, you c
 to use Spring Framework's message bundles and the `MessageSource` interface. This gives you the ability to delegate these values to
 locale-specific message bundles and even internationalize the metadata.
 
+[[mediatypes.community]]
+== Community-based media types
+
+Thanks to the <<mediatypes.custom, ability to create your own media type>>, there are several community-led efforts to build additional media types.
+
+[[mediatypes.community.json:api]]
+=== JSON:API
+
+* https://jsonapi.org[Specification]
+* Media type designation: `application/vnd.api+json`
+* https://toedter.github.io/spring-hateoas-jsonapi[Reference documentation]
+* https://toedter.github.io/spring-hateoas-jsonapi/javadoc/index.html[javadocs]
+* https://github.com/toedter/spring-hateoas-jsonapi[Source]
+* Project Lead: https://github.com/toedter[Kai Toedter]
+
+.Maven coordinates
+[source,xml,tabsize=2]
+----
+<dependency>
+    <groupId>com.toedter</groupId>
+    <artifactId>spring-hateoas-jsonapi</artifactId>
+    <version>{see project page for current version}</version>
+</dependency>
+----
+
+.Gradle coordinates
+[source,tabsize=2]
+----
+implementation 'com.toedter:spring-hateoas-jsonapi:{see project page for current version}'
+----
+
+Visit the project page for more details if you want snapshot releases.
+
+[[mediatypes.community.siren]]
+=== Siren
+
+* https://github.com/kevinswiber/siren[Specification]
+* Media type designation: `application/vnd.siren+json`
+* https://spring-hateoas-siren.ingogriebsch.de[Reference documentation]
+* https://spring-hateoas-siren.ingogriebsch.de/apidocs[javadocs]
+* https://github.com/ingogriebsch/spring-hateoas-siren[Source]
+* Project Lead: https://github.com/ingogriebsch[Ingo Griebsch]
+
+.Maven coordinates
+[source,xml,tabsize=2]
+----
+<dependency>
+    <groupId>de.ingogriebsch.hateoas</groupId>
+    <artifactId>spring-hateoas-siren</artifactId>
+    <version>{see project page for current version}</version>
+    <scope>compile</scope>
+</dependency>
+----
+
+.Gradle coordinates
+[source,tabsize=2]
+----
+implementation 'de.ingogriebsch.hateoas:spring-hateoas-siren:{see project page for current version}'
+----
+
 [[mediatypes.custom]]
 == Registering a custom media type
 
