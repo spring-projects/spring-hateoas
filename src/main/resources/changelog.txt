@@ -1,6 +1,20 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.1.1 (2020-07-30)
+----------------------------------------
+- #1342 - Backport listing of community-led media types in ref docs to 1.1.
+- #1338 - Backport custom media type ref doc patch to 1.1.
+- #1336 - Release 1.1.1.
+- #1332 - Upgrade to Reactor Dysprosium SR10.
+- #1331 - Upgrade to Spring 5.2.8.
+- #1330 - Revert back to old version numbering to stay consistent with 1.1 GA.
+- #1327 - VndErrors logref is not just Integer.
+- #1325 - HalLinkRelation incorrectly parses relation sources with more than one colon in them.
+- #1324 - Backport improvements of memory usage in Link / UriTemplate.
+- #1317 - Backport de-lombok of production code.
+- #1315 - Backport ExtendedProblem fix to 1.1.
+
 Changes in version 1.1.0.RELEASE (2020-05-11)
 ----------------------------------------
 - #1292 - Release 1.1.0.RELEASE.
