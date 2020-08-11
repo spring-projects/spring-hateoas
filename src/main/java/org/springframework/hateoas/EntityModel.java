@@ -15,20 +15,24 @@
  */
 package org.springframework.hateoas;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.databind.util.NameTransformer;
 
 /**
  * A simple {@link EntityModel} wrapping a domain object and adding links to it.
@@ -117,10 +121,11 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 *
 	 * @return the content
 	 */
-	@JsonUnwrapped
 	@Nullable
+	@JsonUnwrapped
+	@JsonSerialize(using = MapSuppressingUnwrappingSerializer.class)
 	public T getContent() {
-		return !Map.class.isInstance(content) ? content : null;
+		return content;
 	}
 
 	// Hacks to allow deserialization into an EntityModel<Map<String, Object>>
@@ -128,7 +133,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	@Nullable
 	@JsonAnyGetter
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> getMapContent() {
+	private Map<String, Object> getMapContent() {
 		return Map.class.isInstance(content) ? (Map<String, Object>) content : null;
 	}
 
@@ -189,5 +194,37 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 		int result = super.hashCode();
 		result += content == null ? 0 : 17 * content.hashCode();
 		return result;
+	}
+
+	private static class MapSuppressingUnwrappingSerializer extends StdSerializer<Object> {
+
+		public MapSuppressingUnwrappingSerializer() {
+			super(Object.class);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+
+			if (value == null || Map.class.isInstance(value)) {
+				return;
+			}
+
+			provider.findValueSerializer(value.getClass()) //
+					.unwrappingSerializer(NameTransformer.NOP) //
+					.serialize(value, gen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isUnwrappingSerializer()
+		 */
+		@Override
+		public boolean isUnwrappingSerializer() {
+			return true;
+		}
 	}
 }
