@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -60,8 +59,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -565,7 +566,7 @@ class Jackson2HalIntegrationTest {
 				.forEach(it -> assertThat(it).containsKey("someSample"));
 	}
 
-	@Test // #1157
+	@Test // #1157, #1352
 	void rendersMapContentCorrectly() throws Exception {
 
 		Map<String, Object> map = new HashMap<>();
@@ -574,10 +575,12 @@ class Jackson2HalIntegrationTest {
 
 		EntityModel<?> model = EntityModel.of(map, Link.of("foo", IanaLinkRelations.SELF));
 
-		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
+		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model),
+				Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS));
 
 		assertThat(context.read("$.key", String.class)).isEqualTo("value");
 		assertThat(context.read("$.anotherKey", String.class)).isEqualTo("anotherValue");
+		assertThat(context.read("$.content", Object.class)).isNull();
 	}
 
 	@Test // #1157
@@ -592,8 +595,7 @@ class Jackson2HalIntegrationTest {
 
 		EntityModel<Map<String, Object>> result = mapper.readValue(source, modelType);
 
-		assertThat(result.getContent()).isNull();
-		assertThat(result.getMapContent()).containsEntry("key", "value");
+		assertThat(result.getContent()).containsEntry("key", "value");
 	}
 
 	@Test // #1157
@@ -606,22 +608,6 @@ class Jackson2HalIntegrationTest {
 		EntityModel<SomeSample> result = mapper.readValue(source, modelType);
 
 		assertThat(result.getContent().name).isEqualTo("Dave");
-	}
-
-	@Test // #1352
-	void rendersMapWithoutDuplicateEntries() throws JsonProcessingException {
-
-		Map<String, String> map = new TreeMap<>();
-		map.put("key", "value");
-		map.put("key2", "value2");
-
-		EntityModel<Map<String, String>> entityModel = EntityModel.of(map);
-		entityModel.add(Link.of("http://example.com"));
-
-		String serialized = mapper.writeValueAsString(entityModel);
-
-		assertThat(serialized)
-				.isEqualTo("{\"_links\":{\"self\":{\"href\":\"http://example.com\"}},\"key\":\"value\",\"key2\":\"value2\"}");
 	}
 
 	@Relation(collectionRelation = "someSample")
