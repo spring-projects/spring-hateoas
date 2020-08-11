@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -591,7 +592,8 @@ class Jackson2HalIntegrationTest {
 
 		EntityModel<Map<String, Object>> result = mapper.readValue(source, modelType);
 
-		assertThat(result.getContent()).containsEntry("key", "value");
+		assertThat(result.getContent()).isNull();
+		assertThat(result.getMapContent()).containsEntry("key", "value");
 	}
 
 	@Test // #1157
@@ -604,6 +606,22 @@ class Jackson2HalIntegrationTest {
 		EntityModel<SomeSample> result = mapper.readValue(source, modelType);
 
 		assertThat(result.getContent().name).isEqualTo("Dave");
+	}
+
+	@Test // #1352
+	void rendersMapWithoutDuplicateEntries() throws JsonProcessingException {
+
+		Map<String, String> map = new TreeMap<>();
+		map.put("key", "value");
+		map.put("key2", "value2");
+
+		EntityModel<Map<String, String>> entityModel = EntityModel.of(map);
+		entityModel.add(Link.of("http://example.com"));
+
+		String serialized = mapper.writeValueAsString(entityModel);
+
+		assertThat(serialized)
+				.isEqualTo("{\"_links\":{\"self\":{\"href\":\"http://example.com\"}},\"key\":\"value\",\"key2\":\"value2\"}");
 	}
 
 	@Relation(collectionRelation = "someSample")
