@@ -1,6 +1,32 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2 M1 (2020-08-11)
+----------------------------------------
+- #1351 - Upgrade to Jackson 2.11.2.
+- #1350 - Upgrade to Kotlin 1.4 RC.
+- #1349 - Release 1.2 M1.
+- #1348 - Upgrade to Spring Framework 5.3 M2.
+- #1341 - Add Links.andIf(boolean, Link...).
+- #1340 - Allow adding Stream<Link> to Links.
+- #1337 - List community media type implementations in the reference docs.
+- #1335 - Add HalModelBuilder.embed(Stream<?> …).
+- #1334 - Upgrade to Reactor Dysprosium SR10.
+- #1333 - Upgrade to Spring 5.2.8.
+- #1329 - Remove deprecations.
+- #1323 - Allow HalModelBuilder.build() to pick up call side generics.
+- #1322 - Allow to conditionally add a Link to Links.
+- #1321 - Add convenience type to create Link instances from URIs created via MvcUriComponentsBuilder.
+- #1320 - Update Javadoc and toString() methods in renamed classes.
+- #1319 - Revisit language in reference documentation.
+- #1314 - HalLinkRelation incorrectly parses relation sources with more than one colon in them.
+- #1313 - Problem.ExtendedProblem has no withStatus method.
+- #1304 - The SPI for media types needs to reflect it's ONLY for internal usage.
+- #1294 - Delombok production code.
+- #1291 - VndErrors logref is not just Integer.
+- #1287 - Memory pressure when creating Link instances.
+- #361 - Add Support for Resolving Property Values in @RequestMapping(value).
+
 Changes in version 1.1.0.RELEASE (2020-05-11)
 ----------------------------------------
 - #1292 - Release 1.1.0.RELEASE.
