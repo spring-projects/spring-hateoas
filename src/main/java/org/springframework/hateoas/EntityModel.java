@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -117,7 +119,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	@JsonUnwrapped
 	@Nullable
 	public T getContent() {
-		return content;
+		return !Map.class.isInstance(content) ? content : null;
 	}
 
 	// Hacks to allow deserialization into an EntityModel<Map<String, Object>>
@@ -125,7 +127,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	@Nullable
 	@JsonAnyGetter
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> getMapContent() {
+	public Map<String, Object> getMapContent() {
 		return Map.class.isInstance(content) ? (Map<String, Object>) content : null;
 	}
 

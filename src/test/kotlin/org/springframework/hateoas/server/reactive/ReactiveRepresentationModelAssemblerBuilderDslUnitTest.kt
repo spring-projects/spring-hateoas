@@ -64,8 +64,10 @@ class ReactiveRepresentationModelAssemblerBuilderDslUnitTest : TestUtils() {
         runBlocking {
             val collectionModel = testResourceAssembler.toCollectionModelAndAwait(employees, exchange)
 
-            assertThat(collectionModel.content.flatMap { entityModel -> entityModel.links })
-                .containsExactlyInAnyOrder(Link.of("/employees", EMPLOYEES_RELATION), Link.of("/employees", EMPLOYEES_RELATION))
+            val extractLinks: (EntityModel<Employee>) -> Iterable<Link> = { entityModel -> entityModel.links }
+
+            assertThat(collectionModel.content.flatMap(extractLinks))
+                    .containsExactlyInAnyOrder(Link.of("/employees", EMPLOYEES_RELATION), Link.of("/employees", EMPLOYEES_RELATION))
         }
     }
 
