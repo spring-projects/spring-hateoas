@@ -643,8 +643,12 @@ Thanks to the <<mediatypes.custom, ability to create your own media type>>, ther
 
 * https://jsonapi.org[Specification]
 * Media type designation: `application/vnd.api+json`
-* https://toedter.github.io/spring-hateoas-jsonapi[Reference documentation]
-* https://toedter.github.io/spring-hateoas-jsonapi/javadoc/index.html[javadocs]
+* Latest Release
+** https://toedter.github.io/spring-hateoas-jsonapi/release/reference/index.html[Reference documentation]
+** https://toedter.github.io/spring-hateoas-jsonapi/release/api/index.html[API documentation]
+* Current Snapshot
+** https://toedter.github.io/spring-hateoas-jsonapi/snapshot/reference/index.html[Reference documentation]
+** https://toedter.github.io/spring-hateoas-jsonapi/snapshot/api/index.html[API documentation]
 * https://github.com/toedter/spring-hateoas-jsonapi[Source]
 * Project Lead: https://github.com/toedter[Kai Toedter]
 
