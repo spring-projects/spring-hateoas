@@ -415,7 +415,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 		String serialized = mapper.writeValueAsString(original);
 
-		String expected = "{\n  \"_links\" : {\n    \"order\" : {\n      \"href\" : \"/orders{?id}\",\n      \"templated\" : true\n    }\n  }\n}";
+		String expected = "{\n  \"_links\" : {\n    \"order\" : {\n      \"href\" : \"/orders{?id}\",\n      \"templated\" : true\n    }\n  }\n}"
+				.replaceAll("\n", System.getProperty("line.separator"));
 
 		assertThat(serialized).isEqualTo(expected);
 
