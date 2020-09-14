@@ -722,7 +722,7 @@ To define your own media type could look as simple as this:
 [source, java]
 ----
 @Configuration
-class MyMediaTypeConfiguration implements HypermediaMappingInformation {
+public class MyMediaTypeConfiguration implements HypermediaMappingInformation {
 
   @Override
   public List<MediaType> getMediaTypes() {
@@ -764,3 +764,6 @@ In the `Serializer` and `Deserializer` implementations registered for `Represent
 
 The media types supported by default use the same configuration mechanism as third-party implementations would do.
 So it's worth studying the implementations in https://github.com/spring-projects/spring-hateoas/tree/master/src/main/java/org/springframework/hateoas/mediatype[the `mediatype` package].
+Note, that the built in media type implementations keep their configuration classes package private, as they're activated via `@EnableHypermediaSupport`.
+Custom implementations should probably make those public instead to make sure, users can import those configuration classes from their application packages.
+
