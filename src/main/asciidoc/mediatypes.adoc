@@ -37,7 +37,7 @@ var customer = customer.findById(order.getCustomerId());
 var customerLink = Link.of("/orders/{id}/customer") <2>
   .expand(order.getId())
   .withRel("customer");
-  
+
 var additional = …
 
 var model = HalModelBuilder.halModel(order)
@@ -46,7 +46,7 @@ var model = HalModelBuilder.halModel(order)
   .embed(additional) <5>
   .link(Link.of(…, IanaLinkRelations.SELF));
   .build();
----- 
+----
 <1> We set up some domain type. In this case, an order that has a relationship to the customer that placed it.
 <2> We prepare a link pointing to a resource that will expose customer details
 <3> We start building a preview by providing the payload that's supposed to be rendered inside the `_embeddable` clause.
@@ -107,11 +107,11 @@ If the collection handed into the method is empty, this will cause a field rende
 ----
 HalModelBuilder.emptyHalModel()
   .embed(Collections.emptyList(), Order.class);
-  // or 
+  // or
   .embed(Collections.emptyList(), LinkRelation.of("orders"));
 ----
 
-will create the following, more explicit representation. 
+will create the following, more explicit representation.
 
 [source, javascript]
 ----
@@ -120,7 +120,7 @@ will create the following, more explicit representation.
     "orders" : []
   }
 }
-----  
+----
 
 [[mediatypes.hal.configuration]]
 === Configuring link rendering
