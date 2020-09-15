@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2 RC1 (2020-09-15)
+----------------------------------------
+- #1367 - Release Spring HATEOAS 1.2.0.RC1.
+- #1366 - Upgrade to Spring Framework 5.3.0-RC1.
+- #1364 - Document that media type implementation configuration should be public.
+- #1358 - Update links to JSON:API documentation (community based media types).
+- #1352 - Map content is not getting serialized properly.
+
 Changes in version 1.2 M1 (2020-08-11)
 ----------------------------------------
 - #1351 - Upgrade to Jackson 2.11.2.
