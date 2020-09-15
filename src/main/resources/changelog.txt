@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.1.2 (2020-09-15)
+----------------------------------------
+- #1370 - Release Spring HATEOAS 1.1.2.RELEASE.
+- #1369 - Upgrade to Reactor Dysprosium-SR12.
+- #1368 - Upgrade to Spring Framework 5.2.9.RELEASE.
+- #1365 - Document that media type implementation configuration should be public.
+- #1359 - Backport changes to JSON:API reference docs to 1.1.x.
+- #1354 - Backport fix for EntityModel<Map> serialization.
+
 Changes in version 1.1.1 (2020-07-30)
 ----------------------------------------
 - #1342 - Backport listing of community-led media types in ref docs to 1.1.
