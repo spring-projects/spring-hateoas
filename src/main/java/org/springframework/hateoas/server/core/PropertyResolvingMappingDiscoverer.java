@@ -18,6 +18,7 @@ package org.springframework.hateoas.server.core;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -87,10 +88,10 @@ class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 			return mapping;
 		}
 
-		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+		Environment environment = StaticEnvironmentProvider.get();
 
-		return context == null //
+		return environment == null //
 				? mapping //
-				: context.getEnvironment().resolvePlaceholders(mapping);
+				: environment.resolvePlaceholders(mapping);
 	}
 }
