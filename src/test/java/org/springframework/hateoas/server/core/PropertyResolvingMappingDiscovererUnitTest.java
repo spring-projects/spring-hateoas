@@ -20,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +28,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.hateoas.config.EnvironmentConfiguration;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -51,6 +48,11 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 	@BeforeEach
 	void fakeRequestFiltering() {
 		EnvironmentContext.set(context.getEnvironment());
+	}
+
+	@AfterEach
+	void clearContext() {
+		EnvironmentContext.clear();
 	}
 
 	/**
