@@ -18,11 +18,10 @@ package org.springframework.hateoas.server.core;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Property resolving adapter of {@link MappingDiscoverer}.
@@ -84,13 +83,13 @@ class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 	private static String resolveProperties(@Nullable String mapping) {
 
 		if (mapping == null) {
-			return mapping;
+			return null;
 		}
 
-		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+		Environment environment = EnvironmentContext.get();
 
-		return context == null //
+		return environment == null //
 				? mapping //
-				: context.getEnvironment().resolvePlaceholders(mapping);
+				: environment.resolvePlaceholders(mapping);
 	}
 }
