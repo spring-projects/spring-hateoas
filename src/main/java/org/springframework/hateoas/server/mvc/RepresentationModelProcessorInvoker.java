@@ -383,7 +383,6 @@ public class RepresentationModelProcessorInvoker {
 		 * @param target that target {@link ResolvableType}.
 		 * @return
 		 */
-
 		static boolean isValueTypeMatch(@Nullable CollectionModel<?> collectionModel, ResolvableType target) {
 
 			if (collectionModel == null) {
