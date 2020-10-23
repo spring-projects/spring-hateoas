@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  */
 package org.springframework.hateoas;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -31,8 +33,13 @@ import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Custom URI template to support qualified URI template variables.
@@ -47,11 +54,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w\\,*]+)\\}");
 	private static final long serialVersionUID = -1007874653930162262L;
 
-	private static final Map<String, UriTemplate> CACHE = new ConcurrentHashMap<>();
-
 	private final TemplateVariables variables;
-	private String toString;
 	private String baseUri;
+	private transient UriBuilderFactory factory;
+
+	private String toString;
 
 	/**
 	 * Creates a new {@link UriTemplate} using the given template string.
@@ -93,21 +100,25 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		this.variables = variables.isEmpty() ? TemplateVariables.NONE : new TemplateVariables(variables);
 		this.baseUri = template.substring(0, baseUriEndIndex);
+		this.factory = createFactory(baseUri);
 	}
 
 	/**
-	 * Creates a new {@link UriTemplate} from the given base URI and {@link TemplateVariables}.
+	 * Creates a new {@link UriTemplate} from the given base URI, {@link TemplateVariables} and {@link UriBuilderFactory}.
 	 *
 	 * @param baseUri must not be {@literal null} or empty.
 	 * @param variables must not be {@literal null}.
+	 * @param factory must not be {@literal null}.
 	 */
-	UriTemplate(String baseUri, TemplateVariables variables) {
+	private UriTemplate(String baseUri, TemplateVariables variables, UriBuilderFactory factory) {
 
 		Assert.hasText(baseUri, "Base URI must not be null or empty!");
 		Assert.notNull(variables, "Template variables must not be null!");
+		Assert.notNull(factory, "UriBuilderFactory must not be null!");
 
 		this.baseUri = baseUri;
 		this.variables = variables;
+		this.factory = factory;
 	}
 
 	/**
@@ -120,7 +131,20 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
-		return CACHE.computeIfAbsent(template, UriTemplate::new);
+		return new UriTemplate(template);
+	}
+
+	/**
+	 * Returns a {@link UriTemplate} for the given {@link String} template.
+	 *
+	 * @param template must not be {@literal null} or empty.
+	 * @return
+	 */
+	public static UriTemplate of(String template, TemplateVariables variables) {
+
+		Assert.hasText(template, "Template must not be null or empty!");
+
+		return new UriTemplate(template).with(variables);
 	}
 
 	/**
@@ -156,7 +180,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			result.add(variable);
 		}
 
-		return new UriTemplate(baseUri, this.variables.concat(result));
+		return new UriTemplate(baseUri, this.variables.concat(result), this.factory);
 	}
 
 	/**
@@ -231,9 +255,13 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+		UriBuilder builder = factory.uriString(baseUri);
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
+
+		variables.asList().stream() //
+				.filter(TemplateVariable::isRequired)//
+				.filter(__ -> iterator.hasNext()) //
+				.forEach(__ -> iterator.next());
 
 		for (TemplateVariable variable : getOptionalVariables()) {
 
@@ -241,7 +269,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			appendToBuilder(builder, variable, value);
 		}
 
-		return builder.build().toUri();
+		return builder.build(parameters);
 	}
 
 	/**
@@ -250,22 +278,21 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @param parameters must not be {@literal null}.
 	 * @return
 	 */
-	public URI expand(Map<String, ? extends Object> parameters) {
+	public URI expand(Map<String, ?> parameters) {
+
+		Assert.notNull(parameters, "Parameters must not be null!");
 
 		if (TemplateVariables.NONE.equals(variables)) {
 			return URI.create(baseUri);
 		}
 
-		Assert.notNull(parameters, "Parameters must not be null!");
-
-		org.springframework.web.util.UriTemplate baseTemplate = new org.springframework.web.util.UriTemplate(baseUri);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseTemplate.expand(parameters));
+		UriBuilder builder = factory.uriString(baseUri);
 
 		for (TemplateVariable variable : getOptionalVariables()) {
 			appendToBuilder(builder, variable, parameters.get(variable.getName()));
 		}
 
-		return builder.build().toUri();
+		return builder.build(parameters);
 	}
 
 	/*
@@ -303,13 +330,32 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	}
 
 	/**
+	 * Creates a {@link UriBuilderFactory} that might optionally encode the given base URI if it still needs to be
+	 * encoded.
+	 *
+	 * @param baseUri must not be {@literal null} or empty.
+	 * @return
+	 */
+	private static UriBuilderFactory createFactory(String baseUri) {
+
+		EncodingMode mode = UriUtils.decode(baseUri, StandardCharsets.UTF_8).length() < baseUri.length() //
+				? EncodingMode.VALUES_ONLY //
+				: EncodingMode.TEMPLATE_AND_VALUES;
+
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		factory.setEncodingMode(mode);
+
+		return factory;
+	}
+
+	/**
 	 * Appends the value for the given {@link TemplateVariable} to the given {@link UriComponentsBuilder}.
 	 *
 	 * @param builder must not be {@literal null}.
 	 * @param variable must not be {@literal null}.
 	 * @param value can be {@literal null}.
 	 */
-	private static void appendToBuilder(UriComponentsBuilder builder, TemplateVariable variable, @Nullable Object value) {
+	private static void appendToBuilder(UriBuilder builder, TemplateVariable variable, @Nullable Object value) {
 
 		if (value == null) {
 
@@ -348,7 +394,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 * @see https://tools.ietf.org/html/rfc6570#section-2.4.2
 	 */
 	@SuppressWarnings("unchecked")
-	private static void appendComposite(UriComponentsBuilder builder, String name, Object value) {
+	private static void appendComposite(UriBuilder builder, String name, Object value) {
 
 		if (value instanceof Iterable) {
 
@@ -356,12 +402,25 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		} else if (value instanceof Map) {
 
-			((Map<Object, Object>) value).entrySet() //
-					.forEach(it -> builder.queryParam(it.getKey().toString(), it.getValue()));
+			((Map<Object, Object>) value).forEach((key, value1) -> builder.queryParam(key.toString(), value1));
 
 		} else {
 
 			builder.queryParam(name, value);
 		}
+	}
+
+	/**
+	 * Recreate {@link UriBuilderFactory} on deserialization.
+	 *
+	 * @param in
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+		in.defaultReadObject();
+
+		this.factory = createFactory(baseUri);
 	}
 }

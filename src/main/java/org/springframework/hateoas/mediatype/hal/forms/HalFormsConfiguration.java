@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,52 +15,53 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.hateoas.Link;
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 
 /**
+ * HAL-FORMS specific configuration extension of {@link HalConfiguration}.
+ *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-class HalFormsConfiguration {
+public class HalFormsConfiguration {
 
-	private @Wither @Getter RenderSingleLinks renderSingleLinks = RenderSingleLinks.AS_SINGLE;
+	private final HalConfiguration halConfiguration;
+	private final Map<Class<?>, String> patterns = new HashMap<>();
 
-	public enum RenderSingleLinks {
+	/**
+	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
+	 */
+	public HalFormsConfiguration() {
+		this.halConfiguration = new HalConfiguration();
+	}
 
-		/**
-		 * A single {@link Link} is rendered as a JSON object.
-		 */
-		AS_SINGLE,
+	public HalFormsConfiguration(HalConfiguration halConfiguration) {
+		this.halConfiguration = halConfiguration;
+	}
 
-		/**
-		 * A single {@link Link} is rendered as a JSON Array.
-		 */
-		AS_ARRAY
+	public HalFormsConfiguration registerPattern(Class<?> type, String pattern) {
+
+		patterns.put(type, pattern);
+
+		return this;
 	}
 
 	/**
-	 * Translate a {@link HalFormsConfiguration} into a {@link HalConfiguration}.
+	 * Returns the regular expression pattern that is registered for the given type.
 	 *
+	 * @param type must not be {@literal null}.
 	 * @return
 	 */
-	public HalConfiguration toHalConfiguration() {
+	Optional<String> getTypePatternFor(ResolvableType type) {
+		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
+	}
 
-		if (this.getRenderSingleLinks() == RenderSingleLinks.AS_SINGLE) {
-			return new HalConfiguration().withRenderSingleLinks(HalConfiguration.RenderSingleLinks.AS_SINGLE);
-		}
-
-		if (this.getRenderSingleLinks() == RenderSingleLinks.AS_ARRAY) {
-			return new HalConfiguration().withRenderSingleLinks(HalConfiguration.RenderSingleLinks.AS_ARRAY);
-		}
-
-		throw new IllegalStateException("Don't know how to translate " + this);
+	public HalConfiguration getHalConfiguration() {
+		return this.halConfiguration;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import org.springframework.core.io.Resource;
+import org.springframework.hateoas.MappingTestUtils;
 
 /**
  * @author Greg Turnquist
@@ -31,7 +32,9 @@ public final class MappingUtils {
 	 * @param resource as a {@link Resource}
 	 * @return
 	 * @throws IOException
+	 * @deprecated 1.1, use {@link MappingTestUtils} instead.
 	 */
+	@Deprecated
 	public static String read(Resource resource) throws IOException {
 
 		try (Scanner scanner = new Scanner(resource.getInputStream())) {

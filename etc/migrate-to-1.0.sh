@@ -40,6 +40,7 @@ s/Link\.REL_PREV/IanaLinkRelations.PREV/g;\
 s/Link\.REL_NEXT/IanaLinkRelations.NEXT/g;\
 \
 s/hateoas\.EntityLinks/hateoas.server.EntityLinks/g;\
+s/hateoas\.ExposesResourceFor/hateoas.server.ExposesResourceFor/g;\
 s/hateoas\.JsonPathLinkDiscoverer/hateoas.client.JsonPathLinkDiscoverer/g;\
 s/hateoas\.LinkBuilder/hateoas.server.LinkBuilder/g;\
 s/hateoas\.LinkDiscoverer/hateoas.client.LinkDiscoverer/g;\
@@ -48,8 +49,8 @@ s/hateoas\.MethodLinkBuilderFactory/hateoas.server.MethodLinkBuilderFactory/g;\
 s/hateoas\.RelProvider/hateoas.server.LinkRelationProvider/g;\
 s/hateoas\.ResourceAssembler/hateoas.server.ResourceAssembler/g;\
 s/hateoas\.ResourceProcessor/hateoas.server.ResourceProcessor/g;\
-s/hateoas\.VndErrors/hateoas.mediatype.vnderror.VndErrors/g;\
-s/hateoas\.VndErrors.VndError/hateoas.mediatype.vnderror.VndErrors.VndError/g;\
+s/hateoas\.VndErrors/hateoas.mediatype.vnderrors.VndErrors/g;\
+s/hateoas\.VndErrors.VndError/hateoas.mediatype.vnderrors.VndErrors.VndError/g;\
 \
 s/hateoas\.alps/hateoas.mediatype.alps/g;\
 \
@@ -65,10 +66,13 @@ s/hateoas\.core\.MethodParameters/hateoas.server.core.MethodParameters/g;\
 s/hateoas\.core\.Relation/hateoas.server.core.Relation/g;\
 \
 s/hateoas\.hal/hateoas.mediatype.hal/g;\
+s/HAL_JSON_UTF8/HAL_JSON/g;\
 \
+s/hateoas\.mvc\.BasicLinkBuilder/hateoas.server.mvc.BasicLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilder/hateoas.server.mvc.WebMvcLinkBuilder/g;\
 s/hateoas\.mvc\.ControllerLinkBuilderFactory/hateoas.server.mvc.WebMvcLinkBuilderFactory/g;\
 s/hateoas\.mvc\.HeaderLinksResponseEntity/hateoas.server.core.HeaderLinksResponseEntity/g;\
+s/hateoas\.mvc\.ResourceAssemblerSupport/hateoas.server.mvc.RepresentationModelAssemblerSupport/g;\
 s/hateoas\.mvc\.ResourceProcessorInvoker/hateoas.server.mvc.ResourceProcessorInvoker/g;\
 s/hateoas\.mvc\.ResourceProcessorInvokingHandlerAdapter/hateoas.server.mvc.ResourceProcessorInvokingHandlerAdapter/g;\
 s/hateoas\.mvc\.TypeConstrainedMappingJackson2HttpMessageConverter/hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter/g;\

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.util.UriTemplate;
  */
 public class UriTemplateFactory {
 
-	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<String, UriTemplate>();
+	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<>();
 
 	/**
 	 * Returns the the {@link UriTemplate} for the given mapping.

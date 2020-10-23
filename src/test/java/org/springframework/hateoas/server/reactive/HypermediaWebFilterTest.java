@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 /**
+ * Verify WebFlux properly activates the {@link org.springframework.web.filter.reactive.ServerWebExchangeContextFilter}.
+ *
  * @author Greg Turnquist
  */
 class HypermediaWebFilterTest {
@@ -53,10 +55,9 @@ class HypermediaWebFilterTest {
 		ctx.register(WebFluxConfig.class);
 		ctx.refresh();
 
-		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
+		HypermediaWebTestClientConfigurer configurer = ctx.getBean(HypermediaWebTestClientConfigurer.class);
 
-		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
+		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 	}
 
 	/**
@@ -69,17 +70,18 @@ class HypermediaWebFilterTest {
 				.accept(MediaTypes.HAL_JSON) //
 				.exchange() //
 				.expectStatus().isOk() //
-				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(RepresentationModel.class) //
 				.getResponseBody() //
 				.as(StepVerifier::create) //
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks())//
-							.containsExactly(new Link("https://example.com/api", IanaLinkRelations.SELF));
+							.containsExactly(Link.of("https://example.com/api", IanaLinkRelations.SELF));
 
 					return true;
-				}).verifyComplete();
+				}) //
+				.verifyComplete();
 	}
 
 	@RestController

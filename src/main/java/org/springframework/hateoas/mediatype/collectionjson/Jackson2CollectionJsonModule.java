@@ -1,5 +1,5 @@
 /*
-stand bisher hauptsächlich darin, dass  * Copyright 2015-2019 the original author or authors.
+stand bisher hauptsächlich darin, dass  * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -64,7 +65,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-class Jackson2CollectionJsonModule extends SimpleModule {
+public class Jackson2CollectionJsonModule extends SimpleModule {
 
 	private static final long serialVersionUID = -6540574644565592709L;
 
@@ -761,7 +762,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 				Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
-				return new EntityModel<>(obj, links);
+				return EntityModel.of(obj, links);
 
 			} else {
 
@@ -773,7 +774,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
-				return new EntityModel<>(firstItem.toRawData(rootType),
+				return EntityModel.of(firstItem.toRawData(rootType),
 						merged.merge(MergeMode.REPLACE_BY_REL, firstItem.getLinks()));
 			}
 		}
@@ -875,8 +876,8 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 			return collection.getItems().stream() //
 					.map(CollectionJsonItem::withOwnSelfLink) //
-					.<Object> map(it -> isResource //
-							? new EntityModel<>(it.toRawData(rootType), it.getLinks()) //
+					.map(it -> isResource //
+							? RepresentationModel.of(it.toRawData(rootType), it.getLinks()) //
 							: it.toRawData(rootType)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));
 		}
@@ -885,7 +886,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<CollectionModel<?>> {
 
 		private static final long serialVersionUID = 6406522912020578141L;
-		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::new;
+		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::of;
 		private static final Function<JavaType, CollectionJsonDeserializerBase<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
 
 		CollectionJsonResourcesDeserializer() {
@@ -900,8 +901,8 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedModel<?>> {
 
 		private static final long serialVersionUID = -7465448422501330790L;
-		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content,
-				links) -> new PagedModel<>(content, null, links);
+		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content, links) -> PagedModel
+				.of(content, null, links);
 		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {
@@ -947,6 +948,7 @@ class Jackson2CollectionJsonModule extends SimpleModule {
 
 		return selfLink.getAffordances().stream() //
 				.map(it -> it.getAffordanceModel(MediaTypes.COLLECTION_JSON)) //
+				.peek(it -> Assert.notNull(it, "No Collection/JSON affordance model found but expected!"))
 				.map(CollectionJsonAffordanceModel.class::cast) //
 				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
 				.filter(it -> !it.pointsToTargetOf(selfLink)) //

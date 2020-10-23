@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class SimpleRepresentationModelAssemblerTest {
 		CollectionModel<EntityModel<Employee>> resources = assembler
 				.toCollectionModel(Collections.singletonList(new Employee("Frodo")));
 
-		assertThat(resources.getContent()).containsExactly(new EntityModel<>(new Employee("Frodo")));
+		assertThat(resources.getContent()).containsExactly(EntityModel.of(new Employee("Frodo")));
 		assertThat(resources.getLinks()).isEmpty();
 	}
 
@@ -67,7 +67,7 @@ class SimpleRepresentationModelAssemblerTest {
 		EntityModel<Employee> resource = assembler.toModel(new Employee("Frodo"));
 
 		assertThat(resource.getContent().getName()).isEqualTo("Frodo");
-		assertThat(resource.getLinks()).containsExactly(new Link("/employees").withRel("employees"));
+		assertThat(resource.getLinks()).containsExactly(Link.of("/employees").withRel("employees"));
 	}
 
 	/**
@@ -81,7 +81,7 @@ class SimpleRepresentationModelAssemblerTest {
 				.toCollectionModel(Collections.singletonList(new Employee("Frodo")));
 
 		assertThat(resources.getContent()).containsExactly(
-				new EntityModel<>(new Employee("Frodo"), new Link("/employees").withRel("employees")));
+				EntityModel.of(new Employee("Frodo"), Link.of("/employees").withRel("employees")));
 		assertThat(resources.getLinks()).isEmpty();
 	}
 
@@ -98,7 +98,7 @@ class SimpleRepresentationModelAssemblerTest {
 
 		@Override
 		public void addLinks(EntityModel<Employee> resource) {
-			resource.add(new Link("/employees").withRel("employees"));
+			resource.add(Link.of("/employees").withRel("employees"));
 		}
 
 		@Override

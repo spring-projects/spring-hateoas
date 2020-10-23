@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,21 +89,21 @@ class DefaultCurieProviderUnitTest {
 	@Test
 	void doesNotPrefixIanaRels() {
 
-		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com"))) //
+		assertThat(provider.getNamespacedRelFrom(Link.of("https://amazon.com"))) //
 				.isEqualTo(HalLinkRelation.of(IanaLinkRelations.SELF));
 	}
 
 	@Test
 	void prefixesNormalRels() {
 
-		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "book"))) //
+		assertThat(provider.getNamespacedRelFrom(Link.of("https://amazon.com", "book"))) //
 				.isEqualTo(HalLinkRelation.curied("acme", "book"));
 	}
 
 	@Test
 	void doesNotPrefixQualifiedRels() {
 
-		assertThat(provider.getNamespacedRelFrom(new Link("https://amazon.com", "custom:rel")))
+		assertThat(provider.getNamespacedRelFrom(Link.of("https://amazon.com", "custom:rel")))
 				.isEqualTo(HalLinkRelation.curied("custom", "rel"));
 	}
 
@@ -111,9 +111,9 @@ class DefaultCurieProviderUnitTest {
 	 * @see #100
 	 */
 	@Test
-	void prefixesNormalRelsThatHaveExtraRFC5988Attributes() {
+	void prefixesNormalRelsThatHaveExtraRFC8288Attributes() {
 
-		Link link = new Link("https://amazon.com", "custom:rel") //
+		Link link = Link.of("https://amazon.com", "custom:rel") //
 				.withHreflang("en") //
 				.withTitle("the title") //
 				.withMedia("the media") //
@@ -191,7 +191,7 @@ class DefaultCurieProviderUnitTest {
 		ServletRequestAttributes requestAttributes = new ServletRequestAttributes(request);
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 
-		Links links = Links.of(new Link("http://localhost", "name:foo"));
+		Links links = Links.of(Link.of("http://localhost", "name:foo"));
 
 		Collection<? extends Object> curies = provider.getCurieInformation(links);
 		assertThat(curies).hasSize(1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import lombok.Value;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -56,6 +57,21 @@ class LinkRelationUnitTest {
 
 		assertThat(LinkRelation.of("self").isSameAs(LinkRelation.of("SELF"))).isTrue();
 		assertThat(IanaLinkRelations.SELF.isSameAs(LinkRelation.of("seLF"))).isTrue();
+	}
+
+	@Test // #1132
+	void appliesMapper() {
+
+		assertThat(LinkRelation.of("someRelation").map(it -> it.toLowerCase(Locale.US))) //
+				.isEqualTo(LinkRelation.of("somerelation"));
+	}
+
+	@Test // #1132
+	void doesNotApplyMapperToIanaLinkRelations() {
+
+		LinkRelation mapped = IanaLinkRelations.TERMS_OF_SERVICE.map(it -> it.replace("-", "_"));
+
+		assertThat(mapped).isEqualTo(IanaLinkRelations.TERMS_OF_SERVICE);
 	}
 
 	/**

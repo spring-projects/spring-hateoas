@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 
@@ -69,14 +68,6 @@ class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 		assertThat(getDiscoverer().findLinkWithRel(IanaLinkRelations.SELF.value(), linkText)) //
 				.hasValue(expected);
-	}
-
-	/**
-	 * @see #470
-	 */
-	@Test
-	void supportsHalUtf8() {
-		assertThat(getDiscoverer().supports(MediaTypes.HAL_JSON_UTF8)).isTrue();
 	}
 
 	@Override

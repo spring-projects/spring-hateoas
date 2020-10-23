@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@ package org.springframework.hateoas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
@@ -49,12 +52,48 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 		this.links.add(initialLink);
 	}
 
-	public RepresentationModel(List<Link> initialLinks) {
+	public RepresentationModel(Iterable<Link> initialLinks) {
 
 		Assert.notNull(initialLinks, "initialLinks must not be null!");
 
 		this.links = new ArrayList<>();
-		this.links.addAll(initialLinks);
+
+		for (Link link : initialLinks) {
+			this.links.add(link);
+		}
+	}
+
+	/**
+	 * Creates a new {@link RepresentationModel} for the given content object and no links.
+	 *
+	 * @param object can be {@literal null}.
+	 * @return
+	 * @see #of(Object, Iterable)
+	 */
+	public static <T> RepresentationModel<?> of(@Nullable T object) {
+		return of(object, Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new {@link RepresentationModel} for the given content object and links. Will return a simple
+	 * {@link RepresentationModel} if the content is {@literal null}, a {@link CollectionModel} in case the given content
+	 * object is a {@link Collection} or an {@link EntityModel} otherwise.
+	 *
+	 * @param object can be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 */
+	public static <T> RepresentationModel<?> of(@Nullable T object, Iterable<Link> links) {
+
+		if (object == null) {
+			return new RepresentationModel<>(links);
+		}
+
+		if (Collection.class.isInstance(object)) {
+			return CollectionModel.of((Collection<?>) object, links);
+		}
+
+		return EntityModel.of(object, links);
 	}
 
 	/**
@@ -75,7 +114,8 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 	/**
 	 * Adds all given {@link Link}s to the resource.
 	 *
-	 * @param links
+	 * @param links must not be {@literal null}.
+	 * @see Links
 	 */
 	@SuppressWarnings("unchecked")
 	public T add(Iterable<Link> links) {
@@ -98,6 +138,41 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 		Assert.notNull(links, "Given links must not be null!");
 
 		add(Arrays.asList(links));
+
+		return (T) this;
+	}
+
+	/**
+	 * Adds the {@link Link} produced by the given Supplier if the guard is {@literal true}.
+	 *
+	 * @param guard whether to add the {@link Link} produced by the given {@link Supplier}.
+	 * @param link the {@link Link} to add in case the guard is {@literal true}.
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public T addIf(boolean guard, Supplier<Link> link) {
+
+		if (guard) {
+			add(link.get());
+		}
+
+		return (T) this;
+	}
+
+	/**
+	 * Adds all {@link Link}s produced by the given Supplier if the guard is {@literal true}.
+	 *
+	 * @param guard whether to add the {@link Link}s produced by the given {@link Supplier}.
+	 * @param links the {@link Link}s to add in case the guard is {@literal true}.
+	 * @return
+	 * @see Links
+	 */
+	@SuppressWarnings("unchecked")
+	public T addAllIf(boolean guard, Supplier<? extends Iterable<Link>> links) {
+
+		if (guard) {
+			add(links.get());
+		}
 
 		return (T) this;
 	}

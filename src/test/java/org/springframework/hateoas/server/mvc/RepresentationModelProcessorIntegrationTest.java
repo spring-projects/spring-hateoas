@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.hateoas.MediaTypes.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,6 +43,7 @@ import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -90,7 +92,7 @@ public class RepresentationModelProcessorIntegrationTest {
 	public void collectionModelProcessorShouldWork() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees").accept(HAL_JSON)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
@@ -106,10 +108,23 @@ public class RepresentationModelProcessorIntegrationTest {
 	}
 
 	@Test
+	public void problemReturningControllerMethod() throws Exception {
+
+		this.mockMvc.perform(get("/employees/problem").accept(HTTP_PROBLEM_DETAILS_JSON)) //
+				.andExpect(content().contentType(HTTP_PROBLEM_DETAILS_JSON)) //
+				.andExpect(status().is(HttpStatus.BAD_REQUEST.value())) //
+				.andExpect(jsonPath("$.type", is("http://example.com/problem"))) //
+				.andExpect(jsonPath("$.title", is("Employee-based problem"))) //
+				.andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.value()))) //
+				.andExpect(jsonPath("$.detail", is("This is a test case")));
+
+	}
+
+	@Test
 	public void entityModelProcessorShouldWork() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees/1").accept(HAL_JSON)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
@@ -125,12 +140,10 @@ public class RepresentationModelProcessorIntegrationTest {
 	public void wildcardProcessorShouldNotWork() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees").accept(HAL_JSON)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, HAL_JSON.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
-
-		System.out.println(results);
 
 		assertThat(DISCOVERER.findRequiredLinkWithRel(WILDCARD_LINK_RELATION, results).getHref())
 				.isEqualTo("/non-specific-collection/link");
@@ -148,7 +161,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public EntityModel<Employee> process(EntityModel<Employee> model) {
 
 			triggered = true;
-			model.add(new Link("/entity/link", ENTITY_LINK_RELATION));
+			model.add(Link.of("/entity/link", ENTITY_LINK_RELATION));
 			return model;
 		}
 	}
@@ -162,7 +175,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public CollectionModel<EntityModel<Employee>> process(CollectionModel<EntityModel<Employee>> model) {
 
 			triggered = true;
-			model.add(new Link("/collection/link", COLLECTION_LINK_RELATION));
+			model.add(Link.of("/collection/link", COLLECTION_LINK_RELATION));
 			return model;
 		}
 	}
@@ -175,7 +188,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public CollectionModel<?> process(CollectionModel<?> model) {
 
 			triggered = true;
-			model.add(new Link("/non-specific-collection/link", WILDCARD_LINK_RELATION));
+			model.add(Link.of("/non-specific-collection/link", WILDCARD_LINK_RELATION));
 			return model;
 		}
 	}

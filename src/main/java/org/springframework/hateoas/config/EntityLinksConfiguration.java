@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,13 @@
  */
 package org.springframework.hateoas.config;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.hateoas.server.EntityLinks;
-import org.springframework.hateoas.server.core.ControllerEntityLinksFactoryBean;
 import org.springframework.hateoas.server.core.DelegatingEntityLinks;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
-import org.springframework.stereotype.Controller;
 
 /**
  * Spring configuration to register a {@link PluginRegistry} for {@link EntityLinks}.
@@ -34,7 +29,7 @@ import org.springframework.stereotype.Controller;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class EntityLinksConfiguration {
 
 	@Bean
@@ -49,18 +44,7 @@ class EntityLinksConfiguration {
 
 	@Primary
 	@Bean
-	@DependsOn("webMvcEntityLinks")
 	DelegatingEntityLinks delegatingEntityLinks(PluginRegistry<EntityLinks, Class<?>> entityLinksPluginRegistry) {
 		return new DelegatingEntityLinks(entityLinksPluginRegistry);
-	}
-
-	@Bean
-	ControllerEntityLinksFactoryBean webMvcEntityLinks(ObjectProvider<WebMvcLinkBuilderFactory> linkBuilderFactory) {
-
-		ControllerEntityLinksFactoryBean factory = new ControllerEntityLinksFactoryBean();
-		factory.setAnnotation(Controller.class);
-		factory.setLinkBuilderFactory(linkBuilderFactory.getIfAvailable(WebMvcLinkBuilderFactory::new));
-
-		return factory;
 	}
 }

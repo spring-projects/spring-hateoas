@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,12 +24,12 @@ import java.io.OutputStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
@@ -58,7 +57,7 @@ class HalFormsMessageConverterUnitTest {
 		this.mapper.registerModule(new Jackson2HalFormsModule());
 		this.mapper.setHandlerInstantiator(
 				new Jackson2HalFormsModule.HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-						new MessageSourceAccessor(mock(MessageSource.class)), true, new HalFormsConfiguration()));
+						MessageResolver.DEFAULTS_ONLY, new HalFormsConfiguration(), new DefaultListableBeanFactory()));
 
 		TypeConstrainedMappingJackson2HttpMessageConverter converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
 				RepresentationModel.class);
@@ -95,7 +94,8 @@ class HalFormsMessageConverterUnitTest {
 		assertThat(halFormsDocument.getTemplates().keySet()).containsExactly("default");
 		assertThat(halFormsDocument.getTemplates().get("default").getContentType()).isEqualTo("application/hal+json");
 		assertThat(halFormsDocument.getTemplates().get("default").getHttpMethod()).isEqualTo(HttpMethod.GET);
-		assertThat(halFormsDocument.getTemplates().get("default").getMethod()).isEqualTo(HttpMethod.GET.toString().toLowerCase());
+		assertThat(halFormsDocument.getTemplates().get("default").getMethod())
+				.isEqualTo(HttpMethod.GET.toString().toLowerCase());
 	}
 
 	@Test
@@ -115,8 +115,8 @@ class HalFormsMessageConverterUnitTest {
 				.andProperty(property); //
 
 		HalFormsDocument expected = HalFormsDocument.empty() //
-				.andLink(new Link("/employees").withRel("collection")) //
-				.andLink(new Link("/employees/1").withSelfRel())//
+				.andLink(Link.of("/employees").withRel("collection")) //
+				.andLink(Link.of("/employees/1").withSelfRel())//
 				.andTemplate("foo", template);
 
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();

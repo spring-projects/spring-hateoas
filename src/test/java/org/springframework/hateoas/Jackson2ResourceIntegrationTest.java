@@ -27,8 +27,8 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		EntityModel<Person> resource = new EntityModel<>(person);
-		resource.add(new Link("localhost"));
+		EntityModel<Person> resource = EntityModel.of(person);
+		resource.add(Link.of("localhost"));
 
 		assertThat(write(resource)).isEqualTo(REFERENCE);
 	}
@@ -42,7 +42,7 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 		PersonResource result = read(REFERENCE, PersonResource.class);
 
 		assertThat(result.getLinks()).hasSize(1);
-		assertThat(result.getLinks()).contains(new Link("localhost"));
+		assertThat(result.getLinks()).contains(Link.of("localhost"));
 		assertThat(result.getContent().firstname).isEqualTo("Dave");
 		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}

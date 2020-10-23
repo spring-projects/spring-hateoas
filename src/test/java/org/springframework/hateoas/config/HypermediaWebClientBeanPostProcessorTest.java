@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,12 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
-import reactor.test.StepVerifier;
-
 import java.net.URI;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.test.StepVerifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
@@ -40,7 +39,7 @@ import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Tests registration of proper decoders by the {@link HypermediaWebClientBeanPostProcessor}.
+ * Tests registration of proper decoders by the {@link org.springframework.hateoas.config.WebClientHateoasConfiguration.HypermediaWebClientBeanPostProcessor}.
  * 
  * @author Greg Turnquist
  */
@@ -54,12 +53,12 @@ class HypermediaWebClientBeanPostProcessorTest {
 
 		this.server = new Server();
 
-		EntityModel<Actor> actor = new EntityModel<>(new Actor("Keanu Reaves"));
+		EntityModel<Actor> actor = EntityModel.of(new Actor("Keanu Reaves"));
 		String actorUri = this.server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		EntityModel<Movie> resource = new EntityModel<>(movie);
-		resource.add(new Link(actorUri, "actor"));
+		EntityModel<Movie> resource = EntityModel.of(movie);
+		resource.add(Link.of(actorUri, "actor"));
 
 		this.server.mockResourceFor(resource);
 		this.server.finishMocking();
@@ -126,7 +125,7 @@ class HypermediaWebClientBeanPostProcessorTest {
 							.retrieve() //
 							.bodyToMono(typeReference)) //
 					.as(StepVerifier::create) //
-					.expectNext(new EntityModel<>(new Actor("Keanu Reaves"))) //
+					.expectNext(EntityModel.of(new Actor("Keanu Reaves"))) //
 					.verifyComplete();
 		});
 	}

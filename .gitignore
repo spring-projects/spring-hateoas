@@ -2,6 +2,7 @@ target/
 .settings/
 .project
 .classpath
+.factorypath
 *.iml
 .idea
 *.orig

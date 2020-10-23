@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.experimental.Wither;
-
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.hateoas.Links;
 
@@ -32,12 +28,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author Greg Turnquist
  */
-@Value
-@Wither(AccessLevel.PACKAGE)
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-class CollectionJsonDocument<T> {
+final class CollectionJsonDocument<T> {
 
-	private CollectionJson<T> collection;
+	private final CollectionJson<T> collection;
 
 	@JsonCreator
 	CollectionJsonDocument(@JsonProperty("version") String version, //
@@ -47,6 +40,47 @@ class CollectionJsonDocument<T> {
 			@JsonProperty("queries") List<CollectionJsonQuery> queries, //
 			@JsonProperty("template") CollectionJsonTemplate template, //
 			@JsonProperty("error") CollectionJsonError error) {
+
 		this.collection = new CollectionJson<>(version, href, links, items, queries, template, error);
 	}
+
+	CollectionJsonDocument(CollectionJson<T> collection) {
+		this.collection = collection;
+	}
+
+	/**
+	 * Create a new {@link CollectionJsonDocument} by copying the attributes and replacing the {@literal collection}.
+	 *
+	 * @param collection
+	 * @return
+	 */
+	CollectionJsonDocument<T> withCollection(CollectionJson<T> collection) {
+		return this.collection == collection ? this : new CollectionJsonDocument<T>(this.collection);
+	}
+
+	@JsonProperty
+	public CollectionJson<T> getCollection() {
+		return this.collection;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CollectionJsonDocument<?> that = (CollectionJsonDocument<?>) o;
+		return Objects.equals(this.collection, that.collection);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.collection);
+	}
+
+	public String toString() {
+		return "CollectionJsonDocument(collection=" + this.collection + ")";
+	}
+
 }

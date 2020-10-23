@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ class TraversonTest {
 
 	@BeforeEach
 	void setUp() {
-		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON_UTF8, MediaTypes.HAL_JSON);
+		this.traverson = new Traverson(baseUri, MediaTypes.HAL_JSON);
 
 	}
 
@@ -120,7 +120,7 @@ class TraversonTest {
 
 		verifyThatRequest() //
 				.havingPathEqualTo("/") //
-				.havingHeader("Accept", contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
+				.havingHeader("Accept", contains(MediaTypes.HAL_JSON_VALUE)); //
 	}
 
 	/**
@@ -284,7 +284,7 @@ class TraversonTest {
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
 		assertThat(converters.get(1)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
 
-		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON_UTF8);
+		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON);
 
 		assertThat(converters).hasSize(2);
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
@@ -424,30 +424,30 @@ class TraversonTest {
 
 		verifyThatRequest() //
 				.havingPathEqualTo("/") //
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)); //
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_VALUE)); //
 
 		verifyThatRequest().havingPathEqualTo("/movies") // aggregate root movies
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_VALUE)) //
 				.havingHeader(customHeaderName, contains("alpha")) //
 				.havingHeader(HttpHeaders.LOCATION, contains("http://localhost:8080/my/custom/location")); //
 
 		verifyThatRequest().havingPath(startsWith("/movies/")) // single movie
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_VALUE)) //
 				.havingHeader(customHeaderName, contains("bravo")); //
 
 		verifyThatRequest().havingPath(startsWith("/actors/")) // single actor
-				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_UTF8_VALUE + ", " + MediaTypes.HAL_JSON_VALUE)) //
+				.havingHeader(HttpHeaders.ACCEPT, contains(MediaTypes.HAL_JSON_VALUE)) //
 				.havingHeader(customHeaderName, contains("charlie")); //
 	}
 
 	private static void setUpActors() {
 
-		EntityModel<Actor> actor = new EntityModel<>(new Actor("Keanu Reaves"));
+		EntityModel<Actor> actor = EntityModel.of(new Actor("Keanu Reaves"));
 		String actorUri = server.mockResourceFor(actor);
 
 		Movie movie = new Movie("The Matrix");
-		EntityModel<Movie> resource = new EntityModel<>(movie);
-		resource.add(new Link(actorUri, "actor"));
+		EntityModel<Movie> resource = EntityModel.of(movie);
+		resource.add(Link.of(actorUri, "actor"));
 
 		server.mockResourceFor(resource);
 		server.finishMocking();

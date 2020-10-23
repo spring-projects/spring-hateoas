@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,15 @@
  */
 package org.springframework.hateoas.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.MessageSourceAccessor;
+import static net.jadler.Jadler.*;
+import static org.hamcrest.Matchers.*;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.UUID;
+
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.hateoas.CollectionModel;
@@ -26,6 +31,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.LinkRelationProvider;
@@ -35,18 +41,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.UUID;
-
-import static net.jadler.Jadler.closeJadler;
-import static net.jadler.Jadler.initJadler;
-import static net.jadler.Jadler.onRequest;
-import static net.jadler.Jadler.port;
-import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.mock;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for integration tests.
@@ -68,8 +64,8 @@ public class Server implements Closeable {
 
 		this.mapper = new ObjectMapper();
 		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
-				new MessageSourceAccessor(mock(MessageSource.class))));
+		this.mapper.setHandlerInstantiator(
+				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //
@@ -193,7 +189,7 @@ public class Server implements Closeable {
 		String baseResourceUri = String.format("%s/%s", rootResource(), collectionRel.value());
 		String resourceUri = String.format("%s/%s", baseResourceUri, UUID.randomUUID().toString());
 
-		baseResources.add(new Link(baseResourceUri, collectionRel), new Link(resourceUri, singleRel));
+		baseResources.add(Link.of(baseResourceUri, collectionRel), Link.of(resourceUri, singleRel));
 
 		register(resourceUri, resource);
 
@@ -202,13 +198,13 @@ public class Server implements Closeable {
 
 	public void finishMocking() {
 
-		CollectionModel<String> resources = new CollectionModel<>(Collections.emptyList());
+		CollectionModel<String> resources = CollectionModel.of(Collections.emptyList());
 
 		for (Link link : baseResources.keySet()) {
 
 			resources.add(link);
 
-			CollectionModel<String> nested = new CollectionModel<>(Collections.emptyList());
+			CollectionModel<String> nested = CollectionModel.of(Collections.emptyList());
 			nested.add(baseResources.get(link));
 
 			register(link.getHref(), nested);

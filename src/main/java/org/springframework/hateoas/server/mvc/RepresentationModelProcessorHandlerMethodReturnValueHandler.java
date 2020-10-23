@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -31,6 +29,7 @@ import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -44,7 +43,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @since 0.20
  * @soundtrack Doppelkopf - Balance (Von Abseits)
  */
-@RequiredArgsConstructor
 public class RepresentationModelProcessorHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	static final ResolvableType ENTITY_MODEL_TYPE = ResolvableType.forRawClass(EntityModel.class);
@@ -59,10 +57,20 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 		}
 	}
 
-	private final @NonNull HandlerMethodReturnValueHandler delegate;
-	private final @NonNull RepresentationModelProcessorInvoker invoker;
+	private final HandlerMethodReturnValueHandler delegate;
+	private final Supplier<RepresentationModelProcessorInvoker> invoker;
 
 	private boolean rootLinksAsHeaders = false;
+
+	public RepresentationModelProcessorHandlerMethodReturnValueHandler(HandlerMethodReturnValueHandler delegate,
+			Supplier<RepresentationModelProcessorInvoker> invoker) {
+
+		Assert.notNull(delegate, "delegate must not be null!");
+		Assert.notNull(invoker, "invoker must not be null!");
+
+		this.delegate = delegate;
+		this.invoker = invoker;
+	}
 
 	/**
 	 * @param rootLinksAsHeaders the rootLinksAsHeaders to set
@@ -122,7 +130,7 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 			targetType = returnValueType;
 		}
 
-		RepresentationModel<?> result = invoker.invokeProcessorsFor((RepresentationModel) value, targetType);
+		RepresentationModel<?> result = invoker.get().invokeProcessorsFor((RepresentationModel) value, targetType);
 		delegate.handleReturnValue(rewrapResult(result, returnValue), returnType, mavContainer, webRequest);
 	}
 
@@ -141,7 +149,7 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 			return rootLinksAsHeaders ? HeaderLinksResponseEntity.wrap(newBody) : newBody;
 		}
 
-		HttpEntity<RepresentationModel<?>> entity = null;
+		HttpEntity<RepresentationModel<?>> entity;
 
 		if (originalValue instanceof ResponseEntity) {
 			ResponseEntity<?> source = (ResponseEntity<?>) originalValue;

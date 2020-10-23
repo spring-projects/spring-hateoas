@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	@Override
 	default Mono<EntityModel<T>> toModel(T entity, ServerWebExchange exchange) {
 
-		EntityModel<T> resource = new EntityModel<>(entity);
+		EntityModel<T> resource = EntityModel.of(entity);
 		return Mono.just(addLinks(resource, exchange));
 	}
 
@@ -62,13 +62,13 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	 * @param entities must not be {@literal null}.
 	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}.
 	 */
-	default Mono<CollectionModel<EntityModel<T>>> toCollectionModel(
-			Flux<? extends T> entities, ServerWebExchange exchange) {
+	default Mono<CollectionModel<EntityModel<T>>> toCollectionModel(Flux<? extends T> entities,
+			ServerWebExchange exchange) {
 
 		return entities //
 				.flatMap(entity -> toModel(entity, exchange)) //
 				.collectList() //
-				.map(CollectionModel::new) //
+				.map(CollectionModel::of) //
 				.map(it -> addLinks(it, exchange));
 	}
 
@@ -77,8 +77,8 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	 *
 	 * @param resources
 	 */
-	default CollectionModel<EntityModel<T>> addLinks(
-			CollectionModel<EntityModel<T>> resources, ServerWebExchange exchange) {
+	default CollectionModel<EntityModel<T>> addLinks(CollectionModel<EntityModel<T>> resources,
+			ServerWebExchange exchange) {
 		return resources;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import lombok.Getter;
-
 import java.util.List;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModelFactory;
+import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
+import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -35,10 +34,15 @@ import org.springframework.http.MediaType;
  */
 class CollectionJsonAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final @Getter MediaType mediaType = MediaTypes.COLLECTION_JSON;
+	private final MediaType mediaType = MediaTypes.COLLECTION_JSON;
 
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
+			InputPayloadMetadata inputType, List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 		return new CollectionJsonAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	}
+
+	public MediaType getMediaType() {
+		return this.mediaType;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.hateoas.mediatype.hal;
-
-import lombok.Getter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -98,7 +96,7 @@ public class DefaultCurieProvider implements CurieProvider {
 	 * @see org.springframework.hateoas.hal.CurieProvider#getCurieInformation()
 	 */
 	@Override
-	public Collection<? extends Object> getCurieInformation(Links links) {
+	public Collection<?> getCurieInformation(Links links) {
 
 		return curies.entrySet().stream() //
 				.map(it -> new Curie(it.getKey(), getCurieHref(it.getKey(), it.getValue()))) //
@@ -153,12 +151,17 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		private static final long serialVersionUID = 1L;
 
-		private final @Getter String name;
+		private final String name;
 
+		@SuppressWarnings("deprecation")
 		public Curie(String name, String href) {
 
 			super(href, "curies");
 			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 }

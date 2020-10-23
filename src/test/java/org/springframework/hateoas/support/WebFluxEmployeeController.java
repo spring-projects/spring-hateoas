@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,36 @@
  */
 package org.springframework.hateoas.support;
 
+import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.mediatype.PropertyUtils.*;
+import static org.springframework.hateoas.mediatype.alps.Alps.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static reactor.function.TupleUtils.*;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
+import org.springframework.hateoas.mediatype.alps.Alps;
+import org.springframework.hateoas.mediatype.alps.Descriptor;
+import org.springframework.hateoas.mediatype.alps.Ext;
+import org.springframework.hateoas.mediatype.alps.Format;
+import org.springframework.hateoas.mediatype.alps.Type;
+import org.springframework.hateoas.mediatype.problem.Problem;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,6 +54,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Sample controller using {@link WebFluxLinkBuilder} to create {@link Affordance}s.
@@ -72,7 +87,7 @@ public class WebFluxEmployeeController {
 						.andAffordance(controller.newEmployee(null)) //
 						.andAffordance(controller.search(null, null)) //
 						.toMono() //
-						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
+						.map(selfLink -> CollectionModel.of(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
@@ -99,13 +114,19 @@ public class WebFluxEmployeeController {
 						.andAffordance(controller.newEmployee(null)) //
 						.andAffordance(controller.search(null, null)) //
 						.toMono() //
-						.map(selfLink -> new CollectionModel<>(resources, selfLink)));
+						.map(selfLink -> CollectionModel.of(resources, selfLink)));
 	}
 
 	@GetMapping("/employees/{id}")
 	public Mono<EntityModel<Employee>> findOne(@PathVariable Integer id) {
 
 		WebFluxEmployeeController controller = methodOn(WebFluxEmployeeController.class);
+
+		Employee employee = EMPLOYEES.get(id);
+
+		if (employee == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
 
 		Mono<Link> selfLink = linkTo(controller.findOne(id)).withSelfRel() //
 				.andAffordance(controller.updateEmployee(null, id)) //
@@ -117,7 +138,7 @@ public class WebFluxEmployeeController {
 
 		return selfLink.zipWith(employeesLink) //
 				.map(function((left, right) -> Links.of(left, right))) //
-				.map(links -> new EntityModel<>(EMPLOYEES.get(id), links));
+				.map(links -> EntityModel.of(employee, links));
 	}
 
 	@PostMapping("/employees")
@@ -173,5 +194,41 @@ public class WebFluxEmployeeController {
 						.location(findOne.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
 						.build() //
 				);
+	}
+
+	@GetMapping(value = "/profile", produces = ALPS_JSON_VALUE)
+	Alps profile() {
+
+		return Alps.alps() //
+				.doc(doc() //
+						.href("https://example.org/samples/full/doc.html") //
+						.value("value goes here") //
+						.format(Format.TEXT) //
+						.build()) //
+				.descriptor(getExposedProperties(Employee.class).stream() //
+						.map(property -> Descriptor.builder() //
+								.id("class field [" + property.getName() + "]") //
+								.name(property.getName()) //
+								.type(Type.SEMANTIC) //
+								.ext(Ext.builder() //
+										.id("ext [" + property.getName() + "]") //
+										.href("https://example.org/samples/ext/" + property.getName()) //
+										.value("value goes here") //
+										.build()) //
+								.rt("rt for [" + property.getName() + "]") //
+								.descriptor(Collections.singletonList(Descriptor.builder().id("embedded").build())) //
+								.build()) //
+						.collect(Collectors.toList()))
+				.build();
+	}
+
+	@GetMapping("/employees/problem")
+	public ResponseEntity<?> problem() {
+
+		return ResponseEntity.badRequest().body(Problem.create() //
+				.withType(URI.create("http://example.com/problem")) //
+				.withTitle("Employee-based problem") //
+				.withStatus(HttpStatus.BAD_REQUEST) //
+				.withDetail("This is a test case"));
 	}
 }

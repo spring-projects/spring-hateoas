@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 package org.springframework.hateoas.server.reactive;
 
-import static org.springframework.hateoas.server.reactive.HypermediaWebFilter.*;
+import static org.springframework.web.filter.reactive.ServerWebExchangeContextFilter.*;
 
-import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.function.Function;
 
-import reactor.core.publisher.Mono;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -31,6 +30,9 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.hateoas.server.core.WebHandler;
+import org.springframework.hateoas.server.core.WebHandler.PreparedWebHandler;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
@@ -45,10 +47,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @since 1.0
  */
 public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebFluxLinkBuilder> {
-
-	private WebFluxLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
-		super(builder, variables, affordances);
-	}
 
 	private WebFluxLinkBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances) {
 		super(components, variables, affordances);
@@ -89,17 +87,18 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 * @return
 	 */
 	public static <T> T methodOn(Class<T> controller, Object... parameters) {
+
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
+	 * @see org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponents, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected WebFluxLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected WebFluxLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances,
 			TemplateVariables variables) {
-		return new WebFluxLinkBuilder(builder, variables, affordances);
+		return new WebFluxLinkBuilder(components, variables, affordances);
 	}
 
 	/*
@@ -111,10 +110,27 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 		return this;
 	}
 
-	@RequiredArgsConstructor
 	public static class WebFluxBuilder {
 
 		private final Mono<WebFluxLinkBuilder> builder;
+
+		public WebFluxBuilder(Mono<WebFluxLinkBuilder> builder) {
+			this.builder = builder;
+		}
+
+		/**
+		 * Creates a new {@link WebFluxBuilder} appending the given path to the currently to be built link.
+		 *
+		 * @param path must not be {@literal null}.
+		 * @return
+		 * @since 1.1
+		 */
+		public WebFluxBuilder slash(String path) {
+
+			Assert.notNull(path, "Path must not be null!");
+
+			return new WebFluxBuilder(builder.map(it -> it.slash(path)));
+		}
 
 		/**
 		 * Creates a new {@link WebFluxLink} for the {@link Link} with the given {@link LinkRelation}
@@ -165,10 +181,13 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 *
 	 * @author Oliver Gierke
 	 */
-	@RequiredArgsConstructor
 	public static class WebFluxLink {
 
 		private final Mono<Link> link;
+
+		public WebFluxLink(Mono<Link> link) {
+			this.link = link;
+		}
 
 		/**
 		 * Adds the affordance created by the given virtual method invocation.
@@ -233,27 +252,33 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 */
 	private static UriComponentsBuilder getBuilder(@Nullable ServerWebExchange exchange) {
 
-		return exchange == null //
-				? UriComponentsBuilder.fromPath("/") //
-				: UriComponentsBuilder.fromHttpRequest(exchange.getRequest());
+		if (exchange == null) {
+			return UriComponentsBuilder.fromPath("/");
+		}
+
+		ServerHttpRequest request = exchange.getRequest();
+		PathContainer contextPath = request.getPath().contextPath();
+
+		return UriComponentsBuilder.fromHttpRequest(request) //
+				.replacePath(contextPath.toString()) //
+				.replaceQuery("");
 	}
 
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation) {
 
 		return linkToInternal(invocation,
-				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(SERVER_WEB_EXCHANGE, null))));
+				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(EXCHANGE_CONTEXT_ATTRIBUTE, null))));
 	}
 
-	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> exchange) {
+	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> builder) {
 
-		Function<Function<String, UriComponentsBuilder>, WebFluxLinkBuilder> linkTo = //
-				WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
+		PreparedWebHandler<WebFluxLinkBuilder> handler = WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
 
-		return exchange.map(WebFluxLinkBuilder::getBuilderCreator) //
-				.map(linkTo::apply);
+		return builder.map(WebFluxLinkBuilder::getBuilderCreator) //
+				.map(handler::conclude);
 	}
 
-	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder exchange) {
-		return path -> exchange.replacePath(path == null ? "/" : path);
+	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder builder) {
+		return path -> builder.path(path);
 	}
 }

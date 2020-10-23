@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,6 +32,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
@@ -147,11 +151,14 @@ public class MethodParameters {
 	 * set over discovering it.
 	 *
 	 * @author Oliver Gierke
+	 * @author Greg Turnquist
 	 */
 	private static class AnnotationNamingMethodParameter extends SynthesizingMethodParameter {
 
 		private final AnnotationAttribute attribute;
+
 		private String name;
+		private @Nullable Annotation[] combinedAnnotations;
 
 		/**
 		 * Creates a new {@link AnnotationNamingMethodParameter} for the given {@link Method}'s parameter with the given
@@ -189,6 +196,57 @@ public class MethodParameters {
 			}
 
 			return super.getParameterName();
+		}
+
+		/**
+		 * Overriding the original behavior to also include parameter annotations declared on original interface method
+		 * declaration for which the parameter is a member of the implementation method.
+		 */
+		@Override
+		public Annotation[] getParameterAnnotations() {
+
+			if (combinedAnnotations != null) {
+				return combinedAnnotations;
+			}
+
+			Method method = getMethod();
+
+			if (method == null) {
+				throw new IllegalStateException("No method available for " + this.toString() + "!");
+			}
+
+			Annotation[] original = super.getParameterAnnotations();
+			Method interfaceMethod = ClassUtils.getInterfaceMethodIfPossible(method);
+
+			// No interface or method not declared in interface
+			if (method.equals(interfaceMethod)) {
+				return cacheAndReturn(original);
+			}
+
+			// Lookup annotations and their types of the interface method parameter
+			MethodParameter interfaceParameter = new MethodParameter(interfaceMethod, getParameterIndex());
+			List<Annotation> originalAnnotations = new ArrayList<>(Arrays.asList(original));
+			Set<Class<?>> originalAnnotationTypes = originalAnnotations.stream() //
+					.map(Object::getClass) //
+					.collect(Collectors.toSet());
+
+			// Add annotations which have not been declared on the target method
+			Arrays.stream(interfaceParameter.getParameterAnnotations()) //
+					.filter(it -> !originalAnnotationTypes.contains(it.annotationType())) //
+					.forEach(originalAnnotations::add);
+
+			return cacheAndReturn(originalAnnotations);
+		}
+
+		private Annotation[] cacheAndReturn(List<Annotation> annotations) {
+			return cacheAndReturn(annotations.toArray(new Annotation[annotations.size()]));
+		}
+
+		private Annotation[] cacheAndReturn(Annotation[] annotations) {
+
+			this.combinedAnnotations = annotations;
+
+			return annotations;
 		}
 	}
 }

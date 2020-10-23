@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class CollectionJsonSpecTest {
 		RepresentationModel<?> resource = mapper.readValue(specBasedJson, RepresentationModel.class);
 
 		assertThat(resource.getLinks()).hasSize(1);
-		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(new Link("https://example.org/friends/"));
+		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("https://example.org/friends/"));
 	}
 
 	/**
@@ -87,8 +87,8 @@ class CollectionJsonSpecTest {
 						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
 
 		assertThat(resources.getLinks()).hasSize(2);
-		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(new Link("https://example.org/friends/"));
-		assertThat(resources.getRequiredLink("feed")).isEqualTo(new Link("https://example.org/friends/rss", "feed"));
+		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("https://example.org/friends/"));
+		assertThat(resources.getRequiredLink("feed")).isEqualTo(Link.of("https://example.org/friends/rss", "feed"));
 		assertThat(resources.getContent()).hasSize(3);
 
 		List<EntityModel<Friend>> friends = new ArrayList<>(resources.getContent());
@@ -96,27 +96,27 @@ class CollectionJsonSpecTest {
 		assertThat(friends.get(0).getContent().getEmail()).isEqualTo("jdoe@example.org");
 		assertThat(friends.get(0).getContent().getFullname()).isEqualTo("J. Doe");
 		assertThat(friends.get(0).getRequiredLink(IanaLinkRelations.SELF))
-				.isEqualTo(new Link("https://example.org/friends/jdoe"));
-		assertThat(friends.get(0).getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/jdoe", "blog"));
+				.isEqualTo(Link.of("https://example.org/friends/jdoe"));
+		assertThat(friends.get(0).getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/jdoe", "blog"));
 		assertThat(friends.get(0).getRequiredLink("avatar"))
-				.isEqualTo(new Link("https://examples.org/images/jdoe", "avatar"));
+				.isEqualTo(Link.of("https://examples.org/images/jdoe", "avatar"));
 
 		assertThat(friends.get(1).getContent().getEmail()).isEqualTo("msmith@example.org");
 		assertThat(friends.get(1).getContent().getFullname()).isEqualTo("M. Smith");
 		assertThat(friends.get(1).getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(new Link("https://example.org/friends/msmith"));
-		assertThat(friends.get(1).getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/msmith", "blog"));
+				.isEqualTo(Link.of("https://example.org/friends/msmith"));
+		assertThat(friends.get(1).getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/msmith", "blog"));
 		assertThat(friends.get(1).getRequiredLink("avatar"))
-				.isEqualTo(new Link("https://examples.org/images/msmith", "avatar"));
+				.isEqualTo(Link.of("https://examples.org/images/msmith", "avatar"));
 
 		assertThat(friends.get(2).getContent().getEmail()).isEqualTo("rwilliams@example.org");
 		assertThat(friends.get(2).getContent().getFullname()).isEqualTo("R. Williams");
 		assertThat(friends.get(2).getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(new Link("https://example.org/friends/rwilliams"));
+				.isEqualTo(Link.of("https://example.org/friends/rwilliams"));
 		assertThat(friends.get(2).getRequiredLink("blog"))
-				.isEqualTo(new Link("https://examples.org/blogs/rwilliams", "blog"));
+				.isEqualTo(Link.of("https://examples.org/blogs/rwilliams", "blog"));
 		assertThat(friends.get(2).getRequiredLink("avatar"))
-				.isEqualTo(new Link("https://examples.org/images/rwilliams", "avatar"));
+				.isEqualTo(Link.of("https://examples.org/images/rwilliams", "avatar"));
 	}
 
 	/**
@@ -132,14 +132,14 @@ class CollectionJsonSpecTest {
 				mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class));
 
 		assertThat(resource.getLinks()).hasSize(6);
-		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(new Link("https://example.org/friends/jdoe"));
-		assertThat(resource.getRequiredLink("feed")).isEqualTo(new Link("https://example.org/friends/rss", "feed"));
+		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("https://example.org/friends/jdoe"));
+		assertThat(resource.getRequiredLink("feed")).isEqualTo(Link.of("https://example.org/friends/rss", "feed"));
 		assertThat(resource.getRequiredLink("queries"))
-				.isEqualTo(new Link("https://example.org/friends/?queries", "queries"));
+				.isEqualTo(Link.of("https://example.org/friends/?queries", "queries"));
 		assertThat(resource.getRequiredLink("template"))
-				.isEqualTo(new Link("https://example.org/friends/?template", "template"));
-		assertThat(resource.getRequiredLink("blog")).isEqualTo(new Link("https://examples.org/blogs/jdoe", "blog"));
-		assertThat(resource.getRequiredLink("avatar")).isEqualTo(new Link("https://examples.org/images/jdoe", "avatar"));
+				.isEqualTo(Link.of("https://example.org/friends/?template", "template"));
+		assertThat(resource.getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/jdoe", "blog"));
+		assertThat(resource.getRequiredLink("avatar")).isEqualTo(Link.of("https://examples.org/images/jdoe", "avatar"));
 
 		assertThat(resource.getContent().getEmail()).isEqualTo("jdoe@example.org");
 		assertThat(resource.getContent().getFullname()).isEqualTo("J. Doe");
@@ -160,7 +160,7 @@ class CollectionJsonSpecTest {
 
 		assertThat(resources.getContent()).hasSize(0);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(new Link("https://example.org/friends/"));
+				.isEqualTo(Link.of("https://example.org/friends/"));
 	}
 
 	/**
@@ -178,7 +178,7 @@ class CollectionJsonSpecTest {
 
 		assertThat(resources.getContent()).hasSize(0);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(new Link("https://example.org/friends/"));
+				.isEqualTo(Link.of("https://example.org/friends/"));
 	}
 
 	/**
@@ -196,7 +196,7 @@ class CollectionJsonSpecTest {
 
 		assertThat(resources.getContent()).hasSize(0);
 		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(new Link("https://example.org/friends/"));
+				.isEqualTo(Link.of("https://example.org/friends/"));
 	}
 
 	/**

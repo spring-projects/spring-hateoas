@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2017 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * {@link MappingDiscoverer} implementation that inspects mappings from a particular annotation.
- * 
+ *
  * @author Oliver Gierke
  * @author Mark Paluch
  * @author Greg Turnquist
+ * @deprecated since 1.2, not for removal but for hiding within the package in 1.3
  */
+@Deprecated
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/{2,}");
@@ -48,7 +50,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	/**
 	 * Creates an {@link AnnotationMappingDiscoverer} for the given annotation type. Will lookup the {@code value}
 	 * attribute by default.
-	 * 
+	 *
 	 * @param annotation must not be {@literal null}.
 	 */
 	public AnnotationMappingDiscoverer(Class<? extends Annotation> annotation) {
@@ -57,7 +59,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	/**
 	 * Creates an {@link AnnotationMappingDiscoverer} for the given annotation type and attribute name.
-	 * 
+	 *
 	 * @param annotation must not be {@literal null}.
 	 * @param mappingAttributeName if {@literal null}, it defaults to {@code value}.
 	 */
@@ -69,7 +71,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		this.mappingAttributeName = mappingAttributeName;
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
 	 */
@@ -84,7 +86,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return mapping.length == 0 ? null : mapping[0];
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
 	 */
@@ -96,7 +98,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return getMapping(method.getDeclaringClass(), method);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
 	 */
@@ -120,7 +122,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	/**
 	 * Extract {@link org.springframework.web.bind.annotation.RequestMapping}'s list of {@link RequestMethod}s into an
 	 * array of {@link String}s.
-	 * 
+	 *
 	 * @param type
 	 * @param method
 	 * @return
@@ -171,7 +173,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	/**
 	 * Joins the given mappings making sure exactly one slash.
-	 * 
+	 *
 	 * @param typeMapping must not be {@literal null} or empty.
 	 * @param mapping must not be {@literal null} or empty.
 	 * @return

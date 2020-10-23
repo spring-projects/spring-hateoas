@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,11 @@ import java.util.Map;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
-import org.springframework.hateoas.server.core.AnnotationMappingDiscoverer;
-import org.springframework.hateoas.server.core.CachingMappingDiscoverer;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
-import org.springframework.hateoas.server.core.MappingDiscoverer;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.hateoas.server.core.UriTemplateFactory;
+import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -47,12 +44,11 @@ import org.springframework.web.util.UriTemplate;
  * @author Andrew Naydyonock
  * @author Oliver Trosien
  * @author Greg Turnquist
+ * @author Lars Michele
  */
 @SuppressWarnings("deprecation")
 public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebMvcLinkBuilder> {
 
-	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
-			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
 	private static final WebMvcLinkBuilderFactory FACTORY = new WebMvcLinkBuilderFactory();
 	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
 
@@ -61,12 +57,8 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 	 *
 	 * @param builder must not be {@literal null}.
 	 */
-	WebMvcLinkBuilder(UriComponentsBuilder builder) {
-		this(builder, TemplateVariables.NONE, Collections.emptyList());
-	}
-
-	WebMvcLinkBuilder(UriComponentsBuilder builder, TemplateVariables variables, List<Affordance> affordances) {
-		super(builder, variables, affordances);
+	WebMvcLinkBuilder(UriComponents components) {
+		this(components, TemplateVariables.NONE, Collections.emptyList());
 	}
 
 	WebMvcLinkBuilder(UriComponents uriComponents, TemplateVariables variables, List<Affordance> affordances) {
@@ -97,12 +89,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		String mapping = DISCOVERER.getMapping(controller);
+		String mapping = WebHandler.DISCOVERER.getMapping(controller);
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
 
 	/**
@@ -119,12 +111,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		String mapping = DISCOVERER.getMapping(controller);
+		String mapping = WebHandler.DISCOVERER.getMapping(controller);
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
 
-		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uriComponents, true);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
 
 	/*
@@ -142,11 +134,11 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		String mapping = DISCOVERER.getMapping(controller, method);
+		String mapping = WebHandler.DISCOVERER.getMapping(controller, method);
 		UriTemplate template = UriTemplateFactory.templateFor(mapping);
 		URI uri = template.expand(parameters);
 
-		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getBuilder()).slash(uri);
+		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uri);
 	}
 
 	/**
@@ -221,12 +213,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponentsBuilder, java.util.List, org.springframework.hateoas.TemplateVariables)
+	 * @see org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport#createNewInstance(org.springframework.web.util.UriComponents, java.util.List, org.springframework.hateoas.TemplateVariables)
 	 */
 	@Override
-	protected WebMvcLinkBuilder createNewInstance(UriComponentsBuilder builder, List<Affordance> affordances,
+	protected WebMvcLinkBuilder createNewInstance(UriComponents components, List<Affordance> affordances,
 			TemplateVariables variables) {
-		return new WebMvcLinkBuilder(builder, variables, affordances);
+		return new WebMvcLinkBuilder(components, variables, affordances);
 	}
 
 	/**

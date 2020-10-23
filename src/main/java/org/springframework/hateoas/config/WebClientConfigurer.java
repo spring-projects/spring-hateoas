@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,9 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.util.MimeType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -37,14 +27,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Assembles {@link ExchangeStrategies} needed to wire a {@link WebClient} with hypermedia support.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  * @since 1.0
+ * @deprecated Migrate to {@link HypermediaWebClientConfigurer} and it's {@link WebClient.Builder}-oriented approach.
  */
-@Configuration
-@RequiredArgsConstructor
+@Deprecated
 public class WebClientConfigurer {
 
-	private final ObjectMapper mapper;
-	private final Collection<HypermediaMappingInformation> hypermediaTypes;
+	private final HypermediaWebClientConfigurer hypermediaWebClientConfigurer;
+
+	/**
+	 * Creates a new {@link WebClientConfigurer} for the given {@link ObjectMapper} and
+	 * {@link HypermediaMappingInformation}s.
+	 *
+	 * @param mapper must not be {@literal null}.
+	 * @param hypermediaTypes must not be {@literal null}.
+	 */
+	public WebClientConfigurer(ObjectMapper mapper, List<HypermediaMappingInformation> hypermediaTypes) {
+		this.hypermediaWebClientConfigurer = new HypermediaWebClientConfigurer(mapper, hypermediaTypes);
+	}
 
 	/**
 	 * Return a set of {@link ExchangeStrategies} driven by registered {@link HypermediaType}s.
@@ -53,24 +54,9 @@ public class WebClientConfigurer {
 	 */
 	public ExchangeStrategies hypermediaExchangeStrategies() {
 
-		List<Encoder<?>> encoders = new ArrayList<>();
-		List<Decoder<?>> decoders = new ArrayList<>();
-
-		this.hypermediaTypes.forEach(hypermedia -> {
-
-			ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
-			MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
-
-			encoders.add(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-			decoders.add(new Jackson2JsonDecoder(objectMapper, mimeTypes));
-		});
-
-		return ExchangeStrategies.builder().codecs(clientCodecConfigurer -> {
-
-			encoders.forEach(encoder -> clientCodecConfigurer.customCodecs().encoder(encoder));
-			decoders.forEach(decoder -> clientCodecConfigurer.customCodecs().decoder(decoder));
-
-		}).build();
+		return ExchangeStrategies.builder() //
+				.codecs(this.hypermediaWebClientConfigurer.configurer) //
+				.build();
 	}
 
 	/**
@@ -80,6 +66,6 @@ public class WebClientConfigurer {
 	 * @return mutated webClient with hypermedia support.
 	 */
 	public WebClient registerHypermediaTypes(WebClient webClient) {
-		return webClient.mutate().exchangeStrategies(hypermediaExchangeStrategies()).build();
+		return this.hypermediaWebClientConfigurer.registerHypermediaTypes(webClient.mutate()).build();
 	}
 }

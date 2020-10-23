@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,6 @@ public interface RepresentationModelAssembler<T, D extends RepresentationModel<?
 
 		return StreamSupport.stream(entities.spliterator(), false) //
 				.map(this::toModel) //
-				.collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::new));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), CollectionModel::of));
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,17 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.springframework.http.HttpMethod.*;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -41,16 +37,14 @@ import org.springframework.http.MediaType;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@EqualsAndHashCode(callSuper = true)
 class HalFormsAffordanceModel extends AffordanceModel {
 
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
-	private static final Set<HttpMethod> REQUIRED_METHODS = EnumSet.of(POST, PUT);
 
-	private final @Getter List<HalFormsProperty> inputProperties;
+	private final List<HalFormsProperty> inputProperties;
 
-	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
@@ -67,10 +61,32 @@ class HalFormsAffordanceModel extends AffordanceModel {
 			return Collections.emptyList();
 		}
 
-		return PropertyUtils.findPropertyNames(getInputType()).stream() //
-				.map(propertyName -> new HalFormsProperty() //
-						.withName(propertyName) //
-						.withRequired(REQUIRED_METHODS.contains(getHttpMethod()))) //
+		return getInput().stream() //
+				.map(PropertyMetadata::getName) //
+				.map(it -> new HalFormsProperty() //
+						.withName(it)) //
 				.collect(Collectors.toList());
+	}
+
+	public List<HalFormsProperty> getInputProperties() {
+		return this.inputProperties;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof HalFormsAffordanceModel))
+			return false;
+		if (!super.equals(o))
+			return false;
+		HalFormsAffordanceModel that = (HalFormsAffordanceModel) o;
+		return Objects.equals(this.inputProperties, that.inputProperties);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), inputProperties);
 	}
 }

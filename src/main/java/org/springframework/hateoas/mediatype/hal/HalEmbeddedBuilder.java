@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package org.springframework.hateoas.mediatype.hal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.LinkRelation;
@@ -40,11 +41,17 @@ import org.springframework.util.Assert;
 class HalEmbeddedBuilder {
 
 	private static final String INVALID_EMBEDDED_WRAPPER = "Embedded wrapper %s returned null for both the static rel and the rel target type! Make sure one of the two returns a non-null value!";
+	private static final Function<String, String> NO_TRANSFORMER = Function.identity();
 
-	private final Map<HalLinkRelation, Object> embeddeds = new HashMap<>();
+	private final Map<HalLinkRelation, Object> embeddeds = new LinkedHashMap<>(); // preserve ordering
 	private final LinkRelationProvider provider;
 	private final CurieProvider curieProvider;
 	private final EmbeddedWrappers wrappers;
+
+	/**
+	 * Returns a {@link HalEmbeddedBuilder} with the given transformer
+	 */
+	private final Function<String, String> relationTransformer;
 
 	/**
 	 * Creates a new {@link HalEmbeddedBuilder} using the given {@link LinkRelationProvider} and prefer collection rels
@@ -54,13 +61,23 @@ class HalEmbeddedBuilder {
 	 * @param curieProvider must not be {@literal null}.
 	 * @param preferCollectionRels whether to prefer to ask the provider for collection rels.
 	 */
-	public HalEmbeddedBuilder(LinkRelationProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
+	HalEmbeddedBuilder(LinkRelationProvider provider, CurieProvider curieProvider, boolean preferCollectionRels) {
 
 		Assert.notNull(provider, "LinkRelationProvider must not be null!");
 
 		this.provider = provider;
 		this.curieProvider = curieProvider;
 		this.wrappers = new EmbeddedWrappers(preferCollectionRels);
+		this.relationTransformer = NO_TRANSFORMER;
+	}
+
+	private HalEmbeddedBuilder(LinkRelationProvider provider, CurieProvider curieProvider, EmbeddedWrappers wrappers,
+			Function<String, String> relationTransformer) {
+
+		this.provider = provider;
+		this.curieProvider = curieProvider;
+		this.wrappers = wrappers;
+		this.relationTransformer = relationTransformer;
 	}
 
 	/**
@@ -69,7 +86,7 @@ class HalEmbeddedBuilder {
 	 *
 	 * @param source can be {@literal null}.
 	 */
-	public void add(@Nullable Object source) {
+	void add(@Nullable Object source) {
 
 		EmbeddedWrapper wrapper = wrappers.wrap(source);
 
@@ -124,6 +141,8 @@ class HalEmbeddedBuilder {
 							? provider.getCollectionResourceRelFor(type) //
 							: provider.getItemResourceRelFor(type);
 
+					rel = relationTransformer == NO_TRANSFORMER ? rel : rel.map(relationTransformer);
+
 					return curieProvider != CurieProvider.NONE //
 							? curieProvider.getNamespacedRelFor(rel) //
 							: HalLinkRelation.of(rel);
@@ -135,7 +154,19 @@ class HalEmbeddedBuilder {
 	 *
 	 * @return
 	 */
-	public Map<HalLinkRelation, Object> asMap() {
+	Map<HalLinkRelation, Object> asMap() {
 		return Collections.unmodifiableMap(embeddeds);
+	}
+
+	/**
+	 * Create new {@link HalEmbeddedBuilder} by copying attributes and replacing the {@literal relationTransformer}.
+	 * 
+	 * @param relationTransformer
+	 * @return
+	 */
+	HalEmbeddedBuilder withRelationTransformer(Function<String, String> relationTransformer) {
+
+		return this.relationTransformer == relationTransformer ? this
+				: new HalEmbeddedBuilder(this.provider, this.curieProvider, this.wrappers, relationTransformer);
 	}
 }

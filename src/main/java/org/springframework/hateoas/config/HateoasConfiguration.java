@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,27 @@
  */
 package org.springframework.hateoas.config;
 
-import org.springframework.beans.factory.BeanCreationException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.PropertiesFactoryBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
@@ -30,10 +43,13 @@ import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.config.EnablePluginRegistries;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Common HATEOAS specific configuration.
@@ -43,28 +59,24 @@ import org.springframework.util.ClassUtils;
  * @soundtrack Elephants Crossing - Wait (Live at Stadtfest Dresden)
  * @since 0.19
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnablePluginRegistries({ LinkDiscoverer.class })
-class HateoasConfiguration {
+public class HateoasConfiguration {
 
-	/**
-	 * The {@link MessageSourceAccessor} to provide messages for {@link ResourceDescription}s being rendered.
-	 *
-	 * @return
-	 */
+	static String I18N_BASE_NAME = "rest-messages";
+	static String I18N_DEFAULTS_BASE_NAME = "rest-default-messages";
+
+	private @Autowired ApplicationContext context;
+
 	@Bean
-	public MessageSourceAccessor linkRelationMessageSource() {
+	public MessageResolver messageResolver() {
+		return MessageResolver.of(lookupMessageSource());
+	}
 
-		try {
-
-			ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-			messageSource.setBasename("classpath:rest-messages");
-
-			return new MessageSourceAccessor(messageSource);
-
-		} catch (Exception o_O) {
-			throw new BeanCreationException("resourceDescriptionMessageSourceAccessor", "", o_O);
-		}
+	@Bean
+	WebConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> information) {
+		return WebConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
 	}
 
 	// RelProvider
@@ -105,5 +117,61 @@ class HateoasConfiguration {
 	@Bean
 	LinkDiscoverers linkDiscoverers(PluginRegistry<LinkDiscoverer, MediaType> discoverers) {
 		return new LinkDiscoverers(discoverers);
+	}
+
+	/**
+	 * Creates a message source for the {@code rest-messages} resource bundle if the file exists or a
+	 * {@link NoOpMessageSource} otherwise.
+	 *
+	 * @return will never be {@literal null}.
+	 */
+	@Nullable
+	private final AbstractMessageSource lookupMessageSource() {
+
+		List<Resource> candidates = loadResourceBundleResources(I18N_DEFAULTS_BASE_NAME, false);
+
+		if (candidates.isEmpty() && loadResourceBundleResources(I18N_BASE_NAME, true).isEmpty()) {
+			return null;
+		}
+
+		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+		messageSource.setResourceLoader(context);
+		messageSource.setBasename("classpath:".concat(I18N_BASE_NAME));
+		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.toString());
+
+		if (!candidates.isEmpty()) {
+			messageSource.setCommonMessages(loadProperties(candidates));
+		}
+
+		return messageSource;
+	}
+
+	@Nullable
+	private final Properties loadProperties(List<Resource> sources) {
+
+		PropertiesFactoryBean factory = new PropertiesFactoryBean();
+		factory.setLocations(sources.toArray(new Resource[sources.size()]));
+
+		try {
+
+			factory.afterPropertiesSet();
+			return factory.getObject();
+
+		} catch (IOException o_O) {
+			throw new IllegalStateException("Could not load default properties from resources!", o_O);
+		}
+	}
+
+	private final List<Resource> loadResourceBundleResources(String baseName, boolean withWildcard) {
+
+		try {
+			return Arrays //
+					.stream(context.getResources(String.format("classpath:%s%s.properties", baseName, withWildcard ? "*" : ""))) //
+					.filter(Resource::exists) //
+					.collect(Collectors.toList());
+
+		} catch (IOException e) {
+			return Collections.emptyList();
+		}
 	}
 }

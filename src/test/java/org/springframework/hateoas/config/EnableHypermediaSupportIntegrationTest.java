@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -26,17 +29,21 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
@@ -54,6 +61,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -103,8 +111,6 @@ class EnableHypermediaSupportIntegrationTest {
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
 					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
-					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -132,8 +138,6 @@ class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
-					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
-			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON_UTF8))
 					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))
@@ -203,7 +207,7 @@ class EnableHypermediaSupportIntegrationTest {
 			RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 
 			assertThat(adapter.getMessageConverters().get(0).getSupportedMediaTypes()) //
-					.contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+					.contains(MediaTypes.HAL_JSON);
 
 			boolean found = false;
 
@@ -218,7 +222,7 @@ class EnableHypermediaSupportIntegrationTest {
 							.getField(processor, "messageConverters");
 
 					assertThat(converters.get(0)).isInstanceOfSatisfying(TypeConstrainedMappingJackson2HttpMessageConverter.class,
-							it -> assertThat(it.getSupportedMediaTypes()).contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8));
+							it -> assertThat(it.getSupportedMediaTypes()).contains(MediaTypes.HAL_JSON));
 				}
 			}
 
@@ -336,7 +340,7 @@ class EnableHypermediaSupportIntegrationTest {
 			RestTemplate template = context.getBean(RestTemplate.class);
 
 			assertThat(template.getMessageConverters().get(0).getSupportedMediaTypes()) //
-					.contains(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+					.contains(MediaTypes.HAL_JSON);
 		});
 	}
 
@@ -494,7 +498,7 @@ class EnableHypermediaSupportIntegrationTest {
 			assertThat(mapper).hasValueSatisfying(it -> {
 
 				RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-				resourceSupport.add(new Link("localhost").withSelfRel());
+				resourceSupport.add(Link.of("localhost").withSelfRel());
 
 				assertThatCode(() -> {
 					assertThat(it.writeValueAsString(resourceSupport)) //
@@ -514,12 +518,57 @@ class EnableHypermediaSupportIntegrationTest {
 						MediaTypes.HAL_JSON, //
 						mapper -> { //
 							RepresentationModel<?> resourceSupport = new RepresentationModel<>(); //
-							resourceSupport.add(new Link("localhost").withSelfRel()); //
+							resourceSupport.add(Link.of("localhost").withSelfRel()); //
 							assertThat(mapper.writeValueAsString(resourceSupport)) //
 									.isEqualTo("{\"_links\":{\"self\":[{\"href\":\"localhost\"}]}}"); //
 						} //
 				) //
 		);
+	}
+
+	@Test // #1019
+	void registersNoOpMessageResolverIfMessagesBundleMissing() {
+
+		withServletContext(HateoasConfiguration.class, //
+				context -> {
+					assertThat(context.getBean(MessageResolver.class)).isEqualTo(MessageResolver.of(null));
+				});
+	}
+
+	@Test // #1019
+	void registersMessageResolverIfMessagesBundleAvailable() {
+
+		String originalBaseName = HateoasConfiguration.I18N_BASE_NAME;
+
+		try {
+
+			HateoasConfiguration.I18N_BASE_NAME = "org/springframework/hateoas/config/rest-messages";
+
+			withServletContext(HateoasConfiguration.class, simulateResourceBundle(), context -> {
+
+				MessageResolver bean = context.getBean(MessageResolver.class);
+
+				assertThat(bean).isNotEqualTo(MessageResolver.of(null));
+				assertThat(bean.resolve(() -> new String[] { "key" })).isEqualTo("Schlüssel");
+			});
+
+		} finally {
+			HateoasConfiguration.I18N_BASE_NAME = originalBaseName;
+		}
+	}
+
+	@Test // #1019, DATAREST-686
+	void defaultsEncodingOfMessageSourceToUtf8() throws Exception {
+
+		withServletContext(HalConfig.class, simulateResourceBundle(), context -> {
+
+			MessageResolver resolver = context.getBean(MessageResolver.class);
+
+			Object accessor = ReflectionTestUtils.getField(resolver, "accessor");
+			Object messageSource = ReflectionTestUtils.getField(accessor, "messageSource");
+
+			assertThat((String) ReflectionTestUtils.getField(messageSource, "defaultEncoding")).isEqualTo("UTF-8");
+		});
 	}
 
 	private static void assertEntityLinksSetUp(ApplicationContext context) {
@@ -605,6 +654,29 @@ class EnableHypermediaSupportIntegrationTest {
 		}
 
 		throw new IllegalStateException("Unexpected result when looking up argument resolvers!");
+	}
+
+	private static <T extends AnnotationConfigWebApplicationContext> Function<T, T> simulateResourceBundle() {
+
+		return context -> {
+
+			T spy = Mockito.spy(context);
+
+			ClassPathResource resource = new ClassPathResource("rest-messages.properties",
+					EnableHypermediaSupportIntegrationTest.class);
+			assertThat(resource.exists()).isTrue();
+
+			try {
+
+				doReturn(new Resource[0]).when(spy).getResources("classpath:rest-default-messages.properties");
+				doReturn(new Resource[] { resource }).when(spy).getResources(contains("rest-messages"));
+
+			} catch (IOException o_O) {
+				fail("Couldn't mock resource lookup!", o_O);
+			}
+
+			return spy;
+		};
 	}
 
 	@Configuration

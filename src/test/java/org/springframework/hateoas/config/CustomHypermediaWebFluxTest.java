@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@ import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static org.springframework.hateoas.support.CustomHypermediaType.*;
 import static org.springframework.hateoas.support.MappingUtils.*;
 
+import reactor.core.publisher.Mono;
+
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,11 +52,11 @@ class CustomHypermediaWebFluxTest {
 		ctx.register(TestConfig.class);
 		ctx.refresh();
 
-		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
+		HypermediaWebClientConfigurer webClientConfigurer = ctx.getBean(HypermediaWebClientConfigurer.class);
 
 		this.testClient = WebTestClient.bindToApplicationContext(ctx).build() //
 				.mutate() //
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()) //
+				.exchangeStrategies(it -> it.codecs(webClientConfigurer.configurer)) //
 				.build();
 	}
 
@@ -95,7 +96,7 @@ class CustomHypermediaWebFluxTest {
 
 			return linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel() //
 					.toMono() //
-					.map(link -> new EntityModel<>(new Employee("Frodo Baggins", "ring bearer"), link)); //
+					.map(link -> EntityModel.of(new Employee("Frodo Baggins", "ring bearer"), link)); //
 		}
 	}
 }

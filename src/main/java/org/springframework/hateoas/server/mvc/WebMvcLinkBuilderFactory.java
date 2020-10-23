@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,14 +115,16 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 				Object parameterValue = parameterValues.next();
 
-				uriComponentsContributors.stream() //
-						.filter(it -> it.supportsParameter(parameter)) //
-						.forEach(it -> it.enhance(builder, parameter, parameterValue));
+				for (UriComponentsContributor contributor : uriComponentsContributors) {
+					if (contributor.supportsParameter(parameter)) {
+						contributor.enhance(builder, parameter, parameterValue);
+					}
+				}
 			}
 
 			return builder;
 
-		}).apply(builderFactory);
+		}, builderFactory);
 	}
 
 	/*

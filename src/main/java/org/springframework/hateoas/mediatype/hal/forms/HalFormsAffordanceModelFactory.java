@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import lombok.Getter;
-
 import java.util.List;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModelFactory;
+import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
+import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
@@ -36,15 +35,19 @@ import org.springframework.http.MediaType;
  */
 class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final @Getter MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
+	private final MediaType mediaType = MediaTypes.HAL_FORMS_JSON;
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.core.ResolvableType, java.util.List, org.springframework.core.ResolvableType)
 	 */
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
-		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
+			InputPayloadMetadata inputType, List<QueryParameter> parameters, PayloadMetadata outputType) {
+		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, parameters, outputType);
+	}
+
+	public MediaType getMediaType() {
+		return this.mediaType;
 	}
 }

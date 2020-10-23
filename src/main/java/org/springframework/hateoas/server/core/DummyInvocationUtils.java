@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 package org.springframework.hateoas.server.core;
 
-import lombok.NonNull;
-import lombok.Value;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.lang.Nullable;
@@ -36,6 +37,8 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DummyInvocationUtils {
 
+	private static final ThreadLocal<Map<CacheKey<?>, Object>> CACHE = ThreadLocal.withInitial(HashMap::new);
+
 	/**
 	 * Method interceptor that records the last method invocation and creates a proxy for the return value that exposes
 	 * the method invocation.
@@ -44,17 +47,9 @@ public class DummyInvocationUtils {
 	 */
 	private static class InvocationRecordingMethodInterceptor implements MethodInterceptor, LastInvocationAware {
 
-		private static final Method GET_INVOCATIONS;
-		private static final Method GET_OBJECT_PARAMETERS;
-
 		private final Class<?> targetType;
 		private final Object[] objectParameters;
 		private MethodInvocation invocation;
-
-		static {
-			GET_INVOCATIONS = ReflectionUtils.findMethod(LastInvocationAware.class, "getLastInvocation");
-			GET_OBJECT_PARAMETERS = ReflectionUtils.findMethod(LastInvocationAware.class, "getObjectParameters");
-		}
 
 		/**
 		 * Creates a new {@link InvocationRecordingMethodInterceptor} carrying the given parameters forward that might be
@@ -83,11 +78,7 @@ public class DummyInvocationUtils {
 
 			Method method = invocation.getMethod();
 
-			if (GET_INVOCATIONS.equals(method)) {
-				return getLastInvocation();
-			} else if (GET_OBJECT_PARAMETERS.equals(method)) {
-				return getObjectParameters();
-			} else if (ReflectionUtils.isObjectMethod(method)) {
+			if (ReflectionUtils.isObjectMethod(method)) {
 				return ReflectionUtils.invokeMethod(method, invocation.getThis(), invocation.getArguments());
 			}
 
@@ -131,12 +122,29 @@ public class DummyInvocationUtils {
 	 * @param parameters parameters to extend template variables in the type level mapping.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T methodOn(Class<T> type, Object... parameters) {
 
 		Assert.notNull(type, "Given type must not be null!");
 
-		InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(type, parameters);
-		return getProxyWithInterceptor(type, interceptor, type.getClassLoader());
+		return (T) CACHE.get().computeIfAbsent(CacheKey.of(type, parameters), it -> {
+
+			InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(it.type,
+					it.arguments);
+			return getProxyWithInterceptor(it.type, interceptor, type.getClassLoader());
+		});
+	}
+
+	/**
+	 * Returns the {@link LastInvocationAware} instance from the given source, that essentially has to be a proxy created
+	 * via {@link #methodOn(Class, Object...)} and subsequent {@code linkTo(…)} calls.
+	 *
+	 * @param source must not be {@literal null}.
+	 * @return
+	 */
+	@Nullable
+	public static LastInvocationAware getLastInvocationAware(Object source) {
+		return (LastInvocationAware) ((Advised) source).getAdvisors()[0].getAdvice();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -157,11 +165,108 @@ public class DummyInvocationUtils {
 		return (T) factory.getProxy(classLoader);
 	}
 
-	@Value
-	private static class SimpleMethodInvocation implements MethodInvocation {
+	private static final class CacheKey<T> {
 
-		@NonNull Class<?> targetType;
-		@NonNull Method method;
-		@NonNull Object[] arguments;
+		private final Class<T> type;
+		private final Object[] arguments;
+
+		private CacheKey(Class<T> type, Object[] arguments) {
+
+			this.type = type;
+			this.arguments = arguments;
+		}
+
+		public static <T> CacheKey<T> of(Class<T> type, Object[] arguments) {
+			return new CacheKey<T>(type, arguments);
+		}
+
+		public Class<T> getType() {
+			return this.type;
+		}
+
+		public Object[] getArguments() {
+			return this.arguments;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof CacheKey))
+				return false;
+			CacheKey<?> cacheKey = (CacheKey<?>) o;
+			return Objects.equals(this.type, cacheKey.type) && Arrays.equals(this.arguments, cacheKey.arguments);
+		}
+
+		@Override
+		public int hashCode() {
+
+			int result = Objects.hash(this.type);
+			result = 31 * result + Arrays.hashCode(this.arguments);
+			return result;
+		}
+
+		public String toString() {
+
+			return "DummyInvocationUtils.CacheKey(type=" + this.type + ", arguments=" + Arrays.deepToString(this.arguments)
+					+ ")";
+		}
+	}
+
+	private static final class SimpleMethodInvocation implements MethodInvocation {
+
+		private final Class<?> targetType;
+		private final Method method;
+		private final Object[] arguments;
+
+		public SimpleMethodInvocation(Class<?> targetType, Method method, Object[] arguments) {
+
+			Assert.notNull(targetType, "targetType must not be null!");
+			Assert.notNull(method, "method must not be null!");
+			Assert.notNull(arguments, "arguments must not be null!");
+
+			this.targetType = targetType;
+			this.method = method;
+			this.arguments = arguments;
+		}
+
+		public Class<?> getTargetType() {
+			return this.targetType;
+		}
+
+		public Method getMethod() {
+			return this.method;
+		}
+
+		public Object[] getArguments() {
+			return this.arguments;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof SimpleMethodInvocation))
+				return false;
+			SimpleMethodInvocation that = (SimpleMethodInvocation) o;
+			return Objects.equals(this.targetType, that.targetType) && Objects.equals(this.method, that.method)
+					&& Arrays.equals(this.arguments, that.arguments);
+		}
+
+		@Override
+		public int hashCode() {
+
+			int result = Objects.hash(this.targetType, this.method);
+			result = 31 * result + Arrays.hashCode(this.arguments);
+			return result;
+		}
+
+		public String toString() {
+
+			return "DummyInvocationUtils.SimpleMethodInvocation(targetType=" + this.targetType + ", method=" + this.method
+					+ ", arguments=" + Arrays.deepToString(this.arguments) + ")";
+		}
 	}
 }

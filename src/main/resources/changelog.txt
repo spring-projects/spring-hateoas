@@ -1,6 +1,278 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2 RC1 (2020-09-15)
+----------------------------------------
+- #1367 - Release Spring HATEOAS 1.2.0.RC1.
+- #1366 - Upgrade to Spring Framework 5.3.0-RC1.
+- #1364 - Document that media type implementation configuration should be public.
+- #1358 - Update links to JSON:API documentation (community based media types).
+- #1352 - Map content is not getting serialized properly.
+
+Changes in version 1.2 M1 (2020-08-11)
+----------------------------------------
+- #1351 - Upgrade to Jackson 2.11.2.
+- #1350 - Upgrade to Kotlin 1.4 RC.
+- #1349 - Release 1.2 M1.
+- #1348 - Upgrade to Spring Framework 5.3 M2.
+- #1341 - Add Links.andIf(boolean, Link...).
+- #1340 - Allow adding Stream<Link> to Links.
+- #1337 - List community media type implementations in the reference docs.
+- #1335 - Add HalModelBuilder.embed(Stream<?> …).
+- #1334 - Upgrade to Reactor Dysprosium SR10.
+- #1333 - Upgrade to Spring 5.2.8.
+- #1329 - Remove deprecations.
+- #1323 - Allow HalModelBuilder.build() to pick up call side generics.
+- #1322 - Allow to conditionally add a Link to Links.
+- #1321 - Add convenience type to create Link instances from URIs created via MvcUriComponentsBuilder.
+- #1320 - Update Javadoc and toString() methods in renamed classes.
+- #1319 - Revisit language in reference documentation.
+- #1314 - HalLinkRelation incorrectly parses relation sources with more than one colon in them.
+- #1313 - Problem.ExtendedProblem has no withStatus method.
+- #1304 - The SPI for media types needs to reflect it's ONLY for internal usage.
+- #1294 - Delombok production code.
+- #1291 - VndErrors logref is not just Integer.
+- #1287 - Memory pressure when creating Link instances.
+- #361 - Add Support for Resolving Property Values in @RequestMapping(value).
+
+Changes in version 1.1.0.RELEASE (2020-05-11)
+----------------------------------------
+- #1292 - Release 1.1.0.RELEASE.
+- #1280 - RepresentationModelProcessorInvoker incorrectly invokes generic processors.
+- #968 - @JsonUnwrapped ignored with (embedded) CollectionModel and HAL Forms.
+- #864 - Create a dedicated builder for HAL representations.
+- #270 - Sample for embedding HAL Resources of different types with root resource.
+- #193 - Support for Resources in a Resource to be added to _embedded.
+
+Changes in version 1.1.0.RC1 (2020-04-28)
+----------------------------------------
+- #1277 - Upgrade to Jackson 2.11.0.
+- #1275 - Align Naming for Kotlin Extension Functions with Spring.
+- #1270 - Add Kotlin source to released artifacts.
+- #1266 - Use JDK 14 for Java.next CI testing.
+- #1264 - Remove .factorypath.
+- #1255 - Introduce ability to alter classpath for test purposes.
+- #1252 - HypermediaWebTestClientConfigurer must not be registered if spring-test is not on the classpath.
+- #1250 - Start testing against Jackson 2.11.
+- #1247 - Update spring-doc-resources and highlight.
+- #1213 - Add support for Kotlin co-routines.
+-  #227 - Uri Template {?value*} does not generate templated:true.
+
+Changes in version 1.1.0.M3 (2020-03-31)
+----------------------------------------
+- #1246 - Upgrade to AssertJ 3.15.0.
+- #1245 - Upgrade to Kotlin 1.3.71.
+- #1241 - Additional factory methods for empty CollectionModel and PagedModel instances.
+- #1230 - Upgrade to Jackson 2.10.3.
+- #1229 - Upgrade to Reactor Dysprosium-SR6.
+- #1228 - Fix CI scripts to properly use maven caching.
+- #1227 - Upgrade to JUnit 5.6.1.
+- #1226 - Upgrade to Spring Framework 5.2.5.RELEASE.
+- #1225 - Provide implementation of WebTestClientConfigurer to support hypermedia.
+- #1224 - Provide API for users to easily configure WebClient.
+- #1223 - Provide API for users to easily configure RestTemplate.
+- #1216 - Consider providing String constants in IanaLinkRelations.
+- #1215 - Update RFC-5988 references to RFC-8288.
+- #1208 - Migrate from Lombok's @Wither to @With.
+
+Changes in version 1.1.0.M2 (2020-02-12)
+----------------------------------------
+- #1205 - Fix nullability warnings in EntityModelProcessorWrapper.isValueTypeMatch(…).
+- #1204 - Fix nullability warnings in VndErrors.
+- #1203 - Migrate off deprecated Link APIs.
+- #1202 - Polish imports and formatting.
+- #1201 - Switch to new EntityModel factory methods where possible.
+- #1200 - Link.of(String, String) should not be deprecated.
+- #1198 - Upgrade to Lombok 1.18.12.
+- #1195 - Upgrade to Jackson BOM 2.10.2.20200130.
+- #1193 - Revise usage of Encoder registration APIs.
+- #1189 - Link building does not consider method parameters declared in interfaces.
+- #1183 - Migration script doesn't cover @ExposesResourceFor.
+- #1172 - Add helper methods for creating template variables.
+
+Changes in version 1.1.0.M1 (2020-01-15)
+----------------------------------------
+- #1182 - Upgrade to JUnit 5.5.2.
+- #1181 - Upgrade to Reactor Dysprosium SR3.
+- #1180 - Upgrade to Slf4J 1.7.30.
+- #1179 - Upgrade to Kotlin 1.3.61.
+- #1178 - Upgrade to Jackson 2.10.2.
+- #1177 - Upgrade to JaCoCO 0.8.5.
+- #1176 - Upgrade to AssertJ 3.14.
+- #1174 - Upgrade to Spring Framework 5.2.3.
+- #1169 - Update license headers to extend copyright to 2020.
+- #1166 - Premature initialization of downstream beans caused by RestTemplateHateoasConfiguration's reference to WebConverters.
+- #1165 - Potential NullPointerException in UriTemplate.
+- #1159 - Fold HalHandlerInstantiator.enforceEmbeddedCollections into HalConfiguration.
+- #1157 - Map content in an EntityModel is not properly unwrapped.
+- #1155 - Thread-safety issues in AnnotationLinkRelationProvider's cache.
+- #1152 - Allow appending path segments in WebFluxLinkBuilder.
+- #1148 - Further performance improvements in link creation.
+- #1145 - Query parameters are not removed from generated WebFlux links.
+- #1138 - Upgrade to Spring Framework 5.2.2.
+- #1134 - WebClientConfigurer "drops" ObjectMapper customizations from WebClients.
+- #1133 - Fix package name 'vnderror' to 'vnderrors' in migration script.
+- #1132 - Keys for HAL's _embedded document and link relations do not follow the Jackson PropertyNamingStrategy configured.
+- #1127 - UriTemplate redundantly percent encodes literal part.
+- #1122 - Generics bounds too strict in RepresentationModelAssemblerSupport.
+- #1121 - Bean class without reader method producing NullPointerException.
+- #1119 - Configuring RestTemplate breaks in a pure Spring WebFlux application.
+- #1118 - MemoryLeak caused by UriTemplate cache.
+- #1116 - Refine factory methods and nullability checks for RepresentationModel types.
+- #1109 - Upgrade to Reactor Dysprosium-SR1.
+- #1107 - Upgrade to Spring Framework 5.2.1.RELEASE.
+- #1103 - Migration for ResourceAssemblerSupport -> RepresentationModelAssemblerSupport missing.
+- #1101 - Fix also HAL_JSON_UTF8 media type.
+- #1100 - Upgrade CI to use JDK 13 for edge testing.
+- #1098 - WebMvcHateoasConfiguration not applied for plain client application.
+- #1097 - Fixed some grammatical and spelling errors.
+- #1091 - Fix single char typo.
+- #1057 - Migrate to vendor neutral error handling mechanism (RFC-7807).
+- #1045 - Reduce visibility of UriTemplate constructor calls.
+- #1025 - logref property should be optional.
+- #786 - Introduce comprehensive error handling strategy.
+- #776 - #775 - Overhaul VndErrors to match spec.
+- #775 - Update VndErrors to match latest details of the spec.
+- #651 - Allow VndError  to have children. .
+- #593 - UriTemplate handles encoded variables improperly on expand call.
+- #546 - vnd.error path attribute.
+- #478 - VndErrors.VndError#logRef is not optional.
+- #345 - Vnd.error links key on json response.
+
+Changes in version 1.0.2.RELEASE (2019-12-03)
+----------------------------------------
+- #1142 - Release 1.0.2.RELEASE.
+- #1140 - WebClientConfigurer "drops" ObjectMapper customizations from WebClients.
+- #1139 - Upgrade to Spring Framework 5.2.2.
+- #1137 - Fix package name 'vnderror' to 'vnderrors' in migration script.
+- #1131 - UriTemplate handles encoded variables improperly on expand call.
+- #1130 - UriTemplate redundantly percent encodes literal part.
+- #1128 - Configuring RestTemplate breaks in a pure Spring WebFlux application.
+- #1126 - Generics bounds too strict in RepresentationModelAssemblerSupport.
+- #1124 - Bean class without reader method producing NullPointerException.
+- #1123 - MemoryLeak caused by UriTemplate cache.
+
+Changes in version 1.0.1.RELEASE (2019-11-03)
+----------------------------------------
+- #1112 - Release 1.0.1.RELEASE.
+- #1111 - Add 1.0.1.RELEASE to the ChangeLog.
+- #1110 - Upgrade to Reactor Dysprosium-SR1.
+- #1108 - Upgrade to Spring Framework 5.2.1.RELEASE.
+- #1104 - Migration for ResourceAssemblerSupport -> RepresentationModelAssemblerSupport missing.
+
+Changes in version 1.0.0.RELEASE (2019-09-30)
+----------------------------------------
+- #1090 - Release 1.0.0.RELEASE.
+- #1089 - Upgrade Reactor to Dysprosium-RELEASE.
+- #1088 - Upgrade to Jackson 2.10.
+- #1086 - Upgrade to Jackson BOM 2.9.9.20190807.
+- #1085 - Upgrade to Spring Plugin 2.0.
+- #1080 - Clarify expected behaviour around EntityLinks when using WebFlux.
+- #1079 - Upgrade to Spring Framework 5.2.0.RELEASE.
+- #1075 - i18n only working when rest-default-messages.properties is available.
+- #1038 - Update documentation to show how to create an ALPS serving controller for profile purposes.
+- #1028 - Fix example in docs to reflect requirement for _prompt for property I18N.
+- #966 - Application does not start due to two bean instances of org.springframework.plugin.core.PluginRegistry.
+- #965 - NPE when generating a link to POST method without RequestBody parameter.
+- #837 - Update reference docs to reflect new APIs, SPIs, and package structures.
+
+Changes in version 1.0.0.RC2 (2019-09-05)
+----------------------------------------
+- #1072 - Expose null handling configuration of HalFormsTemplate.title.
+- #1070 - Release 1.0.0.RC2.
+- #1069 - Upgrade to Reactor Dyprosium-RC1.
+- #1067 - Remove @EnableEntityLinks.
+- #1066 - Upgrade to Spring Framework 5.2.0.RC2.
+- #1064 - #1061 - Reenable default codecs for WebFlux configuration.
+- #1063 - Documentation describes using @EnableEntityLinks but it is deprecated and no longer necessary.
+- #1062 - @EnableHypermediaSupport does not provide a ContollerEntityLinks bean when using WebFlux.
+- #1061 - Enabling hypermedia disables all of WebFlux's default codecs.
+- #1059 - Code cleanup.
+- #1058 - Migrate off deprecated Spring APIs.
+- #1054 - Fix unresolved directive for Traverson section of ref docs.
+- #1047 - WebFlux configuration must properly handle application/json.
+- #1044 - Properly deprecate UriTemplate's constructors.
+
+Changes in version 1.0.0.RC1 (2019-08-05)
+----------------------------------------
+- #1042 - Upgrade to AssertJ 3.13.2.
+- #1041 - Upgrade to JUnit 5.5.1.
+- #1039 - ALPS documents should not render null attributes.
+- #1035 - Upgrade to Reactor Dysprosium M3.
+- #1034 - Upgrade to Spring Framework 5.2.0.RC1.
+- #1030 - Release 1.0.0.RC1.
+- #1029 - Update changelog for RC1.
+- #1027 - #857 - Use List instead of Collection in configuration classes.
+- #1026 - Upgrade to Jackson 2.9.9.20190727.
+- #1024 - Release documentation through CI.
+- #1023 - Update CI pipeline based on lessons learned.
+- #1022 - Deprecate @EnableEntityLinks.
+- #1021 - Make sure that EntityLinks bean is only activated for Spring MVC.
+- #1020 - Migration for BasicLinkBuilder in 1.0.0.M3.
+- #1019 - Performance issues with i18n of HAL link titles.
+- #1018 - Support customizing additional HAL-FORMS properties.
+- #1017 - Update document publication mechanism .
+- #1014 - RepresentationModel should allow adding links optionally.
+- #1013 - Upgrade to JUnit 5.5.
+- #1012 - Documentation for HAL-FORMS resource bundles for _templates is wrong.
+- #1011 - Add timeouts to the pipeline.
+- #1010 - #987 - Drop UTF8 HAL media type.
+- #1008 - Properly configure user.name and user.home for CI jobs.
+- #1006 - Upgrade Asciidoctor Maven plugin dependencies.
+- #1005 - Document internationalization options.
+- #1003 - IllegalArgumentException when calling linkTo(methodOn(...)) on controller method with optional @RequestParam.
+- #992 - HAL-FORMS implementation prevents mediatype usage as intended by the specification.
+- #987 - Deprecate _UTF8 media type variants.
+- #986 - Switch to Spring's ServerWebExchangeContextFilter.
+- #981 - Provide linkRelationBasedPolicy for HAL Forms.
+- #979 - Allow customization of HAL Forms property prompts.
+- #857 - Use List not Collection when asking for beans.
+- #849 - Support defining HAL Forms template titles via resource bundles.
+- #836 - Reference documentation mentions inexistant "createResource" method in class "ResourceAssemblerSupport".
+- #832 - Properly integrate configuration for HAL into HAL-FORMS configuration.
+- #777 - Rename UnitTest classes as ...UnitTests for consistency.
+- #729 - Serializing ResourceSupport types into HAL-FORMS doesn't work.
+- #445 - RepresentationModelAssemblerSupport does not expose controllerClass/resourceType to subclasses.
+- #153 - Readme does not match code.
+
+Changes in version 1.0.0.M3 (2019-06-14)
+----------------------------------------
+- #1002 - Release 1.0 M3.
+- #1001 - Upgrade to Reactor Dysprosium M2.
+- #1000 - Upgrade to Spring Framework 5.0 M3.
+- #999 - Introduce Jenkins CI.
+- #998 - Prevent eager bean instantiation from WebMvcHateoasConfiguration.
+- #997 - Upgrade to Jackson 2.9.9.
+- #990 - Fix deployment of Javadoc and reference docs.
+- #989 - Update pipeline to support Concourse 5.
+- #888 - Upgrade to Spring Plugin 2.0 M2.
+
+Changes in version 1.0.0.M2 (2019-05-13)
+----------------------------------------
+- #988 - Release 1.0 M2.
+- #985 - Stabilize on Spring Framework 5.2.0.M1.
+- #983 - Switch to Spring's ServerWebExchangeContextFilter.
+- #980 - Migrate to JUnit 5.
+- #977 - Performance improvements in link generation.
+- #973 - Add configuration options to select the web stack to add hypermedia support for.
+- #971 - Traverson to templated Link fails.
+- #919 - Upgrade to Spring Framework 5.2 M2.
+- #911 - Rename pull request tasks.
+- #910 - URL Cleanup.
+- #891 - Overhaul documentation section on EntityLinks.
+- #886 - Add section on forward header handling to reference documents.
+- #885 - Re-enable default registry of WebFlux encoders and decoders.
+- #867 - WebClientConfigurer overrides exchange strategies.
+- #863 - Removal of spring-plugin library.
+- #860 - Switch to URI.create().
+- #859 - Fix RepresentationModelProcessor to smoothly register with Spring MVC.
+- #856 - Improve migration script.
+- #855 - URL Cleanup.
+- #831 - Add nullability annotations to codebase.
+- #830 - Reorganize the labels.
+- #459 - Add Spring HATEOAS room to Gitter.
+
+
 Changes in version 1.0.0.M1 (2019-03-05)
 ----------------------------------------
 - #854 - Migrate off Objenesis in favor of Spring's ProxyFactory.

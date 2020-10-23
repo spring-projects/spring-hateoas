@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,29 @@
 package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.TemplateVariable.*;
+import static org.springframework.hateoas.UriTemplateUnitTest.EncodingFixture.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
@@ -37,10 +49,8 @@ import org.springframework.hateoas.TemplateVariable.VariableType;
  */
 class UriTemplateUnitTest {
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
+	@SuppressWarnings("null")
 	void discoversTemplate() {
 
 		assertThat(UriTemplate.isTemplate("/foo{?bar}")).isTrue();
@@ -49,10 +59,7 @@ class UriTemplateUnitTest {
 		assertThat(UriTemplate.isTemplate("")).isFalse();
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversRequestParam() {
 
 		UriTemplate template = UriTemplate.of("/foo{?bar}");
@@ -60,10 +67,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.REQUEST_PARAM));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversRequestParamCntinued() {
 
 		UriTemplate template = UriTemplate.of("/foo?bar{&foobar}");
@@ -71,10 +75,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("foobar", VariableType.REQUEST_PARAM_CONTINUED));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversOptionalPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/foo{/bar}");
@@ -82,10 +83,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.SEGMENT));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/foo/{bar}");
@@ -93,10 +91,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.PATH_VARIABLE));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversFragment() {
 
 		UriTemplate template = UriTemplate.of("/foo{#bar}");
@@ -104,10 +99,7 @@ class UriTemplateUnitTest {
 		assertVariables(template, new TemplateVariable("bar", VariableType.FRAGMENT));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void discoversMultipleRequestParam() {
 
 		UriTemplate template = UriTemplate.of("/foo{?bar,foobar}");
@@ -116,10 +108,7 @@ class UriTemplateUnitTest {
 				new TemplateVariable("foobar", VariableType.REQUEST_PARAM));
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsRequestParameter() {
 
 		UriTemplate template = UriTemplate.of("/foo{?bar}");
@@ -128,10 +117,7 @@ class UriTemplateUnitTest {
 		assertThat(uri.toString()).isEqualTo("/foo?bar=myBar");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsMultipleRequestParameters() {
 
 		Map<String, Object> parameters = new HashMap<>();
@@ -144,10 +130,7 @@ class UriTemplateUnitTest {
 		assertThat(uri.toString()).isEqualTo("/foo?bar=myBar&fooBar=myFooBar");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void rejectsMissingRequiredPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/foo/{bar}");
@@ -157,10 +140,7 @@ class UriTemplateUnitTest {
 		});
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsMultipleVariablesViaArray() {
 
 		UriTemplate template = UriTemplate.of("/foo{/bar}{?firstname,lastname}{#anchor}");
@@ -168,37 +148,25 @@ class UriTemplateUnitTest {
 		assertThat(uri.toString()).isEqualTo("/foo/path?firstname=Dave&lastname=Matthews#discography");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void expandsTemplateWithoutVariablesCorrectly() {
 		assertThat(UriTemplate.of("/foo").expand().toString()).isEqualTo("/foo");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void correctlyExpandsFullUri() {
 		assertThat(UriTemplate.of("http://localhost:8080/foo{?bar}").expand().toString())
 				.isEqualTo("http://localhost:8080/foo");
 	}
 
-	/**
-	 * @see #137
-	 */
-	@Test
+	@Test // #137
 	void rendersUriTempalteWithPathVariable() {
 
 		UriTemplate template = UriTemplate.of("/{foo}/bar{?page}");
 		assertThat(template.toString()).isEqualTo("/{foo}/bar{?page}");
 	}
 
-	/**
-	 * #@see 137
-	 */
-	@Test
+	@Test // #137
 	void addsTemplateVariables() {
 
 		UriTemplate source = UriTemplate.of("/{foo}/bar{?page}");
@@ -211,10 +179,7 @@ class UriTemplateUnitTest {
 		assertVariables(source.with(new TemplateVariables(toAdd)), expected);
 	}
 
-	/**
-	 * @see #217
-	 */
-	@Test
+	@Test // #217
 	void doesNotAddVariablesForAlreadyExistingRequestParameters() {
 
 		UriTemplate template = UriTemplate.of("/?page=2");
@@ -225,10 +190,7 @@ class UriTemplateUnitTest {
 		assertThat(result.getVariableNames()).isEmpty();
 	}
 
-	/**
-	 * @see #217
-	 */
-	@Test
+	@Test // #217
 	void doesNotAddVariablesForAlreadyExistingFragment() {
 
 		UriTemplate template = UriTemplate.of("/#fragment");
@@ -236,31 +198,16 @@ class UriTemplateUnitTest {
 		assertThat(result.getVariableNames()).isEmpty();
 	}
 
-	/**
-	 * @see #271
-	 */
-	@Test
-	void expandASimplePathVariable() {
-
-		UriTemplate template = UriTemplate.of("/foo/{id}");
-		assertThat(template.expand(2).toString()).isEqualTo("/foo/2");
-	}
-
-	/**
-	 * @see #273
-	 */
-	@Test
+	@Test // #273
+	@SuppressWarnings("null")
 	void rejectsEmptyBaseUri() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new UriTemplate(null, TemplateVariables.NONE);
+			UriTemplate.of(null, TemplateVariables.NONE);
 		});
 	}
 
-	/**
-	 * @see #281
-	 */
-	@Test
+	@Test // #281
 	void allowsAddingTemplateVariable() {
 
 		UriTemplate template = UriTemplate.of("/").with("q", VariableType.REQUEST_PARAM);
@@ -268,10 +215,7 @@ class UriTemplateUnitTest {
 		assertThat(template.toString()).isEqualTo("/{?q}");
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
+	@Test // #483
 	void compositveValuesAreRecognisedAsVariableType() {
 
 		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
@@ -280,66 +224,128 @@ class UriTemplateUnitTest {
 				new TemplateVariable("foobar", VariableType.COMPOSITE_PARAM));
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
+	@Test // #483
 	@SuppressWarnings("serial")
 	void expandsCompositeValueAsAssociativeArray() {
 
-		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
-
-		String expandedTemplate = template.expand(new HashMap<String, Object>() {
-			{
-				put("bar", "barExpanded");
-				put("foobar", new HashMap<String, String>() {
+		of("/foo{&bar,foobar*}", "/foo?bar=barExpanded&city=Clarksville&state=TN") //
+				.param("bar", "barExpanded") //
+				.param("foobar", new HashMap<String, String>() {
 					{
 						put("city", "Clarksville");
 						put("state", "TN");
 					}
-				});
-			}
-		}).toString();
-
-		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&city=Clarksville&state=TN");
+				}) //
+				.verify();
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
-	@SuppressWarnings("serial")
+	@Test // #483
 	void expandsCompositeValueAsList() {
 
-		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
-
-		String expandedTemplate = template.expand(new HashMap<String, Object>() {
-			{
-				put("bar", "barExpanded");
-				put("foobar", Arrays.asList("foo1", "foo2"));
-			}
-		}).toString();
-
-		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&foobar=foo1&foobar=foo2");
+		of("/foo{&bar,foobar*}", "/foo?bar=barExpanded&foobar=foo1&foobar=foo2") //
+				.param("bar", "barExpanded") //
+				.param("foobar", Arrays.asList("foo1", "foo2")) //
+				.verify();
 	}
 
-	/**
-	 * @see #483
-	 */
-	@Test
-	@SuppressWarnings("serial")
+	@Test // #483
 	void handlesCompositeValueAsSingleValue() {
 
-		UriTemplate template = UriTemplate.of("/foo{&bar,foobar*}");
+		of("/foo{&bar,foobar*}", "/foo?bar=barExpanded&foobar=singleValue") //
+				.param("bar", "barExpanded") //
+				.param("foobar", "singleValue") //
+				.verify();
+	}
 
-		String expandedTemplate = template.expand(new HashMap<String, Object>() {
-			{
-				put("bar", "barExpanded");
-				put("foobar", "singleValue");
+	@Test // #1127
+	void escapesBaseUriProperly() {
+		of("https://example.org/foo and bar/{baz}", "https://example.org/foo%20and%20bar/xyzzy") //
+				.param("baz", "xyzzy") //
+				.verify();
+	}
+
+	@ParameterizedTest // #593
+	@MethodSource("getEncodingFixtures")
+	public void uriTemplateExpansionsShouldWork(EncodingFixture fixture) {
+		fixture.verify();
+	}
+
+	@Test // #593
+	void deserializesProperly() throws IOException, ClassNotFoundException {
+
+		UriTemplate template = UriTemplate.of("/{foo}");
+
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream();
+				ObjectOutputStream stream = new ObjectOutputStream(output)) {
+
+			stream.writeObject(template);
+
+			try (InputStream input = new ByteArrayInputStream(output.toByteArray());
+					ObjectInputStream object = new ObjectInputStream(input)) {
+
+				Object result = object.readObject();
+
+				assertThat(result).isInstanceOfSatisfying(UriTemplate.class, it -> {
+					assertThat(it.expand("bar")).hasToString("/bar");
+				});
 			}
-		}).toString();
+		}
+	}
 
-		assertThat(expandedTemplate).isEqualTo("/foo?bar=barExpanded&foobar=singleValue");
+	@Test // #1165
+	void expandsTemplateWithAddedVariable() {
+
+		UriTemplate template = UriTemplate.of("/foo") //
+				.with(new TemplateVariable("bar", VariableType.REQUEST_PARAM));
+
+		assertThat(template.expand("value").toString()).isEqualTo("/foo?bar=value");
+	}
+
+	@Test // #1172
+	void useHelperMethodsToBuildUriTemplates() {
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(pathVariable("var")) //
+				.getVariableNames()) //
+						.containsExactly("var");
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(requestParameter("var")) //
+				.with(requestParameterContinued("var2")) //
+				.toString()) //
+						.isEqualTo("/foo{?var,var2}");
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(requestParameter("var")) //
+				.with(requestParameter("var2")) //
+				.toString()) //
+						.isEqualTo("/foo{?var,var2}");
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(requestParameterContinued("var2")) //
+				.toString()).isEqualTo("/foo{&var2}");
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(segment("var")) //
+				.toString()) //
+						.isEqualTo("/foo{/var}");
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(fragment("var")) //
+				.toString()) //
+						.isEqualTo("/foo{#var}");
+
+		assertThat(UriTemplate.of("/foo") //
+				.with(compositeParameter("var")) //
+				.toString()) //
+						.isEqualTo("/foo{*var}");
+	}
+
+	@Test // #227
+	void variableParameterIsTemplated() {
+
+		assertThat(Link.of("http://localhost/api/rest/v1/userGroups/50/functions/{?id*}").isTemplated()).isTrue();
+		assertThat(UriTemplate.isTemplate("http://localhost/api/rest/v1/userGroups/50/functions/{?id*}")).isTrue();
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
@@ -355,6 +361,85 @@ class UriTemplateUnitTest {
 
 			assertThat(template).contains(variable);
 			assertThat(template.getVariableNames()).contains(variable.getName());
+		}
+	}
+
+	private static Stream<EncodingFixture> getEncodingFixtures() {
+
+		return Stream.of(//
+				of("/foo/bar/{?x}", "/foo/bar/?x=1").param("x", 1), //
+				of("/foo/bar/{?x,y}", "/foo/bar/?x=1&y=2").param("x", 1).param("y", 2),
+				of("/foo/bar{?x}{&y}", "/foo/bar?x=1&y=2").param("x", 1).param("y", 2),
+				of("/foo/bar?x=1{&y}", "/foo/bar?x=1&y=2").param("y", 2), //
+				of("/foo/bar?x=1{&y,z}", "/foo/bar?x=1&y=2&z=3").param("y", 2).param("z", 3L),
+				of("/foo{/x}", "/foo/1").param("x", 1), //
+				of("/foo{/x,y}", "/foo/1/2").param("x", 1).param("y", "2"),
+				of("/foo{/x}{/y}", "/foo/1/2").param("x", 1).param("y", "2"),
+				of("/foo{/x}{/y}{?z}", "/foo/1/2?z=3").param("x", 1).param("y", "2").param("z", 3L),
+				of("/foo/{x}", "/foo/1").param("x", 1), //
+				of("/foo/{x}/bar", "/foo/1/bar").param("x", 1), //
+				of("/services/foo/{x}/bar/{y}/gaz", "/services/foo/1/bar/2/gaz").param("x", 1).param("y", "2"),
+				of("/foo/{x}/bar/{y}/bar{?z}", "/foo/1/bar/2/bar?z=3").param("x", 1).param("y", "2").param("z", 3),
+				of("/foo/{x}/bar/{y}/bar{?z}", "/foo/1/bar/2/bar").param("x", 1).param("y", "2"),
+				of("/foo/{x}/bar/{y}/bar{?z}", "/foo/1/bar/2/bar").param("x", 1).param("y", "2"),
+				of("/foo/bar{?x,y,z}", "/foo/bar?x=1").param("x", 1), //
+				of("/foo/bar{?x,y,z}", "/foo/bar?x=1&y=2").param("x", 1).param("y", "2"),
+				of("/foo/bar{?x,y,z}", "/foo/bar?x=1&z=3").param("x", 1).param("z", 3L).skipVarArgsVerification(),
+				of("/foo/{x}/bar{/y}{?z}", "/foo/1/bar/2?z=3").param("x", 1).param("y", "2").param("z", 3L),
+				of("/foo/{x}/bar{/y}{?z}", "/foo/1/bar?z=3").param("x", 1).param("z", 3L).skipVarArgsVerification(),
+				of("/foo/{x}/bar{?y}{#z}", "/foo/1/bar?y=2").param("x", 1).param("y", "2"),
+				of("/foo/{x}/bar{?y}{#z}", "/foo/1/bar?y=2#3").param("x", 1).param("y", "2").param("z", 3L),
+				of("/foo/{x}/bar{?y}{#z}", "/foo/1/bar#3").param("x", 1).param("z", 3L).skipVarArgsVerification(),
+				of("/foo/b%20ar{?x}", "/foo/b%20ar?x=1").param("x", 1), //
+				of("/foo/b\"ar{?x}", "/foo/b%22ar?x=1").param("x", 1), //
+				of("/foo/b%22ar{?x}", "/foo/b%22ar?x=1").param("x", 1));
+	}
+
+	static class EncodingFixture {
+
+		private final String template;
+		private final URI uri;
+		private final Map<String, Object> parameters;
+		private final boolean varArgsVerification;
+
+		private EncodingFixture(String template, URI uri, Map<String, Object> parameters, boolean varArgsVerification) {
+
+			this.template = template;
+			this.uri = uri;
+			this.parameters = parameters;
+			this.varArgsVerification = varArgsVerification;
+		}
+
+		public static EncodingFixture of(String template, String uri) {
+			return new EncodingFixture(template, URI.create(uri), new LinkedHashMap<>(), true);
+		}
+
+		public EncodingFixture param(String key, Object value) {
+
+			Map<String, Object> newParameters = new LinkedHashMap<>(parameters);
+			newParameters.put(key, value);
+
+			return new EncodingFixture(template, uri, newParameters, varArgsVerification);
+		}
+
+		public EncodingFixture skipVarArgsVerification() {
+			return new EncodingFixture(template, uri, parameters, false);
+		}
+
+		public void verify() {
+
+			UriTemplate uriTemplate = UriTemplate.of(template);
+
+			assertThat(uriTemplate.expand(parameters)).isEqualTo(uri);
+
+			if (varArgsVerification) {
+				assertThat(uriTemplate.expand(parameters.values().toArray())).isEqualTo(uri);
+			}
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Expanding %s using parameters %s results in %s.", template, parameters, uri);
 		}
 	}
 }

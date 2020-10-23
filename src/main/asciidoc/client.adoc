@@ -1,5 +1,6 @@
 [[client]]
 = Client-side Support
+:base-dir: ../../../
 
 This section describes Spring HATEOAS's support for clients.
 
@@ -10,30 +11,30 @@ Spring HATEOAS provides an API for client-side service traversal. It is inspired
 The following example shows how to use it:
 
 ====
-[source, java]
+[source, java, tabsize=2]
 ----
 Map<String, Object> parameters = new HashMap<>();
 parameters.put("user", 27);
 
 Traverson traverson = new Traverson(URI.create("http://localhost:8080/api/"), MediaTypes.HAL_JSON);
 String name = traverson
-  .follow("movies", "movie", "actor").withTemplateParameters(parameters)
-  .toObject("$.name");
+		.follow("movies", "movie", "actor").withTemplateParameters(parameters)
+		.toObject("$.name");
 ----
 ====
 
 You can set up a `Traverson` instance by pointing it to a REST server and configuring the media types you want to set as `Accept` headers. You can then define the relation names you want to discover and follow. Relation names can either be simple names or JSONPath expressions (starting with an `$`).
 
-The sample then hands a parameter map into the execution. The parameters are used to expand URIs (which are templated) found during the traversal. The traversal is concluded by accessing the representation of the final traversal. In the preceding example, we evaluate a JSONPath expression to access the actor's name.
+The sample then hands a parameter map into the `Traverson` instance. The parameters are used to expand URIs (which are templated) found during the traversal. The traversal is concluded by accessing the representation of the final traversal. In the preceding example, we evaluate a JSONPath expression to access the actor's name.
 
 The preceding example is the simplest version of traversal, where the `rel` values are strings and, at each hop, the same template parameters are applied.
 
 There are more options to customize template parameters at each level.
 The following example shows these options.
 
-[source,java,indent=0]
+[source,java,indent=0, tabsize=2]
 ----
-include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
+include::{base-dir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-with-param]
 ----
 
 The static `rel(...)` function is a convenient way to define a single `Hop`. Using `.withParameter(key, value)` makes it simple to specify URI template variables.
@@ -42,9 +43,9 @@ NOTE: `.withParameter()` returns a new `Hop` object that is chainable. You can s
 The following example shows one way to do so:
 
 ====
-[source,java,indent=0]
+[source,java,indent=0, tabsize=2]
 ----
-include::{baseDir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
+include::{base-dir}/src/test/java/org/springframework/hateoas/client/TraversonTest.java[tag=hop-put]
 ----
 ====
 
@@ -58,14 +59,14 @@ The examples shown so far demonstrate how to sidestep Java's type erasure and co
 You can do so with only one slight tweak, as the following example shows:
 
 ====
-[source,java]
+[source,java, tabsize=2]
 ----
 CollectionModelType<Item> collectionModelType =
-        TypeReferences.CollectionModelType<Item>() {};
+		TypeReferences.CollectionModelType<Item>() {};
 
 CollectionModel<Item> itemResource = traverson.//
-        follow(rel("items")).//
-        toObject(collectionModelType);
+		follow(rel("items")).//
+		toObject(collectionModelType);
 ----
 ====
 
@@ -76,7 +77,7 @@ Instead of fetching a single resource, this one deserializes a collection into `
 
 When working with hypermedia enabled representations, a common task is to find a link with a particular relation type in it. Spring HATEOAS provides https://code.google.com/p/json-path[JSONPath]-based implementations of the `LinkDiscoverer` interface for either the default representation rendering or HAL out of the box. When using `@EnableHypermediaSupport`, we automatically expose an instance supporting the configured hypermedia type as a Spring bean.
 
-Alternatively, you can setup and use an instance as follows:
+Alternatively, you can set up and use an instance as follows:
 
 ====
 [source, java]
@@ -89,3 +90,148 @@ assertThat(link.getRel(), is("foo"));
 assertThat(link.getHref(), is("/foo/bar"));
 ----
 ====
+
+[[client.web-client]]
+== Configuring WebClient instances
+
+If you need configure a `WebClient` to speak hypermedia, it's easy. Get a hold of the `HypermediaWebClientConfigurer` as shown below:
+
+.Configuring a `WebClient` yourself
+====
+[source, java, tabsize=0, indent=0]
+----
+include::{base-dir}/src/docs/java/org/springframework/hateoas/client/HypermediaConfiguration.java[tag=web-client]
+----
+<1> Inside your `@Configuration` class, get a copy of the `HypermediaWebClientConfigurer` bean Spring HATEOAS registers.
+<2> After creating a `WebClient.Builder`, use the configurer to register hypermedia types.
+====
+
+NOTE: What `HypermediaWebClientConfigurer` does it register all the right encoders and decoders with a `WebClient.Builder`. To make use of it,
+you need to inject the builder somewhere into your application, and run the `build()` method to produce a `WebClient`.
+
+If you're using Spring Boot, there is another way: the `WebClientCustomizer`.
+
+.Letting Spring Boot configure things
+====
+[source,java]
+----
+@Bean // <4>
+WebClientCustomizer hypermediaWebClientCustomizer(HypermediaWebClientConfigurer configurer) { // <1>
+    return webClientBuilder -> { // <2>
+        configurer.registerHypermediaTypes(webClientBuilder); // <3>
+    };
+}
+----
+<1> When creating a Spring bean, request a copy of Spring HATEOAS's `HypermediaWebClientConfigurer` bean.
+<2> Use a Java 8 lambda expression to define a `WebClientCustomizer`.
+<3> Inside the function call, apply the `registerHypermediaTypes` method.
+<4> Return the whole thing as a Spring bean so Spring Boot can pick it up and apply it to its autoconfigured `WebClient.Builder` bean.
+====
+
+At this stage, whenever you need a concrete `WebClient`, simply inject `WebClient.Builder` into your code, and use `build()`. The `WebClient` instance
+will be able to interact using hypermedia.
+
+[[client.web-test-client]]
+== Configuring `WebTestClient` Instances
+
+When working with hypermedia-enabled representations, a common task is to run various tests by using `WebTestClient`.
+
+To configure an instance of `WebTestClient` in a test case, check out this example:
+
+.Configuring `WebTestClient` when using Spring HATEOAS
+====
+[source, java, indent=0, tabsize=2]
+----
+include::{base-dir}/src/test/java/org/springframework/hateoas/config/HypermediaWebTestClientConfigurerTest.java[tag=web-test-client]
+----
+<1> Register your configuration class that uses `@EnableHypermediaSupport` to enable HAL support.
+<2> Use `HypermediaWebTestClientConfigurer` to apply hypermedia support.
+<3> Ask for a response of `CollectionModel<EntityModel<Employee>>` using Spring HATEOAS's `TypeReferences.CollectionModelType` helper.
+<4> After getting the "body" in Spring HATEOAS format, assert against it!
+====
+
+IMPORTANT: `WebTestClient` is an immutable value type, so you can't alter it in place. `HypermediaWebClientConfigurer` returns a mutated
+variant that you must then capture to use it.
+
+If you are using Spring Boot, there are additional options, like this:
+
+.Configuring `WebTestClient` when using Spring Boot
+====
+[source,java,tabsize=2]
+----
+@SpringBootTest
+@AutoConfigureWebTestClient // <1>
+class WebClientBasedTests {
+
+    @Test
+    void exampleTest(@Autowired WebTestClient.Builder builder, @Autowired HypermediaWebTestClientConfigurer configurer) { // <2>
+        client = builder.apply(configurer).build(); // <3>
+
+        client.get().uri("/") //
+                .exchange() //
+                .expectBody(new TypeReferences.EntityModelType<Employee>() {}) // <4>
+                .consumeWith(result -> {
+                    // assert against this EntityModel<Employee>!
+                });
+    }
+}
+----
+<1> This is Spring Boot's test annotation that will configure a `WebTestClient.Builder` for this test class.
+<2> Autowire Spring Boot's `WebTestClient.Builder` into `builder` and Spring HATEOAS's configurer as method parameters.
+<3> Use `HypermediaWebTestClientConfigurer` to register support for hypermedia.
+<4> Signal you want an `EntityModel<Employee>` returned using `TypeReferences`.
+
+Again, you can use similar assertions as the earlier example.
+====
+
+There are many other ways to fashion test cases. `WebTestClient` can be bound to controllers, functions, and URLs. This section isn't meant to show all that. Instead, this gives you some examples to get started. The important thing is that by applying `HypermediaWebTestClientConfigurer`, any instance of `WebTestClient` can be altered to handle hypermedia.
+
+[[client.rest-template]]
+== Configuring RestTemplate instances
+
+If you want to create your own copy of `RestTemplate`, configured to speak hypermedia, you can use the `HypermediaRestTemplateConfigurer`:
+
+.Configuring `RestTemplate` yourself
+====
+[source, java, tabsize=0, indent=0]
+----
+include::{base-dir}/src/docs/java/org/springframework/hateoas/client/HypermediaConfiguration.java[tag=rest-template]
+----
+<1> Inside your `@Configuration` class, get a copy of the `HypermediaRestTemplateConfigurer` bean Spring HATEOAS registers.
+<2> After creating a `RestTemplate`, use the configurer to apply hypermedia types.
+====
+
+You are free to apply this pattern to any instance of `RestTemplate` that you need, whether is to create a registered bean, or inside a service you define.
+
+If you're using Spring Boot, there is another approach.
+
+In general, Spring Boot has moved away from the concept of registering a `RestTemplate` bean in the application context.
+
+* When talking to different services, you often need different credentials.
+* When `RestTemplate` uses an underlying connection pool, you run into additional issues.
+* Users often need different instances rather than a single bean.
+
+To compensate for this, Spring Boot provides a `RestTemplateBuilder`. This autoconfigured bean lets you define various beans used to fashion
+a `RestTemplate` instance. You ask for a `RestTemplateBuilder` bean, call its `build()` method, and then apply final settings (such as credentials and other details).
+
+To register hypermedia-based message converters, add the following to your code:
+
+.Letting Spring Boot configure things
+====
+[source,java]
+----
+@Bean // <4>
+RestTemplateCustomizer hypermediaRestTemplateCustomizer(HypermediaRestTemplateConfigurer configurer) { // <1>
+    return restTemplate -> { // <2>
+        configurer.registerHypermediaTypes(restTemplate); // <3>
+    };
+}
+----
+<1> When creating a Spring bean, request a copy of Spring HATEOAS's `HypermediaRestTemplateConfigurer` bean.
+<2> Use a Java 8 lambda expression to define a `RestTemplateCustomizer`.
+<3> Inside the function call, apply the `registerHypermediaTypes` method.
+<4> Return the whole thing as a Spring bean so Spring Boot can pick it up and apply it to its autoconfigured `RestTemplateBuilder`.
+====
+
+At this stage, whenever you need a concrete `RestTemplate`, simply inject `RestTemplateBuilder` into your code, and use `build()`. The `RestTemplate` instance
+will be able to interact using hypermedia.

@@ -11,7 +11,7 @@ This section covers the basics of Spring HATEOAS and its fundamental domain abst
 The fundamental idea of hypermedia is to enrich the representation of a resource with hypermedia elements.
 The simplest form of that are links.
 They indicate a client that it can navigate to a certain resource.
-The semantics of a related resource are defined in a so called link relation.
+The semantics of a related resource are defined in a so-called link relation.
 You might have seen this in the header of an HTML file already:
 
 .A link in an HTML document
@@ -26,8 +26,8 @@ As you can see the link points to a resource `theme.css` and indicates that it i
 Links often carry additional information, like the media type that the resource pointed to will return.
 However, the fundamental building blocks of a link are its reference and relation.
 
-Spring HATEOAS let's you work with links through its immutable `Link` value type.
-Its constructor take both an hypertext reference and a link relation, the latter being defaulted to the IANA link relation `self`.
+Spring HATEOAS lets you work with links through its immutable `Link` value type.
+Its constructor takes both a hypertext reference and a link relation, the latter being defaulted to the IANA link relation `self`.
 Read more on the latter in <<fundamentals.link-relations>>.
 
 
@@ -39,17 +39,17 @@ include::{code-dir}/FundamentalsTest.java[tags=links]
 ----
 ====
 
-`Link` exposes other attributes as defined in https://tools.ietf.org/html/rfc5988[RFC-5988].
+`Link` exposes other attributes as defined in https://tools.ietf.org/html/rfc8288[RFC-8288].
 You can set them by calling the corresponding wither method on a `Link` instance.
 
-Find more information on how to create links pointing to Spring MVC and Spring WebFlux controllers in <<server.link-builder>>.
+Find more information on how to create links pointing to Spring MVC and Spring WebFlux controllers in <<server.link-builder.webmvc>> and <<server.link-builder.webflux>>.
 
 [[fundamentals.uri-templates]]
 == URI templates
 
 For a Spring HATEOAS `Link`, the hypertext reference can not only be a URI, but also a URI template according to https://tools.ietf.org/html/rfc6570[RFC-6570].
-A URI template contains so called template variables and allows expansion of these parameters.
-This allows clients to turn parameterized templates into URIs without having to know about the structure of the final URI, it only needs to know about the names or the variables.
+A URI template contains so-called template variables and allows expansion of these parameters.
+This allows clients to turn parameterized templates into URIs without having to know about the structure of the final URI, it only needs to know about the names of the variables.
 
 .Using links with templated URIs
 ====
@@ -68,7 +68,7 @@ URI templates can be constructed manually and template variables added later on.
 ====
 [source, java]
 ----
-UriTemplate template = new UriTemplate("/{segment}/something")
+UriTemplate template = UriTemplate.of("/{segment}/something")
   .with(new TemplateVariable("parameter", VariableType.REQUEST_PARAM);
 
 assertThat(template.toString()).isEqualTo("/{segment}/something{?parameter}");
@@ -78,7 +78,7 @@ assertThat(template.toString()).isEqualTo("/{segment}/something{?parameter}");
 [[fundamentals.link-relations]]
 == Link relations
 
-To indicate the relationship of target resource to the current one so called link relations are used.
+To indicate the relationship of the target resource to the current one so-called link relations are used.
 Spring HATEOAS provides a `LinkRelation` type to easily create `String`-based instances of it.
 
 
@@ -92,7 +92,7 @@ They can be referred to via `IanaLinkRelations`.
 ====
 [source, java]
 ----
-Link link = new Link("/some-resource"), IanaLinkRelations.NEXT);
+Link link = Link.of("/some-resource"), IanaLinkRelations.NEXT);
 
 assertThat(link.getRel()).isEqualTo(LinkRelation.of("next"));
 assertThat(IanaLinkRelation.isIanaRel(link.getRel())).isTrue();
@@ -105,7 +105,7 @@ assertThat(IanaLinkRelation.isIanaRel(link.getRel())).isTrue();
 To easily create hypermedia enriched representations, Spring HATEOAS provides a set of classes with `RepresentationModel` at their root.
 It's basically a container for a collection of ``Link``s and has convenient methods to add those to the model.
 The models can later be rendered into various media type formats that will define how the hypermedia elements look in the representation.
-For more information on this, have a look at <<mediatypes>>
+For more information on this, have a look at <<mediatypes>>.
 
 .The `RepresentationModel` class hierarchy
 ====
@@ -145,7 +145,7 @@ The model type can now be used like this:
 PersonModel model = new PersonModel();
 model.firstname = "Dave";
 model.lastname = "Matthews";
-model.add(new Link("https://myhost/people/42"));
+model.add(Link.of("https://myhost/people/42"));
 ----
 ====
 
@@ -153,7 +153,7 @@ If you returned such an instance from a Spring MVC or WebFlux controller and the
 
 .The HAL representation generated for the person representation model
 ====
-[source, json]
+[source javscript]
 ----
 {
   "_links" : {
@@ -178,131 +178,20 @@ Instead of creating a custom model type for each concept, you can just reuse an 
 [source, java]
 ----
 Person person = new Person("Dave", "Matthews");
-EntityModel<Person> model = new EntityModel<>(person);
+EntityModel<Person> model = EntityModel.of(person);
 ----
 ====
 
 === Collection resource representation model
 
-For resources that a conceptually collections, a `CollectionModel` is available.
+For resources that are conceptually collections, a `CollectionModel` is available.
 Its elements can either be simple objects or `RepresentationModel` instances in turn.
 
-.Using `EntityModel` to wrap existing objects
+.Using `CollectionModel` to wrap a collection of existing objects
 ====
 [source, java]
 ----
 Collection<Person> people = Collections.singleton(new Person("Dave", "Matthews"));
-CollectionModel<Person> model = new CollectionModel<>(people);
+CollectionModel<Person> model = CollectionModel.of(people);
 ----
 ====
-
-[[fundamentals.affordances]]
-== Affordances
-
-[quote, James J. Gibson, The Ecological Approach to Visual Perception (page 126)]
-____
-The affordances of the environment are what it offers …​ what it provides or furnishes, either for good or ill. The verb 'to afford' is found in the dictionary, but the noun 'affordance' is not. I have made it up.
-____
-
-REST-based resources provide not just data but controls. The last ingredient to form a flexible service are detailed *affordances*
-on how to use the various controls.
-
-Because affordances are associated with links, Spring HATEOAS provides an API to attach as many related methods as needed to a link.
-The following code shows how to take a *self* link and associate two more affordances:
-
-.Connecting affordances to `GET /employees/{id}`
-====
-[source, java, indent=0, tabsize=2]
-----
-include::{code-dir}/EmployeeController.java[tag=get]
-----
-<1> Create the *self* link.
-<2> Associate the `updateEmployee` method with the `self` link.
-<3> Associate the `partiallyUpdateEmployee` method with the `self` link.
-
-Using `.andAffordance(afford(...))`, you can use the controller's methods to connect a `PUT` and a `PATCH` operation to a `GET` operation.
-====
-
-Imagine that the related methods *afforded* above looking like this:
-
-.`updateEmpoyee` method that responds to `PUT /employees/{id}`
-====
-[source, java, indent=0, tabsize=2]
-----
-include::{code-dir}/EmployeeController.java[tag=put]
-----
-====
-
-.`partiallyUpdateEmployee` method that responds to `PATCH /employees/{id}`
-====
-[source, java, indent=0, tabsize=2]
-----
-include::{code-dir}/EmployeeController.java[tag=patch]
-----
-====
-
-There are many media types that support rendering affordances. Unfortunately, HAL isn't one of them.
-
-A HAL document for `GET /employees/{id}` would look like this:
-
-.HAL document with no affordances
-====
-[source, json]
-----
-{
-  "firstname" : "Frodo",
-  "lastname" : "Baggins",
-  "role" : "ring bearer",
-  "_links" : {
-    "self" : {
-      "href" : "http://localhost:8080/employees/1"
-    }
-  }
-}
-----
-====
-
-HAL supports providing links, but nothing else. While powerful, it doesn't let you show clients what inputs are required
-by its various operations. Nor does it show _what_ HTTP methods are supported.
-
-However, https://rwcbook.github.io/hal-forms/[HAL-FORMS] (`application/prs.hal-forms+json`), is a backwards compatible
-extension of HAL s that adds `_templates`. This affordance-aware media type can fill in what's missing.
-
-The same resource above will render the following HAL-FORMS document:
-
-.HAL-FORMS document with affordances
-====
-[source, json, tabsize=2]
-----
-include::{resource-dir}/docs/mediatype/hal/forms/hal-forms-sample-with-notes.json[]
-----
-<1> The `_templates` attribute provided by HAL-FORMS with affordance-based information.
-<2> The `updateEmployee` method's `@PutMapping` annotation is translated to `put`.
-<3> The method's `@RequestBody` input type is used to find domain `properties`.
-<4> For `POST` and `PUT`, all attributes are `required`.
-<5> The second affordance is named after the `partiallyUpdateEmployee` method.
-<6> `@PatchMapping` is translated into `patch`.
-<7> For `PATCH`, attributes are _not_ `required`.
-====
-
-This rich document, consumable by any HAL-FORMS aware client includes enough extra details for full interaction with the resource.
-
-In fact, this type of document makes it easy to write custom client-side code to generate an HTML form:
-
-[source, html, tabsize=2]
-----
-<form method="put" action="http://localhost:8080/employees/1">
-	<input type="text" id="firstName" name="firstName"/>
-	<input type="text" id="lastName" name="lastName" />
-	<input type="text" id="role" name="role" />
-	<input type="submit" value="Submit" />
-</form>
-----
-
-Letting hypermedia drive web forms for users reduces the need for the client to know about the domain.
-
-By trading in domain knowledge and instead adding protocol support for HAL-FORMS, clients can become flexible and receptive
-to server-side changes. No need to update your client every time a domain change is made on the server.
-
-IMPORTANT: HAL-FORMS only supports affordances against the `self` link, but other affordance-aware media types may not
-have the same restriction. In general, don't define affordances based on one particular media type.

@@ -33,6 +33,7 @@ Also the name changes have been reflected in the classes contained in `TypeRefer
 * The `LinkDiscoverer` API has been moved to the `client` package.
 * The `LinkBuilder` and `EntityLinks` APIs have been moved to the `server` package.
 * `ControllerLinkBuilder` has been moved into `server.mvc` and deprecated to be replaced by `WebMvcLinkBuilder`.
+* `RelProvider` has been renamed to `LinkRelationProvider` and returns `LinkRelation` instances instead of ``String``s.
 * `VndError` has been moved to the `mediatype.vnderror` package.
 
 [[migrate-to-1.0.script]]
@@ -61,3 +62,11 @@ Note that the script will not necessarily be able to entirely fix all changes, b
 
 Now verify the changes made to the files in your favorite Git client and commit as appropriate.
 In case you find method or type references unmigrated, please open a ticket in out issue tracker.
+
+[[migration.1-0-M3-to-1-0-RC1]]
+== Migrating from 1.0 M3 to 1.0 RC1
+
+- `Link.andAffordance(…)` taking Affordance details have been moved to `Affordances`. To manually build up `Affordance` instances now use `Affordances.of(link).afford(…)`. Also note the new `AffordanceBuilder` type exposed from `Affordances` for fluent usage. See <<server.affordances>> for details.
+- `AffordanceModelFactory.getAffordanceModel(…)` now receives `InputPayloadMetadata` and `PayloadMetadata` instances instead of ``ResolvableType``s to allow non-type-based implementations. Custom media type implementations have to be adapted to that accordingly.
+- HAL Forms now does not render property attributes if their value adheres to what's defined as default in the spec. I.e. if previously `required` was explicitly set to `false`, we now just omit the entry for `required`.
+We also now only force them to be non-required for templates that use `PATCH` as the HTTP method.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class ReactiveResourceAssemblerUnitTest {
 
 					assertThat(employeeResource.getEmployee()).isEqualTo(new Employee("Frodo Baggins"));
 					AssertionsForInterfaceTypes.assertThat(employeeResource.getLinks())
-							.containsExactlyInAnyOrder(new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -90,7 +90,7 @@ class ReactiveResourceAssemblerUnitTest {
 							.extracting("employee") //
 							.containsExactly(new Employee("Frodo Baggins"));
 
-					assertThat(content.iterator().next().getLinks()).containsExactly(new Link("/employees", "employees"));
+					assertThat(content.iterator().next().getLinks()).containsExactly(Link.of("/employees", "employees"));
 					assertThat(employeeResources.getLinks()).isEmpty();
 
 					return true;
@@ -108,12 +108,12 @@ class ReactiveResourceAssemblerUnitTest {
 				.expectNextMatches(employeeResources -> {
 
 					assertThat(employeeResources.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees").withSelfRel(), new Link("/", "root"));
+							.containsExactlyInAnyOrder(Link.of("/employees").withSelfRel(), Link.of("/", "root"));
 
 					EmployeeResource content = employeeResources.getContent().iterator().next();
 
 					assertThat(content.getEmployee()).isEqualTo(new Employee("Frodo Baggins"));
-					assertThat(content.getLinks()).containsExactly(new Link("/employees", "employees"));
+					assertThat(content.getLinks()).containsExactly(Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -125,7 +125,7 @@ class ReactiveResourceAssemblerUnitTest {
 		public Mono<EmployeeResource> toModel(Employee entity, ServerWebExchange exchange) {
 
 			EmployeeResource employeeResource = new EmployeeResource(entity);
-			employeeResource.add(new Link("/employees", "employees"));
+			employeeResource.add(Link.of("/employees", "employees"));
 
 			return Mono.just(employeeResource);
 		}
@@ -139,11 +139,11 @@ class ReactiveResourceAssemblerUnitTest {
 
 			return entities.flatMap(entity -> toModel(entity, exchange)).collectList().map(listOfResources -> {
 
-				CollectionModel<EmployeeResource> employeeResources = new CollectionModel<>(
+				CollectionModel<EmployeeResource> employeeResources = CollectionModel.of(
 						listOfResources);
 
-				employeeResources.add(new Link("/employees").withSelfRel());
-				employeeResources.add(new Link("/", "root"));
+				employeeResources.add(Link.of("/employees").withSelfRel());
+				employeeResources.add(Link.of("/", "root"));
 
 				return employeeResources;
 			});

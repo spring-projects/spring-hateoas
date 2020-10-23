@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,23 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Collection;
-
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.hateoas.server.reactive.HypermediaWebFilter;
-import org.springframework.http.codec.CodecConfigurer;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.lang.NonNull;
 import org.springframework.util.MimeType;
+import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,66 +39,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Spring WebFlux HATEOAS configuration.
  *
  * @author Greg Turnquist
- * @since 1.0 TODO: Inspect ApplicationContext -> WebApplicationContext -> WebMVC
+ * @author Oliver Drotbohm
+ * @since 1.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class WebFluxHateoasConfiguration {
 
 	@Bean
-	WebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
-			Collection<HypermediaMappingInformation> hypermediaTypes) {
-		return new WebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
-	}
-
-	@Bean
-	static HypermediaWebClientBeanPostProcessor webClientBeanPostProcessor(
-			ObjectProvider<WebClientConfigurer> configurer) {
-		return new HypermediaWebClientBeanPostProcessor(configurer);
+	WebFluxCodecs hypermediaConverters(ObjectProvider<ObjectMapper> mapper,
+			List<HypermediaMappingInformation> mappingInformation) {
+		return new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
 	}
 
 	@Bean
 	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
-			Collection<HypermediaMappingInformation> hypermediaTypes) {
+			List<HypermediaMappingInformation> mappingInformation) {
 
-		return new HypermediaWebFluxConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+		WebFluxCodecs codecs = new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
+
+		return new HypermediaWebFluxConfigurer(codecs);
 	}
 
-	/**
-	 * TODO: Replace with Spring Framework filter when https://github.com/spring-projects/spring-framework/issues/21746 is
-	 * completed.
-	 */
 	@Bean
-	@Lazy // To avoid creation on a WebMVC app using WebClient only
-	HypermediaWebFilter hypermediaWebFilter() {
-		return new HypermediaWebFilter();
-	}
-
-	/**
-	 * {@link BeanPostProcessor} to register the proper handlers in {@link WebClient} instances found in the application
-	 * context.
-	 *
-	 * @author Greg Turnquist
-	 * @since 1.0
-	 */
-	@RequiredArgsConstructor
-	static class HypermediaWebClientBeanPostProcessor implements BeanPostProcessor {
-
-		private final ObjectProvider<WebClientConfigurer> configurer;
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
-		 */
-		@NonNull
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-			if (bean instanceof WebClient) {
-				return this.configurer.getObject().registerHypermediaTypes((WebClient) bean);
-			}
-
-			return bean;
-		}
+	@Lazy
+	ServerWebExchangeContextFilter serverWebExchangeContextFilter() {
+		return new ServerWebExchangeContextFilter();
 	}
 
 	/**
@@ -112,37 +73,59 @@ class WebFluxHateoasConfiguration {
 	 * @author Greg Turnquist
 	 * @since 1.0
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaWebFluxConfigurer implements WebFluxConfigurer {
 
-		private final ObjectMapper mapper;
-		private final Collection<HypermediaMappingInformation> hypermediaTypes;
+		private final WebFluxCodecs codecs;
+
+		public HypermediaWebFluxConfigurer(WebFluxCodecs codecs) {
+			this.codecs = codecs;
+		}
 
 		/**
 		 * Configure custom HTTP message readers and writers or override built-in ones.
 		 * <p>
 		 * The configured readers and writers will be used for both annotated controllers and functional endpoints.
 		 *
-		 * @param configurer the configurer to use
+		 * @param configurer the configurer to use, must not be {@literal null}.
 		 */
 		@Override
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+			codecs.registerCodecs(configurer.customCodecs());
+		}
+	}
 
-			CodecConfigurer.CustomCodecs customCodecs = configurer.customCodecs();
+	private static class WebFluxCodecs {
 
-			this.hypermediaTypes.forEach(hypermedia -> {
+		private final List<Decoder<?>> decoders;
+		private final List<Encoder<?>> encoders;
 
-				MimeType[] mimeTypes = hypermedia.getMediaTypes().toArray(new MimeType[0]);
+		private WebFluxCodecs(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
 
-				ObjectMapper objectMapper = hypermedia.configureObjectMapper(this.mapper.copy());
-				customCodecs.encoder(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-				customCodecs.decoder(new Jackson2JsonDecoder(objectMapper, mimeTypes));
-			});
+			this.decoders = new ArrayList<>();
+			this.encoders = new ArrayList<>();
 
-			customCodecs.encoder(CharSequenceEncoder.allMimeTypes());
-			customCodecs.decoder(StringDecoder.allMimeTypes());
+			for (HypermediaMappingInformation information : mappingInformation) {
 
-			configurer.registerDefaults(false);
+				ObjectMapper objectMapper = information.configureObjectMapper(mapper.copy());
+				List<MediaType> mediaTypes = information.getMediaTypes();
+
+				this.decoders.add(getDecoder(objectMapper, mediaTypes));
+				this.encoders.add(getEncoder(objectMapper, mediaTypes));
+			}
+		}
+
+		public void registerCodecs(CustomCodecs codecs) {
+
+			decoders.forEach(codecs::registerWithDefaultConfig);
+			encoders.forEach(codecs::registerWithDefaultConfig);
+		}
+
+		private static Decoder<?> getDecoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
+			return new Jackson2JsonDecoder(mapper, mediaTypes.toArray(new MimeType[0]));
+		}
+
+		private static Encoder<?> getEncoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
+			return new Jackson2JsonEncoder(mapper, mediaTypes.toArray(new MimeType[0]));
 		}
 	}
 }

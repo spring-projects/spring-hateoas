@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 	 * Constructor for {@link MediaTypes#HAL_JSON}.
 	 */
 	public HalLinkDiscoverer() {
-		this(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		this(MediaTypes.HAL_JSON);
 	}
 
 	protected HalLinkDiscoverer(MediaType... mediaTypes) {
@@ -57,7 +57,7 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 
 		Map<String, String> json = (Map<String, String>) element;
 
-		return new Link(json.get("href"), rel) //
+		return Link.of(json.get("href"), rel) //
 				.withHreflang(json.get("hreflang")) //
 				.withMedia(json.get("media")) //
 				.withTitle(json.get("title")) //

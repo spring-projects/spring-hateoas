@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  */
 package org.springframework.hateoas.server.core;
 
-import lombok.experimental.UtilityClass;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.util.Assert;
 import org.springframework.web.util.UriUtils;
@@ -28,10 +29,13 @@ import org.springframework.web.util.UriUtils;
  * @since 0.22
  * @soundtrack Don Philippe - Between Now And Now (Between Now And Now)
  */
-@UtilityClass
-class EncodingUtils {
+final class EncodingUtils {
 
-	private static final String ENCODING = "UTF-8";
+	private static final Charset ENCODING = StandardCharsets.UTF_8;
+
+	private EncodingUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 
 	/**
 	 * Encodes the given path value.

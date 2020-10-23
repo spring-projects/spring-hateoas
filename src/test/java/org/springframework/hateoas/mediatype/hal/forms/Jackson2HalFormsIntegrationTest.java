@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
+import lombok.Getter;
+import net.minidev.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,11 +28,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.AbstractJackson2MarshallingIntegrationTest;
@@ -42,9 +49,11 @@ import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.hateoas.mediatype.Affordances;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.DefaultCurieProvider;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalIntegrationTest;
+import org.springframework.hateoas.mediatype.hal.HalTestUtils;
 import org.springframework.hateoas.mediatype.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule.HalFormsHandlerInstantiator;
@@ -52,11 +61,17 @@ import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
+import org.springframework.hateoas.support.EmployeeResource;
 import org.springframework.hateoas.support.MappingUtils;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * @author Greg Turnquist
@@ -65,21 +80,20 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 
 	static final Links PAGINATION_LINKS = Links.of( //
-			new Link("foo", IanaLinkRelations.NEXT), //
-			new Link("bar", IanaLinkRelations.PREV) //
+			Link.of("foo", IanaLinkRelations.NEXT), //
+			Link.of("bar", IanaLinkRelations.PREV) //
 	);
-
-	MessageSource messageSource = mock(MessageSource.class);
 
 	@BeforeEach
 	void setUpModule() {
 
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
-				Jackson2HalIntegrationTest.DefaultLinkRelationProvider.INSTANCE);
+				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator( //
-				provider, CurieProvider.NONE, new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
+				provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalFormsConfiguration(),
+				new DefaultListableBeanFactory()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 	}
 
@@ -87,7 +101,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void rendersSingleLinkAsObject() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost"));
+		resourceSupport.add(Link.of("localhost"));
 
 		assertThat(write(resourceSupport))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("single-link-reference.json", getClass())));
@@ -97,7 +111,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void deserializeSingleLink() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost"));
+		expected.add(Link.of("localhost"));
 
 		assertThat(read(MappingUtils.read(new ClassPathResource("single-link-reference.json", getClass())),
 				RepresentationModel.class)).isEqualTo(expected);
@@ -107,8 +121,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void rendersMultipleLinkAsArray() throws Exception {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(new Link("localhost"));
-		resourceSupport.add(new Link("localhost2"));
+		resourceSupport.add(Link.of("localhost"));
+		resourceSupport.add(Link.of("localhost2"));
 
 		assertThat(write(resourceSupport))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass())));
@@ -118,17 +132,34 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void deserializeMultipleLinks() throws Exception {
 
 		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(new Link("localhost"));
-		expected.add(new Link("localhost2"));
+		expected.add(Link.of("localhost"));
+		expected.add(Link.of("localhost2"));
 
 		assertThat(read(MappingUtils.read(new ClassPathResource("list-link-reference.json", getClass())),
 				RepresentationModel.class)).isEqualTo(expected);
 	}
 
 	@Test
+	void rendersRepresentationModelWithTemplates() throws Exception {
+
+		EmployeeResource resource = new EmployeeResource("Frodo Baggins");
+
+		Link link = Affordances.of(Link.of("/employees/1")) //
+				.afford(HttpMethod.POST) //
+				.withInputAndOutput(EmployeeResource.class) //
+				.withName("foo") //
+				.toLink();
+
+		resource.add(link);
+
+		assertThat(write(resource))
+				.isEqualTo(MappingUtils.read(new ClassPathResource("employee-resource-support.json", getClass())));
+	}
+
+	@Test
 	void rendersResource() throws Exception {
 
-		EntityModel<SimplePojo> resource = new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost"));
+		EntityModel<SimplePojo> resource = EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost"));
 
 		assertThat(write(resource))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass())));
@@ -137,7 +168,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void deserializesResource() throws IOException {
 
-		EntityModel<SimplePojo> expected = new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost"));
+		EntityModel<SimplePojo> expected = EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost"));
 
 		EntityModel<SimplePojo> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("simple-resource-unwrapped.json", getClass())),
@@ -153,8 +184,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		content.add("first");
 		content.add("second");
 
-		CollectionModel<String> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<String> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
 		assertThat(write(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("simple-embedded-resource-reference.json", getClass())));
@@ -167,8 +198,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		content.add("first");
 		content.add("second");
 
-		CollectionModel<String> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<String> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<String> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("simple-embedded-resource-reference.json", getClass())),
@@ -182,10 +213,10 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void rendersSingleResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimplePojo>> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
 		assertThat(write(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("single-embedded-resource-reference.json", getClass())));
@@ -195,10 +226,10 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void deserializesSingleResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimplePojo>> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimplePojo>> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<EntityModel<SimplePojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("single-embedded-resource-reference.json", getClass())),
@@ -212,7 +243,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void rendersMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimplePojo>> resources = setupResources();
-		resources.add(new Link("localhost"));
+		resources.add(Link.of("localhost"));
 
 		assertThat(write(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("multiple-resource-resources.json", getClass())));
@@ -222,7 +253,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void deserializesMultipleResourceResourcesAsEmbedded() throws Exception {
 
 		CollectionModel<EntityModel<SimplePojo>> expected = setupResources();
-		expected.add(new Link("localhost"));
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<EntityModel<SimplePojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("multiple-resource-resources.json", getClass())),
@@ -236,10 +267,10 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void serializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = new CollectionModel<>(content);
-		resources.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimpleAnnotatedPojo>> resources = CollectionModel.of(content);
+		resources.add(Link.of("localhost"));
 
 		assertThat(write(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass())));
@@ -249,10 +280,10 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void deserializesAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> expected = new CollectionModel<>(content);
-		expected.add(new Link("localhost"));
+		CollectionModel<EntityModel<SimpleAnnotatedPojo>> expected = CollectionModel.of(content);
+		expected.add(Link.of("localhost"));
 
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readValue(
 				MappingUtils.read(new ClassPathResource("annotated-resource-resources.json", getClass())),
@@ -298,8 +329,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void rendersCuriesCorrectly() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet(), new Link("foo"),
-				new Link("bar", "myrel"));
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet(), Link.of("foo"),
+				Link.of("bar", "myrel"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("curied-document.json", getClass())));
@@ -308,7 +339,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void doesNotRenderCuriesIfNoLinkIsPresent() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet());
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("empty-document.json", getClass())));
 	}
@@ -316,8 +347,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void doesNotRenderCuriesIfNoCurieLinkIsPresent() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
-		resources.add(new Link("foo"));
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet());
+		resources.add(Link.of("foo"));
 
 		assertThat(getCuriedObjectMapper().writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("single-non-curie-document.json", getClass())));
@@ -327,7 +358,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void rendersTemplate() throws Exception {
 
 		RepresentationModel<?> support = new RepresentationModel<>();
-		support.add(new Link("/foo{?bar}", "search"));
+		support.add(Link.of("/foo{?bar}", "search"));
 
 		assertThat(write(support)).isEqualTo(MappingUtils.read(new ClassPathResource("link-template.json", getClass())));
 	}
@@ -335,8 +366,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void rendersMultipleCuries() throws Exception {
 
-		CollectionModel<Object> resources = new CollectionModel<>(Collections.emptySet());
-		resources.add(new Link("foo", "myrel"));
+		CollectionModel<Object> resources = CollectionModel.of(Collections.emptySet());
+		resources.add(Link.of("foo", "myrel"));
 
 		CurieProvider provider = new DefaultCurieProvider("default", UriTemplate.of("/doc{?rel}")) {
 			@Override
@@ -345,7 +376,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 			}
 		};
 
-		assertThat(getCuriedObjectMapper(provider, messageSource).writeValueAsString(resources))
+		assertThat(getCuriedObjectMapper(provider).writeValueAsString(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("multiple-curies-document.json", getClass())));
 	}
 
@@ -357,7 +388,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		List<Object> values = new ArrayList<>();
 		values.add(wrappers.emptyCollectionOf(SimpleAnnotatedPojo.class));
 
-		CollectionModel<Object> resources = new CollectionModel<>(values);
+		CollectionModel<Object> resources = CollectionModel.of(values);
 
 		assertThat(write(resources))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("empty-embedded-pojos.json", getClass())));
@@ -380,7 +411,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	void handleTemplatedLinksOnDeserialization() throws IOException {
 
 		RepresentationModel<?> original = new RepresentationModel<>();
-		original.add(new Link("/orders{?id}", "order"));
+		original.add(Link.of("/orders{?id}", "order"));
 
 		String serialized = mapper.writeValueAsString(original);
 
@@ -393,6 +424,133 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		assertThat(deserialized).isEqualTo(original);
 	}
 
+	@ParameterizedTest // #979
+	@ValueSource(strings = { "firstname._prompt", //
+			"HalFormsPayload.firstname._prompt", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload.firstname._prompt" })
+	void usesResourceBundleToCreatePropertyPrompts(String key) {
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(key, Locale.US, "Vorname");
+
+		Link link = Affordances.of(Link.of("some:link")) //
+				.afford(HttpMethod.POST) //
+				.withInput(HalFormsPayload.class) //
+				.withOutput(Object.class) //
+				.withName("sample") //
+				.toLink();
+
+		EntityModel<HalFormsPayload> model = EntityModel.of(new HalFormsPayload(), link);
+		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThatCode(() -> {
+
+			String promptString = JsonPath.compile("$._templates.default.properties[0].prompt") //
+					.read(mapper.writeValueAsString(model));
+
+			assertThat(promptString).isEqualTo("Vorname");
+
+		}).doesNotThrowAnyException();
+	}
+
+	@ParameterizedTest // #849
+	@ValueSource(strings = { //
+			"_templates.postHalFormsPayload.title", //
+			"HalFormsPayload._templates.postHalFormsPayload.title", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload._templates.postHalFormsPayload.title", //
+			"_templates.default.title", //
+			"HalFormsPayload._templates.default.title", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload._templates.default.title" })
+	void usesResourceBundleToCreateTemplateTitle(String key) {
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(key, Locale.US, "Template title");
+
+		Link link = Affordances.of(Link.of("some:link")) //
+				.afford(HttpMethod.POST) //
+				.withInput(HalFormsPayload.class) //
+				.toLink();
+
+		EntityModel<HalFormsPayload> model = EntityModel.of(new HalFormsPayload(), link);
+		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThatCode(() -> {
+
+			String promptString = JsonPath.compile("$._templates.default.title") //
+					.read(mapper.writeValueAsString(model));
+
+			assertThat(promptString).isEqualTo("Template title");
+
+		}).doesNotThrowAnyException();
+	}
+
+	@Test
+	void doesNotRenderPromptPropertyIfEmpty() throws Exception {
+
+		HalFormsProperty property = HalFormsProperty.named("someName");
+
+		assertThatPathDoesNotExist(property.withPrompt(""), "$.prompt");
+		assertValueForPath(property.withPrompt("Some prompt"), "$.prompt", "Some prompt");
+	}
+
+	@Test
+	void doesNotRenderRequiredPropertyIfFalse() throws Exception {
+
+		HalFormsProperty property = HalFormsProperty.named("someName");
+
+		assertThatPathDoesNotExist(property, "$.required");
+		assertValueForPath(property.withRequired(true), ".required", true);
+	}
+
+	@Test
+	void considersJsr303AnnotationsForTemplates() throws Exception {
+
+		Link link = Affordances.of(Link.of("localhost:8080")) //
+				.afford(HttpMethod.POST) //
+				.withInput(Jsr303Sample.class) //
+				.toLink();
+
+		EntityModel<Jsr303Sample> model = EntityModel.of(new Jsr303Sample(), link);
+
+		assertValueForPath(model, "$._templates.default.properties[0].readOnly", true);
+		assertValueForPath(model, "$._templates.default.properties[0].regex", "[\\w\\s]");
+		assertValueForPath(model, "$._templates.default.properties[0].required", true);
+	}
+
+	@Test // #968
+	void considerJsonUnwrapped() throws Exception {
+
+		UnwrappedExample unwrappedExample = new UnwrappedExample();
+
+		unwrappedExample.element = new UnwrappedExampleElement();
+		unwrappedExample.element.firstname = "john";
+
+		assertValueForPath(unwrappedExample, "$.firstname", "john");
+	}
+
+	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {
+
+		ObjectMapper mapper = getCuriedObjectMapper();
+		String json = mapper.writeValueAsString(toMarshall);
+
+		assertThatExceptionOfType(PathNotFoundException.class) //
+				.isThrownBy(() -> JsonPath.compile(path).read(json));
+	}
+
+	private void assertValueForPath(Object toMarshall, String path, Object expected) throws Exception {
+
+		ObjectMapper mapper = getCuriedObjectMapper();
+		String json = mapper.writeValueAsString(toMarshall);
+
+		Object actual = JsonPath.compile(path).read(json);
+
+		Object value = JSONArray.class.isInstance(actual) //
+				? JSONArray.class.cast(actual).get(0) //
+				: actual;
+
+		assertThat(value).isEqualTo(expected);
+	}
+
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
 
 		LocaleContextHolder.setLocale(Locale.US);
@@ -403,7 +561,7 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		ObjectMapper objectMapper = getCuriedObjectMapper(CurieProvider.NONE, messageSource);
 
 		RepresentationModel<?> resource = new RepresentationModel<>();
-		resource.add(new Link("target", "ns:foobar"));
+		resource.add(Link.of("target", "ns:foobar"));
 
 		assertThat(objectMapper.writeValueAsString(resource))
 				.isEqualTo(MappingUtils.read(new ClassPathResource("link-with-title.json", getClass())));
@@ -412,46 +570,81 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	private static CollectionModel<EntityModel<SimplePojo>> setupResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimplePojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimplePojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimplePojo("test2", 2), Link.of("localhost")));
 
-		return new CollectionModel<>(content);
+		return CollectionModel.of(content);
 	}
 
 	private static CollectionModel<EntityModel<SimpleAnnotatedPojo>> setupAnnotatedResources() {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test2", 2), Link.of("localhost")));
 
-		return new CollectionModel<>(content);
+		return CollectionModel.of(content);
 	}
 
 	private static CollectionModel<EntityModel<SimpleAnnotatedPojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimpleAnnotatedPojo>> content = new ArrayList<>();
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test1", 1), new Link("localhost")));
-		content.add(new EntityModel<>(new SimpleAnnotatedPojo("test2", 2), new Link("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test1", 1), Link.of("localhost")));
+		content.add(EntityModel.of(new SimpleAnnotatedPojo("test2", 2), Link.of("localhost")));
 
-		return new PagedModel<>(content, new PagedModel.PageMetadata(2, 0, 4), PAGINATION_LINKS);
+		return PagedModel.of(content, new PagedModel.PageMetadata(2, 0, 4), PAGINATION_LINKS);
 	}
 
 	private ObjectMapper getCuriedObjectMapper() {
 
-		return getCuriedObjectMapper(new DefaultCurieProvider("foo", UriTemplate.of("http://localhost:8080/rels/{rel}")),
-				messageSource);
+		return getCuriedObjectMapper(new DefaultCurieProvider("foo", UriTemplate.of("http://localhost:8080/rels/{rel}")));
 	}
 
-	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, MessageSource messageSource) {
+	private ObjectMapper getCuriedObjectMapper(CurieProvider provider) {
+		return getCuriedObjectMapper(provider, null);
+	}
+
+	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, @Nullable MessageSource messageSource) {
 
 		ObjectMapper mapper = new ObjectMapper();
 
 		mapper.registerModule(new Jackson2HalFormsModule());
 		mapper.setHandlerInstantiator(new HalFormsHandlerInstantiator(new AnnotationLinkRelationProvider(), provider,
-				messageSource == null ? null : new MessageSourceAccessor(messageSource), true, new HalFormsConfiguration()));
+				MessageResolver.of(messageSource), new HalFormsConfiguration(), new DefaultListableBeanFactory()));
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);
 
 		return mapper;
+	}
+
+	public static class HalFormsPayload {
+		private @Getter String firstname;
+	}
+
+	public static class Jsr303Sample {
+
+		private String firstname;
+
+		/**
+		 * @return the firstname
+		 */
+		@NotNull
+		@Pattern(regexp = "[\\w\\s]")
+		public String getFirstname() {
+			return firstname;
+		}
+	}
+
+	public static class UnwrappedExample extends RepresentationModel<UnwrappedExample> {
+
+		private UnwrappedExampleElement element;
+
+		@JsonUnwrapped
+		public UnwrappedExampleElement getElement() {
+			return element;
+		}
+	}
+
+	public static class UnwrappedExampleElement {
+		private @Getter String firstname;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 
@@ -49,15 +48,15 @@ class JacksonSerializationTest {
 	void createSimpleCollection() throws IOException {
 
 		CollectionJson<?> collection = new CollectionJson<>().withVersion("1.0").withHref("localhost")
-				.withLinks(Links.of(new Link("foo").withSelfRel())) //
+				.withLinks(Links.of(Link.of("foo").withSelfRel())) //
 				.withItems(new CollectionJsonItem<>() //
 						.withHref("localhost") //
 						.withRawData("Greetings programs") //
-						.withLinks(new Link("localhost").withSelfRel()), //
+						.withLinks(Link.of("localhost").withSelfRel()), //
 						new CollectionJsonItem<>() //
 								.withHref("localhost") //
 								.withRawData("Yo") //
-								.withLinks(new Link("localhost/orders").withRel("orders")));
+								.withLinks(Link.of("localhost/orders").withRel("orders")));
 
 		String actual = mapper.writeValueAsString(collection);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.JsonPathResultMatchers;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -197,32 +199,23 @@ class MultiMediaTypeWebMvcIntegrationTest {
 	@Test
 	void singleEmployeeHalForms() throws Exception {
 
-		this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
+		ResultActions actions = this.mockMvc.perform(get("/employees/0").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
 				.andExpect(jsonPath("$.name", is("Frodo Baggins"))).andExpect(jsonPath("$.role", is("ring bearer")))
 
 				.andExpect(jsonPath("$._links.*", hasSize(2)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
-				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
+				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")));
 
-				.andExpect(jsonPath("$._templates.*", hasSize(2)))
+		expectEmployeeProperties(actions, "default", "partiallyUpdateEmployee") //
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
-
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")));
 	}
 
 	@Test
 	void collectionOfEmployeesHalForms() throws Exception {
 
-		this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
+		ResultActions actions = this.mockMvc.perform(get("/employees").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
 				.andExpect(jsonPath("$._embedded.employees[0].name", is("Frodo Baggins")))
 				.andExpect(jsonPath("$._embedded.employees[0].role", is("ring bearer")))
@@ -234,12 +227,9 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links.*", hasSize(1)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$._templates.*", hasSize(1)))
-				.andExpect(jsonPath("$._templates['default'].method", is("post")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)));
+				.andExpect(jsonPath("$._templates['default'].method", is("post")));
+
+		expectEmployeeProperties(actions, "default");
 	}
 
 	@Test
@@ -251,26 +241,18 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(status().isCreated())
 				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 
-		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.HAL_FORMS_JSON)) //
+		ResultActions actions = this.mockMvc.perform(get("/employees/2").accept(MediaTypes.HAL_FORMS_JSON)) //
 				.andExpect(status().isOk()) //
 				.andExpect(jsonPath("$.name", is("Samwise Gamgee"))).andExpect(jsonPath("$.role", is("gardener")))
 
 				.andExpect(jsonPath("$._links.*", hasSize(2)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/2")))
-				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
+				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")));
 
-				.andExpect(jsonPath("$._templates.*", hasSize(2)))
+		expectEmployeeProperties(actions, "default", "partiallyUpdateEmployee") //
+
 				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required", is(true)))
-
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required", is(false)))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].required", is(false)));
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")));
 	}
 
 	@Test
@@ -429,6 +411,26 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$.uber.data[4].data[1].value", is("Samwise Gamgee")));
 	}
 
+	private static final ResultActions expectEmployeeProperties(ResultActions actions, String... templates)
+			throws Exception {
+
+		for (String template : templates) {
+
+			JsonPathResultMatchers namePropertyMatcher = jsonPath("$._templates['%s'].properties[0].required", template);
+
+			actions = actions //
+					.andExpect(jsonPath("$._templates['%s'].properties[0].name", template).value("name"))
+					.andExpect(jsonPath("$._templates['%s'].properties[1].name", template).value("role"))
+					.andExpect(jsonPath("$._templates['%s'].properties[1].required", template).doesNotExist());
+
+			actions = template.equals("partiallyUpdateEmployee") //
+					? actions.andExpect(namePropertyMatcher.doesNotExist()) //
+					: actions.andExpect(namePropertyMatcher.value(true));
+		}
+
+		return actions.andExpect(jsonPath("$._templates.*", hasSize(templates.length)));
+	}
+
 	@RestController
 	static class EmployeeController {
 
@@ -449,7 +451,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/search")
@@ -480,7 +482,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -493,7 +495,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new EntityModel<>(EMPLOYEES.get(id),
+			return EntityModel.of(EMPLOYEES.get(id),
 					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
 							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
 					employeesLink);

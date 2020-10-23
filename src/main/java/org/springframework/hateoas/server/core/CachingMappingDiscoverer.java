@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.hateoas.server.core;
-
-import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -32,13 +30,20 @@ import org.springframework.util.StringUtils;
  * @author Michal Stochmialek
  * @author Oliver Drotbohm
  */
-@RequiredArgsConstructor(staticName = "of")
 public class CachingMappingDiscoverer implements MappingDiscoverer {
 
 	private static final Map<String, String> MAPPINGS = new ConcurrentReferenceHashMap<>();
 	private static final Map<String, Collection<HttpMethod>> METHODS = new ConcurrentReferenceHashMap<>();
 
 	private final MappingDiscoverer delegate;
+
+	private CachingMappingDiscoverer(MappingDiscoverer delegate) {
+		this.delegate = delegate;
+	}
+
+	public static CachingMappingDiscoverer of(MappingDiscoverer delegate) {
+		return new CachingMappingDiscoverer(delegate);
+	}
 
 	/*
 	 * (non-Javadoc)

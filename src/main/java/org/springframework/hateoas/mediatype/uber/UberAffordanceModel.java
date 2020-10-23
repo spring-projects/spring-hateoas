@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.Getter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -24,12 +22,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -42,14 +38,16 @@ import org.springframework.lang.Nullable;
  */
 class UberAffordanceModel extends AffordanceModel {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT,
+			HttpMethod.PATCH);
 
-	private final @Getter Collection<MediaType> mediaTypes = Collections.singleton(MediaTypes.UBER_JSON);
-	
-	private final @Getter List<UberData> inputProperties;
-	private final @Getter List<UberData> queryProperties;
+	private final Collection<MediaType> mediaTypes = Collections.singleton(MediaTypes.UBER_JSON);
 
-	UberAffordanceModel(String name, Link link, HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
+	private final List<UberData> inputProperties;
+	private final List<UberData> queryProperties;
+
+	UberAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
 		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
 
 		this.inputProperties = determineAffordanceInputs();
@@ -58,16 +56,16 @@ class UberAffordanceModel extends AffordanceModel {
 
 	private List<UberData> determineAffordanceInputs() {
 
-		if (ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
-
-			return PropertyUtils.findPropertyNames(getInputType()).stream()
-				.map(propertyName -> new UberData()
-					.withName(propertyName)
-					.withValue(""))
-				.collect(Collectors.toList());
-		} else {
+		if (!ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
 			return Collections.emptyList();
 		}
+
+		return getInput().stream()//
+				.map(PropertyMetadata::getName) //
+				.map(propertyName -> new UberData() //
+						.withName(propertyName) //
+						.withValue("")) //
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -81,10 +79,8 @@ class UberAffordanceModel extends AffordanceModel {
 
 		if (getHttpMethod().equals(HttpMethod.GET)) {
 			return getQueryMethodParameters().stream()
-				.map(queryParameter -> new UberData()
-					.withName(queryParameter.getName())
-					.withValue(""))
-				.collect(Collectors.toList());
+					.map(queryParameter -> new UberData().withName(queryParameter.getName()).withValue(""))
+					.collect(Collectors.toList());
 		} else {
 			return Collections.emptyList();
 		}
@@ -93,5 +89,17 @@ class UberAffordanceModel extends AffordanceModel {
 	@Nullable
 	UberAction getAction() {
 		return UberAction.forRequestMethod(getHttpMethod());
+	}
+
+	public Collection<MediaType> getMediaTypes() {
+		return this.mediaTypes;
+	}
+
+	public List<UberData> getInputProperties() {
+		return this.inputProperties;
+	}
+
+	public List<UberData> getQueryProperties() {
+		return this.queryProperties;
 	}
 }

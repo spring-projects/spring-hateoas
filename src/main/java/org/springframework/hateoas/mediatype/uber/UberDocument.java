@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import lombok.experimental.Wither;
-
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 
@@ -33,12 +29,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Greg Turnquist
  * @since 1.0
  */
-@Value
-@Wither(AccessLevel.PACKAGE)
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-class UberDocument {
+final class UberDocument {
 
-	private Uber uber;
+	private final Uber uber;
 
 	@JsonCreator
 	UberDocument(@JsonProperty("version") String version, @JsonProperty("data") @Nullable List<UberData> data,
@@ -48,5 +41,38 @@ class UberDocument {
 
 	UberDocument() {
 		this("1.0", null, null);
+	}
+
+	UberDocument(Uber uber) {
+		this.uber = uber;
+	}
+
+	UberDocument withUber(Uber uber) {
+		return this.uber == uber ? this : new UberDocument(uber);
+	}
+
+	@JsonProperty
+	public Uber getUber() {
+		return this.uber;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof UberDocument))
+			return false;
+		UberDocument that = (UberDocument) o;
+		return Objects.equals(this.uber, that.uber);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.uber);
+	}
+
+	public String toString() {
+		return "UberDocument(uber=" + this.uber + ")";
 	}
 }

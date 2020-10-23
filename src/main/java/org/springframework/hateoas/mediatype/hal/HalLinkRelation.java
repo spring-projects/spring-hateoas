@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.IanaUriSchemes;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,8 +34,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author Oliver Drotbohm
  */
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 
 	public static final HalLinkRelation CURIES = HalLinkRelation.uncuried("curies");
@@ -46,7 +41,15 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	private static final String RELATION_MESSAGE_TEMPLATE = "_links.%s.title";
 
 	private final @Nullable String curie;
-	private final @NonNull @Getter String localPart;
+	private final String localPart;
+
+	private HalLinkRelation(@Nullable String curie, String localPart) {
+
+		Assert.notNull(localPart, "Local part must not be null!");
+
+		this.curie = curie;
+		this.localPart = localPart;
+	}
 
 	/**
 	 * Returns a {@link HalLinkRelation} for the given general {@link LinkRelation}.
@@ -74,12 +77,13 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	@JsonCreator
 	private static HalLinkRelation of(String relation) {
 
-		String[] split = relation.split(":");
+		int firstColonIndex = relation.indexOf(':');
 
-		String curie = split.length == 1 ? null : split[0];
-		String localPart = split.length == 1 ? split[0] : split[1];
+		String curie = firstColonIndex == -1 ? null : relation.substring(0, firstColonIndex);
 
-		return new HalLinkRelation(curie, localPart);
+		return curie == null || IanaUriSchemes.isIanaUriScheme(curie)
+				? new HalLinkRelation(null, relation)
+				: new HalLinkRelation(curie, relation.substring(firstColonIndex + 1));
 	}
 
 	/**
@@ -153,6 +157,20 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 
 	/*
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.LinkRelation#map(java.util.function.Function)
+	 */
+	@Override
+	public HalLinkRelation map(Function<String, String> mapper) {
+
+		String mappedLocalPart = mapper.apply(localPart);
+
+		return localPart.equals(mappedLocalPart) //
+				? this //
+				: new HalLinkRelation(curie, mappedLocalPart);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.LinkRelation#value()
 	 */
 	@JsonValue
@@ -174,6 +192,20 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 				.toArray(String[]::new);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
+	 */
+	@Override
+	@org.springframework.lang.NonNull
+	public String getDefaultMessage() {
+		return "";
+	}
+
+	public String getLocalPart() {
+		return this.localPart;
+	}
+
 	/**
 	 * Simple builder interface to easily create multiple {@link HalLinkRelation}s for a single curie.
 	 *
@@ -188,6 +220,36 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 		 * @return will never be {@literal null}.
 		 */
 		HalLinkRelation relation(String relation);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(@Nullable Object o) {
+
+		if (this == o) {
+			return true;
+		}
+
+		if (!(o instanceof HalLinkRelation)) {
+			return false;
+		}
+
+		HalLinkRelation that = (HalLinkRelation) o;
+
+		return Objects.equals(this.curie, that.curie) //
+				&& Objects.equals(this.localPart, that.localPart);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.curie, this.localPart);
 	}
 
 	/*

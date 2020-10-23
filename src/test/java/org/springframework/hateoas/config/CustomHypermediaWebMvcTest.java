@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ class CustomHypermediaWebMvcTest {
 	void getUsingCustomMediaType() throws Exception {
 
 		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString() + ";charset=UTF-8")) //
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
@@ -95,7 +95,7 @@ class CustomHypermediaWebMvcTest {
 
 		@GetMapping("/employees/1")
 		public EntityModel<Employee> findOne() {
-			return new EntityModel<>(new Employee("Frodo Baggins", "ring bearer"),
+			return EntityModel.of(new Employee("Frodo Baggins", "ring bearer"),
 					linkTo(methodOn(EmployeeController.class).findOne()).withSelfRel());
 		}
 	}

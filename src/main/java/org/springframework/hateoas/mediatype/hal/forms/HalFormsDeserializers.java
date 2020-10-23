@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,20 +41,20 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  */
 class HalFormsDeserializers {
 
-	static class HalFormsResourcesDeserializer extends ContainerDeserializerBase<List<Object>>
+	static class HalFormsCollectionModelDeserializer extends ContainerDeserializerBase<List<Object>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = -7325599536381465624L;
 
 		private JavaType contentType;
 
-		HalFormsResourcesDeserializer(JavaType contentType) {
+		HalFormsCollectionModelDeserializer(JavaType contentType) {
 
 			super(contentType);
 			this.contentType = contentType;
 		}
 
-		HalFormsResourcesDeserializer() {
+		HalFormsCollectionModelDeserializer() {
 			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class));
 		}
 
@@ -119,7 +119,7 @@ class HalFormsDeserializers {
 		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
 				throws JsonMappingException {
 
-			return new HalFormsResourcesDeserializer(
+			return new HalFormsCollectionModelDeserializer(
 					property == null ? ctxt.getContextualType() : property.getType().getContentType());
 		}
 	}

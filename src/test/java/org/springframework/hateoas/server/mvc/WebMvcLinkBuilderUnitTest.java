@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,14 @@ import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -521,7 +524,8 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", null, 5)).withSelfRel();
 
-		assertThat(link.getVariables()).containsExactly(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED));
+		assertThat(link.getVariables())
+				.containsExactly(new TemplateVariable("offset", VariableType.REQUEST_PARAM_CONTINUED));
 
 		UriComponents components = toComponents(link);
 
@@ -599,6 +603,26 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithAlternatePathVariable("bar")).withSelfRel();
 		assertThat(link.getHref()).isEqualTo("http://localhost/something/bar/foo");
+	}
+
+	/**
+	 * @see #1003, #122, #169
+	 */
+	@Test
+	void appendsOptionalParameterIfSet() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalNextPage(1)).withSelfRel();
+
+		assertThat(link.getVariables()).isEmpty();
+		assertThat(link.expand().getHref()).endsWith("/foo?offset=1");
+	}
+
+	@Test // #1189
+	void parentInterfaceCanHoldSpringWebAnnotations() {
+
+		Link link = linkTo(methodOn(WebMvcClass.class).root("short")).withSelfRel();
+
+		assertThat(link.getHref()).endsWith("/api?view=short");
 	}
 
 	private static UriComponents toComponents(Link link) {
@@ -710,5 +734,22 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	@RequestMapping("/root")
 	interface ChildControllerWithRootMapping extends ParentControllerWithoutRootMapping {
 
+	}
+
+	// #1189
+
+	interface WebMvcInterface {
+
+		@GetMapping("/api")
+		HttpEntity<?> root(@RequestParam String view);
+	}
+
+	@RestController
+	static class WebMvcClass implements WebMvcInterface {
+
+		@Override
+		public HttpEntity<?> root(String view) {
+			return ResponseEntity.noContent().build();
+		}
 	}
 }

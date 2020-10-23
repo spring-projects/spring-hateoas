@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListDeserializer;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalLinkListSerializer;
 import org.springframework.hateoas.mediatype.hal.LinkMixin;
-import org.springframework.hateoas.mediatype.hal.RepresentationModelMixin;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsResourcesDeserializer;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourceSerializer;
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsResourcesSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.HalFormsCollectionModelDeserializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsCollectionModelSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsEntityModelSerializer;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsSerializers.HalFormsRepresentationModelSerializer;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.mvc.JacksonSerializers.MediaTypeDeserializer;
 import org.springframework.http.MediaType;
@@ -72,7 +74,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-class Jackson2HalFormsModule extends SimpleModule {
+public class Jackson2HalFormsModule extends SimpleModule {
 
 	private static final long serialVersionUID = -4496351128468451196L;
 
@@ -81,21 +83,30 @@ class Jackson2HalFormsModule extends SimpleModule {
 		super("hal-forms-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
 		setMixInAnnotation(Link.class, LinkMixin.class);
+		setMixInAnnotation(Links.class, LinksMixin.class);
 		setMixInAnnotation(RepresentationModel.class, RepresentationModelMixin.class);
+		setMixInAnnotation(EntityModel.class, EntityModelMixin.class);
 		setMixInAnnotation(CollectionModel.class, CollectionModelMixin.class);
 		setMixInAnnotation(PagedModel.class, PagedModelMixin.class);
 		setMixInAnnotation(MediaType.class, MediaTypeMixin.class);
-
-		addSerializer(new HalFormsResourceSerializer());
 	}
 
-	@JsonSerialize(using = HalFormsResourcesSerializer.class)
+	@JsonSerialize(using = HalLinkListSerializer.class)
+	abstract class LinksMixin {}
+
+	@JsonSerialize(using = HalFormsRepresentationModelSerializer.class)
+	abstract class RepresentationModelMixin extends org.springframework.hateoas.mediatype.hal.RepresentationModelMixin {}
+
+	@JsonSerialize(using = HalFormsEntityModelSerializer.class)
+	abstract class EntityModelMixin<T> extends EntityModel<T> {}
+
+	@JsonSerialize(using = HalFormsCollectionModelSerializer.class)
 	abstract class CollectionModelMixin<T> extends CollectionModel<T> {
 
 		@Override
 		@JsonProperty("_embedded")
 		@JsonInclude(Include.NON_EMPTY)
-		@JsonDeserialize(using = HalFormsResourcesDeserializer.class)
+		@JsonDeserialize(using = HalFormsCollectionModelDeserializer.class)
 		public abstract Collection<T> getContent();
 	}
 
@@ -153,24 +164,28 @@ class Jackson2HalFormsModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider resolver, CurieProvider curieProvider,
-				MessageSourceAccessor accessor, boolean enforceEmbeddedCollections,
-				HalFormsConfiguration halFormsConfiguration) {
+				MessageResolver accessor, HalFormsConfiguration configuration, AutowireCapableBeanFactory beanFactory) {
 
-			super(resolver, curieProvider, accessor, enforceEmbeddedCollections, halFormsConfiguration.toHalConfiguration());
+			super(resolver, curieProvider, accessor, configuration.getHalConfiguration(), beanFactory);
 
-			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider, enforceEmbeddedCollections);
+			HalConfiguration halConfiguration = configuration.getHalConfiguration();
+			EmbeddedMapper mapper = new EmbeddedMapper(resolver, curieProvider,
+					halConfiguration.isEnforceEmbeddedCollections());
+			HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, accessor);
 
-			this.serializers.put(HalFormsResourcesSerializer.class, new HalFormsResourcesSerializer(mapper));
+			this.serializers.put(HalFormsRepresentationModelSerializer.class,
+					new HalFormsRepresentationModelSerializer(builder));
+			this.serializers.put(HalFormsEntityModelSerializer.class, new HalFormsEntityModelSerializer(builder));
+			this.serializers.put(HalFormsCollectionModelSerializer.class,
+					new HalFormsCollectionModelSerializer(builder, mapper, halConfiguration));
 			this.serializers.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, accessor, halFormsConfiguration.toHalConfiguration()));
+					new HalLinkListSerializer(curieProvider, mapper, accessor, halConfiguration));
 		}
 
 		public HalFormsHandlerInstantiator(LinkRelationProvider relProvider, CurieProvider curieProvider,
-				MessageSourceAccessor messageSource, boolean enforceEmbeddedCollections,
-				AutowireCapableBeanFactory beanFactory) {
+				MessageResolver resolver, AutowireCapableBeanFactory beanFactory) {
 
-			this(relProvider, curieProvider, messageSource, enforceEmbeddedCollections,
-					beanFactory.getBean(HalFormsConfiguration.class));
+			this(relProvider, curieProvider, resolver, beanFactory.getBean(HalFormsConfiguration.class), beanFactory);
 		}
 
 		@Nullable

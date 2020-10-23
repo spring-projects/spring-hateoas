@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,10 @@ public interface ReactiveRepresentationModelAssembler<T, D extends Representatio
 	 * @param entities must not be {@literal null}.
 	 * @return {@link CollectionModel} containing {@code D}.
 	 */
-	default Mono<CollectionModel<D>> toCollectionModel(Flux<? extends T> entities,
-			ServerWebExchange exchange) {
+	default Mono<CollectionModel<D>> toCollectionModel(Flux<? extends T> entities, ServerWebExchange exchange) {
 
 		return entities.flatMap(entity -> toModel(entity, exchange)) //
 				.collectList() //
-				.map(CollectionModel::new);
+				.map(CollectionModel::of);
 	}
 }

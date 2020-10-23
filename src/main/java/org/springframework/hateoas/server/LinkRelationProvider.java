@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,14 @@
  */
 package org.springframework.hateoas.server;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import java.util.Objects;
 
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.lang.Nullable;
 import org.springframework.plugin.core.Plugin;
+import org.springframework.util.Assert;
 
 /**
  * API to provide {@link LinkRelation}s for collections and items of the given type. Implementations can be selected
@@ -71,16 +68,30 @@ public interface LinkRelationProvider extends Plugin<LookupContext> {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	@RequiredArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)
-	@EqualsAndHashCode
-	static class LookupContext {
+	class LookupContext {
 
-		private enum ResourceType {
-			ITEM, COLLECTION;
+		private final Class<?> type;
+		private final @Nullable ResourceType resourceType;
+
+		private LookupContext(Class<?> type, ResourceType resourceType) {
+
+			Assert.notNull(type, "type must not be null!");
+
+			this.type = type;
+			this.resourceType = resourceType;
 		}
 
-		private final @NonNull @Getter Class<?> type;
-		private final @Nullable ResourceType resourceType;
+		private static LookupContext of(Class<?> type, ResourceType resourceType) {
+			return new LookupContext(type, resourceType);
+		}
+
+		public Class<?> getType() {
+			return this.type;
+		}
+
+		private enum ResourceType {
+			ITEM, COLLECTION
+		}
 
 		/**
 		 * Creates a {@link LookupContext} for the type in general, i.e. both item and collection relation lookups.
@@ -138,6 +149,22 @@ public interface LinkRelationProvider extends Plugin<LookupContext> {
 		 */
 		public boolean handlesType(Class<?> type) {
 			return this.type.equals(type);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+
+			if (this == o)
+				return true;
+			if (!(o instanceof LookupContext))
+				return false;
+			LookupContext that = (LookupContext) o;
+			return Objects.equals(this.type, that.type) && this.resourceType == that.resourceType;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.type, this.resourceType);
 		}
 
 		/*

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		EntityModel<Person> resource = new EntityModel<>(person);
-		resource.add(new Link("localhost"));
+		EntityModel<Person> resource = EntityModel.of(person);
+		resource.add(Link.of("localhost"));
 
 		assertThat(write(resource)).isEqualTo(REFERENCE);
 	}
@@ -54,7 +54,7 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		PersonModel result = read(REFERENCE, PersonModel.class);
 
 		assertThat(result.getLinks()).hasSize(1);
-		assertThat(result.getLinks()).contains(new Link("localhost"));
+		assertThat(result.getLinks()).contains(Link.of("localhost"));
 		assertThat(result.getContent().firstname).isEqualTo("Dave");
 		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}

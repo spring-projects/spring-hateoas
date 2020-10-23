@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,61 @@
  */
 package org.springframework.hateoas.support;
 
+import java.util.function.Function;
+
+import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 /**
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class ContextTester {
 
-	public static <E extends Exception> void withContext(Class<?> configuration,
-		 	ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+	public static <E extends Exception> void withContext(Class<?> configuration, //
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer, //
+			@Nullable ClassLoader classLoader) throws E {
 
 		try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
+
+			if (classLoader != null) {
+				context.setClassLoader(classLoader);
+			}
 
 			context.register(configuration);
 			context.refresh();
 
 			consumer.accept(context);
 		}
+	}
+
+	public static <E extends Exception> void withContext(Class<?> configuration,
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+		withContext(configuration, consumer, null);
 	}
 
 	public static <E extends Exception> void withServletContext(Class<?> configuration,
-			  ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
 
-		try (AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext()) {
+		withServletContext(configuration, Function.identity(), consumer);
+	}
 
-			context.register(configuration);
-			context.setServletContext(new MockServletContext());
-			context.refresh();
+	public static <E extends Exception> void withServletContext(Class<?> configuration,
+			Function<AnnotationConfigWebApplicationContext, AnnotationConfigWebApplicationContext> preparer,
+			ConsumerWithException<AnnotationConfigWebApplicationContext, E> consumer) throws E {
 
-			consumer.accept(context);
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.register(configuration);
+		context.setServletContext(new MockServletContext());
+
+		try (AnnotationConfigWebApplicationContext prepared = preparer.apply(context)) {
+
+			prepared.refresh();
+			consumer.accept(prepared);
 		}
 	}
-	
+
 	public interface ConsumerWithException<T, E extends Exception> {
 
 		void accept(T element) throws E;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@ import org.springframework.util.Assert;
  * @author Greg Turnquist
  * @since 1.0
  */
-public interface SimpleRepresentationModelAssembler<T>
-		extends RepresentationModelAssembler<T, EntityModel<T>> {
+public interface SimpleRepresentationModelAssembler<T> extends RepresentationModelAssembler<T, EntityModel<T>> {
 
 	/**
 	 * Converts the given entity into a {@link EntityModel}.
@@ -40,7 +39,7 @@ public interface SimpleRepresentationModelAssembler<T>
 	 */
 	default EntityModel<T> toModel(T entity) {
 
-		EntityModel<T> resource = new EntityModel<>(entity);
+		EntityModel<T> resource = EntityModel.of(entity);
 		addLinks(resource);
 		return resource;
 	}
@@ -60,8 +59,7 @@ public interface SimpleRepresentationModelAssembler<T>
 	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}.
 	 */
 	@Override
-	default CollectionModel<EntityModel<T>> toCollectionModel(
-			Iterable<? extends T> entities) {
+	default CollectionModel<EntityModel<T>> toCollectionModel(Iterable<? extends T> entities) {
 
 		Assert.notNull(entities, "entities must not be null!");
 		List<EntityModel<T>> resourceList = new ArrayList<>();
@@ -70,8 +68,7 @@ public interface SimpleRepresentationModelAssembler<T>
 			resourceList.add(toModel(entity));
 		}
 
-		CollectionModel<EntityModel<T>> resources = new CollectionModel<>(
-				resourceList);
+		CollectionModel<EntityModel<T>> resources = CollectionModel.of(resourceList);
 		addLinks(resources);
 		return resources;
 	}

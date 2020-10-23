@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.WebClientConfigurer;
+import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,12 +61,12 @@ class CollectionJsonWebFluxIntegrationTest {
 	@Test
 	void singleEmployee() {
 
-		this.testClient.get().uri("http://localhost/employees/0")
-				.accept(MediaTypes.COLLECTION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees/0") //
+				.accept(MediaTypes.COLLECTION_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+				.expectBody(String.class) //
 				.value(jsonPath("$.collection.version", is("1.0")))
 				.value(jsonPath("$.collection.href", is("http://localhost/employees/0")))
 				.value(jsonPath("$.collection.links.*", hasSize(1)))
@@ -96,12 +96,12 @@ class CollectionJsonWebFluxIntegrationTest {
 	@Test
 	void collectionOfEmployees() {
 
-		this.testClient.get().uri("http://localhost/employees")
-				.accept(MediaTypes.COLLECTION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees") //
+				.accept(MediaTypes.COLLECTION_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.collection.version", is("1.0")))
 				.value(jsonPath("$.collection.href", is("http://localhost/employees")))
@@ -140,19 +140,19 @@ class CollectionJsonWebFluxIntegrationTest {
 
 		String specBasedJson = read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
 
-		this.testClient.post().uri("http://localhost/employees")
-				.contentType(MediaTypes.COLLECTION_JSON)
-				.syncBody(specBasedJson)
-				.exchange()
-				.expectStatus().isCreated()
+		this.testClient.post().uri("http://localhost/employees") //
+				.contentType(MediaTypes.COLLECTION_JSON) //
+				.bodyValue(specBasedJson) //
+				.exchange() //
+				.expectStatus().isCreated() //
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
 
-		this.testClient.get().uri("http://localhost/employees/2")
-				.accept(MediaTypes.COLLECTION_JSON)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON)
-				.expectBody(String.class)
+		this.testClient.get().uri("http://localhost/employees/2") //
+				.accept(MediaTypes.COLLECTION_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.collection.version", is("1.0")))
 				.value(jsonPath("$.collection.href", is("http://localhost/employees/2")))
@@ -189,12 +189,8 @@ class CollectionJsonWebFluxIntegrationTest {
 		}
 
 		@Bean
-		WebTestClient webTestClient(WebClientConfigurer webClientConfigurer, ApplicationContext ctx) {
-			
-			return WebTestClient.bindToApplicationContext(ctx).build()
-				.mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies())
-				.build();
+		WebTestClient webTestClient(HypermediaWebTestClientConfigurer configurer, ApplicationContext ctx) {
+			return WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 		}
 	}
 }

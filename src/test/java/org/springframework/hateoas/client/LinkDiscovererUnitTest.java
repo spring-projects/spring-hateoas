@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,19 +38,19 @@ public abstract class LinkDiscovererUnitTest {
 	void findsSingleLink() {
 
 		assertThat(getDiscoverer().findLinkWithRel("self", getInputString())) //
-				.hasValue(new Link("selfHref"));
+				.hasValue(Link.of("selfHref"));
 
 		Links links = getDiscoverer().findLinksWithRel("self", getInputString());
 
 		assertThat(links).hasSize(1);
-		assertThat(links).contains(new Link("selfHref"));
+		assertThat(links).contains(Link.of("selfHref"));
 	}
 
 	@Test
 	void findsFirstLink() {
 
 		assertThat(getDiscoverer().findLinkWithRel("relation", getInputString()))
-				.hasValue(new Link("firstHref", "relation"));
+				.hasValue(Link.of("firstHref", "relation"));
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public abstract class LinkDiscovererUnitTest {
 		Links links = getDiscoverer().findLinksWithRel("relation", getInputString());
 
 		assertThat(links).hasSize(2);
-		assertThat(links).contains(new Link("firstHref", "relation"), new Link("secondHref", "relation"));
+		assertThat(links).contains(Link.of("firstHref", "relation"), Link.of("secondHref", "relation"));
 	}
 
 	@Test

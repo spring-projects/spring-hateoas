@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,9 @@ class HypermediaWebFluxConfigurerTest {
 		ctx.register(context);
 		ctx.refresh();
 
-		WebClientConfigurer webClientConfigurer = ctx.getBean(WebClientConfigurer.class);
+        HypermediaWebTestClientConfigurer configurer = ctx.getBean(HypermediaWebTestClientConfigurer.class);
 
-		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutate()
-				.exchangeStrategies(webClientConfigurer.hypermediaExchangeStrategies()).build();
+		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 	}
 
 	/**
@@ -81,12 +80,12 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 	}
 
 	/**
@@ -145,9 +144,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHalWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
@@ -162,8 +161,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHalWebFluxConfig.class);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 
 		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
 		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
@@ -177,9 +176,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalAndCollectionJsonWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
@@ -198,8 +197,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(HalAndCollectionJsonWebFluxConfig.class);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 
 		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
 		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
@@ -216,9 +215,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
 
-		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyRootUriServesHypermedia(MediaTypes.HAL_JSON);
+		verifyAggregateRootServesHypermedia(MediaTypes.HAL_JSON);
+		verifySingleItemResourceServesHypermedia(MediaTypes.HAL_JSON);
 
 		verifyRootUriServesHypermedia(MediaTypes.HAL_FORMS_JSON);
 		verifyAggregateRootServesHypermedia(MediaTypes.HAL_FORMS_JSON);
@@ -241,8 +240,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		setUp(AllHypermediaTypesWebFluxConfig.class);
 
-		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
-		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+		verifyCreatingNewEntityWorks(MediaTypes.HAL_JSON);
+		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_JSON);
 
 		verifyCreatingNewEntityWorks(MediaTypes.HAL_FORMS_JSON);
 		verifyCreatingNewEntityReactivelyShouldWork(MediaTypes.HAL_FORMS_JSON);
@@ -255,15 +254,22 @@ class HypermediaWebFluxConfigurerTest {
 	}
 
 	/**
+	 * When requesting an unregistered media type, fallback to Spring Framework's default JSON handler.
+	 *
 	 * @see #728
 	 */
 	@Test
-	void callingForUnregisteredMediaTypeShouldFail() {
+	void callingForUnregisteredMediaTypeShouldFallBackToDefaultHandler() {
 
 		setUp(HalWebFluxConfig.class);
 
-		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON).exchange().expectStatus().is4xxClientError()
-				.returnResult(String.class).getResponseBody().as(StepVerifier::create).verifyComplete();
+		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON) //
+				.exchange() //
+				.expectStatus().isOk() //
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
+				.expectNext("{\"links\":[{\"rel\":\"self\",\"href\":\"/\"},{\"rel\":\"employees\",\"href\":\"/employees\"}]}")
+				.verifyComplete();
 	}
 
 	/**
@@ -276,42 +282,42 @@ class HypermediaWebFluxConfigurerTest {
 
 		this.testClient.get().uri("/reactive").accept(MediaTypes.HAL_JSON).exchange() //
 				.expectStatus().isOk() //
-				.expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(RepresentationModel.class).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resourceSupport -> {
 
-					assertThat(resourceSupport.getLinks()).containsExactlyInAnyOrder(new Link("/", IanaLinkRelations.SELF),
-							new Link("/employees", "employees"));
+					assertThat(resourceSupport.getLinks()).containsExactlyInAnyOrder(Link.of("/", IanaLinkRelations.SELF),
+							Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
 
 		this.testClient.get().uri("/reactive/employees").accept(MediaTypes.HAL_JSON).exchange() //
-				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(this.resourcesEmployeeType).getResponseBody() //
 				.as(StepVerifier::create).expectNextMatches(resources -> {
 
-					assertThat(resources.getLinks()).containsExactlyInAnyOrder(new Link("/employees", IanaLinkRelations.SELF));
+					assertThat(resources.getLinks()).containsExactlyInAnyOrder(Link.of("/employees", IanaLinkRelations.SELF));
 
 					EntityModel<Employee> content = resources.getContent().iterator().next();
 
 					assertThat(content.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(content.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
 
 		this.testClient.get().uri("/reactive/employees/1").accept(MediaTypes.HAL_JSON).exchange() //
-				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON_UTF8) //
+				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(this.resourceEmployeeType).getResponseBody() //
 				.as(StepVerifier::create).expectNextMatches(employee -> {
 
 					assertThat(employee.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(employee.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 					return true;
 				}).verifyComplete();
 	}
@@ -329,7 +335,7 @@ class HypermediaWebFluxConfigurerTest {
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/", IanaLinkRelations.SELF), new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/", IanaLinkRelations.SELF), Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -345,7 +351,7 @@ class HypermediaWebFluxConfigurerTest {
 				.contentType(responseType).returnResult(this.resourcesEmployeeType).getResponseBody().as(StepVerifier::create)
 				.expectNextMatches(resources -> {
 
-					assertThat(resources.getLinks()).containsExactlyInAnyOrder(new Link("/employees", IanaLinkRelations.SELF));
+					assertThat(resources.getLinks()).containsExactlyInAnyOrder(Link.of("/employees", IanaLinkRelations.SELF));
 
 					Collection<EntityModel<Employee>> content = resources.getContent();
 					assertThat(content).hasSize(1);
@@ -354,8 +360,8 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(resource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(resource.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -376,7 +382,7 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(employeeResource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(employeeResource.getLinks()).containsExactlyInAnyOrder(
-							new Link("/employees/1", IanaLinkRelations.SELF), new Link("/employees", "employees"));
+							Link.of("/employees/1", IanaLinkRelations.SELF), Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -410,8 +416,8 @@ class HypermediaWebFluxConfigurerTest {
 
 					assertThat(resource.getContent()).isEqualTo(new Employee("Samwise Gamgee", "gardener"));
 					assertThat(resource.getLinks()) //
-							.containsExactlyInAnyOrder(new Link("/employees/1", IanaLinkRelations.SELF),
-									new Link("/employees", "employees"));
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
 
 					return true;
 				}).verifyComplete();
@@ -465,8 +471,8 @@ class HypermediaWebFluxConfigurerTest {
 
 			RepresentationModel<?> root = new RepresentationModel<>();
 
-			root.add(new Link("/").withSelfRel());
-			root.add(new Link("/employees").withRel("employees"));
+			root.add(Link.of("/").withSelfRel());
+			root.add(Link.of("/employees").withRel("employees"));
 
 			return root;
 		}
@@ -539,13 +545,13 @@ class HypermediaWebFluxConfigurerTest {
 		@Override
 		public void addLinks(EntityModel<Employee> resource) {
 
-			resource.add(new Link("/employees/1").withSelfRel());
-			resource.add(new Link("/employees").withRel("employees"));
+			resource.add(Link.of("/employees/1").withSelfRel());
+			resource.add(Link.of("/employees").withRel("employees"));
 		}
 
 		@Override
 		public void addLinks(CollectionModel<EntityModel<Employee>> resources) {
-			resources.add(new Link("/employees").withSelfRel());
+			resources.add(Link.of("/employees").withSelfRel());
 		}
 	}
 

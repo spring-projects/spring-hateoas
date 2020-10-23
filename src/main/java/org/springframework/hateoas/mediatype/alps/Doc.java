@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.alps;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Value;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -31,13 +32,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @since 0.15
  * @see http://alps.io/spec/#prop-doc
  */
-@Value
-@Builder
-@AllArgsConstructor
-@JsonPropertyOrder({"format", "href", "value"})
-public class Doc {
+@JsonPropertyOrder({ "format", "href", "value" })
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public final class Doc {
 
-	private final String href, value;
+	private final String href;
+	private final String value;
 	private final Format format;
 
 	/**
@@ -54,5 +54,85 @@ public class Doc {
 		this.href = null;
 		this.value = value;
 		this.format = format;
+	}
+
+	@JsonCreator
+	private Doc(@JsonProperty("href") String href, @JsonProperty("value") String value,
+			@JsonProperty("format") Format format) {
+
+		this.href = href;
+		this.value = value;
+		this.format = format;
+	}
+
+	public static DocBuilder builder() {
+		return new DocBuilder();
+	}
+
+	public String getHref() {
+		return this.href;
+	}
+
+	public String getValue() {
+		return this.value;
+	}
+
+	public Format getFormat() {
+		return this.format;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Doc doc = (Doc) o;
+		return Objects.equals(this.href, doc.href) && Objects.equals(this.value, doc.value) && this.format == doc.format;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.href, this.value, this.format);
+	}
+
+	public String toString() {
+		return "Doc(href=" + this.href + ", value=" + this.value + ", format=" + this.format + ")";
+	}
+
+	public static class DocBuilder {
+
+		private String href;
+		private String value;
+		private Format format;
+
+		DocBuilder() {}
+
+		public Doc.DocBuilder href(String href) {
+
+			this.href = href;
+			return this;
+		}
+
+		public Doc.DocBuilder value(String value) {
+
+			this.value = value;
+			return this;
+		}
+
+		public Doc.DocBuilder format(Format format) {
+
+			this.format = format;
+			return this;
+		}
+
+		public Doc build() {
+			return new Doc(this.href, this.value, this.format);
+		}
+
+		public String toString() {
+			return "Doc.DocBuilder(href=" + this.href + ", value=" + this.value + ", format=" + this.format + ")";
+		}
 	}
 }

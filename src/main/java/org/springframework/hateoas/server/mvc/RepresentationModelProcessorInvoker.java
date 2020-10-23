@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,13 +171,7 @@ public class RepresentationModelProcessorInvoker {
 	}
 
 	private static Class<?> getRawType(@Nullable ResolvableType type) {
-
-		if (type == null) {
-			return Object.class;
-		}
-
-		Class<?> rawType = type.getRawClass();
-		return rawType == null ? Object.class : rawType;
+		return type == null ? Object.class : type.resolve(Object.class);
 	}
 
 	/**
@@ -310,7 +304,7 @@ public class RepresentationModelProcessorInvoker {
 		 */
 		private static boolean isValueTypeMatch(@Nullable EntityModel<?> entityModel, @Nullable ResolvableType target) {
 
-			if (entityModel == null || !isRawTypeAssignable(target, entityModel.getClass())) {
+			if (target == null || entityModel == null || !isRawTypeAssignable(target, entityModel.getClass())) {
 				return false;
 			}
 
@@ -323,7 +317,7 @@ public class RepresentationModelProcessorInvoker {
 			ResolvableType type = findGenericType(target, EntityModel.class);
 
 			return target.isAssignableFrom(content.getClass()) || //
-					(type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass())));
+					type != null && type.getGeneric(0).isAssignableFrom(ResolvableType.forClass(content.getClass()));
 		}
 
 		@Nullable

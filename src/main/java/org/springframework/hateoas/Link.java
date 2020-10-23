@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.experimental.Wither;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
@@ -28,17 +22,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Value object for links.
@@ -48,11 +43,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author Jens Schauder
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(value = "templated", ignoreUnknown = true)
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Getter
-@EqualsAndHashCode(
-		of = { "rel", "href", "hreflang", "media", "title", "type", "deprecation", "profile", "name", "affordances" })
+@JsonIgnoreProperties(value = { "templated", "template" }, ignoreUnknown = true)
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
@@ -90,15 +81,15 @@ public class Link implements Serializable {
 	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
 
 	private LinkRelation rel;
-	private @Wither String href;
-	private @Wither String hreflang;
-	private @Wither String media;
-	private @Wither String title;
-	private @Wither String type;
-	private @Wither String deprecation;
-	private @Wither String profile;
-	private @Wither String name;
-	private @JsonIgnore UriTemplate template;
+	private String href;
+	private String hreflang;
+	private String media;
+	private String title;
+	private String type;
+	private String deprecation;
+	private String profile;
+	private String name;
+	private @JsonIgnore @Nullable UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 
 	/**
@@ -106,7 +97,9 @@ public class Link implements Serializable {
 	 *
 	 * @see IanaLinkRelations#SELF
 	 * @param href must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(String)}
 	 */
+	@Deprecated
 	public Link(String href) {
 		this(href, IanaLinkRelations.SELF);
 	}
@@ -116,9 +109,11 @@ public class Link implements Serializable {
 	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(String, String)}.
 	 */
+	@Deprecated
 	public Link(String href, String rel) {
-		this(UriTemplate.of(href), LinkRelation.of(rel));
+		this(href, LinkRelation.of(rel));
 	}
 
 	/**
@@ -126,9 +121,11 @@ public class Link implements Serializable {
 	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(String, LinkRelation)}.
 	 */
+	@Deprecated
 	public Link(String href, LinkRelation rel) {
-		this(UriTemplate.of(href), rel);
+		this(href, templateOrNull(href), rel, Collections.emptyList());
 	}
 
 	/**
@@ -136,7 +133,9 @@ public class Link implements Serializable {
 	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(UriTemplate, String)}.
 	 */
+	@Deprecated
 	public Link(UriTemplate template, String rel) {
 		this(template, LinkRelation.of(rel));
 	}
@@ -146,7 +145,9 @@ public class Link implements Serializable {
 	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
+	 * @deprecated since 1.1, use {@link #of(UriTemplate, LinkRelation)}.
 	 */
+	@Deprecated
 	public Link(UriTemplate template, LinkRelation rel) {
 		this(template, rel, Collections.emptyList());
 	}
@@ -167,6 +168,94 @@ public class Link implements Serializable {
 		this.rel = rel;
 		this.href = template.toString();
 		this.affordances = affordances;
+	}
+
+	private Link(String href, @Nullable UriTemplate template, LinkRelation rel, List<Affordance> affordances) {
+
+		Assert.hasText(href, "Href must not be null or empty!");
+		Assert.notNull(rel, "LinkRelation must not be null!");
+		Assert.notNull(affordances, "Affordances must not be null!");
+
+		this.href = href;
+		this.template = template;
+		this.rel = rel;
+		this.affordances = affordances;
+	}
+
+	private Link(LinkRelation rel, String href, String hreflang, String media, String title, String type,
+			String deprecation, String profile, String name, @Nullable UriTemplate template, List<Affordance> affordances) {
+
+		this.rel = rel;
+		this.href = href;
+		this.hreflang = hreflang;
+		this.media = media;
+		this.title = title;
+		this.type = type;
+		this.deprecation = deprecation;
+		this.profile = profile;
+		this.name = name;
+		this.template = template;
+		this.affordances = affordances;
+	}
+
+	/**
+	 * Creates a new link to the given URI with the self relation.
+	 *
+	 * @see IanaLinkRelations#SELF
+	 * @param href must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(String href) {
+		return new Link(href);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given href with the given relation.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(String href, String relation) {
+		return new Link(href, relation);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given href and {@link LinkRelation}.
+	 *
+	 * @param href must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(String href, LinkRelation relation) {
+		return new Link(href, relation);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given {@link UriTemplate} and link relation.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param relation must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(UriTemplate template, String relation) {
+		return new Link(template, relation);
+	}
+
+	/**
+	 * Creates a new {@link Link} to the given {@link UriTemplate} and {@link LinkRelation}.
+	 *
+	 * @param template must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static Link of(UriTemplate template, LinkRelation relation) {
+		return new Link(template, relation);
 	}
 
 	/**
@@ -204,65 +293,10 @@ public class Link implements Serializable {
 
 		Assert.notNull(affordance, "Affordance must not be null!");
 
-		List<Affordance> newAffordances = new ArrayList<>();
-		newAffordances.addAll(this.affordances);
+		List<Affordance> newAffordances = new ArrayList<>(this.affordances);
 		newAffordances.add(affordance);
 
 		return withAffordances(newAffordances);
-	}
-
-	/**
-	 * Convenience method when chaining an existing {@link Link}.
-	 *
-	 * @param name
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 * @return
-	 */
-	public Link andAffordance(String name, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
-		return andAffordance(new Affordance(name, this, httpMethod, inputType, queryMethodParameters, outputType));
-	}
-
-	/**
-	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
-	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
-	 *
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 * @return
-	 */
-	public Link andAffordance(HttpMethod httpMethod, ResolvableType inputType, List<QueryParameter> queryMethodParameters,
-			ResolvableType outputType) {
-
-		String name = httpMethod.toString().toLowerCase();
-
-		Class<?> resolvedInputType = inputType.resolve();
-		if (resolvedInputType != null) {
-			name += resolvedInputType.getSimpleName();
-		}
-
-		return andAffordance(name, httpMethod, inputType, queryMethodParameters, outputType);
-	}
-
-	/**
-	 * Convenience method when chaining an existing {@link Link}. Defaults the name of the affordance to verb + classname,
-	 * e.g. {@literal <httpMethod=HttpMethod.PUT, inputType=Employee>} produces {@literal <name=putEmployee>}.
-	 *
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 * @return
-	 */
-	public Link andAffordance(HttpMethod httpMethod, Class<?> inputType, List<QueryParameter> queryMethodParameters,
-			Class<?> outputType) {
-		return andAffordance(httpMethod, ResolvableType.forClass(inputType), queryMethodParameters,
-				ResolvableType.forClass(outputType));
 	}
 
 	/**
@@ -299,7 +333,7 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<String> getVariableNames() {
-		return template.getVariableNames();
+		return template == null ? Collections.emptyList() : template.getVariableNames();
 	}
 
 	/**
@@ -309,7 +343,7 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
-		return template.getVariables();
+		return template == null ? Collections.emptyList() : template.getVariables();
 	}
 
 	/**
@@ -318,7 +352,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public boolean isTemplated() {
-		return !template.getVariables().isEmpty();
+		return template == null ? false : !template.getVariables().isEmpty();
 	}
 
 	/**
@@ -328,7 +362,7 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Object... arguments) {
-		return new Link(template.expand(arguments).toString(), getRel());
+		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -337,8 +371,8 @@ public class Link implements Serializable {
 	 * @param arguments must not be {@literal null}.
 	 * @return
 	 */
-	public Link expand(Map<String, ? extends Object> arguments) {
-		return new Link(template.expand(arguments).toString(), getRel());
+	public Link expand(Map<String, ?> arguments) {
+		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
 	/**
@@ -407,6 +441,276 @@ public class Link implements Serializable {
 		}
 	}
 
+	/**
+	 * Factory method to easily create {@link Link} instances from RFC-8288 compatible {@link String} representations of a
+	 * link.
+	 *
+	 * @param element an RFC-8288 compatible representation of a link.
+	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-8288.
+	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
+	 * @return
+	 */
+	public static Link valueOf(String element) {
+
+		if (!StringUtils.hasText(element)) {
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
+		}
+
+		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);
+
+		if (matcher.find()) {
+
+			Map<String, String> attributes = getAttributeMap(matcher.group(2));
+
+			if (!attributes.containsKey("rel")) {
+				throw new IllegalArgumentException("Link does not provide a rel attribute!");
+			}
+
+			Link link = of(matcher.group(1), attributes.get("rel"));
+
+			if (attributes.containsKey("hreflang")) {
+				link = link.withHreflang(attributes.get("hreflang"));
+			}
+
+			if (attributes.containsKey("media")) {
+				link = link.withMedia(attributes.get("media"));
+			}
+
+			if (attributes.containsKey("title")) {
+				link = link.withTitle(attributes.get("title"));
+			}
+
+			if (attributes.containsKey("type")) {
+				link = link.withType(attributes.get("type"));
+			}
+
+			if (attributes.containsKey("deprecation")) {
+				link = link.withDeprecation(attributes.get("deprecation"));
+			}
+
+			if (attributes.containsKey("profile")) {
+				link = link.withProfile(attributes.get("profile"));
+			}
+
+			if (attributes.containsKey("name")) {
+				link = link.withName(attributes.get("name"));
+			}
+
+			return link;
+
+		} else {
+			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
+		}
+	}
+
+	/**
+	 * Parses the links attributes from the given source {@link String}.
+	 *
+	 * @param source
+	 * @return
+	 */
+	private static Map<String, String> getAttributeMap(String source) {
+
+		if (!StringUtils.hasText(source)) {
+			return Collections.emptyMap();
+		}
+
+		Map<String, String> attributes = new HashMap<>();
+		Matcher matcher = KEY_AND_VALUE_PATTERN.matcher(source);
+
+		while (matcher.find()) {
+			attributes.put(matcher.group(1), matcher.group(2));
+		}
+
+		return attributes;
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal href}.
+	 *
+	 * @param href
+	 * @return
+	 */
+	public Link withHref(String href) {
+
+		return this.href == href ? this
+				: new Link(this.rel, href, this.hreflang, this.media, this.title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal hrefleng}.
+	 *
+	 * @param hreflang
+	 * @return
+	 */
+	public Link withHreflang(String hreflang) {
+
+		return this.hreflang == hreflang ? this
+				: new Link(this.rel, this.href, hreflang, this.media, this.title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal media}.
+	 *
+	 * @param media
+	 * @return
+	 */
+	public Link withMedia(String media) {
+
+		return this.media == media ? this
+				: new Link(this.rel, this.href, this.hreflang, media, this.title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal title}.
+	 *
+	 * @param title
+	 * @return
+	 */
+	public Link withTitle(String title) {
+
+		return this.title == title ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, title, this.type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal type}.
+	 *
+	 * @param type
+	 * @return
+	 */
+	public Link withType(String type) {
+
+		return this.type == type ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, type, this.deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal deprecation}.
+	 *
+	 * @param deprecation
+	 * @return
+	 */
+	public Link withDeprecation(String deprecation) {
+
+		return this.deprecation == deprecation ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, deprecation, this.profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal profile}.
+	 *
+	 * @param profile
+	 * @return
+	 */
+	public Link withProfile(String profile) {
+
+		return this.profile == profile ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation, profile,
+						this.name, this.template, this.affordances);
+	}
+
+	/**
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal name}.
+	 *
+	 * @param name
+	 * @return
+	 */
+	public Link withName(String name) {
+
+		return this.name == name ? this
+				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
+						this.profile, name, this.template, this.affordances);
+	}
+
+	@JsonProperty
+	public LinkRelation getRel() {
+		return this.rel;
+	}
+
+	@JsonProperty
+	public String getHref() {
+		return this.href;
+	}
+
+	@JsonProperty
+	public String getHreflang() {
+		return this.hreflang;
+	}
+
+	@JsonProperty
+	public String getMedia() {
+		return this.media;
+	}
+
+	@JsonProperty
+	public String getTitle() {
+		return this.title;
+	}
+
+	@JsonProperty
+	public String getType() {
+		return this.type;
+	}
+
+	@JsonProperty
+	public String getDeprecation() {
+		return this.deprecation;
+	}
+
+	@JsonProperty
+	public String getProfile() {
+		return this.profile;
+	}
+
+	@JsonProperty
+	public String getName() {
+		return this.name;
+	}
+
+	@JsonProperty
+	public UriTemplate getTemplate() {
+		return template == null ? UriTemplate.of(href) : this.template;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Link link = (Link) o;
+		return Objects.equals(this.rel, link.rel) && Objects.equals(this.href, link.href)
+				&& Objects.equals(this.hreflang, link.hreflang) && Objects.equals(this.media, link.media)
+				&& Objects.equals(this.title, link.title) && Objects.equals(this.type, link.type)
+				&& Objects.equals(this.deprecation, link.deprecation) && Objects.equals(this.profile, link.profile)
+				&& Objects.equals(this.name, link.name) && Objects.equals(this.affordances, link.affordances);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+
+		return Objects.hash(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
+				this.profile, this.name, this.affordances);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -447,87 +751,11 @@ public class Link implements Serializable {
 		return linkString;
 	}
 
-	/**
-	 * Factory method to easily create {@link Link} instances from RFC-5988 compatible {@link String} representations of a
-	 * link.
-	 *
-	 * @param element an RFC-5899 compatible representation of a link.
-	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-5899.
-	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
-	 * @return
-	 */
-	public static Link valueOf(String element) {
+	@Nullable
+	private static UriTemplate templateOrNull(String href) {
 
-		if (!StringUtils.hasText(element)) {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
-		}
+		Assert.notNull(href, "Href must not be null!");
 
-		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);
-
-		if (matcher.find()) {
-
-			Map<String, String> attributes = getAttributeMap(matcher.group(2));
-
-			if (!attributes.containsKey("rel")) {
-				throw new IllegalArgumentException("Link does not provide a rel attribute!");
-			}
-
-			Link link = new Link(matcher.group(1), attributes.get("rel"));
-
-			if (attributes.containsKey("hreflang")) {
-				link = link.withHreflang(attributes.get("hreflang"));
-			}
-
-			if (attributes.containsKey("media")) {
-				link = link.withMedia(attributes.get("media"));
-			}
-
-			if (attributes.containsKey("title")) {
-				link = link.withTitle(attributes.get("title"));
-			}
-
-			if (attributes.containsKey("type")) {
-				link = link.withType(attributes.get("type"));
-			}
-
-			if (attributes.containsKey("deprecation")) {
-				link = link.withDeprecation(attributes.get("deprecation"));
-			}
-
-			if (attributes.containsKey("profile")) {
-				link = link.withProfile(attributes.get("profile"));
-			}
-
-			if (attributes.containsKey("name")) {
-				link = link.withName(attributes.get("name"));
-			}
-
-			return link;
-
-		} else {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC5988 compliant!", element));
-		}
-	}
-
-	/**
-	 * Parses the links attributes from the given source {@link String}.
-	 *
-	 * @param source
-	 * @return
-	 */
-	private static Map<String, String> getAttributeMap(String source) {
-
-		if (!StringUtils.hasText(source)) {
-			return Collections.emptyMap();
-		}
-
-		Map<String, String> attributes = new HashMap<>();
-		Matcher matcher = KEY_AND_VALUE_PATTERN.matcher(source);
-
-		while (matcher.find()) {
-			attributes.put(matcher.group(1), matcher.group(2));
-		}
-
-		return attributes;
+		return href.contains("{") ? UriTemplate.of(href) : null;
 	}
 }

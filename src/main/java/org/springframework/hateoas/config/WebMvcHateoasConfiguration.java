@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package org.springframework.hateoas.config;
 
-import lombok.RequiredArgsConstructor;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,48 +24,44 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.RepresentationModel;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorHandlerMethodReturnValueHandler;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.hateoas.server.mvc.UriComponentsContributor;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.NonNull;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring MVC HATEOAS Configuration
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
+@Import(WebMvcEntityLinksConfiguration.class)
 class WebMvcHateoasConfiguration {
 
 	@Bean
-	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(ObjectProvider<ObjectMapper> mapper,
-			Collection<HypermediaMappingInformation> hypermediaTypes) {
-
-		return new HypermediaWebMvcConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+	HypermediaWebMvcConfigurer hypermediaWebMvcConfigurer(WebConverters converters) {
+		return new HypermediaWebMvcConfigurer(converters);
 	}
 
 	@Bean
-	HypermediaRepresentationModelBeanProcessorPostProcessor hypermediaRepresentionModelProcessorConfigurator(
+	RepresentationModelProcessorInvoker representationModelProcessorInvoker(
 			List<RepresentationModelProcessor<?>> processors) {
-
-		return new HypermediaRepresentationModelBeanProcessorPostProcessor(processors);
+		return new RepresentationModelProcessorInvoker(processors);
 	}
 
 	@Bean
-	static HypermediaRestTemplateBeanPostProcessor restTemplateBeanPostProcessor(
-			ObjectProvider<HypermediaWebMvcConfigurer> configurer) {
-		return new HypermediaRestTemplateBeanPostProcessor(configurer);
+	static HypermediaRepresentationModelBeanProcessorPostProcessor hypermediaRepresentionModelProcessorConfigurator(
+			ObjectProvider<RepresentationModelProcessorInvoker> invoker) {
+
+		return new HypermediaRepresentationModelBeanProcessorPostProcessor(invoker);
 	}
 
 	@Bean
@@ -84,11 +77,13 @@ class WebMvcHateoasConfiguration {
 	 * @author Oliver Gierke
 	 * @author Greg Turnquist
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaWebMvcConfigurer implements WebMvcConfigurer {
 
-		private final ObjectMapper mapper;
-		private final Collection<HypermediaMappingInformation> hypermediaTypes;
+		private final @NonNull WebConverters hypermediaConverters;
+
+		public HypermediaWebMvcConfigurer(WebConverters hypermediaConverters) {
+			this.hypermediaConverters = hypermediaConverters;
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -96,23 +91,28 @@ class WebMvcHateoasConfiguration {
 		 */
 		@Override
 		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-
-			this.hypermediaTypes.forEach(hypermedia -> {
-
-				converters.add(0, new TypeConstrainedMappingJackson2HttpMessageConverter(RepresentationModel.class,
-						hypermedia.getMediaTypes(), hypermedia.configureObjectMapper(mapper.copy())));
-			});
+			hypermediaConverters.augment(converters);
 		}
 	}
 
 	/**
 	 * @author Greg Turnquist
+	 * @author Oliver Drotbohm
 	 */
-	@RequiredArgsConstructor
 	static class HypermediaRepresentationModelBeanProcessorPostProcessor implements BeanPostProcessor {
 
-		private final List<RepresentationModelProcessor<?>> processors;
+		private final ObjectProvider<RepresentationModelProcessorInvoker> invoker;
 
+		public HypermediaRepresentationModelBeanProcessorPostProcessor(
+				ObjectProvider<RepresentationModelProcessorInvoker> invoker) {
+			this.invoker = invoker;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization(java.lang.Object, java.lang.String)
+		 */
+		@NonNull
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
@@ -124,40 +124,10 @@ class WebMvcHateoasConfiguration {
 				delegate.addHandlers(adapter.getReturnValueHandlers());
 
 				RepresentationModelProcessorHandlerMethodReturnValueHandler handler = new RepresentationModelProcessorHandlerMethodReturnValueHandler(
-						delegate, new RepresentationModelProcessorInvoker(processors));
+						delegate, () -> invoker.getObject());
 
 				adapter.setReturnValueHandlers(Collections.singletonList(handler));
 			}
-
-			return bean;
-		}
-	}
-
-	/**
-	 * {@link BeanPostProcessor} to register hypermedia support with {@link RestTemplate} instances found in the
-	 * application context.
-	 *
-	 * @author Oliver Gierke
-	 * @author Greg Turnquist
-	 */
-	@RequiredArgsConstructor
-	static class HypermediaRestTemplateBeanPostProcessor implements BeanPostProcessor {
-
-		private final ObjectProvider<HypermediaWebMvcConfigurer> configurer;
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization(java.lang.Object, java.lang.String)
-		 */
-		@NonNull
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-
-			if (!RestTemplate.class.isInstance(bean)) {
-				return bean;
-			}
-
-			configurer.getObject().extendMessageConverters(((RestTemplate) bean).getMessageConverters());
 
 			return bean;
 		}

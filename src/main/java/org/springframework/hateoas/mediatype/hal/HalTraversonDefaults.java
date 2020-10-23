@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.hal;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class HalTraversonDefaults implements TraversonDefaults {
 
-	private static final List<MediaType> HAL_FLAVORS = Arrays.asList(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+	private static final List<MediaType> HAL_FLAVORS = Collections.singletonList(MediaTypes.HAL_JSON);
 
 	/*
 	 * (non-Javadoc)
@@ -54,7 +53,7 @@ class HalTraversonDefaults implements TraversonDefaults {
 		converters.add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
 		List<MediaType> halFlavors = mediaTypes.stream() //
-				.filter(it -> HAL_FLAVORS.contains(it)) //
+				.filter(HAL_FLAVORS::contains) //
 				.collect(Collectors.toList());
 
 		if (!halFlavors.isEmpty()) {
@@ -81,7 +80,7 @@ class HalTraversonDefaults implements TraversonDefaults {
 	 *
 	 * @return
 	 */
-	private static final HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
+	private static HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new Jackson2HalModule());

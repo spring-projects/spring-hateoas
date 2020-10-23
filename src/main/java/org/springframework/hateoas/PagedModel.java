@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.hateoas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.lang.Nullable;
@@ -51,7 +52,9 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
+	 * @deprectated since 1.1, use {@link #of(Collection, PageMetadata, Link...)} instead.
 	 */
+	@Deprecated
 	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Link... links) {
 		this(content, metadata, Arrays.asList(links));
 	}
@@ -62,12 +65,120 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @param content must not be {@literal null}.
 	 * @param metadata
 	 * @param links
+	 * @deprectated since 1.1, use {@link #of(Collection, PageMetadata, Iterable)} instead.
 	 */
+	@Deprecated
 	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
 
 		super(content, links);
 
 		this.metadata = metadata;
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel}.
+	 *
+	 * @param <T>
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty() {
+		return empty(Collections.emptyList());
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(Link... links) {
+		return empty((PageMetadata) null, links);
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(Iterable<Link> links) {
+		return empty((PageMetadata) null, links);
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata}.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata) {
+		return empty(metadata, Collections.emptyList());
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and links.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, Link... links) {
+		return empty(Arrays.asList(links));
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and links.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, Iterable<Link> links) {
+		return of(Collections.emptyList(), metadata, links);
+	}
+
+	/**
+	 * Creates a new {@link PagedModel} from the given content, {@link PageMetadata} and {@link Link}s (optional).
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param metadata can be {@literal null}.
+	 * @param links
+	 */
+	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata) {
+		return new PagedModel<>(content, metadata);
+	}
+
+	/**
+	 * Creates a new {@link PagedModel} from the given content, {@link PageMetadata} and {@link Link}s (optional).
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param metadata can be {@literal null}.
+	 * @param links
+	 */
+	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata, Link... links) {
+		return new PagedModel<>(content, metadata, Arrays.asList(links));
+	}
+
+	/**
+	 * Creates a new {@link PagedModel} from the given content {@link PageMetadata} and {@link Link}s.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param metadata can be {@literal null}.
+	 * @param links
+	 */
+	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
+		return new PagedModel<>(content, metadata, links);
 	}
 
 	/**
@@ -95,10 +206,10 @@ public class PagedModel<T> extends CollectionModel<T> {
 		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new EntityModel<>(element));
+			resources.add((T) EntityModel.of(element));
 		}
 
-		return new PagedModel<>(resources, metadata);
+		return PagedModel.of(resources, metadata);
 	}
 
 	/**
@@ -123,16 +234,16 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#toString()
+	 * @see org.springframework.hateoas.RepresentationModel#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("PagedResource { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
+		return String.format("PagedModel { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.Resources#equals(java.lang.Object)
+	 * @see org.springframework.hateoas.CollectionModel#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(@Nullable Object obj) {
@@ -153,7 +264,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.Resources#hashCode()
+	 * @see org.springframework.hateoas.CollectionModel#hashCode()
 	 */
 	@Override
 	public int hashCode() {

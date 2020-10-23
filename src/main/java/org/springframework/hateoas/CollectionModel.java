@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2018 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,9 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @deprecated since 1.1, use {@link #of(Iterable, Link...)} instead.
 	 */
+	@Deprecated
 	public CollectionModel(Iterable<T> content, Link... links) {
 		this(content, Arrays.asList(links));
 	}
@@ -58,7 +60,9 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @deprecated since 1.1, use {@link #of(Iterable, Iterable)} instead.
 	 */
+	@Deprecated
 	public CollectionModel(Iterable<T> content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
@@ -68,7 +72,78 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 		for (T element : content) {
 			this.content.add(element);
 		}
+
 		this.add(links);
+	}
+
+	/**
+	 * Creates a new empty collection model.
+	 *
+	 * @param <T>
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> empty() {
+		return of(Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new empty collection model with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> empty(Link... links) {
+		return of(Collections.emptyList(), links);
+	}
+
+	/**
+	 * Creates a new empty collection model with the given links.
+	 *
+	 * @param <T>
+	 * @param links must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> empty(Iterable<Link> links) {
+		return of(Collections.emptyList(), links);
+	}
+
+	/**
+	 * Creates a {@link CollectionModel} instance with the given content.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> of(Iterable<T> content) {
+		return of(content, Collections.emptyList());
+	}
+
+	/**
+	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s (optional).
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> of(Iterable<T> content, Link... links) {
+		return of(content, Arrays.asList(links));
+	}
+
+	/**
+	 * s Creates a {@link CollectionModel} instance with the given content and {@link Link}s.
+	 *
+	 * @param content must not be {@literal null}.
+	 * @param links the links to be added to the {@link CollectionModel}.
+	 * @return
+	 * @since 1.1
+	 */
+	public static <T> CollectionModel<T> of(Iterable<T> content, Iterable<Link> links) {
+		return new CollectionModel<>(content, links);
 	}
 
 	/**
@@ -86,10 +161,10 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 		ArrayList<T> resources = new ArrayList<>();
 
 		for (S element : content) {
-			resources.add((T) new EntityModel<>(element));
+			resources.add((T) EntityModel.of(element));
 		}
 
-		return new CollectionModel<>(resources);
+		return CollectionModel.of(resources);
 	}
 
 	/**
@@ -113,16 +188,16 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#toString()
+	 * @see org.springframework.hateoas.RepresentationModel#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("Resources { content: %s, %s }", getContent(), super.toString());
+		return String.format("CollectionModel { content: %s, %s }", getContent(), super.toString());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#equals(java.lang.Object)
+	 * @see org.springframework.hateoas.RepresentationModel#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(@Nullable Object obj) {
@@ -143,7 +218,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.ResourceSupport#hashCode()
+	 * @see org.springframework.hateoas.RepresentationModel#hashCode()
 	 */
 	@Override
 	public int hashCode() {

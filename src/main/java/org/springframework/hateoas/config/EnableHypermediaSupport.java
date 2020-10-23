@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@EnableEntityLinks
 @Import({ HypermediaConfigurationImportSelector.class, HateoasConfiguration.class, WebStackImportSelector.class })
 public @interface EnableHypermediaSupport {
 
@@ -74,7 +73,7 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8),
+		HAL(MediaTypes.HAL_JSON),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
@@ -82,6 +81,8 @@ public @interface EnableHypermediaSupport {
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
 		HAL_FORMS(MediaTypes.HAL_FORMS_JSON),
+
+		HTTP_PROBLEM_DETAILS(MediaTypes.HTTP_PROBLEM_DETAILS_JSON),
 
 		/**
 		 * Collection+JSON

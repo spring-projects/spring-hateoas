@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public class PaymentProcessor implements RepresentationModelProcessor<EntityMode
 	public EntityModel<Order> process(EntityModel<Order> model) {
 
 		model.add( // <2>
-				new Link("/payments/{orderId}").withRel(LinkRelation.of("payments")) //
+				Link.of("/payments/{orderId}").withRel(LinkRelation.of("payments")) //
 						.expand(model.getContent().getOrderId()));
 
 		return model; // <3>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,13 @@
  */
 package org.springframework.hateoas.support;
 
-import java.time.Duration;
-import java.util.Iterator;
-
 import net.minidev.json.JSONArray;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Links;
 import org.springframework.http.HttpEntity;
@@ -35,7 +38,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 25;
+	private static final int MILESTONE_ID = 47;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {
@@ -61,7 +64,8 @@ class ChangelogCreator {
 			readPage(response.getBody(), printHeader);
 			printHeader = false;
 
-			Links links = Links.parse(response.getHeaders().get(HttpHeaders.LINK).get(0));
+			List<String> linksInHeader = response.getHeaders().get(HttpHeaders.LINK);
+			Links links = linksInHeader == null ? Links.NONE : Links.parse(linksInHeader.get(0));
 
 			if (links.getLink(IanaLinkRelations.NEXT).isPresent()) {
 
@@ -86,7 +90,9 @@ class ChangelogCreator {
 		Iterator<Object> ids = ((JSONArray) idPath.read(content)).iterator();
 
 		if (header) {
-			System.out.println("Milestone - " + JsonPath.read(content, "$[1].milestone.title"));
+			System.out.println(
+					"Changes in version " + JsonPath.read(content, "$[1].milestone.title") + " (" + LocalDate.now() + ")");
+			System.out.println("----------------------------------------");
 		}
 
 		for (Object title : titles) {

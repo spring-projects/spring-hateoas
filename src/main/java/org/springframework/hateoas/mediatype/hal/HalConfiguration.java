@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.hateoas.mediatype.hal;
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.Wither;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +31,6 @@ import org.springframework.util.PathMatcher;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class HalConfiguration {
 
 	private static final PathMatcher MATCHER = new AntPathMatcher();
@@ -45,8 +39,20 @@ public class HalConfiguration {
 	 * Configures how to render links in case there is exactly one defined for a given link relation in general. By
 	 * default, this single link will be rendered as nested document.
 	 */
-	private final @Wither @Getter RenderSingleLinks renderSingleLinks;
-	private final @Wither(AccessLevel.PRIVATE) Map<String, RenderSingleLinks> singleLinksPerPattern;
+	private final RenderSingleLinks renderSingleLinks;
+	private final Map<String, RenderSingleLinks> singleLinksPerPattern;
+
+	/**
+	 * Configures whether the Jackson property naming strategy is applied to link relations and within {@code _embedded}
+	 * clauses.
+	 */
+	private final boolean applyPropertyNamingStrategy;
+
+	/**
+	 * Configures whether to always use collections for embeddeds, even if there's only one entry for a link relation.
+	 * Defaults to {@literal true}.
+	 */
+	private final boolean enforceEmbeddedCollections;
 
 	/**
 	 * Creates a new default {@link HalConfiguration} rendering single links as immediate sub-document.
@@ -55,6 +61,17 @@ public class HalConfiguration {
 
 		this.renderSingleLinks = RenderSingleLinks.AS_SINGLE;
 		this.singleLinksPerPattern = new LinkedHashMap<>();
+		this.applyPropertyNamingStrategy = true;
+		this.enforceEmbeddedCollections = true;
+	}
+
+	private HalConfiguration(RenderSingleLinks renderSingleLinks, Map<String, RenderSingleLinks> singleLinksPerPattern,
+			boolean applyPropertyNamingStrategy, boolean enforceEmbeddedCollections) {
+
+		this.renderSingleLinks = renderSingleLinks;
+		this.singleLinksPerPattern = singleLinksPerPattern;
+		this.applyPropertyNamingStrategy = applyPropertyNamingStrategy;
+		this.enforceEmbeddedCollections = enforceEmbeddedCollections;
 	}
 
 	/**
@@ -103,6 +120,72 @@ public class HalConfiguration {
 				.map(Entry::getValue) //
 				.findFirst() //
 				.orElse(renderSingleLinks);
+	}
+
+	/**
+	 * Create a new {@link HalConfiguration} by copying the attributes and replacing the {@literal renderSingleLinks}.
+	 *
+	 * @param renderSingleLinks
+	 * @return
+	 */
+	public HalConfiguration withRenderSingleLinks(RenderSingleLinks renderSingleLinks) {
+
+		return this.renderSingleLinks == renderSingleLinks ? this
+				: new HalConfiguration(renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
+						this.enforceEmbeddedCollections);
+	}
+
+	/**
+	 * Create a new {@link HalConfiguration} by copying the attributes and replacing the {@literal singleLinksPattern}.
+	 *
+	 * @param singleLinksPerPattern
+	 * @return
+	 */
+	private HalConfiguration withSingleLinksPerPattern(Map<String, RenderSingleLinks> singleLinksPerPattern) {
+
+		return this.singleLinksPerPattern == singleLinksPerPattern ? this
+				: new HalConfiguration(this.renderSingleLinks, singleLinksPerPattern, this.applyPropertyNamingStrategy,
+						this.enforceEmbeddedCollections);
+	}
+
+	/**
+	 * Create a new {@link HalConfiguration} by copying the attributes and replacing the
+	 * {@literal applyProperNamingStrategy}.
+	 *
+	 * @param applyPropertyNamingStrategy
+	 * @return
+	 */
+	public HalConfiguration withApplyPropertyNamingStrategy(boolean applyPropertyNamingStrategy) {
+
+		return this.applyPropertyNamingStrategy == applyPropertyNamingStrategy ? this
+				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, applyPropertyNamingStrategy,
+						this.enforceEmbeddedCollections);
+	}
+
+	/**
+	 * Create a new {@link HalConfiguration} by copying the attributes and replacing the
+	 * {@literal enforceEmbeddedCollections}.
+	 *
+	 * @param enforceEmbeddedCollections
+	 * @return
+	 */
+	public HalConfiguration withEnforceEmbeddedCollections(boolean enforceEmbeddedCollections) {
+
+		return this.enforceEmbeddedCollections == enforceEmbeddedCollections ? this
+				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
+						enforceEmbeddedCollections);
+	}
+
+	public RenderSingleLinks getRenderSingleLinks() {
+		return this.renderSingleLinks;
+	}
+
+	public boolean isApplyPropertyNamingStrategy() {
+		return this.applyPropertyNamingStrategy;
+	}
+
+	public boolean isEnforceEmbeddedCollections() {
+		return this.enforceEmbeddedCollections;
 	}
 
 	/**

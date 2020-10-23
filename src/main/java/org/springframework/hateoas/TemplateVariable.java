@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * Copyright 2014-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,35 +17,31 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
  * A single template variable.
- * 
+ *
  * @author Oliver Gierke
  * @author JamesE Richardson
  */
-@Value
-@EqualsAndHashCode
 public final class TemplateVariable implements Serializable {
 
 	private static final long serialVersionUID = -2731446749851863774L;
 
-	String name;
-	TemplateVariable.VariableType type;
-	String description;
+	private final String name;
+	private final TemplateVariable.VariableType type;
+	private final String description;
 
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name and type.
-	 * 
+	 *
 	 * @param name must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
 	 */
@@ -55,7 +51,7 @@ public final class TemplateVariable implements Serializable {
 
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name, type and description.
-	 * 
+	 *
 	 * @param name must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
 	 * @param description must not be {@literal null}.
@@ -72,8 +68,74 @@ public final class TemplateVariable implements Serializable {
 	}
 
 	/**
+	 * Static helper to fashion {@link VariableType#PATH_VARIABLE} variables.
+	 *
+	 * @param variable must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static TemplateVariable pathVariable(String variable) {
+		return new TemplateVariable(variable, VariableType.PATH_VARIABLE);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#REQUEST_PARAM} variables.
+	 *
+	 * @param parameter must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static TemplateVariable requestParameter(String parameter) {
+		return new TemplateVariable(parameter, VariableType.REQUEST_PARAM);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#REQUEST_PARAM_CONTINUED} variables.
+	 *
+	 * @param parameter must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static TemplateVariable requestParameterContinued(String parameter) {
+		return new TemplateVariable(parameter, VariableType.REQUEST_PARAM_CONTINUED);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#SEGMENT} variables.
+	 *
+	 * @param segment must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static TemplateVariable segment(String segment) {
+		return new TemplateVariable(segment, VariableType.SEGMENT);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#FRAGMENT} variables.
+	 *
+	 * @param fragment must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static TemplateVariable fragment(String fragment) {
+		return new TemplateVariable(fragment, VariableType.FRAGMENT);
+	}
+
+	/**
+	 * Static helper to fashion {@link VariableType#COMPOSITE_PARAM} variables.
+	 *
+	 * @param parameter must not be {@literal null} or empty.
+	 * @return
+	 * @since 1.1
+	 */
+	public static TemplateVariable compositeParameter(String parameter) {
+		return new TemplateVariable(parameter, VariableType.COMPOSITE_PARAM);
+	}
+
+	/**
 	 * Returns whether the variable has a description.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean hasDescription() {
@@ -83,7 +145,7 @@ public final class TemplateVariable implements Serializable {
 	/**
 	 * Returns whether the template variable is optional, which means the template can be expanded to a URI without a
 	 * value given for that variable.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isRequired() {
@@ -92,7 +154,7 @@ public final class TemplateVariable implements Serializable {
 
 	/**
 	 * Returns whether the given {@link TemplateVariable} is of the same type as the current one.
-	 * 
+	 *
 	 * @param variable must not be {@literal null}.
 	 * @return
 	 */
@@ -103,7 +165,7 @@ public final class TemplateVariable implements Serializable {
 	/**
 	 * Returns whether the given {@link TemplateVariable} is logically equivalent to the given one. This considers request
 	 * parameter variables equivalent independently from whether they're continued or not.
-	 * 
+	 *
 	 * @param variable
 	 * @return
 	 */
@@ -113,7 +175,7 @@ public final class TemplateVariable implements Serializable {
 
 	/**
 	 * Returns whether the current {@link TemplateVariable} is representing a request parameter.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isRequestParameterVariable() {
@@ -122,14 +184,14 @@ public final class TemplateVariable implements Serializable {
 
 	/**
 	 * Returns whether the variable is a fragment one.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isFragment() {
 		return type.equals(FRAGMENT);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -140,9 +202,38 @@ public final class TemplateVariable implements Serializable {
 		return StringUtils.hasText(description) ? String.format("%s - %s", base, description) : base;
 	}
 
+	public String getName() {
+		return this.name;
+	}
+
+	public VariableType getType() {
+		return this.type;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TemplateVariable that = (TemplateVariable) o;
+		return Objects.equals(this.name, that.name) && this.type == that.type
+				&& Objects.equals(this.description, that.description);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.name, this.type, this.description);
+	}
+
 	/**
 	 * An enumeration for all supported variable types.
-	 * 
+	 *
 	 * @author Oliver Gierke
 	 */
 	public enum VariableType {
@@ -167,7 +258,7 @@ public final class TemplateVariable implements Serializable {
 
 		/**
 		 * Returns whether the variable of this type is optional.
-		 * 
+		 *
 		 * @return
 		 */
 		public boolean isOptional() {
@@ -180,7 +271,7 @@ public final class TemplateVariable implements Serializable {
 
 		/**
 		 * Returns the {@link VariableType} for the given variable key.
-		 * 
+		 *
 		 * @param key must not be {@literal null}.
 		 * @return
 		 */
@@ -192,7 +283,7 @@ public final class TemplateVariable implements Serializable {
 					.orElseThrow(() -> new IllegalArgumentException("Unsupported variable type " + key + "!"));
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Enum#toString()
 		 */

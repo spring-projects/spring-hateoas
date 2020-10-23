@@ -9,7 +9,6 @@
   },
   "_templates" : {
     "default" : {
-      "title" : null,
       "method" : "put",
       "contentType" : "",
       "properties" : [ {
@@ -24,7 +23,6 @@
       } ]
     },
     "partiallyUpdateEmployee" : {
-      "title" : null,
       "method" : "patch",
       "contentType" : "",
       "properties" : [ {

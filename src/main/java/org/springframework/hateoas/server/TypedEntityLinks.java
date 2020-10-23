@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 package org.springframework.hateoas.server;
 
-import lombok.AccessLevel;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.util.function.Function;
 
 import org.springframework.hateoas.IanaLinkRelations;
@@ -32,11 +28,19 @@ import org.springframework.util.Assert;
  * @see EntityLinks#forType(Function)
  * @see EntityLinks#forType(Class, Function)
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class TypedEntityLinks<T> {
 
-	private final @NonNull Function<T, ? extends Object> identifierExtractor;
-	private final @NonNull EntityLinks entityLinks;
+	private final Function<T, ?> identifierExtractor;
+	private final EntityLinks entityLinks;
+
+	TypedEntityLinks(Function<T, ?> identifierExtractor, EntityLinks entityLinks) {
+
+		Assert.notNull(identifierExtractor, "identifierExtractor must not be null!");
+		Assert.notNull(entityLinks, "entityLinks must not be null!");
+
+		this.identifierExtractor = identifierExtractor;
+		this.entityLinks = entityLinks;
+	}
 
 	/**
 	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity. Implementations
@@ -73,7 +77,7 @@ public class TypedEntityLinks<T> {
 		private final Class<T> type;
 		private final EntityLinks delegate;
 
-		ExtendedTypedEntityLinks(Function<T, ? extends Object> identifierExtractor, EntityLinks delegate, Class<T> type) {
+		ExtendedTypedEntityLinks(Function<T, ?> identifierExtractor, EntityLinks delegate, Class<T> type) {
 
 			super(identifierExtractor, delegate);
 

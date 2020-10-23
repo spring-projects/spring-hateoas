@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
@@ -39,6 +40,17 @@ public interface HypermediaMappingInformation {
 	 * @return
 	 */
 	List<MediaType> getMediaTypes();
+
+	/**
+	 * Return the type that this hypermedia type is represented by. Default implementation returns
+	 * {@link RepresentationModel} as it's the base class most media type serializations work with.
+	 *
+	 * @return the type that this hypermedia type is represented by.
+	 * @since 1.1
+	 */
+	default Class<?> getRootType() {
+		return RepresentationModel.class;
+	}
 
 	/**
 	 * Configure an {@link ObjectMapper} and register custom serializers and deserializers for the supported media types.

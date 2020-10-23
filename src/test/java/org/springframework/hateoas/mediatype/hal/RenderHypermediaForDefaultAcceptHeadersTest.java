@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import lombok.Data;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.APPLICATION_XHTML_XML, MediaType.ALL)) //
 				.andExpect(status().isOk())
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
 	}
 
 	/**
@@ -91,7 +91,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 
 		this.mockMvc.perform(get("/employees").accept(MediaType.ALL)) //
 				.andExpect(status().isOk())
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE));
+				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE));
 	}
 
 	@RestController
@@ -119,7 +119,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel();
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -132,7 +132,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new EntityModel<>(EMPLOYEES.get(id), findOneLink, employeesLink);
+			return EntityModel.of(EMPLOYEES.get(id), findOneLink, employeesLink);
 		}
 	}
 
@@ -148,7 +148,7 @@ class RenderHypermediaForDefaultAcceptHeadersTest {
 	}
 
 	@Data
-	@Wither
+	@With
 	static class Employee {
 
 		private final String name;

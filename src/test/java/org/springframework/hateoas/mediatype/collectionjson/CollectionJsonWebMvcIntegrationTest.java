@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ class CollectionJsonWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/search")
@@ -239,7 +239,7 @@ class CollectionJsonWebMvcIntegrationTest {
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
 			// Return the collection of employee resources along with the composite affordance
-			return new CollectionModel<>(employees, selfLink);
+			return CollectionModel.of(employees, selfLink);
 		}
 
 		@GetMapping("/employees/{id}")
@@ -252,7 +252,7 @@ class CollectionJsonWebMvcIntegrationTest {
 			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
-			return new EntityModel<>(EMPLOYEES.get(id),
+			return EntityModel.of(EMPLOYEES.get(id),
 					findOneLink.andAffordance(afford(methodOn(EmployeeController.class).updateEmployee(null, id))) //
 							.andAffordance(afford(methodOn(EmployeeController.class).partiallyUpdateEmployee(null, id))),
 					employeesLink);

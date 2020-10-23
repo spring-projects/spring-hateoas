@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -576,7 +576,7 @@ public class Jackson2UberModule extends SimpleModule {
 	/**
 	 * Custom {@link StdDeserializer} to deserialize {@link EntityModel}.
 	 */
-	static class UberEntityModelDeserializer extends ContainerDeserializerBase<EntityModel<?>>
+	static class UberEntityModelDeserializer extends ContainerDeserializerBase<RepresentationModel<?>>
 			implements ContextualDeserializer {
 
 		private static final long serialVersionUID = 1776321413269082414L;
@@ -599,7 +599,7 @@ public class Jackson2UberModule extends SimpleModule {
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public EntityModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+		public RepresentationModel<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			UberDocument doc = p.getCodec().readValue(p, UberDocument.class);
 			Links links = doc.getUber().getLinks();
@@ -612,8 +612,7 @@ public class Jackson2UberModule extends SimpleModule {
 							() -> new IllegalStateException("No data entry containing a 'value' was found in this document!"));
 		}
 
-		@NotNull
-		private EntityModel<Object> convertToResource(UberData uberData, Links links) {
+		private RepresentationModel<?> convertToResource(UberData uberData, Links links) {
 
 			// Primitive type
 			List<UberData> data = uberData.getData();
@@ -625,9 +624,9 @@ public class Jackson2UberModule extends SimpleModule {
 			if (isPrimitiveType(data)) {
 
 				UberData firstItem = data.get(0);
-
 				Object scalarValue = firstItem.getValue();
-				return new EntityModel<>(scalarValue, links);
+
+				return RepresentationModel.of(scalarValue, links);
 			}
 
 			Map<String, Object> properties = data == null //
@@ -637,7 +636,7 @@ public class Jackson2UberModule extends SimpleModule {
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			Object value = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
 
-			return new EntityModel<>(value, links);
+			return EntityModel.of(value, links);
 		}
 
 		/*
@@ -774,7 +773,7 @@ public class Jackson2UberModule extends SimpleModule {
 			CollectionModel<?> resources = extractResources(doc, rootType, this.contentType);
 			PageMetadata pageMetadata = extractPagingMetadata(doc);
 
-			return new PagedModel<>(resources.getContent(), pageMetadata, resources.getLinks());
+			return PagedModel.of(resources.getContent(), pageMetadata, resources.getLinks());
 		}
 
 		/**
@@ -834,7 +833,7 @@ public class Jackson2UberModule extends SimpleModule {
 			}
 
 			List<Link> resourceLinks = new ArrayList<>();
-			EntityModel<?> resource = null;
+			RepresentationModel<?> resource = null;
 
 			List<UberData> data = uberData.getData();
 
@@ -847,7 +846,7 @@ public class Jackson2UberModule extends SimpleModule {
 				List<LinkRelation> rel = item.getRel();
 
 				if (rel != null) {
-					item.getLinks().forEach(resourceLinks::add);
+					resourceLinks.addAll(item.getLinks());
 				} else {
 
 					// Primitive type
@@ -861,7 +860,8 @@ public class Jackson2UberModule extends SimpleModule {
 
 						UberData firstItem = itemData.get(0);
 						Object scalarValue = firstItem.getValue();
-						resource = new EntityModel<>(scalarValue, uberData.getLinks());
+
+						resource = RepresentationModel.of(scalarValue, uberData.getLinks());
 
 					} else {
 
@@ -871,7 +871,7 @@ public class Jackson2UberModule extends SimpleModule {
 										.collect(Collectors.toMap(UberData::getName, UberData::getValue));
 
 						Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
-						resource = new EntityModel<>(obj, uberData.getLinks());
+						resource = EntityModel.of(obj, uberData.getLinks());
 					}
 				}
 			}
@@ -889,7 +889,7 @@ public class Jackson2UberModule extends SimpleModule {
 			/*
 			 * Either return a Resources<Resource<T>>...
 			 */
-			return new CollectionModel<>(content, doc.getUber().getLinks());
+			return CollectionModel.of(content, doc.getUber().getLinks());
 		} else {
 			/*
 			 * ...or return a Resources<T>
@@ -898,7 +898,7 @@ public class Jackson2UberModule extends SimpleModule {
 			List<Object> resourceLessContent = content.stream().map(item -> (EntityModel<?>) item)
 					.map(EntityModel::getContent).collect(Collectors.toList());
 
-			return new CollectionModel<>(resourceLessContent, doc.getUber().getLinks());
+			return CollectionModel.of(resourceLessContent, doc.getUber().getLinks());
 		}
 	}
 

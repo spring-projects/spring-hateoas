@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,12 @@
  */
 package org.springframework.hateoas;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Value;
-
-import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * Hold the {@link AffordanceModel}s for all supported media types.
@@ -36,37 +28,15 @@ import org.springframework.util.Assert;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-@Value
-public class Affordance {
-
-	private static List<AffordanceModelFactory> factories = SpringFactoriesLoader
-			.loadFactories(AffordanceModelFactory.class, Affordance.class.getClassLoader());
+public final class Affordance implements Iterable<AffordanceModel> {
 
 	/**
 	 * Collection of {@link AffordanceModel}s related to this affordance.
 	 */
-	private final @Getter(AccessLevel.PACKAGE) Map<MediaType, AffordanceModel> affordanceModels = new HashMap<>();
+	private final Map<MediaType, AffordanceModel> models;
 
-	/**
-	 * Creates a new {@link Affordance}.
-	 *
-	 * @param name
-	 * @param link
-	 * @param httpMethod
-	 * @param inputType
-	 * @param queryMethodParameters
-	 * @param outputType
-	 */
-	public Affordance(String name, Link link, HttpMethod httpMethod, ResolvableType inputType,
-			List<QueryParameter> queryMethodParameters, ResolvableType outputType) {
-
-		Assert.notNull(httpMethod, "httpMethod must not be null!");
-		Assert.notNull(queryMethodParameters, "queryMethodParameters must not be null!");
-
-		for (AffordanceModelFactory factory : factories) {
-			this.affordanceModels.put(factory.getMediaType(),
-					factory.getAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType));
-		}
+	public Affordance(Map<MediaType, AffordanceModel> models) {
+		this.models = models;
 	}
 
 	/**
@@ -78,6 +48,39 @@ public class Affordance {
 	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
-		return (T) this.affordanceModels.get(mediaType);
+		return (T) this.models.get(mediaType);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Iterable#iterator()
+	 */
+	@Override
+	public Iterator<AffordanceModel> iterator() {
+		return this.models.values().iterator();
+	}
+
+	Map<MediaType, AffordanceModel> getModels() {
+		return this.models;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Affordance that = (Affordance) o;
+		return Objects.equals(this.models, that.models);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.models);
+	}
+
+	public String toString() {
+		return "Affordance(models=" + this.models + ")";
 	}
 }

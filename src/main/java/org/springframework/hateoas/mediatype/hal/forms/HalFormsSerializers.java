@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,16 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.HalLinkRelation;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
-import org.springframework.http.HttpMethod;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.EmbeddedMapper;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -51,23 +45,97 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
  */
 class HalFormsSerializers {
 
-	/**
-	 * Serializer for {@link CollectionModel}.
-	 */
-	static class HalFormsResourceSerializer extends ContainerSerializer<EntityModel<?>> implements ContextualSerializer {
+	static class HalFormsRepresentationModelSerializer extends ContainerSerializer<RepresentationModel<?>>
+			implements ContextualSerializer {
 
-		private static final long serialVersionUID = -7912243216469101379L;
+		private static final long serialVersionUID = -4583146321934407153L;
 
+		private final HalFormsTemplateBuilder builder;
 		private final BeanProperty property;
 
-		HalFormsResourceSerializer(@Nullable BeanProperty property) {
+		HalFormsRepresentationModelSerializer(HalFormsTemplateBuilder builder, @Nullable BeanProperty property) {
 
-			super(EntityModel.class, false);
+			super(RepresentationModel.class, false);
+
+			this.builder = builder;
 			this.property = property;
 		}
 
-		HalFormsResourceSerializer() {
-			this(null);
+		HalFormsRepresentationModelSerializer(HalFormsTemplateBuilder customizations) {
+			this(customizations, null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
+		@Override
+		@SuppressWarnings("null")
+		public void serialize(RepresentationModel<?> value, JsonGenerator gen, SerializerProvider provider)
+				throws IOException {
+
+			HalFormsDocument<?> doc = HalFormsDocument.forRepresentationModel(value) //
+					.withLinks(value.getLinks()) //
+					.withTemplates(builder.findTemplates(value));
+
+			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		public JavaType getContentType() {
+			return null;
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		public JsonSerializer<?> getContentSerializer() {
+			return null;
+		}
+
+		@Override
+		@SuppressWarnings("null")
+		public boolean hasSingleElement(RepresentationModel<?> resource) {
+			return false;
+		}
+
+		@Override
+		@Nullable
+		@SuppressWarnings("null")
+		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer typeSerializer) {
+			return null;
+		}
+
+		@Override
+		@SuppressWarnings("null")
+		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) {
+			return new HalFormsRepresentationModelSerializer(builder, property);
+		}
+	}
+
+	/**
+	 * Serializer for {@link CollectionModel}.
+	 */
+	static class HalFormsEntityModelSerializer extends ContainerSerializer<EntityModel<?>>
+			implements ContextualSerializer {
+
+		private static final long serialVersionUID = -7912243216469101379L;
+
+		private final HalFormsTemplateBuilder builder;
+		private final BeanProperty property;
+
+		HalFormsEntityModelSerializer(HalFormsTemplateBuilder builder, @Nullable BeanProperty property) {
+
+			super(EntityModel.class, false);
+
+			this.builder = builder;
+			this.property = property;
+		}
+
+		HalFormsEntityModelSerializer(HalFormsTemplateBuilder builder) {
+			this(builder, null);
 		}
 
 		/*
@@ -78,9 +146,9 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
-			HalFormsDocument<?> doc = HalFormsDocument.forResource(value.getContent()) //
+			HalFormsDocument<?> doc = HalFormsDocument.forEntity(value.getContent()) //
 					.withLinks(value.getLinks()) //
-					.withTemplates(findTemplates(value));
+					.withTemplates(builder.findTemplates(value));
 
 			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
 		}
@@ -134,31 +202,38 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourceSerializer(property);
+			return new HalFormsEntityModelSerializer(builder, property);
 		}
 	}
 
 	/**
 	 * Serializer for {@link CollectionModel}
 	 */
-	static class HalFormsResourcesSerializer extends ContainerSerializer<CollectionModel<?>>
+	static class HalFormsCollectionModelSerializer extends ContainerSerializer<CollectionModel<?>>
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -3601146866067500734L;
 
 		private final BeanProperty property;
 		private final Jackson2HalModule.EmbeddedMapper embeddedMapper;
+		private final HalFormsTemplateBuilder customizations;
+		private final HalConfiguration configuration;
 
-		HalFormsResourcesSerializer(@Nullable BeanProperty property, Jackson2HalModule.EmbeddedMapper embeddedMapper) {
+		HalFormsCollectionModelSerializer(HalFormsTemplateBuilder customizations,
+				Jackson2HalModule.EmbeddedMapper embeddedMapper, HalConfiguration configuration,
+				@Nullable BeanProperty property) {
 
 			super(CollectionModel.class, false);
 
 			this.property = property;
 			this.embeddedMapper = embeddedMapper;
+			this.customizations = customizations;
+			this.configuration = configuration;
 		}
 
-		HalFormsResourcesSerializer(Jackson2HalModule.EmbeddedMapper embeddedMapper) {
-			this(null, embeddedMapper);
+		HalFormsCollectionModelSerializer(HalFormsTemplateBuilder customizations,
+				Jackson2HalModule.EmbeddedMapper embeddedMapper, HalConfiguration configuration) {
+			this(customizations, embeddedMapper, configuration, null);
 		}
 
 		/*
@@ -169,7 +244,11 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public void serialize(CollectionModel<?> value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
-			Map<HalLinkRelation, Object> embeddeds = embeddedMapper.map(value);
+			EmbeddedMapper mapper = configuration.isApplyPropertyNamingStrategy() //
+					? embeddedMapper.with(provider.getConfig().getPropertyNamingStrategy()) //
+					: embeddedMapper;
+
+			Map<HalLinkRelation, Object> embeddeds = mapper.map(value);
 
 			HalFormsDocument<?> doc;
 
@@ -179,14 +258,14 @@ class HalFormsSerializers {
 						.withEmbedded(embeddeds) //
 						.withPageMetadata(((PagedModel<?>) value).getMetadata()) //
 						.withLinks(value.getLinks()) //
-						.withTemplates(findTemplates(value));
+						.withTemplates(customizations.findTemplates(value));
 
 			} else {
 
 				doc = HalFormsDocument.empty() //
 						.withEmbedded(embeddeds) //
 						.withLinks(value.getLinks()) //
-						.withTemplates(findTemplates(value));
+						.withTemplates(customizations.findTemplates(value));
 			}
 
 			provider.findValueSerializer(HalFormsDocument.class, property).serialize(doc, gen, provider);
@@ -241,59 +320,7 @@ class HalFormsSerializers {
 		@SuppressWarnings("null")
 		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
 				throws JsonMappingException {
-			return new HalFormsResourcesSerializer(property, embeddedMapper);
-		}
-	}
-
-	/**
-	 * Extract template details from a {@link RepresentationModel}'s {@link Affordance}s.
-	 *
-	 * @param resource
-	 * @return
-	 */
-	private static Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource) {
-
-		if (!resource.hasLink(IanaLinkRelations.SELF)) {
-			return Collections.emptyMap();
-		}
-
-		Map<String, HalFormsTemplate> templates = new HashMap<>();
-		List<Affordance> affordances = resource.getLink(IanaLinkRelations.SELF).map(Link::getAffordances)
-				.orElse(Collections.emptyList());
-
-		affordances.stream() //
-				.map(it -> it.getAffordanceModel(MediaTypes.HAL_FORMS_JSON)) //
-				.map(HalFormsAffordanceModel.class::cast) //
-				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
-				.peek(it -> validate(resource, it)) //
-				.forEach(it -> {
-
-					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
-							.withProperties(it.getInputProperties());
-
-					/*
-					 * First template in HAL-FORMS is "default".
-					 */
-					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
-				});
-
-		return templates;
-	}
-
-	/**
-	 * Verify that the resource's self link and the affordance's URI have the same relative path.
-	 *
-	 * @param resource
-	 * @param model
-	 */
-	private static void validate(RepresentationModel<?> resource, HalFormsAffordanceModel model) {
-
-		String affordanceUri = model.getURI();
-		String selfLinkUri = resource.getRequiredLink(IanaLinkRelations.SELF.value()).expand().getHref();
-
-		if (!affordanceUri.equals(selfLinkUri)) {
-			throw new IllegalStateException("Affordance's URI " + affordanceUri + " doesn't match self link " + selfLinkUri
-					+ " as expected in HAL-FORMS");
+			return new HalFormsCollectionModelSerializer(customizations, embeddedMapper, configuration, property);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,13 @@ import static org.springframework.hateoas.TemplateVariables.*;
 import static org.springframework.hateoas.server.core.EncodingUtils.*;
 import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -46,6 +39,7 @@ import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -61,15 +55,13 @@ import org.springframework.web.util.UriTemplate;
  * Utility for taking a method invocation and extracting a {@link LinkBuilder}.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 public class WebHandler {
 
-	private static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
-			.of(new AnnotationMappingDiscoverer(RequestMapping.class));
-	private static final AnnotatedParametersParameterAccessor PATH_VARIABLE_ACCESSOR //
-			= new AnnotatedParametersParameterAccessor(new AnnotationAttribute(PathVariable.class));
-	private static final AnnotatedParametersParameterAccessor REQUEST_PARAM_ACCESSOR //
-			= new RequestParamParameterAccessor();
+	@SuppressWarnings("deprecation") //
+	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
 
 	private static final Map<AffordanceKey, List<Affordance>> AFFORDANCES_CACHE = new ConcurrentReferenceHashMap<>();
 
@@ -77,49 +69,68 @@ public class WebHandler {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
 	}
 
-	public static <T extends LinkBuilder> Function<Function<String, UriComponentsBuilder>, T> linkTo(
-			Object invocationValue, LinkBuilderCreator<T> creator) {
-		return linkTo(invocationValue, creator, null);
+	public interface PreparedWebHandler<T extends LinkBuilder> {
+		T conclude(Function<String, UriComponentsBuilder> finisher);
 	}
 
-	public static <T extends LinkBuilder> Function<Function<String, UriComponentsBuilder>, T> linkTo(
-			Object invocationValue, LinkBuilderCreator<T> creator,
+	public static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
+			LinkBuilderCreator<T> creator) {
+		return linkTo(invocationValue, creator,
+				(BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder>) null);
+	}
+
+	public static <T extends LinkBuilder> T linkTo(Object invocationValue, LinkBuilderCreator<T> creator,
+			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler,
+			Function<String, UriComponentsBuilder> finisher) {
+
+		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher);
+	}
+
+	private static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
+			LinkBuilderCreator<T> creator,
 			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 
-		LastInvocationAware invocations = (LastInvocationAware) invocationValue;
+		LastInvocationAware invocations = (LastInvocationAware) DummyInvocationUtils
+				.getLastInvocationAware(invocationValue);
+
+		if (invocations == null) {
+			throw new IllegalStateException(String.format("Could not obtain previous invocation from %s!", invocationValue));
+		}
+
 		MethodInvocation invocation = invocations.getLastInvocation();
 
-		return mappingToUriComponentsBuilder -> {
+		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
 
-			String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
+		return finisher -> {
 
-			UriComponentsBuilder builder = mappingToUriComponentsBuilder.apply(mapping);
+			UriComponentsBuilder builder = finisher.apply(mapping);
 			UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
 			Map<String, Object> values = new HashMap<>();
 
-			Iterator<String> names = template.getVariableNames().iterator();
+			List<String> variableNames = template.getVariableNames();
+			Iterator<String> names = variableNames.iterator();
 			Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 
 			while (classMappingParameters.hasNext()) {
 				values.put(names.next(), encodePath(classMappingParameters.next()));
 			}
 
-			for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : PATH_VARIABLE_ACCESSOR
-					.getBoundParameters(invocation)) {
+			HandlerMethodParameters parameters = HandlerMethodParameters.of(invocation.getMethod());
+			Object[] arguments = invocation.getArguments();
 
-				values.put(parameter.getVariableName(), encodePath(parameter.asString()));
+			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(PathVariable.class, arguments)) {
+				values.put(parameter.getVariableName(), encodePath(parameter.getValueAsString(arguments)));
 			}
 
 			List<String> optionalEmptyParameters = new ArrayList<>();
 
-			for (AnnotatedParametersParameterAccessor.BoundMethodParameter parameter : REQUEST_PARAM_ACCESSOR
-					.getBoundParameters(invocation)) {
+			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(RequestParam.class, arguments)) {
 
-				bindRequestParameters(builder, parameter);
+				bindRequestParameters(builder, parameter, arguments);
 
-				if (SKIP_VALUE.equals(parameter.getValue())) {
+				if (SKIP_VALUE.equals(parameter.getVerifiedValue(arguments))) {
 
 					values.put(parameter.getVariableName(), SKIP_VALUE);
 
@@ -129,14 +140,14 @@ public class WebHandler {
 				}
 			}
 
-			for (String variable : template.getVariableNames()) {
+			for (String variable : variableNames) {
 				if (!values.containsKey(variable)) {
 					values.put(variable, SKIP_VALUE);
 				}
 			}
 
 			UriComponents components = additionalUriHandler == null //
-					? builder.buildAndExpand(values)
+					? builder.buildAndExpand(values) //
 					: additionalUriHandler.apply(builder, invocation).buildAndExpand(values);
 
 			TemplateVariables variables = NONE;
@@ -149,11 +160,9 @@ public class WebHandler {
 				variables = variables.concat(variable);
 			}
 
-			String href = components.toUriString().equals("") ? "/" : components.toUriString();
-
 			List<Affordance> affordances = AFFORDANCES_CACHE.computeIfAbsent(
-					AffordanceKey.of(invocation.getTargetType(), invocation.getMethod(), href),
-					key -> SpringAffordanceBuilder.create(key.type, key.method, key.href, DISCOVERER));
+					new AffordanceKey(invocation.getTargetType(), invocation.getMethod(), components),
+					key -> SpringAffordanceBuilder.create(key.type, key.method, key.href.toUriString(), DISCOVERER));
 
 			return creator.createBuilder(components, variables, affordances);
 		};
@@ -167,10 +176,15 @@ public class WebHandler {
 	 * @param parameter must not be {@literal null}.
 	 */
 	@SuppressWarnings("unchecked")
-	private static void bindRequestParameters(UriComponentsBuilder builder,
-			AnnotatedParametersParameterAccessor.BoundMethodParameter parameter) {
+	private static void bindRequestParameters(UriComponentsBuilder builder, HandlerMethodParameter parameter,
+			Object[] arguments) {
 
-		Object value = parameter.getValue();
+		Object value = parameter.getVerifiedValue(arguments);
+
+		if (value == null) {
+			return;
+		}
+
 		String key = parameter.getVariableName();
 
 		if (value instanceof MultiValueMap) {
@@ -203,73 +217,303 @@ public class WebHandler {
 
 			if (parameter.isRequired()) {
 				if (key != null) {
-					builder.queryParam(key, String.format("{%s}", parameter.getVariableName()));
+					builder.queryParam(key, String.format("{%s}", key));
 				}
 			}
 
 		} else {
 			if (key != null) {
-				builder.queryParam(key, encodeParameter(parameter.asString()));
+				builder.queryParam(key, encodeParameter(parameter.getValueAsString(arguments)));
 			}
 		}
 	}
 
-	/**
-	 * Custom extension of {@link AnnotatedParametersParameterAccessor} for {@link RequestParam} to allow {@literal null}
-	 * values handed in for optional request parameters.
-	 *
-	 * @author Oliver Gierke
-	 */
-	private static class RequestParamParameterAccessor extends AnnotatedParametersParameterAccessor {
+	private static final class AffordanceKey {
 
-		public RequestParamParameterAccessor() {
-			super(new AnnotationAttribute(RequestParam.class));
+		private final Class<?> type;
+		private final Method method;
+		private final UriComponents href;
+
+		AffordanceKey(Class<?> type, Method method, UriComponents href) {
+
+			this.type = type;
+			this.method = method;
+			this.href = href;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#createParameter(org.springframework.core.MethodParameter, java.lang.Object, org.springframework.hateoas.core.AnnotationAttribute)
+		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
-		protected BoundMethodParameter createParameter(final MethodParameter parameter, @Nullable Object value,
-				AnnotationAttribute attribute) {
+		public boolean equals(@Nullable Object o) {
 
-			return new BoundMethodParameter(parameter, value, attribute) {
+			if (this == o) {
+				return true;
+			}
 
-				/*
-				 * (non-Javadoc)
-				 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor.BoundMethodParameter#isRequired()
-				 */
-				@Override
-				public boolean isRequired() {
+			if (!(o instanceof AffordanceKey)) {
+				return false;
+			}
 
-					RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
+			AffordanceKey that = (AffordanceKey) o;
 
-					if (parameter.isOptional()) {
-						return false;
-					}
+			return Objects.equals(this.type, that.type) //
+					&& Objects.equals(this.method, that.method) //
+					&& Objects.equals(this.href, that.href);
+		}
 
-					return annotation != null && annotation.required() //
-							&& annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.type, this.method, this.href);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "WebHandler.AffordanceKey(type=" + this.type + ", method=" + this.method + ", href=" + this.href + ")";
+		}
+	}
+
+	private static class HandlerMethodParameters {
+
+		private static final List<Class<? extends Annotation>> ANNOTATIONS = Arrays.asList(RequestParam.class,
+				PathVariable.class);
+		private static final Map<Method, HandlerMethodParameters> CACHE = new ConcurrentHashMap<Method, HandlerMethodParameters>();
+
+		private final MultiValueMap<Class<? extends Annotation>, HandlerMethodParameter> byAnnotationCache;
+
+		private HandlerMethodParameters(MethodParameters parameters) {
+
+			this.byAnnotationCache = new LinkedMultiValueMap<>();
+
+			for (Class<? extends Annotation> annotation : ANNOTATIONS) {
+
+				this.byAnnotationCache.putAll(parameters.getParametersWith(annotation).stream() //
+						.map(it -> HandlerMethodParameter.of(it, annotation)) //
+						.collect(Collectors.groupingBy(HandlerMethodParameter::getAnnotationType, LinkedMultiValueMap::new,
+								Collectors.toList())));
+			}
+		}
+
+		public static HandlerMethodParameters of(Method method) {
+
+			return CACHE.computeIfAbsent(method, it -> {
+
+				MethodParameters parameters = MethodParameters.of(it);
+				return new HandlerMethodParameters(parameters);
+			});
+		}
+
+		public List<HandlerMethodParameter> getParameterAnnotatedWith(Class<? extends Annotation> annotation,
+				Object[] arguments) {
+
+			List<HandlerMethodParameter> parameters = byAnnotationCache.get(annotation);
+
+			if (parameters == null) {
+				return Collections.emptyList();
+			}
+
+			List<HandlerMethodParameter> result = new ArrayList<>();
+
+			for (HandlerMethodParameter parameter : parameters) {
+				if (parameter.getVerifiedValue(arguments) != null) {
+					result.add(parameter);
 				}
-			};
+			}
+
+			return result;
+		}
+	}
+
+	private abstract static class HandlerMethodParameter {
+
+		private static final ConversionService CONVERSION_SERVICE = new DefaultFormattingConversionService();
+		private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
+		private static final Map<Class<? extends Annotation>, Function<MethodParameter, ? extends HandlerMethodParameter>> FACTORY;
+		private static final String NO_PARAMETER_NAME = "Could not determine name of parameter %s! Make sure you compile with parameter information or explicitly define a parameter name in %s.";
+
+		static {
+			FACTORY = new HashMap<>();
+			FACTORY.put(RequestParam.class, RequestParamParameter::new);
+			FACTORY.put(PathVariable.class, PathVariableParameter::new);
+		}
+
+		private final MethodParameter parameter;
+		private final AnnotationAttribute attribute;
+		private final TypeDescriptor typeDescriptor;
+
+		private String variableName;
+
+		/**
+		 * Creates a new {@link HandlerMethodParameter} for the given {@link MethodParameter} and
+		 * {@link AnnotationAttribute}.
+		 *
+		 * @param parameter
+		 * @param attribute
+		 */
+		private HandlerMethodParameter(MethodParameter parameter, AnnotationAttribute attribute) {
+
+			this.parameter = parameter;
+			this.attribute = attribute;
+
+			int nestingIndex = Optional.class.isAssignableFrom(parameter.getParameterType()) ? 1 : 0;
+
+			this.typeDescriptor = TypeDescriptor.nested(parameter, nestingIndex);
+		}
+
+		/**
+		 * Creates a new {@link HandlerMethodParameter} for the given {@link MethodParameter} and annotation type.
+		 *
+		 * @param parameter must not be {@literal null}.
+		 * @param type must not be {@literal null}.
+		 * @return
+		 */
+		public static HandlerMethodParameter of(MethodParameter parameter, Class<? extends Annotation> type) {
+
+			Function<MethodParameter, ? extends HandlerMethodParameter> function = FACTORY.get(type);
+
+			if (function == null) {
+				throw new IllegalArgumentException(String.format("Unsupported annotation type %s!", type.getName()));
+			}
+
+			return function.apply(parameter);
+		}
+
+		Class<? extends Annotation> getAnnotationType() {
+			return attribute.getAnnotationType();
+		}
+
+		public String getVariableName() {
+
+			if (variableName == null) {
+				this.variableName = determineVariableName();
+			}
+
+			return variableName;
+		}
+
+		public String getValueAsString(Object[] values) {
+
+			Object value = values[parameter.getParameterIndex()];
+
+			if (value == null) {
+				throw new IllegalArgumentException("Cannot turn null value into required String!");
+			}
+
+			if (String.class.isInstance(value)) {
+				return (String) value;
+			}
+
+			value = ObjectUtils.unwrapOptional(value);
+
+			// Try to lookup ConversionService from the request's context
+
+			// Guard with ….canConvert(…)
+			// if not, fall back to ….toString();
+			Object result = CONVERSION_SERVICE.convert(value, typeDescriptor, STRING_DESCRIPTOR);
+
+			if (result == null) {
+				throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", value));
+			}
+
+			return (String) result;
+		}
+
+		private String determineVariableName() {
+
+			if (attribute == null) {
+
+				this.variableName = parameter.getParameterName();
+
+				return variableName;
+			}
+
+			Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
+			String parameterName = annotation != null ? attribute.getValueFrom(annotation) : "";
+
+			if (parameterName != null && StringUtils.hasText(parameterName)) {
+				return parameterName;
+			}
+
+			parameterName = parameter.getParameterName();
+
+			if (parameterName == null) {
+				throw new IllegalStateException(String.format(NO_PARAMETER_NAME, parameter, attribute.getAnnotationType()));
+			}
+
+			return parameterName;
+		}
+
+		/**
+		 * Returns the value for the underlying {@link MethodParameter} potentially applying validation.
+		 *
+		 * @param values must not be {@literal null}.
+		 * @return
+		 */
+		@Nullable
+		public Object getVerifiedValue(Object[] values) {
+			return values[parameter.getParameterIndex()];
+		}
+
+		public abstract boolean isRequired();
+	}
+
+	/**
+	 * {@link HandlerMethodParameter} implementation to work with {@link RequestParam}.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	private static class RequestParamParameter extends HandlerMethodParameter {
+
+		private final MethodParameter parameter;
+
+		public RequestParamParameter(MethodParameter parameter) {
+
+			super(parameter, new AnnotationAttribute(RequestParam.class));
+
+			this.parameter = parameter;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mvc.AnnotatedParametersParameterAccessor#verifyParameterValue(org.springframework.core.MethodParameter, java.lang.Object)
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#isRequired()
 		 */
 		@Override
-		@Nullable
-		protected Object verifyParameterValue(MethodParameter parameter, @Nullable Object value) {
+		public boolean isRequired() {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
-			value = ObjectUtils.unwrapOptional(value);
+			if (parameter.isOptional()) {
+				return false;
+			}
+
+			return annotation != null && annotation.required() //
+					&& annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#verifyValue(java.lang.Object[])
+		 */
+		@Override
+		@Nullable
+		public Object getVerifiedValue(Object[] values) {
+
+			Object value = ObjectUtils.unwrapOptional(values[parameter.getParameterIndex()]);
 
 			if (value != null) {
 				return value;
 			}
+
+			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
 			if (!(annotation != null && annotation.required()) || parameter.isOptional()) {
 				return SKIP_VALUE;
@@ -280,169 +524,23 @@ public class WebHandler {
 	}
 
 	/**
-	 * Value object to allow accessing {@link MethodInvocation} parameters with the configured
-	 * {@link AnnotationAttribute}.
+	 * {@link HandlerMethodParameter} extension dealing with {@link PathVariable} parameters.
 	 *
-	 * @author Oliver Gierke
+	 * @author Oliver Drotbohm
 	 */
-	@RequiredArgsConstructor
-	private static class AnnotatedParametersParameterAccessor {
+	private static class PathVariableParameter extends HandlerMethodParameter {
 
-		private final @NonNull AnnotationAttribute attribute;
-
-		/**
-		 * Returns {@link BoundMethodParameter}s contained in the given {@link MethodInvocation}.
-		 *
-		 * @param invocation must not be {@literal null}.
-		 * @return
-		 */
-		public List<BoundMethodParameter> getBoundParameters(MethodInvocation invocation) {
-
-			Assert.notNull(invocation, "MethodInvocation must not be null!");
-
-			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
-			Object[] arguments = invocation.getArguments();
-			List<BoundMethodParameter> result = new ArrayList<>();
-
-			for (MethodParameter parameter : parameters.getParametersWith(attribute.getAnnotationType())) {
-
-				Object value = arguments[parameter.getParameterIndex()];
-				Object verifiedValue = verifyParameterValue(parameter, value);
-
-				if (verifiedValue != null) {
-					result.add(createParameter(parameter, verifiedValue, attribute));
-				}
-			}
-
-			return result;
+		public PathVariableParameter(MethodParameter parameter) {
+			super(parameter, new AnnotationAttribute(PathVariable.class));
 		}
 
-		/**
-		 * Create the {@link BoundMethodParameter} for the given {@link MethodParameter}, parameter value and
-		 * {@link AnnotationAttribute}.
-		 *
-		 * @param parameter must not be {@literal null}.
-		 * @param value can be {@literal null}.
-		 * @param attribute must not be {@literal null}.
-		 * @return
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#isRequired()
 		 */
-		protected BoundMethodParameter createParameter(MethodParameter parameter, @Nullable Object value,
-				AnnotationAttribute attribute) {
-			return new BoundMethodParameter(parameter, value, attribute);
+		@Override
+		public boolean isRequired() {
+			return true;
 		}
-
-		/**
-		 * Callback to verify the parameter values given for a dummy invocation. Default implementation rejects
-		 * {@literal null} values as they indicate an invalid dummy call.
-		 *
-		 * @param parameter will never be {@literal null}.
-		 * @param value could be {@literal null}.
-		 * @return the verified value.
-		 */
-		@Nullable
-		protected Object verifyParameterValue(MethodParameter parameter, @Nullable Object value) {
-			return value;
-		}
-
-		/**
-		 * Represents a {@link MethodParameter} alongside the value it has been bound to.
-		 *
-		 * @author Oliver Gierke
-		 */
-		static class BoundMethodParameter {
-
-			private static final ConversionService CONVERSION_SERVICE = new DefaultFormattingConversionService();
-			private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
-
-			private final MethodParameter parameter;
-			private final Object value;
-			private final AnnotationAttribute attribute;
-			private final TypeDescriptor parameterTypeDescriptor;
-
-			/**
-			 * Creates a new {@link BoundMethodParameter}
-			 *
-			 * @param parameter must not be {@literal null}.
-			 * @param value can be {@literal null}.
-			 * @param attribute can be {@literal null}.
-			 */
-			public BoundMethodParameter(MethodParameter parameter, @Nullable Object value, AnnotationAttribute attribute) {
-
-				Assert.notNull(parameter, "MethodParameter must not be null!");
-
-				this.parameter = parameter;
-				this.value = value;
-				this.attribute = attribute;
-				this.parameterTypeDescriptor = TypeDescriptor.nested(parameter, parameter.isOptional() ? 1 : 0);
-			}
-
-			/**
-			 * Returns the name of the {@link UriTemplate} variable to be bound. The name will be derived from the configured
-			 * {@link AnnotationAttribute} or the {@link MethodParameter} name as fallback.
-			 *
-			 * @return
-			 */
-			@Nullable
-			public String getVariableName() {
-
-				if (attribute == null) {
-					return parameter.getParameterName();
-				}
-
-				Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
-				String annotationAttributeValue = annotation != null ? attribute.getValueFrom(annotation) : "";
-
-				return StringUtils.hasText(annotationAttributeValue) ? annotationAttributeValue : parameter.getParameterName();
-			}
-
-			/**
-			 * Returns the raw value bound to the {@link MethodParameter}.
-			 *
-			 * @return
-			 */
-			@Nullable
-			public Object getValue() {
-				return value;
-			}
-
-			/**
-			 * Returns the bound value converted into a {@link String} based on default conversion service setup.
-			 *
-			 * @return
-			 */
-			public String asString() {
-
-				Object value = this.value;
-
-				if (value == null) {
-					throw new IllegalStateException("Cannot turn null value into required String!");
-				}
-
-				Object result = CONVERSION_SERVICE.convert(value, parameterTypeDescriptor, STRING_DESCRIPTOR);
-
-				if (result == null) {
-					throw new IllegalStateException(String.format("Conversion of value %s resulted in null!", value));
-				}
-
-				return (String) result;
-			}
-
-			/**
-			 * Returns whether the given parameter is a required one. Defaults to {@literal true}.
-			 *
-			 * @return
-			 */
-			public boolean isRequired() {
-				return true;
-			}
-		}
-	}
-
-	@Value(staticConstructor = "of")
-	private static class AffordanceKey {
-
-		Class<?> type;
-		Method method;
-		String href;
 	}
 }

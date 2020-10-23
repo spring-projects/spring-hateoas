@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,14 @@
  */
 package org.springframework.hateoas.support;
 
+import static org.springframework.hateoas.MediaTypes.*;
+import static org.springframework.hateoas.mediatype.PropertyUtils.*;
+import static org.springframework.hateoas.mediatype.alps.Alps.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +34,13 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.alps.Alps;
+import org.springframework.hateoas.mediatype.alps.Descriptor;
+import org.springframework.hateoas.mediatype.alps.Ext;
+import org.springframework.hateoas.mediatype.alps.Format;
+import org.springframework.hateoas.mediatype.alps.Type;
+import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -68,7 +80,7 @@ public class WebMvcEmployeeController {
 		// Return the collection of employee resources along with the composite affordance
 		return IntStream.range(0, EMPLOYEES.size()) //
 				.mapToObj(this::findOne) //
-				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> new CollectionModel<>(it, selfLink)));
+				.collect(Collectors.collectingAndThen(Collectors.toList(), it -> CollectionModel.of(it, selfLink)));
 	}
 
 	@GetMapping("/employees/search")
@@ -105,7 +117,7 @@ public class WebMvcEmployeeController {
 				.andAffordance(afford(controller.search(null, null)));
 
 		// Return the collection of employee resources along with the composite affordance
-		return new CollectionModel<>(employees, selfLink);
+		return CollectionModel.of(employees, selfLink);
 	}
 
 	@GetMapping("/employees/{id}")
@@ -120,7 +132,7 @@ public class WebMvcEmployeeController {
 		Link employeesLink = linkTo(controller.all()).withRel("employees");
 
 		// Return the affordance + a link back to the entire collection resource.
-		return new EntityModel<>(EMPLOYEES.get(id), //
+		return EntityModel.of(EMPLOYEES.get(id), //
 				findOneLink //
 						.andAffordance(afford(controller.updateEmployee(null, id))) // //
 						.andAffordance(afford(controller.partiallyUpdateEmployee(null, id))), //
@@ -173,5 +185,43 @@ public class WebMvcEmployeeController {
 						.getRequiredLink(IanaLinkRelations.SELF) //
 						.toUri()) //
 				.build();
+	}
+
+	// tag::alps-profile[]
+	@GetMapping(value = "/profile", produces = ALPS_JSON_VALUE)
+	Alps profile() {
+
+		return Alps.alps() //
+				.doc(doc() //
+						.href("https://example.org/samples/full/doc.html") //
+						.value("value goes here") //
+						.format(Format.TEXT) //
+						.build()) //
+				.descriptor(getExposedProperties(Employee.class).stream() //
+						.map(property -> Descriptor.builder() //
+								.id("class field [" + property.getName() + "]") //
+								.name(property.getName()) //
+								.type(Type.SEMANTIC) //
+								.ext(Ext.builder() //
+										.id("ext [" + property.getName() + "]") //
+										.href("https://example.org/samples/ext/" + property.getName()) //
+										.value("value goes here") //
+										.build()) //
+								.rt("rt for [" + property.getName() + "]") //
+								.descriptor(Collections.singletonList(Descriptor.builder().id("embedded").build())) //
+								.build()) //
+						.collect(Collectors.toList()))
+				.build();
+	}
+	// end::alps-profile[]
+
+	@GetMapping("/employees/problem")
+	public ResponseEntity<?> problem() {
+
+		return ResponseEntity.badRequest().body(Problem.create() //
+				.withType(URI.create("http://example.com/problem")) //
+				.withTitle("Employee-based problem") //
+				.withStatus(HttpStatus.BAD_REQUEST) //
+				.withDetail("This is a test case"));
 	}
 }

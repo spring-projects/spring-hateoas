@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,16 +36,6 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/hal+json}.
 	 */
 	public static final MediaType HAL_JSON = MediaType.valueOf(HAL_JSON_VALUE);
-
-	/**
-	 * A String equivalent of {@link MediaTypes#HAL_JSON_UTF8}.
-	 */
-	public static final String HAL_JSON_UTF8_VALUE = HAL_JSON_VALUE + ";charset=UTF-8";
-
-	/**
-	 * Public constant media type for {@code application/hal+json;charset=UTF-8}.
-	 */
-	public static final MediaType HAL_JSON_UTF8 = MediaType.valueOf(HAL_JSON_UTF8_VALUE);
 
 	/**
 	 * A String equivalent of {@link MediaTypes#ALPS_JSON}.
@@ -86,4 +76,24 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/vnd.amundsen-uber+json}.
 	 */
 	public static final MediaType UBER_JSON = MediaType.parseMediaType(UBER_JSON_VALUE);
+	
+	/**
+	 * A String equivalent of {@link MediaTypes#VND_ERROR_JSON}.
+	 */
+	public static final String VND_ERROR_JSON_VALUE = "application/vnd.error+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.error+json}.
+	 */
+	public static final MediaType VND_ERROR_JSON = MediaType.valueOf(VND_ERROR_JSON_VALUE);
+
+	/**
+	 * A String equivalent of {@link MediaTypes#HTTP_PROBLEM_DETAILS_JSON_VALUE}.
+	 */
+	public static final String HTTP_PROBLEM_DETAILS_JSON_VALUE = "application/problem+json";
+
+	/**
+	 * Public constant media type for {@code application/problem+json}.
+	 */
+	public static final MediaType HTTP_PROBLEM_DETAILS_JSON = MediaType.parseMediaType(HTTP_PROBLEM_DETAILS_JSON_VALUE);
 }
