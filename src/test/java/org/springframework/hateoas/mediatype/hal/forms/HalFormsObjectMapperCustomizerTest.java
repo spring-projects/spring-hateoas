@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
@@ -12,8 +27,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
-import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -30,13 +45,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-public class HalFormsObjectMapperCustomizerTest {
+class HalFormsObjectMapperCustomizerTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
-
-	MappingTestUtils.ContextualMapper mapper = MappingTestUtils.createMapper(getClass());
+	ContextualMapper mapper = MappingTestUtils.createMapper(getClass());
 
 	@BeforeEach
 	void setUp() {
@@ -48,9 +62,9 @@ public class HalFormsObjectMapperCustomizerTest {
 	@Test // #1382
 	void objectMapperCustomizerShouldBeApplied() throws Exception {
 
-		String actualHalFormsJson = this.mockMvc.perform(get("/employees/0")).andReturn().getResponse()
+		String actualHalFormsJson = mockMvc.perform(get("/employees/0")).andReturn().getResponse()
 				.getContentAsString();
-		String expectedHalFormsJson = this.mapper.readFile("hal-forms-custom.json");
+		String expectedHalFormsJson = mapper.readFile("hal-forms-custom.json");
 
 		assertThat(actualHalFormsJson).isEqualTo(expectedHalFormsJson);
 	}
@@ -62,8 +76,8 @@ public class HalFormsObjectMapperCustomizerTest {
 	static class TestConfig {
 
 		@Bean
-		HalConfiguration halConfiguration() {
-			return new HalConfiguration()
+		HalFormsConfiguration halFormsConfiguration() {
+			return new HalFormsConfiguration()
 					.withObjectMapperCustomizer(objectMapper -> objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true));
 		}
 	}

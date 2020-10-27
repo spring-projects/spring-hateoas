@@ -62,17 +62,16 @@ public class HalConfiguration {
 	 * Creates a new default {@link HalConfiguration} rendering single links as immediate sub-document.
 	 */
 	public HalConfiguration() {
-
-		this.renderSingleLinks = RenderSingleLinks.AS_SINGLE;
-		this.singleLinksPerPattern = new LinkedHashMap<>();
-		this.applyPropertyNamingStrategy = true;
-		this.enforceEmbeddedCollections = true;
-		this.objectMapperCustomizer = objectMapper -> {}; // Default to no action.
+		this(RenderSingleLinks.AS_SINGLE, new LinkedHashMap<>(), true, true, __ -> {});
 	}
 
 	private HalConfiguration(RenderSingleLinks renderSingleLinks, Map<String, RenderSingleLinks> singleLinksPerPattern,
 			boolean applyPropertyNamingStrategy, boolean enforceEmbeddedCollections,
 			Consumer<ObjectMapper> objectMapperCustomizer) {
+
+		Assert.notNull(renderSingleLinks, "RenderSingleLinks must not be null!");
+		Assert.notNull(singleLinksPerPattern, "Single links per pattern map must not be null!");
+		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
 
 		this.renderSingleLinks = renderSingleLinks;
 		this.singleLinksPerPattern = singleLinksPerPattern;
@@ -102,11 +101,14 @@ public class HalConfiguration {
 	 * relation (like {@code search}), take wildcards to e.g. match links of a given curie (like {@code acme:*}) or even
 	 * complete URIs (like {@code https://api.acme.com/foo/**}).
 	 *
-	 * @param pattern must not be {@literal null}.
+	 * @param pattern must not be {@literal null} or empty.
 	 * @param renderSingleLinks must not be {@literal null}.
 	 * @return @see PathMatcher
 	 */
 	public HalConfiguration withRenderSingleLinksFor(String pattern, RenderSingleLinks renderSingleLinks) {
+
+		Assert.hasText(pattern, "Pattern must not be null or empty!");
+		Assert.notNull(renderSingleLinks, "RenderSingleLinks must not be null!");
 
 		Map<String, RenderSingleLinks> map = new LinkedHashMap<>(singleLinksPerPattern);
 		map.put(pattern, renderSingleLinks);
@@ -132,27 +134,33 @@ public class HalConfiguration {
 	/**
 	 * Create a new {@link HalConfiguration} by copying the attributes and replacing the {@literal renderSingleLinks}.
 	 *
-	 * @param renderSingleLinks
-	 * @return
+	 * @param renderSingleLinks must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	public HalConfiguration withRenderSingleLinks(RenderSingleLinks renderSingleLinks) {
 
-		return this.renderSingleLinks == renderSingleLinks ? this
-				: new HalConfiguration(renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections, this.objectMapperCustomizer);
+		Assert.notNull(renderSingleLinks, "RenderSingleLinks must not be null!");
+
+		return this.renderSingleLinks == renderSingleLinks //
+				? this //
+				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
+						enforceEmbeddedCollections, objectMapperCustomizer);
 	}
 
 	/**
 	 * Create a new {@link HalConfiguration} by copying the attributes and replacing the {@literal singleLinksPattern}.
 	 *
-	 * @param singleLinksPerPattern
-	 * @return
+	 * @param singleLinksPerPattern must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	private HalConfiguration withSingleLinksPerPattern(Map<String, RenderSingleLinks> singleLinksPerPattern) {
 
-		return this.singleLinksPerPattern == singleLinksPerPattern ? this
-				: new HalConfiguration(this.renderSingleLinks, singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections, this.objectMapperCustomizer);
+		Assert.notNull(singleLinksPerPattern, "Single links per pattern map must not be null!");
+
+		return this.singleLinksPerPattern == singleLinksPerPattern //
+				? this //
+				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
+						enforceEmbeddedCollections, objectMapperCustomizer);
 	}
 
 	/**
@@ -164,9 +172,10 @@ public class HalConfiguration {
 	 */
 	public HalConfiguration withApplyPropertyNamingStrategy(boolean applyPropertyNamingStrategy) {
 
-		return this.applyPropertyNamingStrategy == applyPropertyNamingStrategy ? this
-				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections, this.objectMapperCustomizer);
+		return this.applyPropertyNamingStrategy == applyPropertyNamingStrategy //
+				? this //
+				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
+						enforceEmbeddedCollections, objectMapperCustomizer);
 	}
 
 	/**
@@ -178,32 +187,37 @@ public class HalConfiguration {
 	 */
 	public HalConfiguration withEnforceEmbeddedCollections(boolean enforceEmbeddedCollections) {
 
-		return this.enforceEmbeddedCollections == enforceEmbeddedCollections ? this
-				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						enforceEmbeddedCollections, this.objectMapperCustomizer);
+		return this.enforceEmbeddedCollections == enforceEmbeddedCollections //
+				? this //
+				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
+						enforceEmbeddedCollections, objectMapperCustomizer);
 	}
 
 	public HalConfiguration withObjectMapperCustomizer(Consumer<ObjectMapper> objectMapperCustomizer) {
 
-		return this.objectMapperCustomizer == objectMapperCustomizer ? this
-				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections, objectMapperCustomizer);
+		return this.objectMapperCustomizer == objectMapperCustomizer //
+				? this //
+				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
+						enforceEmbeddedCollections, objectMapperCustomizer);
 	}
 
 	public RenderSingleLinks getRenderSingleLinks() {
-		return this.renderSingleLinks;
+		return renderSingleLinks;
 	}
 
 	public boolean isApplyPropertyNamingStrategy() {
-		return this.applyPropertyNamingStrategy;
+		return applyPropertyNamingStrategy;
 	}
 
 	public boolean isEnforceEmbeddedCollections() {
-		return this.enforceEmbeddedCollections;
+		return enforceEmbeddedCollections;
 	}
 
-	public Consumer<ObjectMapper> getObjectMapperCustomizer() {
-		return this.objectMapperCustomizer;
+	public HalConfiguration customize(ObjectMapper mapper) {
+
+		this.objectMapperCustomizer.accept(mapper);
+
+		return this;
 	}
 
 	/**
