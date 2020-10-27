@@ -82,6 +82,8 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 		mapper.setHandlerInstantiator(new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider,
 				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, configuration, beanFactory));
 
+		configuration.getHalConfiguration().getObjectMapperCustomizer().accept(mapper);
+
 		return mapper;
 	}
 
