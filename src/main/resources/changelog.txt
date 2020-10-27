@@ -1,6 +1,11 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2 GA (2020-10-27)
+----------------------------------------
+- #1384 - Upgrade to Spring Framework 5.3.
+- #1382 - Create an ObjectMapperCustomizer to allow tailoring ObjectMapper through media types configuration.
+
 Changes in version 1.2 RC1 (2020-09-15)
 ----------------------------------------
 - #1367 - Release Spring HATEOAS 1.2.0.RC1.
