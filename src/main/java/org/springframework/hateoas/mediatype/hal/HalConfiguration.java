@@ -18,12 +18,15 @@ package org.springframework.hateoas.mediatype.hal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HAL specific configuration.
@@ -41,6 +44,7 @@ public class HalConfiguration {
 	 */
 	private final RenderSingleLinks renderSingleLinks;
 	private final Map<String, RenderSingleLinks> singleLinksPerPattern;
+	private final Consumer<ObjectMapper> objectMapperCustomizer;
 
 	/**
 	 * Configures whether the Jackson property naming strategy is applied to link relations and within {@code _embedded}
@@ -63,15 +67,18 @@ public class HalConfiguration {
 		this.singleLinksPerPattern = new LinkedHashMap<>();
 		this.applyPropertyNamingStrategy = true;
 		this.enforceEmbeddedCollections = true;
+		this.objectMapperCustomizer = objectMapper -> {}; // Default to no action.
 	}
 
 	private HalConfiguration(RenderSingleLinks renderSingleLinks, Map<String, RenderSingleLinks> singleLinksPerPattern,
-			boolean applyPropertyNamingStrategy, boolean enforceEmbeddedCollections) {
+			boolean applyPropertyNamingStrategy, boolean enforceEmbeddedCollections,
+			Consumer<ObjectMapper> objectMapperCustomizer) {
 
 		this.renderSingleLinks = renderSingleLinks;
 		this.singleLinksPerPattern = singleLinksPerPattern;
 		this.applyPropertyNamingStrategy = applyPropertyNamingStrategy;
 		this.enforceEmbeddedCollections = enforceEmbeddedCollections;
+		this.objectMapperCustomizer = objectMapperCustomizer;
 	}
 
 	/**
@@ -132,7 +139,7 @@ public class HalConfiguration {
 
 		return this.renderSingleLinks == renderSingleLinks ? this
 				: new HalConfiguration(renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections);
+						this.enforceEmbeddedCollections, this.objectMapperCustomizer);
 	}
 
 	/**
@@ -145,7 +152,7 @@ public class HalConfiguration {
 
 		return this.singleLinksPerPattern == singleLinksPerPattern ? this
 				: new HalConfiguration(this.renderSingleLinks, singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections);
+						this.enforceEmbeddedCollections, this.objectMapperCustomizer);
 	}
 
 	/**
@@ -159,7 +166,7 @@ public class HalConfiguration {
 
 		return this.applyPropertyNamingStrategy == applyPropertyNamingStrategy ? this
 				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, applyPropertyNamingStrategy,
-						this.enforceEmbeddedCollections);
+						this.enforceEmbeddedCollections, this.objectMapperCustomizer);
 	}
 
 	/**
@@ -173,7 +180,14 @@ public class HalConfiguration {
 
 		return this.enforceEmbeddedCollections == enforceEmbeddedCollections ? this
 				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
-						enforceEmbeddedCollections);
+						enforceEmbeddedCollections, this.objectMapperCustomizer);
+	}
+
+	public HalConfiguration withObjectMapperCustomizer(Consumer<ObjectMapper> objectMapperCustomizer) {
+
+		return this.objectMapperCustomizer == objectMapperCustomizer ? this
+				: new HalConfiguration(this.renderSingleLinks, this.singleLinksPerPattern, this.applyPropertyNamingStrategy,
+						this.enforceEmbeddedCollections, objectMapperCustomizer);
 	}
 
 	public RenderSingleLinks getRenderSingleLinks() {
@@ -186,6 +200,10 @@ public class HalConfiguration {
 
 	public boolean isEnforceEmbeddedCollections() {
 		return this.enforceEmbeddedCollections;
+	}
+
+	public Consumer<ObjectMapper> getObjectMapperCustomizer() {
+		return this.objectMapperCustomizer;
 	}
 
 	/**

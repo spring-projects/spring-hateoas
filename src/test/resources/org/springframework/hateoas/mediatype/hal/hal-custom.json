@@ -1,0 +1,12 @@
+{
+  "name" : "Frodo Baggins",
+  "role" : "ring bearer",
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost/employees/0"
+    },
+    "employees" : {
+      "href" : "http://localhost/employees"
+    }
+  }
+}
