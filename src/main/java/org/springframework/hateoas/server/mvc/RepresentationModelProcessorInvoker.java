@@ -434,7 +434,7 @@ public class RepresentationModelProcessorInvoker {
 
 			Class<?> rawType = source.getRawClass();
 
-			if (rawType != null && rawType.isAssignableFrom(superType)) {
+			if (rawType != null && rawType.equals(superType)) {
 				return source;
 			}
 
