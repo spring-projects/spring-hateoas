@@ -28,6 +28,7 @@ import org.springframework.hateoas.server.RepresentationModelProcessor;
  * Unit tests for {@link RepresentationModelProcessorInvoker}.
  *
  * @author Oliver Drotbohm
+ * @author Karina Pleskach
  */
 public class RepresentationModelProcessorInvokerUnitTests {
 
@@ -52,6 +53,20 @@ public class RepresentationModelProcessorInvokerUnitTests {
 		invoker.invokeProcessorsFor(CollectionModel.of(singleton(entityModel)));
 
 		assertThat(processor.invoked).isFalse();
+	}
+
+	@Test // #1379
+	void doesNotInvokeProcessorForNonAssignableNestedEntityOnSpecializedCollectionModel() {
+
+		FirstEntityProcessor firstProcessor = new FirstEntityProcessor();
+
+		RepresentationModelProcessorInvoker invoker = new RepresentationModelProcessorInvoker(
+				singletonList(firstProcessor));
+
+		EntityModel<SecondEntity> entityModel = EntityModel.of(new SecondEntity());
+		invoker.invokeProcessorsFor(new MyCollectionModelInheritor<>(singletonList(entityModel)));
+
+		assertThat(firstProcessor.invoked).isFalse();
 	}
 
 	// #1280
@@ -80,6 +95,12 @@ public class RepresentationModelProcessorInvokerUnitTests {
 			invoked = true;
 
 			return model;
+		}
+	}
+
+	static class MyCollectionModelInheritor<T> extends CollectionModel<T> {
+		public MyCollectionModelInheritor(Iterable<T> content) {
+			super(content);
 		}
 	}
 }

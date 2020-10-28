@@ -429,6 +429,7 @@ public class RepresentationModelProcessorInvoker {
 		 * @param superType must not be {@literal null}.
 		 * @return
 		 */
+		@Nullable
 		private static ResolvableType getSuperType(ResolvableType source, Class<?> superType) {
 
 			Class<?> rawType = source.getRawClass();
@@ -449,7 +450,7 @@ public class RepresentationModelProcessorInvoker {
 				}
 			}
 
-			return ResolvableType.forClass(superType);
+			return null;
 		}
 	}
 
