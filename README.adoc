@@ -32,9 +32,9 @@ git config core.commentchar "/"
 2. With the release tagged, push the tagged version to the release branch.
 +
 ----
-% git checkout -b release
+% git checkout -b release-1.2
 % git reset --hard <tag>
-% git push -f origin release
+% git push -f origin release-1.2
 ----
 
 NOTE: You can chain the previous set of commands together using `&&`.
