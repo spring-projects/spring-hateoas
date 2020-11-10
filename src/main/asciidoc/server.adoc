@@ -72,7 +72,7 @@ return new ResponseEntity<PersonModel>(headers, HttpStatus.CREATED);
 ====
 
 [[fundamentals.obtaining-links.builder.methods]]
-==== Building links that point to methods
+=== Building links that point to methods
 
 You can even build links that point to methods or create dummy controller method invocations.
 The first approach is to hand a `Method` instance to the `WebMvcLinkBuilder`.
