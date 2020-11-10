@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2.1 (2020-11-10)
+----------------------------------------
+- #1393 - Upgrade to Spring Docs Resources 0.2.4.
+- #1392 - Upgrade to Jackson 2.11.3.
+- #1391 - Upgrade to Spring Framework 5.3.1.
+- #1389 - Backport new version parsing to 1.2.x.
+- #1386 - RepresentationModelProcessor invoked for invalid CollectionModel payload if specialized.
+
 Changes in version 1.2 GA (2020-10-27)
 ----------------------------------------
 - #1384 - Upgrade to Spring Framework 5.3.
