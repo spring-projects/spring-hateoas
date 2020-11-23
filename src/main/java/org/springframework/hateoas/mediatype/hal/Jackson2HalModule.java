@@ -49,20 +49,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
@@ -187,12 +175,11 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 
 				LinkRelation rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
+				HalLinkRelation relation = transformingMapper.map(rel);
 
-				if (!link.hasRel(rel)) {
+				if (relation.isCuried()) {
 					curiedLinkPresent = true;
 				}
-
-				HalLinkRelation relation = transformingMapper.map(rel);
 
 				sortedLinks //
 						.computeIfAbsent(relation, key -> new ArrayList<>())//

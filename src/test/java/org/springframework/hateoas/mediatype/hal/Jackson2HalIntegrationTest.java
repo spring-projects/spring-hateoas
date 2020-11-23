@@ -17,6 +17,8 @@ package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
 
+import net.minidev.json.JSONArray;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -608,6 +610,16 @@ class Jackson2HalIntegrationTest {
 		EntityModel<SomeSample> result = mapper.readValue(source, modelType);
 
 		assertThat(result.getContent().name).isEqualTo("Dave");
+	}
+
+	@Test // #1399, #1400
+	void rendersCurieInformationIfCuriedLinkIsGiven() throws Exception {
+
+		RepresentationModel<?> model = new RepresentationModel<>().add(Link.of("/href", LinkRelation.of("foo:bar")));
+
+		DocumentContext document = JsonPath.parse(getCuriedObjectMapper().writeValueAsString(model));
+
+		assertThat(document.read("$._links.curies", JSONArray.class)).isNotEmpty();
 	}
 
 	@Relation(collectionRelation = "someSample")
