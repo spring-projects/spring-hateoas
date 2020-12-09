@@ -70,8 +70,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>1.8</source.level>
-		<assertj.version>3.18.0</assertj.version>
-		<docs.resources.version>0.2.4</docs.resources.version>
+		<assertj.version>3.18.1</assertj.version>
+		<docs.resources.version>0.2.5</docs.resources.version>
 		<spring.data.build.resources.version>2.4.0</spring.data.build.resources.version>
 		<evo.version>1.2.2</evo.version>
 		<logback.version>1.2.3</logback.version>
@@ -81,11 +81,11 @@
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<junit.version>5.7.0</junit.version>
-		<reactor-bom.version>2020.0.0</reactor-bom.version>
+		<reactor-bom.version>2020.0.2</reactor-bom.version>
 		<slf4j.version>1.7.30</slf4j.version>
-		<spring.version>5.3.1</spring.version>
+		<spring.version>5.3.2</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
-		<kotlin.version>1.4.10</kotlin.version>
+		<kotlin.version>1.4.21</kotlin.version>
 		<kotlinx-coroutines.version>1.4.0</kotlinx-coroutines.version>
 		<mockk.version>1.10.2</mockk.version>
 	</properties>
