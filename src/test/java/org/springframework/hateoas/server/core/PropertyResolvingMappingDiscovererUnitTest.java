@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.hateoas.server.core.AnnotationMappingDiscoverer;
-import org.springframework.hateoas.server.core.PropertyResolvingMappingDiscoverer;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
