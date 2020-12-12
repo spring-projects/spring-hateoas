@@ -93,7 +93,6 @@ public class HalFormsConfiguration {
 	 * @param pattern must not be {@literal null} or empty.
 	 * @return will never be {@literal null}.
 	 */
-	@Deprecated
 	public HalFormsConfiguration withPattern(Class<?> type, String pattern) {
 
 		Assert.notNull(type, "Type must not be null!");
