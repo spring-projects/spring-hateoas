@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpMethod;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/{2,}");
+	private static final Pattern TEMPLATE_VARIABLE_NAME = Pattern.compile("\\{(.*)\\}");
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
@@ -116,7 +118,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			return typeMapping;
 		}
 
-		return typeMapping == null || "/".equals(typeMapping) ? mapping[0] : join(typeMapping, mapping[0]);
+		return cleanup(typeMapping == null || "/".equals(typeMapping) ? mapping[0] : join(typeMapping, mapping[0]));
 	}
 
 	/**
@@ -179,6 +181,49 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 * @return
 	 */
 	private static String join(String typeMapping, String mapping) {
-		return MULTIPLE_SLASHES.matcher(typeMapping.concat("/").concat(mapping)).replaceAll("/");
+		return typeMapping.concat("/").concat(mapping);
+	}
+
+	/**
+	 * @param mapping
+	 * @return
+	 */
+	private static String cleanup(String mapping) {
+
+		String[] parts = mapping.split("/");
+		StringBuilder result = new StringBuilder();
+
+		for (int i = 0; i < parts.length; i++) {
+
+			String part = parts[i];
+
+			if (i != 0) {
+				result.append("/");
+			}
+
+			result.append(part.contains(":") ? cleanupPart(part) : part);
+		}
+
+		return MULTIPLE_SLASHES.matcher(result.toString()).replaceAll("/");
+	}
+
+	private static String cleanupPart(String variable) {
+
+		if (!variable.contains("{")) {
+			return variable;
+		}
+
+		Matcher matcher = TEMPLATE_VARIABLE_NAME.matcher(variable);
+
+		if (!matcher.find()) {
+			return variable;
+		}
+
+		String rawName = matcher.group(1);
+		int colonIndex = rawName.indexOf(':');
+
+		return colonIndex < 0
+				? variable
+				: variable.replace(matcher.group(0), "{" + rawName.substring(0, colonIndex) + "}");
 	}
 }

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Unit tests for {@link AnnotationMappingDiscoverer}.
- * 
+ *
  * @author Oliver Gierke
  * @author Kevin Conaway
  * @author Mark Paluch
@@ -153,6 +153,13 @@ class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/otherMethod");
 	}
 
+	@Test // #1412
+	void removesMatchingExpressionFromTemplateVariable() throws Exception {
+
+		Method method = MyController.class.getMethod("mappingWithMatchingExpression");
+		assertThat(discoverer.getMapping(method)).isEqualTo("/type/foo/{bar}");
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -164,6 +171,9 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping
 		void noMethodMapping();
+
+		@RequestMapping("/foo/{bar:[ABC]{1}}")
+		void mappingWithMatchingExpression();
 	}
 
 	interface ControllerWithoutTypeLevelMapping {
