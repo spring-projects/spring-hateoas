@@ -36,7 +36,6 @@ pipeline {
 			}
 			options { timeout(time: 30, unit: 'MINUTES') }
 			steps {
-				sh 'rm -rf ?'
 				sh 'PROFILE=none ci/test.sh'
 			}
 		}
@@ -52,7 +51,6 @@ pipeline {
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
-						sh 'rm -rf ?'
 						sh 'PROFILE=none ci/test.sh'
 					}
 				}
@@ -65,7 +63,6 @@ pipeline {
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
-						sh 'rm -rf ?'
 						sh 'PROFILE=none ci/test.sh'
 					}
 				}
@@ -78,7 +75,6 @@ pipeline {
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
-						sh 'rm -rf ?'
 						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
@@ -91,7 +87,6 @@ pipeline {
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
-						sh 'rm -rf ?'
 						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
@@ -104,14 +99,13 @@ pipeline {
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
-						sh 'rm -rf ?'
 						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
 			}
 		}
 
-		stage('Deploy to Artifactory') {
+		stage('Deploy') {
 			agent {
 				docker {
 					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
@@ -122,12 +116,13 @@ pipeline {
 
 			environment {
 				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
+				SONATYPE = credentials('oss-token')
+				KEYRING = credentials('spring-signing-secring.gpg')
+				PASSPHRASE = credentials('spring-gpg-passphrase')
 			}
 
 			steps {
 				script {
-					sh 'rm -rf ?'
-
 					// Warm up this plugin quietly before using it.
 					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
 
@@ -147,23 +142,10 @@ pipeline {
 						RELEASE_TYPE = 'release'
 					}
 
-					// Capture build output...
-					OUTPUT = sh(
-							script: "PROFILE=ci,${RELEASE_TYPE} ci/build.sh",
-							returnStdout: true
-					).trim()
-
-					echo "$OUTPUT"
-
-					// ...to extract artifactory build info
-					build_info_path = OUTPUT.split('\n')
-							.find { it.contains('Artifactory Build Info Recorder') }
-							.split('Saving Build Info to ')[1]
-							.trim()[1..-2]
-
-					// Stash the JSON build info to support promotion to bintray
-					dir(build_info_path + '/..') {
-						stash name: 'build_info', includes: "*.json"
+					if (RELEASE_TYPE == 'release') {
+						sh "PROFILE=ci,central ci/build-and-deploy-to-maven-central.sh ${PROJECT_VERSION}"
+					} else {
+						sh "PROFILE=ci,${RELEASE_TYPE} ci/build-and-deploy-to-artifactory.sh"
 					}
 				}
 			}
@@ -195,81 +177,6 @@ pipeline {
 							"-Dartifactory.password=${ARTIFACTORY_PSW} " +
 							"-Dartifactory.distribution-repository=temp-private-local " +
 							'-Dmaven.test.skip=true deploy -B'
-				}
-			}
-		}
-		stage('Promote to Bintray') {
-			when {
-				branch 'release-1.2'
-			}
-			agent {
-				docker {
-					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-				}
-			}
-			options { timeout(time: 20, unit: 'MINUTES') }
-
-			environment {
-				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
-			}
-
-			steps {
-				script {
-					sh 'rm -rf ?'
-
-					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
-
-					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
-							returnStdout: true
-					).trim()
-
-					if (PROJECT_VERSION.matches(/.*\.[0-9]+$/)) {
-						unstash name: 'build_info'
-						sh "ci/promote-to-bintray.sh"
-					} else {
-						echo "${PROJECT_VERSION} is not a candidate for promotion to Bintray."
-					}
-				}
-			}
-		}
-		stage('Sync to Maven Central') {
-			when {
-				branch 'release-1.2'
-			}
-			agent {
-				docker {
-					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
-					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-				}
-			}
-			options { timeout(time: 20, unit: 'MINUTES') }
-
-			environment {
-				BINTRAY = credentials('Bintray-spring-operator')
-				SONATYPE = credentials('oss-token')
-			}
-
-			steps {
-				script {
-					sh 'rm -rf ?'
-
-					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
-
-					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
-							returnStdout: true
-					).trim()
-
-					if (PROJECT_VERSION.matches(/.*\.[0-9]+$/)) {
-						unstash name: 'build_info'
-						sh "ci/sync-to-maven-central.sh"
-					} else {
-						echo "${PROJECT_VERSION} is not a candidate for syncing to Maven Central."
-					}
 				}
 			}
 		}
