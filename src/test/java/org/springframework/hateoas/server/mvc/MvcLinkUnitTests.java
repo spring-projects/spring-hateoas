@@ -16,7 +16,7 @@
 package org.springframework.hateoas.server.mvc;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+import static org.springframework.hateoas.server.mvc.MvcLink.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
