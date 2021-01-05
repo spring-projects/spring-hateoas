@@ -69,6 +69,21 @@ public class RepresentationModelProcessorInvokerUnitTests {
 		assertThat(firstProcessor.invoked).isFalse();
 	}
 
+	@Test // #1425
+	void doesInvokeProcessorForCollectionModelOfRepresentationModel() {
+
+		CollectionModelOfGenericModelProcessor processor = new CollectionModelOfGenericModelProcessor();
+
+		RepresentationModelProcessorInvoker invoker = new RepresentationModelProcessorInvoker(
+				singletonList(processor));
+
+		GenericModel<?> model = new GenericModel<>();
+
+		invoker.invokeProcessorsFor(CollectionModel.of(singletonList(model)));
+
+		assertThat(processor.invoked).isTrue();
+	}
+
 	// #1280
 
 	static class GenericPostProcessor<T extends GenericModel<T>> implements RepresentationModelProcessor<T> {
@@ -91,6 +106,20 @@ public class RepresentationModelProcessorInvokerUnitTests {
 
 		@Override
 		public CollectionModel<EntityModel<FirstEntity>> process(CollectionModel<EntityModel<FirstEntity>> model) {
+
+			invoked = true;
+
+			return model;
+		}
+	}
+
+	// 1425
+	static class CollectionModelOfGenericModelProcessor implements RepresentationModelProcessor<CollectionModel<GenericModel<?>>> {
+
+		boolean invoked = false;
+
+		@Override
+		public CollectionModel<GenericModel<?>> process(CollectionModel<GenericModel<?>> model) {
 
 			invoked = true;
 
