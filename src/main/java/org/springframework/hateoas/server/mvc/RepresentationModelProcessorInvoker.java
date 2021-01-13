@@ -383,7 +383,7 @@ public class RepresentationModelProcessorInvoker {
 		 * @param target that target {@link ResolvableType}.
 		 * @return
 		 */
-		static boolean isValueTypeMatch(@Nullable CollectionModel<?> collectionModel, ResolvableType target) {
+		boolean isValueTypeMatch(@Nullable CollectionModel<?> collectionModel, ResolvableType target) {
 
 			if (collectionModel == null) {
 				return false;
@@ -415,6 +415,8 @@ public class RepresentationModelProcessorInvoker {
 
 			if (element instanceof EntityModel) {
 				return EntityModelProcessorWrapper.isValueTypeMatch((EntityModel<?>) element, resourceType);
+			} else if (element instanceof RepresentationModel) {
+				return resourceType.isInstance(element);
 			} else if (element instanceof EmbeddedWrapper) {
 				return isRawTypeAssignable(resourceType, ((EmbeddedWrapper) element).getRelTargetType());
 			}
