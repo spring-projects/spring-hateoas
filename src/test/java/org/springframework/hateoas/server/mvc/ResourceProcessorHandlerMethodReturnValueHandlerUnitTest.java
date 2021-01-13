@@ -269,8 +269,10 @@ class ResourceProcessorHandlerMethodReturnValueHandlerUnitTest {
 	void resourcesProcessorMatchesValueSubTypes() {
 
 		ResolvableType type = ResolvableType.forClass(PagedStringResources.class);
+		CollectionModelProcessorWrapper wrapper = new CollectionModelProcessorWrapper(
+				mock(RepresentationModelProcessor.class));
 
-		assertThat(CollectionModelProcessorWrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
+		assertThat(wrapper.isValueTypeMatch(FOO_PAGE, type)).isTrue();
 	}
 
 	/**

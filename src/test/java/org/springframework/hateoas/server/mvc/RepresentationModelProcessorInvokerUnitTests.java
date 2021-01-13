@@ -73,7 +73,6 @@ public class RepresentationModelProcessorInvokerUnitTests {
 	void doesInvokeProcessorForCollectionModelOfRepresentationModel() {
 
 		CollectionModelOfGenericModelProcessor processor = new CollectionModelOfGenericModelProcessor();
-
 		RepresentationModelProcessorInvoker invoker = new RepresentationModelProcessorInvoker(
 				singletonList(processor));
 
@@ -114,7 +113,8 @@ public class RepresentationModelProcessorInvokerUnitTests {
 	}
 
 	// 1425
-	static class CollectionModelOfGenericModelProcessor implements RepresentationModelProcessor<CollectionModel<GenericModel<?>>> {
+	static class CollectionModelOfGenericModelProcessor
+			implements RepresentationModelProcessor<CollectionModel<GenericModel<?>>> {
 
 		boolean invoked = false;
 
