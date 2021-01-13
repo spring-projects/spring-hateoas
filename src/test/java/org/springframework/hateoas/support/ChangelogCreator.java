@@ -38,7 +38,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 56;
+	private static final int MILESTONE_ID = 58;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {
@@ -52,8 +52,7 @@ class ChangelogCreator {
 
 		HttpEntity<String> response = webClient //
 				.get().uri(URI_TEMPLATE, MILESTONE_ID) //
-				.exchange() //
-				.flatMap(clientResponse -> clientResponse.toEntity(String.class)) //
+				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)) //
 				.block(Duration.ofSeconds(10));
 
 		boolean keepChecking = true;

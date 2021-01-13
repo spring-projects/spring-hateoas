@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2.3 (2021-01-13)
+----------------------------------------
+- #1432 - Upgrade to Spring Framework 5.3.3.
+- #1431 - RepresentationModelProcessor not invoked for PagedModel / CollectionModel consisting of RepresentationModels.
+- #1419 - Backport direct release to maven central.
+- #1416 - Use proper build plugins.
+- #1413 - Extracted mappings still contain regex matching expressions.
+
 Changes in version 1.2.2 (2020-12-09)
 ----------------------------------------
 - #1409 - Upgrade to Spring Framework 5.3.2.
