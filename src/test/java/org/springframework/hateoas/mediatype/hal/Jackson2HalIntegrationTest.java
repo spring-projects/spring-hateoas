@@ -18,6 +18,7 @@ package org.springframework.hateoas.mediatype.hal;
 import static org.assertj.core.api.Assertions.*;
 
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,6 +66,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -620,6 +622,18 @@ class Jackson2HalIntegrationTest {
 		DocumentContext document = JsonPath.parse(getCuriedObjectMapper().writeValueAsString(model));
 
 		assertThat(document.read("$._links.curies", JSONArray.class)).isNotEmpty();
+	}
+
+	@Test // #1428
+	void doesNotRenderCuriesIfNoneConfigured() throws Exception {
+
+		ObjectMapper mapper = getCuriedObjectMapper(new DefaultCurieProvider(Collections.emptyMap()));
+		RepresentationModel<?> model = new RepresentationModel<>().add(Link.of("/href", LinkRelation.of("foo:bar")));
+
+		DocumentContext document = JsonPath.parse(mapper.writeValueAsString(model));
+
+		assertThatExceptionOfType(PathNotFoundException.class)
+				.isThrownBy(() -> document.read("$.curies", JSONObject.class));
 	}
 
 	@Relation(collectionRelation = "someSample")
