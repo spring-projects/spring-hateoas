@@ -203,9 +203,11 @@ public class Jackson2HalModule extends SimpleModule {
 
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
-				List<Object> curies = new ArrayList<>(curieProvider.getCurieInformation(Links.of(links)));
+				Collection<?> curies = curieProvider.getCurieInformation(Links.of(links));
 
-				sortedLinks.put(HalLinkRelation.CURIES, curies);
+				if (!curies.isEmpty()) {
+					sortedLinks.put(HalLinkRelation.CURIES, new ArrayList<>(curies));
+				}
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
