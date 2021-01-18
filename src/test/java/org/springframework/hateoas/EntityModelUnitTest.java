@@ -21,6 +21,10 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Unit tests for {@link EntityModel}.
  *
@@ -72,5 +76,21 @@ class EntityModelUnitTest {
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			EntityModel.of(Collections.emptyList());
 		});
+	}
+
+	@Test // #1371
+	void producesProperExceptionWhenRenderingAJsonValue() throws Exception {
+
+		EntityModel<?> model = EntityModel.of(new ValueType());
+
+		assertThatExceptionOfType(JsonMappingException.class)
+				.isThrownBy(() -> new ObjectMapper().writeValueAsString(model))
+				.withMessageContaining("@JsonValue");
+	}
+
+	// #1371
+
+	static class ValueType {
+		@JsonValue String type;
 	}
 }
