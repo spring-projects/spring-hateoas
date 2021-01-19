@@ -87,6 +87,8 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@BeforeEach
 	void setUpModule() {
 
+		LocaleContextHolder.setLocale(Locale.US);
+
 		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
 
@@ -528,6 +530,33 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 		assertValueForPath(unwrappedExample, "$.firstname", "john");
 	}
 
+	@ParameterizedTest // #1438
+	@ValueSource(strings = { "firstname._placeholder", //
+			"HalFormsPayload.firstname._placeholder", //
+			"org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsIntegrationTest$HalFormsPayload.firstname._placeholder" })
+	void usesResourceBundleToCreatePropertyPlaceholder(String key) {
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(key, Locale.US, "Property placeholder");
+
+		Link link = Affordances.of(Link.of("some:link")) //
+				.afford(HttpMethod.POST) //
+				.withInput(HalFormsPayload.class) //
+				.toLink();
+
+		EntityModel<HalFormsPayload> model = EntityModel.of(new HalFormsPayload(), link);
+		ObjectMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThatCode(() -> {
+
+			String promptString = JsonPath.compile("$._templates.default.properties[0].placeholder") //
+					.read(mapper.writeValueAsString(model));
+
+			assertThat(promptString).isEqualTo("Property placeholder");
+
+		}).doesNotThrowAnyException();
+	}
+
 	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {
 
 		ObjectMapper mapper = getCuriedObjectMapper();
@@ -552,8 +581,6 @@ class Jackson2HalFormsIntegrationTest extends AbstractJackson2MarshallingIntegra
 	}
 
 	private void verifyResolvedTitle(String resourceBundleKey) throws Exception {
-
-		LocaleContextHolder.setLocale(Locale.US);
 
 		StaticMessageSource messageSource = new StaticMessageSource();
 		messageSource.addMessage(resourceBundleKey, Locale.US, "Foobar's title!");

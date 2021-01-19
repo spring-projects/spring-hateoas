@@ -19,11 +19,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -134,20 +137,35 @@ public abstract class AffordanceModel {
 		return this.output;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
+
 		AffordanceModel that = (AffordanceModel) o;
-		return Objects.equals(this.name, that.name) && Objects.equals(this.link, that.link)
-				&& this.httpMethod == that.httpMethod && Objects.equals(this.input, that.input)
-				&& Objects.equals(this.queryMethodParameters, that.queryMethodParameters)
+
+		return Objects.equals(this.name, that.name) //
+				&& Objects.equals(this.link, that.link) //
+				&& this.httpMethod == that.httpMethod //
+				&& Objects.equals(this.input, that.input) //
+				&& Objects.equals(this.queryMethodParameters, that.queryMethodParameters) //
 				&& Objects.equals(this.output, that.output);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.name, this.link, this.httpMethod, this.input, this.queryMethodParameters, this.output);
@@ -191,13 +209,44 @@ public abstract class AffordanceModel {
 		}
 
 		/**
+		 * Creates a {@link List} of properties based on the given creator and customizer. The {@link PropertyMetadata} will
+		 * be applied to the instance returned from the creator before its handed to the customizer.
+		 *
+		 * @param <T> the property type
+		 * @param creator a creator function that turns a {@link PropertyMetadata} into a property instance.
+		 * @param customizer a {@link BiFunction} to apply after the {@link PropertyMetadata} has been applied to the
+		 *          property instance.
+		 * @return will never be {@literal null}.
+		 */
+		default <T extends PropertyMetadataConfigured<T> & Named> List<T> createProperties(
+				Function<PropertyMetadata, T> creator,
+				BiFunction<T, PropertyMetadata, T> customizer) {
+
+			Assert.notNull(creator, "Creator must not be null!");
+			Assert.notNull(customizer, "Customizer must not be null!");
+
+			return stream().map(creator).map(it -> {
+
+				return getPropertyMetadata(it.getName())
+						.map(metadata -> customizer.apply(it.apply(metadata), metadata))
+						.orElse(it);
+
+			}).collect(Collectors.toList());
+		}
+
+		/**
 		 * Applies the {@link InputPayloadMetadata} to the given target.
 		 *
 		 * @param <T>
 		 * @param target
 		 * @return
 		 */
-		<T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target);
+		default <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
+
+			return getPropertyMetadata(target.getName()) //
+					.map(it -> target.apply(it)) //
+					.orElse(target);
+		}
 
 		<T extends Named> T customize(T target, Function<PropertyMetadata, T> customizer);
 
@@ -262,14 +311,23 @@ public abstract class AffordanceModel {
 			return Collections.emptyList();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
+
 			DelegatingInputPayloadMetadata that = (DelegatingInputPayloadMetadata) o;
+
 			return Objects.equals(this.metadata, that.metadata);
 		}
 
@@ -278,6 +336,7 @@ public abstract class AffordanceModel {
 			return Objects.hash(this.metadata);
 		}
 
+		@Override
 		public String toString() {
 			return "AffordanceModel.DelegatingInputPayloadMetadata(metadata=" + this.metadata + ")";
 		}

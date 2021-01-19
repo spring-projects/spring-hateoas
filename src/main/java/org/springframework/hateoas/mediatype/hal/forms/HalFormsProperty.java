@@ -20,8 +20,11 @@ import java.util.Objects;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,14 +38,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_DEFAULT)
 final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsProperty>, Named {
 
-	private final String name;
-	private @JsonInclude(Include.NON_DEFAULT) final boolean readOnly;
-	private final String value;
-	private @JsonInclude(Include.NON_EMPTY) final String prompt;
-	private final String regex;
-	private final boolean templated;
-	private @JsonInclude(Include.NON_DEFAULT) final boolean required;
-	private final boolean multi;
+	private final String name, value, prompt, regex, placeholder;
+	private final boolean templated, multi;
+	private final @JsonInclude(Include.NON_DEFAULT) boolean readOnly, required;
 
 	HalFormsProperty() {
 
@@ -54,21 +52,23 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 		this.templated = false;
 		this.required = false;
 		this.multi = false;
+		this.placeholder = null;
 	}
 
 	private HalFormsProperty(String name, boolean readOnly, String value, String prompt, String regex, boolean templated,
-			boolean required, boolean multi) {
+			boolean required, boolean multi, String placeholder) {
 
 		Assert.notNull(name, "name must not be null!");
 
 		this.name = name;
 		this.readOnly = readOnly;
 		this.value = value;
-		this.prompt = prompt;
+		this.prompt = StringUtils.hasText(prompt) ? prompt : null;
 		this.regex = regex;
 		this.templated = templated;
 		this.required = required;
 		this.multi = multi;
+		this.placeholder = StringUtils.hasText(placeholder) ? placeholder : null;
 	}
 
 	/**
@@ -107,7 +107,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.name == name ? this
 				: new HalFormsProperty(name, this.readOnly, this.value, this.prompt, this.regex, this.templated, this.required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -120,7 +120,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.readOnly == readOnly ? this
 				: new HalFormsProperty(this.name, readOnly, this.value, this.prompt, this.regex, this.templated, this.required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -133,7 +133,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.value == value ? this
 				: new HalFormsProperty(this.name, this.readOnly, value, this.prompt, this.regex, this.templated, this.required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -146,7 +146,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.prompt == prompt ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, prompt, this.regex, this.templated, this.required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -159,7 +159,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.regex == regex ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, regex, this.templated, this.required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -172,7 +172,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.templated == templated ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, templated, this.required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -185,7 +185,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.required == required ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated, required,
-						this.multi);
+						this.multi, this.placeholder);
 	}
 
 	/**
@@ -198,7 +198,20 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.multi == multi ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
-						this.required, multi);
+						this.required, multi, this.placeholder);
+	}
+
+	/**
+	 * Create a new {@link HalFormsProperty} by copying attributes and replacing {@literal placeholder}.
+	 *
+	 * @param placeholder
+	 * @return
+	 */
+	HalFormsProperty withPlaceholder(String placeholder) {
+
+		return this.placeholder == placeholder ? this
+				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
+						this.required, this.multi, placeholder);
 	}
 
 	@JsonProperty
@@ -226,6 +239,11 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 		return this.regex;
 	}
 
+	@JsonIgnore
+	boolean hasRegex() {
+		return StringUtils.hasText(regex);
+	}
+
 	@JsonProperty
 	boolean isTemplated() {
 		return this.templated;
@@ -241,30 +259,63 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 		return this.multi;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-
-		if (this == o)
-			return true;
-		if (!(o instanceof HalFormsProperty))
-			return false;
-		HalFormsProperty that = (HalFormsProperty) o;
-		return this.readOnly == that.readOnly && this.templated == that.templated && this.required == that.required
-				&& this.multi == that.multi && Objects.equals(this.name, that.name) && Objects.equals(this.value, that.value)
-				&& Objects.equals(this.prompt, that.prompt) && Objects.equals(this.regex, that.regex);
+	@JsonProperty
+	public String getPlaceholder() {
+		return this.placeholder;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(@Nullable Object o) {
+
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof HalFormsProperty)) {
+			return false;
+		}
+		HalFormsProperty that = (HalFormsProperty) o;
+
+		return this.readOnly == that.readOnly //
+				&& this.templated == that.templated //
+				&& this.required == that.required //
+				&& this.multi == that.multi //
+				&& Objects.equals(this.name, that.name) //
+				&& Objects.equals(this.value, that.value) //
+				&& Objects.equals(this.prompt, that.prompt) //
+				&& Objects.equals(this.regex, that.regex) //
+				&& Objects.equals(this.placeholder, that.placeholder);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 
 		return Objects.hash(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated, this.required,
-				this.multi);
+				this.multi, this.placeholder);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
 	public String toString() {
 
-		return "HalFormsProperty(name=" + this.name + ", readOnly=" + this.readOnly + ", value=" + this.value + ", prompt="
-				+ this.prompt + ", regex=" + this.regex + ", templated=" + this.templated + ", required=" + this.required
-				+ ", multi=" + this.multi + ")";
+		return "HalFormsProperty(name=" + this.name //
+				+ ", readOnly=" + this.readOnly //
+				+ ", value=" + this.value //
+				+ ", prompt=" + this.prompt //
+				+ ", regex=" + this.regex //
+				+ ", templated=" + this.templated //
+				+ ", required=" + this.required //
+				+ ", multi=" + this.multi //
+				+ ", placeholder=" + this.placeholder + ")";
 	}
 }

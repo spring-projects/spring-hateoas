@@ -27,7 +27,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
-import org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured;
 
 /**
  * {@link InputPayloadMetadata} implementation based on a Java type.
@@ -44,18 +43,6 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 		this.type = type;
 		this.properties = new TreeMap<>(
 				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity())));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.mediatype.PayloadMetadata#customize(T)
-	 */
-	@Override
-	public <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
-
-		PropertyMetadata metadata = this.properties.get(target.getName());
-
-		return metadata == null ? target : target.apply(metadata);
 	}
 
 	/*

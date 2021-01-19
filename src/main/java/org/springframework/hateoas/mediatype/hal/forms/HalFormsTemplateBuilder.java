@@ -15,19 +15,16 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
-import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -75,15 +72,8 @@ class HalFormsTemplateBuilder {
 				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
 				.forEach(it -> {
 
-					PropertyCustomizations propertyCustomizations = forMetadata(it.getInput());
-
-					List<HalFormsProperty> propertiesWithPrompt = it.getInputProperties().stream() //
-							.map(property -> propertyCustomizations.apply(property)) //
-							.map(property -> it.hasHttpMethod(HttpMethod.PATCH) ? property.withRequired(false) : property)
-							.collect(Collectors.toList());
-
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
-							.withProperties(propertiesWithPrompt);
+							.withProperties(it.getProperties(configuration, resolver));
 
 					template = applyTo(template, TemplateTitle.of(it, templates.isEmpty()));
 					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
@@ -92,46 +82,14 @@ class HalFormsTemplateBuilder {
 		return templates;
 	}
 
-	public PropertyCustomizations forMetadata(InputPayloadMetadata metadata) {
-		return new PropertyCustomizations(metadata);
-	}
-
-	public HalFormsTemplate applyTo(HalFormsTemplate template, HalFormsTemplateBuilder.TemplateTitle templateTitle) {
+	private HalFormsTemplate applyTo(HalFormsTemplate template, HalFormsTemplateBuilder.TemplateTitle templateTitle) {
 
 		return Optional.ofNullable(resolver.resolve(templateTitle)) //
 				.map(template::withTitle) //
 				.orElse(template);
 	}
 
-	class PropertyCustomizations {
-
-		private final InputPayloadMetadata metadata;
-
-		public PropertyCustomizations(InputPayloadMetadata metadata) {
-			this.metadata = metadata;
-		}
-
-		private HalFormsProperty apply(HalFormsProperty property) {
-
-			String message = resolver.resolve(PropertyPrompt.of(metadata, property));
-
-			HalFormsProperty withPrompt = Optional.ofNullable(message) //
-					.map(it -> property.withPrompt(it)) //
-					.orElse(property);
-
-			HalFormsProperty withConfig = metadata.getPropertyMetadata(withPrompt.getName()) //
-					.flatMap(it -> applyConfig(it, withPrompt)) //
-					.orElse(withPrompt);
-
-			return metadata.applyTo(withConfig);
-		}
-
-		private Optional<HalFormsProperty> applyConfig(PropertyMetadata metadata, HalFormsProperty property) {
-			return configuration.getTypePatternFor(metadata.getType()).map(property::withRegex);
-		}
-	}
-
-	static class TemplateTitle implements MessageSourceResolvable {
+	private static class TemplateTitle implements MessageSourceResolvable {
 
 		private static final String TEMPLATE_TEMPLATE = "_templates.%s.title";
 
@@ -182,55 +140,6 @@ class HalFormsTemplateBuilder {
 		@Override
 		public String getDefaultMessage() {
 			return "";
-		}
-	}
-
-	static class PropertyPrompt implements MessageSourceResolvable {
-
-		private static final String PROMPT_TEMPLATE = "%s._prompt";
-
-		private final InputPayloadMetadata metadata;
-		private final HalFormsProperty property;
-
-		private PropertyPrompt(InputPayloadMetadata metadata, HalFormsProperty property) {
-
-			this.metadata = metadata;
-			this.property = property;
-		}
-
-		public static PropertyPrompt of(InputPayloadMetadata metadata, HalFormsProperty property) {
-			return new PropertyPrompt(metadata, property);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
-		 */
-		@Nullable
-		@Override
-		public String getDefaultMessage() {
-			return "";
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.context.MessageSourceResolvable#getCodes()
-		 */
-		@NonNull
-		@Override
-		public String[] getCodes() {
-
-			String globalCode = String.format(PROMPT_TEMPLATE, property.getName());
-
-			List<String> codes = new ArrayList<>();
-
-			metadata.getI18nCodes().stream() //
-					.map(it -> String.format("%s.%s", it, globalCode)) //
-					.forEach(codes::add);
-
-			codes.add(globalCode);
-
-			return codes.toArray(new String[0]);
 		}
 	}
 }

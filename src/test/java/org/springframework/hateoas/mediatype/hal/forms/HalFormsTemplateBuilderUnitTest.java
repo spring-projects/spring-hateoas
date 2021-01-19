@@ -42,8 +42,8 @@ class HalFormsTemplateBuilderUnitTest {
 	@CsvSource({ "number, [0-9]{16}", "overridden, foo", "annotated, bar" })
 	void detectsRegularExpressionsOnProperties(String propertyName, String expected) {
 
-		HalFormsConfiguration configuration = new HalFormsConfiguration();
-		configuration.registerPattern(CreditCardNumber.class, "[0-9]{16}");
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
+				.withPattern(CreditCardNumber.class, "[0-9]{16}");
 
 		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY);
 

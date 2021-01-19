@@ -174,23 +174,43 @@ final class HalFormsTemplate {
 		return this.title;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof HalFormsTemplate))
+		}
+
+		if (!(o instanceof HalFormsTemplate)) {
 			return false;
+		}
+
 		HalFormsTemplate that = (HalFormsTemplate) o;
-		return Objects.equals(this.title, that.title) && this.httpMethod == that.httpMethod
-				&& Objects.equals(this.properties, that.properties) && Objects.equals(this.contentTypes, that.contentTypes);
+
+		return Objects.equals(this.title, that.title) //
+				&& this.httpMethod == that.httpMethod //
+				&& Objects.equals(this.properties, that.properties) //
+				&& Objects.equals(this.contentTypes, that.contentTypes);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.title, this.httpMethod, this.properties, this.contentTypes);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
 	public String toString() {
 		return "HalFormsTemplate(title=" + this.title + ", httpMethod=" + this.httpMethod + ", properties="
 				+ this.properties + ", contentTypes=" + this.contentTypes + ")";
