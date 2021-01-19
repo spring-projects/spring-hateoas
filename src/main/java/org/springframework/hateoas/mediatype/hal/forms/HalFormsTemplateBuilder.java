@@ -37,13 +37,13 @@ import org.springframework.util.Assert;
 
 class HalFormsTemplateBuilder {
 
-	private final HalFormsConfiguration configuration;
 	private final MessageResolver resolver;
+	private final HalFormsPropertyFactory factory;
 
 	public HalFormsTemplateBuilder(HalFormsConfiguration configuration, MessageResolver resolver) {
 
-		this.configuration = configuration;
 		this.resolver = resolver;
+		this.factory = new HalFormsPropertyFactory(configuration, resolver);
 	}
 
 	/**
@@ -73,7 +73,7 @@ class HalFormsTemplateBuilder {
 				.forEach(it -> {
 
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
-							.withProperties(it.getProperties(configuration, resolver));
+							.withProperties(factory.createProperties(it));
 
 					template = applyTo(template, TemplateTitle.of(it, templates.isEmpty()));
 					templates.put(templates.isEmpty() ? "default" : it.getName(), template);

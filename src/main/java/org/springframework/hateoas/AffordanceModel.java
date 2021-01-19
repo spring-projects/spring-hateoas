@@ -137,6 +137,22 @@ public abstract class AffordanceModel {
 		return this.output;
 	}
 
+	/**
+	 * Creates a {@link List} of properties based on the given creator.
+	 *
+	 * @param <T> the property type
+	 * @param creator a creator function that turns an {@link InputPayloadMetadata} and {@link PropertyMetadata} into a
+	 *          property instance.
+	 * @return will never be {@literal null}.
+	 * @since 1.3
+	 */
+	public <T> List<T> createProperties(BiFunction<InputPayloadMetadata, PropertyMetadata, T> creator) {
+
+		return input.stream()
+				.map(it -> creator.apply(input, it))
+				.collect(Collectors.toList());
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -209,38 +225,14 @@ public abstract class AffordanceModel {
 		}
 
 		/**
-		 * Creates a {@link List} of properties based on the given creator and customizer. The {@link PropertyMetadata} will
-		 * be applied to the instance returned from the creator before its handed to the customizer.
-		 *
-		 * @param <T> the property type
-		 * @param creator a creator function that turns a {@link PropertyMetadata} into a property instance.
-		 * @param customizer a {@link BiFunction} to apply after the {@link PropertyMetadata} has been applied to the
-		 *          property instance.
-		 * @return will never be {@literal null}.
-		 */
-		default <T extends PropertyMetadataConfigured<T> & Named> List<T> createProperties(
-				Function<PropertyMetadata, T> creator,
-				BiFunction<T, PropertyMetadata, T> customizer) {
-
-			Assert.notNull(creator, "Creator must not be null!");
-			Assert.notNull(customizer, "Customizer must not be null!");
-
-			return stream().map(creator).map(it -> {
-
-				return getPropertyMetadata(it.getName())
-						.map(metadata -> customizer.apply(it.apply(metadata), metadata))
-						.orElse(it);
-
-			}).collect(Collectors.toList());
-		}
-
-		/**
 		 * Applies the {@link InputPayloadMetadata} to the given target.
 		 *
 		 * @param <T>
 		 * @param target
 		 * @return
+		 * @deprecated since 1.3, prefer setting up the model types via {@link #createProperties(Function)}
 		 */
+		@Deprecated
 		default <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
 
 			return getPropertyMetadata(target.getName()) //
@@ -396,6 +388,50 @@ public abstract class AffordanceModel {
 		 * @return
 		 */
 		ResolvableType getType();
+
+		/**
+		 * Return the minimum value allowed for a numeric type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMin() {
+			return null;
+		}
+
+		/**
+		 * Return the maximum value allowed for a numeric type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMax() {
+			return null;
+		}
+
+		/**
+		 * Return the minimum length allowed for a string type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMinLength() {
+			return null;
+		}
+
+		/**
+		 * Return the maximum length allowed for a string type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMaxLength() {
+			return null;
+		}
 	}
 
 	/**

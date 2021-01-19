@@ -20,10 +20,14 @@ import static org.assertj.core.api.Assertions.*;
 import lombok.Getter;
 
 import java.util.Map;
+import java.util.Optional;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.hibernate.validator.constraints.Length;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -66,10 +70,6 @@ class HalFormsTemplateBuilderUnitTest {
 	@Test
 	void allPropertiesAreOptionalForPatchRequests() throws Exception {
 
-		Affordances.of(Link.of("/example")) //
-				.afford(HttpMethod.PATCH) //
-				.withInput(RequiredProperty.class);
-
 		RequiredProperty model = new RequiredProperty();
 		model.add(Affordances.of(Link.of("/example")) //
 				.afford(HttpMethod.PATCH) //
@@ -95,6 +95,26 @@ class HalFormsTemplateBuilderUnitTest {
 		assertThat(template.getPropertyByName("name").map(HalFormsProperty::isRequired)).hasValue(true);
 	}
 
+	@Test // #1439
+	void considersMinandMaxAnnotations() {
+
+		Link link = Affordances.of(Link.of("/example")) //
+				.afford(HttpMethod.POST) //
+				.withInput(Payload.class) //
+				.toLink();
+
+		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
+
+		Optional<HalFormsProperty> name = template.getPropertyByName("number");
+		assertThat(name).map(HalFormsProperty::getMin).hasValue(2L);
+		assertThat(name).map(HalFormsProperty::getMax).hasValue(5L);
+
+		Optional<HalFormsProperty> text = template.getPropertyByName("text");
+		assertThat(text).map(HalFormsProperty::getMinLength).hasValue(2L);
+		assertThat(text).map(HalFormsProperty::getMaxLength).hasValue(5L);
+	}
+
 	@Getter
 	static class PatternExample extends RepresentationModel<PatternExample> {
 
@@ -113,5 +133,16 @@ class HalFormsTemplateBuilderUnitTest {
 	@Getter
 	static class RequiredProperty extends RepresentationModel<RequiredProperty> {
 		@NotNull String name;
+	}
+
+	@Getter
+	static class Payload {
+
+		@Min(2) //
+		@Max(5) //
+		Integer number;
+
+		@Length(min = 2, max = 5) //
+		String text;
 	}
 }

@@ -20,21 +20,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -56,7 +48,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -512,6 +503,14 @@ public class PropertyUtils {
 	 */
 	private static class Jsr303AwarePropertyMetadata extends DefaultPropertyMetadata {
 
+		private static final Optional<Class<? extends Annotation>> LENGTH_ANNOTATION;
+
+		static {
+
+			LENGTH_ANNOTATION = Optional.ofNullable(org.springframework.hateoas.support.ClassUtils
+					.loadIfPresent("org.hibernate.validator.constraints.Length"));
+		}
+
 		private final AnnotatedProperty property;
 
 		/**
@@ -541,24 +540,65 @@ public class PropertyUtils {
 		 */
 		@Override
 		public Optional<String> getPattern() {
-
-			MergedAnnotation<Pattern> annotation = property.getAnnotation(Pattern.class);
-
-			if (annotation.isPresent()) {
-				return fromAnnotation(annotation);
-			}
-
-			annotation = property.getTypeAnnotations().get(Pattern.class);
-
-			return annotation.isPresent() //
-					? fromAnnotation(annotation) //
-					: Optional.empty();
+			return getAnnotationAttribute(Pattern.class, "regexp", String.class);
 		}
 
-		private static Optional<String> fromAnnotation(MergedAnnotation<Pattern> annotation) {
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMin()
+		 */
+		@Nullable
+		@Override
+		public Long getMin() {
+			return getAnnotationAttribute(Min.class, "value", Long.class).orElse(null);
+		}
 
-			return Optional.of(annotation.getString("regexp")) //
-					.filter(StringUtils::hasText);
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMax()
+		 */
+		@Nullable
+		@Override
+		public Long getMax() {
+			return getAnnotationAttribute(Max.class, "value", Long.class).orElse(null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMinLength()
+		 */
+		@Nullable
+		@Override
+		public Long getMinLength() {
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class))
+					.map(Integer::longValue)
+					.orElse(null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMaxLength()
+		 */
+		@Nullable
+		@Override
+		public Long getMaxLength() {
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class))
+					.map(Integer::longValue)
+					.orElse(null);
+		}
+
+		private <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,
+				Class<T> type) {
+
+			MergedAnnotation<? extends Annotation> mergedAnnotation = property.getAnnotation(annotation);
+
+			if (mergedAnnotation.isPresent()) {
+				return mergedAnnotation.getValue(attribute, type);
+			}
+
+			mergedAnnotation = property.getTypeAnnotations().get(annotation);
+
+			return mergedAnnotation.isPresent() ? mergedAnnotation.getValue(attribute, type) : Optional.empty();
 		}
 	}
 }

@@ -16,10 +16,9 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.hateoas.AffordanceModel.Named;
-import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
-import org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -36,11 +35,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @see https://mamund.site44.com/misc/hal-forms/
  */
 @JsonInclude(Include.NON_DEFAULT)
-final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsProperty>, Named {
+final class HalFormsProperty implements Named {
 
 	private final String name, value, prompt, regex, placeholder;
 	private final boolean templated, multi;
 	private final @JsonInclude(Include.NON_DEFAULT) boolean readOnly, required;
+	private final @Nullable Long min, max, minLength, maxLength;
 
 	HalFormsProperty() {
 
@@ -53,10 +53,15 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 		this.required = false;
 		this.multi = false;
 		this.placeholder = null;
+		this.min = null;
+		this.max = null;
+		this.minLength = null;
+		this.maxLength = null;
 	}
 
 	private HalFormsProperty(String name, boolean readOnly, String value, String prompt, String regex, boolean templated,
-			boolean required, boolean multi, String placeholder) {
+			boolean required, boolean multi, String placeholder, @Nullable Long min, @Nullable Long max,
+			@Nullable Long minLength, @Nullable Long maxLength) {
 
 		Assert.notNull(name, "name must not be null!");
 
@@ -69,6 +74,10 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 		this.required = required;
 		this.multi = multi;
 		this.placeholder = StringUtils.hasText(placeholder) ? placeholder : null;
+		this.min = min;
+		this.max = max;
+		this.minLength = minLength;
+		this.maxLength = maxLength;
 	}
 
 	/**
@@ -79,20 +88,6 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 	 */
 	static HalFormsProperty named(String name) {
 		return new HalFormsProperty().withName(name);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.mediatype.PropertyMetadataAware#apply(org.springframework.hateoas.mediatype.PropertyUtils.PropertyMetadata)
-	 */
-	public HalFormsProperty apply(PropertyMetadata metadata) {
-
-		HalFormsProperty customized = withRequired(metadata.isRequired()) //
-				.withReadOnly(metadata.isReadOnly());
-
-		return metadata.getPattern() //
-				.map(customized::withRegex) //
-				.orElse(customized);
 	}
 
 	/**
@@ -107,7 +102,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.name == name ? this
 				: new HalFormsProperty(name, this.readOnly, this.value, this.prompt, this.regex, this.templated, this.required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -120,7 +115,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.readOnly == readOnly ? this
 				: new HalFormsProperty(this.name, readOnly, this.value, this.prompt, this.regex, this.templated, this.required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -133,7 +128,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.value == value ? this
 				: new HalFormsProperty(this.name, this.readOnly, value, this.prompt, this.regex, this.templated, this.required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -146,7 +141,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.prompt == prompt ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, prompt, this.regex, this.templated, this.required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -159,7 +154,17 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.regex == regex ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, regex, this.templated, this.required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
+	}
+
+	/**
+	 * Create a new {@link HalFormsProperty} by copying attributes and replacing the {@literal regex}.
+	 *
+	 * @param regex
+	 * @return
+	 */
+	HalFormsProperty withRegex(Optional<String> regex) {
+		return regex.map(it -> withRegex(it)).orElse(this);
 	}
 
 	/**
@@ -172,7 +177,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.templated == templated ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, templated, this.required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -185,7 +190,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.required == required ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated, required,
-						this.multi, this.placeholder);
+						this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -198,7 +203,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.multi == multi ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
-						this.required, multi, this.placeholder);
+						this.required, multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/**
@@ -211,9 +216,65 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 
 		return this.placeholder == placeholder ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
-						this.required, this.multi, placeholder);
+						this.required, this.multi, placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
+	/**
+	 * Create a new {@link HalFormsProperty} by copying attributes and replacing {@literal min}.
+	 *
+	 * @param min
+	 * @return
+	 */
+	HalFormsProperty withMin(@Nullable Long min) {
+
+		return Objects.equals(this.min, min) ? this
+				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
+						this.required, this.multi, this.placeholder, min, this.max, this.minLength, this.maxLength);
+	}
+
+	/**
+	 * Create a new {@link HalFormsProperty} by copying attributes and replacing {@literal max}.
+	 *
+	 * @param max
+	 * @return
+	 */
+	HalFormsProperty withMax(@Nullable Long max) {
+
+		return Objects.equals(this.max, max) ? this
+				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
+						this.required, this.multi, this.placeholder, this.min, max, this.minLength, this.maxLength);
+	}
+
+	/**
+	 * Create a new {@link HalFormsProperty} by copying attributes and replacing {@literal minLength}.
+	 *
+	 * @param minLength
+	 * @return
+	 */
+	HalFormsProperty withMinLength(@Nullable Long minLength) {
+
+		return Objects.equals(this.minLength, minLength) ? this
+				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
+						this.required, this.multi, this.placeholder, this.min, this.max, minLength, this.maxLength);
+	}
+
+	/**
+	 * Create a new {@link HalFormsProperty} by copying attributes and replacing {@literal maxLength}.
+	 *
+	 * @param maxLength
+	 * @return
+	 */
+	HalFormsProperty withMaxLength(@Nullable Long maxLength) {
+
+		return Objects.equals(this.maxLength, maxLength) ? this
+				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
+						this.required, this.multi, this.placeholder, this.min, this.max, this.minLength, maxLength);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel.Named#getName()
+	 */
 	@JsonProperty
 	public String getName() {
 		return this.name;
@@ -264,6 +325,42 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 		return this.placeholder;
 	}
 
+	/**
+	 * @return the min
+	 */
+	@Nullable
+	@JsonProperty
+	public Long getMin() {
+		return min;
+	}
+
+	/**
+	 * @return the max
+	 */
+	@Nullable
+	@JsonProperty
+	public Long getMax() {
+		return max;
+	}
+
+	/**
+	 * @return the minLength
+	 */
+	@Nullable
+	@JsonProperty
+	public Long getMinLength() {
+		return minLength;
+	}
+
+	/**
+	 * @return the maxLength
+	 */
+	@Nullable
+	@JsonProperty
+	public Long getMaxLength() {
+		return maxLength;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -298,7 +395,7 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 	public int hashCode() {
 
 		return Objects.hash(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated, this.required,
-				this.multi, this.placeholder);
+				this.multi, this.placeholder, this.min, this.max, this.minLength, this.maxLength);
 	}
 
 	/*
@@ -316,6 +413,11 @@ final class HalFormsProperty implements PropertyMetadataConfigured<HalFormsPrope
 				+ ", templated=" + this.templated //
 				+ ", required=" + this.required //
 				+ ", multi=" + this.multi //
-				+ ", placeholder=" + this.placeholder + ")";
+				+ ", placeholder=" + this.placeholder //
+				+ ", min=" + this.min //
+				+ ", max=" + this.max //
+				+ ", minLength=" + this.minLength //
+				+ ", maxLength=" + this.maxLength //
+				+ ")";
 	}
 }
