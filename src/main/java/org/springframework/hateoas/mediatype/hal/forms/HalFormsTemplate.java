@@ -54,19 +54,21 @@ final class HalFormsTemplate {
 	private HttpMethod httpMethod;
 	private List<HalFormsProperty> properties;
 	private List<MediaType> contentTypes;
+	private String target;
 
 	@SuppressWarnings("null")
 	private HalFormsTemplate() {
-		this(null, null, Collections.emptyList(), Collections.emptyList());
+		this(null, null, Collections.emptyList(), Collections.emptyList(), null);
 	}
 
 	private HalFormsTemplate(String title, HttpMethod httpMethod, List<HalFormsProperty> properties,
-			List<MediaType> contentTypes) {
+			List<MediaType> contentTypes, String target) {
 
 		this.title = title;
 		this.httpMethod = httpMethod;
 		this.properties = properties;
 		this.contentTypes = contentTypes;
+		this.target = target;
 	}
 
 	static HalFormsTemplate forMethod(HttpMethod httpMethod) {
@@ -76,13 +78,13 @@ final class HalFormsTemplate {
 	HalFormsTemplate withTitle(String title) {
 
 		return this.title == title ? this
-				: new HalFormsTemplate(title, this.httpMethod, this.properties, this.contentTypes);
+				: new HalFormsTemplate(title, this.httpMethod, this.properties, this.contentTypes, this.target);
 	}
 
 	private HalFormsTemplate withHttpMethod(HttpMethod httpMethod) {
 
 		return this.httpMethod == httpMethod ? this
-				: new HalFormsTemplate(this.title, httpMethod, this.properties, this.contentTypes);
+				: new HalFormsTemplate(this.title, httpMethod, this.properties, this.contentTypes, this.target);
 	}
 
 	/**
@@ -98,13 +100,13 @@ final class HalFormsTemplate {
 		List<HalFormsProperty> properties = new ArrayList<>(this.properties);
 		properties.add(property);
 
-		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
+		return new HalFormsTemplate(title, httpMethod, properties, contentTypes, target);
 	}
 
 	HalFormsTemplate withProperties(List<HalFormsProperty> properties) {
 
 		return this.properties == properties ? this
-				: new HalFormsTemplate(this.title, this.httpMethod, properties, this.contentTypes);
+				: new HalFormsTemplate(title, httpMethod, properties, contentTypes, target);
 	}
 
 	/**
@@ -120,13 +122,19 @@ final class HalFormsTemplate {
 		List<MediaType> contentTypes = new ArrayList<>(this.contentTypes);
 		contentTypes.add(mediaType);
 
-		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
+		return new HalFormsTemplate(title, httpMethod, properties, contentTypes, target);
 	}
 
 	HalFormsTemplate withContentTypes(List<MediaType> contentTypes) {
 
 		return this.contentTypes == contentTypes ? this
-				: new HalFormsTemplate(this.title, this.httpMethod, this.properties, contentTypes);
+				: new HalFormsTemplate(title, httpMethod, properties, contentTypes, target);
+	}
+
+	HalFormsTemplate withTarget(String target) {
+
+		return this.target == target ? this
+				: new HalFormsTemplate(title, httpMethod, properties, contentTypes, target);
 	}
 
 	// Jackson helper methods to create the right representation format
@@ -172,6 +180,11 @@ final class HalFormsTemplate {
 	@JsonInclude(Include.NON_EMPTY)
 	String getTitle() {
 		return this.title;
+	}
+
+	@JsonInclude(Include.NON_EMPTY)
+	String getTarget() {
+		return target;
 	}
 
 	/*

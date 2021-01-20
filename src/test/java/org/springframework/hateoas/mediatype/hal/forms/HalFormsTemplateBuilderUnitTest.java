@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.hateoas.mediatype.MessageResolver;
@@ -113,6 +114,21 @@ class HalFormsTemplateBuilderUnitTest {
 		Optional<HalFormsProperty> text = template.getPropertyByName("text");
 		assertThat(text).map(HalFormsProperty::getMinLength).hasValue(2L);
 		assertThat(text).map(HalFormsProperty::getMaxLength).hasValue(5L);
+	}
+
+	@Test // #1427
+	void addsTargetAttributeForLinksNotPointingToSelf() {
+
+		Link link = Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+				.afford(HttpMethod.POST) //
+				.withInput(Payload.class) //
+				.withName("create")
+				.toLink();
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
+
+		assertThat(templates.get("default").getTarget()).isEqualTo("/example");
 	}
 
 	@Getter

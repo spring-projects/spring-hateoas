@@ -15,9 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,6 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 class HalFormsTemplateBuilder {
 
@@ -54,16 +53,11 @@ class HalFormsTemplateBuilder {
 	 */
 	public Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource) {
 
-		if (!resource.hasLink(IanaLinkRelations.SELF)) {
-			return Collections.emptyMap();
-		}
-
 		Map<String, HalFormsTemplate> templates = new HashMap<>();
-		List<Affordance> affordances = resource.getLink(IanaLinkRelations.SELF) //
-				.map(Link::getAffordances) //
-				.orElse(Collections.emptyList());
+		Link selfLink = resource.getLink(IanaLinkRelations.SELF).orElse(null);
 
-		affordances.stream() //
+		resource.getLinks().stream() //
+				.flatMap(it -> it.getAffordances().stream()) //
 				.map(it -> it.getAffordanceModel(MediaTypes.HAL_FORMS_JSON)) //
 				.peek(it -> {
 					Assert.notNull(it, "No HAL Forms affordance model found but expected!");
@@ -75,16 +69,24 @@ class HalFormsTemplateBuilder {
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
 							.withProperties(factory.createProperties(it));
 
+					String target = it.getLink().getHref();
+
+					if (selfLink == null || !target.equals(selfLink.getHref())) {
+						template = template.withTarget(target);
+					}
+
 					template = applyTo(template, TemplateTitle.of(it, templates.isEmpty()));
 					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
 				});
 
 		return templates;
+
 	}
 
 	private HalFormsTemplate applyTo(HalFormsTemplate template, HalFormsTemplateBuilder.TemplateTitle templateTitle) {
 
 		return Optional.ofNullable(resolver.resolve(templateTitle)) //
+				.filter(StringUtils::hasText) //
 				.map(template::withTitle) //
 				.orElse(template);
 	}
