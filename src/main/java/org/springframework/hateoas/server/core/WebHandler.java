@@ -38,7 +38,7 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -63,7 +63,8 @@ public class WebHandler {
 	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
 			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
 
-	private static final Map<AffordanceKey, List<Affordance>> AFFORDANCES_CACHE = new ConcurrentReferenceHashMap<>();
+	private static final ConcurrentLruCache<AffordanceKey, List<Affordance>> AFFORDANCES_CACHE = new ConcurrentLruCache<>(
+			256, key -> SpringAffordanceBuilder.create(key.type, key.method, key.href.toUriString(), DISCOVERER));
 
 	public interface LinkBuilderCreator<T extends LinkBuilder> {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
@@ -160,9 +161,8 @@ public class WebHandler {
 				variables = variables.concat(variable);
 			}
 
-			List<Affordance> affordances = AFFORDANCES_CACHE.computeIfAbsent(
-					new AffordanceKey(invocation.getTargetType(), invocation.getMethod(), components),
-					key -> SpringAffordanceBuilder.create(key.type, key.method, key.href.toUriString(), DISCOVERER));
+			List<Affordance> affordances = AFFORDANCES_CACHE
+					.get(new AffordanceKey(invocation.getTargetType(), invocation.getMethod(), components));
 
 			return creator.createBuilder(components, variables, affordances);
 		};
