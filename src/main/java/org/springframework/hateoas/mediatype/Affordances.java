@@ -26,12 +26,12 @@ import java.util.stream.Stream;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -82,7 +82,7 @@ public class Affordances implements AffordanceOperations {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.mediatype.TerminalOperations#build()
+	 * @see org.springframework.hateoas.mediatype.AffordanceOperations#toLink()
 	 */
 	public Link toLink() {
 		return link;
@@ -92,11 +92,14 @@ public class Affordances implements AffordanceOperations {
 	 * Builder API for {@link Affordance} instances.
 	 *
 	 * @author Oliver Drotbohm
+	 * @deprecated since 1.3, refer to {@link ConfiguredAffordance} instead. Will be made private in 1.4.
+	 * @see ConfigurableAffordance
+	 * @see ConfiguredAffordance
 	 */
-	public static class AffordanceBuilder implements AffordanceOperations {
+	@Deprecated
+	public static class AffordanceBuilder implements ConfigurableAffordance, ConfiguredAffordance {
 
 		private final Affordances context;
-
 		private final HttpMethod method;
 		private final Link target;
 		private final InputPayloadMetadata inputMetdata;
@@ -106,17 +109,7 @@ public class Affordances implements AffordanceOperations {
 		private @Nullable String name;
 
 		private AffordanceBuilder(Affordances context, HttpMethod method, Link target, InputPayloadMetadata inputMetdata,
-				PayloadMetadata outputMetadata) {
-
-			this.context = context;
-			this.method = method;
-			this.target = target;
-			this.inputMetdata = inputMetdata;
-			this.outputMetadata = outputMetadata;
-		}
-
-		private AffordanceBuilder(Affordances context, HttpMethod method, Link target, InputPayloadMetadata inputMetdata,
-				PayloadMetadata outputMetadata, List<QueryParameter> parameters, String name) {
+				PayloadMetadata outputMetadata, List<QueryParameter> parameters, @Nullable String name) {
 
 			this.context = context;
 			this.method = method;
@@ -127,42 +120,38 @@ public class Affordances implements AffordanceOperations {
 			this.name = name;
 		}
 
-		/**
-		 * Registers the given type as input and output model for the affordance.
-		 *
-		 * @param type must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputAndOutput(java.lang.Class)
 		 */
+		@Override
 		public AffordanceBuilder withInputAndOutput(Class<?> type) {
 			return withInput(type).withOutput(type);
 		}
 
-		/**
-		 * Registers the given {@link ResolvableType} as input and output model for the affordance.
-		 *
-		 * @param type must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputAndOutput(org.springframework.core.ResolvableType)
 		 */
+		@Override
 		public AffordanceBuilder withInputAndOutput(ResolvableType type) {
 			return withInput(type).withOutput(type);
 		}
 
-		/**
-		 * Registers the given {@link PayloadMetadata} as input and output model.
-		 *
-		 * @param metadata must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputAndOutput(org.springframework.hateoas.AffordanceModel.PayloadMetadata)
 		 */
+		@Override
 		public AffordanceBuilder withInputAndOutput(PayloadMetadata metadata) {
 			return withInput(metadata).withOutput(metadata);
 		}
 
-		/**
-		 * Registers the given type as input model for the affordance.
-		 *
-		 * @param type must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInput(java.lang.Class)
 		 */
+		@Override
 		public AffordanceBuilder withInput(Class<?> type) {
 
 			Assert.notNull(type, "Type must not be null!");
@@ -170,12 +159,11 @@ public class Affordances implements AffordanceOperations {
 			return withInput(ResolvableType.forClass(type));
 		}
 
-		/**
-		 * Registers the given {@link ResolvableType} as input model for the affordance.
-		 *
-		 * @param type must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInput(org.springframework.core.ResolvableType)
 		 */
+		@Override
 		public AffordanceBuilder withInput(ResolvableType type) {
 
 			Assert.notNull(type, "Type must not be null!");
@@ -183,12 +171,11 @@ public class Affordances implements AffordanceOperations {
 			return withInput(PropertyUtils.getExposedProperties(type));
 		}
 
-		/**
-		 * Registers the given {@link PayloadMetadata} as input model.
-		 *
-		 * @param metadata must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInput(org.springframework.hateoas.AffordanceModel.PayloadMetadata)
 		 */
+		@Override
 		public AffordanceBuilder withInput(PayloadMetadata metadata) {
 
 			InputPayloadMetadata inputMetadata = InputPayloadMetadata.from(metadata);
@@ -196,62 +183,65 @@ public class Affordances implements AffordanceOperations {
 			return new AffordanceBuilder(context, method, target, inputMetadata, outputMetadata, parameters, name);
 		}
 
-		/**
-		 * Registers the given type as the output model.
-		 *
-		 * @param type must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withOutput(java.lang.Class)
 		 */
+		@Override
 		public AffordanceBuilder withOutput(Class<?> type) {
 			return withOutput(ResolvableType.forClass(type));
 		}
 
-		/**
-		 * Registers the given {@link ResolvableType} as the output model.
-		 *
-		 * @param type must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withOutput(org.springframework.core.ResolvableType)
 		 */
+		@Override
 		public AffordanceBuilder withOutput(ResolvableType type) {
 			return withOutput(PropertyUtils.getExposedProperties(type));
 		}
 
-		/**
-		 * Registers the given {@link PayloadMetadata} as output model.
-		 *
-		 * @param metadata must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withOutput(org.springframework.hateoas.AffordanceModel.PayloadMetadata)
 		 */
+		@Override
 		public AffordanceBuilder withOutput(PayloadMetadata metadata) {
 			return new AffordanceBuilder(context, method, target, inputMetdata, metadata, parameters, name);
 		}
 
-		/**
-		 * Replaces the current {@link QueryParameter} list with the given ones.
-		 *
-		 * @param parameters must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputMediaType(org.springframework.http.MediaType)
 		 */
+		@Override
+		public AffordanceBuilder withInputMediaType(@Nullable MediaType inputMediaType) {
+			return withInput(inputMetdata.withMediaType(inputMediaType));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withParameters(org.springframework.hateoas.QueryParameter[])
+		 */
+		@Override
 		public AffordanceBuilder withParameters(QueryParameter... parameters) {
 			return withParameters(Arrays.asList(parameters));
 		}
 
-		/**
-		 * Replaces the current {@link QueryParameter} list with the given ones.
-		 *
-		 * @param parameters must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withParameters(java.util.List)
 		 */
+		@Override
 		public AffordanceBuilder withParameters(List<QueryParameter> parameters) {
 			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name);
 		}
 
-		/**
-		 * Adds the given {@link QueryParameter}s to the {@link Affordance} to build.
-		 *
-		 * @param parameters must not be {@literal null}.
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#addParameters(org.springframework.hateoas.QueryParameter[])
 		 */
+		@Override
 		public AffordanceBuilder addParameters(QueryParameter... parameters) {
 
 			List<QueryParameter> newParameters = new ArrayList<>(this.parameters.size() + parameters.length);
@@ -261,16 +251,48 @@ public class Affordances implements AffordanceOperations {
 			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, newParameters, name);
 		}
 
-		/**
-		 * Concludes the creation of the current {@link Affordance} to build and starts a new one.
-		 *
-		 * @param method must not be {@literal null}.
-		 * @return
-		 * @see #build()
-		 * @see #toLink()
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withTarget(org.springframework.hateoas.Link)
 		 */
+		@Override
+		public ConfigurableAffordance withTarget(Link target) {
+
+			Assert.notNull(target, "Target must not be null!");
+
+			return this.target == target ? this
+					: new AffordanceBuilder(this.context, this.method, target, this.inputMetdata, this.outputMetadata,
+							this.parameters, this.name);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withName(java.lang.String)
+		 */
+		@Override
+		public ConfigurableAffordance withName(@Nullable String name) {
+
+			return this.name == name ? this
+					: new AffordanceBuilder(this.context, this.method, this.target, this.inputMetdata, this.outputMetadata,
+							this.parameters, name);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#andAfford(org.springframework.http.HttpMethod)
+		 */
+		@Override
 		public AffordanceBuilder andAfford(HttpMethod method) {
 			return build().afford(method);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#build()
+		 */
+		@Override
+		public Affordances build() {
+			return Affordances.of(toLink());
 		}
 
 		/*
@@ -282,47 +304,11 @@ public class Affordances implements AffordanceOperations {
 			return context.link.andAffordance(buildAffordance());
 		}
 
-		/**
-		 * Builds the {@link Affordance} currently under construction and returns in alongside the ones already contained in
-		 * the {@link Link} the buildup started from.
-		 *
-		 * @return will never be {@literal null}.
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfiguredAffordance#getNameOrDefault()
 		 */
-		public Affordances build() {
-			return Affordances.of(toLink());
-		}
-
-		/**
-		 * Builds an {@link Affordance} from the current state of the builder.
-		 *
-		 * @return must not be {@literal null}.
-		 */
-		private Affordance buildAffordance() {
-
-			return factories.stream() //
-					.collect(collectingAndThen(toMap(AffordanceModelFactory::getMediaType, //
-							it -> createModel(it, parameters == null ? Collections.emptyList() : parameters)), //
-							Affordance::new));
-		}
-
-		/**
-		 * Creates a new {@link AffordanceModel} using the given {@link AffordanceModelFactory} and {@link QueryParameter}s.
-		 *
-		 * @param factory must not be {@literal null}.
-		 * @param parameters must not be {@literal null}.
-		 * @return will never be {@literal null}.
-		 */
-		private AffordanceModel createModel(AffordanceModelFactory factory, List<QueryParameter> parameters) {
-			return factory.getAffordanceModel(getNameOrDefault(), target, method, inputMetdata, parameters, outputMetadata);
-		}
-
-		/**
-		 * Returns the explicitly configured name of the {@link Affordance} or calculates a default based on the
-		 * {@link HttpMethod} and type backing it.
-		 *
-		 * @return
-		 */
-		private String getNameOrDefault() {
+		public String getNameOrDefault() {
 
 			if (name != null) {
 				return name;
@@ -343,30 +329,61 @@ public class Affordances implements AffordanceOperations {
 			return resolvedType == null ? name : name.concat(resolvedType.getSimpleName());
 		}
 
-		/**
-		 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal target}.
-		 * 
-		 * @param target
-		 * @return
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfiguredAffordance#getMethod()
 		 */
-		public AffordanceBuilder withTarget(Link target) {
+		@Override
+		public HttpMethod getMethod() {
+			return method;
+		}
 
-			return this.target == target ? this
-					: new AffordanceBuilder(this.context, this.method, target, this.inputMetdata, this.outputMetadata,
-							this.parameters, this.name);
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfiguredAffordance#getInputMetadata()
+		 */
+		@Override
+		public InputPayloadMetadata getInputMetadata() {
+			return inputMetdata;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfiguredAffordance#getOutputMetadata()
+		 */
+		@Override
+		public PayloadMetadata getOutputMetadata() {
+			return outputMetadata;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfiguredAffordance#getTarget()
+		 */
+		@Override
+		public Link getTarget() {
+			return target;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfiguredAffordance#getQueryParameters()
+		 */
+		@Override
+		public List<QueryParameter> getQueryParameters() {
+			return parameters;
 		}
 
 		/**
-		 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal name}.
-		 * 
-		 * @param name
-		 * @return
+		 * Builds an {@link Affordance} from the current state of the builder.
+		 *
+		 * @return must not be {@literal null}.
 		 */
-		public AffordanceBuilder withName(@Nullable String name) {
+		private Affordance buildAffordance() {
 
-			return this.name == name ? this
-					: new AffordanceBuilder(this.context, this.method, this.target, this.inputMetdata, this.outputMetadata,
-							this.parameters, name);
+			return factories.stream() //
+					.collect(collectingAndThen(toMap(AffordanceModelFactory::getMediaType, //
+							it -> it.getAffordanceModel(this)), Affordance::new));
 		}
 	}
 }

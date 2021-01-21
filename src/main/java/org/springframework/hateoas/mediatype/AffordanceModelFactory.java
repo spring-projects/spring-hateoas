@@ -24,8 +24,11 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 
 /**
+ * SPI for media type implementations to create a specific {@link AffordanceModel} for a {@link ConfiguredAffordance}.
+ *
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
@@ -48,7 +51,28 @@ public interface AffordanceModelFactory {
 	 * @param queryMethodParameters
 	 * @param outputType
 	 * @return
+	 * @deprecated since 1.3 in favor of {@link #getAffordanceModel(ConfiguredAffordance)}. Will be removed in 1.4.
 	 */
-	AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType);
+	@Deprecated
+	default AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
+			InputPayloadMetadata inputType,
+			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
+		throw new IllegalStateException(
+				"This method needs to be implemented unless you implement getAffordanceModel(ConfiguredAffordance)!");
+	}
+
+	/**
+	 * Return the {@link AffordanceModel} for the given {@link ConfiguredAffordance}.
+	 *
+	 * @param configured will never be {@literal null}.
+	 * @return must not be {@literal null}.
+	 * @since 1.3
+	 */
+	default AffordanceModel getAffordanceModel(ConfiguredAffordance configured) {
+
+		Assert.notNull(configured, "Configured affordance must not be null!");
+
+		return getAffordanceModel(configured.getNameOrDefault(), configured.getTarget(), configured.getMethod(),
+				configured.getInputMetadata(), configured.getQueryParameters(), configured.getOutputMetadata());
+	}
 }

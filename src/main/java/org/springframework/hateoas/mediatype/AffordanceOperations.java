@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mediatype.Affordances.AffordanceBuilder;
 
 /**
  * Operations commons to all builder APIs.

@@ -15,16 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import java.util.List;
-
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
-import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.mediatype.AffordanceModelFactory;
-import org.springframework.http.HttpMethod;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.MediaType;
 
 /**
@@ -35,19 +29,21 @@ import org.springframework.http.MediaType;
  */
 class UberAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final MediaType mediaType = MediaTypes.UBER_JSON;
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.mediatype.AffordanceModelFactory#getAffordanceModel(org.springframework.hateoas.mediatype.ConfiguredAffordance)
+	 */
+	@Override
+	public AffordanceModel getAffordanceModel(ConfiguredAffordance configured) {
+		return new UberAffordanceModel(configured);
+	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.hateoas.mediatype.PayloadMetadata, java.util.List, org.springframework.core.ResolvableType)
+	 * @see org.springframework.hateoas.mediatype.AffordanceModelFactory#getMediaType()
 	 */
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
-			InputPayloadMetadata inputType, List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
-		return new UberAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
-	}
-
 	public MediaType getMediaType() {
-		return this.mediaType;
+		return MediaTypes.UBER_JSON;
 	}
 }

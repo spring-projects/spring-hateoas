@@ -27,6 +27,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
+import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link InputPayloadMetadata} implementation based on a Java type.
@@ -37,12 +39,19 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
 	private final ResolvableType type;
 	private final SortedMap<String, PropertyMetadata> properties;
+	private final @Nullable MediaType mediaType;
 
 	TypeBasedPayloadMetadata(ResolvableType type, Stream<PropertyMetadata> properties) {
+		this(type, new TreeMap<>(
+				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity()))), null);
+	}
+
+	TypeBasedPayloadMetadata(ResolvableType type, SortedMap<String, PropertyMetadata> properties,
+			@Nullable MediaType mediaType) {
 
 		this.type = type;
-		this.properties = new TreeMap<>(
-				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity())));
+		this.properties = properties;
+		this.mediaType = mediaType;
 	}
 
 	/*
@@ -80,5 +89,24 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
 	ResolvableType getType() {
 		return this.type;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#withMediaType(org.springframework.http.MediaType)
+	 */
+	@Override
+	public InputPayloadMetadata withMediaType(@Nullable MediaType mediaType) {
+		return new TypeBasedPayloadMetadata(type, properties, mediaType);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getMediaType()
+	 */
+	@Nullable
+	@Override
+	public MediaType getMediaType() {
+		return mediaType;
 	}
 }
