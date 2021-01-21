@@ -67,7 +67,8 @@ class HalFormsTemplateBuilder {
 				.forEach(it -> {
 
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
-							.withProperties(factory.createProperties(it));
+							.withProperties(factory.createProperties(it))
+							.withContentType(it.getInput().getPrimaryMediaType());
 
 					String target = it.getLink().getHref();
 
@@ -80,7 +81,6 @@ class HalFormsTemplateBuilder {
 				});
 
 		return templates;
-
 	}
 
 	private HalFormsTemplate applyTo(HalFormsTemplate template, HalFormsTemplateBuilder.TemplateTitle templateTitle) {

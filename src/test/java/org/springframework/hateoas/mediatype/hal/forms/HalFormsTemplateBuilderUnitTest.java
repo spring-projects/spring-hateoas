@@ -37,6 +37,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 
 /**
  * @author Oliver Drotbohm
@@ -129,6 +130,24 @@ class HalFormsTemplateBuilderUnitTest {
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
 
 		assertThat(templates.get("default").getTarget()).isEqualTo("/example");
+	}
+
+	@Test // #1443
+	void exposesInputMediaTypeAsContentType() {
+
+		MediaType mediaType = MediaType.parseMediaType("text/uri-list");
+
+		Link link = Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+				.afford(HttpMethod.POST) //
+				.withInput(Payload.class) //
+				.withInputMediaType(mediaType) //
+				.withName("create") //
+				.toLink();
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
+
+		assertThat(templates.get("default").getContentType()).isEqualTo(mediaType.toString());
 	}
 
 	@Getter

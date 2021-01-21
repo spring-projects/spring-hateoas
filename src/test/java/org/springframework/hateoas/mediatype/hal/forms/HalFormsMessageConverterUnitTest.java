@@ -111,7 +111,7 @@ class HalFormsMessageConverterUnitTest {
 
 		HalFormsTemplate template = HalFormsTemplate.forMethod(HttpMethod.GET) //
 				.withTitle("HAL-FORMS unit test") //
-				.andContentType(MediaTypes.HAL_JSON) //
+				.withContentType(MediaTypes.HAL_JSON) //
 				.andProperty(property); //
 
 		HalFormsDocument expected = HalFormsDocument.empty() //

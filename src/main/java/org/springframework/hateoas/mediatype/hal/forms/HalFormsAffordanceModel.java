@@ -15,12 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.util.List;
-
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.QueryParameter;
-import org.springframework.http.HttpMethod;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.MediaType;
 
 /**
@@ -31,8 +27,8 @@ import org.springframework.http.MediaType;
  */
 class HalFormsAffordanceModel extends AffordanceModel {
 
-	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
-		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	public HalFormsAffordanceModel(ConfiguredAffordance configured) {
+		super(configured.getNameOrDefault(), configured.getTarget(), configured.getMethod(), configured.getInputMetadata(),
+				configured.getQueryParameters(), configured.getOutputMetadata());
 	}
 }
