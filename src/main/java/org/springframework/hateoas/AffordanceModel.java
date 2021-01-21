@@ -257,16 +257,29 @@ public abstract class AffordanceModel {
 		 * @return will never be {@literal null}.
 		 * @since 1.3
 		 */
-		InputPayloadMetadata withMediaType(@Nullable MediaType mediaType);
+		InputPayloadMetadata withMediaTypes(List<MediaType> mediaType);
 
 		/**
 		 * Returns the {@link MediaType} that the payload requires.
 		 *
-		 * @return can be {@literal null}.
+		 * @return will never be {@literal null}.
 		 * @since 1.3
 		 */
+		List<MediaType> getMediaTypes();
+
+		/**
+		 * Returns the primary {@link MediaType} expected for the input. That is, from {@link #getMediaTypes()} the first
+		 * one, if available.
+		 *
+		 * @return can be {@literal null}.
+		 */
 		@Nullable
-		MediaType getMediaType();
+		default MediaType getPrimaryMediaType() {
+
+			List<MediaType> mediaTypes = getMediaTypes();
+
+			return mediaTypes.isEmpty() ? null : mediaTypes.get(0);
+		}
 	}
 
 	/**
@@ -277,15 +290,15 @@ public abstract class AffordanceModel {
 	private static class DelegatingInputPayloadMetadata implements InputPayloadMetadata {
 
 		private final PayloadMetadata metadata;
-		private final MediaType mediaType;
+		private final List<MediaType> mediaTypes;
 
 		public static DelegatingInputPayloadMetadata of(PayloadMetadata metadata) {
-			return new DelegatingInputPayloadMetadata(metadata, null);
+			return new DelegatingInputPayloadMetadata(metadata, Collections.emptyList());
 		}
 
-		private DelegatingInputPayloadMetadata(PayloadMetadata metadata, MediaType mediaType) {
+		private DelegatingInputPayloadMetadata(PayloadMetadata metadata, List<MediaType> mediaTypes) {
 			this.metadata = metadata;
-			this.mediaType = mediaType;
+			this.mediaTypes = mediaTypes;
 		}
 
 		/*
@@ -326,20 +339,20 @@ public abstract class AffordanceModel {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#withMediaType(org.springframework.http.MediaType)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#withMediaTypes(java.util.List)
 		 */
 		@Override
-		public InputPayloadMetadata withMediaType(MediaType mediaType) {
-			return new DelegatingInputPayloadMetadata(metadata, mediaType);
+		public InputPayloadMetadata withMediaTypes(List<MediaType> mediaTypes) {
+			return new DelegatingInputPayloadMetadata(metadata, mediaTypes);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getMediaType()
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getMediaTypes()
 		 */
 		@Override
-		public MediaType getMediaType() {
-			return mediaType;
+		public List<MediaType> getMediaTypes() {
+			return mediaTypes;
 		}
 
 		/*

@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mediatype;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -28,7 +29,7 @@ import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link InputPayloadMetadata} implementation based on a Java type.
@@ -39,19 +40,23 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
 	private final ResolvableType type;
 	private final SortedMap<String, PropertyMetadata> properties;
-	private final @Nullable MediaType mediaType;
+	private final List<MediaType> mediaTypes;
 
 	TypeBasedPayloadMetadata(ResolvableType type, Stream<PropertyMetadata> properties) {
 		this(type, new TreeMap<>(
-				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity()))), null);
+				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity()))), Collections.emptyList());
 	}
 
 	TypeBasedPayloadMetadata(ResolvableType type, SortedMap<String, PropertyMetadata> properties,
-			@Nullable MediaType mediaType) {
+			List<MediaType> mediaTypes) {
+
+		Assert.notNull(type, "Type must not be null!");
+		Assert.notNull(properties, "Properties must not be null!");
+		Assert.notNull(mediaTypes, "Media types must not be null!");
 
 		this.type = type;
 		this.properties = properties;
-		this.mediaType = mediaType;
+		this.mediaTypes = mediaTypes;
 	}
 
 	/*
@@ -93,20 +98,19 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#withMediaType(org.springframework.http.MediaType)
+	 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#withMediaTypes(java.util.List)
 	 */
 	@Override
-	public InputPayloadMetadata withMediaType(@Nullable MediaType mediaType) {
-		return new TypeBasedPayloadMetadata(type, properties, mediaType);
+	public InputPayloadMetadata withMediaTypes(List<MediaType> mediaTypes) {
+		return new TypeBasedPayloadMetadata(type, properties, mediaTypes);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getMediaType()
+	 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getMediaTypes()
 	 */
-	@Nullable
 	@Override
-	public MediaType getMediaType() {
-		return mediaType;
+	public List<MediaType> getMediaTypes() {
+		return mediaTypes;
 	}
 }

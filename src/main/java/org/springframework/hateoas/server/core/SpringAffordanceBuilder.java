@@ -72,6 +72,7 @@ public class SpringAffordanceBuilder {
 						.withOutput(outputType) //
 						.withParameters(queryMethodParameters) //
 						.withName(methodName) //
+						.withInputMediaTypes(discoverer.getConsumes(method)) //
 						.build() //
 						.stream()) //
 				.collect(Collectors.toList());

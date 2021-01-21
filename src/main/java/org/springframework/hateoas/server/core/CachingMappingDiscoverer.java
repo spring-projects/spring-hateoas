@@ -17,9 +17,11 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
@@ -91,6 +93,15 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	@Override
 	public Collection<HttpMethod> getRequestMethod(Class<?> type, Method method) {
 		return METHODS.computeIfAbsent(key(type, method), __ -> delegate.getRequestMethod(type, method));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getConsumes(java.lang.reflect.Method)
+	 */
+	@Override
+	public List<MediaType> getConsumes(Method method) {
+		return delegate.getConsumes(method);
 	}
 
 	private static String key(Class<?> type, @Nullable Method method) {

@@ -111,10 +111,18 @@ public interface ConfigurableAffordance extends AffordanceOperations {
 	/**
 	 * Registers the input to expect to be of the given {@link MediaType}.
 	 *
-	 * @param inputMediaType
-	 * @return
+	 * @param inputMediaType can be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
-	ConfigurableAffordance withInputMediaType(@Nullable MediaType inputMediaType);
+	ConfigurableAffordance withInputMediaType(MediaType inputMediaType);
+
+	/**
+	 * Registers the given {@link MediaType}s as input payload media types.
+	 *
+	 * @param inputMediaTypes must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	ConfigurableAffordance withInputMediaTypes(List<MediaType> inputMediaTypes);
 
 	/**
 	 * Replaces the current {@link QueryParameter} list with the given ones.

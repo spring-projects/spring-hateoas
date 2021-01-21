@@ -215,8 +215,17 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputMediaType(org.springframework.http.MediaType)
 		 */
 		@Override
-		public AffordanceBuilder withInputMediaType(@Nullable MediaType inputMediaType) {
-			return withInput(inputMetdata.withMediaType(inputMediaType));
+		public ConfigurableAffordance withInputMediaType(MediaType inputMediaType) {
+			return withInputMediaTypes(Arrays.asList(inputMediaType));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputMediaTypes(java.util.List)
+		 */
+		@Override
+		public ConfigurableAffordance withInputMediaTypes(List<MediaType> inputMediaTypes) {
+			return withInput(inputMetdata.withMediaTypes(inputMediaTypes));
 		}
 
 		/*

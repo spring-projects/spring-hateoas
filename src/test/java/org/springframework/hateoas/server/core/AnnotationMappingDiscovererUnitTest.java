@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -160,6 +161,16 @@ class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/foo/{bar}");
 	}
 
+	@Test // #1442
+	void exposesConsumesClause() throws Exception {
+
+		Method method = MyController.class.getMethod("mappingWithConsumesClause");
+		assertThat(discoverer.getConsumes(method)).containsExactly(MediaType.APPLICATION_JSON);
+
+		method = MyController.class.getMethod("method");
+		assertThat(discoverer.getConsumes(method)).isEmpty();
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -174,6 +185,9 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping("/foo/{bar:[ABC]{1}}")
 		void mappingWithMatchingExpression();
+
+		@RequestMapping(path = "/path", consumes = "application/json")
+		void mappingWithConsumesClause();
 	}
 
 	interface ControllerWithoutTypeLevelMapping {

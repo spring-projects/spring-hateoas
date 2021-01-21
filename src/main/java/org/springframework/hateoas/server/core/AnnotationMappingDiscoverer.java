@@ -21,13 +21,16 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -151,6 +154,21 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		}
 
 		return requestMethodNames;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getConsumes(java.lang.reflect.Method)
+	 */
+	@Override
+	public List<MediaType> getConsumes(Method method) {
+
+		Annotation annotation = findMergedAnnotation(method, annotationType);
+		String[] mediaTypes = (String[]) getValue(annotation, "consumes");
+
+		return mediaTypes == null
+				? Collections.emptyList()
+				: Arrays.stream(mediaTypes).map(MediaType::parseMediaType).collect(Collectors.toList());
 	}
 
 	private String[] getMappingFrom(@Nullable Annotation annotation) {
