@@ -78,6 +78,7 @@
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson-bom.version>2.17.0</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
+		<jmustache.version>1.16</jmustache.version>
 		<jsonpath.version>2.9.0</jsonpath.version>
 		<junit.version>5.10.2</junit.version>
 		<lombok.version>1.18.30</lombok.version>
@@ -677,6 +678,13 @@
 			<artifactId>archunit</artifactId>
 			<version>1.0.1</version>
 			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.samskivert</groupId>
+			<artifactId>jmustache</artifactId>
+			<version>${jmustache.version}</version>
+			<optional>true</optional>
 		</dependency>
 
 	</dependencies>

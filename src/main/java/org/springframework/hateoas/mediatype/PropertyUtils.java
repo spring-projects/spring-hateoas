@@ -40,6 +40,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -404,6 +405,15 @@ public class PropertyUtils {
 			return (MergedAnnotation<T>) annotationCache.computeIfAbsent(type, it -> lookupAnnotation(type));
 		}
 
+		List<String> getI18nCodes() {
+
+			Class<?> owner = property.getObjectType();
+
+			return Stream.of(owner.getName(), owner.getSimpleName())
+					.map(it -> String.format("%s.%s", it, property.getName()))
+					.collect(Collectors.toList());
+		}
+
 		private <T extends Annotation> MergedAnnotation<T> lookupAnnotation(Class<T> type) {
 
 			return this.annotations.stream() //
@@ -523,6 +533,68 @@ public class PropertyUtils {
 			return annotatedInputType != null //
 					? annotatedInputType //
 					: INPUT_TYPE_FACTORY.getInputType(getType().resolve(Object.class));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#i18nize(java.lang.String)
+		 */
+		@Override
+		public MessageSourceResolvable i18nize(String suffix) {
+
+			return new MessageSourceResolvable() {
+
+				/*
+				 * (non-Javadoc)
+				 * @see org.springframework.context.MessageSourceResolvable#getCodes()
+				 */
+				@Override
+				public String[] getCodes() {
+					return property.getI18nCodes().stream()
+							.map(it -> String.format("%s.%s", it, suffix))
+							.toArray(String[]::new);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
+				 */
+				@Override
+				public String getDefaultMessage() {
+					return "";
+				}
+			};
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#i18nize(java.lang.String)
+		 */
+		@Override
+		public MessageSourceResolvable i18nizeWithDefault(String suffix) {
+
+			return new MessageSourceResolvable() {
+
+				/*
+				 * (non-Javadoc)
+				 * @see org.springframework.context.MessageSourceResolvable#getCodes()
+				 */
+				@Override
+				public String[] getCodes() {
+					return property.getI18nCodes().stream()
+							.map(it -> String.format("%s.%s", it, suffix))
+							.toArray(String[]::new);
+				}
+
+				/*
+				 * (non-Javadoc)
+				 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
+				 */
+				@Override
+				public String getDefaultMessage() {
+					return StringUtils.capitalize(getName());
+				}
+			};
 		}
 
 		@Nullable

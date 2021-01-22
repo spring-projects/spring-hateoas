@@ -1,0 +1,19 @@
+<form action="/target" method="POST">
+  <div>
+  <label for="ccn">Kreditkartennummer (16 Ziffern)</label>:
+  <input type="text" name="ccn" pattern="[0-9]{16}" />
+  </div>
+  <div>
+  <label for="email">E-Mail-Adresse</label>:
+  <input type="email" name="email" placeholder="foo@bar.com" />
+  </div>
+  <div>
+  <label for="firstname">Vorname</label>:
+  <input type="text" name="firstname" />
+  </div>
+  <div>
+  <label for="lastname">Nachname</label>:
+  <input type="text" name="lastname" />
+  </div>
+  <input type="submit" title="Submit">
+</form>

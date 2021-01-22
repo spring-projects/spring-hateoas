@@ -1,0 +1,9 @@
+<form action="{{action}}" method="{{method}}">
+  {{#properties}}
+  <div>
+    <label for="{{it.name}}">{{prompt}}{{#patternPrompt}} ({{patternPrompt}}){{/patternPrompt}}</label>:
+    <input type="{{it.inputType}}" name="{{it.name}}" {{#readOnly}}readonly="readonly" {{/readOnly}}{{#placeholder}}placeholder="{{placeholder}}" {{/placeholder}}{{#pattern}}pattern="{{pattern}}" {{/pattern}}/>
+  </div>
+  {{/properties}}
+  <input type="submit" title="Submit">
+</form>

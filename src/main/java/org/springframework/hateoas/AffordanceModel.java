@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -514,6 +515,10 @@ public abstract class AffordanceModel {
 		 */
 		@Nullable
 		String getInputType();
+
+		MessageSourceResolvable i18nize(String suffix);
+
+		MessageSourceResolvable i18nizeWithDefault(String suffix);
 	}
 
 	/**

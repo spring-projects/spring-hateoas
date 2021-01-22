@@ -52,7 +52,7 @@ public class AffordancesUnitTests {
 
 		Affordance affordance = link.getAffordances().get(0);
 
-		assertThat(affordance).hasSize(3);
+		assertThat(affordance).hasSize(4);
 
 		assertAffordanceModel(affordance, commonAssertions().andThen(it -> {
 			assertThat(it.getName()).isEqualTo("name");
@@ -73,7 +73,7 @@ public class AffordancesUnitTests {
 
 		Affordance affordance = link.getAffordances().get(0);
 
-		assertThat(affordance).hasSize(3);
+		assertThat(affordance).hasSize(4);
 
 		assertAffordanceModel(affordance, commonAssertions().andThen(it -> {
 			assertThat(it.getName()).isEqualTo("postEmployee");

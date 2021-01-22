@@ -21,12 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.support.WebStack;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans to support all
@@ -50,12 +48,13 @@ public @interface EnableHypermediaSupport {
 
 	/**
 	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
-	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components
-	 * like {@link WebClient} but don't want to use hypermedia operations with it.
+	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components like
+	 * {@link WebClient} but don't want to use hypermedia operations with it.
 	 *
 	 * @return
 	 */
-	WebStack[] stacks() default { WebStack.WEBMVC, WebStack.WEBFLUX };
+	WebStack[] stacks() default { WebStack.WEBMVC, WebStack.WEBFLUX
+	};
 
 	/**
 	 * Hypermedia representation types supported.
@@ -94,7 +93,12 @@ public @interface EnableHypermediaSupport {
 		 *
 		 * @see https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html
 		 */
-		UBER(MediaTypes.UBER_JSON, "uber");
+		UBER(MediaTypes.UBER_JSON, "uber"),
+
+		/**
+		 * HTML
+		 */
+		HTML(MediaType.TEXT_HTML, "html");
 
 		private final MediaType mediaTypes;
 		private final String localPackageName;
