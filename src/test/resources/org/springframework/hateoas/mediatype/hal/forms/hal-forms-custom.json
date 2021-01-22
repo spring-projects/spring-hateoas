@@ -14,17 +14,21 @@
       "method" : "put",
       "properties" : [ {
         "name" : "name",
-        "required" : true
+        "required" : true,
+        "type" : "text"
       }, {
-        "name" : "role"
+        "name" : "role",
+        "type" : "text"
       } ]
     },
     "partiallyUpdateEmployee" : {
       "method" : "patch",
       "properties" : [ {
-        "name" : "name"
+        "name" : "name",
+        "type" : "text"
       }, {
-        "name" : "role"
+        "name" : "role",
+        "type" : "text"
       } ]
     }
   }

@@ -8,7 +8,8 @@
     "default" : {
       "method" : "post",
       "properties" : [ {
-        "name" : "name"
+        "name" : "name",
+        "type" : "text"
       } ]
     }
   },

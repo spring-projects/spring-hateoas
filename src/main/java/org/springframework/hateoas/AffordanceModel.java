@@ -484,6 +484,15 @@ public abstract class AffordanceModel {
 		default Long getMaxLength() {
 			return null;
 		}
+
+		/**
+		 * Returns the input type of the property.
+		 *
+		 * @return
+		 * @see InputType
+		 */
+		@Nullable
+		String getInputType();
 	}
 
 	/**

@@ -28,6 +28,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -108,9 +109,13 @@ class HalFormsTemplateBuilderUnitTest {
 		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
 
-		Optional<HalFormsProperty> name = template.getPropertyByName("number");
-		assertThat(name).map(HalFormsProperty::getMin).hasValue(2L);
-		assertThat(name).map(HalFormsProperty::getMax).hasValue(5L);
+		Optional<HalFormsProperty> number = template.getPropertyByName("number");
+		assertThat(number).map(HalFormsProperty::getMin).hasValue(2L);
+		assertThat(number).map(HalFormsProperty::getMax).hasValue(5L);
+
+		Optional<HalFormsProperty> range = template.getPropertyByName("range");
+		assertThat(range).map(HalFormsProperty::getMin).hasValue(8L);
+		assertThat(range).map(HalFormsProperty::getMax).hasValue(10L);
 
 		Optional<HalFormsProperty> text = template.getPropertyByName("text");
 		assertThat(text).map(HalFormsProperty::getMinLength).hasValue(2L);
@@ -179,5 +184,8 @@ class HalFormsTemplateBuilderUnitTest {
 
 		@Length(min = 2, max = 5) //
 		String text;
+
+		@Range(min = 8, max = 10) //
+		Integer range;
 	}
 }
