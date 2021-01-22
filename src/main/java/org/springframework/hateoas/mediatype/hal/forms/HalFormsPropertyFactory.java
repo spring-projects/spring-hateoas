@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * @since 1.3
  * @soundtrack The Chicks - March March (Gaslighter)
  */
-public class HalFormsPropertyFactory {
+class HalFormsPropertyFactory {
 
 	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
 

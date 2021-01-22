@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.mediatype.MessageResolver;
@@ -59,7 +60,8 @@ public class HalTestUtils {
 
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, configuration));
+				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, configuration,
+						new DefaultListableBeanFactory()));
 
 		return mapper;
 	}

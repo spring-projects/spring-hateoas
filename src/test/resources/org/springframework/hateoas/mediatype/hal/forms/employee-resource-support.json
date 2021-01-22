@@ -1,4 +1,5 @@
 {
+  "name" : "Frodo Baggins",
   "_links" : {
     "self" : {
       "href" : "/employees/1"
@@ -12,6 +13,5 @@
         "type" : "text"
       } ]
     }
-  },
-  "name" : "Frodo Baggins"
+  }
 }

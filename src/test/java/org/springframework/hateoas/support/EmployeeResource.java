@@ -18,13 +18,17 @@ package org.springframework.hateoas.support;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Greg Turnquist
  */
 @Data
+@Getter(onMethod = @__(@JsonProperty))
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 public class EmployeeResource extends RepresentationModel<EmployeeResource> {
@@ -32,7 +36,7 @@ public class EmployeeResource extends RepresentationModel<EmployeeResource> {
 	private String name;
 
 	public EmployeeResource(EmployeeResource employeeResource) {
-		
+
 		this.name = employeeResource.getName();
 		add(employeeResource.getLinks());
 	}

@@ -99,7 +99,7 @@ public class HalModelBuilderUnitTest {
 				.build();
 
 		assertThat(this.mapper.writeValueAsString(model))
-				.isEqualTo(contextualMapper.readFile("hal-embedded-author-illustrator.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-embedded-author-illustrator.json"));
 	}
 
 	@Test // #864
@@ -119,7 +119,7 @@ public class HalModelBuilderUnitTest {
 				.forLink(Link.of("/people/john-smith", ILLUSTRATOR_REL)).build();
 
 		assertThat(this.mapper.writeValueAsString(model))
-				.isEqualTo(contextualMapper.readFile("hal-embedded-author-illustrator.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-embedded-author-illustrator.json"));
 	}
 
 	@Test // #864
@@ -130,7 +130,7 @@ public class HalModelBuilderUnitTest {
 				.link(ALAN_WATTS_SELF) //
 				.build();
 
-		assertThat(this.mapper.writeValueAsString(model)).isEqualTo(contextualMapper.readFile("hal-single-item.json"));
+		assertThat(this.mapper.writeValueAsString(model)).isEqualTo(contextualMapper.readFileContent("hal-single-item.json"));
 	}
 
 	@Test // #864
@@ -142,7 +142,7 @@ public class HalModelBuilderUnitTest {
 				.build();
 
 		assertThat(this.mapper.writeValueAsString(model)) //
-				.isEqualTo(contextualMapper.readFile("hal-single-item.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-single-item.json"));
 	}
 
 	@Test // #864
@@ -173,7 +173,7 @@ public class HalModelBuilderUnitTest {
 				.build();
 
 		assertThat(this.mapper.writeValueAsString(model))
-				.isEqualTo(contextualMapper.readFile("hal-embedded-collection.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-embedded-collection.json"));
 	}
 
 	@Test // #864
@@ -199,7 +199,7 @@ public class HalModelBuilderUnitTest {
 				.build();
 
 		assertThat(this.mapper.writeValueAsString(model))
-				.isEqualTo(contextualMapper.readFile("hal-embedded-collection.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-embedded-collection.json"));
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class HalModelBuilderUnitTest {
 		HalModelBuilder halModelBuilder = halModel();
 
 		assertThat(this.mapper.writeValueAsString(halModelBuilder.build()))
-				.isEqualTo(contextualMapper.readFile("hal-empty.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-empty.json"));
 
 		halModelBuilder //
 				.entity(halModel() //
@@ -218,13 +218,13 @@ public class HalModelBuilderUnitTest {
 						.build());
 
 		assertThat(this.mapper.writeValueAsString(halModelBuilder.build()))
-				.isEqualTo(contextualMapper.readFile("hal-one-thing.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-one-thing.json"));
 
 		halModelBuilder //
 				.embed(new Product("Alf alarm clock", 19.99), LinkRelation.of("product")).build();
 
 		assertThat(this.mapper.writeValueAsString(halModelBuilder.build()))
-				.isEqualTo(contextualMapper.readFile("hal-two-things.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-two-things.json"));
 	}
 
 	@Test // #193
@@ -239,7 +239,7 @@ public class HalModelBuilderUnitTest {
 				.build();
 
 		assertThat(this.mapper.writeValueAsString(model)) //
-				.isEqualTo(contextualMapper.readFile("hal-multiple-types.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-multiple-types.json"));
 	}
 
 	@Test // #193
@@ -260,7 +260,7 @@ public class HalModelBuilderUnitTest {
 				.build();
 
 		assertThat(this.mapper.writeValueAsString(model))
-				.isEqualTo(contextualMapper.readFile("hal-explicit-and-implicit-relations.json"));
+				.isEqualTo(contextualMapper.readFileContent("hal-explicit-and-implicit-relations.json"));
 	}
 
 	@Test // #175 #864
@@ -306,7 +306,7 @@ public class HalModelBuilderUnitTest {
 		}
 
 		assertThat(this.mapper.writeValueAsString(builder.build()))
-				.isEqualTo(contextualMapper.readFile("zoom-hypermedia.json"));
+				.isEqualTo(contextualMapper.readFileContent("zoom-hypermedia.json"));
 	}
 
 	@Test // #864
