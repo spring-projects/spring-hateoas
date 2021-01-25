@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -29,6 +30,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -41,9 +43,13 @@ import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule;
 import org.springframework.hateoas.mediatype.uber.Jackson2UberModule;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.hateoas.support.Employee;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.stereotype.Controller;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -254,6 +261,15 @@ class HypermediaWebMvcConfigurerTest {
 
 		assertThat(unformattedJson)
 				.isEqualTo("{\"links\":[{\"rel\":\"self\",\"href\":\"/\"},{\"rel\":\"employees\",\"href\":\"/employees\"}]}");
+	}
+
+	@Test // #118
+	void linkCreationConsidersRegisteredConverters() throws Exception {
+
+		setUp(WithConversionService.class);
+
+		this.mockMvc.perform(get("/sample/4711"))
+				.andExpect(status().isIAmATeapot());
 	}
 
 	private void verifyRootUriServesHypermedia(MediaType mediaType) throws Exception {
@@ -478,4 +494,33 @@ class HypermediaWebMvcConfigurerTest {
 		}
 	}
 
+	// #118
+
+	@Configuration
+	static class WithConversionService extends BaseConfig implements WebMvcConfigurer {
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer#addFormatters(org.springframework.format.FormatterRegistry)
+		 */
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			registry.addConverter(Sample.class, String.class, source -> "sample");
+			registry.addConverter(String.class, Sample.class, source -> new Sample());
+		}
+
+		static class Sample {}
+
+		@Controller
+		static class SampleController {
+
+			@GetMapping("/sample/{sample}")
+			HttpEntity<?> sample(@PathVariable Sample sample) {
+
+				linkTo(methodOn(SampleController.class).sample(new Sample())).withSelfRel();
+
+				return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+			}
+		}
+	}
 }

@@ -26,12 +26,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
@@ -71,7 +71,7 @@ public class WebHandler {
 	}
 
 	public interface PreparedWebHandler<T extends LinkBuilder> {
-		T conclude(Function<String, UriComponentsBuilder> finisher);
+		T conclude(Function<String, UriComponentsBuilder> finisher, ConversionService conversionService);
 	}
 
 	public static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
@@ -82,9 +82,9 @@ public class WebHandler {
 
 	public static <T extends LinkBuilder> T linkTo(Object invocationValue, LinkBuilderCreator<T> creator,
 			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler,
-			Function<String, UriComponentsBuilder> finisher) {
+			Function<String, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
 
-		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher);
+		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher, conversionService.get());
 	}
 
 	private static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
@@ -104,7 +104,7 @@ public class WebHandler {
 
 		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
 
-		return finisher -> {
+		return (finisher, conversionService) -> {
 
 			UriComponentsBuilder builder = finisher.apply(mapping);
 			UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
@@ -120,16 +120,18 @@ public class WebHandler {
 
 			HandlerMethodParameters parameters = HandlerMethodParameters.of(invocation.getMethod());
 			Object[] arguments = invocation.getArguments();
+			ConversionService resolved = conversionService;
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(PathVariable.class, arguments)) {
-				values.put(parameter.getVariableName(), encodePath(parameter.getValueAsString(arguments)));
+				values.put(parameter.getVariableName(),
+						encodePath(parameter.getValueAsString(arguments, resolved)));
 			}
 
 			List<String> optionalEmptyParameters = new ArrayList<>();
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(RequestParam.class, arguments)) {
 
-				bindRequestParameters(builder, parameter, arguments);
+				bindRequestParameters(builder, parameter, arguments, conversionService);
 
 				if (SKIP_VALUE.equals(parameter.getVerifiedValue(arguments))) {
 
@@ -177,7 +179,7 @@ public class WebHandler {
 	 */
 	@SuppressWarnings("unchecked")
 	private static void bindRequestParameters(UriComponentsBuilder builder, HandlerMethodParameter parameter,
-			Object[] arguments) {
+			Object[] arguments, ConversionService conversionService) {
 
 		Object value = parameter.getVerifiedValue(arguments);
 
@@ -223,7 +225,7 @@ public class WebHandler {
 
 		} else {
 			if (key != null) {
-				builder.queryParam(key, encodeParameter(parameter.getValueAsString(arguments)));
+				builder.queryParam(key, encodeParameter(parameter.getValueAsString(arguments, conversionService)));
 			}
 		}
 	}
@@ -335,7 +337,6 @@ public class WebHandler {
 
 	private abstract static class HandlerMethodParameter {
 
-		private static final ConversionService CONVERSION_SERVICE = new DefaultFormattingConversionService();
 		private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 		private static final Map<Class<? extends Annotation>, Function<MethodParameter, ? extends HandlerMethodParameter>> FACTORY;
 		private static final String NO_PARAMETER_NAME = "Could not determine name of parameter %s! Make sure you compile with parameter information or explicitly define a parameter name in %s.";
@@ -400,7 +401,7 @@ public class WebHandler {
 			return variableName;
 		}
 
-		public String getValueAsString(Object[] values) {
+		public String getValueAsString(Object[] values, ConversionService conversionService) {
 
 			Object value = values[parameter.getParameterIndex()];
 
@@ -414,11 +415,9 @@ public class WebHandler {
 
 			value = ObjectUtils.unwrapOptional(value);
 
-			// Try to lookup ConversionService from the request's context
-
-			// Guard with ….canConvert(…)
-			// if not, fall back to ….toString();
-			Object result = CONVERSION_SERVICE.convert(value, typeDescriptor, STRING_DESCRIPTOR);
+			Object result = conversionService.canConvert(typeDescriptor, STRING_DESCRIPTOR)
+					? conversionService.convert(value, typeDescriptor, STRING_DESCRIPTOR)
+					: value == null ? null : value.toString();
 
 			if (result == null) {
 				throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", value));

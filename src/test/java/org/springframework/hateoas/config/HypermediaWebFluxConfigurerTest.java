@@ -18,6 +18,7 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -41,7 +43,11 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.hateoas.server.core.TypeReferences.CollectionModelType;
 import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.hateoas.support.Employee;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +56,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 /**
  * @author Greg Turnquist
@@ -67,7 +74,7 @@ class HypermediaWebFluxConfigurerTest {
 		ctx.register(context);
 		ctx.refresh();
 
-        HypermediaWebTestClientConfigurer configurer = ctx.getBean(HypermediaWebTestClientConfigurer.class);
+		HypermediaWebTestClientConfigurer configurer = ctx.getBean(HypermediaWebTestClientConfigurer.class);
 
 		this.testClient = WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
 	}
@@ -322,6 +329,24 @@ class HypermediaWebFluxConfigurerTest {
 				}).verifyComplete();
 	}
 
+	@Test // #118
+	void linkCreationConsidersRegisteredConverters() throws Exception {
+
+		setUp(WithConversionService.class);
+
+		this.testClient.get().uri("/sample/4711").exchange() //
+				.expectStatus().isEqualTo(HttpStatus.I_AM_A_TEAPOT) //
+				.returnResult(String.class).getResponseBody()
+				.as(StepVerifier::create)
+				.expectNextMatches(it -> {
+
+					assertThat(it).isEqualTo("/sample/sample");
+
+					return true;
+				})
+				.verifyComplete();
+	}
+
 	private void verifyRootUriServesHypermedia(MediaType mediaType) {
 		verifyRootUriServesHypermedia(mediaType, mediaType);
 	}
@@ -555,4 +580,33 @@ class HypermediaWebFluxConfigurerTest {
 		}
 	}
 
+	// #118
+
+	@Configuration
+	static class WithConversionService extends HalWebFluxConfig implements WebFluxConfigurer {
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer#addFormatters(org.springframework.format.FormatterRegistry)
+		 */
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			registry.addConverter(Sample.class, String.class, source -> "sample");
+			registry.addConverter(String.class, Sample.class, source -> new Sample());
+		}
+
+		static class Sample {}
+
+		@Controller
+		static class SampleController {
+
+			@GetMapping("/sample/{sample}")
+			Mono<HttpEntity<?>> sample(@PathVariable Sample sample) {
+
+				return linkTo(methodOn(SampleController.class).sample(new Sample())).withSelfRel()
+						.toMono()
+						.map(it -> new ResponseEntity<>(it.getHref(), HttpStatus.I_AM_A_TEAPOT));
+			}
+		}
+	}
 }
