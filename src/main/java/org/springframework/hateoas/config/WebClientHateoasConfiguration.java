@@ -42,7 +42,11 @@ class WebClientHateoasConfiguration {
 	@Lazy
 	HypermediaWebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
-		return new HypermediaWebClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+
+		WebfluxCodecCustomizer withGenericJsonTypes = new WebfluxCodecCustomizer(hypermediaTypes,
+				mapper.getIfAvailable(ObjectMapper::new)).withGenericJsonTypes();
+
+		return new HypermediaWebClientConfigurer(withGenericJsonTypes);
 	}
 
 	@Bean

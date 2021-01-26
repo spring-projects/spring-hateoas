@@ -22,6 +22,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.io.ResourceLoader;
@@ -38,11 +42,12 @@ import org.springframework.util.ClassUtils;
  * @author Oliver Drotbohm
  * @author Greg Turnquist
  */
-class HypermediaConfigurationImportSelector implements ImportSelector, ResourceLoaderAware {
+class HypermediaConfigurationImportSelector implements ImportSelector, ResourceLoaderAware, BeanFactoryAware {
 
 	public static final String SPRING_TEST = "org.springframework.test.web.reactive.server.WebTestClient";
 
 	private ResourceLoader resourceLoader;
+	private ConfigurableBeanFactory beanFactory;
 
 	/*
 	 * (non-Javadoc)
@@ -51,6 +56,15 @@ class HypermediaConfigurationImportSelector implements ImportSelector, ResourceL
 	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+	 */
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
 	}
 
 	/*
@@ -67,6 +81,10 @@ class HypermediaConfigurationImportSelector implements ImportSelector, ResourceL
 				: Arrays.stream((HypermediaType[]) attributes.get("type")) //
 						.flatMap(it -> it.getMediaTypes().stream()) //
 						.collect(Collectors.toList());
+
+		if (!beanFactory.containsBean("hateoasMediaTypeConfigurer")) {
+			beanFactory.registerSingleton("hateoasMediaTypeConfigurer", new HypermediaMappingInformationComparator(types));
+		}
 
 		List<MediaTypeConfigurationProvider> configurationProviders = SpringFactoriesLoader.loadFactories(
 				MediaTypeConfigurationProvider.class, HypermediaConfigurationImportSelector.class.getClassLoader());

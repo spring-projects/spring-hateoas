@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Deprecated
 public class WebClientConfigurer {
 
-	private final HypermediaWebClientConfigurer hypermediaWebClientConfigurer;
+	private final WebfluxCodecCustomizer customizer;
 
 	/**
 	 * Creates a new {@link WebClientConfigurer} for the given {@link ObjectMapper} and
@@ -44,7 +44,7 @@ public class WebClientConfigurer {
 	 * @param hypermediaTypes must not be {@literal null}.
 	 */
 	public WebClientConfigurer(ObjectMapper mapper, List<HypermediaMappingInformation> hypermediaTypes) {
-		this.hypermediaWebClientConfigurer = new HypermediaWebClientConfigurer(mapper, hypermediaTypes);
+		this.customizer = new WebfluxCodecCustomizer(hypermediaTypes, mapper);
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class WebClientConfigurer {
 	public ExchangeStrategies hypermediaExchangeStrategies() {
 
 		return ExchangeStrategies.builder() //
-				.codecs(this.hypermediaWebClientConfigurer.configurer) //
+				.codecs(it -> it.defaultCodecs().configureDefaultCodec(customizer)) //
 				.build();
 	}
 
@@ -66,6 +66,9 @@ public class WebClientConfigurer {
 	 * @return mutated webClient with hypermedia support.
 	 */
 	public WebClient registerHypermediaTypes(WebClient webClient) {
-		return this.hypermediaWebClientConfigurer.registerHypermediaTypes(webClient.mutate()).build();
+
+		return webClient.mutate()
+				.codecs(it -> it.defaultCodecs().configureDefaultCodec(customizer))
+				.build();
 	}
 }

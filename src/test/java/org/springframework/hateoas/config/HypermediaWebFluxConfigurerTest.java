@@ -17,6 +17,7 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.CoreMatchers.*;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 
@@ -261,7 +262,7 @@ class HypermediaWebFluxConfigurerTest {
 	}
 
 	/**
-	 * When requesting an unregistered media type, fallback to Spring Framework's default JSON handler.
+	 * When requesting an unregistered media type, expect a 406 Not Acceptable.
 	 *
 	 * @see #728
 	 */
@@ -272,10 +273,9 @@ class HypermediaWebFluxConfigurerTest {
 
 		this.testClient.get().uri("/").accept(MediaTypes.UBER_JSON) //
 				.exchange() //
-				.expectStatus().isOk() //
+				.expectStatus().value(is(406))
 				.returnResult(String.class).getResponseBody() //
 				.as(StepVerifier::create) //
-				.expectNext("{\"links\":[{\"rel\":\"self\",\"href\":\"/\"},{\"rel\":\"employees\",\"href\":\"/employees\"}]}")
 				.verifyComplete();
 	}
 
@@ -316,10 +316,14 @@ class HypermediaWebFluxConfigurerTest {
 					return true;
 				}).verifyComplete();
 
-		this.testClient.get().uri("/reactive/employees/1").accept(MediaTypes.HAL_JSON).exchange() //
-				.expectStatus().isOk().expectHeader().contentType(MediaTypes.HAL_JSON) //
+		this.testClient.get() //
+				.uri("/reactive/employees/1") //
+				.accept(MediaTypes.HAL_JSON).exchange() //
+				.expectStatus().isOk() //
+				.expectHeader().contentType(MediaTypes.HAL_JSON) //
 				.returnResult(this.resourceEmployeeType).getResponseBody() //
-				.as(StepVerifier::create).expectNextMatches(employee -> {
+				.as(StepVerifier::create) //
+				.expectNextMatches(employee -> {
 
 					assertThat(employee.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
 					assertThat(employee.getLinks()) //
@@ -336,8 +340,8 @@ class HypermediaWebFluxConfigurerTest {
 
 		this.testClient.get().uri("/sample/4711").exchange() //
 				.expectStatus().isEqualTo(HttpStatus.I_AM_A_TEAPOT) //
-				.returnResult(String.class).getResponseBody()
-				.as(StepVerifier::create)
+				.returnResult(String.class).getResponseBody() //
+				.as(StepVerifier::create) //
 				.expectNextMatches(it -> {
 
 					assertThat(it).isEqualTo("/sample/sample");
@@ -356,7 +360,8 @@ class HypermediaWebFluxConfigurerTest {
 		this.testClient.get().uri("/").accept(requestType).exchange() //
 				.expectStatus().isOk() //
 				.expectHeader().contentType(responseType) //
-				.returnResult(RepresentationModel.class).getResponseBody().as(StepVerifier::create)
+				.returnResult(RepresentationModel.class) //
+				.getResponseBody().as(StepVerifier::create) //
 				.expectNextMatches(resourceSupport -> {
 
 					assertThat(resourceSupport.getLinks()) //

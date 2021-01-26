@@ -15,14 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
-import java.util.List;
-import java.util.function.Consumer;
-
-import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.util.Assert;
-import org.springframework.util.MimeType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class HypermediaWebClientConfigurer {
 
-	final Consumer<ClientCodecConfigurer> configurer;
+	final WebfluxCodecCustomizer customizer;
 
 	/**
 	 * Creates a new {@link HypermediaWebClientConfigurer} for the given {@link ObjectMapper} and
@@ -46,19 +40,8 @@ public class HypermediaWebClientConfigurer {
 	 * @param mapper must not be {@literal null}.
 	 * @param hypermediaTypes must not be {@literal null}.
 	 */
-	HypermediaWebClientConfigurer(ObjectMapper mapper, List<HypermediaMappingInformation> hypermediaTypes) {
-
-		Assert.notNull(mapper, "ObjectMapper must not be null!");
-		Assert.notNull(hypermediaTypes, "HypermediaMappingInformations must not be null!");
-
-		this.configurer = clientCodecConfigurer -> hypermediaTypes.forEach(hypermediaType -> {
-
-			ObjectMapper objectMapper = hypermediaType.configureObjectMapper(mapper.copy());
-			MimeType[] mimeTypes = hypermediaType.getMediaTypes().toArray(new MimeType[0]);
-
-			clientCodecConfigurer.customCodecs().registerWithDefaultConfig(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-			clientCodecConfigurer.customCodecs().registerWithDefaultConfig(new Jackson2JsonDecoder(objectMapper, mimeTypes));
-		});
+	HypermediaWebClientConfigurer(WebfluxCodecCustomizer customizer) {
+		this.customizer = customizer;
 	}
 
 	/**
@@ -68,6 +51,9 @@ public class HypermediaWebClientConfigurer {
 	 * @return {@link WebClient.Builder} registered to handle hypermedia types.
 	 */
 	public WebClient.Builder registerHypermediaTypes(WebClient.Builder builder) {
-		return builder.codecs(this.configurer);
+
+		return builder.codecs(it -> {
+			it.defaultCodecs().configureDefaultCodec(customizer);
+		});
 	}
 }

@@ -56,7 +56,8 @@ class CustomHypermediaWebFluxTest {
 
 		this.testClient = WebTestClient.bindToApplicationContext(ctx).build() //
 				.mutate() //
-				.exchangeStrategies(it -> it.codecs(webClientConfigurer.configurer)) //
+				.exchangeStrategies(
+						it -> it.codecs(inner -> inner.defaultCodecs().configureDefaultCodec(webClientConfigurer.customizer))) //
 				.build();
 	}
 

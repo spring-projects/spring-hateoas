@@ -15,21 +15,14 @@
  */
 package org.springframework.hateoas.config;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.util.MimeType;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
@@ -46,18 +39,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class WebFluxHateoasConfiguration {
 
 	@Bean
-	WebFluxCodecs hypermediaConverters(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> mappingInformation) {
-		return new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
-	}
-
-	@Bean
 	HypermediaWebFluxConfigurer hypermediaWebFluxConfigurer(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> mappingInformation) {
+			List<HypermediaMappingInformation> mappingInformation,
+			Optional<HypermediaMappingInformationComparator> comparator) {
 
-		WebFluxCodecs codecs = new WebFluxCodecs(mapper.getIfAvailable(ObjectMapper::new), mappingInformation);
+		comparator.ifPresent(mappingInformation::sort);
 
-		return new HypermediaWebFluxConfigurer(codecs);
+		WebfluxCodecCustomizer customizer = new WebfluxCodecCustomizer(mappingInformation,
+				mapper.getIfAvailable(ObjectMapper::new));
+
+		return new HypermediaWebFluxConfigurer(customizer);
 	}
 
 	@Bean
@@ -75,10 +66,10 @@ class WebFluxHateoasConfiguration {
 	 */
 	static class HypermediaWebFluxConfigurer implements WebFluxConfigurer {
 
-		private final WebFluxCodecs codecs;
+		private final WebfluxCodecCustomizer customizer;
 
-		public HypermediaWebFluxConfigurer(WebFluxCodecs codecs) {
-			this.codecs = codecs;
+		public HypermediaWebFluxConfigurer(WebfluxCodecCustomizer customizer) {
+			this.customizer = customizer;
 		}
 
 		/**
@@ -90,42 +81,7 @@ class WebFluxHateoasConfiguration {
 		 */
 		@Override
 		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
-			codecs.registerCodecs(configurer.customCodecs());
-		}
-	}
-
-	private static class WebFluxCodecs {
-
-		private final List<Decoder<?>> decoders;
-		private final List<Encoder<?>> encoders;
-
-		private WebFluxCodecs(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
-
-			this.decoders = new ArrayList<>();
-			this.encoders = new ArrayList<>();
-
-			for (HypermediaMappingInformation information : mappingInformation) {
-
-				ObjectMapper objectMapper = information.configureObjectMapper(mapper.copy());
-				List<MediaType> mediaTypes = information.getMediaTypes();
-
-				this.decoders.add(getDecoder(objectMapper, mediaTypes));
-				this.encoders.add(getEncoder(objectMapper, mediaTypes));
-			}
-		}
-
-		public void registerCodecs(CustomCodecs codecs) {
-
-			decoders.forEach(codecs::registerWithDefaultConfig);
-			encoders.forEach(codecs::registerWithDefaultConfig);
-		}
-
-		private static Decoder<?> getDecoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
-			return new Jackson2JsonDecoder(mapper, mediaTypes.toArray(new MimeType[0]));
-		}
-
-		private static Encoder<?> getEncoder(ObjectMapper mapper, List<MediaType> mediaTypes) {
-			return new Jackson2JsonEncoder(mapper, mediaTypes.toArray(new MimeType[0]));
+			configurer.defaultCodecs().configureDefaultCodec(customizer);
 		}
 	}
 }
