@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.config.RestTemplateHateoasConfiguration.HypermediaRestTemplateBeanPostProcessor;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
@@ -110,8 +111,10 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 
 	private List<MediaType> lookupSupportedHypermediaTypes(RestTemplate restTemplate) {
 
-		return restTemplate.getMessageConverters().stream().filter(MappingJackson2HttpMessageConverter.class::isInstance)
-				.map(AbstractJackson2HttpMessageConverter.class::cast).map(AbstractHttpMessageConverter::getSupportedMediaTypes)
+		return restTemplate.getMessageConverters().stream()
+				.filter(MappingJackson2HttpMessageConverter.class::isInstance)
+				.map(AbstractJackson2HttpMessageConverter.class::cast)
+				.map(AbstractHttpMessageConverter::getSupportedMediaTypes)
 				.flatMap(Collection::stream).collect(Collectors.toList());
 	}
 

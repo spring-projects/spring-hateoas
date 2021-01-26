@@ -15,15 +15,18 @@
  */
 package org.springframework.hateoas.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class WebConverters {
 
-	private final List<HttpMessageConverter<?>> converters;
+	private final List<HypermediaMappingInformation> infos;
+	private final ObjectMapper mapper;
 
 	/**
 	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and {@link HypermediaMappingInformation}s.
@@ -45,9 +49,8 @@ class WebConverters {
 	 */
 	private WebConverters(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
 
-		this.converters = mappingInformation.stream() //
-				.map(it -> createMessageConverter(it, it.configureObjectMapper(mapper.copy()))) //
-				.collect(Collectors.toList());
+		this.mapper = mapper;
+		this.infos = mappingInformation;
 	}
 
 	/**
@@ -74,23 +77,28 @@ class WebConverters {
 
 		Assert.notNull(converters, "HttpMessageConverters must not be null!");
 
-		this.converters.forEach(it -> converters.add(0, it));
-	}
+		MappingJackson2HttpMessageConverter converter = converters.stream()
+				.filter(MappingJackson2HttpMessageConverter.class::isInstance)
+				.map(MappingJackson2HttpMessageConverter.class::cast)
+				.findFirst()
+				.orElseGet(() -> new MappingJackson2HttpMessageConverter(mapper));
 
-	/**
-	 * Returns a new {@link List} of {@link HttpMessageConverter}s consisting of both the hypermedia based ones as well as
-	 * the given ones.
-	 *
-	 * @param converters must not be {@literal null}.
-	 */
-	public List<HttpMessageConverter<?>> and(Collection<HttpMessageConverter<?>> converters) {
+		Stream<MediaType> original = converter.getSupportedMediaTypes().stream();
+		Stream<MediaType> custom = infos.stream()
+				.flatMap(it -> it.getMediaTypes().stream());
 
-		Assert.notNull(converters, "HttpMessageConverters must not be null!");
+		converter.setSupportedMediaTypes(Stream.concat(custom, original).collect(Collectors.toList()));
 
-		List<HttpMessageConverter<?>> result = new ArrayList<>(this.converters);
-		result.addAll(converters);
+		infos.forEach(it -> {
 
-		return result;
+			Class<?> rootType = it.getRootType();
+			ObjectMapper objectMapper = it.configureObjectMapper(mapper.copy());
+			Map<MediaType, ObjectMapper> mappers = it.getMediaTypes().stream()
+					.distinct()
+					.collect(Collectors.toMap(Function.identity(), __ -> objectMapper));
+
+			converter.registerObjectMappersForType(rootType, map -> map.putAll(mappers));
+		});
 	}
 
 	/**

@@ -82,7 +82,7 @@
 		<junit.version>5.7.0</junit.version>
 		<reactor-bom.version>2020.0.0</reactor-bom.version>
 		<slf4j.version>1.7.30</slf4j.version>
-		<spring.version>5.3.3</spring.version>
+		<spring.version>5.3.4-SNAPSHOT</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<kotlin.version>1.4.10</kotlin.version>
 		<kotlinx-coroutines.version>1.4.0</kotlinx-coroutines.version>
@@ -975,6 +975,13 @@
 			<version>2.9.9</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>net.jadler</groupId>
@@ -1012,7 +1019,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 
