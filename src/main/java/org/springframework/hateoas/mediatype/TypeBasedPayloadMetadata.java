@@ -24,7 +24,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
@@ -38,16 +37,16 @@ import org.springframework.util.Assert;
  */
 class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 
-	private final ResolvableType type;
+	private final Class<?> type;
 	private final SortedMap<String, PropertyMetadata> properties;
 	private final List<MediaType> mediaTypes;
 
-	TypeBasedPayloadMetadata(ResolvableType type, Stream<PropertyMetadata> properties) {
+	TypeBasedPayloadMetadata(Class<?> type, Stream<PropertyMetadata> properties) {
 		this(type, new TreeMap<>(
 				properties.collect(Collectors.toMap(PropertyMetadata::getName, Function.identity()))), Collections.emptyList());
 	}
 
-	TypeBasedPayloadMetadata(ResolvableType type, SortedMap<String, PropertyMetadata> properties,
+	TypeBasedPayloadMetadata(Class<?> type, SortedMap<String, PropertyMetadata> properties,
 			List<MediaType> mediaTypes) {
 
 		Assert.notNull(type, "Type must not be null!");
@@ -86,13 +85,10 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 	 */
 	@Override
 	public List<String> getI18nCodes() {
-
-		Class<?> type = this.type.resolve(Object.class);
-
 		return Arrays.asList(type.getName(), type.getSimpleName());
 	}
 
-	ResolvableType getType() {
+	public Class<?> getType() {
 		return this.type;
 	}
 

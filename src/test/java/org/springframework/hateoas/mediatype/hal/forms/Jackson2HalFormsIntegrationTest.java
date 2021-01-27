@@ -62,12 +62,15 @@ import org.springframework.hateoas.mediatype.hal.HalTestUtils;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.Inline;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.Remote;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.support.EmployeeResource;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -75,6 +78,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 
@@ -556,6 +560,34 @@ class Jackson2HalFormsIntegrationTest {
 			assertThat(promptString).isEqualTo("Property placeholder");
 
 		}).doesNotThrowAnyException();
+	}
+
+	@Test // #1483
+	void rendersPromptedOptionsValues() throws Exception {
+
+		Inline inline = HalFormsOptions.inline(HalFormsPromptedValue.ofI18ned("some.prompt", "myValue"));
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage("some.prompt", Locale.US, "My Prompt");
+
+		ContextualMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThat(JsonPath.parse(mapper.writeObject(inline)).read("$.inline[0].prompt", String.class))
+				.isEqualTo("My Prompt");
+	}
+
+	@Test // #1483
+	void rendersRemoteOptions() {
+
+		Link link = Link.of("/foo{?bar}").withType(MediaType.APPLICATION_JSON_VALUE);
+
+		Remote remote = HalFormsOptions.remote(link);
+
+		DocumentContext result = JsonPath.parse(getCuriedObjectMapper().writeObject(remote));
+
+		assertThat(result.read("$.link.href", String.class)).isEqualTo("/foo{?bar}");
+		assertThat(result.read("$.link.type", String.class)).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(result.read("$.link.templated", boolean.class)).isTrue();
 	}
 
 	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {
