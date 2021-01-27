@@ -19,8 +19,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
+import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -38,6 +41,7 @@ public class HalFormsConfiguration {
 	private final HalConfiguration halConfiguration;
 	private final Map<Class<?>, String> patterns;
 	private final Consumer<ObjectMapper> objectMapperCustomizer;
+	private final HalFormsOptionsFactory options;
 
 	/**
 	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
@@ -52,19 +56,21 @@ public class HalFormsConfiguration {
 	 * @param halConfiguration must not be {@literal null}.
 	 */
 	public HalFormsConfiguration(HalConfiguration halConfiguration) {
-		this(halConfiguration, new HashMap<>(), __ -> {});
+		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {});
 	}
 
 	private HalFormsConfiguration(HalConfiguration halConfiguration, Map<Class<?>, String> patterns,
-			@Nullable Consumer<ObjectMapper> objectMapperCustomizer) {
+			HalFormsOptionsFactory suggests, @Nullable Consumer<ObjectMapper> objectMapperCustomizer) {
 
 		Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
 		Assert.notNull(patterns, "Patterns must not be null!");
 		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
+		Assert.notNull(suggests, "HalFormsSuggests must not be null!");
 
 		this.halConfiguration = halConfiguration;
 		this.patterns = patterns;
 		this.objectMapperCustomizer = objectMapperCustomizer;
+		this.options = suggests;
 	}
 
 	/**
@@ -101,7 +107,7 @@ public class HalFormsConfiguration {
 		Map<Class<?>, String> newPatterns = new HashMap<>(patterns);
 		newPatterns.put(type, pattern);
 
-		return new HalFormsConfiguration(halConfiguration, newPatterns, objectMapperCustomizer);
+		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer);
 	}
 
 	/**
@@ -117,7 +123,7 @@ public class HalFormsConfiguration {
 
 		return this.objectMapperCustomizer == objectMapperCustomizer //
 				? this //
-				: new HalFormsConfiguration(halConfiguration, patterns, objectMapperCustomizer);
+				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer);
 	}
 
 	/**
@@ -140,6 +146,17 @@ public class HalFormsConfiguration {
 		return halConfiguration;
 	}
 
+	public <T> HalFormsConfiguration withOptions(Class<T> type, String property,
+			Function<PropertyMetadata, HalFormsOptions> creator) {
+
+		return new HalFormsConfiguration(halConfiguration, patterns, options.withOptions(type, property, creator),
+				objectMapperCustomizer);
+	}
+
+	HalFormsOptionsFactory getOptionsFactory() {
+		return this.options;
+	}
+
 	/**
 	 * Returns the regular expression pattern that is registered for the given type.
 	 *
@@ -148,5 +165,54 @@ public class HalFormsConfiguration {
 	 */
 	Optional<String> getTypePatternFor(ResolvableType type) {
 		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
+	}
+
+	static class HalFormsOptionsFactory {
+
+		private final Map<Class<?>, Map<String, Function<PropertyMetadata, HalFormsOptions>>> options;
+
+		public HalFormsOptionsFactory() {
+			this.options = new HashMap<>();
+		}
+
+		private HalFormsOptionsFactory(Map<Class<?>, Map<String, Function<PropertyMetadata, HalFormsOptions>>> options) {
+			this.options = options;
+		}
+
+		HalFormsOptionsFactory withOptions(Class<?> type, String property,
+				Function<PropertyMetadata, HalFormsOptions> creator) {
+
+			Map<Class<?>, Map<String, Function<PropertyMetadata, HalFormsOptions>>> options = new HashMap<>(this.options);
+
+			options.compute(type, (it, map) -> {
+
+				if (map == null) {
+					map = new HashMap<>();
+				}
+
+				map.put(property, creator);
+
+				return map;
+			});
+
+			return new HalFormsOptionsFactory(options);
+		}
+
+		@Nullable
+		HalFormsOptions getOptions(PayloadMetadata metadata, PropertyMetadata property) {
+
+			Class<?> type = metadata.getType();
+			String name = property.getName();
+
+			Map<String, Function<PropertyMetadata, HalFormsOptions>> map = options.get(type);
+
+			if (map == null) {
+				return null;
+			}
+
+			Function<PropertyMetadata, HalFormsOptions> function = map.get(name);
+
+			return function == null ? null : function.apply(property);
+		}
 	}
 }

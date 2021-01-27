@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
@@ -114,7 +113,7 @@ public class AffordancesUnitTests {
 		public PayloadMetadataAssert isBackedBy(Class<?> type) {
 
 			Assertions.assertThat(actual).isInstanceOfSatisfying(TypeBasedPayloadMetadata.class, it -> {
-				Assertions.assertThat(it.getType()).isEqualTo(ResolvableType.forClass(type));
+				Assertions.assertThat(it.getType()).isEqualTo(type);
 			});
 
 			return this;

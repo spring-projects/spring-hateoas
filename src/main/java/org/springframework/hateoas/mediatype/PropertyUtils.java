@@ -137,7 +137,7 @@ public class PropertyUtils {
 
 			return Object.class.equals(resolved) //
 					? InputPayloadMetadata.NONE //
-					: new TypeBasedPayloadMetadata(domainType, lookupExposedProperties(resolved));
+					: new TypeBasedPayloadMetadata(resolved, lookupExposedProperties(resolved));
 		});
 	}
 

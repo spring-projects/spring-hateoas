@@ -62,12 +62,15 @@ import org.springframework.hateoas.mediatype.hal.HalTestUtils;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.hal.SimpleAnnotatedPojo;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.Inline;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.Remote;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.support.EmployeeResource;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -556,6 +559,32 @@ class Jackson2HalFormsIntegrationTest {
 			assertThat(promptString).isEqualTo("Property placeholder");
 
 		}).doesNotThrowAnyException();
+	}
+
+	@Test
+	void rendersPromptedOptionsValues() throws Exception {
+
+		Inline inline = HalFormsOptions.inline(HalFormsPromptedValue.ofI18ned("some.prompt", "myValue"));
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage("some.prompt", Locale.US, "My Prompt");
+
+		ContextualMapper mapper = getCuriedObjectMapper(CurieProvider.NONE, source);
+
+		assertThat(JsonPath.parse(mapper.writeObject(inline)).read("$.inline[0].prompt", String.class))
+				.isEqualTo("My Prompt");
+	}
+
+	@Test
+	void rendersRemoteOptions() {
+
+		Link link = Link.of("/foo{?bar}").withType(MediaType.APPLICATION_JSON_VALUE);
+
+		Remote remote = HalFormsOptions.remote(link);
+
+		String result = getCuriedObjectMapper().writeObject(remote);
+
+		System.out.println(result);
 	}
 
 	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {

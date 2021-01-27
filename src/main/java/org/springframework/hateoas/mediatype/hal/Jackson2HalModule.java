@@ -36,6 +36,7 @@ import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.ConfigurableHandlerInstantiator;
 import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.MessageSourceResolvableSerializer;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.lang.Nullable;
@@ -742,6 +743,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			registerInstance(new HalResourcesSerializer(mapper, halConfiguration));
 			registerInstance(new HalLinkListSerializer(curieProvider, mapper, resolver, halConfiguration));
+			registerInstance(new MessageSourceResolvableSerializer(resolver));
 		}
 	}
 

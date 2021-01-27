@@ -28,6 +28,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsConfiguration.HalFormsOptionsFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -38,11 +39,13 @@ class HalFormsTemplateBuilder {
 
 	private final MessageResolver resolver;
 	private final HalFormsPropertyFactory factory;
+	private final HalFormsOptionsFactory suggests;
 
 	public HalFormsTemplateBuilder(HalFormsConfiguration configuration, MessageResolver resolver) {
 
 		this.resolver = resolver;
 		this.factory = new HalFormsPropertyFactory(configuration, resolver);
+		this.suggests = configuration.getOptionsFactory();
 	}
 
 	/**

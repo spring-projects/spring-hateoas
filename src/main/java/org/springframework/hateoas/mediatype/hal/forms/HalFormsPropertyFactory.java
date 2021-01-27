@@ -29,6 +29,7 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsConfiguration.HalFormsOptionsFactory;
 import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
@@ -80,6 +81,8 @@ class HalFormsPropertyFactory {
 			return Collections.emptyList();
 		}
 
+		HalFormsOptionsFactory options = configuration.getOptionsFactory();
+
 		return model.createProperties((payload, metadata) -> {
 
 			String inputTypeSource = metadata.getInputType();
@@ -94,7 +97,8 @@ class HalFormsPropertyFactory {
 					.withMinLength(metadata.getMinLength())
 					.withMaxLength(metadata.getMaxLength())
 					.withRegex(lookupRegex(metadata)) //
-					.withType(inputType);
+					.withType(inputType) //
+					.withOptions(options.getOptions(payload, metadata));
 
 			Function<String, I18nedPropertyMetadata> factory = I18nedPropertyMetadata.factory(payload, property);
 
