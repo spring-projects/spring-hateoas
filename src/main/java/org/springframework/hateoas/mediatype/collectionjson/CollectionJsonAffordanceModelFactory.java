@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,35 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import java.util.List;
-
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
-import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.mediatype.AffordanceModelFactory;
-import org.springframework.http.HttpMethod;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.MediaType;
 
 /**
  * Factory for creating {@link CollectionJsonAffordanceModel}s.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 class CollectionJsonAffordanceModelFactory implements AffordanceModelFactory {
 
-	private final MediaType mediaType = MediaTypes.COLLECTION_JSON;
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.mediatype.AffordanceModelFactory#getAffordanceModel(org.springframework.hateoas.mediatype.ConfiguredAffordance)
+	 */
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
-			InputPayloadMetadata inputType, List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
-		return new CollectionJsonAffordanceModel(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	public AffordanceModel getAffordanceModel(ConfiguredAffordance configured) {
+		return new CollectionJsonAffordanceModel(configured);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.mediatype.AffordanceModelFactory#getMediaType()
+	 */
+	@Override
 	public MediaType getMediaType() {
-		return this.mediaType;
+		return MediaTypes.COLLECTION_JSON;
 	}
 }

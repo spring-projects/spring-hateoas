@@ -1,4 +1,5 @@
 {
+  "name" : "Frodo Baggins",
   "_links" : {
     "self" : {
       "href" : "/employees/1"
@@ -8,9 +9,9 @@
     "default" : {
       "method" : "post",
       "properties" : [ {
-        "name" : "name"
+        "name" : "name",
+        "type" : "text"
       } ]
     }
-  },
-  "name" : "Frodo Baggins"
+  }
 }

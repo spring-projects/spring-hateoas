@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
@@ -27,6 +28,7 @@ import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.http.MediaType;
 
@@ -39,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final DelegatingLinkRelationProvider relProvider;
@@ -48,6 +50,8 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	private final ObjectProvider<HalConfiguration> halConfiguration;
 	private final MessageResolver resolver;
 	private final AbstractAutowireCapableBeanFactory beanFactory;
+
+	private HalFormsConfiguration resolvedConfiguration;
 
 	public HalFormsMediaTypeConfiguration(DelegatingLinkRelationProvider relProvider,
 			ObjectProvider<CurieProvider> curieProvider, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
@@ -67,6 +71,15 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 		return new HalFormsLinkDiscoverer();
 	}
 
+	@Bean
+	HalFormsTemplatePropertyWriter halFormsTemplatePropertyWriter() {
+
+		HalFormsConfiguration configuration = getResolvedConfiguration();
+		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, resolver);
+
+		return new HalFormsTemplatePropertyWriter(builder);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureObjectMapper(com.fasterxml.jackson.databind.ObjectMapper)
@@ -74,13 +87,15 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		HalFormsConfiguration configuration = halFormsConfiguration
-				.getIfAvailable(() -> new HalFormsConfiguration(halConfiguration.getIfAvailable(HalConfiguration::new)));
+		HalFormsConfiguration halFormsConfig = getResolvedConfiguration();
+		CurieProvider provider = curieProvider.getIfAvailable(() -> CurieProvider.NONE);
 
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalFormsModule());
-		mapper.setHandlerInstantiator(new Jackson2HalFormsModule.HalFormsHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, configuration, beanFactory));
+		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, provider,
+				resolver, halFormsConfig.getHalConfiguration(), beanFactory));
+
+		halFormsConfig.customize(mapper);
 
 		return mapper;
 	}
@@ -92,5 +107,17 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public List<MediaType> getMediaTypes() {
 		return HypermediaType.HAL_FORMS.getMediaTypes();
+	}
+
+	HalFormsConfiguration getResolvedConfiguration() {
+
+		Supplier<HalFormsConfiguration> defaultConfig = () -> new HalFormsConfiguration(
+				halConfiguration.getIfAvailable(HalConfiguration::new));
+
+		if (resolvedConfiguration == null) {
+			this.resolvedConfiguration = halFormsConfiguration.getIfAvailable(defaultConfig);
+		}
+
+		return resolvedConfiguration;
 	}
 }

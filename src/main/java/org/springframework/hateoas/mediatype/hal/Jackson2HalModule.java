@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,51 +26,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.mediatype.ConfigurableHandlerInstantiator;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
-import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
-import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
@@ -187,12 +171,11 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 
 				LinkRelation rel = prefixingRequired ? curieProvider.getNamespacedRelFrom(link) : link.getRel();
+				HalLinkRelation relation = transformingMapper.map(rel);
 
-				if (!link.hasRel(rel)) {
+				if (relation.isCuried()) {
 					curiedLinkPresent = true;
 				}
-
-				HalLinkRelation relation = transformingMapper.map(rel);
 
 				sortedLinks //
 						.computeIfAbsent(relation, key -> new ArrayList<>())//
@@ -203,9 +186,11 @@ public class Jackson2HalModule extends SimpleModule {
 
 			if (!skipCuries && prefixingRequired && curiedLinkPresent) {
 
-				List<Object> curies = new ArrayList<>(curieProvider.getCurieInformation(Links.of(links)));
+				Collection<?> curies = curieProvider.getCurieInformation(Links.of(links));
 
-				sortedLinks.put(HalLinkRelation.CURIES, curies);
+				if (!curies.isEmpty()) {
+					sortedLinks.put(HalLinkRelation.CURIES, new ArrayList<>(curies));
+				}
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
@@ -722,32 +707,32 @@ public class Jackson2HalModule extends SimpleModule {
 	 *
 	 * @author Oliver Gierke
 	 */
-	public static class HalHandlerInstantiator extends HandlerInstantiator {
+	public static class HalHandlerInstantiator extends ConfigurableHandlerInstantiator {
 
-		private final Map<Class<?>, Object> serializers = new HashMap<>();
-		private final @Nullable AutowireCapableBeanFactory delegate;
-
+		/**
+		 * Convenience constructor for testing purposes. Prefer
+		 * {@link #HalHandlerInstantiator(LinkRelationProvider, CurieProvider, MessageResolver, HalConfiguration, AutowireCapableBeanFactory)}
+		 *
+		 * @param provider must not be {@literal null}.
+		 * @param curieProvider must not be {@literal null}.
+		 * @param resolver must not be {@literal null}.
+		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider,
 				MessageResolver resolver) {
-			this(provider, curieProvider, resolver, new HalConfiguration());
+			this(provider, curieProvider, resolver, new HalConfiguration(), new DefaultListableBeanFactory());
 		}
 
 		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
-		 * and {@link MessageResolver}. Registers a prepared {@link HalResourcesSerializer} and
-		 * {@link HalLinkListSerializer} falling back to instantiation expecting a default constructor.
-		 *
 		 * @param provider must not be {@literal null}.
-		 * @param curieProvider can be {@literal null}.
+		 * @param curieProvider must not be {@literal null}.
 		 * @param resolver must not be {@literal null}.
+		 * @param halConfiguration must not be {@literal null}.
+		 * @param delegate must not be {@literal null}.
 		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
-				HalConfiguration halConfiguration) {
-			this(provider, curieProvider, resolver, halConfiguration, null);
-		}
+				HalConfiguration halConfiguration, AutowireCapableBeanFactory delegate) {
 
-		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
-				HalConfiguration halConfiguration, @Nullable AutowireCapableBeanFactory delegate) {
+			super(delegate);
 
 			Assert.notNull(provider, "RelProvider must not be null!");
 			Assert.notNull(curieProvider, "CurieProvider must not be null!");
@@ -755,73 +740,8 @@ public class Jackson2HalModule extends SimpleModule {
 			EmbeddedMapper mapper = new EmbeddedMapper(provider, curieProvider,
 					halConfiguration.isEnforceEmbeddedCollections());
 
-			this.delegate = delegate;
-
-			this.serializers.put(HalResourcesSerializer.class, new HalResourcesSerializer(mapper, halConfiguration));
-			this.serializers.put(HalLinkListSerializer.class,
-					new HalLinkListSerializer(curieProvider, mapper, resolver, halConfiguration));
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#deserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
-		 */
-		@Override
-		@SuppressWarnings("null")
-		public JsonDeserializer<?> deserializerInstance(@NonNull DeserializationConfig config, @NonNull Annotated annotated,
-				@NonNull Class<?> deserClass) {
-			return (JsonDeserializer<?>) findInstance(deserClass);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#keyDeserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
-		 */
-		@Override
-		@SuppressWarnings("null")
-		public KeyDeserializer keyDeserializerInstance(@NonNull DeserializationConfig config, @NonNull Annotated annotated,
-				@NonNull Class<?> keyDeserClass) {
-			return (KeyDeserializer) findInstance(keyDeserClass);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#serializerInstance(com.fasterxml.jackson.databind.SerializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
-		 */
-		@Override
-		@SuppressWarnings("null")
-		public JsonSerializer<?> serializerInstance(@NonNull SerializationConfig config, @NonNull Annotated annotated,
-				@NonNull Class<?> serClass) {
-			return (JsonSerializer<?>) findInstance(serClass);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#typeResolverBuilderInstance(com.fasterxml.jackson.databind.cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
-		 */
-		@Override
-		@SuppressWarnings("null")
-		public TypeResolverBuilder<?> typeResolverBuilderInstance(@NonNull MapperConfig<?> config,
-				@NonNull Annotated annotated, @NonNull Class<?> builderClass) {
-			return (TypeResolverBuilder<?>) findInstance(builderClass);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#typeIdResolverInstance(com.fasterxml.jackson.databind.cfg.MapperConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
-		 */
-		@Override
-		@SuppressWarnings("null")
-		public TypeIdResolver typeIdResolverInstance(@NonNull MapperConfig<?> config, @NonNull Annotated annotated,
-				@NonNull Class<?> resolverClass) {
-			return (TypeIdResolver) findInstance(resolverClass);
-		}
-
-		private Object findInstance(Class<?> type) {
-
-			Object result = serializers.get(type);
-
-			return result != null ? result : delegate != null ? delegate.createBean(type) : BeanUtils.instantiateClass(type);
+			registerInstance(new HalResourcesSerializer(mapper, halConfiguration));
+			registerInstance(new HalLinkListSerializer(curieProvider, mapper, resolver, halConfiguration));
 		}
 	}
 
@@ -999,6 +919,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		@Nullable
 		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty
 		public String getTitle() {
 			return title;
 		}

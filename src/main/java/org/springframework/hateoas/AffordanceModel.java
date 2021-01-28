@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -134,20 +138,51 @@ public abstract class AffordanceModel {
 		return this.output;
 	}
 
-	@Override
-	public boolean equals(Object o) {
+	/**
+	 * Creates a {@link List} of properties based on the given creator.
+	 *
+	 * @param <T> the property type
+	 * @param creator a creator function that turns an {@link InputPayloadMetadata} and {@link PropertyMetadata} into a
+	 *          property instance.
+	 * @return will never be {@literal null}.
+	 * @since 1.3
+	 */
+	public <T> List<T> createProperties(BiFunction<InputPayloadMetadata, PropertyMetadata, T> creator) {
 
-		if (this == o)
+		return input.stream()
+				.map(it -> creator.apply(input, it))
+				.collect(Collectors.toList());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(@Nullable Object o) {
+
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
+
 		AffordanceModel that = (AffordanceModel) o;
-		return Objects.equals(this.name, that.name) && Objects.equals(this.link, that.link)
-				&& this.httpMethod == that.httpMethod && Objects.equals(this.input, that.input)
-				&& Objects.equals(this.queryMethodParameters, that.queryMethodParameters)
+
+		return Objects.equals(this.name, that.name) //
+				&& Objects.equals(this.link, that.link) //
+				&& this.httpMethod == that.httpMethod //
+				&& Objects.equals(this.input, that.input) //
+				&& Objects.equals(this.queryMethodParameters, that.queryMethodParameters) //
 				&& Objects.equals(this.output, that.output);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.name, this.link, this.httpMethod, this.input, this.queryMethodParameters, this.output);
@@ -196,8 +231,15 @@ public abstract class AffordanceModel {
 		 * @param <T>
 		 * @param target
 		 * @return
+		 * @deprecated since 1.3, prefer setting up the model types via {@link #createProperties(Function)}
 		 */
-		<T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target);
+		@Deprecated
+		default <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
+
+			return getPropertyMetadata(target.getName()) //
+					.map(it -> target.apply(it)) //
+					.orElse(target);
+		}
 
 		<T extends Named> T customize(T target, Function<PropertyMetadata, T> customizer);
 
@@ -207,6 +249,37 @@ public abstract class AffordanceModel {
 		 * @return
 		 */
 		List<String> getI18nCodes();
+
+		/**
+		 * Creates a new {@link InputPayloadMetadata} with the given {@link MediaType} assigned.
+		 *
+		 * @param mediaType can be {@literal null}.
+		 * @return will never be {@literal null}.
+		 * @since 1.3
+		 */
+		InputPayloadMetadata withMediaTypes(List<MediaType> mediaType);
+
+		/**
+		 * Returns the {@link MediaType} that the payload requires.
+		 *
+		 * @return will never be {@literal null}.
+		 * @since 1.3
+		 */
+		List<MediaType> getMediaTypes();
+
+		/**
+		 * Returns the primary {@link MediaType} expected for the input. That is, from {@link #getMediaTypes()} the first
+		 * one, if available.
+		 *
+		 * @return can be {@literal null}.
+		 */
+		@Nullable
+		default MediaType getPrimaryMediaType() {
+
+			List<MediaType> mediaTypes = getMediaTypes();
+
+			return mediaTypes.isEmpty() ? null : mediaTypes.get(0);
+		}
 	}
 
 	/**
@@ -217,13 +290,15 @@ public abstract class AffordanceModel {
 	private static class DelegatingInputPayloadMetadata implements InputPayloadMetadata {
 
 		private final PayloadMetadata metadata;
+		private final List<MediaType> mediaTypes;
 
 		public static DelegatingInputPayloadMetadata of(PayloadMetadata metadata) {
-			return new DelegatingInputPayloadMetadata(metadata);
+			return new DelegatingInputPayloadMetadata(metadata, Collections.emptyList());
 		}
 
-		private DelegatingInputPayloadMetadata(PayloadMetadata metadata) {
+		private DelegatingInputPayloadMetadata(PayloadMetadata metadata, List<MediaType> mediaTypes) {
 			this.metadata = metadata;
+			this.mediaTypes = mediaTypes;
 		}
 
 		/*
@@ -262,14 +337,41 @@ public abstract class AffordanceModel {
 			return Collections.emptyList();
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#withMediaTypes(java.util.List)
+		 */
 		@Override
-		public boolean equals(Object o) {
+		public InputPayloadMetadata withMediaTypes(List<MediaType> mediaTypes) {
+			return new DelegatingInputPayloadMetadata(metadata, mediaTypes);
+		}
 
-			if (this == o)
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getMediaTypes()
+		 */
+		@Override
+		public List<MediaType> getMediaTypes() {
+			return mediaTypes;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(@Nullable Object o) {
+
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
+
 			DelegatingInputPayloadMetadata that = (DelegatingInputPayloadMetadata) o;
+
 			return Objects.equals(this.metadata, that.metadata);
 		}
 
@@ -278,6 +380,7 @@ public abstract class AffordanceModel {
 			return Objects.hash(this.metadata);
 		}
 
+		@Override
 		public String toString() {
 			return "AffordanceModel.DelegatingInputPayloadMetadata(metadata=" + this.metadata + ")";
 		}
@@ -337,6 +440,59 @@ public abstract class AffordanceModel {
 		 * @return
 		 */
 		ResolvableType getType();
+
+		/**
+		 * Return the minimum value allowed for a numeric type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMin() {
+			return null;
+		}
+
+		/**
+		 * Return the maximum value allowed for a numeric type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMax() {
+			return null;
+		}
+
+		/**
+		 * Return the minimum length allowed for a string type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMinLength() {
+			return null;
+		}
+
+		/**
+		 * Return the maximum length allowed for a string type.
+		 *
+		 * @return can be {@literal null}.
+		 * @since 1.3
+		 */
+		@Nullable
+		default Long getMaxLength() {
+			return null;
+		}
+
+		/**
+		 * Returns the input type of the property.
+		 *
+		 * @return
+		 * @see InputType
+		 */
+		@Nullable
+		String getInputType();
 	}
 
 	/**

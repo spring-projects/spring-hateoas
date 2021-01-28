@@ -24,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
 
 public class HypermediaWebTestClientConfigurerTest {
 
@@ -118,12 +117,12 @@ public class HypermediaWebTestClientConfigurerTest {
 	 * @param webTestClient
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	private static ExchangeStrategies exchangeStrategies(WebTestClient webTestClient) {
 
-		WebClient webClient = (WebClient) ReflectionTestUtils.getField(webTestClient, "webClient");
+		Object exchangeFunction = ReflectionTestUtils.getField(webTestClient, "exchangeFunction");
 
-		return (ExchangeStrategies) ReflectionTestUtils
-				.getField(ReflectionTestUtils.getField(webClient, "exchangeFunction"), "strategies");
+		return (ExchangeStrategies) ReflectionTestUtils.getField(exchangeFunction, "strategies");
 	}
 
 	@Configuration

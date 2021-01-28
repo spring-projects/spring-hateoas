@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2020 the original author or authors.
+ * Copyright 2014-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.hateoas.TemplateVariable.VariableType;
+import org.springframework.hateoas.TemplateVariable.*;
 
 /**
  * Unit tests for {@link UriTemplate}.
@@ -346,6 +346,20 @@ class UriTemplateUnitTest {
 
 		assertThat(Link.of("http://localhost/api/rest/v1/userGroups/50/functions/{?id*}").isTemplated()).isTrue();
 		assertThat(UriTemplate.isTemplate("http://localhost/api/rest/v1/userGroups/50/functions/{?id*}")).isTrue();
+	}
+
+	@Test // #475
+	void variablesWithPercentEncodingShouldWork() {
+
+		assertThat(UriTemplate.of("http://localhost/foo/bar/{%24filter}").expand("value"))
+				.isEqualTo(URI.create("http://localhost/foo/bar/value"));
+	}
+
+	@Test // #475
+	void variablesWithUnderscoresShouldWork() {
+
+		assertThat(UriTemplate.of("http://localhost/foo/bar/{_filter}").expand("value"))
+				.isEqualTo(URI.create("http://localhost/foo/bar/value"));
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -383,8 +383,7 @@ public class RepresentationModelProcessorInvoker {
 		 * @param target that target {@link ResolvableType}.
 		 * @return
 		 */
-
-		static boolean isValueTypeMatch(@Nullable CollectionModel<?> collectionModel, ResolvableType target) {
+		boolean isValueTypeMatch(@Nullable CollectionModel<?> collectionModel, ResolvableType target) {
 
 			if (collectionModel == null) {
 				return false;
@@ -416,6 +415,8 @@ public class RepresentationModelProcessorInvoker {
 
 			if (element instanceof EntityModel) {
 				return EntityModelProcessorWrapper.isValueTypeMatch((EntityModel<?>) element, resourceType);
+			} else if (element instanceof RepresentationModel) {
+				return resourceType.isInstance(element);
 			} else if (element instanceof EmbeddedWrapper) {
 				return isRawTypeAssignable(resourceType, ((EmbeddedWrapper) element).getRelTargetType());
 			}
@@ -430,6 +431,7 @@ public class RepresentationModelProcessorInvoker {
 		 * @param superType must not be {@literal null}.
 		 * @return
 		 */
+		@Nullable
 		private static ResolvableType getSuperType(ResolvableType source, Class<?> superType) {
 
 			Class<?> rawType = source.getRawClass();
@@ -450,7 +452,7 @@ public class RepresentationModelProcessorInvoker {
 				}
 			}
 
-			return ResolvableType.forClass(superType);
+			return null;
 		}
 	}
 

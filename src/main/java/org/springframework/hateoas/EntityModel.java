@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +28,13 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.databind.util.NameTransformer;
 
 /**
  * A simple {@link EntityModel} wrapping a domain object and adding links to it.
@@ -114,8 +122,9 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 *
 	 * @return the content
 	 */
-	@JsonUnwrapped
 	@Nullable
+	@JsonUnwrapped
+	@JsonSerialize(using = MapSuppressingUnwrappingSerializer.class)
 	public T getContent() {
 		return content;
 	}
@@ -186,5 +195,44 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 		int result = super.hashCode();
 		result += content == null ? 0 : 17 * content.hashCode();
 		return result;
+	}
+
+	private static class MapSuppressingUnwrappingSerializer extends StdSerializer<Object> {
+
+		public MapSuppressingUnwrappingSerializer() {
+			super(Object.class);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 */
+		@Override
+		public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+
+			if (value == null || Map.class.isInstance(value)) {
+				return;
+			}
+
+			JsonSerializer<Object> serializer = provider.findValueSerializer(value.getClass());
+
+			if (JsonValueSerializer.class.isInstance(serializer)) {
+				throw new IllegalStateException(
+						"@JsonValue rendered classes can not be directly nested in EntityModel as they do not produce a document key!");
+			}
+
+			serializer //
+					.unwrappingSerializer(NameTransformer.NOP) //
+					.serialize(value, gen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.JsonSerializer#isUnwrappingSerializer()
+		 */
+		@Override
+		public boolean isUnwrappingSerializer() {
+			return true;
+		}
 	}
 }

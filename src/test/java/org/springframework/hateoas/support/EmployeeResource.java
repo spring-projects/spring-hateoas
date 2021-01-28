@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package org.springframework.hateoas.support;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Greg Turnquist
  */
 @Data
+@Getter(onMethod = @__(@JsonProperty))
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 public class EmployeeResource extends RepresentationModel<EmployeeResource> {
@@ -32,7 +36,7 @@ public class EmployeeResource extends RepresentationModel<EmployeeResource> {
 	private String name;
 
 	public EmployeeResource(EmployeeResource employeeResource) {
-		
+
 		this.name = employeeResource.getName();
 		add(employeeResource.getLinks());
 	}

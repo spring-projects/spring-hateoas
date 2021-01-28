@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.hateoas.mediatype.hal.forms.HalFormsDeserializers.MediaTypesDeserializer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -34,7 +32,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Value object for a HAL-FORMS template. Describes the available state transition details.
@@ -53,20 +50,22 @@ final class HalFormsTemplate {
 	private String title;
 	private HttpMethod httpMethod;
 	private List<HalFormsProperty> properties;
-	private List<MediaType> contentTypes;
+	private MediaType contentType;
+	private String target;
 
 	@SuppressWarnings("null")
 	private HalFormsTemplate() {
-		this(null, null, Collections.emptyList(), Collections.emptyList());
+		this(null, null, Collections.emptyList(), null, null);
 	}
 
 	private HalFormsTemplate(String title, HttpMethod httpMethod, List<HalFormsProperty> properties,
-			List<MediaType> contentTypes) {
+			@Nullable MediaType contentType, String target) {
 
 		this.title = title;
 		this.httpMethod = httpMethod;
 		this.properties = properties;
-		this.contentTypes = contentTypes;
+		this.contentType = contentType;
+		this.target = target;
 	}
 
 	static HalFormsTemplate forMethod(HttpMethod httpMethod) {
@@ -76,13 +75,13 @@ final class HalFormsTemplate {
 	HalFormsTemplate withTitle(String title) {
 
 		return this.title == title ? this
-				: new HalFormsTemplate(title, this.httpMethod, this.properties, this.contentTypes);
+				: new HalFormsTemplate(title, this.httpMethod, this.properties, this.contentType, this.target);
 	}
 
 	private HalFormsTemplate withHttpMethod(HttpMethod httpMethod) {
 
 		return this.httpMethod == httpMethod ? this
-				: new HalFormsTemplate(this.title, httpMethod, this.properties, this.contentTypes);
+				: new HalFormsTemplate(this.title, httpMethod, this.properties, this.contentType, this.target);
 	}
 
 	/**
@@ -98,47 +97,35 @@ final class HalFormsTemplate {
 		List<HalFormsProperty> properties = new ArrayList<>(this.properties);
 		properties.add(property);
 
-		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
+		return new HalFormsTemplate(title, httpMethod, properties, contentType, target);
 	}
 
 	HalFormsTemplate withProperties(List<HalFormsProperty> properties) {
 
 		return this.properties == properties ? this
-				: new HalFormsTemplate(this.title, this.httpMethod, properties, this.contentTypes);
+				: new HalFormsTemplate(title, httpMethod, properties, contentType, target);
 	}
 
-	/**
-	 * Returns a new {@link HalFormsTemplate} with the given {@link MediaType} added as content type.
-	 *
-	 * @param mediaType must not be {@literal null}.
-	 * @return
-	 */
-	HalFormsTemplate andContentType(MediaType mediaType) {
+	HalFormsTemplate withContentType(@Nullable MediaType contentType) {
 
-		Assert.notNull(mediaType, "Media type must not be null!");
-
-		List<MediaType> contentTypes = new ArrayList<>(this.contentTypes);
-		contentTypes.add(mediaType);
-
-		return new HalFormsTemplate(title, httpMethod, properties, contentTypes);
+		return this.contentType == contentType ? this
+				: new HalFormsTemplate(title, httpMethod, properties, contentType, target);
 	}
 
-	HalFormsTemplate withContentTypes(List<MediaType> contentTypes) {
+	HalFormsTemplate withTarget(String target) {
 
-		return this.contentTypes == contentTypes ? this
-				: new HalFormsTemplate(this.title, this.httpMethod, this.properties, contentTypes);
+		return this.target == target ? this
+				: new HalFormsTemplate(title, httpMethod, properties, contentType, target);
 	}
 
-	// Jackson helper methods to create the right representation format
-
+	@Nullable
 	@JsonInclude(Include.NON_EMPTY)
 	String getContentType() {
-		return StringUtils.collectionToDelimitedString(contentTypes, ", ");
+		return contentType == null ? null : contentType.toString();
 	}
 
-	@JsonDeserialize(using = MediaTypesDeserializer.class)
-	void setContentType(List<MediaType> mediaTypes) {
-		this.contentTypes = mediaTypes;
+	void setContentType(MediaType mediaType) {
+		this.contentType = mediaType;
 	}
 
 	@Nullable
@@ -165,34 +152,55 @@ final class HalFormsTemplate {
 		return this.properties;
 	}
 
-	List<MediaType> getContentTypes() {
-		return this.contentTypes;
-	}
-
 	@JsonInclude(Include.NON_EMPTY)
 	String getTitle() {
 		return this.title;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-
-		if (this == o)
-			return true;
-		if (!(o instanceof HalFormsTemplate))
-			return false;
-		HalFormsTemplate that = (HalFormsTemplate) o;
-		return Objects.equals(this.title, that.title) && this.httpMethod == that.httpMethod
-				&& Objects.equals(this.properties, that.properties) && Objects.equals(this.contentTypes, that.contentTypes);
+	@JsonInclude(Include.NON_EMPTY)
+	String getTarget() {
+		return target;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(@Nullable Object o) {
+
+		if (this == o) {
+			return true;
+		}
+
+		if (!(o instanceof HalFormsTemplate)) {
+			return false;
+		}
+
+		HalFormsTemplate that = (HalFormsTemplate) o;
+
+		return Objects.equals(this.title, that.title) //
+				&& this.httpMethod == that.httpMethod //
+				&& Objects.equals(this.properties, that.properties) //
+				&& Objects.equals(this.contentType, that.contentType);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.title, this.httpMethod, this.properties, this.contentTypes);
+		return Objects.hash(this.title, this.httpMethod, this.properties, this.contentType);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
 	public String toString() {
 		return "HalFormsTemplate(title=" + this.title + ", httpMethod=" + this.httpMethod + ", properties="
-				+ this.properties + ", contentTypes=" + this.contentTypes + ")";
+				+ this.properties + ", contentTypes=" + this.contentType + ")";
 	}
 }

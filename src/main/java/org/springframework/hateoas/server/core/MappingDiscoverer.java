@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -68,4 +70,13 @@ public interface MappingDiscoverer {
 	 * @return
 	 */
 	Collection<HttpMethod> getRequestMethod(Class<?> type, Method method);
+
+	/**
+	 * Returns the {@link MediaType}s supported for consumption.
+	 *
+	 * @param method must not be {@literal null}.
+	 * @return can be {@literal null}.
+	 * @since 1.3
+	 */
+	List<MediaType> getConsumes(Method method);
 }

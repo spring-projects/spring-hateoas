@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link EntityModel}.
@@ -72,5 +76,21 @@ class EntityModelUnitTest {
 		assertThatIllegalArgumentException().isThrownBy(() -> {
 			EntityModel.of(Collections.emptyList());
 		});
+	}
+
+	@Test // #1371
+	void producesProperExceptionWhenRenderingAJsonValue() throws Exception {
+
+		EntityModel<?> model = EntityModel.of(new ValueType());
+
+		assertThatExceptionOfType(JsonMappingException.class)
+				.isThrownBy(() -> new ObjectMapper().writeValueAsString(model))
+				.withMessageContaining("@JsonValue");
+	}
+
+	// #1371
+
+	static class ValueType {
+		@JsonValue String type;
 	}
 }

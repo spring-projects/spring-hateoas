@@ -1,0 +1,35 @@
+{
+  "name" : "Frodo Baggins",
+  "role" : "ring bearer",
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost/employees/0"
+    },
+    "employees" : {
+      "href" : "http://localhost/employees"
+    }
+  },
+  "_templates" : {
+    "default" : {
+      "method" : "put",
+      "properties" : [ {
+        "name" : "name",
+        "required" : true,
+        "type" : "text"
+      }, {
+        "name" : "role",
+        "type" : "text"
+      } ]
+    },
+    "partiallyUpdateEmployee" : {
+      "method" : "patch",
+      "properties" : [ {
+        "name" : "name",
+        "type" : "text"
+      }, {
+        "name" : "role",
+        "type" : "text"
+      } ]
+    }
+  }
+}

@@ -1,6 +1,58 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3 M1 (2021-01-13)
+----------------------------------------
+- #1433 - Upgrade to Spring Framework 5.3.3.
+- #1425 - RepresentationModelProcessor not invoked for PagedModel / CollectionModel consisting of RepresentationModels.
+- #1424 - More convenience methods for MvcLink.
+- #1423 - HaloFormsConfiguration.withPattern(…) should not be deprecated.
+- #1417 - Release directly to OSS Sonatype.
+- #1412 - Extracted mappings still contain regex matching expressions.
+- #1399 - Curie information not rendered if model contains pre-curied links.
+- #1388 - Properly parse new version format for CI.
+- #1379 - RepresentationModelProcessor invoked for invalid CollectionModel payload if specialized.
+- #475  - Allow all UriTemplate variable names following RFC.
+
+Changes in version 1.2 GA (2020-10-27)
+----------------------------------------
+- #1384 - Upgrade to Spring Framework 5.3.
+- #1382 - Create an ObjectMapperCustomizer to allow tailoring ObjectMapper through media types configuration.
+
+Changes in version 1.2 RC1 (2020-09-15)
+----------------------------------------
+- #1367 - Release Spring HATEOAS 1.2.0.RC1.
+- #1366 - Upgrade to Spring Framework 5.3.0-RC1.
+- #1364 - Document that media type implementation configuration should be public.
+- #1358 - Update links to JSON:API documentation (community based media types).
+- #1352 - Map content is not getting serialized properly.
+
+Changes in version 1.2 M1 (2020-08-11)
+----------------------------------------
+- #1351 - Upgrade to Jackson 2.11.2.
+- #1350 - Upgrade to Kotlin 1.4 RC.
+- #1349 - Release 1.2 M1.
+- #1348 - Upgrade to Spring Framework 5.3 M2.
+- #1341 - Add Links.andIf(boolean, Link...).
+- #1340 - Allow adding Stream<Link> to Links.
+- #1337 - List community media type implementations in the reference docs.
+- #1335 - Add HalModelBuilder.embed(Stream<?> …).
+- #1334 - Upgrade to Reactor Dysprosium SR10.
+- #1333 - Upgrade to Spring 5.2.8.
+- #1329 - Remove deprecations.
+- #1323 - Allow HalModelBuilder.build() to pick up call side generics.
+- #1322 - Allow to conditionally add a Link to Links.
+- #1321 - Add convenience type to create Link instances from URIs created via MvcUriComponentsBuilder.
+- #1320 - Update Javadoc and toString() methods in renamed classes.
+- #1319 - Revisit language in reference documentation.
+- #1314 - HalLinkRelation incorrectly parses relation sources with more than one colon in them.
+- #1313 - Problem.ExtendedProblem has no withStatus method.
+- #1304 - The SPI for media types needs to reflect it's ONLY for internal usage.
+- #1294 - Delombok production code.
+- #1291 - VndErrors logref is not just Integer.
+- #1287 - Memory pressure when creating Link instances.
+- #361 - Add Support for Resolving Property Values in @RequestMapping(value).
+
 Changes in version 1.1.0.RELEASE (2020-05-11)
 ----------------------------------------
 - #1292 - Release 1.1.0.RELEASE.

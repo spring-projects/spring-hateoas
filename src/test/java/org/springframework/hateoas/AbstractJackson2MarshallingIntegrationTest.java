@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.hateoas.mediatype.MessageResolver;
-import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.HalConfiguration;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
-import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -42,16 +37,6 @@ public abstract class AbstractJackson2MarshallingIntegrationTest {
 	@BeforeEach
 	void setUp() {
 		mapper = MappingTestUtils.defaultObjectMapper();
-	}
-
-	protected ObjectMapper with(HalConfiguration configuration) {
-
-		ObjectMapper copy = mapper.copy();
-
-		copy.setHandlerInstantiator(new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), CurieProvider.NONE,
-				MessageResolver.DEFAULTS_ONLY, configuration));
-
-		return copy;
 	}
 
 	protected String write(Object object) throws Exception {

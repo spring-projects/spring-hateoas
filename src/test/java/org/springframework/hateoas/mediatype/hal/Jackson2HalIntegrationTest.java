@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,8 +62,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 
 /**
  * Integration tests for Jackson 2 HAL integration.
@@ -564,7 +570,7 @@ class Jackson2HalIntegrationTest {
 				.forEach(it -> assertThat(it).containsKey("someSample"));
 	}
 
-	@Test // #1157
+	@Test // #1157, #1352
 	void rendersMapContentCorrectly() throws Exception {
 
 		Map<String, Object> map = new HashMap<>();
@@ -573,10 +579,12 @@ class Jackson2HalIntegrationTest {
 
 		EntityModel<?> model = EntityModel.of(map, Link.of("foo", IanaLinkRelations.SELF));
 
-		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model));
+		DocumentContext context = JsonPath.parse(mapper.writeValueAsString(model),
+				Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS));
 
 		assertThat(context.read("$.key", String.class)).isEqualTo("value");
 		assertThat(context.read("$.anotherKey", String.class)).isEqualTo("anotherValue");
+		assertThat(context.read("$.content", Object.class)).isNull();
 	}
 
 	@Test // #1157
@@ -604,6 +612,28 @@ class Jackson2HalIntegrationTest {
 		EntityModel<SomeSample> result = mapper.readValue(source, modelType);
 
 		assertThat(result.getContent().name).isEqualTo("Dave");
+	}
+
+	@Test // #1399
+	void rendersCurieInformationIfCuriedLinkIsGiven() throws Exception {
+
+		RepresentationModel<?> model = new RepresentationModel<>().add(Link.of("/href", LinkRelation.of("foo:bar")));
+
+		DocumentContext document = JsonPath.parse(getCuriedObjectMapper().writeValueAsString(model));
+
+		assertThat(document.read("$._links.curies", JSONArray.class)).isNotEmpty();
+	}
+
+	@Test // #1428
+	void doesNotRenderCuriesIfNoneConfigured() throws Exception {
+
+		ObjectMapper mapper = getCuriedObjectMapper(new DefaultCurieProvider(Collections.emptyMap()));
+		RepresentationModel<?> model = new RepresentationModel<>().add(Link.of("/href", LinkRelation.of("foo:bar")));
+
+		DocumentContext document = JsonPath.parse(mapper.writeValueAsString(model));
+
+		assertThatExceptionOfType(PathNotFoundException.class)
+				.isThrownBy(() -> document.read("$.curies", JSONObject.class));
 	}
 
 	@Relation(collectionRelation = "someSample")
