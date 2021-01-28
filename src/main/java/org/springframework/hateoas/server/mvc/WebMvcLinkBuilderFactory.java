@@ -124,7 +124,7 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 				.path(mapping);
 
 		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new,
-				new UriComponentsContributorsAdditionalUriHandler(uriComponentsContributors), builderFactory);
+				new UriComponentsContributorsAdditionalUriHandler(uriComponentsContributors), builderFactory, getConversionService());
 	}
 
 	/*
