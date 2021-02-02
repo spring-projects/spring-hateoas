@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link AffordanceModel} for Collection+JSON.
@@ -42,10 +43,11 @@ class CollectionJsonAffordanceModel extends AffordanceModel {
 	private final List<CollectionJsonData> inputProperties;
 	private final List<CollectionJsonData> queryProperties;
 
-	public CollectionJsonAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
+	CollectionJsonAffordanceModel(ConfiguredAffordance configured) {
 
-		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+		super(configured.getNameOrDefault(), configured.getTarget(),
+				configured.getMethod(), configured.getInputMetadata(), configured.getQueryParameters(),
+				configured.getOutputMetadata());
 
 		this.inputProperties = determineInputs();
 		this.queryProperties = determineQueryProperties();
@@ -94,20 +96,35 @@ class CollectionJsonAffordanceModel extends AffordanceModel {
 		return this.queryProperties;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel#equals(java.lang.Object)
+	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof CollectionJsonAffordanceModel))
+		}
+
+		if (!(o instanceof CollectionJsonAffordanceModel)) {
 			return false;
-		if (!super.equals(o))
+		}
+
+		if (!super.equals(o)) {
 			return false;
+		}
+
 		CollectionJsonAffordanceModel that = (CollectionJsonAffordanceModel) o;
+
 		return Objects.equals(this.inputProperties, that.inputProperties)
 				&& Objects.equals(this.queryProperties, that.queryProperties);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), this.inputProperties, this.queryProperties);

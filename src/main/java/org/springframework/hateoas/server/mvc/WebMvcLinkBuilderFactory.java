@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
+
+import javax.servlet.ServletContext;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.MethodLinkBuilderFactory;
 import org.springframework.hateoas.server.core.LinkBuilderSupport;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.server.core.WebHandler;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -46,6 +56,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Greg Turnquist
  */
 public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvcLinkBuilder> {
+
+	private static ConversionService FALLBACK_CONVERSION_SERVICE = new DefaultFormattingConversionService();
 
 	private List<UriComponentsContributor> uriComponentsContributors = new ArrayList<>();
 
@@ -124,7 +136,7 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 			return builder;
 
-		}, builderFactory);
+		}, builderFactory, getConversionService());
 	}
 
 	/*
@@ -134,5 +146,25 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 	@Override
 	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
 		return WebMvcLinkBuilder.linkTo(method, parameters);
+	}
+
+	@SuppressWarnings("null")
+	private Supplier<ConversionService> getConversionService() {
+
+		return () -> {
+
+			RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+
+			if (!ServletRequestAttributes.class.isInstance(attributes)) {
+				return null;
+			}
+
+			ServletContext servletContext = ((ServletRequestAttributes) attributes).getRequest().getServletContext();
+			WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+
+			return context == null || !context.containsBean("mvcConversionService")
+					? FALLBACK_CONVERSION_SERVICE
+					: context.getBean("mvcConversionService", ConversionService.class);
+		};
 	}
 }

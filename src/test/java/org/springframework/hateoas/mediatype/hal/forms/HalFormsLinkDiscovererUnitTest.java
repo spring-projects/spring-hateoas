@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,28 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link HalFormsLinkDiscoverer}.
  *
  * @author Greg Turnquist
+ * @author Oliver Drotbohm
  */
 class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalFormsLinkDiscoverer();
+	static final ContextualMapper mapper = ContextualMapper.of(HalFormsLinkDiscovererUnitTest.class, new ObjectMapper());
 
 	/**
 	 * @see #314
@@ -50,7 +53,7 @@ class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	@Test
 	void discoversAllTheLinkAttributes() throws IOException {
 
-		String linkText = read(new ClassPathResource("hal-forms-link.json", getClass()));
+		String linkText = mapper.readFileContent("hal-forms-link.json");
 
 		Link expected = Link.valueOf("</customer/1>;" //
 				+ "rel=\"self\";" //
@@ -73,12 +76,7 @@ class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	@Override
 	protected String getInputString() {
-
-		try {
-			return read(new ClassPathResource("hal-forms-link-discoverer.json", getClass()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return mapper.readFileContent("hal-forms-link-discoverer.json");
 	}
 
 	@Override

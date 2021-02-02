@@ -1,6 +1,24 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3 M1 (2021-01-13)
+----------------------------------------
+- #1433 - Upgrade to Spring Framework 5.3.3.
+- #1425 - RepresentationModelProcessor not invoked for PagedModel / CollectionModel consisting of RepresentationModels.
+- #1424 - More convenience methods for MvcLink.
+- #1423 - HaloFormsConfiguration.withPattern(…) should not be deprecated.
+- #1417 - Release directly to OSS Sonatype.
+- #1412 - Extracted mappings still contain regex matching expressions.
+- #1399 - Curie information not rendered if model contains pre-curied links.
+- #1388 - Properly parse new version format for CI.
+- #1379 - RepresentationModelProcessor invoked for invalid CollectionModel payload if specialized.
+- #475  - Allow all UriTemplate variable names following RFC.
+
+Changes in version 1.2 GA (2020-10-27)
+----------------------------------------
+- #1384 - Upgrade to Spring Framework 5.3.
+- #1382 - Create an ObjectMapperCustomizer to allow tailoring ObjectMapper through media types configuration.
+
 Changes in version 1.2 RC1 (2020-09-15)
 ----------------------------------------
 - #1367 - Release Spring HATEOAS 1.2.0.RC1.

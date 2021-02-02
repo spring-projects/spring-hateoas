@@ -12,3 +12,6 @@ org.springframework.hateoas.config.MediaTypeConfigurationProvider=\
  
 org.springframework.hateoas.client.TraversonDefaults=\
  org.springframework.hateoas.mediatype.hal.HalTraversonDefaults
+ 
+org.springframework.hateoas.mediatype.InputTypeFactory=\
+ org.springframework.hateoas.mediatype.html.HtmlInputTypeFactory

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.util.List;
-
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
-import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.mediatype.AffordanceModelFactory;
-import org.springframework.http.HttpMethod;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.MediaType;
 
 /**
@@ -39,12 +33,11 @@ class HalFormsAffordanceModelFactory implements AffordanceModelFactory {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.AffordanceModelFactory#getAffordanceModel(java.lang.String, org.springframework.hateoas.Link, org.springframework.http.HttpMethod, org.springframework.core.ResolvableType, java.util.List, org.springframework.core.ResolvableType)
+	 * @see org.springframework.hateoas.mediatype.AffordanceModelFactory#getAffordanceModel(org.springframework.hateoas.mediatype.ConfiguredAffordance)
 	 */
 	@Override
-	public AffordanceModel getAffordanceModel(String name, Link link, HttpMethod httpMethod,
-			InputPayloadMetadata inputType, List<QueryParameter> parameters, PayloadMetadata outputType) {
-		return new HalFormsAffordanceModel(name, link, httpMethod, inputType, parameters, outputType);
+	public AffordanceModel getAffordanceModel(ConfiguredAffordance configured) {
+		return new HalFormsAffordanceModel(configured);
 	}
 
 	public MediaType getMediaType() {

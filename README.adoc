@@ -3,6 +3,7 @@ image:https://spring.io/badges/spring-hateoas/snapshot.svg[link=https://spring.i
 image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://gitter.im/spring-projects/spring-hateoas]
 
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2Fmaster&subject=master[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
+image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.2.x&subject=1.2.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.1.x&subject=1.1.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.0.x&subject=1.0.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F0.25.x&subject=0.25.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]

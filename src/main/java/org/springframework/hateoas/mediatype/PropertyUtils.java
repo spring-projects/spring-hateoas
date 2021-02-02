@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -46,10 +39,12 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.convert.Property;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.InputType;
 import org.springframework.http.HttpEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -432,7 +427,14 @@ public class PropertyUtils {
 	 */
 	private static class DefaultPropertyMetadata implements PropertyMetadata, Comparable<DefaultPropertyMetadata> {
 
-		private static Comparator<PropertyMetadata> BY_NAME = Comparator.comparing(PropertyMetadata::getName);
+		private static final Comparator<PropertyMetadata> BY_NAME = Comparator.comparing(PropertyMetadata::getName);
+		private static final InputTypeFactory INPUT_TYPE_FACTORY;
+
+		static {
+
+			INPUT_TYPE_FACTORY = SpringFactoriesLoader.loadFactories(InputTypeFactory.class,
+					DefaultPropertyMetadata.class.getClassLoader()).get(0);
+		}
 
 		private final AnnotatedProperty property;
 
@@ -503,6 +505,30 @@ public class PropertyUtils {
 		public int compareTo(DefaultPropertyMetadata that) {
 			return BY_NAME.compare(this, that);
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getInputType()
+		 */
+		@Nullable
+		@Override
+		public String getInputType() {
+
+			String annotatedInputType = getAnnotatedInputType();
+
+			return annotatedInputType != null
+					? annotatedInputType
+					: INPUT_TYPE_FACTORY.getInputType(getType().resolve(Object.class));
+		}
+
+		@Nullable
+		protected String getAnnotatedInputType() {
+
+			MergedAnnotation<InputType> annotation = property.getAnnotation(InputType.class);
+			String value = annotation.isPresent() ? annotation.getString("value") : null;
+
+			return StringUtils.hasText(value) ? value : null;
+		}
 	}
 
 	/**
@@ -512,7 +538,37 @@ public class PropertyUtils {
 	 */
 	private static class Jsr303AwarePropertyMetadata extends DefaultPropertyMetadata {
 
+		private static final Optional<Class<? extends Annotation>> LENGTH_ANNOTATION;
+		private static final Class<? extends Annotation> URL_ANNOTATION, RANGE_ANNOTATION;
+		private static final Map<Class<? extends Annotation>, String> TYPE_MAP;
+
+		static {
+
+			LENGTH_ANNOTATION = Optional.ofNullable(
+					org.springframework.hateoas.support.ClassUtils.loadIfPresent("org.hibernate.validator.constraints.Length"));
+
+			URL_ANNOTATION = org.springframework.hateoas.support.ClassUtils
+					.loadIfPresent("org.hibernate.validator.constraints.URL");
+
+			RANGE_ANNOTATION = org.springframework.hateoas.support.ClassUtils
+					.loadIfPresent("org.hibernate.validator.constraints.Range");
+
+			Map<Class<? extends Annotation>, String> typeMap = new HashMap<>();
+			typeMap.put(Email.class, "email");
+
+			if (URL_ANNOTATION != null) {
+				typeMap.put(URL_ANNOTATION, "url");
+			}
+
+			if (RANGE_ANNOTATION != null) {
+				typeMap.put(RANGE_ANNOTATION, "range");
+			}
+
+			TYPE_MAP = Collections.unmodifiableMap(typeMap);
+		}
+
 		private final AnnotatedProperty property;
+		private @Nullable Optional<String> inputType;
 
 		/**
 		 * Creates a new {@link Jsr303AwarePropertyMetadata} instance for the given {@link AnnotatedProperty}.
@@ -524,6 +580,7 @@ public class PropertyUtils {
 			super(property);
 
 			this.property = property;
+			this.inputType = null;
 		}
 
 		/*
@@ -541,24 +598,122 @@ public class PropertyUtils {
 		 */
 		@Override
 		public Optional<String> getPattern() {
-
-			MergedAnnotation<Pattern> annotation = property.getAnnotation(Pattern.class);
-
-			if (annotation.isPresent()) {
-				return fromAnnotation(annotation);
-			}
-
-			annotation = property.getTypeAnnotations().get(Pattern.class);
-
-			return annotation.isPresent() //
-					? fromAnnotation(annotation) //
-					: Optional.empty();
+			return getAnnotationAttribute(Pattern.class, "regexp", String.class);
 		}
 
-		private static Optional<String> fromAnnotation(MergedAnnotation<Pattern> annotation) {
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMin()
+		 */
+		@Nullable
+		@Override
+		public Long getMin() {
 
-			return Optional.of(annotation.getString("regexp")) //
-					.filter(StringUtils::hasText);
+			Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "min", Long.class);
+
+			if (attribute.isPresent()) {
+				return attribute.get();
+			}
+
+			return getAnnotationAttribute(Min.class, "value", Long.class).orElse(null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMax()
+		 */
+		@Nullable
+		@Override
+		public Long getMax() {
+
+			Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "max", Long.class);
+
+			if (attribute.isPresent()) {
+				return attribute.get();
+			}
+
+			return getAnnotationAttribute(Max.class, "value", Long.class).orElse(null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMinLength()
+		 */
+		@Nullable
+		@Override
+		public Long getMinLength() {
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class))
+					.map(Integer::longValue)
+					.orElse(null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.PropertyMetadata#getMaxLength()
+		 */
+		@Nullable
+		@Override
+		public Long getMaxLength() {
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class))
+					.map(Integer::longValue)
+					.orElse(null);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.PropertyUtils.DefaultPropertyMetadata#getInputType()
+		 */
+		@Nullable
+		@Override
+		public String getInputType() {
+
+			if (inputType != null) {
+				return inputType.orElse(null);
+			}
+
+			String inputType = getAnnotatedInputType();
+
+			if (inputType != null) {
+				return cacheAndReturn(inputType);
+			}
+
+			inputType = lookupFromTypeMap();
+
+			return cacheAndReturn(inputType != null ? inputType : super.getInputType());
+		}
+
+		private String cacheAndReturn(String value) {
+
+			this.inputType = Optional.ofNullable(value);
+
+			return value;
+		}
+
+		private String lookupFromTypeMap() {
+
+			return TYPE_MAP.entrySet().stream()
+					.flatMap(it -> {
+
+						MergedAnnotation<? extends Annotation> annotation = property.getAnnotation(it.getKey());
+
+						return annotation.isPresent() ? Stream.of(it.getValue()) : Stream.empty();
+					})
+					.findFirst()
+					.orElse(null);
+		}
+
+		private <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,
+				Class<T> type) {
+
+			MergedAnnotation<? extends Annotation> mergedAnnotation = property.getAnnotation(annotation);
+
+			if (mergedAnnotation.isPresent()) {
+				return mergedAnnotation.getValue(attribute, type);
+			}
+
+			mergedAnnotation = property.getTypeAnnotations().get(annotation);
+
+			return mergedAnnotation.isPresent() ? mergedAnnotation.getValue(attribute, type) : Optional.empty();
 		}
 	}
 }

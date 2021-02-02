@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.QueryParameter;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -46,9 +45,11 @@ class UberAffordanceModel extends AffordanceModel {
 	private final List<UberData> inputProperties;
 	private final List<UberData> queryProperties;
 
-	UberAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
-		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
+	UberAffordanceModel(ConfiguredAffordance configured) {
+
+		super(configured.getNameOrDefault(), configured.getTarget(),
+				configured.getMethod(), configured.getInputMetadata(), configured.getQueryParameters(),
+				configured.getOutputMetadata());
 
 		this.inputProperties = determineAffordanceInputs();
 		this.queryProperties = determineQueryProperties();

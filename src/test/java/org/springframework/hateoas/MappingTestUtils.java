@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,27 +86,45 @@ public class MappingTestUtils {
 			}
 		}
 
-		public RepresentationModel<?> readObject(String filename) {
-			return readObject(filename, RepresentationModel.class);
+		public RepresentationModel<?> readObject(String serialized) {
+			try {
+				return mapper.readValue(serialized, RepresentationModel.class);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
-		public <T> T readObject(String filename, Class<T> type) {
+		public RepresentationModel<?> readFile(String filename) {
+			return readFile(filename, RepresentationModel.class);
+		}
+
+		public <T> T readFile(String filename, Class<T> type) {
 
 			TypeFactory factory = mapper.getTypeFactory();
 			JavaType javaType = factory.constructType(type);
 
-			return readObject(filename, javaType);
+			return readFile(filename, javaType);
 		}
 
-		public <S> S readObject(String filename, Class<?> type, Class<?> elementType) {
+		public <S> S readFile(String filename, Class<?> type, Class<?> elementType) {
 
 			TypeFactory factory = mapper.getTypeFactory();
 			JavaType javaType = factory.constructParametricType(type, elementType);
 
-			return readObject(filename, javaType);
+			return readFile(filename, javaType);
 		}
 
-		public <S> S readObject(String filename, JavaType type) {
+		public <S> S readFile(String filename, Class<?> type, Class<?> elementType, Class<?> nested) {
+
+			TypeFactory factory = mapper.getTypeFactory();
+
+			JavaType genericElement = factory.constructParametricType(elementType, nested);
+			JavaType javaType = factory.constructParametricType(type, genericElement);
+
+			return readFile(filename, javaType);
+		}
+
+		public <S> S readFile(String filename, JavaType type) {
 
 			ClassPathResource resource = new ClassPathResource(filename, context);
 
@@ -119,7 +137,7 @@ public class MappingTestUtils {
 			}
 		}
 
-		public String readFile(String filename) {
+		public String readFileContent(String filename) {
 
 			ClassPathResource resource = new ClassPathResource(filename, context);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import static org.springframework.http.HttpMethod.*;
-
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.QueryParameter;
-import org.springframework.http.HttpMethod;
+import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.MediaType;
 
 /**
@@ -39,54 +27,8 @@ import org.springframework.http.MediaType;
  */
 class HalFormsAffordanceModel extends AffordanceModel {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
-
-	private final List<HalFormsProperty> inputProperties;
-
-	public HalFormsAffordanceModel(String name, Link link, HttpMethod httpMethod, InputPayloadMetadata inputType,
-			List<QueryParameter> queryMethodParameters, PayloadMetadata outputType) {
-
-		super(name, link, httpMethod, inputType, queryMethodParameters, outputType);
-
-		this.inputProperties = determineInputs();
-	}
-
-	/**
-	 * Look at the input's domain type to extract the {@link Affordance}'s properties. Then transform them into a list of
-	 * {@link HalFormsProperty} objects.
-	 */
-	private List<HalFormsProperty> determineInputs() {
-
-		if (!ENTITY_ALTERING_METHODS.contains(getHttpMethod())) {
-			return Collections.emptyList();
-		}
-
-		return getInput().stream() //
-				.map(PropertyMetadata::getName) //
-				.map(it -> new HalFormsProperty() //
-						.withName(it)) //
-				.collect(Collectors.toList());
-	}
-
-	public List<HalFormsProperty> getInputProperties() {
-		return this.inputProperties;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-
-		if (this == o)
-			return true;
-		if (!(o instanceof HalFormsAffordanceModel))
-			return false;
-		if (!super.equals(o))
-			return false;
-		HalFormsAffordanceModel that = (HalFormsAffordanceModel) o;
-		return Objects.equals(this.inputProperties, that.inputProperties);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(super.hashCode(), inputProperties);
+	public HalFormsAffordanceModel(ConfiguredAffordance configured) {
+		super(configured.getNameOrDefault(), configured.getTarget(), configured.getMethod(), configured.getInputMetadata(),
+				configured.getQueryParameters(), configured.getOutputMetadata());
 	}
 }

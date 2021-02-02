@@ -10,7 +10,6 @@
   "_templates" : {
     "default" : {
       "method" : "put",
-      "contentType" : "",
       "properties" : [ {
         "name" : "firstName",
         "required" : true
@@ -24,7 +23,6 @@
     },
     "partiallyUpdateEmployee" : {
       "method" : "patch",
-      "contentType" : "",
       "properties" : [ {
         "name" : "firstName",
         "required" : false

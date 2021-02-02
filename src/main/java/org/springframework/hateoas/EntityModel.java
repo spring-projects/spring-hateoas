@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 
@@ -212,7 +214,14 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 				return;
 			}
 
-			provider.findValueSerializer(value.getClass()) //
+			JsonSerializer<Object> serializer = provider.findValueSerializer(value.getClass());
+
+			if (JsonValueSerializer.class.isInstance(serializer)) {
+				throw new IllegalStateException(
+						"@JsonValue rendered classes can not be directly nested in EntityModel as they do not produce a document key!");
+			}
+
+			serializer //
 					.unwrappingSerializer(NameTransformer.NOP) //
 					.serialize(value, gen, provider);
 		}

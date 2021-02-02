@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.function.Function;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -75,7 +78,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 * @param exchange must not be {@literal null}.
 	 */
 	public static WebFluxBuilder linkTo(Object invocation, ServerWebExchange exchange) {
-		return new WebFluxBuilder(linkToInternal(invocation, Mono.just(getBuilder(exchange))));
+		return new WebFluxBuilder(linkToInternal(invocation, CurrentRequest.of(exchange)));
 	}
 
 	/**
@@ -87,7 +90,6 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 	 * @return
 	 */
 	public static <T> T methodOn(Class<T> controller, Object... parameters) {
-
 		return DummyInvocationUtils.methodOn(controller, parameters);
 	}
 
@@ -245,40 +247,58 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 		}
 	}
 
-	/**
-	 * Returns a {@link UriComponentsBuilder} obtained from the {@link ServerWebExchange}.
-	 *
-	 * @param exchange
-	 */
-	private static UriComponentsBuilder getBuilder(@Nullable ServerWebExchange exchange) {
-
-		if (exchange == null) {
-			return UriComponentsBuilder.fromPath("/");
-		}
-
-		ServerHttpRequest request = exchange.getRequest();
-		PathContainer contextPath = request.getPath().contextPath();
-
-		return UriComponentsBuilder.fromHttpRequest(request) //
-				.replacePath(contextPath.toString()) //
-				.replaceQuery("");
-	}
-
 	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation) {
 
 		return linkToInternal(invocation,
-				Mono.subscriberContext().map(context -> getBuilder(context.getOrDefault(EXCHANGE_CONTEXT_ATTRIBUTE, null))));
+				Mono.deferContextual(
+						context -> CurrentRequest.of(context.getOrDefault(EXCHANGE_CONTEXT_ATTRIBUTE, null))));
 	}
 
-	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<UriComponentsBuilder> builder) {
+	private static Mono<WebFluxLinkBuilder> linkToInternal(Object invocation, Mono<CurrentRequest> builder) {
 
 		PreparedWebHandler<WebFluxLinkBuilder> handler = WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
 
-		return builder.map(WebFluxLinkBuilder::getBuilderCreator) //
-				.map(handler::conclude);
+		return builder.map(it -> handler.conclude(path -> it.builder.path(path), it.conversionService));
 	}
 
-	private static Function<String, UriComponentsBuilder> getBuilderCreator(UriComponentsBuilder builder) {
-		return path -> builder.path(path);
+	/**
+	 * Access to components we can obtain from the current request or fallbacks in case no current request is available.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	private static class CurrentRequest {
+
+		private static final ConversionService FALLBACK_CONVERSION_SERVICE = new DefaultConversionService();
+
+		private UriComponentsBuilder builder;
+		private ConversionService conversionService;
+
+		public static Mono<CurrentRequest> of(@Nullable ServerWebExchange exchange) {
+
+			CurrentRequest result = new CurrentRequest();
+
+			if (exchange == null) {
+
+				result.builder = UriComponentsBuilder.fromPath("/");
+				result.conversionService = FALLBACK_CONVERSION_SERVICE;
+
+				return Mono.just(result);
+			}
+
+			ServerHttpRequest request = exchange.getRequest();
+			PathContainer contextPath = request.getPath().contextPath();
+
+			result.builder = UriComponentsBuilder.fromHttpRequest(request) //
+					.replacePath(contextPath.toString()) //
+					.replaceQuery("");
+
+			ApplicationContext context = exchange.getApplicationContext();
+
+			result.conversionService = context != null && context.containsBean("webFluxConversionService")
+					? context.getBean("webFluxConversionService", ConversionService.class)
+					: FALLBACK_CONVERSION_SERVICE;
+
+			return Mono.just(result);
+		}
 	}
 }

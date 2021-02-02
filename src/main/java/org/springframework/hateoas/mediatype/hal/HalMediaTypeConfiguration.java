@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,11 +79,14 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
+		HalConfiguration halConfiguration = this.halConfiguration.getIfAvailable(HalConfiguration::new);
+
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver,
-				halConfiguration.getIfAvailable(HalConfiguration::new), beanFactory));
+				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, halConfiguration, beanFactory));
+
+		halConfiguration.customize(mapper);
 
 		return mapper;
 	}

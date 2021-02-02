@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,27 @@ import lombok.Setter;
 import lombok.Value;
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.hibernate.validator.constraints.Range;
+import org.hibernate.validator.constraints.URL;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.InputType;
+import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.util.ReflectionUtils;
@@ -164,6 +173,24 @@ class PropertyUtilsTest {
 		assertThat(metadata.getPropertyMetadata("firstname")).isPresent();
 	}
 
+	@TestFactory
+	Stream<DynamicTest> exposesInputTypeForProperties() {
+
+		Stream<InputTypes> source = Stream.of( //
+				InputTypes.of("firstname", HtmlInputType.TEXT), //
+				InputTypes.of("comment", HtmlInputType.TEXTAREA), //
+				InputTypes.of("email", HtmlInputType.EMAIL), //
+				InputTypes.of("uri", HtmlInputType.URL), //
+				InputTypes.of("url", HtmlInputType.URL), //
+				InputTypes.of("stringUrl", HtmlInputType.URL), //
+				InputTypes.of("email", HtmlInputType.EMAIL), //
+				InputTypes.of("ranged", HtmlInputType.RANGE));
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(InputTypeSample.class);
+
+		return DynamicTest.stream(source, InputTypes::toString, it -> it.verify(metadata));
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -215,7 +242,8 @@ class PropertyUtilsTest {
 
 	static class MethodExposurePayload {
 
-		@Getter @Setter String readWrite;
+		@Getter
+		@Setter String readWrite;
 		@Getter String readOnly;
 	}
 
@@ -234,6 +262,45 @@ class PropertyUtilsTest {
 
 		public void setFirstname(String firstname) {
 			this.firstname = firstname;
+		}
+	}
+
+	@Data
+	static class InputTypeSample {
+
+		String firstname;
+
+		@InputType(HtmlInputType.TEXTAREA_VALUE) String comment;
+
+		@Email String email;
+
+		URI uri;
+
+		java.net.URL url;
+
+		@URL String stringUrl;
+
+		@Range int ranged;
+	}
+
+	// Test fixtures
+
+	@Value(staticConstructor = "of")
+	static class InputTypes {
+
+		String property;
+		HtmlInputType type;
+
+		public void verify(InputPayloadMetadata metadata) {
+
+			assertThat(metadata.getPropertyMetadata(property))
+					.map(PropertyMetadata::getInputType)
+					.hasValue(type.toString());
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Expecting input type %s for %s.", type, property);
 		}
 	}
 }
