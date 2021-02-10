@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpMethod;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/{2,}");
-	private static final Pattern TEMPLATE_VARIABLE_NAME = Pattern.compile("\\{(.*)\\}");
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
@@ -207,23 +205,44 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return MULTIPLE_SLASHES.matcher(result.toString()).replaceAll("/");
 	}
 
-	private static String cleanupPart(String variable) {
+	private static String cleanupPart(String part) {
 
-		if (!variable.contains("{")) {
-			return variable;
+		StringBuilder builder = new StringBuilder();
+		int level = 0;
+		boolean inRegex = false;
+
+		for (int i = 0; i < part.length(); i++) {
+
+			char character = part.charAt(i);
+
+			if (character == '{') {
+
+				level++;
+
+				if (level == 1) {
+					builder.append(character);
+					continue;
+				}
+			}
+
+			if (level == 1 && character == ':') {
+				inRegex = true;
+			}
+
+			if (character == '}') {
+
+				level--;
+
+				if (level == 0) {
+					inRegex = false;
+				}
+			}
+
+			if (!inRegex) {
+				builder.append(character);
+			}
 		}
 
-		Matcher matcher = TEMPLATE_VARIABLE_NAME.matcher(variable);
-
-		if (!matcher.find()) {
-			return variable;
-		}
-
-		String rawName = matcher.group(1);
-		int colonIndex = rawName.indexOf(':');
-
-		return colonIndex < 0
-				? variable
-				: variable.replace(matcher.group(0), "{" + rawName.substring(0, colonIndex) + "}");
+		return builder.toString();
 	}
 }
