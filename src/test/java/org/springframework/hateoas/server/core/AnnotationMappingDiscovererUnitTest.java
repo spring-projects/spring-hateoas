@@ -171,6 +171,14 @@ class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getConsumes(method)).isEmpty();
 	}
 
+	@Test // #1450
+	void extractsMultipleRegularExpressionVariablesCorrectly() throws Exception {
+
+		Method method = MyController.class.getMethod("multipleRegularExpressions");
+
+		assertThat(discoverer.getMapping(method)).isEqualTo("/type/spring-web/{symbolicName}-{version}{extension}");
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -188,6 +196,9 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping(path = "/path", consumes = "application/json")
 		void mappingWithConsumesClause();
+
+		@GetMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
+		void multipleRegularExpressions();
 	}
 
 	interface ControllerWithoutTypeLevelMapping {
