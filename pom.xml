@@ -977,6 +977,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>net.jadler</groupId>
 			<artifactId>jadler-all</artifactId>
 			<version>1.3.0</version>
@@ -1005,15 +1012,6 @@
 			<groupId>io.projectreactor.addons</groupId>
 			<artifactId>reactor-extra</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<!--  Needs to be after Jadler to make sure it sees the Servlet 3.0 dependency pulled in for testing -->
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
