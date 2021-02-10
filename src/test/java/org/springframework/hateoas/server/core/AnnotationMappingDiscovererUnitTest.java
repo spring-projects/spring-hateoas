@@ -160,6 +160,14 @@ class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/foo/{bar}");
 	}
 
+	@Test // #1455
+	void extractsMultipleRegularExpressionVariablesCorrectly() throws Exception {
+
+		Method method = MyController.class.getMethod("multipleRegularExpressions");
+
+		assertThat(discoverer.getMapping(method)).isEqualTo("/type/spring-web/{symbolicName}-{version}{extension}");
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -174,6 +182,9 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping("/foo/{bar:[ABC]{1}}")
 		void mappingWithMatchingExpression();
+
+		@GetMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
+		void multipleRegularExpressions();
 	}
 
 	interface ControllerWithoutTypeLevelMapping {
