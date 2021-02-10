@@ -42,7 +42,7 @@ import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 @TestInstance(Lifecycle.PER_CLASS)
 class ArchitectureTest {
 
-	ImportOptions options = new ImportOptions().with(ImportOption.Predefined.DONT_INCLUDE_TESTS);
+	ImportOptions options = new ImportOptions().with(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS);
 	JavaClasses classes = new ClassFileImporter(options) //
 			.importPackages("org.springframework.hateoas", "org.springframework");
 
