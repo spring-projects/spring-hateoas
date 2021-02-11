@@ -92,7 +92,7 @@ class WebConverters {
 		Assert.notNull(converters, "HttpMessageConverters must not be null!");
 
 		MappingJackson2HttpMessageConverter converter = converters.stream()
-				.filter(MappingJackson2HttpMessageConverter.class::isInstance)
+				.filter(it -> MappingJackson2HttpMessageConverter.class.equals(it.getClass()))
 				.map(MappingJackson2HttpMessageConverter.class::cast)
 				.findFirst()
 				.orElseGet(() -> new MappingJackson2HttpMessageConverter(mapper));
