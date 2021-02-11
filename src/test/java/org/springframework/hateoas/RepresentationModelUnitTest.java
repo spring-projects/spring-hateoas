@@ -194,4 +194,14 @@ class RepresentationModelUnitTest {
 		model.addAllIf(false, () -> Links.of(Link.of("not-added", "bar")));
 		assertThat(model.hasLink("bar")).isFalse();
 	}
+
+	@Test // #1457
+	void replacesLink() {
+
+		RepresentationModel<?> model = new RepresentationModel<>();
+		model.add(Link.of("/foo", IanaLinkRelations.SELF));
+		model.mapLink(IanaLinkRelations.SELF, it -> Link.of("/bar"));
+
+		assertThat(model.getRequiredLink(IanaLinkRelations.SELF).getHref()).isEqualTo("/bar");
+	}
 }
