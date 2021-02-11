@@ -68,7 +68,7 @@ public class PropertyUtils {
 	private static final Map<ResolvableType, ResolvableType> DOMAIN_TYPE_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Map<ResolvableType, InputPayloadMetadata> METADATA_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Set<String> FIELDS_TO_IGNORE = new HashSet<>(Arrays.asList("class", "links"));
-	private static final boolean JSR_303_PRESENT = ClassUtils.isPresent("javax.validation.Valid",
+	private static final boolean JSR_303_PRESENT = ClassUtils.isPresent("javax.validation.constraints.Email",
 			PropertyUtils.class.getClassLoader());
 	private static final List<Class<?>> TYPES_TO_UNWRAP = new ArrayList<>(
 			Arrays.asList(EntityModel.class, CollectionModel.class, HttpEntity.class));
