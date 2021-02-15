@@ -257,6 +257,13 @@ class LinksUnitTest {
 		assertThat(one.hashCode()).isEqualTo(anotherOne.hashCode());
 	}
 
+	@Test // #1459
+	void supportsUnquotedAttributes() {
+
+		assertThat(Links.parse("<https://url.com?page=1>; rel=first").getRequiredLink("first").getHref())
+				.isEqualTo("https://url.com?page=1");
+	}
+
 	@Value(staticConstructor = "of")
 	static class NamedLinks {
 		String name;
