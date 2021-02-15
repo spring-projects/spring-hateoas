@@ -63,7 +63,7 @@ class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 				+ "title=\"pdf customer copy\";" //
 				+ "type=\"portable document\";" //
 				+ "deprecation=\"https://example.com/customers/deprecated\";" //
-				+ "profile=\"my-profile\"" //
+				+ "profile=\"my-profile\";" //
 				+ "name=\"my-name\"");
 
 		assertThat(getDiscoverer().findLinkWithRel(IanaLinkRelations.SELF.value(), linkText)) //
