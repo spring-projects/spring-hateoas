@@ -135,4 +135,11 @@ class LinksUnitTest {
 		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first))).isFalse();
 		assertThat(Links.of(first, second).containsSameLinksAs(Links.of(first, second))).isTrue();
 	}
+
+	@Test // #1460
+	void supportsUnquotedAttributes() {
+
+		assertThat(Links.parse("<https://url.com?page=1>; rel=first").getRequiredLink("first").getHref())
+				.isEqualTo("https://url.com?page=1");
+	}
 }

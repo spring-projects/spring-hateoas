@@ -131,7 +131,7 @@ class LinkUnitTest {
 
 			softly.assertThat(Link.valueOf("</something>;rel=\"foo\"")).isEqualTo(Link.of("/something", "foo"));
 			softly.assertThat(Link.valueOf("</something>;rel=\"foo\";title=\"Some title\""))
-					.isEqualTo(Link.of("/something", "foo"));
+					.isEqualTo(Link.of("/something", "foo").withTitle("Some title"));
 			softly.assertThat(Link.valueOf("</customer/1>;" //
 					+ "rel=\"self\";" //
 					+ "hreflang=\"en\";" //

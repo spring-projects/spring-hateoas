@@ -47,11 +47,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
-	private static final String URI_PATTERN = "(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-
 	private static final Pattern URI_AND_ATTRIBUTES_PATTERN = Pattern.compile("<(.*)>;(.*)");
-	private static final Pattern KEY_AND_VALUE_PATTERN = Pattern
-			.compile("(\\w+)=\"(\\p{Lower}[\\p{Lower}\\p{Digit}.\\-\\s]*|" + URI_PATTERN + ")\"");
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
@@ -515,11 +511,20 @@ public class Link implements Serializable {
 			return Collections.emptyMap();
 		}
 
+		String[] parts = source.split(";");
 		Map<String, String> attributes = new HashMap<>();
-		Matcher matcher = KEY_AND_VALUE_PATTERN.matcher(source);
 
-		while (matcher.find()) {
-			attributes.put(matcher.group(1), matcher.group(2));
+		for (String part : parts) {
+
+			int delimiter = part.indexOf('=');
+
+			String key = part.substring(0, delimiter).trim();
+			String value = part.substring(delimiter + 1).trim();
+
+			// Potentially unquote value
+			value = value.startsWith("\"") ? value.substring(1, value.length() - 1) : value;
+
+			attributes.put(key, value);
 		}
 
 		return attributes;
