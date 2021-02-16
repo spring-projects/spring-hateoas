@@ -80,7 +80,7 @@
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.5.0</jsonpath.version>
 		<junit.version>5.7.1</junit.version>
-		<reactor-bom.version>2020.0.3</reactor-bom.version>
+		<reactor-bom.version>2020.0.4</reactor-bom.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<spring.version>5.3.4-SNAPSHOT</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
@@ -94,7 +94,7 @@
 		<profile>
 			<id>spring-next</id>
 			<properties>
-				<reactor-bom.version>2020.0.4-SNAPSHOT</reactor-bom.version>
+				<reactor-bom.version>2020.0.5-SNAPSHOT</reactor-bom.version>
 				<spring.version>5.3.4-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
@@ -888,7 +888,7 @@
 			<version>${evo.version}</version>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<!-- Validation API -->
 
 		<dependency>
