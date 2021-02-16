@@ -179,6 +179,14 @@ class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getMapping(method)).isEqualTo("/type/spring-web/{symbolicName}-{version}{extension}");
 	}
 
+	@Test // #1468
+	void keepsTrailingSlash() throws Exception {
+
+		Method method = TrailingSlashes.class.getMethod("trailingSlash");
+
+		assertThat(discoverer.getMapping(method)).isEqualTo("/api/myentities/");
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -266,5 +274,13 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping({ "/method", "/methodAlias" })
 		void method();
+	}
+
+	// #1468
+
+	interface TrailingSlashes {
+
+		@RequestMapping("/api/myentities/")
+		Object trailingSlash();
 	}
 }
