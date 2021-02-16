@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2.4 (2021-02-16)
+----------------------------------------
+- #1469 - AnnotationMappingDiscoverer does not preserve trailing mapping slashes.
+- #1467 - Fix setup of Servlet API consumption.
+- #1464 - Upgrade to Reactor 2020.0.4.
+- #1463 - Upgrade to Spring 5.3.4.
+- #1459 - Link.parse(…) should be able to handle unquoted link relations.
+- #1454 - Multiple template variables using regular expression break link creation.
+- #1449 - API doc  says "curieProvider can be null" but it is required.
+- #1440 - Memory leak in WebHandler.AFFORDANCES_CACHE.
+- #1436 - Curies relation can be added to `_links` without any curie given by the curie provider.
+- #1434 - Backport rejection of @JsonValue types in EntityModel.
+
 Changes in version 1.2.3 (2021-01-13)
 ----------------------------------------
 - #1432 - Upgrade to Spring Framework 5.3.3.
