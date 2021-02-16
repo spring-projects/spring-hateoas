@@ -93,11 +93,21 @@
 	<profiles>
 
 		<profile>
+
 			<id>spring-next</id>
+
 			<properties>
 				<reactor-bom.version>2020.0.5-SNAPSHOT</reactor-bom.version>
 				<spring.version>5.3.4-SNAPSHOT</spring.version>
 			</properties>
+
+			<repositories>
+				<repository>
+					<id>spring-snapshot</id>
+					<url>https://repo.spring.io/lib-snapshot</url>
+				</repository>
+			</repositories>
+
 		</profile>
 
 		<profile>
@@ -1167,13 +1177,6 @@
 			<url>https://jcenter.bintray.com</url>
 		</pluginRepository>
 	</pluginRepositories>
-
-	<repositories>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/lib-snapshot</url>
-		</repository>
-	</repositories>
 
 	<scm>
 		<url>https://github.com/spring-projects/spring-hateoas</url>
