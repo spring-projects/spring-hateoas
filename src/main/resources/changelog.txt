@@ -1,6 +1,35 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3 M2 (2021-02-16)
+----------------------------------------
+- #1468 - AnnotationMappingDiscoverer does not preserve trailing mapping slashes.
+- #1462 - Upgrade to Reactor 2020.0.4.
+- #1458 - Link.parse(…) should be able to handle unquoted link relations.
+- #1457 - Add RepresentationModel.mapLink(LinkRelation, Function<Link, Link>) to handle or replace existing links.
+- #1456 - Properly guard against validation API < 2.0.
+- #1453 - Use new configuration infrastructure on MappingJackson2MessageConverter / Jackson2CodecSupport.
+- #1452 - Upgrade to Spring 5.3.4.
+- #1451 - Upgrade to ArchUnit 0.16.0.
+- #1450 - Multiple template variables using regular expression break link creation.
+- #1447 - Simplify Jackson customizations for HAL FORMS.
+- #1445 - Support for type attribute of HAL FORMS properties.
+- #1444 - Fix settings for documentation publishing.
+- #1443 - Expose affordance input payload media type in HAL FORMS contentType attribute.
+- #1442 - Support for input payload media type exposure for affordances.
+- #1441 - Improvements to AffordanceModelFactory SPI.
+- #1439 - Support for HAL FORMS min, max, minLength and maxLength attributes.
+- #1438 - Support for HAL FORMS placeholder property for template properties.
+- #1428 - Curies relation can be added to `_links` without any curie given by the curie provider.
+- #1427 - Support HAL-FORMS target template element property.
+- #1415 - Remove obsolete Spring plugins repository.
+- #1405 - Memory leak in WebHandler.AFFORDANCES_CACHE.
+- #1371 - Using @JsonValue in the type of the content of EntityModel is now broken.
+- #1253 - Collections not embedded with HAL compatible vendor specific media type.
+-  #352 - ControllerLinkBuilder.linkTo fails to build a link to a method that uses entity as a target of @PathVariable in its signature.
+-  #149 - AnnotatedParametersParameterAccessor uses DefaultFormattingConversionService.
+-  #144 - linkTo and methodOn with custom RequestMappingHandlerMapping.
+
 Changes in version 1.3 M1 (2021-01-13)
 ----------------------------------------
 - #1433 - Upgrade to Spring Framework 5.3.3.
