@@ -24,11 +24,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Greg Turnquist
  */
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
-
-	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/{2,}");
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
@@ -193,6 +191,10 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 			String part = parts[i];
 
+			if (!StringUtils.hasText(part)) {
+				continue;
+			}
+
 			if (i != 0) {
 				result.append("/");
 			}
@@ -200,7 +202,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			result.append(part.contains(":") ? cleanupPart(part) : part);
 		}
 
-		return MULTIPLE_SLASHES.matcher(result.toString()).replaceAll("/");
+		return (mapping.endsWith("/") ? result.append("/") : result).toString();
 	}
 
 	private static String cleanupPart(String part) {
