@@ -716,18 +716,28 @@ public class Jackson2HalModule extends SimpleModule {
 		private final Map<Class<?>, Object> serializers = new HashMap<>();
 		private final @Nullable AutowireCapableBeanFactory delegate;
 
+		/**
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
+		 * and {@link MessageResolver}. Uses a default {@link HalConfiguration} and falls back to instantiation using a
+		 * default constructor. For support of looking up instances via an {@link AutowireCapableBeanFactory} use
+		 * {@link #Jackson2HalModule(LinkRelationProvider, CurieProvider, MessageResolver, HalConfiguration, AutowireCapableBeanFactory)}
+		 *
+		 * @param provider must not be {@literal null}.
+		 * @param curieProvider must not be {@literal null}.
+		 * @param resolver must not be {@literal null}.
+		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider,
 				MessageResolver resolver) {
 			this(provider, curieProvider, resolver, new HalConfiguration());
 		}
 
 		/**
-		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
-		 * and {@link MessageResolver}. Registers a prepared {@link HalResourcesSerializer} and
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider},
+		 * {@link MessageResolver} and {@link HalConfiguration}. Registers a prepared {@link HalResourcesSerializer} and
 		 * {@link HalLinkListSerializer} falling back to instantiation expecting a default constructor.
 		 *
 		 * @param provider must not be {@literal null}.
-		 * @param curieProvider can be {@literal null}.
+		 * @param curieProvider must not be {@literal null}.
 		 * @param resolver must not be {@literal null}.
 		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
@@ -735,6 +745,17 @@ public class Jackson2HalModule extends SimpleModule {
 			this(provider, curieProvider, resolver, halConfiguration, null);
 		}
 
+		/**
+		 * Creates a new {@link HalHandlerInstantiator} using the given {@link LinkRelationProvider}, {@link CurieProvider}
+		 * {@link MessageResolver}, {@link HalConfiguration} and {@link AutowireCapableBeanFactory}. Registers a prepared
+		 * {@link HalResourcesSerializer} and {@link HalLinkListSerializer} falling back to looking up Jackson components in
+		 * the given {@link AutowireCapableBeanFactory} or ultimately instantiation expecting a default constructor.
+		 *
+		 * @param provider must not be {@literal null}.
+		 * @param curieProvider must not be {@literal null}.
+		 * @param resolver must not be {@literal null}.
+		 * @param delegate can be {@literal null}.
+		 */
 		public HalHandlerInstantiator(LinkRelationProvider provider, CurieProvider curieProvider, MessageResolver resolver,
 				HalConfiguration halConfiguration, @Nullable AutowireCapableBeanFactory delegate) {
 
