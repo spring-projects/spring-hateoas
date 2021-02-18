@@ -116,7 +116,7 @@ pipeline {
 
 			environment {
 				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
-				SONATYPE = credentials('oss-token')
+				SONATYPE = credentials('oss-login')
 				KEYRING = credentials('spring-signing-secring.gpg')
 				PASSPHRASE = credentials('spring-gpg-passphrase')
 			}
@@ -144,6 +144,11 @@ pipeline {
 
 					if (RELEASE_TYPE == 'release') {
 						sh "PROFILE=ci,central ci/build-and-deploy-to-maven-central.sh ${PROJECT_VERSION}"
+
+						slackSend(
+                                color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
+                                channel: '#spring-hateoas',
+                                message: "@here Spring HATEOAS ${PROJECT_VERSION} is staged on Sonatype awaiting closure and release.")
 					} else {
 						sh "PROFILE=ci,${RELEASE_TYPE} ci/build-and-deploy-to-artifactory.sh"
 					}

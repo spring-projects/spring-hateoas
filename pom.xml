@@ -705,10 +705,10 @@
 							<extensions>true</extensions>
 							<configuration>
 								<serverId>sonatype</serverId>
-								<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-								<autoReleaseAfterClose>true</autoReleaseAfterClose>
+								<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+								<autoReleaseAfterClose>false</autoReleaseAfterClose>
 								<keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
-								<skipStagingRepositoryClose>false</skipStagingRepositoryClose>
+								<skipStagingRepositoryClose>true</skipStagingRepositoryClose>
 							</configuration>
 						</plugin>
 					</plugins>
@@ -734,7 +734,7 @@
 			<distributionManagement>
 				<repository>
 					<id>sonatype</id>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+					<url>https://s01.oss.sonatype.org//service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
 
