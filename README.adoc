@@ -39,8 +39,10 @@ git config core.commentchar "/"
 
 NOTE: You can chain the previous set of commands together using `&&`.
 
-The pipeline will build and release the "release" branch. It will also build a new a new snapshot and stage it on artifactory.
-And if it's a `.RELEASE`, the pipeline will push it out to Maven Central.
+The pipeline will build and release the "release" branch. It will also build a new snapshot and stage it on artifactory.
+And if it's a `.RELEASE`, the pipeline will push it out to Maven Central. To complete a release on Maven Central, you must login
+to the server shown in `pom.xml`, close, and release. This is a stop gap to guard against bad releases accidentally getting pushed
+out to Maven Central.
 
 === Running CI tasks locally
 
