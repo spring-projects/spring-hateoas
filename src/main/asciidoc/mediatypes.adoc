@@ -858,7 +858,7 @@ public class MyMediaTypeConfiguration implements HypermediaMappingInformation {
 
   @Override
   public List<MediaType> getMediaTypes() {
-    return MediaType.parse("application/vnd-acme-media-type") <1>
+    return Collections.singletonList(MediaType.parseMediaType("application/vnd-acme-media-type")); <1>
   }
 
   @Override
