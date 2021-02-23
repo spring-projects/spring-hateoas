@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Unit tests for {@link DelegatingEntityLinks}.
- * 
+ *
  * @author Oliver Gierke
  */
 class DelegatingEntityLinksUnitTest extends TestUtils {
