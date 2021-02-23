@@ -78,7 +78,16 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 		return getPluginFor(type).linkToItemResource(type, id);
 	}
 
-	/* 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.AbstractEntityLinks#linkForItemResource(java.lang.Class, java.lang.Object)
+	 */
+	@Override
+	public LinkBuilder linkForItemResource(Class<?> type, Object id) {
+		return getPluginFor(type).linkForItemResource(type, id);
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */

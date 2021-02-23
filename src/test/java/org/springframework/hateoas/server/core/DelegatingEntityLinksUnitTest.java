@@ -72,6 +72,17 @@ class DelegatingEntityLinksUnitTest extends TestUtils {
 		verify(target, times(1)).linkFor(String.class);
 	}
 
+	@Test // #1478
+	void delegatesCallToLinkForItemResource() {
+
+		EntityLinks target = mock(EntityLinks.class);
+		when(target.supports(String.class)).thenReturn(true);
+
+		createDelegatingEntityLinks(target).linkForItemResource(String.class, 0);
+
+		verify(target, times(1)).linkForItemResource(String.class, 0);
+	}
+
 	private EntityLinks createDelegatingEntityLinks(EntityLinks target) {
 		return new DelegatingEntityLinks(SimplePluginRegistry.of(target));
 	}
