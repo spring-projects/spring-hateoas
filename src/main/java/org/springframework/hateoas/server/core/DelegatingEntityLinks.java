@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  *
  * @author Oliver Gierke
  */
-public class DelegatingEntityLinks extends AbstractEntityLinks {
+public class DelegatingEntityLinks implements EntityLinks {
 
 	private final PluginRegistry<EntityLinks, Class<?>> delegates;
 
