@@ -21,5 +21,5 @@ MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw \
     -Dmaven.test.skip=true \
     -Dgpg.passphrase=${PASSPHRASE} \
     -Dgpg.secretKeyring=${GNUPGHOME}/secring.gpg \
-    -DstagingDescription="Releasing ${PROJECT_VERSION}" \
+    -DstagingDescription="Releasing Spring HATEOAS ${PROJECT_VERSION}" \
     clean deploy -B
