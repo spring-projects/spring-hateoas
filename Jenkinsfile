@@ -123,12 +123,8 @@ pipeline {
 
 			steps {
 				script {
-					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
-
-					// Extract project's version number
 					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
+							script: "ci/version.sh",
 							returnStdout: true
 					).trim()
 
