@@ -16,7 +16,10 @@
 package org.springframework.hateoas.server.core;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.core.ResolvableType;
@@ -24,9 +27,12 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.AffordanceModelFactory;
 import org.springframework.hateoas.mediatype.Affordances;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ConcurrentLruCache;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -37,20 +43,48 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class SpringAffordanceBuilder {
 
+	@SuppressWarnings("deprecation") //
+	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
+			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
+
+	private static final ConcurrentLruCache<AffordanceKey, Function<Affordances, List<Affordance>>> AFFORDANCES_CACHE = new ConcurrentLruCache<>(
+			256, key -> SpringAffordanceBuilder.create(key.type, key.method));
+
 	/**
-	 * Use the attributes of the current method call along with a collection of {@link AffordanceModelFactory}'s to create
-	 * a set of {@link Affordance}s.
+	 * Returns all {@link Affordance}s for the given type's method and base URI.
 	 *
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @param href must not be {@literal null}.
-	 * @param discoverer must not be {@literal null}.
+	 * @param href must not be {@literal null} or empty.
 	 * @return
 	 */
-	public static List<Affordance> create(Class<?> type, Method method, String href, MappingDiscoverer discoverer) {
+	public static List<Affordance> getAffordances(Class<?> type, Method method, String href) {
 
 		String methodName = method.getName();
 		Link affordanceLink = Link.of(href, LinkRelation.of(methodName));
+
+		return AFFORDANCES_CACHE
+				.get(new AffordanceKey(type, method))
+				.apply(Affordances.of(affordanceLink));
+	}
+
+	/**
+	 * Returns the mapping for the given type's method.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 */
+	@Nullable
+	public static String getMapping(Class<?> type, Method method) {
+		return DISCOVERER.getMapping(type, method);
+	}
+
+	private static Function<Affordances, List<Affordance>> create(Class<?> type, Method method) {
+
+		String methodName = method.getName();
+		ResolvableType outputType = ResolvableType.forMethodReturnType(method);
+		Collection<HttpMethod> requestMethods = DISCOVERER.getRequestMethod(type, method);
 
 		MethodParameters parameters = MethodParameters.of(method);
 
@@ -63,10 +97,7 @@ public class SpringAffordanceBuilder {
 				.map(QueryParameter::of) //
 				.collect(Collectors.toList());
 
-		ResolvableType outputType = ResolvableType.forMethodReturnType(method);
-		Affordances affordances = Affordances.of(affordanceLink);
-
-		return discoverer.getRequestMethod(type, method).stream() //
+		return affordances -> requestMethods.stream() //
 				.flatMap(it -> affordances.afford(it) //
 						.withInput(inputType) //
 						.withOutput(outputType) //
@@ -75,5 +106,56 @@ public class SpringAffordanceBuilder {
 						.build() //
 						.stream()) //
 				.collect(Collectors.toList());
+	}
+
+	private static final class AffordanceKey {
+
+		private final Class<?> type;
+		private final Method method;
+
+		AffordanceKey(Class<?> type, Method method) {
+
+			this.type = type;
+			this.method = method;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(@Nullable Object o) {
+
+			if (this == o) {
+				return true;
+			}
+
+			if (!(o instanceof AffordanceKey)) {
+				return false;
+			}
+
+			AffordanceKey that = (AffordanceKey) o;
+
+			return Objects.equals(this.type, that.type) //
+					&& Objects.equals(this.method, that.method);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.type, this.method);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return "WebHandler.AffordanceKey(type=" + this.type + ", method=" + this.method + ")";
+		}
 	}
 }
