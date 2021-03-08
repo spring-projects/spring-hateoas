@@ -346,6 +346,7 @@ Each property will get the following attributes defined:
 |`maxLength`| The maximum length value allowed for the property. Derived from Hibernate Validator's `@Length` annotation.
 |`min`| The minimum value allowed for the property. Derived from Hibernate Validator's `@Range` or JSR-303's `@Min` annotations.
 |`minLength`| The minimum length value allowed for the property. Derived from Hibernate Validator's `@Length` annotation.
+|`options`| The options to select a value from when submitting the form. For details, see <<mediatypes.hal-forms.options>>.
 |`prompt`| The user readable prompt to use when rendering the form input. For details, see <<mediatypes.hal-forms.i18n.prompts>>. 
 |`placeholder`| A user readable placeholder, to give an example for a format expected. The way of defining those follows <<mediatypes.hal-forms.i18n.prompts>> but uses the suffix `_placeholder`.
 |`type`| The HTML input type derived from the explicit `@InputType` annotation, JSR-303 validation annotations or the property's type. 
@@ -368,6 +369,31 @@ class CustomConfiguration {
 ----
 
 This setup will cause the HAL-FORMS template properties for representation model properties of type `CreditCardNumber` to declare a `regex` field with value `[0-9]{16}`.
+
+[[mediatypes.hal-forms.options]]
+==== Defining HAL-FORMS options for a property
+
+For properties whose value is supposed to match a certain superset of values, HAL-FORMS defines the `options` sub-document within a property definition.
+Options available for a certain property can be described via ``HalFormsConfiguration``'s `withOptions(…)` taking a pointer to a type's property and a creator function to turn a `PropertyMetadata` into a `HalFormsOptions` instance.
+
+[source, java]
+----
+@Configuration
+class CustomConfiguration {
+
+  @Bean
+  HalFormsConfiguration halFormsConfiguration() {
+
+    HalFormsConfiguration configuration = new HalFormsConfiguration();
+    configuration.withOptions(Order.class, "shippingMethod" metadata -> 
+      HalFormsOptions.inline("FedEx", "DHL"));
+  }
+}
+----
+
+See how we set up the option values `FedEx` and `DHL` as the options to select from for the `Order.shippingMethod` property.
+Alternatively, `HalFormsOptions.remote(…)` can point to a remote resource providing values dynamically.
+Fore more constraints on options settings, refer to https://rwcbook.github.io/hal-forms/#options-element[the spec] or the Javadoc of `HalFormsOptions`.
 
 [[mediatypes.hal-forms.i18n]]
 === Internationalization of form attributes
