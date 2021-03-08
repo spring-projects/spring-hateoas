@@ -22,7 +22,15 @@ import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -38,13 +46,11 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.util.UriComponents;
@@ -58,13 +64,6 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Drotbohm
  */
 public class WebHandler {
-
-	@SuppressWarnings("deprecation") //
-	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
-			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
-
-	private static final ConcurrentLruCache<AffordanceKey, List<Affordance>> AFFORDANCES_CACHE = new ConcurrentLruCache<>(
-			256, key -> SpringAffordanceBuilder.create(key.type, key.method, key.href.toUriString(), DISCOVERER));
 
 	public interface LinkBuilderCreator<T extends LinkBuilder> {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
@@ -101,8 +100,7 @@ public class WebHandler {
 		}
 
 		MethodInvocation invocation = invocations.getLastInvocation();
-
-		String mapping = DISCOVERER.getMapping(invocation.getTargetType(), invocation.getMethod());
+		String mapping = SpringAffordanceBuilder.getMapping(invocation.getTargetType(), invocation.getMethod());
 
 		return (finisher, conversionService) -> {
 
@@ -118,7 +116,8 @@ public class WebHandler {
 				values.put(names.next(), encodePath(classMappingParameters.next()));
 			}
 
-			HandlerMethodParameters parameters = HandlerMethodParameters.of(invocation.getMethod());
+			Method method = invocation.getMethod();
+			HandlerMethodParameters parameters = HandlerMethodParameters.of(method);
 			Object[] arguments = invocation.getArguments();
 			ConversionService resolved = conversionService;
 
@@ -163,8 +162,8 @@ public class WebHandler {
 				variables = variables.concat(variable);
 			}
 
-			List<Affordance> affordances = AFFORDANCES_CACHE
-					.get(new AffordanceKey(invocation.getTargetType(), invocation.getMethod(), components));
+			List<Affordance> affordances = SpringAffordanceBuilder.getAffordances(invocation.getTargetType(), method,
+					components.toUriString());
 
 			return creator.createBuilder(components, variables, affordances);
 		};
@@ -227,60 +226,6 @@ public class WebHandler {
 			if (key != null) {
 				builder.queryParam(key, encodeParameter(parameter.getValueAsString(arguments, conversionService)));
 			}
-		}
-	}
-
-	private static final class AffordanceKey {
-
-		private final Class<?> type;
-		private final Method method;
-		private final UriComponents href;
-
-		AffordanceKey(Class<?> type, Method method, UriComponents href) {
-
-			this.type = type;
-			this.method = method;
-			this.href = href;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(@Nullable Object o) {
-
-			if (this == o) {
-				return true;
-			}
-
-			if (!(o instanceof AffordanceKey)) {
-				return false;
-			}
-
-			AffordanceKey that = (AffordanceKey) o;
-
-			return Objects.equals(this.type, that.type) //
-					&& Objects.equals(this.method, that.method) //
-					&& Objects.equals(this.href, that.href);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.lang.Object#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-			return Objects.hash(this.type, this.method, this.href);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "WebHandler.AffordanceKey(type=" + this.type + ", method=" + this.method + ", href=" + this.href + ")";
 		}
 	}
 
