@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -625,6 +626,14 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/api?view=short");
 	}
 
+	@Test // #118
+	void usesFallbackConversionServiceIfNoContextIsCurrentlyPresent() {
+
+		RequestContextHolder.setRequestAttributes(null);
+
+		linkTo(methodOn(ControllerWithHandlerMethodParameterThatNeedsConversion.class).method(41L)).withSelfRel();
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -751,5 +760,12 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		public HttpEntity<?> root(String view) {
 			return ResponseEntity.noContent().build();
 		}
+	}
+
+	// #???
+	interface ControllerWithHandlerMethodParameterThatNeedsConversion {
+
+		@GetMapping("/{id}")
+		HttpEntity<?> method(@PathVariable Long id);
 	}
 }
