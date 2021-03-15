@@ -58,12 +58,15 @@ class TypeReferencesIntegrationTest {
 
 	private static final String COLLECTION_JSON_USER = "{ \"name\" : \"firstname\", \"value\" : \"Dave\" }, { \"name\" : \"lastname\", \"value\" : \"Matthews\" }";
 
-	private static final String RESOURCE_HAL = String.format("{ \"_links\" : { \"self\" : \"/resource\" }, %s }",
+	private static final String RESOURCE_HAL = String.format(
+			"{ \"_links\" : { \"self\" : { \"href\" : \"/resource\" } }, %s }",
 			HAL_USER);
 	private static final String RESOURCES_OF_USER_HAL = String
-			.format("{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ { %s } ] }}", HAL_USER);
+			.format("{ \"_links\" : { \"self\" : { \"href\" : \"/resource\" } }, \"_embedded\" : { \"users\" : [ { %s } ] }}",
+					HAL_USER);
 	private static final String RESOURCES_OF_RESOURCE_HAL = String
-			.format("{ \"_links\" : { \"self\" : \"/resources\" }, \"_embedded\" : { \"users\" : [ %s ] }}", RESOURCE_HAL);
+			.format("{ \"_links\" : { \"self\" : { \"href\" : \"/resource\" } }, \"_embedded\" : { \"users\" : [ %s ] }}",
+					RESOURCE_HAL);
 
 	private static final String RESOURCE_COLLECTION_JSON = String.format(
 			"{ \"collection\": { \"version\": \"1.0\", \"href\": \"localhost\", \"links\": [{ \"rel\": \"self\", \"href\": \"localhost\" }], \"items\": [{\"href\": \"localhost\", \"data\": [%s]}]}}",
