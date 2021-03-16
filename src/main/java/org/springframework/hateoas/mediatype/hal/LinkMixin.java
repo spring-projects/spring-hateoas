@@ -18,9 +18,11 @@ package org.springframework.hateoas.mediatype.hal;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.TrueOnlyBooleanSerializer;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
@@ -34,6 +36,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public abstract class LinkMixin extends Link {
 
 	private static final long serialVersionUID = 4720588561299667409L;
+
+	@JsonCreator
+	public static Link of(@JsonProperty("href") String href) {
+		return Link.of(href);
+	}
 
 	/*
 	 * (non-Javadoc)
