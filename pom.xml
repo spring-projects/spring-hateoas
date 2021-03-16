@@ -82,7 +82,7 @@
 		<junit.version>5.7.1</junit.version>
 		<reactor-bom.version>2020.0.5</reactor-bom.version>
 		<slf4j.version>1.7.30</slf4j.version>
-		<spring.version>5.3.4</spring.version>
+		<spring.version>5.3.5</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<kotlin.version>1.4.30</kotlin.version>
 		<kotlinx-coroutines.version>1.4.3</kotlinx-coroutines.version>
@@ -94,8 +94,8 @@
 		<profile>
 			<id>spring-next</id>
 			<properties>
-				<reactor-bom.version>2020.0.5-SNAPSHOT</reactor-bom.version>
-				<spring.version>5.3.5-SNAPSHOT</spring.version>
+				<reactor-bom.version>2020.0.6-SNAPSHOT</reactor-bom.version>
+				<spring.version>5.3.6-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
