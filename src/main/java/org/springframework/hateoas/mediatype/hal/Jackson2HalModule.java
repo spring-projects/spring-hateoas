@@ -584,8 +584,6 @@ public class Jackson2HalModule extends SimpleModule {
 		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			List<Link> result = new ArrayList<>();
-			String relation;
-			Link link;
 
 			// links is an object, so we parse till we find its end.
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
@@ -595,18 +593,14 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 
 				// save the relation in case the link does not contain it
-				relation = jp.getText();
+				String relation = jp.getText();
 
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-						link = jp.readValueAs(Link.class);
-						result.add(Link.of(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
-								.withType(link.getType()).withDeprecation(link.getDeprecation()));
+						result.add(jp.readValueAs(Link.class).withRel(relation));
 					}
 				} else {
-					link = jp.readValueAs(Link.class);
-					result.add(Link.of(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
-							.withType(link.getType()).withDeprecation(link.getDeprecation()));
+					result.add(jp.readValueAs(Link.class).withRel(relation));
 				}
 			}
 
