@@ -162,7 +162,7 @@ public class HalFormsConfiguration {
 	 *
 	 * @return will never be {@literal null}.
 	 */
-	HalConfiguration getHalConfiguration() {
+	public HalConfiguration getHalConfiguration() {
 		return halConfiguration;
 	}
 
