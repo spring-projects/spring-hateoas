@@ -1,6 +1,22 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3 M3 (2021-03-16)
+----------------------------------------
+- #1497 - Upgrade to Spring 5.3.5.
+- #1494 - Improve HAL Link deserialization.
+- #1493 - Upgrade to JaCoCo 0.8.6.
+- #1492 - Upgrade to Jackson 2.12.
+- #1491 - Upgrade to Kotlin Coroutines 1.4.3.
+- #1490 - Upgrade to Reactor 2020.0.5.
+- #1489 - Release 1.3 M3.
+- #1484 - Significant performance regression in WebHandler.
+- #1483 - Add support for HAL-FORMS options element.
+- #1482 - Properly find project version number for CI jobs.
+- #1477 - DelegatingEntityLinks does not override linkForItermResource(Class<?>, Object).
+- #1474 - Migrate to new Sonatype infrastructure.
+- #1421 - Use JDK 15 for CI testing.
+
 Changes in version 1.3 M2 (2021-02-16)
 ----------------------------------------
 - #1468 - AnnotationMappingDiscoverer does not preserve trailing mapping slashes.
