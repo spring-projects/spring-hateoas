@@ -43,7 +43,8 @@ public interface HalFormsOptions {
 	 * @param values must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	public static Inline inline(Object... values) {
+	@SuppressWarnings("unchecked")
+	public static <T> Inline inline(T... values) {
 
 		Assert.notNull(values, "Values must not be null!");
 
@@ -56,7 +57,7 @@ public interface HalFormsOptions {
 	 * @param values must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	public static Inline inline(Collection<Object> values) {
+	public static Inline inline(Collection<? extends Object> values) {
 
 		Assert.notNull(values, "Values must not be null!");
 
@@ -253,14 +254,14 @@ public interface HalFormsOptions {
 
 	public static class Inline extends AbstractHalFormsOptions<Inline> {
 
-		private final Collection<Object> inline;
+		private final Collection<? extends Object> inline;
 
 		/**
 		 * @param values
 		 * @param promptRef
 		 * @param valueRef
 		 */
-		private Inline(Collection<Object> values, @Nullable String promptRef, @Nullable String valueRef,
+		private Inline(Collection<? extends Object> values, @Nullable String promptRef, @Nullable String valueRef,
 				@Nullable Long minItems, @Nullable Long maxItems) {
 
 			super(promptRef, valueRef, minItems, maxItems);
@@ -276,7 +277,7 @@ public interface HalFormsOptions {
 		 * @return
 		 */
 		@JsonProperty
-		public Collection<Object> getInline() {
+		public Collection<? extends Object> getInline() {
 			return inline;
 		}
 

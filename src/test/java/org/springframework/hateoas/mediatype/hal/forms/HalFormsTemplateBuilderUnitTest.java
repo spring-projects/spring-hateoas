@@ -160,7 +160,7 @@ class HalFormsTemplateBuilderUnitTest {
 	@Test // #1483
 	void rendersRegisteredSuggest() {
 
-		List<Object> values = Arrays.asList("1234123412341234", "4321432143214321");
+		List<String> values = Arrays.asList("1234123412341234", "4321432143214321");
 
 		HalFormsConfiguration configuration = new HalFormsConfiguration()
 				.withOptions(PatternExample.class, "number", metadata -> HalFormsOptions.inline(values));
