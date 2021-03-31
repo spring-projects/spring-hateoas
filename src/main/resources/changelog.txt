@@ -1,6 +1,11 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3 RC1 (2021-03-31)
+----------------------------------------
+- #1505 - Improve signature of HalFormsOptions.inline(…).
+- #1504 - Allow mapping links conditionally via RepresentationModel.mapLinkIf(…).
+
 Changes in version 1.3 M3 (2021-03-16)
 ----------------------------------------
 - #1497 - Upgrade to Spring 5.3.5.
