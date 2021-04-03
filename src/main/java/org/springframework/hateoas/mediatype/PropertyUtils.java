@@ -539,7 +539,7 @@ public class PropertyUtils {
 	private static class Jsr303AwarePropertyMetadata extends DefaultPropertyMetadata {
 
 		private static final Optional<Class<? extends Annotation>> LENGTH_ANNOTATION;
-		private static final Class<? extends Annotation> URL_ANNOTATION, RANGE_ANNOTATION;
+		private static final @Nullable Class<? extends Annotation> URL_ANNOTATION, RANGE_ANNOTATION;
 		private static final Map<Class<? extends Annotation>, String> TYPE_MAP;
 
 		static {
@@ -609,10 +609,13 @@ public class PropertyUtils {
 		@Override
 		public Long getMin() {
 
-			Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "min", Long.class);
+			if (RANGE_ANNOTATION != null) {
 
-			if (attribute.isPresent()) {
-				return attribute.get();
+				Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "min", Long.class);
+
+				if (attribute.isPresent()) {
+					return attribute.get();
+				}
 			}
 
 			return getAnnotationAttribute(Min.class, "value", Long.class).orElse(null);
@@ -626,10 +629,13 @@ public class PropertyUtils {
 		@Override
 		public Long getMax() {
 
-			Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "max", Long.class);
+			if (RANGE_ANNOTATION != null) {
 
-			if (attribute.isPresent()) {
-				return attribute.get();
+				Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "max", Long.class);
+
+				if (attribute.isPresent()) {
+					return attribute.get();
+				}
 			}
 
 			return getAnnotationAttribute(Max.class, "value", Long.class).orElse(null);
