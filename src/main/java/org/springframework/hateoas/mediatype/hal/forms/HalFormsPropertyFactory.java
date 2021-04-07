@@ -80,12 +80,13 @@ class HalFormsPropertyFactory {
 			return Collections.emptyList();
 		}
 
-		HalFormsOptionsFactory options = configuration.getOptionsFactory();
+		HalFormsOptionsFactory optionsFactory = configuration.getOptionsFactory();
 
 		return model.createProperties((payload, metadata) -> {
 
 			String inputTypeSource = metadata.getInputType();
 			HtmlInputType inputType = inputTypeSource == null ? null : HtmlInputType.of(inputTypeSource);
+			HalFormsOptions options = optionsFactory.getOptions(payload, metadata);
 
 			HalFormsProperty property = new HalFormsProperty()
 					.withName(metadata.getName())
@@ -97,7 +98,8 @@ class HalFormsPropertyFactory {
 					.withMaxLength(metadata.getMaxLength())
 					.withRegex(lookupRegex(metadata)) //
 					.withType(inputType) //
-					.withOptions(options.getOptions(payload, metadata));
+					.withValue(options != null ? options.getSelectedValue() : null) //
+					.withOptions(options);
 
 			Function<String, I18nedPropertyMetadata> factory = I18nedPropertyMetadata.factory(payload, property);
 

@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -61,7 +62,7 @@ public interface HalFormsOptions {
 
 		Assert.notNull(values, "Values must not be null!");
 
-		return new Inline(values, null, null, null, null);
+		return new Inline(values, null, null, null, null, null);
 	}
 
 	/**
@@ -74,7 +75,7 @@ public interface HalFormsOptions {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		return new Remote(link, null, null, null, null);
+		return new Remote(link, null, null, null, null, null);
 	}
 
 	/**
@@ -122,14 +123,18 @@ public interface HalFormsOptions {
 	@Nullable
 	Long getMaxItems();
 
+	@Nullable
+	Object getSelectedValue();
+
 	public static abstract class AbstractHalFormsOptions<T extends AbstractHalFormsOptions<T>>
 			implements HalFormsOptions {
 
 		private final @Nullable String promptField, valueField;
 		private final @Nullable Long minItems, maxItems;
+		private final @Nullable Object selectedValue;
 
 		protected AbstractHalFormsOptions(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems) {
+				@Nullable Long maxItems, @Nullable Object selectedValue) {
 
 			Assert.isTrue(minItems == null || minItems >= 0, "MinItems must be greater than or equal to 0!");
 
@@ -137,6 +142,7 @@ public interface HalFormsOptions {
 			this.valueField = valueRef;
 			this.minItems = minItems;
 			this.maxItems = maxItems;
+			this.selectedValue = selectedValue;
 		}
 
 		/*
@@ -179,6 +185,17 @@ public interface HalFormsOptions {
 			return maxItems;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions#getSelectedValue()
+		 */
+		@Nullable
+		@Override
+		@JsonIgnore
+		public Object getSelectedValue() {
+			return selectedValue;
+		}
+
 		/**
 		 * Configures the given field to be used as prompt field.
 		 *
@@ -191,7 +208,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("Prompt field has to either be null or actually have text!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems);
+			return with(promptField, valueField, minItems, maxItems, selectedValue);
 		}
 
 		/**
@@ -206,7 +223,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("Value field has to either be null or actually have text!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems);
+			return with(promptField, valueField, minItems, maxItems, selectedValue);
 		}
 
 		/**
@@ -221,7 +238,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("minItems has to be null or greater or equal to zero!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems);
+			return with(promptField, valueField, minItems, maxItems, selectedValue);
 		}
 
 		/**
@@ -230,13 +247,23 @@ public interface HalFormsOptions {
 		 * @param maxItems must be {@literal null} or greater than zero.
 		 * @return
 		 */
-		public T withMaxItems(Long maxItems) {
+		public T withMaxItems(@Nullable Long maxItems) {
 
 			if (maxItems != null && maxItems <= 0) {
 				throw new IllegalArgumentException("maxItems has to be null or greater than zero!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems);
+			return with(promptField, valueField, minItems, maxItems, selectedValue);
+		}
+
+		/**
+		 * Configured the value to be initially selected
+		 *
+		 * @param value
+		 * @return
+		 */
+		public T withSelectedValue(@Nullable Object value) {
+			return with(promptField, valueField, minItems, maxItems, value);
 		}
 
 		/**
@@ -249,7 +276,7 @@ public interface HalFormsOptions {
 		 * @return
 		 */
 		protected abstract T with(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems);
+				@Nullable Long maxItems, @Nullable Object selectedValue);
 	}
 
 	public static class Inline extends AbstractHalFormsOptions<Inline> {
@@ -262,9 +289,9 @@ public interface HalFormsOptions {
 		 * @param valueRef
 		 */
 		private Inline(Collection<? extends Object> values, @Nullable String promptRef, @Nullable String valueRef,
-				@Nullable Long minItems, @Nullable Long maxItems) {
+				@Nullable Long minItems, @Nullable Long maxItems, @Nullable Object selectedValue) {
 
-			super(promptRef, valueRef, minItems, maxItems);
+			super(promptRef, valueRef, minItems, maxItems, selectedValue);
 
 			Assert.notNull(values, "Values must not be null!");
 
@@ -283,12 +310,12 @@ public interface HalFormsOptions {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.AbstractHalFormsOptions#with(java.lang.String, java.lang.String, java.lang.Long, java.lang.Long)
+		 * @see org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.AbstractHalFormsOptions#with(java.lang.String, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Object)
 		 */
 		@Override
 		protected Inline with(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems) {
-			return new Inline(inline, promptRef, valueRef, minItems, maxItems);
+				@Nullable Long maxItems, @Nullable Object selectedValue) {
+			return new Inline(inline, promptRef, valueRef, minItems, maxItems, selectedValue);
 		}
 	}
 
@@ -302,9 +329,9 @@ public interface HalFormsOptions {
 		private final Link link;
 
 		private Remote(Link link, @Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems) {
+				@Nullable Long maxItems, @Nullable Object selectedValue) {
 
-			super(promptRef, valueRef, minItems, maxItems);
+			super(promptRef, valueRef, minItems, maxItems, selectedValue);
 
 			Assert.notNull(link, "Link must not be null!");
 
@@ -323,12 +350,12 @@ public interface HalFormsOptions {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.Foo#withFoo(java.lang.String, java.lang.String)
+		 * @see org.springframework.hateoas.mediatype.hal.forms.HalFormsOptions.AbstractHalFormsOptions#with(java.lang.String, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Object)
 		 */
 		@Override
 		protected Remote with(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems) {
-			return new Remote(link, promptRef, valueRef, minItems, maxItems);
+				@Nullable Long maxItems, @Nullable Object selectedValue) {
+			return new Remote(link, promptRef, valueRef, minItems, maxItems, selectedValue);
 		}
 	}
 }

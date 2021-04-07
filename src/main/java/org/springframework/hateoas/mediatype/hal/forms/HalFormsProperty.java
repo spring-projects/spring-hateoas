@@ -38,7 +38,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_DEFAULT)
 final class HalFormsProperty implements Named {
 
-	private final String name, value, prompt, regex, placeholder;
+	private final String name, prompt, regex, placeholder;
+	private final Object value;
 	private final boolean templated, multi;
 	private final @JsonInclude(Include.NON_DEFAULT) boolean readOnly, required;
 	private final @Nullable Long min, max, minLength, maxLength;
@@ -64,12 +65,13 @@ final class HalFormsProperty implements Named {
 		this.options = null;
 	}
 
-	private HalFormsProperty(String name, boolean readOnly, String value, String prompt, String regex, boolean templated,
+	private HalFormsProperty(String name, boolean readOnly, @Nullable Object value, String prompt, String regex,
+			boolean templated,
 			boolean required, boolean multi, String placeholder, @Nullable Long min, @Nullable Long max,
 			@Nullable Long minLength, @Nullable Long maxLength, @Nullable HtmlInputType type,
 			@Nullable HalFormsOptions options) {
 
-		Assert.notNull(name, "name must not be null!");
+		Assert.notNull(name, "Name must not be null!");
 
 		this.name = name;
 		this.readOnly = readOnly;
@@ -132,7 +134,7 @@ final class HalFormsProperty implements Named {
 	 * @param value
 	 * @return
 	 */
-	HalFormsProperty withValue(String value) {
+	HalFormsProperty withValue(@Nullable Object value) {
 
 		return this.value == value ? this
 				: new HalFormsProperty(this.name, this.readOnly, value, this.prompt, this.regex, this.templated, this.required,
@@ -329,7 +331,7 @@ final class HalFormsProperty implements Named {
 	}
 
 	@JsonProperty
-	String getValue() {
+	Object getValue() {
 		return this.value;
 	}
 
