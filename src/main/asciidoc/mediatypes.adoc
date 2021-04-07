@@ -895,7 +895,7 @@ The preferred way to implement media type representations is by providing a type
 In the `Serializer` and `Deserializer` implementations registered for `RepresentationModel`, convert the instances into the media type-specific model types and then lookup the Jackson serializer for those.
 
 The media types supported by default use the same configuration mechanism as third-party implementations would do.
-So it's worth studying the implementations in https://github.com/spring-projects/spring-hateoas/tree/master/src/main/java/org/springframework/hateoas/mediatype[the `mediatype` package].
+So it's worth studying the implementations in https://github.com/spring-projects/spring-hateoas/tree/main/src/main/java/org/springframework/hateoas/mediatype[the `mediatype` package].
 Note, that the built in media type implementations keep their configuration classes package private, as they're activated via `@EnableHypermediaSupport`.
 Custom implementations should probably make those public instead to make sure, users can import those configuration classes from their application packages.
 

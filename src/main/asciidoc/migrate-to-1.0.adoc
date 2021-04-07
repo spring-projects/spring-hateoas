@@ -39,7 +39,7 @@ Also the name changes have been reflected in the classes contained in `TypeRefer
 [[migrate-to-1.0.script]]
 == The migration script
 
-You can find https://github.com/spring-projects/spring-hateoas/tree/master/etc[a script] to run from your application root that will update all import statements and static method references to Spring HATEOAS types that moved in our source code repository.
+You can find https://github.com/spring-projects/spring-hateoas/tree/main/etc[a script] to run from your application root that will update all import statements and static method references to Spring HATEOAS types that moved in our source code repository.
 Simply download that, run it from your project root.
 By default it will inspect all Java source files and replace the legacy Spring HATEOAS type references with the new ones.
 
