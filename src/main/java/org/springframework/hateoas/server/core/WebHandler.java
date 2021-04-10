@@ -459,7 +459,7 @@ public class WebHandler {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
-			if (!(annotation != null && annotation.required()) || parameter.isOptional()) {
+			if (!isRequired() || parameter.isOptional()) {
 				return SKIP_VALUE;
 			}
 

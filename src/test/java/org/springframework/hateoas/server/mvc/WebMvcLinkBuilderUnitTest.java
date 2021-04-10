@@ -473,7 +473,7 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
 
-		assertThat(link.getHref()).endsWith("/bar");
+		assertThat(link.getHref()).endsWith("/bar{?size}");
 	}
 
 	/**
