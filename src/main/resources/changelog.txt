@@ -1,13 +1,21 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3 GA (2021-04-13)
+--------------------------------------
+- #1513 - Upgrade to Jackson 2.12.3.
+- #1512 - Upgrade to Spring Framework 5.3.6 and Reactor 2020.0.6.
+- #1510 - Support for defining selected value on HalFormsOptions.
+- #1509 - Migrate to main branch.
+- #1507 - Potential NullPointerException in Jsr303AwarePropertyMetadata.
+
 Changes in version 1.3 RC1 (2021-03-31)
-----------------------------------------
+---------------------------------------
 - #1505 - Improve signature of HalFormsOptions.inline(…).
 - #1504 - Allow mapping links conditionally via RepresentationModel.mapLinkIf(…).
 
 Changes in version 1.3 M3 (2021-03-16)
-----------------------------------------
+--------------------------------------
 - #1497 - Upgrade to Spring 5.3.5.
 - #1494 - Improve HAL Link deserialization.
 - #1493 - Upgrade to JaCoCo 0.8.6.
@@ -23,7 +31,7 @@ Changes in version 1.3 M3 (2021-03-16)
 - #1421 - Use JDK 15 for CI testing.
 
 Changes in version 1.3 M2 (2021-02-16)
-----------------------------------------
+--------------------------------------
 - #1468 - AnnotationMappingDiscoverer does not preserve trailing mapping slashes.
 - #1462 - Upgrade to Reactor 2020.0.4.
 - #1458 - Link.parse(…) should be able to handle unquoted link relations.
@@ -52,7 +60,7 @@ Changes in version 1.3 M2 (2021-02-16)
 -  #144 - linkTo and methodOn with custom RequestMappingHandlerMapping.
 
 Changes in version 1.3 M1 (2021-01-13)
-----------------------------------------
+--------------------------------------
 - #1433 - Upgrade to Spring Framework 5.3.3.
 - #1425 - RepresentationModelProcessor not invoked for PagedModel / CollectionModel consisting of RepresentationModels.
 - #1424 - More convenience methods for MvcLink.
@@ -65,12 +73,12 @@ Changes in version 1.3 M1 (2021-01-13)
 - #475  - Allow all UriTemplate variable names following RFC.
 
 Changes in version 1.2 GA (2020-10-27)
-----------------------------------------
+--------------------------------------
 - #1384 - Upgrade to Spring Framework 5.3.
 - #1382 - Create an ObjectMapperCustomizer to allow tailoring ObjectMapper through media types configuration.
 
 Changes in version 1.2 RC1 (2020-09-15)
-----------------------------------------
+---------------------------------------
 - #1367 - Release Spring HATEOAS 1.2.0.RC1.
 - #1366 - Upgrade to Spring Framework 5.3.0-RC1.
 - #1364 - Document that media type implementation configuration should be public.
@@ -78,7 +86,7 @@ Changes in version 1.2 RC1 (2020-09-15)
 - #1352 - Map content is not getting serialized properly.
 
 Changes in version 1.2 M1 (2020-08-11)
-----------------------------------------
+--------------------------------------
 - #1351 - Upgrade to Jackson 2.11.2.
 - #1350 - Upgrade to Kotlin 1.4 RC.
 - #1349 - Release 1.2 M1.
@@ -104,7 +112,7 @@ Changes in version 1.2 M1 (2020-08-11)
 - #361 - Add Support for Resolving Property Values in @RequestMapping(value).
 
 Changes in version 1.1.0.RELEASE (2020-05-11)
-----------------------------------------
+---------------------------------------------
 - #1292 - Release 1.1.0.RELEASE.
 - #1280 - RepresentationModelProcessorInvoker incorrectly invokes generic processors.
 - #968 - @JsonUnwrapped ignored with (embedded) CollectionModel and HAL Forms.
@@ -113,7 +121,7 @@ Changes in version 1.1.0.RELEASE (2020-05-11)
 - #193 - Support for Resources in a Resource to be added to _embedded.
 
 Changes in version 1.1.0.RC1 (2020-04-28)
-----------------------------------------
+-----------------------------------------
 - #1277 - Upgrade to Jackson 2.11.0.
 - #1275 - Align Naming for Kotlin Extension Functions with Spring.
 - #1270 - Add Kotlin source to released artifacts.
@@ -208,7 +216,7 @@ Changes in version 1.1.0.M1 (2020-01-15)
 - #345 - Vnd.error links key on json response.
 
 Changes in version 1.0.2.RELEASE (2019-12-03)
-----------------------------------------
+---------------------------------------------
 - #1142 - Release 1.0.2.RELEASE.
 - #1140 - WebClientConfigurer "drops" ObjectMapper customizations from WebClients.
 - #1139 - Upgrade to Spring Framework 5.2.2.
@@ -221,7 +229,7 @@ Changes in version 1.0.2.RELEASE (2019-12-03)
 - #1123 - MemoryLeak caused by UriTemplate cache.
 
 Changes in version 1.0.1.RELEASE (2019-11-03)
-----------------------------------------
+---------------------------------------------
 - #1112 - Release 1.0.1.RELEASE.
 - #1111 - Add 1.0.1.RELEASE to the ChangeLog.
 - #1110 - Upgrade to Reactor Dysprosium-SR1.
@@ -229,7 +237,7 @@ Changes in version 1.0.1.RELEASE (2019-11-03)
 - #1104 - Migration for ResourceAssemblerSupport -> RepresentationModelAssemblerSupport missing.
 
 Changes in version 1.0.0.RELEASE (2019-09-30)
-----------------------------------------
+---------------------------------------------
 - #1090 - Release 1.0.0.RELEASE.
 - #1089 - Upgrade Reactor to Dysprosium-RELEASE.
 - #1088 - Upgrade to Jackson 2.10.
@@ -245,7 +253,7 @@ Changes in version 1.0.0.RELEASE (2019-09-30)
 - #837 - Update reference docs to reflect new APIs, SPIs, and package structures.
 
 Changes in version 1.0.0.RC2 (2019-09-05)
-----------------------------------------
+-----------------------------------------
 - #1072 - Expose null handling configuration of HalFormsTemplate.title.
 - #1070 - Release 1.0.0.RC2.
 - #1069 - Upgrade to Reactor Dyprosium-RC1.
@@ -262,7 +270,7 @@ Changes in version 1.0.0.RC2 (2019-09-05)
 - #1044 - Properly deprecate UriTemplate's constructors.
 
 Changes in version 1.0.0.RC1 (2019-08-05)
-----------------------------------------
+-----------------------------------------
 - #1042 - Upgrade to AssertJ 3.13.2.
 - #1041 - Upgrade to JUnit 5.5.1.
 - #1039 - ALPS documents should not render null attributes.

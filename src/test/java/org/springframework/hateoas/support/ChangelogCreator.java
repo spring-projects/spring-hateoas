@@ -38,7 +38,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 65;
+	private static final int MILESTONE_ID = 66;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {
@@ -95,7 +95,7 @@ class ChangelogCreator {
 
 		for (Object title : titles) {
 
-			String format = String.format("- #%s - %s", ids.next(), title);
+			String format = String.format("- #%s - %s", ids.next(), title.toString().replaceAll("`", ""));
 			System.out.println(format.endsWith(".") ? format : format.concat("."));
 		}
 	}
