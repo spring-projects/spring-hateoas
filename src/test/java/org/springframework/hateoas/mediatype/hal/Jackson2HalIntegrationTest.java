@@ -59,6 +59,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -641,6 +642,13 @@ class Jackson2HalIntegrationTest {
 
 		mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
 				.writeValueAsString(new RepresentationModel<>().add(Link.of("/href")));
+	}
+
+	@Test // #1516
+	void considersNamingBase() throws Exception {
+
+		mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+				.writeValueAsString(new RepresentationModel<>().add(Link.of("/href", "fooBar")));
 	}
 
 	@Relation(collectionRelation = "someSample")
