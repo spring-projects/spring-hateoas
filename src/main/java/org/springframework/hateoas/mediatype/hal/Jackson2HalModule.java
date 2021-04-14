@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -41,6 +40,8 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLi
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -145,7 +146,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public void serialize(Links value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			// sort links according to their relation
-			Map<LinkRelation, List<Object>> sortedLinks = new LinkedHashMap<>();
+			MultiValueMap<String, Object> sortedLinks = new LinkedMultiValueMap<>();
 			List<Link> links = new ArrayList<>();
 
 			boolean prefixingRequired = curieProvider != CurieProvider.NONE;
@@ -178,10 +179,7 @@ public class Jackson2HalModule extends SimpleModule {
 					curiedLinkPresent = true;
 				}
 
-				sortedLinks //
-						.computeIfAbsent(relation, key -> new ArrayList<>())//
-						.add(toHalLink(link, relation));
-
+				sortedLinks.add(relation.value(), toHalLink(link, relation));
 				links.add(link);
 			}
 
@@ -190,12 +188,12 @@ public class Jackson2HalModule extends SimpleModule {
 				Collection<?> curies = curieProvider.getCurieInformation(Links.of(links));
 
 				if (!curies.isEmpty()) {
-					sortedLinks.put(HalLinkRelation.CURIES, new ArrayList<>(curies));
+					sortedLinks.addAll(HalLinkRelation.CURIES.value(), new ArrayList<>(curies));
 				}
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-			JavaType keyType = typeFactory.constructType(LinkRelation.class);
+			JavaType keyType = typeFactory.constructType(String.class);
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
