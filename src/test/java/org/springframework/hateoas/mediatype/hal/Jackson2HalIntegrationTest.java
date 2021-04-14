@@ -636,6 +636,13 @@ class Jackson2HalIntegrationTest {
 				.isThrownBy(() -> document.read("$.curies", JSONObject.class));
 	}
 
+	@Test // #1515
+	void rendersLinksWhenMapEntrySortingIsEnabled() throws Exception {
+
+		mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+				.writeValueAsString(new RepresentationModel<>().add(Link.of("/href")));
+	}
+
 	@Relation(collectionRelation = "someSample")
 	static class SomeSample {
 		@JsonProperty String name;
