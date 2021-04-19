@@ -40,7 +40,7 @@ class HypermediaMappingInformationComparator implements Comparator<HypermediaMap
 	 */
 	HypermediaMappingInformationComparator(List<MediaType> mediaTypes) {
 
-		Assert.notEmpty(mediaTypes, "MediaTypes must not be empty!");
+		Assert.notNull(mediaTypes, "MediaTypes must not be null!");
 
 		this.mediaTypes = mediaTypes;
 	}
