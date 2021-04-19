@@ -351,13 +351,7 @@ class EnableHypermediaSupportIntegrationTest {
 	 * RepresentationModel -> uber, application/json, application/*+json
 	 *
 	 * hal-forms, uber, application/json, application/*+json
-	 *
-	 *
-	 *
-	 *
-	 *
 	 */
-
 	@Test
 	void ordersMediaTypeIntegrationBasedOnConfiguration() {
 
@@ -367,6 +361,14 @@ class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(converters.getSupportedMediaTypes()) //
 					.containsExactly(MediaTypes.UBER_JSON, MediaTypes.HAL_FORMS_JSON);
+		});
+	}
+
+	@Test // #1521
+	void bootstrapsWithOutDefaultMediaTypeEnabled() {
+
+		assertThatNoException().isThrownBy(() -> {
+			withServletContext(NoDefaultMediaTypes.class, context -> {});
 		});
 	}
 
@@ -588,4 +590,8 @@ class EnableHypermediaSupportIntegrationTest {
 	static class MediaTypeOrdering {
 
 	}
+
+	@Configuration
+	@EnableHypermediaSupport(type = {})
+	static class NoDefaultMediaTypes {}
 }
