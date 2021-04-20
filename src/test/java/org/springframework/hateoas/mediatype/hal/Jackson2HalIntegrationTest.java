@@ -644,6 +644,15 @@ class Jackson2HalIntegrationTest {
 				.writeValueAsString(new RepresentationModel<>().add(Link.of("/href")));
 	}
 
+	@Test // #1515, #1517
+	void rendersEmbeddedKeysWhenMapEntrySortingIsEnabled() throws Exception {
+
+		List<SimplePojo> embbededs = Arrays.asList(new SimplePojo(), new SimpleAnnotatedPojo());
+
+		mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+				.writeValueAsString(CollectionModel.of(embbededs));
+	}
+
 	@Test // #1516, #1519
 	void considersNamingBase() throws Exception {
 

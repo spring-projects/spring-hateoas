@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -333,7 +334,11 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 			}
 
-			provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
+			Map<String, Object> map = new LinkedHashMap<>(embeddeds.size());
+			embeddeds.forEach((key, it) -> map.put(key.value(), it));
+
+			provider.findValueSerializer(Map.class, property) //
+					.serialize(map, jgen, provider);
 		}
 
 		/*
