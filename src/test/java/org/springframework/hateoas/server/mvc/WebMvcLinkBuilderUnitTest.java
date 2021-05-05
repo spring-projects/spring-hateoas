@@ -304,33 +304,6 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	}
 
 	/**
-	 * @see #122, #169
-	 */
-	@Test
-	void rejectsMissingPathVariable() {
-
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null))//
-					.withSelfRel().expand();
-		});
-	}
-
-	/**
-	 * @see #122, #169
-	 */
-	@Test
-	void rejectsMissingRequiredRequestParam() {
-
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
-
-			assertThat(link.getVariableNames()).containsExactly("id");
-
-			link.expand();
-		});
-	}
-
-	/**
 	 * @see #170
 	 */
 	@Test
@@ -504,22 +477,6 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		assertThat(link.isTemplated()).isTrue();
 		assertThat(link.getHref()).contains("some%20id");
-	}
-
-	/**
-	 * @see #169
-	 */
-	@Test
-	void addsRequestParameterVariablesForMissingRequiredParameter() {
-
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-
-			Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, null)).withSelfRel();
-
-			assertThat(link.getVariableNames()).containsExactly("limit");
-
-			link.expand();
-		}).withMessageContaining("limit");
 	}
 
 	/**

@@ -324,9 +324,4 @@ class LinkUnitTest {
 	void createsUriForTemplateWithOptionalParameters() {
 		assertThat(Link.of("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
 	}
-
-	@Test
-	void uriCreationRejectsLinkWithUnresolvedMandatoryParameters() {
-		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> Link.of("/{segment}/path").toUri());
-	}
 }

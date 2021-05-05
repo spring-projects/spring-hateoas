@@ -472,11 +472,11 @@ public class WebHandler {
 				return value;
 			}
 
-			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
-
 			if (!isRequired() || parameter.isOptional()) {
 				return SKIP_VALUE;
 			}
+
+			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
 			return annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? SKIP_VALUE : null;
 		}

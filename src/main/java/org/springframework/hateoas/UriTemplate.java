@@ -15,13 +15,13 @@
  */
 package org.springframework.hateoas;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +33,6 @@ import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -51,14 +48,13 @@ import org.springframework.web.util.UriUtils;
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
-	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/]?)([\\w%\\,*]+)\\}");
+	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/\\.\\+\\;]?)([\\w(\\:\\d+)*%\\,*]+)\\}");
+	private static final Pattern ELEMENT_REGEX = Pattern.compile("([\\w\\%]+)(\\:\\d+)?(\\*)?");
 	private static final long serialVersionUID = -1007874653930162262L;
 
 	private final TemplateVariables variables;
-	private String baseUri;
-	private transient UriBuilderFactory factory;
-
-	private String toString;
+	private final ExpandGroups groups;
+	private final String baseUri, template;
 
 	/**
 	 * Creates a new {@link UriTemplate} using the given template string.
@@ -69,38 +65,52 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		Assert.hasText(template, "Template must not be null or empty!");
 
-		Matcher matcher = VARIABLE_REGEX.matcher(template);
-		int baseUriEndIndex = template.length();
+		int firstCurlyBraceIndex = template.indexOf('{');
+		template = prepareTemplate(template, firstCurlyBraceIndex);
+		String baseUri = template;
+
 		List<TemplateVariable> variables = new ArrayList<>();
+		List<ExpandGroup> expandGroups = new ArrayList<>();
 
-		while (matcher.find()) {
+		if (firstCurlyBraceIndex != -1) {
 
-			int start = matcher.start(0);
+			Matcher matcher = VARIABLE_REGEX.matcher(template);
 
-			VariableType type = VariableType.from(matcher.group(1));
-			String[] names = matcher.group(2).split(",");
+			while (matcher.find()) {
 
-			for (String name : names) {
+				String typeFlag = matcher.group(1);
+				String[] segments = matcher.group(2).split(",");
+				VariableType type = VariableType.from(typeFlag);
+				List<TemplateVariable> variableGroup = new ArrayList<>();
 
-				TemplateVariable variable;
+				for (String segment : segments) {
 
-				if (name.endsWith(VariableType.COMPOSITE_PARAM.toString())) {
-					variable = new TemplateVariable(name.substring(0, name.length() - 1), VariableType.COMPOSITE_PARAM);
-				} else {
-					variable = new TemplateVariable(name, type);
+					Matcher inner = ELEMENT_REGEX.matcher(segment);
+
+					while (inner.find()) {
+
+						String name = inner.group(1);
+						String limit = inner.group(2);
+						String composite = inner.group(3);
+
+						TemplateVariable variable = new TemplateVariable(name, type);
+
+						variable = StringUtils.hasText(composite) ? variable.composite() : variable;
+						variable = StringUtils.hasText(limit) ? variable.limit(Integer.valueOf(limit.substring(1))) : variable;
+
+						variableGroup.add(variable);
+						variables.add(variable);
+					}
 				}
 
-				if (!variable.isRequired() && start < baseUriEndIndex) {
-					baseUriEndIndex = start;
-				}
-
-				variables.add(variable);
+				expandGroups.add(new ExpandGroup(variableGroup));
 			}
 		}
 
 		this.variables = variables.isEmpty() ? TemplateVariables.NONE : new TemplateVariables(variables);
-		this.baseUri = template.substring(0, baseUriEndIndex);
-		this.factory = createFactory(baseUri);
+		this.groups = new ExpandGroups(expandGroups);
+		this.baseUri = baseUri;
+		this.template = template;
 	}
 
 	/**
@@ -108,17 +118,16 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 *
 	 * @param baseUri must not be {@literal null} or empty.
 	 * @param variables must not be {@literal null}.
-	 * @param factory must not be {@literal null}.
 	 */
-	private UriTemplate(String baseUri, TemplateVariables variables, UriBuilderFactory factory) {
+	private UriTemplate(String baseUri, String template, TemplateVariables variables, ExpandGroups groups) {
 
 		Assert.hasText(baseUri, "Base URI must not be null or empty!");
 		Assert.notNull(variables, "Template variables must not be null!");
-		Assert.notNull(factory, "UriBuilderFactory must not be null!");
 
 		this.baseUri = baseUri;
 		this.variables = variables;
-		this.factory = factory;
+		this.groups = groups;
+		this.template = template;
 	}
 
 	/**
@@ -163,6 +172,8 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
 		List<TemplateVariable> result = new ArrayList<>();
+		String newOriginal = template;
+		ExpandGroups groups = this.groups;
 
 		for (TemplateVariable variable : variables) {
 
@@ -177,10 +188,21 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 				continue;
 			}
 
+			ExpandGroup existing = groups.findLastExpandGroupOfType(variable.getType());
+			ExpandGroup group = new ExpandGroup(Collections.singletonList(variable));
+
+			if (existing != null) {
+				group = existing.merge(group);
+				newOriginal = newOriginal.replace(existing.asString(), group.asString());
+			} else {
+				newOriginal = newOriginal.concat(group.asString());
+			}
+
+			groups = groups.addOrAugment(group);
 			result.add(variable);
 		}
 
-		return new UriTemplate(baseUri, this.variables.concat(result), this.factory);
+		return new UriTemplate(baseUri, newOriginal, this.variables.concat(result), groups);
 	}
 
 	/**
@@ -255,21 +277,18 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		UriBuilder builder = factory.uriString(baseUri);
 		Iterator<Object> iterator = Arrays.asList(parameters).iterator();
+		Map<String, Object> foo = new HashMap<>();
 
-		variables.asList().stream() //
-				.filter(TemplateVariable::isRequired)//
-				.filter(__ -> iterator.hasNext()) //
-				.forEach(__ -> iterator.next());
+		variables.stream()
+				.map(TemplateVariable::getName)
+				.forEach(it -> {
 
-		for (TemplateVariable variable : getOptionalVariables()) {
+					Object value = iterator.hasNext() ? iterator.next() : null;
+					foo.put(it, value);
+				});
 
-			Object value = iterator.hasNext() ? iterator.next() : null;
-			appendToBuilder(builder, variable, value);
-		}
-
-		return builder.build(parameters);
+		return expand(foo);
 	}
 
 	/**
@@ -286,13 +305,21 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			return URI.create(baseUri);
 		}
 
-		UriBuilder builder = factory.uriString(baseUri);
+		String result = template;
 
-		for (TemplateVariable variable : getOptionalVariables()) {
-			appendToBuilder(builder, variable, parameters.get(variable.getName()));
+		for (ExpandGroup group : groups.groupList) {
+			result = result.replace(group.asString(), group.expand(parameters));
 		}
 
-		return builder.build(parameters);
+		return URI.create(result);
+	}
+
+	interface Expandable {
+
+		@Nullable
+		String expand(Map<String, ?> parameters);
+
+		String asString();
 	}
 
 	/*
@@ -310,117 +337,134 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 	 */
 	@Override
 	public String toString() {
+		return template;
+	}
 
-		if (toString == null) {
+	private static String prepareTemplate(String template, int index) {
 
-			UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
-			boolean hasQueryParameters = !components.getQueryParams().isEmpty();
+		String decodedTemplate = UriUtils.decode(template, StandardCharsets.UTF_8);
 
-			this.toString = baseUri + getOptionalVariables().toString(hasQueryParameters);
+		if (decodedTemplate.length() != template.length()) {
+			return template;
 		}
 
-		return toString;
+		String head = index == -1 ? template : template.substring(0, index);
+		String tail = index == -1 ? "" : template.substring(index);
+		String encodedBase = UriComponentsBuilder.fromUriString(head)
+				.encode()
+				.build()
+				.toUriString();
+
+		head = encodedBase.length() > head.length() ? encodedBase : head;
+
+		return head + tail;
 	}
 
-	private TemplateVariables getOptionalVariables() {
+	private static class ExpandGroups implements Serializable {
 
-		return variables.asList().stream() //
-				.filter(variable -> !variable.isRequired()) //
-				.collect(Collectors.collectingAndThen(Collectors.toList(), TemplateVariables::new));
-	}
+		private static final long serialVersionUID = 6260926152179514011L;
 
-	/**
-	 * Creates a {@link UriBuilderFactory} that might optionally encode the given base URI if it still needs to be
-	 * encoded.
-	 *
-	 * @param baseUri must not be {@literal null} or empty.
-	 * @return
-	 */
-	private static UriBuilderFactory createFactory(String baseUri) {
+		private final List<ExpandGroup> groupList;
 
-		EncodingMode mode = UriUtils.decode(baseUri, StandardCharsets.UTF_8).length() < baseUri.length() //
-				? EncodingMode.VALUES_ONLY //
-				: EncodingMode.TEMPLATE_AND_VALUES;
+		public ExpandGroups(List<ExpandGroup> groups) {
+			this.groupList = groups;
+		}
 
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		factory.setEncodingMode(mode);
+		public ExpandGroups addOrAugment(ExpandGroup group) {
 
-		return factory;
-	}
+			ExpandGroup existing = findLastExpandGroupOfType(group.type);
+			List<ExpandGroup> foo = new ArrayList<>(groupList);
 
-	/**
-	 * Appends the value for the given {@link TemplateVariable} to the given {@link UriComponentsBuilder}.
-	 *
-	 * @param builder must not be {@literal null}.
-	 * @param variable must not be {@literal null}.
-	 * @param value can be {@literal null}.
-	 */
-	private static void appendToBuilder(UriBuilder builder, TemplateVariable variable, @Nullable Object value) {
+			if (existing == null) {
 
-		if (value == null) {
+				foo.add(group);
 
-			if (variable.isRequired()) {
-				throw new IllegalArgumentException(
-						String.format("Template variable %s is required but no value was given!", variable.getName()));
+				return new ExpandGroups(foo);
 			}
 
-			return;
+			ExpandGroup merged = existing.merge(group);
+
+			foo.remove(existing);
+			foo.add(merged);
+
+			return new ExpandGroups(foo);
 		}
 
-		switch (variable.getType()) {
-			case COMPOSITE_PARAM:
-				appendComposite(builder, variable.getName(), value);
-				break;
-			case REQUEST_PARAM:
-			case REQUEST_PARAM_CONTINUED:
-				builder.queryParam(variable.getName(), value);
-				break;
-			case PATH_VARIABLE:
-			case SEGMENT:
-				builder.pathSegment(value.toString());
-				break;
-			case FRAGMENT:
-				builder.fragment(value.toString());
-				break;
-		}
-	}
+		@Nullable
+		ExpandGroup findLastExpandGroupOfType(VariableType type) {
 
-	/**
-	 * Expand what could be a single value, a {@link List}, or a {@link Map}.
-	 *
-	 * @param builder
-	 * @param name
-	 * @param value
-	 * @see https://tools.ietf.org/html/rfc6570#section-2.4.2
-	 */
-	@SuppressWarnings("unchecked")
-	private static void appendComposite(UriBuilder builder, String name, Object value) {
+			ExpandGroup result = null;
 
-		if (value instanceof Iterable) {
+			for (ExpandGroup entry : groupList) {
+				if (entry.canBeCombinedWith(type)) {
+					result = entry;
+				}
+			}
 
-			((Iterable<?>) value).forEach(it -> builder.queryParam(name, it));
-
-		} else if (value instanceof Map) {
-
-			((Map<Object, Object>) value).forEach((key, value1) -> builder.queryParam(key.toString(), value1));
-
-		} else {
-
-			builder.queryParam(name, value);
+			return result;
 		}
 	}
 
-	/**
-	 * Recreate {@link UriBuilderFactory} on deserialization.
-	 *
-	 * @param in
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
-	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private static class ExpandGroup implements Expandable, Serializable {
 
-		in.defaultReadObject();
+		private static final long serialVersionUID = -6057608202572953271L;
 
-		this.factory = createFactory(baseUri);
+		private final TemplateVariables variables;
+		private final VariableType type;
+
+		public ExpandGroup(List<TemplateVariable> variables) {
+			this(new TemplateVariables(variables));
+		}
+
+		ExpandGroup(TemplateVariables variables) {
+
+			this.variables = variables;
+			this.type = variables.asList().get(0).getType();
+		}
+
+		ExpandGroup merge(ExpandGroup group) {
+
+			Assert.isTrue(this.type.canBeCombinedWith(group.type), "Incompatible expand groups!");
+
+			return new ExpandGroup(variables.concat(group.variables));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.UriTemplate.Expandable#expand(org.springframework.web.util.UriBuilder, java.util.Map)
+		 */
+		@Nullable
+		@Override
+		public String expand(Map<String, ?> parameters) {
+
+			return type.join(variables.stream()
+					.map(it -> it.prepareValue(parameters))
+					.filter(it -> it != null)
+					.collect(Collectors.toList()));
+		}
+
+		boolean canBeCombinedWith(VariableType type) {
+			return this.type.canBeCombinedWith(type);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.UriTemplate.Expandable#asString()
+		 */
+		@Override
+		public String asString() {
+
+			return variables.stream().map(TemplateVariable::essence)
+					.collect(Collectors.joining(",", "{".concat(type.toString()), "}"));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return asString();
+		}
 	}
 }
