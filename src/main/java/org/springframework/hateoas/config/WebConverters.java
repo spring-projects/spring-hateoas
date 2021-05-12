@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Oliver Drotbohm
  */
-class WebConverters {
+public class WebConverters {
 
 	private static MediaType ANY_JSON = MediaType.parseMediaType("application/*+json");
 
