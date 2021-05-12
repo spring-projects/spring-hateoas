@@ -102,6 +102,42 @@ pipeline {
 						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
+				stage("test: kotlin-next (jdk8)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk8:latest'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+						}
+					}
+					options { timeout(time: 30, unit: 'MINUTES') }
+					steps {
+						sh 'PROFILE=kotlin-next ci/test.sh'
+					}
+				}
+				stage("test: kotlin-next (jdk11)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk11:latest'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+						}
+					}
+					options { timeout(time: 30, unit: 'MINUTES') }
+					steps {
+						sh 'PROFILE=kotlin-next ci/test.sh'
+					}
+				}
+				stage("test: kotlin-next (jdk15)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk15:latest'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+						}
+					}
+					options { timeout(time: 30, unit: 'MINUTES') }
+					steps {
+						sh 'PROFILE=kotlin-next ci/test.sh'
+					}
+				}
 			}
 		}
 
