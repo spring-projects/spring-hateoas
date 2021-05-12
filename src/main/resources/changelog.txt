@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2.6 (2021-05-12)
+----------------------------------------
+- #1536 - Add build profile for Kotlin 1.5.0 compatibility.
+- #1535 - Upgrade to Spring 5.3.7.
+- #1518 - Exception on HAL serialization with object mapper configured to sort map entries by keys.
+
+Changes in version 1.2.5 (2021-03-16)
+----------------------------------------
+- #1498 - Upgrade to Spring 5.3.5.
+- #1495 - Improve HAL Link deserialization.
+- #1486 - Significant performance regression in WebHandler.
+- #1478 - DelegatingEntityLinks does not override linkForItermResource(Class<?>, Object).
+
 Changes in version 1.2.4 (2021-02-16)
 ----------------------------------------
 - #1469 - AnnotationMappingDiscoverer does not preserve trailing mapping slashes.
