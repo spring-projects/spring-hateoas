@@ -25,14 +25,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -45,9 +44,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Deprecated
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
-
-	private static final Pattern MULTIPLE_SLASHES = Pattern.compile("/{2,}");
-	private static final Pattern TEMPLATE_VARIABLE_NAME = Pattern.compile("\\{(.*)\\}");
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
@@ -215,6 +211,10 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 			String part = parts[i];
 
+			if (!StringUtils.hasText(part)) {
+				continue;
+			}
+
 			if (i != 0) {
 				result.append("/");
 			}
@@ -222,26 +222,47 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 			result.append(part.contains(":") ? cleanupPart(part) : part);
 		}
 
-		return MULTIPLE_SLASHES.matcher(result.toString()).replaceAll("/");
+		return (mapping.endsWith("/") ? result.append("/") : result).toString();
 	}
 
-	private static String cleanupPart(String variable) {
+	private static String cleanupPart(String part) {
 
-		if (!variable.contains("{")) {
-			return variable;
+		StringBuilder builder = new StringBuilder();
+		int level = 0;
+		boolean inRegex = false;
+
+		for (int i = 0; i < part.length(); i++) {
+
+			char character = part.charAt(i);
+
+			if (character == '{') {
+
+				level++;
+
+				if (level == 1) {
+					builder.append(character);
+					continue;
+				}
+			}
+
+			if (level == 1 && character == ':') {
+				inRegex = true;
+			}
+
+			if (character == '}') {
+
+				level--;
+
+				if (level == 0) {
+					inRegex = false;
+				}
+			}
+
+			if (!inRegex) {
+				builder.append(character);
+			}
 		}
 
-		Matcher matcher = TEMPLATE_VARIABLE_NAME.matcher(variable);
-
-		if (!matcher.find()) {
-			return variable;
-		}
-
-		String rawName = matcher.group(1);
-		int colonIndex = rawName.indexOf(':');
-
-		return colonIndex < 0
-				? variable
-				: variable.replace(matcher.group(0), "{" + rawName.substring(0, colonIndex) + "}");
+		return builder.toString();
 	}
 }

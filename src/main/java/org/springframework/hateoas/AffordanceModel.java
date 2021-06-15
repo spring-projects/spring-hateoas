@@ -207,6 +207,11 @@ public abstract class AffordanceModel {
 		default Optional<PropertyMetadata> getPropertyMetadata(String name) {
 			return stream().filter(it -> it.hasName(name)).findFirst();
 		}
+
+		@Nullable
+		default Class<?> getType() {
+			return null;
+		}
 	}
 
 	/**
@@ -357,6 +362,16 @@ public abstract class AffordanceModel {
 
 		/*
 		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#getType()
+		 */
+		@Nullable
+		@Override
+		public Class<?> getType() {
+			return metadata.getType();
+		}
+
+		/*
+		 * (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override
@@ -391,7 +406,7 @@ public abstract class AffordanceModel {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	public interface PropertyMetadata {
+	public interface PropertyMetadata extends Named {
 
 		/**
 		 * The name of the property.

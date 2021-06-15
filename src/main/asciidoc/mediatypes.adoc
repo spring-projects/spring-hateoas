@@ -320,12 +320,36 @@ identically to <<mediatypes.hal,HAL documents>>.
 HAL-FORMS allows to describe criterias for each form field.
 Spring HATEOAS allows to customize those by shaping the model type for the input and output types and using annotations on them.
 
+Each template will get the following attributes defined:
+
+.Template attributes
+[options="header", cols="1,4"]
+|===============
+|Attribute|Description
+|`contentType`| The media type expected to be received by the server. Only included if the controller method pointed to exposes a `@RequestMapping(consumes = "…")` attribute, or the media type was defined explicitly when setting up the affordance.
+|`method`| The HTTP method to use when submitting the template.
+|`target`| The target URI to submit the form to. Will only be rendered if the affordance target is different than the link it was declared on.
+|`title`| The human readable title when displaying the template.
+|`properties`| All properties to be submitted with the form (see below).
+|===============
+
+Each property will get the following attributes defined:
+
+.Property attributes
 [options="header", cols="1,4"]
 |===============
 |Attribute|Description
 |`readOnly`| Set to `true` if there's no setter method for the property. If that is present, use Jackson's `@JsonProperty(Access.READ_ONLY)` on the accessors or field explicitly. Not rendered by default, thus defaulting to `false`.
 |`regex`| Can be customized by using JSR-303's `@Pattern` annotation either on the field or a type. In case of the latter the pattern will be used for every property declared as that particular type. Not rendered by default.
 |`required`| Can be customized by using JSR-303's `@NotNull`. Not rendered by default and thus defaulting to `false`. Templates using `PATCH` as method will automatically have all properties set to not required.
+|`max`| The maximum value allowed for the property. Derived from Hibernate Validator's `@Range` or JSR-303's `@Max` annotations.
+|`maxLength`| The maximum length value allowed for the property. Derived from Hibernate Validator's `@Length` annotation.
+|`min`| The minimum value allowed for the property. Derived from Hibernate Validator's `@Range` or JSR-303's `@Min` annotations.
+|`minLength`| The minimum length value allowed for the property. Derived from Hibernate Validator's `@Length` annotation.
+|`options`| The options to select a value from when submitting the form. For details, see <<mediatypes.hal-forms.options>>.
+|`prompt`| The user readable prompt to use when rendering the form input. For details, see <<mediatypes.hal-forms.i18n.prompts>>. 
+|`placeholder`| A user readable placeholder, to give an example for a format expected. The way of defining those follows <<mediatypes.hal-forms.i18n.prompts>> but uses the suffix `_placeholder`.
+|`type`| The HTML input type derived from the explicit `@InputType` annotation, JSR-303 validation annotations or the property's type. 
 |===============
 
 For types that you cannot annotate manually, you can register a custom pattern via a `HalFormsConfiguration` bean present in the application context.
@@ -346,11 +370,37 @@ class CustomConfiguration {
 
 This setup will cause the HAL-FORMS template properties for representation model properties of type `CreditCardNumber` to declare a `regex` field with value `[0-9]{16}`.
 
+[[mediatypes.hal-forms.options]]
+==== Defining HAL-FORMS options for a property
+
+For properties whose value is supposed to match a certain superset of values, HAL-FORMS defines the `options` sub-document within a property definition.
+Options available for a certain property can be described via ``HalFormsConfiguration``'s `withOptions(…)` taking a pointer to a type's property and a creator function to turn a `PropertyMetadata` into a `HalFormsOptions` instance.
+
+[source, java]
+----
+@Configuration
+class CustomConfiguration {
+
+  @Bean
+  HalFormsConfiguration halFormsConfiguration() {
+
+    HalFormsConfiguration configuration = new HalFormsConfiguration();
+    configuration.withOptions(Order.class, "shippingMethod" metadata -> 
+      HalFormsOptions.inline("FedEx", "DHL"));
+  }
+}
+----
+
+See how we set up the option values `FedEx` and `DHL` as the options to select from for the `Order.shippingMethod` property.
+Alternatively, `HalFormsOptions.remote(…)` can point to a remote resource providing values dynamically.
+Fore more constraints on options settings, refer to https://rwcbook.github.io/hal-forms/#options-element[the spec] or the Javadoc of `HalFormsOptions`.
+
 [[mediatypes.hal-forms.i18n]]
 === Internationalization of form attributes
 HAL-FORMS contains attributes that are intended for human interpretation, like a template's title or property prompts.
 These can be defined and internationalized using Spring's resource bundle support and the `rest-messages` resource bundle configured by Spring HATEOAS by default.
 
+[[mediatypes.hal-forms.i18n.template-titles]]
 ==== Template titles
 To define a template title use the following pattern: `_templates.$affordanceName.title`. Note that in HAL-FORMS, the name of a template is `default` if it is the only one.
 This means that you'll usually have to qualify the key with the local or fully qualified input type name that affordance describes.
@@ -365,13 +415,14 @@ Employee._templates.default.title=Create employee <3>
 com.acme.Employee._templates.default.title=Create employee <4>
 ----
 <1> A global definition for the title using `default` as key.
-<2> A global definition for the title using the actual affordance name as key. Unless defined explicitly when creating the affordance, this defaults to `$httpMethod + $simpleInputTypeName`.
+<2> A global definition for the title using the actual affordance name as key. Unless defined explicitly when creating the affordance, this defaults to the name of the method that has been pointed to when creating the affordance.
 <3> A locally defined title to be applied to all types named `Employee`.
 <4> A title definition using the fully-qualified type name.
 ====
 
 NOTE: Keys using the actual affordance name enjoy preference over the defaulted ones.
 
+[[mediatypes.hal-forms.i18n.prompts]]
 ==== Property prompts
 Property prompts can also be resolved via the `rest-messages` resource bundle automatically configured by Spring HATEOAS.
 The keys can be defined globally, locally or fully-qualified and need an `._prompt` concatenated to the actual property key:
@@ -389,37 +440,118 @@ com.acme.Employee.firstName._prompt=Firstname <3>
 <3> The `firstName` property of `com.acme.Employee` will get a prompt of "Firstname" assigned.
 ====
 
-A sample document with both template titles and property prompts defined would then look something like this:
+[[mediatypes.hal-forms.example]]
+=== A complete example
 
-.A sample HAL-FORMS document with internationalized template titles and property prompts
-====
+Let's have a look at some example code that combines all the definition and customization attributes described above.
+A `RepresentationModel` for a customer might look something like this:
+
+[source, java]
+----
+class CustomerRepresentation 
+  extends RepresentationModel<CustomerRepresentation> {
+  
+  String name;
+  LocalDate birthdate; <1>
+  @Pattern(regex = "[0-9]{16}") String ccn; <2>
+  @Email String email; <3>
+}
+----
+<1> We define a `birthdate` property of type `LocalDate`.
+<2> We expect `ccn` to adhere to a regular expression.
+<3> We define `email` to be an email using the JSR-303 `@Email` annotation.
+
+Note that this type is not a domain type.
+It's intentionally designed to capture a wide range of potentially invalid input so that potentialy erroneous valies for the fields can be rejected at once.
+
+Let's continue by having a look at how a controller makes use of that model:
+
+[source, java]
+----
+@Controller
+class CustomerController {
+
+  @PostMapping("/customers")
+  EntityModel<?> createCustomer(@RequestBody CustomerRepresentation payload) { <1>
+    // …
+  }
+
+  @GetMapping("/customers")
+  CollectionModel<?> getCustomers() {
+  
+  	CollectionModel<?> model = …;
+  
+    CustomerController controller = methodOn(CustomerController.class);
+  
+    model.add(linkTo(controller.getCustomers()).withSelfRel() <2>
+      .andAfford(controller.createCustomer(null)));
+  
+  	return ResponseEntity.ok(model);
+  }
+}
+----
+<1> A controller method is declared to use the representation model defined above to bind the request body to if a `POST` is issued to `/customers`.
+<2> A `GET` request to `/customers` prepares a model, adds a `self` link to it and additionally declares an affordance on that very link pointing to the controller method mapped to `POST`.
+This will cause an <<server.affordances, affordance model>> to be built up, which -- depending on the media type to be rendered eventually -- will be translated into the media type specific format.
+
+Next, let's add some additional metadata to make the form more accessible to humans:
+
+.Additional properties declared in `rest-messages.properties`.
 [source]
+----
+CustomerRepresentation._template.createCustomer.title=Create customer <1>
+CustomerRepresentation.ccn._prompt=Credit card number <2>
+CustomerRepresentation.ccn._placeholder=1234123412341234 <2>
+----
+<1> We define an explicit title for the template created by pointing to the `createCustomer(…)` method.
+<2> We explicitly a prompt and placeholder for the `ccn` property of the `CustomerRepresentation` model.
+
+If a client now issues a `GET` request to `/customers` using an `Accept` header of `application/prs.hal-forms+json`, the response HAL document is extended to a HAL-FORMS one to include the following `_templates` definition: 
+
+[source, json]
 ----
 {
   …,
   "_templates" : {
-    "default" : {
-      "title" : "Create employee",
-      "method" : "put",
-      "contentType" : "",
+    "default" : { <1>
+      "title" : "Create customer", <2>
+      "method" : "post", <3>
       "properties" : [ {
-        "name" : "firstName",
-        "prompt" : "Firstname",
-        "required" : true
-      }, {
-        "name" : "lastName",
-        "prompt" : "Lastname",
-        "required" : true
-      }, {
-        "name" : "role",
-        "prompt" : "Role",
-        "required" : true
-      } ]
+      	"name" : "name",
+      	"required" : true,
+      	"type" : "text" <4>
+      } , {
+      	"name" : "birthdate",
+      	"required" : true,
+      	"type" : "date" <4>
+      } , {
+      	"name" : "ccn",
+      	"prompt" : "Credit card number", <5>
+      	"placeholder" : "1234123412341234" <5>
+      	"required" : true,
+      	"regex" : "[0-9]{16}", <6>
+      	"type" : "text"
+      } , {
+      	"name" : "email",
+      	"prompt" : "Email",
+      	"required" : true,
+      	"type" : "email" <7>
+      } ] 
     }
   }
 }
 ----
-====
+<1> A template named `default` is exposed. Its name is `default` as it's the sole template defined and the spec requires that name to be used.
+If multiple templates are attached (by declaring additional affordances) they will be each named after the method they're pointing to.
+<2> The template title is derived from the value defined in the resource bundle. Note, that depending on the `Accept-Language` header sent with the request and the availability different values might returned.
+<3> The `method` attribute's value is derived from the mapping of the method the affordance was derived from.
+<4> The `type` attribute's value `text` is derived from the property's type `String`.
+The same applies to `birthdate` property, but resulting in `date`.
+<5> The prompt and placeholder for the `ccn` property are derived from the resource bundle as well.
+<6> The `@Pattern` declaration for the `ccn` property is exposed as `regex` attribute of the template property.
+<7> The `@Email` annotation on the `email` property has been translated into the corresponding `type` value.
+
+HAL-FORMS templates are considered by e.g. the https://github.com/toedter/hal-explorer[HAL Explorer], which automatically renders HTML forms from those descriptions.
 
 [[mediatypes.http-problem]]
 == HTTP Problem Details
@@ -763,7 +895,7 @@ The preferred way to implement media type representations is by providing a type
 In the `Serializer` and `Deserializer` implementations registered for `RepresentationModel`, convert the instances into the media type-specific model types and then lookup the Jackson serializer for those.
 
 The media types supported by default use the same configuration mechanism as third-party implementations would do.
-So it's worth studying the implementations in https://github.com/spring-projects/spring-hateoas/tree/master/src/main/java/org/springframework/hateoas/mediatype[the `mediatype` package].
+So it's worth studying the implementations in https://github.com/spring-projects/spring-hateoas/tree/main/src/main/java/org/springframework/hateoas/mediatype[the `mediatype` package].
 Note, that the built in media type implementations keep their configuration classes package private, as they're activated via `@EnableHypermediaSupport`.
 Custom implementations should probably make those public instead to make sure, users can import those configuration classes from their application packages.
 

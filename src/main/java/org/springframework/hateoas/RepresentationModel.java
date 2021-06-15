@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -297,6 +298,44 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 		Assert.notNull(relation, "Link relation must not be null!");
 
 		return getLinks(relation.value());
+	}
+
+	/**
+	 * Replaces the link(s) with the given {@link LinkRelation} with the mapper applied to each of the links.
+	 *
+	 * @param relation the {@link LinkRelation} to select the source link(s), must not be {@literal null}.
+	 * @param mapper the {@link Function} to apply to the current link, must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.3
+	 */
+	public T mapLink(LinkRelation relation, Function<Link, Link> mapper) {
+		return mapLinkIf(true, relation, mapper);
+	}
+
+	/**
+	 * Replaces the link(s) with the given {@link LinkRelation} with the mapper applied to each of the links if the given
+	 * condition is true.
+	 *
+	 * @param condition the condition that needs to be {@literal true} to apply the mapping.
+	 * @param relation the {@link LinkRelation} to select the source link(s), must not be {@literal null}.
+	 * @param mapper the {@link Function} to apply to the current link, must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.3
+	 */
+	@SuppressWarnings("unchecked")
+	public T mapLinkIf(boolean condition, LinkRelation relation, Function<Link, Link> mapper) {
+
+		if (!condition) {
+			return (T) this;
+		}
+
+		getLinks(relation).forEach(it -> {
+
+			links.remove(it);
+			links.add(mapper.apply(it));
+		});
+
+		return (T) this;
 	}
 
 	/*

@@ -325,17 +325,11 @@ public class Affordances implements AffordanceOperations {
 
 			String name = method.toString().toLowerCase();
 
-			ResolvableType type = TypeBasedPayloadMetadata.class.isInstance(inputMetdata) //
+			Class<?> type = TypeBasedPayloadMetadata.class.isInstance(inputMetdata) //
 					? TypeBasedPayloadMetadata.class.cast(inputMetdata).getType() //
 					: null;
 
-			if (type == null) {
-				return name;
-			}
-
-			Class<?> resolvedType = type.resolve();
-
-			return resolvedType == null ? name : name.concat(resolvedType.getSimpleName());
+			return type == null ? name : name.concat(type.getSimpleName());
 		}
 
 		/*

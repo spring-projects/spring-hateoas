@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -75,7 +76,10 @@ public class HateoasConfiguration {
 
 	@Bean
 	WebConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
-			List<HypermediaMappingInformation> information) {
+			List<HypermediaMappingInformation> information, Optional<HypermediaMappingInformationComparator> comparator) {
+
+		comparator.ifPresent(information::sort);
+
 		return WebConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
 	}
 

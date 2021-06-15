@@ -36,10 +36,13 @@ import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.ConfigurableHandlerInstantiator;
 import org.springframework.hateoas.mediatype.MessageResolver;
+import org.springframework.hateoas.mediatype.MessageSourceResolvableSerializer;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -51,6 +54,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
@@ -144,7 +148,7 @@ public class Jackson2HalModule extends SimpleModule {
 		public void serialize(Links value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 
 			// sort links according to their relation
-			Map<LinkRelation, List<Object>> sortedLinks = new LinkedHashMap<>();
+			MultiValueMap<String, Object> sortedLinks = new LinkedMultiValueMap<>();
 			List<Link> links = new ArrayList<>();
 
 			boolean prefixingRequired = curieProvider != CurieProvider.NONE;
@@ -177,10 +181,7 @@ public class Jackson2HalModule extends SimpleModule {
 					curiedLinkPresent = true;
 				}
 
-				sortedLinks //
-						.computeIfAbsent(relation, key -> new ArrayList<>())//
-						.add(toHalLink(link, relation));
-
+				sortedLinks.add(relation.value(), toHalLink(link, relation));
 				links.add(link);
 			}
 
@@ -189,12 +190,12 @@ public class Jackson2HalModule extends SimpleModule {
 				Collection<?> curies = curieProvider.getCurieInformation(Links.of(links));
 
 				if (!curies.isEmpty()) {
-					sortedLinks.put(HalLinkRelation.CURIES, new ArrayList<>(curies));
+					sortedLinks.addAll(HalLinkRelation.CURIES.value(), new ArrayList<>(curies));
 				}
 			}
 
 			TypeFactory typeFactory = provider.getConfig().getTypeFactory();
-			JavaType keyType = typeFactory.constructType(LinkRelation.class);
+			JavaType keyType = typeFactory.constructType(String.class);
 			JavaType valueType = typeFactory.constructCollectionType(ArrayList.class, Object.class);
 			JavaType mapType = typeFactory.constructMapType(HashMap.class, keyType, valueType);
 
@@ -333,7 +334,11 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 			}
 
-			provider.findValueSerializer(Map.class, property).serialize(embeddeds, jgen, provider);
+			Map<String, Object> map = new LinkedHashMap<>(embeddeds.size());
+			embeddeds.forEach((key, it) -> map.put(key.value(), it));
+
+			provider.findValueSerializer(Map.class, property) //
+					.serialize(map, jgen, provider);
 		}
 
 		/*
@@ -583,8 +588,6 @@ public class Jackson2HalModule extends SimpleModule {
 		public List<Link> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
 
 			List<Link> result = new ArrayList<>();
-			String relation;
-			Link link;
 
 			// links is an object, so we parse till we find its end.
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
@@ -594,18 +597,14 @@ public class Jackson2HalModule extends SimpleModule {
 				}
 
 				// save the relation in case the link does not contain it
-				relation = jp.getText();
+				String relation = jp.getText();
 
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
 					while (!JsonToken.END_ARRAY.equals(jp.nextToken())) {
-						link = jp.readValueAs(Link.class);
-						result.add(Link.of(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
-								.withType(link.getType()).withDeprecation(link.getDeprecation()));
+						result.add(jp.readValueAs(Link.class).withRel(relation));
 					}
 				} else {
-					link = jp.readValueAs(Link.class);
-					result.add(Link.of(link.getHref(), relation).withHreflang(link.getHreflang()).withTitle(link.getTitle())
-							.withType(link.getType()).withDeprecation(link.getDeprecation()));
+					result.add(jp.readValueAs(Link.class).withRel(relation));
 				}
 			}
 
@@ -742,6 +741,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 			registerInstance(new HalResourcesSerializer(mapper, halConfiguration));
 			registerInstance(new HalLinkListSerializer(curieProvider, mapper, resolver, halConfiguration));
+			registerInstance(new MessageSourceResolvableSerializer(resolver));
 		}
 	}
 
@@ -849,12 +849,13 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		public EmbeddedMapper with(@Nullable PropertyNamingStrategy strategy) {
 
-			if (!(strategy instanceof PropertyNamingStrategyBase)) {
-				return this;
-			}
+			Function<String, String> mapper = strategy instanceof PropertyNamingStrategyBase
+					? ((PropertyNamingStrategyBase) strategy)::translate
+					: strategy instanceof NamingBase ? ((NamingBase) strategy)::translate : null;
 
-			return new EmbeddedMapper(relProvider, curieProvider, preferCollectionRels,
-					((PropertyNamingStrategyBase) strategy)::translate);
+			return mapper == null
+					? this
+					: new EmbeddedMapper(relProvider, curieProvider, preferCollectionRels, mapper);
 		}
 
 		/**

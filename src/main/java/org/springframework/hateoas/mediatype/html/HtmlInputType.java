@@ -44,6 +44,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public class HtmlInputType {
 
+	public static final String CHECKBOX_VALUE = "checkbox";
+	public static final HtmlInputType CHECKBOX = new HtmlInputType(CHECKBOX_VALUE);
+
 	public static final String COLOR_VALUE = "color";
 	public static final HtmlInputType COLOR = new HtmlInputType(COLOR_VALUE);
 
@@ -56,6 +59,9 @@ public class HtmlInputType {
 	public static final String EMAIL_VALUE = "email";
 	public static final HtmlInputType EMAIL = new HtmlInputType(EMAIL_VALUE);
 
+	public static final String FILE_VALUE = "file";
+	public static final HtmlInputType FILE = new HtmlInputType(FILE_VALUE);
+
 	public static final String HIDDEN_VALUE = "hidden";
 	public static final HtmlInputType HIDDEN = new HtmlInputType(HIDDEN_VALUE);
 
@@ -67,6 +73,9 @@ public class HtmlInputType {
 
 	public static final String PASSWORD_VALUE = "password";
 	public static final HtmlInputType PASSWORD = new HtmlInputType(PASSWORD_VALUE);
+
+	public static final String RADIO_VALUE = "radio";
+	public static final HtmlInputType RADIO = new HtmlInputType(RADIO_VALUE);
 
 	public static final String RANGE_VALUE = "range";
 	public static final HtmlInputType RANGE = new HtmlInputType(RANGE_VALUE);

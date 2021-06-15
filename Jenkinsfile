@@ -54,10 +54,10 @@ pipeline {
 						sh 'PROFILE=none ci/test.sh'
 					}
 				}
-				stage("test: baseline (jdk14)") {
+				stage("test: baseline (jdk15)") {
 					agent {
 						docker {
-							image 'adoptopenjdk/openjdk14:latest'
+							image 'adoptopenjdk/openjdk15:latest'
 							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
@@ -90,16 +90,52 @@ pipeline {
 						sh 'PROFILE=spring-next ci/test.sh'
 					}
 				}
-				stage("test: spring-next (jdk14)") {
+				stage("test: spring-next (jdk15)") {
 					agent {
 						docker {
-							image 'adoptopenjdk/openjdk14:latest'
+							image 'adoptopenjdk/openjdk15:latest'
 							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 						}
 					}
 					options { timeout(time: 30, unit: 'MINUTES') }
 					steps {
 						sh 'PROFILE=spring-next ci/test.sh'
+					}
+				}
+				stage("test: kotlin-next (jdk8)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk8:latest'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+						}
+					}
+					options { timeout(time: 30, unit: 'MINUTES') }
+					steps {
+						sh 'PROFILE=kotlin-next ci/test.sh'
+					}
+				}
+				stage("test: kotlin-next (jdk11)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk11:latest'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+						}
+					}
+					options { timeout(time: 30, unit: 'MINUTES') }
+					steps {
+						sh 'PROFILE=kotlin-next ci/test.sh'
+					}
+				}
+				stage("test: kotlin-next (jdk15)") {
+					agent {
+						docker {
+							image 'adoptopenjdk/openjdk15:latest'
+							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+						}
+					}
+					options { timeout(time: 30, unit: 'MINUTES') }
+					steps {
+						sh 'PROFILE=kotlin-next ci/test.sh'
 					}
 				}
 			}
@@ -116,19 +152,15 @@ pipeline {
 
 			environment {
 				ARTIFACTORY = credentials('02bd1690-b54f-4c9f-819d-a77cb7a9822c')
-				SONATYPE = credentials('oss-token')
+				SONATYPE = credentials('oss-login')
 				KEYRING = credentials('spring-signing-secring.gpg')
 				PASSPHRASE = credentials('spring-gpg-passphrase')
 			}
 
 			steps {
 				script {
-					// Warm up this plugin quietly before using it.
-					sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -q org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version'
-
-					// Extract project's version number
 					PROJECT_VERSION = sh(
-							script: 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version -o | grep -v INFO',
+							script: "ci/version.sh",
 							returnStdout: true
 					).trim()
 
@@ -144,6 +176,11 @@ pipeline {
 
 					if (RELEASE_TYPE == 'release') {
 						sh "PROFILE=ci,central ci/build-and-deploy-to-maven-central.sh ${PROJECT_VERSION}"
+
+						slackSend(
+                                color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
+                                channel: '#spring-hateoas',
+                                message: "@here Spring HATEOAS ${PROJECT_VERSION} is staged on Sonatype awaiting closure and release.")
 					} else {
 						sh "PROFILE=ci,${RELEASE_TYPE} ci/build-and-deploy-to-artifactory.sh"
 					}
@@ -153,7 +190,7 @@ pipeline {
 		stage('Release documentation') {
 			when {
 				anyOf {
-					branch 'master'
+					branch 'main'
 					branch 'release'
 				}
 			}

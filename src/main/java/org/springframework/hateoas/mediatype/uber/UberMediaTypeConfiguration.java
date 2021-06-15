@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.Module;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class UberMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	@Bean

@@ -16,22 +16,22 @@
 package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.springframework.hateoas.mediatype.MediaTypeTestUtils.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
+import org.springframework.hateoas.config.RestTemplateHateoasConfiguration.HypermediaRestTemplateBeanPostProcessor;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -41,6 +41,9 @@ import org.springframework.web.client.RestTemplate;
  */
 class HypermediaRestTemplateBeanPostProcessorTest {
 
+	static final Function<ApplicationContext, List<HttpMessageConverter<?>>> REST_TEMPLATE_EXTRACTOR = it -> it
+			.getBean(RestTemplate.class).getMessageConverters();
+
 	/**
 	 * @see #728
 	 */
@@ -49,7 +52,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 
 		withContext(HalConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
 							MediaType.APPLICATION_JSON, //
@@ -65,7 +68,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 
 		withContext(HalAndCollectionJsonConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
 							MediaTypes.COLLECTION_JSON, //
@@ -82,7 +85,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 
 		withContext(AllHypermediaConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
 							MediaTypes.HAL_FORMS_JSON, //
@@ -98,7 +101,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 
 		withContext(CustomHypermediaConfig.class, context -> {
 
-			assertThat(lookupSupportedHypermediaTypes(context.getBean(RestTemplate.class))) //
+			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
 							MediaType.parseMediaType("application/frodo+json"), //
@@ -106,13 +109,6 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 							MediaType.parseMediaType("application/*+json") //
 			);
 		});
-	}
-
-	private List<MediaType> lookupSupportedHypermediaTypes(RestTemplate restTemplate) {
-
-		return restTemplate.getMessageConverters().stream().filter(MappingJackson2HttpMessageConverter.class::isInstance)
-				.map(AbstractJackson2HttpMessageConverter.class::cast).map(AbstractHttpMessageConverter::getSupportedMediaTypes)
-				.flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	static class BaseConfig {

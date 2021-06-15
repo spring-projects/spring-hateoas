@@ -24,16 +24,16 @@ import org.springframework.util.Assert;
 /**
  * {@link EntityLinks} implementation that delegates to the {@link EntityLinks} instances registered in the
  * {@link PluginRegistry} given on instance creation.
- * 
+ *
  * @author Oliver Gierke
  */
-public class DelegatingEntityLinks extends AbstractEntityLinks {
+public class DelegatingEntityLinks implements EntityLinks {
 
 	private final PluginRegistry<EntityLinks, Class<?>> delegates;
 
 	/**
 	 * Creates a new {@link DelegatingEntityLinks} using the given {@link PluginRegistry}.
-	 * 
+	 *
 	 * @param plugins must not be {@literal null}.
 	 */
 	public DelegatingEntityLinks(PluginRegistry<EntityLinks, Class<?>> plugins) {
@@ -60,7 +60,7 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 		return getPluginFor(type).linkFor(type, parameters);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.EntityLinks#getLinkToCollectionResource(java.lang.Class)
 	 */
@@ -69,7 +69,7 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 		return getPluginFor(type).linkToCollectionResource(type);
 	}
 
-	/* 
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.EntityLinks#getLinkToSingleResource(java.lang.Class, java.lang.Object)
 	 */
@@ -78,7 +78,16 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 		return getPluginFor(type).linkToItemResource(type, id);
 	}
 
-	/* 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.AbstractEntityLinks#linkForItemResource(java.lang.Class, java.lang.Object)
+	 */
+	@Override
+	public LinkBuilder linkForItemResource(Class<?> type, Object id) {
+		return getPluginFor(type).linkForItemResource(type, id);
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.plugin.core.Plugin#supports(java.lang.Object)
 	 */
@@ -90,7 +99,7 @@ public class DelegatingEntityLinks extends AbstractEntityLinks {
 	/**
 	 * Returns the plugin for the given type or throws an {@link IllegalArgumentException} if no delegate
 	 * {@link EntityLinks} can be found.
-	 * 
+	 *
 	 * @param type must not be {@literal null}.
 	 * @return
 	 */

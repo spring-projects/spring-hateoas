@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Unit tests for {@link DelegatingEntityLinks}.
- * 
+ *
  * @author Oliver Gierke
  */
 class DelegatingEntityLinksUnitTest extends TestUtils {
@@ -70,6 +70,17 @@ class DelegatingEntityLinksUnitTest extends TestUtils {
 		createDelegatingEntityLinks(target).linkFor(String.class);
 
 		verify(target, times(1)).linkFor(String.class);
+	}
+
+	@Test // #1477
+	void delegatesCallToLinkForItemResource() {
+
+		EntityLinks target = mock(EntityLinks.class);
+		when(target.supports(String.class)).thenReturn(true);
+
+		createDelegatingEntityLinks(target).linkForItemResource(String.class, 0);
+
+		verify(target, times(1)).linkForItemResource(String.class, 0);
 	}
 
 	private EntityLinks createDelegatingEntityLinks(EntityLinks target) {

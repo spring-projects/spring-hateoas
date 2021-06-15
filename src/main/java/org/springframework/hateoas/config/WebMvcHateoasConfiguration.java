@@ -91,7 +91,7 @@ class WebMvcHateoasConfiguration {
 		 */
 		@Override
 		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-			hypermediaConverters.augment(converters);
+			hypermediaConverters.augmentServer(converters);
 		}
 	}
 

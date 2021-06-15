@@ -44,7 +44,8 @@ public class HypermediaRestTemplateConfigurer {
 	 */
 	public RestTemplate registerHypermediaTypes(RestTemplate template) {
 
-		template.setMessageConverters(converters.and(template.getMessageConverters()));
+		converters.augmentClient(template.getMessageConverters());
+
 		return template;
 	}
 }

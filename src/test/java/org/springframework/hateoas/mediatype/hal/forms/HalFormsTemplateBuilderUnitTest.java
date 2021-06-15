@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -153,6 +155,55 @@ class HalFormsTemplateBuilderUnitTest {
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
 
 		assertThat(templates.get("default").getContentType()).isEqualTo(mediaType.toString());
+	}
+
+	@Test // #1483
+	void rendersInlineOptions() {
+
+		List<String> values = Arrays.asList("1234123412341234", "4321432143214321");
+
+		HalFormsConfiguration configuration = new HalFormsConfiguration()
+				.withOptions(PatternExample.class, "number", metadata -> HalFormsOptions.inline(values));
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("create")))
+						.afford(HttpMethod.POST)
+						.withInput(PatternExample.class)
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
+				.findTemplates(models);
+
+		assertThat(templates.get("default").getPropertyByName("number"))
+				.hasValueSatisfying(it -> {
+					assertThat(it.getOptions()).isNotNull()
+							.isInstanceOfSatisfying(HalFormsOptions.Inline.class,
+									inline -> assertThat(inline.getInline()).isEqualTo(values));
+				});
+	}
+
+	@Test // #1510
+	void propagatesSelectedValueToProperty() {
+
+		String selected = "1234123412341234";
+		List<String> values = Arrays.asList(selected, "4321432143214321");
+
+		HalFormsConfiguration configuration = new HalFormsConfiguration()
+				.withOptions(PatternExample.class, "number",
+						metadata -> HalFormsOptions.inline(values).withSelectedValue(selected));
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("create")))
+						.afford(HttpMethod.POST)
+						.withInput(PatternExample.class)
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
+				.findTemplates(models);
+
+		assertThat(templates.get("default").getPropertyByName("number")).hasValueSatisfying(it -> {
+			assertThat(it.getValue()).isEqualTo(selected);
+		});
 	}
 
 	@Getter

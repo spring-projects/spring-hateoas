@@ -25,9 +25,9 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
+import org.springframework.hateoas.server.core.SpringAffordanceBuilder;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.hateoas.server.core.UriTemplateFactory;
-import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriComponents;
@@ -89,7 +89,7 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		String mapping = WebHandler.DISCOVERER.getMapping(controller);
+		String mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
@@ -111,7 +111,7 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		String mapping = WebHandler.DISCOVERER.getMapping(controller);
+		String mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
 
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
 		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
@@ -134,7 +134,7 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 
-		String mapping = WebHandler.DISCOVERER.getMapping(controller, method);
+		String mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller, method);
 		UriTemplate template = UriTemplateFactory.templateFor(mapping);
 		URI uri = template.expand(parameters);
 

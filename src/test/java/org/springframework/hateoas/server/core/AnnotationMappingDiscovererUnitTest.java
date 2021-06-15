@@ -171,6 +171,22 @@ class AnnotationMappingDiscovererUnitTest {
 		assertThat(discoverer.getConsumes(method)).isEmpty();
 	}
 
+	@Test // #1450
+	void extractsMultipleRegularExpressionVariablesCorrectly() throws Exception {
+
+		Method method = MyController.class.getMethod("multipleRegularExpressions");
+
+		assertThat(discoverer.getMapping(method)).isEqualTo("/type/spring-web/{symbolicName}-{version}{extension}");
+	}
+
+	@Test // #1468
+	void keepsTrailingSlash() throws Exception {
+
+		Method method = TrailingSlashes.class.getMethod("trailingSlash");
+
+		assertThat(discoverer.getMapping(method)).isEqualTo("/api/myentities/");
+	}
+
 	@RequestMapping("/type")
 	interface MyController {
 
@@ -188,6 +204,9 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping(path = "/path", consumes = "application/json")
 		void mappingWithConsumesClause();
+
+		@GetMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
+		void multipleRegularExpressions();
 	}
 
 	interface ControllerWithoutTypeLevelMapping {
@@ -255,5 +274,13 @@ class AnnotationMappingDiscovererUnitTest {
 
 		@RequestMapping({ "/method", "/methodAlias" })
 		void method();
+	}
+
+	// #1468
+
+	interface TrailingSlashes {
+
+		@RequestMapping("/api/myentities/")
+		Object trailingSlash();
 	}
 }

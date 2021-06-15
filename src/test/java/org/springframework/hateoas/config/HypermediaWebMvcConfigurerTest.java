@@ -245,22 +245,13 @@ class HypermediaWebMvcConfigurerTest {
 		verifyCreatingNewEntityWorks(MediaTypes.UBER_JSON);
 	}
 
-	/**
-	 * When requesting an unregistered media type, fallback to Spring Framework's default JSON handler.
-	 */
 	@Test
 	void callingForUnregisteredMediaTypeShouldFallBackToDefaultHandler() throws Exception {
 
 		setUp(HalWebMvcConfig.class);
 
-		String unformattedJson = this.mockMvc.perform(get("/").accept(MediaTypes.UBER_JSON)) //
-				.andExpect(status().isOk()) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.UBER_JSON.toString())) //
-				.andReturn() //
-				.getResponse().getContentAsString(); //
-
-		assertThat(unformattedJson)
-				.isEqualTo("{\"links\":[{\"rel\":\"self\",\"href\":\"/\"},{\"rel\":\"employees\",\"href\":\"/employees\"}]}");
+		this.mockMvc.perform(get("/").accept(MediaTypes.UBER_JSON))
+				.andExpect(status().isNotAcceptable());
 	}
 
 	@Test // #118

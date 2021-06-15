@@ -180,15 +180,14 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 		}
 	}
 
-	@SuppressWarnings("null")
-	private Supplier<ConversionService> getConversionService() {
+	private static Supplier<ConversionService> getConversionService() {
 
 		return () -> {
 
 			RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
 
-			if (!ServletRequestAttributes.class.isInstance(attributes)) {
-				return null;
+			if (attributes == null || !ServletRequestAttributes.class.isInstance(attributes)) {
+				return FALLBACK_CONVERSION_SERVICE;
 			}
 
 			ServletContext servletContext = ((ServletRequestAttributes) attributes).getRequest().getServletContext();

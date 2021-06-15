@@ -2,7 +2,7 @@ image:https://spring.io/badges/spring-hateoas/ga.svg[link=https://spring.io/proj
 image:https://spring.io/badges/spring-hateoas/snapshot.svg[link=https://spring.io/projects/spring-hateoas]
 image:https://badges.gitter.im/spring-projects/spring-hateoas.png[link=https://gitter.im/spring-projects/spring-hateoas]
 
-image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2Fmaster&subject=master[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
+image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2Fmain&subject=main[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.2.x&subject=1.2.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.1.x&subject=1.1.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
 image:https://jenkins.spring.io/buildStatus/icon?job=spring-hateoas%2F1.0.x&subject=1.0.x[link=https://jenkins.spring.io/view/SpringHATEOAS/job/spring-hateoas/]
@@ -40,8 +40,10 @@ git config core.commentchar "/"
 
 NOTE: You can chain the previous set of commands together using `&&`.
 
-The pipeline will build and release the "release" branch. It will also build a new a new snapshot and stage it on artifactory.
-And if it's a `.RELEASE`, the pipeline will push it out to Maven Central.
+The pipeline will build and release the "release" branch. It will also build a new snapshot and stage it on artifactory.
+And if it's a `.RELEASE`, the pipeline will push it out to Maven Central. To complete a release on Maven Central, you must login
+to the server shown in `pom.xml`, close, and release. This is a stop gap to guard against bad releases accidentally getting pushed
+out to Maven Central.
 
 === Running CI tasks locally
 

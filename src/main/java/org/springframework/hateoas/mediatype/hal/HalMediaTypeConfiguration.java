@@ -23,7 +23,6 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
@@ -69,7 +68,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return HypermediaType.HAL.getMediaTypes();
+		return this.halConfiguration.getIfAvailable(HalConfiguration::new).getMediaTypes();
 	}
 
 	/*
