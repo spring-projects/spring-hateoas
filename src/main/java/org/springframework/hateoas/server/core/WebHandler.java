@@ -132,7 +132,10 @@ public class WebHandler {
 
 				bindRequestParameters(builder, parameter, arguments, conversionService);
 
-				if (SKIP_VALUE.equals(parameter.getVerifiedValue(arguments))) {
+				boolean isSkipValue = SKIP_VALUE.equals(parameter.getVerifiedValue(arguments));
+				boolean isMapParameter = Map.class.isAssignableFrom(parameter.parameter.getParameterType());
+
+				if (isSkipValue && !isMapParameter) {
 
 					values.put(parameter.getVariableName(), SKIP_VALUE);
 
@@ -186,7 +189,7 @@ public class WebHandler {
 			return;
 		}
 
-		String key = parameter.getVariableName();
+		Class<?> parameterType = parameter.parameter.getParameterType();
 
 		if (value instanceof MultiValueMap) {
 
@@ -198,7 +201,11 @@ public class WebHandler {
 				}
 			}
 
-		} else if (value instanceof Map) {
+			return;
+
+		}
+
+		if (value instanceof Map) {
 
 			Map<String, String> requestParams = (Map<String, String>) value;
 
@@ -206,14 +213,22 @@ public class WebHandler {
 				builder.queryParam(requestParamEntry.getKey(), encodeParameter(requestParamEntry.getValue()));
 			}
 
-		} else if (value instanceof Collection) {
+			return;
+		}
+
+		if (Map.class.isAssignableFrom(parameterType) && SKIP_VALUE.equals(value)) {
+			return;
+		}
+
+		String key = parameter.getVariableName();
+
+		if (value instanceof Collection) {
 
 			for (Object element : (Collection<?>) value) {
 				if (key != null) {
 					builder.queryParam(key, encodeParameter(element));
 				}
 			}
-
 		} else if (SKIP_VALUE.equals(value)) {
 
 			if (parameter.isRequired()) {
