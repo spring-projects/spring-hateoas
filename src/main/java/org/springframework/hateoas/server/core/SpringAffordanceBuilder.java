@@ -18,6 +18,7 @@ package org.springframework.hateoas.server.core;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -96,6 +97,7 @@ public class SpringAffordanceBuilder {
 				.orElse(ResolvableType.NONE);
 
 		List<QueryParameter> queryMethodParameters = parameters.getParametersWith(RequestParam.class).stream() //
+				.filter(it -> !Map.class.isAssignableFrom(it.getParameterType()))
 				.map(QueryParameter::of) //
 				.collect(Collectors.toList());
 

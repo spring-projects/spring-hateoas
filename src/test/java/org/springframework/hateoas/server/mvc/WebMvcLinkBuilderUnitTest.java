@@ -20,8 +20,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -29,8 +32,10 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -634,6 +639,27 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		linkTo(methodOn(ControllerWithHandlerMethodParameterThatNeedsConversion.class).method(41L)).withSelfRel();
 	}
 
+	@Test // #1548
+	void mapsRequestParamMap() {
+
+		Object original = ReflectionTestUtils.getField(MethodParameters.class, "DISCOVERER");
+
+		try {
+
+			ReflectionTestUtils.setField(MethodParameters.class, "DISCOVERER", null);
+
+			Stream.of(null, new HashMap<String, String>()).forEach(it -> {
+
+				Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithMapRequestParam(it)).withSelfRel();
+
+				assertThat(link.getHref()).endsWith("/with-map");
+			});
+
+		} finally {
+			ReflectionTestUtils.setField(MethodParameters.class, "DISCOVERER", original);
+		}
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -712,6 +738,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping
 		HttpEntity<Void> methodWithJdk8Optional(@RequestParam Optional<Integer> value) {
+			return null;
+		}
+
+		@RequestMapping(path = "/with-map") // #1548
+		HttpEntity<Void> methodWithMapRequestParam(@RequestParam Map<String, String> params) {
 			return null;
 		}
 	}
