@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3.2 (2021-06-22)
+----------------------------------------
+- #1554 - Upgrade to Spring Framework 5.3.8.
+- #1553 - Upgrade to Reactor 2020.0.8.
+- #1549 - IllegalStateException with @RequestParam Map<String, String>.
+- #1546 - Upgrade to JSON Smart 2.3.1.
+
 Changes in version 1.3.1 (2021-05-12)
 ----------------------------------------
 - #1533 - Upgrade to Spring 5.3.7.
