@@ -30,6 +30,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 
 import org.reactivestreams.Publisher;
 import org.springframework.beans.BeanUtils;
@@ -618,7 +620,9 @@ public class PropertyUtils {
 				}
 			}
 
-			return getAnnotationAttribute(Min.class, "value", Long.class).orElse(null);
+			return getAnnotationAttribute(Min.class, "value", Long.class)
+				.orElse(getAnnotationAttribute(DecimalMin.class, "value", String.class))
+				.orElse(null);
 		}
 
 		/*
@@ -637,8 +641,10 @@ public class PropertyUtils {
 					return attribute.get();
 				}
 			}
-
-			return getAnnotationAttribute(Max.class, "value", Long.class).orElse(null);
+			
+			return getAnnotationAttribute(Max.class, "value", Long.class)
+				.orElse(getAnnotationAttribute(DecimalMax.class, "value", String.class).orElse(null))
+				.orElse(null);
 		}
 
 		/*
