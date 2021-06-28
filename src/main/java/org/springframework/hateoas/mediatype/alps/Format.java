@@ -27,7 +27,7 @@ import java.util.Locale;
  */
 public enum Format {
 
-	TEXT, HTML, ASCIIDOC;
+	TEXT, HTML, ASCIIDOC, MARKDOWN;
 
 	/*
 	 * (non-Javadoc)
