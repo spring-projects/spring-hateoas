@@ -621,7 +621,7 @@ public class PropertyUtils {
 			}
 
 			return getAnnotationAttribute(Min.class, "value", Long.class)
-				.orElse(getAnnotationAttribute(DecimalMin.class, "value", String.class))
+				.orElse(Long.valueOf(getAnnotationAttribute(DecimalMin.class, "value", String.class)))
 				.orElse(null);
 		}
 
@@ -643,7 +643,7 @@ public class PropertyUtils {
 			}
 			
 			return getAnnotationAttribute(Max.class, "value", Long.class)
-				.orElse(getAnnotationAttribute(DecimalMax.class, "value", String.class).orElse(null))
+				.orElse(Long.valueOf(getAnnotationAttribute(DecimalMax.class, "value", String.class)))
 				.orElse(null);
 		}
 
@@ -671,7 +671,7 @@ public class PropertyUtils {
 					.orElse(null);
 		}
 
-		/*
+		/*`
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.mediatype.PropertyUtils.DefaultPropertyMetadata#getInputType()
 		 */
