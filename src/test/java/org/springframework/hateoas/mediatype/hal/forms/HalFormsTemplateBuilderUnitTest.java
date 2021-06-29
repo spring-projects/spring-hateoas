@@ -19,11 +19,14 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -122,6 +125,22 @@ class HalFormsTemplateBuilderUnitTest {
 		Optional<HalFormsProperty> text = template.getPropertyByName("text");
 		assertThat(text).map(HalFormsProperty::getMinLength).hasValue(2L);
 		assertThat(text).map(HalFormsProperty::getMaxLength).hasValue(5L);
+	}
+
+	@Test // #1557
+	void considersDecimalMinandDecimalMaxAnnotations() {
+
+		Link link = Affordances.of(Link.of("/example")) //
+				.afford(HttpMethod.POST) //
+				.withInput(Payload.class) //
+				.toLink();
+
+		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(), //
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
+
+		Optional<HalFormsProperty> decimal = template.getPropertyByName("decimal");
+		assertThat(decimal).map(HalFormsProperty::getMin).hasValue(new BigDecimal("2.1"));
+		assertThat(decimal).map(HalFormsProperty::getMax).hasValue(new BigDecimal("5.3"));
 	}
 
 	@Test // #1427
@@ -238,5 +257,9 @@ class HalFormsTemplateBuilderUnitTest {
 
 		@Range(min = 8, max = 10) //
 		Integer range;
+
+		@DecimalMin("2.1") //
+		@DecimalMax("5.3") //
+		BigDecimal decimal;
 	}
 }

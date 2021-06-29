@@ -20,11 +20,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -616,7 +619,7 @@ public class PropertyUtils {
 		 */
 		@Nullable
 		@Override
-		public Long getMin() {
+		public Number getMin() {
 
 			if (RANGE_ANNOTATION != null) {
 
@@ -627,7 +630,19 @@ public class PropertyUtils {
 				}
 			}
 
-			return getAnnotationAttribute(Min.class, "value", Long.class).orElse(null);
+			Optional<Long> minLong = getAnnotationAttribute(Min.class, "value", Long.class);
+
+			if (minLong.isPresent()) {
+				return minLong.get();
+			}
+
+			Optional<String> minDecimal = getAnnotationAttribute(DecimalMin.class, "value", String.class);
+
+			if (minDecimal.isPresent()) {
+				return new BigDecimal(minDecimal.get());
+			}
+
+			return null;
 		}
 
 		/*
@@ -636,7 +651,7 @@ public class PropertyUtils {
 		 */
 		@Nullable
 		@Override
-		public Long getMax() {
+		public Number getMax() {
 
 			if (RANGE_ANNOTATION != null) {
 
@@ -647,7 +662,19 @@ public class PropertyUtils {
 				}
 			}
 
-			return getAnnotationAttribute(Max.class, "value", Long.class).orElse(null);
+			Optional<Long> maxLong = getAnnotationAttribute(Max.class, "value", Long.class);
+
+			if (maxLong.isPresent()) {
+				return maxLong.get();
+			}
+
+			Optional<String> maxDecimal = getAnnotationAttribute(DecimalMax.class, "value", String.class);
+
+			if (maxDecimal.isPresent()) {
+				return new BigDecimal(maxDecimal.get());
+			}
+
+			return null;
 		}
 
 		/*
