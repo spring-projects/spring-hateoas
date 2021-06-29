@@ -448,7 +448,16 @@ public class PropertyUtils {
 		 */
 		@Override
 		public String getName() {
-			return property.getName();
+
+			MergedAnnotation<JsonProperty> annotation = property.getAnnotation(JsonProperty.class);
+
+			if (!annotation.isPresent()) {
+				return property.getName();
+			}
+
+			String annotatedName = annotation.getString("value");
+
+			return StringUtils.hasText(annotatedName) ? annotatedName.trim() : property.getName();
 		}
 
 		/*
