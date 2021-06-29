@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.Email;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Greg Turnquist
@@ -191,6 +193,14 @@ class PropertyUtilsTest {
 		return DynamicTest.stream(source, InputTypes::toString, it -> it.verify(metadata));
 	}
 
+	@Test // #1563
+	void considersJacksonRenamedProperty() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(JacksonCustomizations.class);
+
+		assertThat(getProperty(metadata, "renamed")).isPresent();
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -283,6 +293,11 @@ class PropertyUtilsTest {
 		@Range int ranged;
 	}
 
+	@Value
+	static class JacksonCustomizations {
+		@JsonProperty("renamed") String property;
+	}
+
 	// Test fixtures
 
 	@Value(staticConstructor = "of")
@@ -302,5 +317,9 @@ class PropertyUtilsTest {
 		public String toString() {
 			return String.format("Expecting input type %s for %s.", type, property);
 		}
+	}
+
+	private static Optional<PropertyMetadata> getProperty(PayloadMetadata metadata, String name) {
+		return metadata.stream().filter(it -> it.hasName(name)).findFirst();
 	}
 }
