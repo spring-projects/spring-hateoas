@@ -204,6 +204,11 @@ public abstract class AffordanceModel {
 		 */
 		Stream<PropertyMetadata> stream();
 
+		/**
+		 * @deprecated since 1.4, for removal in 1.5. Prefer {@link #stream()} and selecting individual
+		 *             {@code PropertyMetadata} instances yourself.
+		 */
+		@Deprecated
 		default Optional<PropertyMetadata> getPropertyMetadata(String name) {
 			return stream().filter(it -> it.hasName(name)).findFirst();
 		}

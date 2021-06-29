@@ -140,11 +140,11 @@ class PropertyUtilsTest {
 
 		PayloadMetadata metadata = PropertyUtils.getExposedProperties(MethodExposurePayload.class);
 
-		assertThat(metadata.getPropertyMetadata("readWrite")) //
+		assertThat(getProperty(metadata, "readWrite")) //
 				.map(PropertyMetadata::isReadOnly) //
 				.hasValue(false);
 
-		assertThat(metadata.getPropertyMetadata("readOnly")) //
+		assertThat(getProperty(metadata, "readOnly")) //
 				.map(PropertyMetadata::isReadOnly) //
 				.hasValue(true);
 	}
@@ -154,15 +154,15 @@ class PropertyUtilsTest {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
 
-		assertThat(metadata.getPropertyMetadata("nonNull")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "nonNull")).hasValueSatisfying(it -> {
 			assertThat(it.isRequired()).isTrue();
 		});
 
-		assertThat(metadata.getPropertyMetadata("pattern")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "pattern")).hasValueSatisfying(it -> {
 			assertThat(it.getPattern()).hasValue("\\w");
 		});
 
-		assertThat(metadata.getPropertyMetadata("annotated")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "annotated")).hasValueSatisfying(it -> {
 			assertThat(it.getPattern()).hasValue("regex");
 		});
 	}
@@ -172,7 +172,7 @@ class PropertyUtilsTest {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(WithoutReaderMethod.class);
 
-		assertThat(metadata.getPropertyMetadata("firstname")).isPresent();
+		assertThat(getProperty(metadata, "firstname")).isPresent();
 	}
 
 	@TestFactory
@@ -252,8 +252,7 @@ class PropertyUtilsTest {
 
 	static class MethodExposurePayload {
 
-		@Getter
-		@Setter String readWrite;
+		@Getter @Setter String readWrite;
 		@Getter String readOnly;
 	}
 
@@ -308,7 +307,7 @@ class PropertyUtilsTest {
 
 		public void verify(InputPayloadMetadata metadata) {
 
-			assertThat(metadata.getPropertyMetadata(property))
+			assertThat(PropertyUtilsTest.getProperty(metadata, property))
 					.map(PropertyMetadata::getInputType)
 					.hasValue(type.toString());
 		}
