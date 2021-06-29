@@ -468,7 +468,7 @@ public abstract class AffordanceModel {
 		 * @since 1.3
 		 */
 		@Nullable
-		default Long getMin() {
+		default Number getMin() {
 			return null;
 		}
 
@@ -479,7 +479,7 @@ public abstract class AffordanceModel {
 		 * @since 1.3
 		 */
 		@Nullable
-		default Long getMax() {
+		default Number getMax() {
 			return null;
 		}
 
