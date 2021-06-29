@@ -42,6 +42,8 @@ import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author Oliver Drotbohm
  */
@@ -111,7 +113,7 @@ class HalFormsTemplateBuilderUnitTest {
 		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
 
-		Optional<HalFormsProperty> number = template.getPropertyByName("number");
+		Optional<HalFormsProperty> number = template.getPropertyByName("example");
 		assertThat(number).map(HalFormsProperty::getMin).hasValue(2L);
 		assertThat(number).map(HalFormsProperty::getMax).hasValue(5L);
 
@@ -197,6 +199,7 @@ class HalFormsTemplateBuilderUnitTest {
 						.afford(HttpMethod.POST)
 						.withInput(PatternExample.class)
 						.toLink());
+		
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
 				.findTemplates(models);
@@ -231,6 +234,7 @@ class HalFormsTemplateBuilderUnitTest {
 
 		@Min(2) //
 		@Max(5) //
+		@JsonProperty("example")
 		Integer number;
 
 		@Length(min = 2, max = 5) //
@@ -238,5 +242,6 @@ class HalFormsTemplateBuilderUnitTest {
 
 		@Range(min = 8, max = 10) //
 		Integer range;
+		
 	}
 }

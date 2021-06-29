@@ -448,7 +448,7 @@ public class PropertyUtils {
 		 */
 		@Override
 		public String getName() {
-			return property.getName();
+			return getAnnotationAttribute(JsonProperty.class, "value", String.class).orElse(property.getName());
 		}
 
 		/*
@@ -528,6 +528,20 @@ public class PropertyUtils {
 			String value = annotation.isPresent() ? annotation.getString("value") : null;
 
 			return StringUtils.hasText(value) ? value : null;
+		}
+	
+		protected <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,
+			Class<T> type) {
+
+		MergedAnnotation<? extends Annotation> mergedAnnotation = property.getAnnotation(annotation);
+
+		if (mergedAnnotation.isPresent()) {
+			return mergedAnnotation.getValue(attribute, type);
+		}
+
+		mergedAnnotation = property.getTypeAnnotations().get(annotation);
+
+		return mergedAnnotation.isPresent() ? mergedAnnotation.getValue(attribute, type) : Optional.empty();
 		}
 	}
 
@@ -706,20 +720,6 @@ public class PropertyUtils {
 					})
 					.findFirst()
 					.orElse(null);
-		}
-
-		private <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,
-				Class<T> type) {
-
-			MergedAnnotation<? extends Annotation> mergedAnnotation = property.getAnnotation(annotation);
-
-			if (mergedAnnotation.isPresent()) {
-				return mergedAnnotation.getValue(attribute, type);
-			}
-
-			mergedAnnotation = property.getTypeAnnotations().get(annotation);
-
-			return mergedAnnotation.isPresent() ? mergedAnnotation.getValue(attribute, type) : Optional.empty();
 		}
 	}
 }
