@@ -42,8 +42,10 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -358,6 +360,22 @@ public class HalModelBuilderUnitTest {
 
 		assertEmptyEmbed(halModel().embed(Stream.empty(), Product.class).build(), "products");
 		assertEmptyEmbed(halModel().embed(Stream.empty(), LinkRelation.of("products")).build(), "products");
+	}
+
+	@Test // #1540
+	void doesNotRenderAdditionalLinksBlockForCuriedEmbeds() throws Exception {
+
+		this.mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator( //
+				new EvoInflectorLinkRelationProvider(), //
+				new DefaultCurieProvider("foo", UriTemplate.of("http://localhost/foo/{rel}")), //
+				MessageResolver.DEFAULTS_ONLY));
+
+		RepresentationModel<?> model = halModel() //
+				.embed(new Staff("Frodo Baggins", "ring bearer")) //
+				.build();
+
+		assertThat(StringUtils.countOccurrencesOf(mapper.writeValueAsString(model), "_links")) //
+				.isEqualTo(1);
 	}
 
 	private void assertEmptyEmbed(RepresentationModel<?> model, String name) throws Exception {
