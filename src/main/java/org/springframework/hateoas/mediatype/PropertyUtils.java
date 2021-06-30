@@ -435,7 +435,7 @@ public class PropertyUtils {
 
 		static {
 
-			INPUT_TYPE_FACTORY = SpringFactoriesLoader.loadFactories(InputTypeFactory.class,
+			INPUT_TYPE_FACTORY = SpringFactoriesLoader.loadFactories(InputTypeFactory.class, //
 					DefaultPropertyMetadata.class.getClassLoader()).get(0);
 		}
 
@@ -528,8 +528,8 @@ public class PropertyUtils {
 
 			String annotatedInputType = getAnnotatedInputType();
 
-			return annotatedInputType != null
-					? annotatedInputType
+			return annotatedInputType != null //
+					? annotatedInputType //
 					: INPUT_TYPE_FACTORY.getInputType(getType().resolve(Object.class));
 		}
 
@@ -684,8 +684,8 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMinLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class))
-					.map(Integer::longValue)
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class)) //
+					.map(Integer::longValue) //
 					.orElse(null);
 		}
 
@@ -696,8 +696,8 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMaxLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class))
-					.map(Integer::longValue)
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class)) //
+					.map(Integer::longValue) //
 					.orElse(null);
 		}
 
@@ -733,14 +733,14 @@ public class PropertyUtils {
 
 		private String lookupFromTypeMap() {
 
-			return TYPE_MAP.entrySet().stream()
+			return TYPE_MAP.entrySet().stream() //
 					.flatMap(it -> {
 
 						MergedAnnotation<? extends Annotation> annotation = property.getAnnotation(it.getKey());
 
 						return annotation.isPresent() ? Stream.of(it.getValue()) : Stream.empty();
-					})
-					.findFirst()
+					}) //
+					.findFirst() //
 					.orElse(null);
 		}
 
