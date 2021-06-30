@@ -359,7 +359,7 @@ public class HalModelBuilder {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends RepresentationModel<T>> RepresentationModel<T> build() {
-		return (T) new HalRepresentationModel<>(model, CollectionModel.of(embeddeds), links);
+		return (T) new HalRepresentationModel<>(model, embeddeds, links);
 	}
 
 	/**
@@ -381,16 +381,16 @@ public class HalModelBuilder {
 	private static class HalRepresentationModel<T> extends EntityModel<T> {
 
 		private final @Nullable T entity;
-		private final CollectionModel<?> embeddeds;
+		private final List<Object> embeddeds;
 
-		public HalRepresentationModel(@Nullable T entity, CollectionModel<T> embeddeds, Links links) {
+		public HalRepresentationModel(@Nullable T entity, List<Object> embeddeds, Links links) {
 
 			this(entity, embeddeds);
 
 			add(links);
 		}
 
-		private HalRepresentationModel(@Nullable T entity, CollectionModel<?> embeddeds) {
+		private HalRepresentationModel(@Nullable T entity, List<Object> embeddeds) {
 
 			Assert.notNull(embeddeds, "Embedds must not be null!");
 
@@ -409,8 +409,21 @@ public class HalModelBuilder {
 		}
 
 		@JsonUnwrapped
+		@SuppressWarnings("deprecation")
 		public CollectionModel<?> getEmbeddeds() {
-			return embeddeds;
+
+			return new CollectionModel<Object>(embeddeds) {
+
+				/**
+				 * Overriding this to make sure that the marker link added to signal the need for curie-ing is added to the
+				 * outer representation model.
+				 */
+				@Override
+				public CollectionModel<Object> add(Link link) {
+					HalRepresentationModel.this.add(link);
+					return this;
+				}
+			};
 		}
 	}
 
