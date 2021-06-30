@@ -67,7 +67,7 @@ final class HalFormsProperty implements Named {
 	}
 
 	private HalFormsProperty(String name, boolean readOnly, @Nullable Object value, String prompt, String regex,
-			boolean templated,
+			boolean templated, //
 			boolean required, boolean multi, String placeholder, @Nullable Number min, @Nullable Number max,
 			@Nullable Long minLength, @Nullable Long maxLength, @Nullable HtmlInputType type,
 			@Nullable HalFormsOptions options) {

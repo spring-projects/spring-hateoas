@@ -111,7 +111,7 @@ class HalFormsTemplateBuilderUnitTest {
 				.withInput(Payload.class) //
 				.toLink();
 
-		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(), //
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
 
 		Optional<HalFormsProperty> number = template.getPropertyByName("number");
@@ -149,7 +149,7 @@ class HalFormsTemplateBuilderUnitTest {
 		Link link = Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
 				.afford(HttpMethod.POST) //
 				.withInput(Payload.class) //
-				.withName("create")
+				.withName("create") //
 				.toLink();
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
@@ -181,21 +181,21 @@ class HalFormsTemplateBuilderUnitTest {
 
 		List<String> values = Arrays.asList("1234123412341234", "4321432143214321");
 
-		HalFormsConfiguration configuration = new HalFormsConfiguration()
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
 				.withOptions(PatternExample.class, "number", metadata -> HalFormsOptions.inline(values));
 
 		RepresentationModel<?> models = new RepresentationModel<>(
-				Affordances.of(Link.of("/example", LinkRelation.of("create")))
-						.afford(HttpMethod.POST)
-						.withInput(PatternExample.class)
+				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(PatternExample.class) //
 						.toLink());
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
 				.findTemplates(models);
 
-		assertThat(templates.get("default").getPropertyByName("number"))
+		assertThat(templates.get("default").getPropertyByName("number")) //
 				.hasValueSatisfying(it -> {
-					assertThat(it.getOptions()).isNotNull()
+					assertThat(it.getOptions()).isNotNull() //
 							.isInstanceOfSatisfying(HalFormsOptions.Inline.class,
 									inline -> assertThat(inline.getInline()).isEqualTo(values));
 				});
@@ -207,14 +207,14 @@ class HalFormsTemplateBuilderUnitTest {
 		String selected = "1234123412341234";
 		List<String> values = Arrays.asList(selected, "4321432143214321");
 
-		HalFormsConfiguration configuration = new HalFormsConfiguration()
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
 				.withOptions(PatternExample.class, "number",
 						metadata -> HalFormsOptions.inline(values).withSelectedValue(selected));
 
 		RepresentationModel<?> models = new RepresentationModel<>(
-				Affordances.of(Link.of("/example", LinkRelation.of("create")))
-						.afford(HttpMethod.POST)
-						.withInput(PatternExample.class)
+				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(PatternExample.class) //
 						.toLink());
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)

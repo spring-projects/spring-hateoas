@@ -149,8 +149,8 @@ public abstract class AffordanceModel {
 	 */
 	public <T> List<T> createProperties(BiFunction<InputPayloadMetadata, PropertyMetadata, T> creator) {
 
-		return input.stream()
-				.map(it -> creator.apply(input, it))
+		return input.stream() //
+				.map(it -> creator.apply(input, it)) //
 				.collect(Collectors.toList());
 	}
 
