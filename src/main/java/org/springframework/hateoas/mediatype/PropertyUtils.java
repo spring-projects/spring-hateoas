@@ -466,18 +466,21 @@ public class PropertyUtils {
 		@Override
 		public String getName() {			
 			MergedAnnotation<JsonProperty> annotation = property.getAnnotation(JsonProperty.class);
-
-			String annotatedName = annotation.getValue("value", String.class).orElse(property.getName());
-			
-			String nameValue = StringUtils.hasText(annotatedName) ? annotatedName.trim() : property.getName();
-			
 			MergedAnnotation<JsonNaming> classAnnotation = property.getAnnotation(JsonNaming.class);
+
+			String propertyName = property.getName();
 			
-			if (classAnnotation.isPresent()) {
-				return convertNameWithPropertyNamingStrategy(classAnnotation, nameValue);
+			if (!annotation.isPresent()) {
+				if (classAnnotation.isPresent()) {
+					return convertNameWithPropertyNamingStrategy(classAnnotation, propertyName);
+				} else {
+					return propertyName;					
+				}
 			}
 			
-			return nameValue;
+			String annotatedName = annotation.getString("value");
+			
+			return StringUtils.hasText(annotatedName) ? annotatedName.trim() : propertyName;
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -212,7 +212,7 @@ class PropertyUtilsTest {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(JacksonPropertyNamingStrategyCustomizations.class);
 		
-		assertThat(getProperty(metadata, "SmallProperty")).isPresent();
+		assertThat(getProperty(metadata, "small_property")).isPresent();
 		assertThat(getProperty(metadata, "No_Name")).isPresent();
 	}
 	
@@ -222,7 +222,7 @@ class PropertyUtilsTest {
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(JacksonNullPropertyNamingStrategyCustomizations.class);
 		
 		assertThat(getProperty(metadata, "smallProperty")).isPresent();
-		assertThat(getProperty(metadata, "Name")).isPresent();
+		assertThat(getProperty(metadata, "name")).isPresent();
 	}
 
 	@Data
@@ -324,7 +324,7 @@ class PropertyUtilsTest {
 	@Value
 	@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
 	static class JacksonPropertyNamingStrategyCustomizations {
-		String smallProperty;
+		@JsonProperty("small_property") String smallProperty;
 		String no_Name;
 	}
 	
@@ -332,7 +332,7 @@ class PropertyUtilsTest {
 	@JsonNaming
 	static class JacksonNullPropertyNamingStrategyCustomizations {
 		@JsonProperty("smallProperty") String SmallProperty;
-		@JsonProperty("Name") String name;
+		String name;
 	}
 
 	// Test fixtures
