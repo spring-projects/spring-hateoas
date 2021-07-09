@@ -16,6 +16,7 @@
 package org.springframework.hateoas.mediatype;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -56,6 +57,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.UpperCamelCaseStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
  * @author Greg Turnquist
@@ -200,6 +206,24 @@ class PropertyUtilsTest {
 
 		assertThat(getProperty(metadata, "renamed")).isPresent();
 	}
+	
+	@Test
+	void considersJacksonPropertyNamingStrategy() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(JacksonPropertyNamingStrategyCustomizations.class);
+		
+		assertThat(getProperty(metadata, "SmallProperty")).isPresent();
+		assertThat(getProperty(metadata, "No_Name")).isPresent();
+	}
+	
+	@Test
+	void considersJacksonNullPropertyNamingStrategy() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(JacksonNullPropertyNamingStrategyCustomizations.class);
+		
+		assertThat(getProperty(metadata, "smallProperty")).isPresent();
+		assertThat(getProperty(metadata, "Name")).isPresent();
+	}
 
 	@Data
 	@AllArgsConstructor
@@ -295,6 +319,20 @@ class PropertyUtilsTest {
 	@Value
 	static class JacksonCustomizations {
 		@JsonProperty("renamed") String property;
+	}
+	
+	@Value
+	@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
+	static class JacksonPropertyNamingStrategyCustomizations {
+		String smallProperty;
+		String no_Name;
+	}
+	
+	@Value
+	@JsonNaming
+	static class JacksonNullPropertyNamingStrategyCustomizations {
+		@JsonProperty("smallProperty") String SmallProperty;
+		@JsonProperty("Name") String name;
 	}
 
 	// Test fixtures

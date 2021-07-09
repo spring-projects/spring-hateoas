@@ -21,7 +21,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,6 +71,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 /**
  * @author Greg Turnquist
@@ -225,7 +239,6 @@ public class PropertyUtils {
 	}
 
 	private static Stream<PropertyMetadata> lookupExposedProperties(@Nullable Class<?> type) {
-
 		return type == null //
 				? Stream.empty() //
 				: getPropertyDescriptors(type) //
@@ -346,6 +359,7 @@ public class PropertyUtils {
 					.filter(it -> it != null) //
 					.map(MergedAnnotations::from) //
 					.collect(Collectors.toList());
+			this.annotations.add(MergedAnnotations.from(property.getObjectType()));
 
 			this.typeAnnotations = MergedAnnotations.from(this.type.resolve(Object.class));
 		}
@@ -450,17 +464,42 @@ public class PropertyUtils {
 		 * @see org.springframework.hateoas.mediatype.PropertyMetadata#getName()
 		 */
 		@Override
-		public String getName() {
-
+		public String getName() {			
 			MergedAnnotation<JsonProperty> annotation = property.getAnnotation(JsonProperty.class);
 
-			if (!annotation.isPresent()) {
-				return property.getName();
+			String annotatedName = annotation.getValue("value", String.class).orElse(property.getName());
+			
+			String nameValue = StringUtils.hasText(annotatedName) ? annotatedName.trim() : property.getName();
+			
+			MergedAnnotation<JsonNaming> classAnnotation = property.getAnnotation(JsonNaming.class);
+			
+			if (classAnnotation.isPresent()) {
+				return convertNameWithPropertyNamingStrategy(classAnnotation, nameValue);
 			}
-
-			String annotatedName = annotation.getString("value");
-
-			return StringUtils.hasText(annotatedName) ? annotatedName.trim() : property.getName();
+			
+			return nameValue;
+		}
+		
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		private String convertNameWithPropertyNamingStrategy(MergedAnnotation<JsonNaming> annotation, String input) {
+			
+			Optional<? extends Class> strategyAnnotation = annotation.getValue("value", PropertyNamingStrategy.class.getClass());
+			
+			Class strategyClass = strategyAnnotation.get();
+			NamingBase strategyToUse = null;
+			
+			if (strategyClass.getDeclaringClass() == null) {
+				return input;
+			}
+			
+			try {
+				strategyToUse = (NamingBase) strategyAnnotation.get().getConstructor(null).newInstance(null);
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				return input; 
+			}
+			
+			return org.springframework.hateoas.mediatype.StringUtils.convertCase(strategyToUse, property.getName());
 		}
 
 		/*
