@@ -1,7 +1,5 @@
 package org.springframework.hateoas.mediatype;
 
-import org.springframework.lang.Nullable;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
 
 /*
@@ -9,7 +7,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
  */
 public class StringUtils {
 	
-	public static String convertCase(@Nullable NamingBase strategy, String input) {
+	public static String convertCase(NamingBase strategy, String input) {
 		return strategy.translate(input);
 	}
 
