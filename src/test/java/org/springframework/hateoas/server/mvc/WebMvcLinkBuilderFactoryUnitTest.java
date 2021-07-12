@@ -50,6 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Kamill Sokol
  * @author Ross Turner
+ * @author Réda Housni Alaoui
  */
 class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 
@@ -111,6 +112,13 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable("with blank")).withSelfRel();
 		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
 		assertThat(link.getHref()).endsWith("/something/with%20blank/foo");
+	}
+
+	@Test
+	void linksToMethodWithPrimaryParam(){
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPrimaryParams()).withSelfRel();
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+		assertThat(link.getHref()).endsWith("/something/foo?a=1&b=2");
 	}
 
 	/**

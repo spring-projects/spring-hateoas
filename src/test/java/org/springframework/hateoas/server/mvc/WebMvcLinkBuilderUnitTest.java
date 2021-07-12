@@ -58,6 +58,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kevin Conaway
  * @author Oliver Trosien
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 class WebMvcLinkBuilderUnitTest extends TestUtils {
 
@@ -663,6 +664,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping("/foo")
 		HttpEntity<Void> methodWithRequestParam(@RequestParam String id) {
+			return null;
+		}
+
+		@RequestMapping(path = "/foo", params = {"a=1", "b=2", "c!=4", "!d"})
+		HttpEntity<Void> methodWithPrimaryParams(){
 			return null;
 		}
 

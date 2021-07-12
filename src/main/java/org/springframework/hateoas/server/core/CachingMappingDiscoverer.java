@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Michal Stochmialek
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 public class CachingMappingDiscoverer implements MappingDiscoverer {
 
@@ -102,6 +103,11 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	@Override
 	public List<MediaType> getConsumes(Method method) {
 		return delegate.getConsumes(method);
+	}
+
+	@Override
+	public String[] getParams(Method method) {
+		return delegate.getParams(method);
 	}
 
 	private static String key(Class<?> type, @Nullable Method method) {

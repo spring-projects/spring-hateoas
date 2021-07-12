@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 public interface MappingDiscoverer {
 
@@ -79,4 +80,10 @@ public interface MappingDiscoverer {
 	 * @since 1.3
 	 */
 	List<MediaType> getConsumes(Method method);
+
+	/**
+	 * @param method - must not be null.
+	 * @return the parameters of the mapped request, narrowing the primary mapping.
+	 */
+	String[] getParams(Method method);
 }

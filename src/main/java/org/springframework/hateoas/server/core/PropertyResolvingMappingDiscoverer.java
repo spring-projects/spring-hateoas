@@ -31,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Lars Michele
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 
@@ -89,6 +90,11 @@ class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 	@Override
 	public List<MediaType> getConsumes(Method method) {
 		return delegate.getConsumes(method);
+	}
+
+	@Override
+	public String[] getParams(Method method) {
+		return delegate.getParams(method);
 	}
 
 	@Nullable
