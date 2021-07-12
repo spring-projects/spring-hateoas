@@ -104,6 +104,11 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 		return delegate.getConsumes(method);
 	}
 
+	@Override
+	public String[] getParams(Method method) {
+		return delegate.getParams(method);
+	}
+
 	private static String key(Class<?> type, @Nullable Method method) {
 
 		StringBuilder builder = new StringBuilder(type.getName());

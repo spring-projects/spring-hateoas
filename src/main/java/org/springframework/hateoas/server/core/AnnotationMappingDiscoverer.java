@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.server.core;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
@@ -165,6 +166,14 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return mediaTypes == null
 				? Collections.emptyList()
 				: Arrays.stream(mediaTypes).map(MediaType::parseMediaType).collect(Collectors.toList());
+	}
+
+	@Override
+	public String[] getParams(Method method) {
+		Annotation annotation = findMergedAnnotation(method, annotationType);
+		String[] params = (String[]) getValue(annotation, "params");
+
+		return ofNullable(params).orElseGet(() -> new String[0]);
 	}
 
 	private String[] getMappingFrom(@Nullable Annotation annotation) {

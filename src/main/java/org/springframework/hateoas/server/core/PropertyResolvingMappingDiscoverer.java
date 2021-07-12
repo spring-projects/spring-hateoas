@@ -91,6 +91,11 @@ class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 		return delegate.getConsumes(method);
 	}
 
+	@Override
+	public String[] getParams(Method method) {
+		return delegate.getParams(method);
+	}
+
 	@Nullable
 	private static String resolveProperties(@Nullable String mapping) {
 

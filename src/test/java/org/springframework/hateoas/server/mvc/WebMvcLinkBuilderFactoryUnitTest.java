@@ -113,6 +113,13 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/something/with%20blank/foo");
 	}
 
+	@Test
+	void linksToMethodWithPrimaryParam(){
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPrimaryParams()).withSelfRel();
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+		assertThat(link.getHref()).endsWith("/something/foo?a=1&b=2");
+	}
+
 	/**
 	 * @see #96
 	 */

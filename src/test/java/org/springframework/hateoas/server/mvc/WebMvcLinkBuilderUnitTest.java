@@ -709,6 +709,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 
+		@RequestMapping(path = "/foo", params = {"a=1", "b=2", "c!=4", "!d"})
+		HttpEntity<Void> methodWithPrimaryParams(){
+			return null;
+		}
+
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam(required = false) Integer offset,
 				@RequestParam Integer limit) {
