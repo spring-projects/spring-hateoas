@@ -29,6 +29,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 public interface MappingDiscoverer {
 

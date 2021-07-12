@@ -55,6 +55,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kevin Conaway
  * @author Andrew Naydyonock
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvcLinkBuilder> {
 

@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Michal Stochmialek
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 public class CachingMappingDiscoverer implements MappingDiscoverer {
 

@@ -31,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Lars Michele
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 

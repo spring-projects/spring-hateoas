@@ -58,6 +58,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kevin Conaway
  * @author Oliver Trosien
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 class WebMvcLinkBuilderUnitTest extends TestUtils {
 

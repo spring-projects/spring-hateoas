@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Oliver Gierke
  * @author Mark Paluch
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  * @deprecated since 1.2, not for removal but for hiding within the package in 1.3
  */
 @Deprecated
