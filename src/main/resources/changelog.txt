@@ -1,5 +1,14 @@
 Spring HATEOAS Changelog
 ========================
+Changes in version 1.3.3 (2021-07-14)
+----------------------------------------
+- #1580 - Upgrade to Reactor 2020.0.9.
+- #1579 - Upgrade to Spring Framework 5.3.9.
+- #1570 - Embedded curie causes two _links in API response.
+- #1569 - Fix custom media type parser documentation.
+- #1568 - Add MARKDOWN as a valid format for ALPS mediatype.
+- #1566 - Consider @JsonProperty-defined property name for affordance metadata.
+- #1560 - Support for implicitly not required request parameters.
 
 Changes in version 1.3.2 (2021-06-22)
 ----------------------------------------
