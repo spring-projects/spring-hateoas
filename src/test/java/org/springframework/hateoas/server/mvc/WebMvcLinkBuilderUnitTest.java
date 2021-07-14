@@ -667,8 +667,8 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 
-		@RequestMapping(path = "/foo", params = {"a=1", "b=2", "c!=4", "!d"})
-		HttpEntity<Void> methodWithPrimaryParams(){
+		@RequestMapping(path = "/foo", params = { "a=1", "b=2", "c!=4", "!d" })
+		HttpEntity<Void> methodWithPrimaryParams() {
 			return null;
 		}
 

@@ -105,6 +105,10 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 		return delegate.getConsumes(method);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getParams(java.lang.reflect.Method)
+	 */
 	@Override
 	public String[] getParams(Method method) {
 		return delegate.getParams(method);

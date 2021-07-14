@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javax.servlet.ServletContext;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -124,14 +126,19 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 			String[] primaryParams = SpringAffordanceBuilder.DISCOVERER.getParams(invocation.getMethod());
 			ParamsRequestCondition paramsRequestCondition = new ParamsRequestCondition(primaryParams);
-			for (NameValueExpression<String> expression: paramsRequestCondition.getExpressions()) {
+
+			for (NameValueExpression<String> expression : paramsRequestCondition.getExpressions()) {
+
 				if (expression.isNegated()) {
 					continue;
 				}
+
 				String value = expression.getValue();
-				if (value == null){
+
+				if (value == null) {
 					continue;
 				}
+
 				builder.queryParam(expression.getName(), value);
 			}
 

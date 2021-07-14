@@ -82,8 +82,11 @@ public interface MappingDiscoverer {
 	List<MediaType> getConsumes(Method method);
 
 	/**
-	 * @param method - must not be null.
+	 * Returns the statically declared request parameters.
+	 *
+	 * @param method must not be {@literal null}.
 	 * @return the parameters of the mapped request, narrowing the primary mapping.
+	 * @since 1.4
 	 */
 	String[] getParams(Method method);
 }
