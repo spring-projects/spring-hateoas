@@ -37,12 +37,15 @@ import org.springframework.hateoas.server.core.AdditionalUriHandler;
 import org.springframework.hateoas.server.core.LinkBuilderSupport;
 import org.springframework.hateoas.server.core.MethodInvocation;
 import org.springframework.hateoas.server.core.MethodParameters;
+import org.springframework.hateoas.server.core.SpringAffordanceBuilder;
 import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.servlet.mvc.condition.NameValueExpression;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -146,6 +149,24 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 		@Override
 		public UriComponentsBuilder apply(UriComponentsBuilder builder, MethodInvocation invocation) {
+			String[] primaryParams = SpringAffordanceBuilder.DISCOVERER.getParams(invocation.getMethod());
+			ParamsRequestCondition paramsRequestCondition = new ParamsRequestCondition(primaryParams);
+
+			for (NameValueExpression<String> expression : paramsRequestCondition.getExpressions()) {
+
+				if (expression.isNegated()) {
+					continue;
+				}
+
+				String value = expression.getValue();
+
+				if (value == null) {
+					continue;
+				}
+
+				builder.queryParam(expression.getName(), value);
+			}
+
 			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
 			Iterator<Object> parameterValues = Arrays.asList(invocation.getArguments()).iterator();
 

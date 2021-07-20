@@ -18,12 +18,19 @@ package org.springframework.hateoas;
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * A single template variable.
@@ -31,13 +38,15 @@ import org.springframework.util.StringUtils;
  * @author Oliver Gierke
  * @author JamesE Richardson
  */
-public final class TemplateVariable implements Serializable {
+public final class TemplateVariable implements Serializable, UriTemplate.Expandable {
 
 	private static final long serialVersionUID = -2731446749851863774L;
 
 	private final String name;
 	private final TemplateVariable.VariableType type;
 	private final String description;
+	private final Cardinality cardinality;
+	private final int limit;
 
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name and type.
@@ -49,22 +58,36 @@ public final class TemplateVariable implements Serializable {
 		this(name, type, "");
 	}
 
+	public TemplateVariable(String name, TemplateVariable.VariableType type, String description) {
+		this(name, type, description, Cardinality.SINGULAR, -1);
+	}
+
+	TemplateVariable(String name, TemplateVariable.VariableType type, String description,
+			Cardinality cardinality) {
+		this(name, type, description, cardinality, -1);
+	}
+
 	/**
 	 * Creates a new {@link TemplateVariable} with the given name, type and description.
 	 *
 	 * @param name must not be {@literal null} or empty.
 	 * @param type must not be {@literal null}.
 	 * @param description must not be {@literal null}.
+	 * @since 1.4
 	 */
-	public TemplateVariable(String name, TemplateVariable.VariableType type, String description) {
+	TemplateVariable(String name, TemplateVariable.VariableType type, String description,
+			Cardinality cardinality, int limit) {
 
 		Assert.hasText(name, "Variable name must not be null or empty!");
 		Assert.notNull(type, "Variable type must not be null!");
 		Assert.notNull(description, "Description must not be null!");
+		Assert.notNull(cardinality, "Cardinality must not be null!");
 
 		this.name = name;
 		this.type = type;
 		this.description = description;
+		this.cardinality = cardinality;
+		this.limit = limit;
 	}
 
 	/**
@@ -114,12 +137,16 @@ public final class TemplateVariable implements Serializable {
 	/**
 	 * Static helper to fashion {@link VariableType#FRAGMENT} variables.
 	 *
-	 * @param fragment must not be {@literal null} or empty.
+	 * @param name must not be {@literal null} or empty.
 	 * @return
 	 * @since 1.1
 	 */
-	public static TemplateVariable fragment(String fragment) {
-		return new TemplateVariable(fragment, VariableType.FRAGMENT);
+	public static TemplateVariable fragment(String name) {
+		return new TemplateVariable(name, VariableType.FRAGMENT);
+	}
+
+	public static TemplateVariable reservedString(String name) {
+		return new TemplateVariable(name, VariableType.RESERVED_STRING);
 	}
 
 	/**
@@ -128,9 +155,59 @@ public final class TemplateVariable implements Serializable {
 	 * @param parameter must not be {@literal null} or empty.
 	 * @return
 	 * @since 1.1
+	 * @deprecated since 1.4, use actual parameter type and call {@link #composite()} on the instance instead.
 	 */
+	@Deprecated
 	public static TemplateVariable compositeParameter(String parameter) {
 		return new TemplateVariable(parameter, VariableType.COMPOSITE_PARAM);
+	}
+
+	/**
+	 * Marks the current template variable as composite value.
+	 *
+	 * @return
+	 * @since 1.4
+	 */
+	public TemplateVariable composite() {
+		return isComposite() ? this : new TemplateVariable(name, type, description, Cardinality.COMPOSITE, limit);
+	}
+
+	/**
+	 * Marks the current template variable as singular value.
+	 *
+	 * @return
+	 * @since 1.4
+	 */
+	public TemplateVariable singular() {
+		return isSingular() ? this : new TemplateVariable(name, type, description, Cardinality.SINGULAR, limit);
+	}
+
+	public TemplateVariable limit(int limit) {
+		return new TemplateVariable(name, type, description, cardinality, limit);
+	}
+
+	/**
+	 * Returns whether the current {@link TemplateVariable} is a composite one.
+	 *
+	 * @return
+	 * @since 1.4
+	 */
+	public boolean isComposite() {
+		return cardinality.equals(Cardinality.COMPOSITE);
+	}
+
+	/**
+	 * Returns whether the current {@link TemplateVariable} is a singular one.
+	 *
+	 * @return
+	 * @since 1.4
+	 */
+	public boolean isSingular() {
+		return cardinality.equals(Cardinality.SINGULAR);
+	}
+
+	String fakeName() {
+		return String.format("{_____%s_____}", name);
 	}
 
 	/**
@@ -147,7 +224,9 @@ public final class TemplateVariable implements Serializable {
 	 * value given for that variable.
 	 *
 	 * @return
+	 * @deprecated since 1.4. No replacement as template variables are never required actually.
 	 */
+	@Deprecated
 	boolean isRequired() {
 		return !type.isOptional();
 	}
@@ -191,21 +270,39 @@ public final class TemplateVariable implements Serializable {
 		return type.equals(FRAGMENT);
 	}
 
+	TemplateVariable withType(VariableType type) {
+		return new TemplateVariable(name, type, description, cardinality, limit);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
+		return StringUtils.hasText(description) ? String.format("%s - %s", asString(), description) : asString();
+	}
 
-		String base = String.format("{%s%s}", type.toString(), name);
-		return StringUtils.hasText(description) ? String.format("%s - %s", base, description) : base;
+	public String asString() {
+		return String.format("{%s%s}", type.toString(), essence());
+	}
+
+	String essence() {
+
+		return String.format("%s%s%s", name,
+				limit != -1 ? ":".concat(String.valueOf(limit)) : "",
+				isComposite() ? "*" : "");
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
+	/**
+	 * Returns the type of the {@link TemplateVariable}.
+	 *
+	 * @return will never be {@literal null}.
+	 */
 	public VariableType getType() {
 		return this.type;
 	}
@@ -214,15 +311,146 @@ public final class TemplateVariable implements Serializable {
 		return this.description;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.UriTemplate.Expandable#expand(org.springframework.web.util.UriBuilder, java.util.Map)
+	 */
+	@Nullable
 	@Override
-	public boolean equals(Object o) {
+	public String expand(Map<String, ?> parameters) {
 
-		if (this == o)
+		Object value = parameters.get(name);
+
+		if (value == null) {
+			return null;
+		}
+
+		return prepareValue(value);
+
+	}
+
+	@Nullable
+	String prepareValue(Map<String, ?> parameters) {
+		return prepareValue(parameters.get(name));
+	}
+
+	@Nullable
+	@SuppressWarnings("unchecked")
+	String prepareValue(@Nullable Object value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		String separator = isComposite() ? type.combiner : DEFAULT_SEPARATOR;
+
+		if (value instanceof Iterable) {
+
+			Iterable<?> source = (Iterable<?>) value;
+
+			if (!source.iterator().hasNext()) {
+				return null;
+			}
+
+			return handleComposite(StreamSupport.stream(source.spliterator(), false)
+					.map(it -> prepareElement(it, false))
+					.collect(Collectors.joining(separator)));
+
+		} else if (value instanceof Map) {
+
+			String keyValueSeparator = isComposite() ? "=" : DEFAULT_SEPARATOR;
+
+			return handleComposite(((Map<Object, Object>) value).entrySet().stream()
+					.map(it -> it.getKey().toString().concat(keyValueSeparator).concat(prepareElement(it.getValue(), true)))
+					.collect(Collectors.joining(separator)));
+
+		} else {
+			return handleComposite(prepareElement(value, false));
+		}
+	}
+
+	@Nullable
+	private String prepareElement(Object value, boolean forMap) {
+
+		String encoded = limitAndEncode(value);
+
+		if (encoded == null) {
+			return null;
+		}
+
+		switch (type) {
+			case REQUEST_PARAM:
+			case REQUEST_PARAM_CONTINUED:
+			case PATH_STYLE_PARAMETER:
+				return isComposite() && !forMap ? name.concat("=").concat(encoded) : encoded;
+			default:
+				return encoded;
+		}
+	}
+
+	@Nullable
+	private String limitAndEncode(@Nullable Object value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		String source = value.toString();
+
+		if (limit != -1 && limit < source.length()) {
+			source = source.substring(0, limit);
+		}
+
+		return type.encode(source);
+	}
+
+	@Nullable
+	private String handleComposite(@Nullable String value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		switch (type) {
+			case REQUEST_PARAM:
+			case REQUEST_PARAM_CONTINUED:
+
+				if (isComposite()) {
+					return value;
+				}
+
+				return name.concat("=").concat(value);
+
+			case PATH_STYLE_PARAMETER:
+
+				if (isComposite()) {
+					return value;
+				}
+
+				return StringUtils.hasText(value)
+						? name.concat("=").concat(value)
+						: name;
+
+			default:
+				return value;
+		}
+	}
+
+	@Override
+	public boolean equals(@Nullable Object o) {
+
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		TemplateVariable that = (TemplateVariable) o;
-		return Objects.equals(this.name, that.name) && this.type == that.type
+
+		return Objects.equals(this.name, that.name) //
+				&& this.type == that.type
+				&& this.limit == that.limit
+				&& this.cardinality == that.cardinality
 				&& Objects.equals(this.description, that.description);
 	}
 
@@ -238,22 +466,61 @@ public final class TemplateVariable implements Serializable {
 	 */
 	public enum VariableType {
 
-		PATH_VARIABLE("", false), //
-		REQUEST_PARAM("?", true), //
-		REQUEST_PARAM_CONTINUED("&", true), //
-		SEGMENT("/", true), //
-		FRAGMENT("#", true), //
-		COMPOSITE_PARAM("*", true);
+		SIMPLE("", ",", false), //
+
+		/**
+		 * @deprecated since 1.4, use {@link #SIMPLE} instead.
+		 */
+		@Deprecated
+		PATH_VARIABLE("", ",", true), //
+		RESERVED_STRING("+", ",", true), //
+		DOT(".", ".", true), //
+		REQUEST_PARAM("?", "&", true), //
+		REQUEST_PARAM_CONTINUED("&", "&", true), //
+
+		PATH_SEGMENT("/", "/", true), //
+
+		/**
+		 * @deprecated since 1.4, use {@link #PATH_SEGMENT} instead.
+		 */
+		@Deprecated
+		SEGMENT("/", "/", true), //
+		PATH_STYLE_PARAMETER(";", ";", true), //
+		FRAGMENT("#", ",", true), //
+
+		/**
+		 * @deprecated since 1.4. Use the actual type and call {@link TemplateVariable#composite()}.
+		 */
+		COMPOSITE_PARAM("*", "", true);
 
 		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
+		static final String DEFAULT_SEPARATOR = ",";
 
-		private final String key;
+		private final String key, combiner;
 		private final boolean optional;
 
-		VariableType(String key, boolean optional) {
+		VariableType(String key, String combiner, boolean optional) {
 
 			this.key = key;
+			this.combiner = combiner;
 			this.optional = optional;
+		}
+
+		public String encode(String value) {
+
+			switch (this) {
+				case DOT:
+				case SEGMENT:
+				case PATH_SEGMENT:
+				case PATH_STYLE_PARAMETER:
+				case REQUEST_PARAM:
+				case REQUEST_PARAM_CONTINUED:
+				case SIMPLE:
+					return UriUtils.encode(value, StandardCharsets.UTF_8);
+				case FRAGMENT:
+				default:
+					return UriUtils.encodePath(value, StandardCharsets.UTF_8);
+			}
 		}
 
 		/**
@@ -265,7 +532,19 @@ public final class TemplateVariable implements Serializable {
 			return optional;
 		}
 
-		public boolean canBeCombinedWith(VariableType type) {
+		String join(Collection<String> values) {
+
+			if (values.isEmpty()) {
+				return "";
+			}
+
+			String prefix = this.equals(RESERVED_STRING) ? "" : key;
+
+			return values.stream()
+					.collect(Collectors.joining(combiner, prefix, ""));
+		}
+
+		boolean canBeCombinedWith(VariableType type) {
 			return this.equals(type) || COMBINABLE_TYPES.contains(this) && COMBINABLE_TYPES.contains(type);
 		}
 
@@ -291,5 +570,17 @@ public final class TemplateVariable implements Serializable {
 		public String toString() {
 			return key;
 		}
+	}
+
+	/**
+	 * The cardinality of the {@link TemplateVariable}.
+	 *
+	 * @author Oliver Drotbohm
+	 * @since 1.4
+	 * @see <a href=
+	 *      "https://datatracker.ietf.org/doc/html/rfc6570#section-2.4.2">https://datatracker.ietf.org/doc/html/rfc6570#section-2.4.2</a>
+	 */
+	public enum Cardinality {
+		SINGULAR, COMPOSITE;
 	}
 }

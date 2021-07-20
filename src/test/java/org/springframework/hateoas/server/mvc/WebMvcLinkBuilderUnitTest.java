@@ -20,8 +20,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -29,8 +32,10 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +58,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Kevin Conaway
  * @author Oliver Trosien
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 class WebMvcLinkBuilderUnitTest extends TestUtils {
 
@@ -299,33 +305,6 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	}
 
 	/**
-	 * @see #122, #169
-	 */
-	@Test
-	void rejectsMissingPathVariable() {
-
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			linkTo(methodOn(ControllerWithMethods.class).methodWithPathVariable(null))//
-					.withSelfRel().expand();
-		});
-	}
-
-	/**
-	 * @see #122, #169
-	 */
-	@Test
-	void rejectsMissingRequiredRequestParam() {
-
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestParam(null)).withSelfRel();
-
-			assertThat(link.getVariableNames()).containsExactly("id");
-
-			link.expand();
-		});
-	}
-
-	/**
 	 * @see #170
 	 */
 	@Test
@@ -466,14 +445,14 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	}
 
 	/**
-	 * @see #331
+	 * @see #331, #545
 	 */
 	@Test
 	void linksToMethodWithRequestParamImplicitlySetToFalse() {
 
 		Link link = linkTo(methodOn(ControllerWithMethods.class).methodForOptionalSizeWithDefaultValue(null)).withSelfRel();
 
-		assertThat(link.getHref()).endsWith("/bar");
+		assertThat(link.getHref()).endsWith("/bar{?size}");
 	}
 
 	/**
@@ -499,22 +478,6 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		assertThat(link.isTemplated()).isTrue();
 		assertThat(link.getHref()).contains("some%20id");
-	}
-
-	/**
-	 * @see #169
-	 */
-	@Test
-	void addsRequestParameterVariablesForMissingRequiredParameter() {
-
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-
-			Link link = linkTo(methodOn(ControllerWithMethods.class).methodForNextPage("1", 10, null)).withSelfRel();
-
-			assertThat(link.getVariableNames()).containsExactly("limit");
-
-			link.expand();
-		}).withMessageContaining("limit");
 	}
 
 	/**
@@ -634,6 +597,27 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		linkTo(methodOn(ControllerWithHandlerMethodParameterThatNeedsConversion.class).method(41L)).withSelfRel();
 	}
 
+	@Test // #1548
+	void mapsRequestParamMap() {
+
+		Object original = ReflectionTestUtils.getField(MethodParameters.class, "DISCOVERER");
+
+		try {
+
+			ReflectionTestUtils.setField(MethodParameters.class, "DISCOVERER", null);
+
+			Stream.of(null, new HashMap<String, String>()).forEach(it -> {
+
+				Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithMapRequestParam(it)).withSelfRel();
+
+				assertThat(link.getHref()).endsWith("/with-map");
+			});
+
+		} finally {
+			ReflectionTestUtils.setField(MethodParameters.class, "DISCOVERER", original);
+		}
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -683,6 +667,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 			return null;
 		}
 
+		@RequestMapping(path = "/foo", params = { "a=1", "b=2", "c!=4", "!d" })
+		HttpEntity<Void> methodWithPrimaryParams() {
+			return null;
+		}
+
 		@RequestMapping(value = "/{id}/foo")
 		HttpEntity<Void> methodForNextPage(@PathVariable String id, @RequestParam(required = false) Integer offset,
 				@RequestParam Integer limit) {
@@ -712,6 +701,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping
 		HttpEntity<Void> methodWithJdk8Optional(@RequestParam Optional<Integer> value) {
+			return null;
+		}
+
+		@RequestMapping(path = "/with-map") // #1548
+		HttpEntity<Void> methodWithMapRequestParam(@RequestParam Map<String, String> params) {
 			return null;
 		}
 	}

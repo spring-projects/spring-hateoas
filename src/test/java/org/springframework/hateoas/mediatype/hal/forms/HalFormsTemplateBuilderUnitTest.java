@@ -19,11 +19,14 @@ import static org.assertj.core.api.Assertions.*;
 
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -108,7 +111,7 @@ class HalFormsTemplateBuilderUnitTest {
 				.withInput(Payload.class) //
 				.toLink();
 
-		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(), //
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
 
 		Optional<HalFormsProperty> number = template.getPropertyByName("number");
@@ -124,13 +127,29 @@ class HalFormsTemplateBuilderUnitTest {
 		assertThat(text).map(HalFormsProperty::getMaxLength).hasValue(5L);
 	}
 
+	@Test // #1557
+	void considersDecimalMinandDecimalMaxAnnotations() {
+
+		Link link = Affordances.of(Link.of("/example")) //
+				.afford(HttpMethod.POST) //
+				.withInput(Payload.class) //
+				.toLink();
+
+		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(), //
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
+
+		Optional<HalFormsProperty> decimal = template.getPropertyByName("decimal");
+		assertThat(decimal).map(HalFormsProperty::getMin).hasValue(new BigDecimal("2.1"));
+		assertThat(decimal).map(HalFormsProperty::getMax).hasValue(new BigDecimal("5.3"));
+	}
+
 	@Test // #1427
 	void addsTargetAttributeForLinksNotPointingToSelf() {
 
 		Link link = Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
 				.afford(HttpMethod.POST) //
 				.withInput(Payload.class) //
-				.withName("create")
+				.withName("create") //
 				.toLink();
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
@@ -162,21 +181,21 @@ class HalFormsTemplateBuilderUnitTest {
 
 		List<String> values = Arrays.asList("1234123412341234", "4321432143214321");
 
-		HalFormsConfiguration configuration = new HalFormsConfiguration()
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
 				.withOptions(PatternExample.class, "number", metadata -> HalFormsOptions.inline(values));
 
 		RepresentationModel<?> models = new RepresentationModel<>(
-				Affordances.of(Link.of("/example", LinkRelation.of("create")))
-						.afford(HttpMethod.POST)
-						.withInput(PatternExample.class)
+				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(PatternExample.class) //
 						.toLink());
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
 				.findTemplates(models);
 
-		assertThat(templates.get("default").getPropertyByName("number"))
+		assertThat(templates.get("default").getPropertyByName("number")) //
 				.hasValueSatisfying(it -> {
-					assertThat(it.getOptions()).isNotNull()
+					assertThat(it.getOptions()).isNotNull() //
 							.isInstanceOfSatisfying(HalFormsOptions.Inline.class,
 									inline -> assertThat(inline.getInline()).isEqualTo(values));
 				});
@@ -188,14 +207,14 @@ class HalFormsTemplateBuilderUnitTest {
 		String selected = "1234123412341234";
 		List<String> values = Arrays.asList(selected, "4321432143214321");
 
-		HalFormsConfiguration configuration = new HalFormsConfiguration()
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
 				.withOptions(PatternExample.class, "number",
 						metadata -> HalFormsOptions.inline(values).withSelectedValue(selected));
 
 		RepresentationModel<?> models = new RepresentationModel<>(
-				Affordances.of(Link.of("/example", LinkRelation.of("create")))
-						.afford(HttpMethod.POST)
-						.withInput(PatternExample.class)
+				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(PatternExample.class) //
 						.toLink());
 
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
@@ -238,5 +257,9 @@ class HalFormsTemplateBuilderUnitTest {
 
 		@Range(min = 8, max = 10) //
 		Integer range;
+
+		@DecimalMin("2.1") //
+		@DecimalMax("5.3") //
+		BigDecimal decimal;
 	}
 }

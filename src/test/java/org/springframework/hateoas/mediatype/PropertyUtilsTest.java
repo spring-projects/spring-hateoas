@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.Email;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Greg Turnquist
@@ -138,11 +140,11 @@ class PropertyUtilsTest {
 
 		PayloadMetadata metadata = PropertyUtils.getExposedProperties(MethodExposurePayload.class);
 
-		assertThat(metadata.getPropertyMetadata("readWrite")) //
+		assertThat(getProperty(metadata, "readWrite")) //
 				.map(PropertyMetadata::isReadOnly) //
 				.hasValue(false);
 
-		assertThat(metadata.getPropertyMetadata("readOnly")) //
+		assertThat(getProperty(metadata, "readOnly")) //
 				.map(PropertyMetadata::isReadOnly) //
 				.hasValue(true);
 	}
@@ -152,15 +154,15 @@ class PropertyUtilsTest {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
 
-		assertThat(metadata.getPropertyMetadata("nonNull")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "nonNull")).hasValueSatisfying(it -> {
 			assertThat(it.isRequired()).isTrue();
 		});
 
-		assertThat(metadata.getPropertyMetadata("pattern")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "pattern")).hasValueSatisfying(it -> {
 			assertThat(it.getPattern()).hasValue("\\w");
 		});
 
-		assertThat(metadata.getPropertyMetadata("annotated")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "annotated")).hasValueSatisfying(it -> {
 			assertThat(it.getPattern()).hasValue("regex");
 		});
 	}
@@ -170,7 +172,7 @@ class PropertyUtilsTest {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(WithoutReaderMethod.class);
 
-		assertThat(metadata.getPropertyMetadata("firstname")).isPresent();
+		assertThat(getProperty(metadata, "firstname")).isPresent();
 	}
 
 	@TestFactory
@@ -189,6 +191,14 @@ class PropertyUtilsTest {
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(InputTypeSample.class);
 
 		return DynamicTest.stream(source, InputTypes::toString, it -> it.verify(metadata));
+	}
+
+	@Test // #1563
+	void considersJacksonRenamedProperty() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(JacksonCustomizations.class);
+
+		assertThat(getProperty(metadata, "renamed")).isPresent();
 	}
 
 	@Data
@@ -242,8 +252,7 @@ class PropertyUtilsTest {
 
 	static class MethodExposurePayload {
 
-		@Getter
-		@Setter String readWrite;
+		@Getter @Setter String readWrite;
 		@Getter String readOnly;
 	}
 
@@ -283,6 +292,11 @@ class PropertyUtilsTest {
 		@Range int ranged;
 	}
 
+	@Value
+	static class JacksonCustomizations {
+		@JsonProperty("renamed") String property;
+	}
+
 	// Test fixtures
 
 	@Value(staticConstructor = "of")
@@ -293,7 +307,7 @@ class PropertyUtilsTest {
 
 		public void verify(InputPayloadMetadata metadata) {
 
-			assertThat(metadata.getPropertyMetadata(property))
+			assertThat(PropertyUtilsTest.getProperty(metadata, property))
 					.map(PropertyMetadata::getInputType)
 					.hasValue(type.toString());
 		}
@@ -302,5 +316,9 @@ class PropertyUtilsTest {
 		public String toString() {
 			return String.format("Expecting input type %s for %s.", type, property);
 		}
+	}
+
+	private static Optional<PropertyMetadata> getProperty(PayloadMetadata metadata, String name) {
+		return metadata.stream().filter(it -> it.hasName(name)).findFirst();
 	}
 }

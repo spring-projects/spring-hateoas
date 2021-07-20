@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.util.Assert;
@@ -61,7 +62,21 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		Assert.notNull(variables, "Template variables must not be null!");
 		Assert.noNullElements(variables.toArray(), "Variables must not contain null values!");
 
-		this.variables = Collections.unmodifiableList(variables);
+		boolean requestParameterFound = false;
+		List<TemplateVariable> processed = new ArrayList<>(variables.size());
+
+		for (TemplateVariable variable : variables) {
+
+			processed.add(variable.isRequestParameterVariable() && requestParameterFound
+					? variable.withType(REQUEST_PARAM_CONTINUED)
+					: variable);
+
+			if (variable.isRequestParameterVariable()) {
+				requestParameterFound = true;
+			}
+		}
+
+		this.variables = Collections.unmodifiableList(processed);
 	}
 
 	/**
@@ -110,6 +125,10 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	 */
 	public List<TemplateVariable> asList() {
 		return this.variables;
+	}
+
+	public Stream<TemplateVariable> stream() {
+		return this.variables.stream();
 	}
 
 	private boolean containsEquivalentFor(TemplateVariable candidate) {
@@ -165,7 +184,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 			}
 
 			previous = variable;
-			builder.append(variable.getName());
+			builder.append(variable.essence());
 		}
 
 		return builder.append("}").toString();
@@ -174,10 +193,12 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		TemplateVariables that = (TemplateVariables) o;
 		return Objects.equals(this.variables, that.variables);
 	}

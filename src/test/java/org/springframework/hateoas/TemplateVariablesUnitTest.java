@@ -21,11 +21,12 @@ import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.TemplateVariable.Cardinality;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
  * Unit tests for {@link TemplateVariables}.
- * 
+ *
  * @author Oliver Gierke
  */
 class TemplateVariablesUnitTest {
@@ -211,7 +212,15 @@ class TemplateVariablesUnitTest {
 	void variableRejectsNullDescription() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new TemplateVariable("foo", PATH_VARIABLE, null);
+			new TemplateVariable("foo", PATH_VARIABLE, null, Cardinality.SINGULAR);
+		});
+	}
+
+	@Test
+	void variableRejectsNullCardinality() {
+
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new TemplateVariable("foo", PATH_VARIABLE, "description", null);
 		});
 	}
 }

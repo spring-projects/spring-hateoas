@@ -20,11 +20,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -432,7 +435,7 @@ public class PropertyUtils {
 
 		static {
 
-			INPUT_TYPE_FACTORY = SpringFactoriesLoader.loadFactories(InputTypeFactory.class,
+			INPUT_TYPE_FACTORY = SpringFactoriesLoader.loadFactories(InputTypeFactory.class, //
 					DefaultPropertyMetadata.class.getClassLoader()).get(0);
 		}
 
@@ -448,7 +451,16 @@ public class PropertyUtils {
 		 */
 		@Override
 		public String getName() {
-			return property.getName();
+
+			MergedAnnotation<JsonProperty> annotation = property.getAnnotation(JsonProperty.class);
+
+			if (!annotation.isPresent()) {
+				return property.getName();
+			}
+
+			String annotatedName = annotation.getString("value");
+
+			return StringUtils.hasText(annotatedName) ? annotatedName.trim() : property.getName();
 		}
 
 		/*
@@ -516,8 +528,8 @@ public class PropertyUtils {
 
 			String annotatedInputType = getAnnotatedInputType();
 
-			return annotatedInputType != null
-					? annotatedInputType
+			return annotatedInputType != null //
+					? annotatedInputType //
 					: INPUT_TYPE_FACTORY.getInputType(getType().resolve(Object.class));
 		}
 
@@ -607,7 +619,7 @@ public class PropertyUtils {
 		 */
 		@Nullable
 		@Override
-		public Long getMin() {
+		public Number getMin() {
 
 			if (RANGE_ANNOTATION != null) {
 
@@ -618,7 +630,19 @@ public class PropertyUtils {
 				}
 			}
 
-			return getAnnotationAttribute(Min.class, "value", Long.class).orElse(null);
+			Optional<Long> minLong = getAnnotationAttribute(Min.class, "value", Long.class);
+
+			if (minLong.isPresent()) {
+				return minLong.get();
+			}
+
+			Optional<String> minDecimal = getAnnotationAttribute(DecimalMin.class, "value", String.class);
+
+			if (minDecimal.isPresent()) {
+				return new BigDecimal(minDecimal.get());
+			}
+
+			return null;
 		}
 
 		/*
@@ -627,7 +651,7 @@ public class PropertyUtils {
 		 */
 		@Nullable
 		@Override
-		public Long getMax() {
+		public Number getMax() {
 
 			if (RANGE_ANNOTATION != null) {
 
@@ -638,7 +662,19 @@ public class PropertyUtils {
 				}
 			}
 
-			return getAnnotationAttribute(Max.class, "value", Long.class).orElse(null);
+			Optional<Long> maxLong = getAnnotationAttribute(Max.class, "value", Long.class);
+
+			if (maxLong.isPresent()) {
+				return maxLong.get();
+			}
+
+			Optional<String> maxDecimal = getAnnotationAttribute(DecimalMax.class, "value", String.class);
+
+			if (maxDecimal.isPresent()) {
+				return new BigDecimal(maxDecimal.get());
+			}
+
+			return null;
 		}
 
 		/*
@@ -648,8 +684,8 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMinLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class))
-					.map(Integer::longValue)
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class)) //
+					.map(Integer::longValue) //
 					.orElse(null);
 		}
 
@@ -660,8 +696,8 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMaxLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class))
-					.map(Integer::longValue)
+			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class)) //
+					.map(Integer::longValue) //
 					.orElse(null);
 		}
 
@@ -697,14 +733,14 @@ public class PropertyUtils {
 
 		private String lookupFromTypeMap() {
 
-			return TYPE_MAP.entrySet().stream()
+			return TYPE_MAP.entrySet().stream() //
 					.flatMap(it -> {
 
 						MergedAnnotation<? extends Annotation> annotation = property.getAnnotation(it.getKey());
 
 						return annotation.isPresent() ? Stream.of(it.getValue()) : Stream.empty();
-					})
-					.findFirst()
+					}) //
+					.findFirst() //
 					.orElse(null);
 		}
 

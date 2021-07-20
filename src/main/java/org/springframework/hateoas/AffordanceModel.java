@@ -149,8 +149,8 @@ public abstract class AffordanceModel {
 	 */
 	public <T> List<T> createProperties(BiFunction<InputPayloadMetadata, PropertyMetadata, T> creator) {
 
-		return input.stream()
-				.map(it -> creator.apply(input, it))
+		return input.stream() //
+				.map(it -> creator.apply(input, it)) //
 				.collect(Collectors.toList());
 	}
 
@@ -204,6 +204,11 @@ public abstract class AffordanceModel {
 		 */
 		Stream<PropertyMetadata> stream();
 
+		/**
+		 * @deprecated since 1.4, for removal in 1.5. Prefer {@link #stream()} and selecting individual
+		 *             {@code PropertyMetadata} instances yourself.
+		 */
+		@Deprecated
 		default Optional<PropertyMetadata> getPropertyMetadata(String name) {
 			return stream().filter(it -> it.hasName(name)).findFirst();
 		}
@@ -463,7 +468,7 @@ public abstract class AffordanceModel {
 		 * @since 1.3
 		 */
 		@Nullable
-		default Long getMin() {
+		default Number getMin() {
 			return null;
 		}
 
@@ -474,7 +479,7 @@ public abstract class AffordanceModel {
 		 * @since 1.3
 		 */
 		@Nullable
-		default Long getMax() {
+		default Number getMax() {
 			return null;
 		}
 

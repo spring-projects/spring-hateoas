@@ -178,6 +178,15 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/people/17/addresses");
 	}
 
+	@Test // #467
+	void linksToMethodWithPrimaryParam() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithPrimaryParams()).withSelfRel();
+
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+		assertThat(link.getHref()).endsWith("/something/foo?a=1&b=2");
+	}
+
 	@Test
 	void appliesTemplateVariableIfContributorConfigured() {
 

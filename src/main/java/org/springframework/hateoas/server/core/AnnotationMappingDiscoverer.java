@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.server.core;
 
+import static java.util.Optional.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Oliver Gierke
  * @author Mark Paluch
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  * @deprecated since 1.2, not for removal but for hiding within the package in 1.3
  */
 @Deprecated
@@ -165,6 +167,19 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		return mediaTypes == null
 				? Collections.emptyList()
 				: Arrays.stream(mediaTypes).map(MediaType::parseMediaType).collect(Collectors.toList());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getParams(java.lang.reflect.Method)
+	 */
+	@Override
+	public String[] getParams(Method method) {
+
+		Annotation annotation = findMergedAnnotation(method, annotationType);
+		String[] params = (String[]) getValue(annotation, "params");
+
+		return ofNullable(params).orElseGet(() -> new String[0]);
 	}
 
 	private String[] getMappingFrom(@Nullable Annotation annotation) {

@@ -42,7 +42,8 @@ final class HalFormsProperty implements Named {
 	private final Object value;
 	private final boolean templated, multi;
 	private final @JsonInclude(Include.NON_DEFAULT) boolean readOnly, required;
-	private final @Nullable Long min, max, minLength, maxLength;
+	private final @Nullable Number min, max;
+	private final @Nullable Long minLength, maxLength;
 	private final @Nullable HtmlInputType type;
 	private final @Nullable HalFormsOptions options;
 
@@ -66,8 +67,8 @@ final class HalFormsProperty implements Named {
 	}
 
 	private HalFormsProperty(String name, boolean readOnly, @Nullable Object value, String prompt, String regex,
-			boolean templated,
-			boolean required, boolean multi, String placeholder, @Nullable Long min, @Nullable Long max,
+			boolean templated, //
+			boolean required, boolean multi, String placeholder, @Nullable Number min, @Nullable Number max,
 			@Nullable Long minLength, @Nullable Long maxLength, @Nullable HtmlInputType type,
 			@Nullable HalFormsOptions options) {
 
@@ -237,7 +238,7 @@ final class HalFormsProperty implements Named {
 	 * @param min can be {@literal null}
 	 * @return will never be {@literal null}.
 	 */
-	HalFormsProperty withMin(@Nullable Long min) {
+	HalFormsProperty withMin(@Nullable Number min) {
 
 		return Objects.equals(this.min, min) ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
@@ -251,7 +252,7 @@ final class HalFormsProperty implements Named {
 	 * @param max can be {@literal null}
 	 * @return will never be {@literal null}.
 	 */
-	HalFormsProperty withMax(@Nullable Long max) {
+	HalFormsProperty withMax(@Nullable Number max) {
 
 		return Objects.equals(this.max, max) ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
@@ -375,7 +376,7 @@ final class HalFormsProperty implements Named {
 	 */
 	@Nullable
 	@JsonProperty
-	public Long getMin() {
+	public Number getMin() {
 		return min;
 	}
 
@@ -384,7 +385,7 @@ final class HalFormsProperty implements Named {
 	 */
 	@Nullable
 	@JsonProperty
-	public Long getMax() {
+	public Number getMax() {
 		return max;
 	}
 
