@@ -660,6 +660,15 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		}
 	}
 
+	@Test // #1588, #1589
+	void buildsLinkFromMethodAndParameters() throws Exception {
+
+		Method method = ControllerWithMethods.class.getDeclaredMethod("methodWithRequestParam", String.class);
+
+		assertThat(linkTo(method, "someString").withSelfRel().getHref()).endsWith("?id=someString");
+		assertThat(linkTo(method, new Object[] { null }).withSelfRel().getHref()).endsWith("?id={id}");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
