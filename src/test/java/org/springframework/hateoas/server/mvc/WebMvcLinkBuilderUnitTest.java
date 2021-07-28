@@ -20,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.NonComposite;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
@@ -627,6 +629,15 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		assertThat(linkTo(method, new Object[] { null }).withSelfRel().getHref()).endsWith("?id={id}");
 	}
 
+	@Test // #1575
+	void buildsNonCompositeRequestParamUri() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).nonCompositeRequestParam(Arrays.asList("first", "second")))
+				.withSelfRel();
+
+		assertThat(link.getHref()).endsWith("?foo=first,second");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -715,6 +726,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(path = "/with-map") // #1548
 		HttpEntity<Void> methodWithMapRequestParam(@RequestParam Map<String, String> params) {
+			return null;
+		}
+
+		@RequestMapping("/non-composite")
+		HttpEntity<Void> nonCompositeRequestParam(@NonComposite @RequestParam("foo") Collection<String> params) {
 			return null;
 		}
 	}

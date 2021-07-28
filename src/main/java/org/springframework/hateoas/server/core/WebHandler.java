@@ -41,6 +41,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.hateoas.Affordance;
+import org.springframework.hateoas.NonComposite;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
@@ -224,9 +225,16 @@ public class WebHandler {
 
 		if (value instanceof Collection) {
 
-			for (Object element : (Collection<?>) value) {
-				if (key != null) {
-					builder.queryParam(key, encodeParameter(element));
+			if (parameter.isNonComposite()) {
+
+				TemplateVariable variable = TemplateVariable.requestParameter(key);
+				builder.queryParam(key, variable.prepareAndEncode(value));
+
+			} else {
+				for (Object element : (Collection<?>) value) {
+					if (key != null) {
+						builder.queryParam(key, encodeParameter(element));
+					}
 				}
 			}
 		} else if (SKIP_VALUE.equals(value)) {
@@ -310,6 +318,7 @@ public class WebHandler {
 		private final MethodParameter parameter;
 		private final AnnotationAttribute attribute;
 		private final TypeDescriptor typeDescriptor;
+		private final boolean isNonComposite;
 
 		private String variableName;
 
@@ -328,6 +337,18 @@ public class WebHandler {
 			int nestingIndex = Optional.class.isAssignableFrom(parameter.getParameterType()) ? 1 : 0;
 
 			this.typeDescriptor = TypeDescriptor.nested(parameter, nestingIndex);
+			this.isNonComposite = parameter.hasParameterAnnotation(NonComposite.class);
+
+			if (isNonComposite) {
+
+				Assert.isTrue(parameter.hasParameterAnnotation(RequestParam.class),
+						"@NonComposite can only be used in combination with @RequestParam!");
+
+				Class<?> parameterType = parameter.getParameterType();
+
+				Assert.isTrue(parameterType.isArray() || Collection.class.isAssignableFrom(parameterType),
+						"@NonComposite can only be used with collections or arrays!");
+			}
 		}
 
 		/**
@@ -350,6 +371,15 @@ public class WebHandler {
 
 		Class<? extends Annotation> getAnnotationType() {
 			return attribute.getAnnotationType();
+		}
+
+		/**
+		 * Returns whether the
+		 *
+		 * @return
+		 */
+		boolean isNonComposite() {
+			return isNonComposite;
 		}
 
 		public String getVariableName() {

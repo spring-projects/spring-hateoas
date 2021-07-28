@@ -325,18 +325,13 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 			return null;
 		}
 
-		return prepareValue(value);
+		return handleComposite(prepareAndEncode(value));
 
-	}
-
-	@Nullable
-	String prepareValue(Map<String, ?> parameters) {
-		return prepareValue(parameters.get(name));
 	}
 
 	@Nullable
 	@SuppressWarnings("unchecked")
-	String prepareValue(@Nullable Object value) {
+	public String prepareAndEncode(@Nullable Object value) {
 
 		if (value == null) {
 			return null;
@@ -352,20 +347,20 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 				return null;
 			}
 
-			return handleComposite(StreamSupport.stream(source.spliterator(), false)
+			return StreamSupport.stream(source.spliterator(), false)
 					.map(it -> prepareElement(it, false))
-					.collect(Collectors.joining(separator)));
+					.collect(Collectors.joining(separator));
 
 		} else if (value instanceof Map) {
 
 			String keyValueSeparator = isComposite() ? "=" : DEFAULT_SEPARATOR;
 
-			return handleComposite(((Map<Object, Object>) value).entrySet().stream()
+			return ((Map<Object, Object>) value).entrySet().stream()
 					.map(it -> it.getKey().toString().concat(keyValueSeparator).concat(prepareElement(it.getValue(), true)))
-					.collect(Collectors.joining(separator)));
+					.collect(Collectors.joining(separator));
 
 		} else {
-			return handleComposite(prepareElement(value, false));
+			return prepareElement(value, false);
 		}
 	}
 
@@ -436,6 +431,10 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(@Nullable Object o) {
 
@@ -454,6 +453,10 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 				&& Objects.equals(this.description, that.description);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.name, this.type, this.description);
