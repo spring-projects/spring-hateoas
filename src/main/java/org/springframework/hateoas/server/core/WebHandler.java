@@ -17,7 +17,6 @@ package org.springframework.hateoas.server.core;
 
 import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 import static org.springframework.hateoas.TemplateVariables.*;
-import static org.springframework.hateoas.server.core.EncodingUtils.*;
 import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
 import java.lang.annotation.Annotation;
@@ -30,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
@@ -114,7 +114,9 @@ public class WebHandler {
 			Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 
 			while (classMappingParameters.hasNext()) {
-				values.put(names.next(), encodePath(classMappingParameters.next()));
+				String name = names.next();
+				TemplateVariable variable = TemplateVariable.segment(name);
+				values.put(name, variable.prepareAndEncode(classMappingParameters.next()));
 			}
 
 			Method method = invocation.getMethod();
@@ -123,8 +125,8 @@ public class WebHandler {
 			ConversionService resolved = conversionService;
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(PathVariable.class, arguments)) {
-				values.put(parameter.getVariableName(),
-						encodePath(parameter.getValueAsString(arguments, resolved)));
+				TemplateVariable variable = TemplateVariable.segment(parameter.getVariableName());
+				values.put(variable.getName(), variable.prepareAndEncode(parameter.getValueAsString(arguments, resolved)));
 			}
 
 			List<String> optionalEmptyParameters = new ArrayList<>();
@@ -194,24 +196,28 @@ public class WebHandler {
 
 		if (value instanceof MultiValueMap) {
 
-			MultiValueMap<String, String> requestParams = (MultiValueMap<String, String>) value;
+			Map<String, List<?>> requestParams = (Map<String, List<?>>) value;
 
-			for (Map.Entry<String, List<String>> multiValueEntry : requestParams.entrySet()) {
-				for (String singleEntryValue : multiValueEntry.getValue()) {
-					builder.queryParam(multiValueEntry.getKey(), encodeParameter(singleEntryValue));
+			for (Entry<String, List<?>> entry : requestParams.entrySet()) {
+				for (Object element : entry.getValue()) {
+					TemplateVariable variable = TemplateVariable.pathVariable(entry.getKey());
+					builder.queryParam(entry.getKey(), variable.prepareAndEncode(element));
 				}
 			}
 
 			return;
-
 		}
 
 		if (value instanceof Map) {
 
-			Map<String, String> requestParams = (Map<String, String>) value;
+			Map<String, ?> requestParams = (Map<String, ?>) value;
 
-			for (Map.Entry<String, String> requestParamEntry : requestParams.entrySet()) {
-				builder.queryParam(requestParamEntry.getKey(), encodeParameter(requestParamEntry.getValue()));
+			for (Entry<String, ?> entry : requestParams.entrySet()) {
+
+				String key = entry.getKey();
+				TemplateVariable variable = TemplateVariable.requestParameter(key);
+
+				builder.queryParam(key, variable.prepareAndEncode(entry.getValue()));
 			}
 
 			return;
@@ -222,18 +228,17 @@ public class WebHandler {
 		}
 
 		String key = parameter.getVariableName();
+		TemplateVariable variable = TemplateVariable.requestParameter(key);
 
 		if (value instanceof Collection) {
 
 			if (parameter.isNonComposite()) {
-
-				TemplateVariable variable = TemplateVariable.requestParameter(key);
 				builder.queryParam(key, variable.prepareAndEncode(value));
 
 			} else {
 				for (Object element : (Collection<?>) value) {
 					if (key != null) {
-						builder.queryParam(key, encodeParameter(element));
+						builder.queryParam(key, variable.prepareAndEncode(element));
 					}
 				}
 			}
@@ -247,7 +252,7 @@ public class WebHandler {
 
 		} else {
 			if (key != null) {
-				builder.queryParam(key, encodeParameter(parameter.getValueAsString(arguments, conversionService)));
+				builder.queryParam(key, variable.prepareAndEncode(parameter.getValueAsString(arguments, conversionService)));
 			}
 		}
 	}

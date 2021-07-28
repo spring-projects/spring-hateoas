@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +30,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.NonComposite;
@@ -638,6 +642,17 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("?foo=first,second");
 	}
 
+	@Test // #1485
+	void encodesDatesCorrectly() {
+
+		OffsetDateTime reference = OffsetDateTime.now(ZoneId.of("CET"));
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithOffsetDateTime(reference)).withSelfRel();
+
+		assertThat(UriComponentsBuilder.fromUriString(link.getHref()).build().getQuery())
+				.contains("%3A", "%2B")
+				.doesNotContain(":", "+");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -731,6 +746,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping("/non-composite")
 		HttpEntity<Void> nonCompositeRequestParam(@NonComposite @RequestParam("foo") Collection<String> params) {
+			return null;
+		}
+
+		@RequestMapping("/offset")
+		HttpEntity<Void> methodWithOffsetDateTime(@RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime date) {
 			return null;
 		}
 	}
