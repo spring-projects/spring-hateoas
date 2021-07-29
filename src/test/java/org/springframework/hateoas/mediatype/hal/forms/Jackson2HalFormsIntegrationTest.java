@@ -308,9 +308,6 @@ class Jackson2HalFormsIntegrationTest {
 	@Test
 	void deserializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
-		mapper.readFile("annotated-embedded-resources-reference.json",
-				CollectionModel.class, EntityModel.class, SimpleAnnotatedPojo.class);
-
 		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readFile(
 				"annotated-embedded-resources-reference.json", CollectionModel.class, EntityModel.class,
 				SimpleAnnotatedPojo.class);

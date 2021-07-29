@@ -18,15 +18,15 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.support.ContextTester.*;
 
+import reactor.test.StepVerifier;
+
 import java.net.URI;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -39,8 +39,9 @@ import org.springframework.hateoas.server.core.TypeReferences.EntityModelType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Tests registration of proper decoders by the {@link org.springframework.hateoas.config.WebClientHateoasConfiguration.HypermediaWebClientBeanPostProcessor}.
- * 
+ * Tests registration of proper decoders by the
+ * {@link org.springframework.hateoas.config.WebClientHateoasConfiguration.HypermediaWebClientBeanPostProcessor}.
+ *
  * @author Greg Turnquist
  */
 class HypermediaWebClientBeanPostProcessorTest {
@@ -104,8 +105,6 @@ class HypermediaWebClientBeanPostProcessorTest {
 	@Test
 	void shouldHandleNavigatingToAResourceObject() {
 
-		ParameterizedTypeReference<EntityModel<Actor>> typeReference = new EntityModelType<Actor>() {};
-
 		withContext(HalConfig.class, context -> {
 
 			WebClient webClient = context.getBean(WebClient.class);
@@ -123,7 +122,7 @@ class HypermediaWebClientBeanPostProcessorTest {
 					.flatMap(link -> webClient //
 							.get().uri(link.expand().getHref()) //
 							.retrieve() //
-							.bodyToMono(typeReference)) //
+							.bodyToMono(new EntityModelType<Actor>() {})) //
 					.as(StepVerifier::create) //
 					.expectNext(EntityModel.of(new Actor("Keanu Reaves"))) //
 					.verifyComplete();
