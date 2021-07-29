@@ -438,7 +438,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		public String expand(Map<String, ?> parameters) {
 
 			return type.join(variables.stream()
-					.map(it -> it.prepareValue(parameters))
+					.map(it -> it.expand(parameters))
 					.filter(it -> it != null)
 					.collect(Collectors.toList()));
 		}

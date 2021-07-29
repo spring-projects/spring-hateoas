@@ -55,23 +55,6 @@ final class EncodingUtils {
 	}
 
 	/**
-	 * Encodes the given request parameter value.
-	 *
-	 * @param source must not be {@literal null}.
-	 * @return
-	 */
-	public static String encodeParameter(Object source) {
-
-		Assert.notNull(source, "Request parameter value must not be null!");
-
-		try {
-			return UriUtils.encodeQueryParam(source.toString(), ENCODING);
-		} catch (Throwable e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	/**
 	 * Encodes the given fragment value.
 	 *
 	 * @param source must not be {@literal null}.

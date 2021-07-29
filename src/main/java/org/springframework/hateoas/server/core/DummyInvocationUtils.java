@@ -82,7 +82,7 @@ public class DummyInvocationUtils {
 				return ReflectionUtils.invokeMethod(method, invocation.getThis(), invocation.getArguments());
 			}
 
-			this.invocation = new SimpleMethodInvocation(targetType, method, invocation.getArguments());
+			this.invocation = new DefaultMethodInvocation(targetType, method, invocation.getArguments());
 
 			Class<?> returnType = method.getReturnType();
 			ClassLoader classLoader = method.getDeclaringClass().getClassLoader();
@@ -144,7 +144,35 @@ public class DummyInvocationUtils {
 	 */
 	@Nullable
 	public static LastInvocationAware getLastInvocationAware(Object source) {
-		return (LastInvocationAware) ((Advised) source).getAdvisors()[0].getAdvice();
+
+		return (LastInvocationAware) (Advised.class.isInstance(source)
+				? ((Advised) source).getAdvisors()[0].getAdvice()
+				: source);
+	}
+
+	/**
+	 * Creates a simple {@link LastInvocationAware} for the given method and parameters.
+	 *
+	 * @param method must not be {@literal null}.
+	 * @param parameters must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.3.4
+	 */
+	public static LastInvocationAware getLastInvocationAware(Method method, Object[] parameters) {
+		return getLastInvocationAware(method.getDeclaringClass(), method, parameters);
+	}
+
+	/**
+	 * Creates a simple {@link LastInvocationAware} from the given type, method and parameters.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @param parameters must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.3.4
+	 */
+	public static LastInvocationAware getLastInvocationAware(Class<?> type, Method method, Object[] parameters) {
+		return new DefaultMethodInvocation(type, method, parameters);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -180,25 +208,31 @@ public class DummyInvocationUtils {
 			return new CacheKey<T>(type, arguments);
 		}
 
-		public Class<T> getType() {
-			return this.type;
-		}
-
-		public Object[] getArguments() {
-			return this.arguments;
-		}
-
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (!(o instanceof CacheKey))
+			}
+
+			if (!(o instanceof CacheKey)) {
 				return false;
+			}
+
 			CacheKey<?> cacheKey = (CacheKey<?>) o;
-			return Objects.equals(this.type, cacheKey.type) && Arrays.equals(this.arguments, cacheKey.arguments);
+
+			return Objects.equals(this.type, cacheKey.type) //
+					&& Arrays.equals(this.arguments, cacheKey.arguments);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
 		@Override
 		public int hashCode() {
 
@@ -207,66 +241,16 @@ public class DummyInvocationUtils {
 			return result;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
 		public String toString() {
 
-			return "DummyInvocationUtils.CacheKey(type=" + this.type + ", arguments=" + Arrays.deepToString(this.arguments)
+			return "DummyInvocationUtils.CacheKey(type=" + this.type //
+					+ ", arguments=" + Arrays.deepToString(this.arguments) //
 					+ ")";
-		}
-	}
-
-	private static final class SimpleMethodInvocation implements MethodInvocation {
-
-		private final Class<?> targetType;
-		private final Method method;
-		private final Object[] arguments;
-
-		public SimpleMethodInvocation(Class<?> targetType, Method method, Object[] arguments) {
-
-			Assert.notNull(targetType, "targetType must not be null!");
-			Assert.notNull(method, "method must not be null!");
-			Assert.notNull(arguments, "arguments must not be null!");
-
-			this.targetType = targetType;
-			this.method = method;
-			this.arguments = arguments;
-		}
-
-		public Class<?> getTargetType() {
-			return this.targetType;
-		}
-
-		public Method getMethod() {
-			return this.method;
-		}
-
-		public Object[] getArguments() {
-			return this.arguments;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-
-			if (this == o)
-				return true;
-			if (!(o instanceof SimpleMethodInvocation))
-				return false;
-			SimpleMethodInvocation that = (SimpleMethodInvocation) o;
-			return Objects.equals(this.targetType, that.targetType) && Objects.equals(this.method, that.method)
-					&& Arrays.equals(this.arguments, that.arguments);
-		}
-
-		@Override
-		public int hashCode() {
-
-			int result = Objects.hash(this.targetType, this.method);
-			result = 31 * result + Arrays.hashCode(this.arguments);
-			return result;
-		}
-
-		public String toString() {
-
-			return "DummyInvocationUtils.SimpleMethodInvocation(targetType=" + this.targetType + ", method=" + this.method
-					+ ", arguments=" + Arrays.deepToString(this.arguments) + ")";
 		}
 	}
 }

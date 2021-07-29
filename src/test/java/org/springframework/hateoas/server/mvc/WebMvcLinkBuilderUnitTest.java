@@ -19,7 +19,10 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +30,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.NonComposite;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
@@ -618,6 +624,35 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		}
 	}
 
+	@Test // #1588, #1589
+	void buildsLinkFromMethodAndParameters() throws Exception {
+
+		Method method = ControllerWithMethods.class.getDeclaredMethod("methodWithRequestParam", String.class);
+
+		assertThat(linkTo(method, "someString").withSelfRel().getHref()).endsWith("?id=someString");
+		assertThat(linkTo(method, new Object[] { null }).withSelfRel().getHref()).endsWith("?id={id}");
+	}
+
+	@Test // #1575
+	void buildsNonCompositeRequestParamUri() {
+
+		Link link = linkTo(methodOn(ControllerWithMethods.class).nonCompositeRequestParam(Arrays.asList("first", "second")))
+				.withSelfRel();
+
+		assertThat(link.getHref()).endsWith("?foo=first,second");
+	}
+
+	@Test // #1485
+	void encodesDatesCorrectly() {
+
+		OffsetDateTime reference = OffsetDateTime.now(ZoneId.of("CET"));
+		Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithOffsetDateTime(reference)).withSelfRel();
+
+		assertThat(UriComponentsBuilder.fromUriString(link.getHref()).build().getQuery())
+				.contains("%3A", "%2B")
+				.doesNotContain(":", "+");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -706,6 +741,16 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(path = "/with-map") // #1548
 		HttpEntity<Void> methodWithMapRequestParam(@RequestParam Map<String, String> params) {
+			return null;
+		}
+
+		@RequestMapping("/non-composite")
+		HttpEntity<Void> nonCompositeRequestParam(@NonComposite @RequestParam("foo") Collection<String> params) {
+			return null;
+		}
+
+		@RequestMapping("/offset")
+		HttpEntity<Void> methodWithOffsetDateTime(@RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime date) {
 			return null;
 		}
 	}

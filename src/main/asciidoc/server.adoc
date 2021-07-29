@@ -71,8 +71,8 @@ return new ResponseEntity<PersonModel>(headers, HttpStatus.CREATED);
 ----
 ====
 
-[[fundamentals.obtaining-links.builder.methods]]
-=== Building links that point to methods
+[[server.link-builder.webmvc.methods]]
+=== [[fundamentals.obtaining-links.builder.methods]] Building links that point to methods
 
 You can even build links that point to methods or create dummy controller method invocations.
 The first approach is to hand a `Method` instance to the `WebMvcLinkBuilder`.
@@ -104,6 +104,39 @@ assertThat(link.getHref()).endsWith("/people/2");
 
 * The return type has to be capable of proxying, as we need to expose the method invocation on it.
 * The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
+
+[[server.link-builder.webmvc.methods.request-params]]
+==== Controlling the rendering of request parameters
+
+Collection-valued request parameters can actually be materialized in two different ways.
+The URI template specification lists the composite way of rendering them that repeats the parameter name for each value (`param=value1&param=value2`), and the non-composite one that separates values by a comma (`param=value1,value2`).
+Spring MVC properly parses the collection out of both formats.
+Rendering the values defaults to the composite style by default.
+If you want the values to be rendered in the non-composite style, you can use the `@NonComposite` annotation with the request parameter handler method parameter:
+
+====
+[source, java]
+----
+@Controller
+class PersonController {
+
+  @GetMapping("/people")
+  HttpEntity<PersonModel> showAll(
+    @NonComposite @RequestParam Collection<String> names) { … } <1>
+}
+
+var values = List.of("Matthews", "Beauford");
+var link = linkTo(methodOn(PersonController.class).showAll(values)).withSelfRel(); <2>
+
+assertThat(link.getHref()).endsWith("/people?names=Matthews,Beauford"); <3>
+----
+<1> We use the `@NonComposite` annotation to declare we want values to be rendered comma-separated.
+<2> We invoke the method using a list of values.
+<3> See how the request parameter is rendered in the expected format.
+====
+
+NOTE: The reason we're exposing `@NonComposite` is that the composite way of rendering request parameters is baked into the internals of Spring's `UriComponents` builder and we only introduced that non-composite style in Spring HATEOAS 1.4.
+If we started from scratch today, we'd probably default to that style and rather let users opt into the composite style explicitly rather than the other way around.
 
 [[server.link-builder.webflux]]
 == Building links in Spring WebFlux
