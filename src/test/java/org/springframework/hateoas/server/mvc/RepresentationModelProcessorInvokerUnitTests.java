@@ -83,6 +83,18 @@ public class RepresentationModelProcessorInvokerUnitTests {
 		assertThat(processor.invoked).isTrue();
 	}
 
+	@Test // #1590
+	void invokesProcessorForEmptyCollectionModelIfFallbackTypeDefined() {
+
+		FirstEntityProcessor processor = new FirstEntityProcessor();
+		RepresentationModelProcessorInvoker invoker = new RepresentationModelProcessorInvoker(singletonList(processor));
+		CollectionModel<?> model = CollectionModel.empty(EntityModel.class, FirstEntity.class);
+
+		invoker.invokeProcessorsFor(model);
+
+		assertThat(processor.invoked).isTrue();
+	}
+
 	// #1280
 
 	static class GenericPostProcessor<T extends GenericModel<T>> implements RepresentationModelProcessor<T> {

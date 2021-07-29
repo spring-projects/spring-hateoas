@@ -370,9 +370,8 @@ public class RepresentationModelProcessorInvoker {
 				return false;
 			}
 
-			boolean defaultSupports = super.supports(type, value);
-			boolean valueTypeMatch = isValueTypeMatch((CollectionModel<?>) value, getTargetType());
-			return defaultSupports && valueTypeMatch;
+			return super.supports(type, value) //
+					&& isValueTypeMatch((CollectionModel<?>) value, getTargetType());
 		}
 
 		/**
@@ -392,7 +391,7 @@ public class RepresentationModelProcessorInvoker {
 			Collection<?> content = collectionModel.getContent();
 
 			if (content.isEmpty()) {
-				return false;
+				return collectionModel.getResolvableType().isAssignableFrom(target);
 			}
 
 			ResolvableType superType = null;

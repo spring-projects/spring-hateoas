@@ -548,7 +548,6 @@ include::{resource-dir}/docs/order-plain.json[]
 
 You wish to add a link so the client can make payment, but don't want to mix details about your `PaymentController` into
 the `OrderController`.
-
 Instead of polluting the details of your ordering system, you can write a `RepresentationModelProcessor` like this:
 
 ====
@@ -589,6 +588,15 @@ This example is quite simple, but you can easily:
 
 Also, in this example, the `PaymentProcessor` alters the provided `EntityModel<Order>`. You also have the power to
 _replace_ it with another object. Just be advised the API requires the return type to equal the input type.
+
+[[server.processors.empty-collections]]
+=== Processing empty collection models
+
+To find the right set of ``RepresentationModelProcessor`` instance to invoke for a `RepresentationModel` instance, the invoking infrastructure performs a detailed analysis of the generics declaration of the ``RepresentationModelProcessor``s registered.
+For `CollectionModel` instances, this includes inspecting the elements of the underlying collection, as at runtime, the sole model instance does not expose generics information (due to Java's type erasure).
+That means, by default, `RepresentationModelProcessor` instances are not invoked for empty collection models.
+To still allow the infrastructure to deduce the payload types correctly, you can initialize empty `CollectionModel` instances with an explicit fallback payload type right from the start, or register it by calling `CollectionModel.withFallbackType(…)`.
+See <<fundamentals.collection-model>> for details.
 
 [[server.rel-provider]]
 == [[spis.rel-provider]] Using the `LinkRelationProvider` API

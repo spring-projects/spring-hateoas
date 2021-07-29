@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -37,7 +40,8 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	public static PagedModel<?> NO_PAGE = new PagedModel<>();
 
-	private PageMetadata metadata;
+	private final PageMetadata metadata;
+	private final @Nullable ResolvableType fallbackType;
 
 	/**
 	 * Default constructor to allow instantiation by reflection.
@@ -69,21 +73,67 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 */
 	@Deprecated
 	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
+		this(content, metadata, links, null);
+	}
 
-		super(content, links);
+	protected PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links,
+			@Nullable ResolvableType fallbackType) {
+
+		super(content, links, fallbackType);
 
 		this.metadata = metadata;
+		this.fallbackType = fallbackType;
 	}
 
 	/**
 	 * Creates an empty {@link PagedModel}.
 	 *
 	 * @param <T>
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @since 1.1
 	 */
 	public static <T> PagedModel<T> empty() {
 		return empty(Collections.emptyList());
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given fallback type.
+	 *
+	 * @param <T>
+	 * @param fallbackElementType must not be {@literal null}.
+	 * @param generics must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 * @see #withFallbackType(Class, Class...)
+	 */
+	public static <T> PagedModel<T> empty(Class<T> fallbackElementType, Class<?> generics) {
+		return empty(ResolvableType.forClassWithGenerics(fallbackElementType, generics));
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given fallback type.
+	 *
+	 * @param <T>
+	 * @param fallbackElementType must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 * @see #withFallbackType(ParameterizedTypeReference)
+	 */
+	public static <T> PagedModel<T> empty(ParameterizedTypeReference<T> fallbackElementType) {
+		return empty(ResolvableType.forType(fallbackElementType));
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given fallback type.
+	 *
+	 * @param <T>
+	 * @param fallbackElementType must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 * @see #withFallbackType(ResolvableType)
+	 */
+	public static <T> PagedModel<T> empty(ResolvableType fallbackElementType) {
+		return new PagedModel<>(Collections.emptyList(), null, Collections.emptyList(), fallbackElementType);
 	}
 
 	/**
@@ -120,6 +170,58 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 */
 	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata) {
 		return empty(metadata, Collections.emptyList());
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and fallback type.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @param fallbackType must not be {@literal null}.
+	 * @param generics must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 * @see #withFallbackType(Class, Class...)
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, Class<?> fallbackType, Class<?>... generics) {
+
+		Assert.notNull(fallbackType, "Fallback type must not be null!");
+		Assert.notNull(generics, "Generics must not be null!");
+
+		return empty(metadata, ResolvableType.forClassWithGenerics(fallbackType, generics));
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and fallback type.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @return
+	 * @since 1.4
+	 * @see #withFallbackType(ParameterizedTypeReference)
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, ParameterizedTypeReference<T> fallbackType) {
+
+		Assert.notNull(fallbackType, "Fallback type must not be null!");
+
+		return empty(metadata, ResolvableType.forType(fallbackType));
+	}
+
+	/**
+	 * Creates an empty {@link PagedModel} with the given {@link PageMetadata} and fallback type.
+	 *
+	 * @param <T>
+	 * @param metadata can be {@literal null}.
+	 * @param fallbackType must not be {@literal null}.
+	 * @return
+	 * @since 1.4
+	 * @see #withFallbackType(ResolvableType)
+	 */
+	public static <T> PagedModel<T> empty(@Nullable PageMetadata metadata, ResolvableType fallbackType) {
+
+		Assert.notNull(fallbackType, "Fallback type must not be null!");
+
+		return new PagedModel<>(Collections.emptyList(), metadata, Collections.emptyList(), fallbackType);
 	}
 
 	/**
@@ -234,11 +336,39 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	/*
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.CollectionModel#withFallbackType(java.lang.Class, java.lang.Class[])
+	 */
+	@Override
+	public PagedModel<T> withFallbackType(Class<? super T> type, Class<?>... generics) {
+		return withFallbackType(ResolvableType.forClassWithGenerics(type, generics));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.CollectionModel#withFallbackType(org.springframework.core.ParameterizedTypeReference)
+	 */
+	@Override
+	public PagedModel<T> withFallbackType(ParameterizedTypeReference<?> type) {
+		return withFallbackType(ResolvableType.forType(type));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.CollectionModel#withFallbackType(org.springframework.core.ResolvableType)
+	 */
+	@Override
+	public PagedModel<T> withFallbackType(ResolvableType type) {
+		return new PagedModel<>(getContent(), metadata, getLinks(), type);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.RepresentationModel#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("PagedModel { content: %s, metadata: %s, links: %s }", getContent(), metadata, getLinks());
+		return String.format("PagedModel { content: %s, fallbackType: %s, metadata: %s, links: %s }", //
+				getContent(), fallbackType, metadata, getLinks());
 	}
 
 	/*
@@ -257,9 +387,9 @@ public class PagedModel<T> extends CollectionModel<T> {
 		}
 
 		PagedModel<?> that = (PagedModel<?>) obj;
-		boolean metadataEquals = this.metadata == null ? that.metadata == null : this.metadata.equals(that.metadata);
 
-		return metadataEquals && super.equals(obj);
+		return Objects.equals(this.metadata, that.metadata) //
+				&& super.equals(obj);
 	}
 
 	/*
@@ -268,10 +398,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 */
 	@Override
 	public int hashCode() {
-
-		int result = super.hashCode();
-		result += this.metadata == null ? 0 : 31 * this.metadata.hashCode();
-		return result;
+		return super.hashCode() + Objects.hash(metadata);
 	}
 
 	/**

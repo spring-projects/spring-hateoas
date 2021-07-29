@@ -182,6 +182,7 @@ EntityModel<Person> model = EntityModel.of(person);
 ----
 ====
 
+[[fundamentals.collection-model]]
 === Collection resource representation model
 
 For resources that are conceptually collections, a `CollectionModel` is available.
@@ -195,3 +196,16 @@ Collection<Person> people = Collections.singleton(new Person("Dave", "Matthews")
 CollectionModel<Person> model = CollectionModel.of(people);
 ----
 ====
+
+While an `EntityModel` is constrained to always contain a payload and thus allows to reason about the type arrangement on the sole instance, a ``CollectionModel``'s underlying collection can be empty.
+Due to Java's type erasure, we cannot actually detect that a `CollectionModel<Person> model = CollectionModel.empty()` is actually a `CollectionModel<Person>` because all we see is the runtime instance and an empty collection.
+That missing type information can be added to the model by either adding it to the empty instance on construction via `CollectionModel.empty(Person.class)` or as fallback in case the underlying collection might be empty:
+
+====
+[source, java] 
+----
+Iterable<Person> people = repository.findAll();
+var model = CollectionModel.of(people).withFallbackType(Person.class);
+----
+====
+
