@@ -1,5 +1,14 @@
 Spring HATEOAS Changelog
 ========================
+Changes in version 1.4 M2 (2021-08-12)
+----------------------------------------
+- #1591 - Allow to register custom media type for HAL FORMS.
+- #1590 - Add fallback type information to empty CollectionModels.
+- #1588 - WebMvcLinkBuilder.linkTo(Method, Object[]) does not append request parameters properly.
+- #1575 - Support for non-composite request parameter rendering on link creation.
+- #1565 - UriBuilder query parameter encoding behaves differently depending on required RequestParameter.
+- #1485 - Special characters in request parameters not fully encoded when generating links from controller methods.
+
 Changes in version 1.4 M1 (2021-07-14)
 ----------------------------------------
 - #1586 - Upgrade to Reactor 2020.0.9.
