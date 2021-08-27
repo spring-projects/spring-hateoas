@@ -21,16 +21,8 @@ import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -65,6 +57,8 @@ import org.springframework.web.util.UriTemplate;
  * @author Oliver Drotbohm
  */
 public class WebHandler {
+
+	private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 
 	public interface LinkBuilderCreator<T extends LinkBuilder> {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
@@ -114,19 +108,27 @@ public class WebHandler {
 			Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 
 			while (classMappingParameters.hasNext()) {
+
 				String name = names.next();
 				TemplateVariable variable = TemplateVariable.segment(name);
-				values.put(name, variable.prepareAndEncode(classMappingParameters.next()));
+				Object source = classMappingParameters.next();
+
+				values.put(name, variable.prepareAndEncode(
+						HandlerMethodParameter.prepareValue(source, conversionService, TypeDescriptor.forObject(source))));
 			}
 
 			Method method = invocation.getMethod();
 			HandlerMethodParameters parameters = HandlerMethodParameters.of(method);
 			Object[] arguments = invocation.getArguments();
-			ConversionService resolved = conversionService;
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(PathVariable.class, arguments)) {
+
 				TemplateVariable variable = TemplateVariable.segment(parameter.getVariableName());
-				values.put(variable.getName(), variable.prepareAndEncode(parameter.getValueAsString(arguments, resolved)));
+				Object verifiedValue = parameter.getVerifiedValue(arguments);
+				Object preparedValue = verifiedValue == null ? verifiedValue
+						: parameter.prepareValue(verifiedValue, conversionService);
+
+				values.put(variable.getName(), variable.prepareAndEncode(preparedValue));
 			}
 
 			List<String> optionalEmptyParameters = new ArrayList<>();
@@ -196,7 +198,7 @@ public class WebHandler {
 
 		if (value instanceof MultiValueMap) {
 
-			Map<String, List<?>> requestParams = (Map<String, List<?>>) value;
+			Map<String, List<?>> requestParams = (Map<String, List<?>>) parameter.prepareValue(value, conversionService);
 
 			for (Entry<String, List<?>> entry : requestParams.entrySet()) {
 				for (Object element : entry.getValue()) {
@@ -210,7 +212,7 @@ public class WebHandler {
 
 		if (value instanceof Map) {
 
-			Map<String, ?> requestParams = (Map<String, ?>) value;
+			Map<String, ?> requestParams = (Map<String, ?>) parameter.prepareValue(value, conversionService);
 
 			for (Entry<String, ?> entry : requestParams.entrySet()) {
 
@@ -232,11 +234,13 @@ public class WebHandler {
 
 		if (value instanceof Collection) {
 
+			Collection<?> collection = (Collection<?>) parameter.prepareValue(value, conversionService);
+
 			if (parameter.isNonComposite()) {
-				builder.queryParam(key, variable.prepareAndEncode(value));
+				builder.queryParam(key, variable.prepareAndEncode(collection));
 
 			} else {
-				for (Object element : (Collection<?>) value) {
+				for (Object element : (Collection<?>) collection) {
 					if (key != null) {
 						builder.queryParam(key, variable.prepareAndEncode(element));
 					}
@@ -252,9 +256,29 @@ public class WebHandler {
 
 		} else {
 			if (key != null) {
-				builder.queryParam(key, variable.prepareAndEncode(parameter.getValueAsString(arguments, conversionService)));
+				builder.queryParam(key, variable.prepareAndEncode(parameter.prepareValue(value, conversionService)));
 			}
 		}
+	}
+
+	private static Function<Object, String> getFormatter(ConversionService conversionService, TypeDescriptor descriptor) {
+
+		return source -> {
+
+			if (String.class.isInstance(source)) {
+				return (String) source;
+			}
+
+			Object result = conversionService.canConvert(descriptor, STRING_DESCRIPTOR)
+					? conversionService.convert(source, descriptor, STRING_DESCRIPTOR)
+					: source == null ? null : source.toString();
+
+			if (result == null) {
+				throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", source));
+			}
+
+			return (String) result;
+		};
 	}
 
 	private static class HandlerMethodParameters {
@@ -310,7 +334,6 @@ public class WebHandler {
 
 	private abstract static class HandlerMethodParameter {
 
-		private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 		private static final Map<Class<? extends Annotation>, Function<MethodParameter, ? extends HandlerMethodParameter>> FACTORY;
 		private static final String NO_PARAMETER_NAME = "Could not determine name of parameter %s! Make sure you compile with parameter information or explicitly define a parameter name in %s.";
 
@@ -396,29 +419,54 @@ public class WebHandler {
 			return variableName;
 		}
 
-		public String getValueAsString(Object[] values, ConversionService conversionService) {
+		public Object prepareValue(Object value, ConversionService conversionService) {
 
-			Object value = values[parameter.getParameterIndex()];
+			Object result = prepareValue(value, conversionService, typeDescriptor);
 
-			if (value == null) {
-				throw new IllegalArgumentException("Cannot turn null value into required String!");
-			}
+			return result == null ? value : result;
+		}
 
-			if (String.class.isInstance(value)) {
-				return (String) value;
+		@Nullable
+		@SuppressWarnings("unchecked")
+		public static Object prepareValue(@Nullable Object value, ConversionService conversionService,
+				@Nullable TypeDescriptor descriptor) {
+
+			if (descriptor == null || value == null) {
+				return value;
 			}
 
 			value = ObjectUtils.unwrapOptional(value);
 
-			Object result = conversionService.canConvert(typeDescriptor, STRING_DESCRIPTOR)
-					? conversionService.convert(value, typeDescriptor, STRING_DESCRIPTOR)
-					: value == null ? null : value.toString();
+			if (Collection.class.isInstance(value)) {
 
-			if (result == null) {
-				throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", value));
+				List<Object> prepared = new ArrayList<>();
+
+				for (Object element : (Collection<?>) value) {
+
+					TypeDescriptor elementTypeDescriptor = descriptor.elementTypeDescriptor(element);
+					prepared.add(prepareValue(element, conversionService, elementTypeDescriptor));
+				}
+
+				return prepared;
 			}
 
-			return (String) result;
+			if (Map.class.isInstance(value)) {
+
+				Map<Object, Object> prepared = new LinkedHashMap<>();
+
+				for (Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
+
+					TypeDescriptor keyTypeDescriptor = descriptor.getMapKeyTypeDescriptor(entry.getKey());
+					TypeDescriptor elementTypeDescriptor = descriptor.elementTypeDescriptor(entry.getValue());
+
+					prepared.put(prepareValue(entry.getKey(), conversionService, keyTypeDescriptor),
+							prepareValue(entry.getValue(), conversionService, elementTypeDescriptor));
+				}
+
+				return prepared;
+			}
+
+			return getFormatter(conversionService, descriptor).apply(value);
 		}
 
 		private String determineVariableName() {

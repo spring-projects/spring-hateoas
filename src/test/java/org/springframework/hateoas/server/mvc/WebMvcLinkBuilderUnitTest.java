@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -39,8 +42,10 @@ import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.core.MethodParameters;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.Sample.SampleConverter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -653,6 +658,22 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 				.doesNotContain(":", "+");
 	}
 
+	@Test // #1598
+	void usesRegisteredConverterForCollectionValues() {
+
+		ConfigurableConversionService conversionService = //
+				(ConfigurableConversionService) ReflectionTestUtils.getField(WebMvcLinkBuilderFactory.class,
+						"FALLBACK_CONVERSION_SERVICE");
+
+		conversionService.addConverter(SampleConverter.INSTANCE);
+
+		Link result = linkTo(
+				methodOn(ControllerWithMethods.class).methodWithCustomEnum(Collections.singletonList(Sample.ENUM)))
+						.withSelfRel();
+
+		assertThat(result.getHref()).endsWith("?param=first");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -753,6 +774,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		HttpEntity<Void> methodWithOffsetDateTime(@RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime date) {
 			return null;
 		}
+
+		@RequestMapping("/custom-enum")
+		HttpEntity<Void> methodWithCustomEnum(@RequestParam List<Sample> param) {
+			return null;
+		}
 	}
 
 	@RequestMapping("/parent")
@@ -801,10 +827,36 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		}
 	}
 
-	// #???
+	// #118
 	interface ControllerWithHandlerMethodParameterThatNeedsConversion {
 
 		@GetMapping("/{id}")
 		HttpEntity<?> method(@PathVariable Long id);
+	}
+
+	// #1598
+	enum Sample {
+
+		ENUM("first");
+
+		String label;
+
+		/**
+		 * @param label
+		 */
+		private Sample(String label) {
+			this.label = label;
+		}
+
+		enum SampleConverter implements Converter<Sample, String> {
+
+			INSTANCE;
+
+			@NonNull
+			@Override
+			public String convert(Sample source) {
+				return source.label;
+			}
+		}
 	}
 }
