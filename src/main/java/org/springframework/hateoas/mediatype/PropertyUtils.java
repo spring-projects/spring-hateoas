@@ -231,7 +231,7 @@ public class PropertyUtils {
 		return type == null //
 				? Stream.empty() //
 				: getPropertyDescriptors(type) //
-						.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod())))
+						.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod(), it.getName())))
 						.map(it -> JSR_303_PRESENT ? new Jsr303AwarePropertyMetadata(it) : new DefaultPropertyMetadata(it));
 	}
 

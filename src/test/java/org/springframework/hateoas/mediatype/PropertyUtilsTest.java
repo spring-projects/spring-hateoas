@@ -164,6 +164,13 @@ class PropertyUtilsTest {
 		assertThat(metadata.getPropertyMetadata("firstname")).isPresent();
 	}
 
+	@Test // #1402
+	void detectesPropertiesWithRecordStyleAccessorsCorrectly() {
+
+		assertThatNoException()
+				.isThrownBy(() -> PropertyUtils.getExposedProperties(TypeWithRecordStyleAccessors.class));
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -234,6 +241,20 @@ class PropertyUtilsTest {
 
 		public void setFirstname(String firstname) {
 			this.firstname = firstname;
+		}
+	}
+
+	// #1402
+	static class TypeWithRecordStyleAccessors {
+
+		private Boolean isActive;
+
+		public Boolean isActive() {
+			return isActive;
+		}
+
+		public void setActive(Boolean active) {
+			isActive = active;
 		}
 	}
 }
