@@ -201,6 +201,13 @@ class PropertyUtilsTest {
 		assertThat(getProperty(metadata, "renamed")).isPresent();
 	}
 
+	@Test // #1402
+	void detectesPropertiesWithRecordStyleAccessorsCorrectly() {
+
+		assertThatNoException()
+				.isThrownBy(() -> PropertyUtils.getExposedProperties(TypeWithRecordStyleAccessors.class));
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -320,5 +327,19 @@ class PropertyUtilsTest {
 
 	private static Optional<PropertyMetadata> getProperty(PayloadMetadata metadata, String name) {
 		return metadata.stream().filter(it -> it.hasName(name)).findFirst();
+	}
+
+	// #1402
+	static class TypeWithRecordStyleAccessors {
+
+		private Boolean isActive;
+
+		public Boolean isActive() {
+			return isActive;
+		}
+
+		public void setActive(Boolean active) {
+			isActive = active;
+		}
 	}
 }
