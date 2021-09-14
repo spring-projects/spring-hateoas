@@ -78,13 +78,7 @@ public class Link implements Serializable {
 
 	private LinkRelation rel;
 	private String href;
-	private String hreflang;
-	private String media;
-	private String title;
-	private String type;
-	private String deprecation;
-	private String profile;
-	private String name;
+	private @Nullable String hreflang, media, title, type, deprecation, profile, name;
 	private @JsonIgnore @Nullable UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 
@@ -178,8 +172,9 @@ public class Link implements Serializable {
 		this.affordances = affordances;
 	}
 
-	private Link(LinkRelation rel, String href, String hreflang, String media, String title, String type,
-			String deprecation, String profile, String name, @Nullable UriTemplate template, List<Affordance> affordances) {
+	private Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
+			@Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
+			@Nullable UriTemplate template, List<Affordance> affordances) {
 
 		this.rel = rel;
 		this.href = href;
@@ -329,6 +324,9 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<String> getVariableNames() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? Collections.emptyList() : template.getVariableNames();
 	}
 
@@ -339,6 +337,9 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? Collections.emptyList() : template.getVariables();
 	}
 
@@ -348,6 +349,9 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public boolean isTemplated() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? false : !template.getVariables().isEmpty();
 	}
 
@@ -357,7 +361,11 @@ public class Link implements Serializable {
 	 * @param arguments
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	public Link expand(Object... arguments) {
+
+		UriTemplate template = this.template;
+
 		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
@@ -368,6 +376,9 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Map<String, ?> arguments) {
+
+		UriTemplate template = this.template;
+
 		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
@@ -644,36 +655,43 @@ public class Link implements Serializable {
 		return this.href;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getHreflang() {
 		return this.hreflang;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getMedia() {
 		return this.media;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getTitle() {
 		return this.title;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getType() {
 		return this.type;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getDeprecation() {
 		return this.deprecation;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getProfile() {
 		return this.profile;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getName() {
 		return this.name;
@@ -681,7 +699,7 @@ public class Link implements Serializable {
 
 	@JsonProperty
 	public UriTemplate getTemplate() {
-		return template == null ? UriTemplate.of(href) : this.template;
+		return template == null ? UriTemplate.of(href) : template;
 	}
 
 	/*
@@ -689,7 +707,7 @@ public class Link implements Serializable {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
 		if (this == o) {
 			return true;
