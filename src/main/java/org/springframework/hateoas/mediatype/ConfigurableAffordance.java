@@ -22,14 +22,13 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.Affordances.AffordanceBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
- * An affordance in creation. Superseding {@link AffordanceBuilder} to build up affordances manually to clearly
- * distinguish between building the affordance and consuming the configured state.
+ * An affordance in creation. API to build up affordances manually to clearly distinguish between building the
+ * affordance and consuming the configured state.
  *
  * @author Oliver Drotbohm
  * @since 1.3
