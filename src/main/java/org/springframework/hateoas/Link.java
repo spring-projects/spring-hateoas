@@ -699,6 +699,9 @@ public class Link implements Serializable {
 
 	@JsonProperty
 	public UriTemplate getTemplate() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? UriTemplate.of(href) : template;
 	}
 

@@ -65,12 +65,14 @@ public final class Affordance implements Iterable<AffordanceModel> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		Affordance that = (Affordance) o;
 		return Objects.equals(this.models, that.models);
 	}
@@ -80,6 +82,7 @@ public final class Affordance implements Iterable<AffordanceModel> {
 		return Objects.hash(this.models);
 	}
 
+	@Override
 	public String toString() {
 		return "Affordance(models=" + this.models + ")";
 	}

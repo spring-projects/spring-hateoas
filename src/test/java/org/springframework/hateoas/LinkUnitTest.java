@@ -307,6 +307,7 @@ class LinkUnitTest {
 	 * @see #671
 	 */
 	@Test
+	@SuppressWarnings("null")
 	void rejectsInvalidRelationsOnHasRel() {
 
 		Link link = Link.of("/");
