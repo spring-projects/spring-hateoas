@@ -24,6 +24,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -160,6 +161,8 @@ public class DefaultCurieProvider implements CurieProvider {
 			this.name = name;
 		}
 
+		@Override
+		@NonNull
 		public String getName() {
 			return this.name;
 		}

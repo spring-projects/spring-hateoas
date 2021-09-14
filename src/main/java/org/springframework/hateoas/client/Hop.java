@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -57,7 +58,7 @@ public final class Hop {
 
 	/**
 	 * Creates a new {@link Hop} for the given relation name.
-	 * 
+	 *
 	 * @param rel must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -130,7 +131,7 @@ public final class Hop {
 
 	/**
 	 * Returns whether the {@link Hop} has parameters declared.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean hasParameters() {
@@ -169,12 +170,14 @@ public final class Hop {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		Hop hop = (Hop) o;
 		return Objects.equals(this.rel, hop.rel) && Objects.equals(this.parameters, hop.parameters)
 				&& Objects.equals(this.headers, hop.headers);
@@ -185,6 +188,7 @@ public final class Hop {
 		return Objects.hash(this.rel, this.parameters, this.headers);
 	}
 
+	@Override
 	public String toString() {
 		return "Hop(rel=" + this.rel + ", parameters=" + this.parameters + ", headers=" + this.headers + ")";
 	}

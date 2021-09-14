@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -191,7 +192,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
 		if (this == o) {
 			return true;

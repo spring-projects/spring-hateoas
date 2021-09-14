@@ -28,6 +28,7 @@ import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 /**
@@ -88,6 +89,11 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 		return Arrays.asList(type.getName(), type.getSimpleName());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel.PayloadMetadata#getType()
+	 */
+	@NonNull
 	public Class<?> getType() {
 		return this.type;
 	}
