@@ -76,11 +76,11 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
 
 				.andExpect(jsonPath("$._templates.*", hasSize(2)))
-				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist())
+				.andExpect(jsonPath("$._templates['updateEmployee'].method", is("put")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[0].name", is("name")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[0].required").value(true))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[1].name", is("role")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[1].required").doesNotExist())
 
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))

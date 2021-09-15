@@ -18,6 +18,7 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -56,16 +57,19 @@ class HalFormsTemplateBuilder {
 		Map<String, HalFormsTemplate> templates = new HashMap<>();
 		Link selfLink = resource.getLink(IanaLinkRelations.SELF).orElse(null);
 
-		resource.getLinks().stream() //
+		Supplier<Stream<HalFormsAffordanceModel>> streamOfAffordances = () -> resource.getLinks().stream() //
 				.flatMap(it -> it.getAffordances().stream()) //
 				.map(it -> it.getAffordanceModel(MediaTypes.HAL_FORMS_JSON)) //
 				.peek(it -> {
 					Assert.notNull(it, "No HAL Forms affordance model found but expected!");
 				}) //
-				.map(HalFormsAffordanceModel.class::cast) //
-				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
+				.map(HalFormsAffordanceModel.class::cast)
+				.filter(it -> !it.hasHttpMethod(HttpMethod.GET));
+				
+		long numberOfAffordances = streamOfAffordances.get().count(); 
+		
+		streamOfAffordances.get()
 				.forEach(it -> {
-
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
 							.withProperties(factory.createProperties(it))
 							.withContentType(it.getInput().getPrimaryMediaType());
@@ -75,11 +79,11 @@ class HalFormsTemplateBuilder {
 					if (selfLink == null || !target.equals(selfLink.getHref())) {
 						template = template.withTarget(target);
 					}
-
 					template = applyTo(template, TemplateTitle.of(it, templates.isEmpty()));
-					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
+					templates.put(templates.isEmpty() ? 
+							(numberOfAffordances == 1 ? "default" : it.getName()) : it.getName(), template);
 				});
-
+				
 		return templates;
 	}
 
