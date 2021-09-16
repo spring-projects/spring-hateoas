@@ -1,5 +1,26 @@
 Spring HATEOAS Changelog
 ========================
+
+Changes in version 1.4 M3 (2021-09-16)
+----------------------------------------
+- #1634 - Upgrade to AssertJ 3.20.2.
+- #1633 - Upgrade to EvoInflector 1.3.
+- #1632 - Upgrade to Logback 1.2.6.
+- #1631 - Upgrade to JaCoCo 0.8.7.
+- #1630 - Upgrade to Jackson 2.12.5.
+- #1629 - Upgrade to JUnit 5.8.
+- #1628 - Upgrade to Slf4j 1.7.32.
+- #1627 - Upgrade to Mockk 1.12.0.
+- #1626 - Upgrade to Kotlin 1.5.30 and Coroutines 1.5.3.
+- #1625 - Upgrade to Reactor 2020.0.11.
+- #1624 - Upgrade to Spring Framework 5.3.10.
+- #1609 - Avoid superfluous object creation in Link.valueOf(…).
+- #1608 - HAL-FORMS affordance method is in lowercase instead of uppercase.
+- #1607 - Remove deprecations in Affordances.
+- #1602 - Wrong nullability declarations for properties of Link.
+- #1599 - @JsonIdentityInfo not rendering correctly since Spring HATEOAS 1.1.2.
+- #1598 - Custom converter is not used for enum list query parameter.
+
 Changes in version 1.4 M2 (2021-08-12)
 ----------------------------------------
 - #1591 - Allow to register custom media type for HAL FORMS.
