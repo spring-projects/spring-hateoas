@@ -1,5 +1,19 @@
 Spring HATEOAS Changelog
 ========================
+
+Changes in version 1.3.4 (2021-09-16)
+----------------------------------------
+- #1622 - Upgrade to Jackson 2.12.5.
+- #1621 - Upgrade to Reactor 2020.0.11.
+- #1620 - Upgrade to Slf4j 1.7.32.
+- #1619 - Upgrade to Kotlin 1.4.32.
+- #1618 - Upgrade to Spring Framework 5.3.10.
+- #1610 - Avoid superfluous object creation in Link.valueOf(…).
+- #1605 - Wrong nullability declarations for properties of Link.
+- #1603 - @JsonIdentityInfo not rendering correctly since Spring HATEOAS 1.1.2.
+- #1600 - Receiving duplicate key when bean property accessors collide.
+- #1589 - WebMvcLinkBuilder.linkTo(Method, Object[]) does not append request parameters properly.
+
 Changes in version 1.3.3 (2021-07-14)
 ----------------------------------------
 - #1580 - Upgrade to Reactor 2020.0.9.
