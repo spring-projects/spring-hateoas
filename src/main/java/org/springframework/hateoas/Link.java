@@ -473,37 +473,18 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			Link link = of(matcher.group(1), attributes.get("rel"));
+			LinkRelation rel = LinkRelation.of(attributes.get("rel"));
+			String href = matcher.group(1);
+			String hrefLang = attributes.get("hreflang");
+			String media = attributes.get("media");
+			String title = attributes.get("title");
+			String type = attributes.get("type");
+			String deprecation = attributes.get("deprecation");
+			String profile = attributes.get("profile");
+			String name = attributes.get("name");
 
-			if (attributes.containsKey("hreflang")) {
-				link = link.withHreflang(attributes.get("hreflang"));
-			}
-
-			if (attributes.containsKey("media")) {
-				link = link.withMedia(attributes.get("media"));
-			}
-
-			if (attributes.containsKey("title")) {
-				link = link.withTitle(attributes.get("title"));
-			}
-
-			if (attributes.containsKey("type")) {
-				link = link.withType(attributes.get("type"));
-			}
-
-			if (attributes.containsKey("deprecation")) {
-				link = link.withDeprecation(attributes.get("deprecation"));
-			}
-
-			if (attributes.containsKey("profile")) {
-				link = link.withProfile(attributes.get("profile"));
-			}
-
-			if (attributes.containsKey("name")) {
-				link = link.withName(attributes.get("name"));
-			}
-
-			return link;
+			return new Link(rel, href, hrefLang, media, title, type, deprecation, profile, name, templateOrNull(href),
+					Collections.emptyList());
 
 		} else {
 			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
