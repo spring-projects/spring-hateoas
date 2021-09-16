@@ -108,8 +108,8 @@
 		<profile>
 			<id>kotlin-next</id>
 			<properties>
-				<kotlin.version>1.5.0</kotlin.version>
-				<kotlinx-coroutines.version>1.4.3</kotlinx-coroutines.version>
+				<kotlin.version>1.5.30</kotlin.version>
+				<kotlinx-coroutines.version>1.5.2</kotlinx-coroutines.version>
 			</properties>
 		</profile>
 
