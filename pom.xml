@@ -73,13 +73,13 @@
 		<assertj.version>3.19.0</assertj.version>
 		<docs.resources.version>0.2.5</docs.resources.version>
 		<evo.version>1.2.2</evo.version>
-		<logback.version>1.2.3</logback.version>
-		<jacoco>0.8.6</jacoco>
+		<logback.version>1.2.6</logback.version>
+		<jacoco>0.8.7</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson-bom.version>2.12.5</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.5.0</jsonpath.version>
-		<junit.version>5.7.1</junit.version>
+		<junit.version>5.7.2</junit.version>
 		<reactor-bom.version>2020.0.11</reactor-bom.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<spring.version>5.3.10</spring.version>
@@ -1033,7 +1033,7 @@
 		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
 			<artifactId>archunit</artifactId>
-			<version>0.16.0</version>
+			<version>0.21.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -1221,9 +1221,11 @@
 
 	<pluginRepositories>
 		<pluginRepository>
-			<id>bintray-plugins</id>
-			<name>bintray-plugins</name>
-			<url>https://jcenter.bintray.com</url>
+			<id>spring-plugins-release</id>
+			<url>https://repo.spring.io/plugins-release</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
 
