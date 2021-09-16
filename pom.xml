@@ -82,7 +82,7 @@
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<junit.version>5.7.0</junit.version>
 		<reactor-bom.version>2020.0.9</reactor-bom.version>
-		<slf4j.version>1.7.30</slf4j.version>
+		<slf4j.version>1.7.32</slf4j.version>
 		<spring.version>5.3.10</spring.version>
 		<spring-plugin.version>2.0.0.RELEASE</spring-plugin.version>
 		<kotlin.version>1.4.32</kotlin.version>
