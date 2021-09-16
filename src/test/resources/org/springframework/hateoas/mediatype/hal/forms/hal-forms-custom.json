@@ -11,7 +11,7 @@
   },
   "_templates" : {
     "default" : {
-      "method" : "put",
+      "method" : "PUT",
       "properties" : [ {
         "name" : "name",
         "required" : true,
@@ -22,7 +22,7 @@
       } ]
     },
     "partiallyUpdateEmployee" : {
-      "method" : "patch",
+      "method" : "PATCH",
       "properties" : [ {
         "name" : "name",
         "type" : "text"

@@ -225,6 +225,11 @@ class HalFormsTemplateBuilderUnitTest {
 		});
 	}
 
+	@Test // #1608
+	void exposesHttpMethodInAllCaps() {
+		assertThat(HalFormsTemplate.forMethod(HttpMethod.POST).getMethod()).isEqualTo("POST");
+	}
+
 	@Getter
 	static class PatternExample extends RepresentationModel<PatternExample> {
 

@@ -80,13 +80,13 @@ class HalFormsWebFluxIntegrationTest {
 				.value(jsonPath("$._links['employees'].href", is("http://localhost/employees"))) //
 
 				.value(jsonPath("$._templates.*", hasSize(2))) //
-				.value(jsonPath("$._templates['default'].method", is("put"))) //
+				.value(jsonPath("$._templates['default'].method", is("PUT"))) //
 				.value(jsonPath("$._templates['default'].properties[0].name", is("name"))) //
 				.value(jsonPath("$._templates['default'].properties[0].required", is(true))) //
 				.value(jsonPath("$._templates['default'].properties[1].name", is("role"))) //
 				.value(jsonPath("$._templates['default'].properties[1].required").doesNotExist()) //
 
-				.value(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch"))) //
+				.value(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("PATCH"))) //
 				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name"))) //
 				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].required").doesNotExist()) //
 				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[1].name", is("role"))) //
@@ -111,7 +111,7 @@ class HalFormsWebFluxIntegrationTest {
 				.value(jsonPath("$._links.*", hasSize(1)))
 				.value(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.value(jsonPath("$._templates.*", hasSize(1))).value(jsonPath("$._templates['default'].method", is("post")))
+				.value(jsonPath("$._templates.*", hasSize(1))).value(jsonPath("$._templates['default'].method", is("POST")))
 				.value(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.value(jsonPath("$._templates['default'].properties[0].required", is(true)))
 				.value(jsonPath("$._templates['default'].properties[1].name", is("role")))

@@ -130,7 +130,7 @@ final class HalFormsTemplate {
 
 	@Nullable
 	String getMethod() {
-		return this.httpMethod == null ? null : this.httpMethod.toString().toLowerCase();
+		return this.httpMethod == null ? null : this.httpMethod.name();
 	}
 
 	void setMethod(String method) {
