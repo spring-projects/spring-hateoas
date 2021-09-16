@@ -74,8 +74,8 @@
 		<docs.resources.version>0.2.5</docs.resources.version>
 		<spring.data.build.resources.version>2.4.0</spring.data.build.resources.version>
 		<evo.version>1.2.2</evo.version>
-		<logback.version>1.2.3</logback.version>
-		<jacoco>0.8.5</jacoco>
+		<logback.version>1.2.6</logback.version>
+		<jacoco>0.8.7</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson-bom.version>2.11.4</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
@@ -1182,11 +1182,6 @@
 		<pluginRepository>
 			<id>spring-plugins-release</id>
 			<url>https://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>bintray-plugins</id>
-			<name>bintray-plugins</name>
-			<url>https://jcenter.bintray.com</url>
 		</pluginRepository>
 	</pluginRepositories>
 
