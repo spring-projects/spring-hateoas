@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.server.mvc;
 
+import jakarta.servlet.ServletContext;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import javax.servlet.ServletContext;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;

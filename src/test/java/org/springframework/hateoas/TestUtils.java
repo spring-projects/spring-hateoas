@@ -17,10 +17,10 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.IOException;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.mock.web.MockFilterChain;

@@ -2,7 +2,7 @@ pipeline {
 	agent none
 
 	triggers {
-		pollSCM 'H/10 * * * *'
+		pollSCM 'H/3 * * * *'
 	}
 
 	options {
@@ -11,7 +11,7 @@ pipeline {
 	}
 
 	stages {
-		stage('Publish OpenJDK 8 + Graphviz + jq docker image') {
+		stage('Publish OpenJDK 17 + Graphviz + jq docker image') {
 			when {
 				changeset "ci/Dockerfile"
 			}
@@ -19,7 +19,7 @@ pipeline {
 
 			steps {
 				script {
-					def image = docker.build("springci/spring-hateoas-openjdk8-with-graphviz-and-jq", "ci/")
+					def image = docker.build("springci/spring-hateoas-openjdk17-with-graphviz-and-jq", "ci/")
 					docker.withRegistry('', 'hub.docker.com-springbuildmaster') {
 						image.push()
 					}
@@ -27,10 +27,10 @@ pipeline {
 			}
 		}
 
-		stage("test: baseline (jdk8)") {
+		stage("test: baseline (JDK 17)") {
 			agent {
 				docker {
-					image 'adoptopenjdk/openjdk8:latest'
+					image 'openjdk:17'
 					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}
@@ -40,111 +40,10 @@ pipeline {
 			}
 		}
 
-		stage("Test other configurations") {
-			parallel {
-				stage("test: baseline (jdk11)") {
-					agent {
-						docker {
-							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=none ci/test.sh'
-					}
-				}
-				stage("test: baseline (jdk17)") {
-					agent {
-						docker {
-							image 'openjdk:17'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=none ci/test.sh'
-					}
-				}
-				stage("test: spring-next (jdk8)") {
-					agent {
-						docker {
-							image 'adoptopenjdk/openjdk8:latest'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=spring-next ci/test.sh'
-					}
-				}
-				stage("test: spring-next (jdk11)") {
-					agent {
-						docker {
-							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=spring-next ci/test.sh'
-					}
-				}
-				stage("test: spring-next (jdk17)") {
-					agent {
-						docker {
-							image 'openjdk:17'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=spring-next ci/test.sh'
-					}
-				}
-				stage("test: kotlin-next (jdk8)") {
-					agent {
-						docker {
-							image 'adoptopenjdk/openjdk8:latest'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=kotlin-next ci/test.sh'
-					}
-				}
-				stage("test: kotlin-next (jdk11)") {
-					agent {
-						docker {
-							image 'adoptopenjdk/openjdk11:latest'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=kotlin-next ci/test.sh'
-					}
-				}
-				stage("test: kotlin-next (jdk17)") {
-					agent {
-						docker {
-							image 'openjdk:17'
-							args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
-						}
-					}
-					options { timeout(time: 30, unit: 'MINUTES') }
-					steps {
-						sh 'PROFILE=kotlin-next ci/test.sh'
-					}
-				}
-			}
-		}
-
 		stage('Deploy') {
 			agent {
 				docker {
-					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
+					image 'springci/spring-hateoas-openjdk17-with-graphviz-and-jq:latest'
 					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}
@@ -196,7 +95,7 @@ pipeline {
 			}
 			agent {
 				docker {
-					image 'springci/spring-hateoas-openjdk8-with-graphviz-and-jq:latest'
+					image 'springci/spring-hateoas-openjdk17-with-graphviz-and-jq:latest'
 					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
 				}
 			}

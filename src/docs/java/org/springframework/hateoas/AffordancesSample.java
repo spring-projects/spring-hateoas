@@ -17,8 +17,6 @@ package org.springframework.hateoas;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import lombok.var;
-
 import org.springframework.hateoas.SimpleRepresentationModelAssemblerTest.Employee;
 import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.http.HttpMethod;
