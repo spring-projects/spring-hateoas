@@ -144,12 +144,23 @@ public class DummyInvocationUtils {
 	 */
 	@Nullable
 	public static LastInvocationAware getLastInvocationAware(Object source) {
-		return (LastInvocationAware) ((Advised) source).getAdvisors()[0].getAdvice();
+
+		if (InvocationRecordingMethodInterceptor.class.isInstance(source)) {
+			return LastInvocationAware.class.cast(source);
+		}
+
+		return (LastInvocationAware) (Advised.class.isInstance(source)
+				? ((Advised) source).getAdvisors()[0].getAdvice()
+				: source);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
 			ClassLoader classLoader) {
+
+		if (type.equals(Object.class)) {
+			return (T) interceptor;
+		}
 
 		ProxyFactory factory = new ProxyFactory();
 		factory.addAdvice(interceptor);
@@ -207,6 +218,11 @@ public class DummyInvocationUtils {
 			return result;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
 		public String toString() {
 
 			return "DummyInvocationUtils.CacheKey(type=" + this.type + ", arguments=" + Arrays.deepToString(this.arguments)
