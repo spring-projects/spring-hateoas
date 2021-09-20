@@ -145,6 +145,10 @@ public class DummyInvocationUtils {
 	@Nullable
 	public static LastInvocationAware getLastInvocationAware(Object source) {
 
+		if (InvocationRecordingMethodInterceptor.class.isInstance(source)) {
+			return LastInvocationAware.class.cast(source);
+		}
+
 		return (LastInvocationAware) (Advised.class.isInstance(source)
 				? ((Advised) source).getAdvisors()[0].getAdvice()
 				: source);
@@ -178,6 +182,10 @@ public class DummyInvocationUtils {
 	@SuppressWarnings("unchecked")
 	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
 			ClassLoader classLoader) {
+
+		if (type.equals(Object.class)) {
+			return (T) interceptor;
+		}
 
 		ProxyFactory factory = new ProxyFactory();
 		factory.addAdvice(interceptor);
