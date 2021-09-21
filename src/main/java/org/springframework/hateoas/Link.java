@@ -51,31 +51,6 @@ public class Link implements Serializable {
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#SELF} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_SELF = IanaLinkRelations.SELF;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#FIRST} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_FIRST = IanaLinkRelations.FIRST;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#PREV} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_PREVIOUS = IanaLinkRelations.PREV;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#NEXT} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_NEXT = IanaLinkRelations.NEXT;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#LAST} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
-
 	private LinkRelation rel;
 	private String href;
 	private @Nullable String hreflang, media, title, type, deprecation, profile, name;
@@ -83,38 +58,12 @@ public class Link implements Serializable {
 	private @JsonIgnore List<Affordance> affordances;
 
 	/**
-	 * Creates a new link to the given URI with the self rel.
-	 *
-	 * @see IanaLinkRelations#SELF
-	 * @param href must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(String)}
-	 */
-	@Deprecated
-	public Link(String href) {
-		this(href, IanaLinkRelations.SELF);
-	}
-
-	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
 	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(String, String)}.
 	 */
-	@Deprecated
-	public Link(String href, String rel) {
-		this(href, LinkRelation.of(rel));
-	}
-
-	/**
-	 * Creates a new {@link Link} to the given URI with the given rel.
-	 *
-	 * @param href must not be {@literal null} or empty.
-	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(String, LinkRelation)}.
-	 */
-	@Deprecated
-	public Link(String href, LinkRelation rel) {
+	protected Link(String href, LinkRelation rel) {
 		this(href, templateOrNull(href), rel, Collections.emptyList());
 	}
 
@@ -123,22 +72,8 @@ public class Link implements Serializable {
 	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(UriTemplate, String)}.
 	 */
-	@Deprecated
-	public Link(UriTemplate template, String rel) {
-		this(template, LinkRelation.of(rel));
-	}
-
-	/**
-	 * Creates a new Link from the given {@link UriTemplate} and rel.
-	 *
-	 * @param template must not be {@literal null}.
-	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(UriTemplate, LinkRelation)}.
-	 */
-	@Deprecated
-	public Link(UriTemplate template, LinkRelation rel) {
+	protected Link(UriTemplate template, LinkRelation rel) {
 		this(template, rel, Collections.emptyList());
 	}
 
@@ -198,7 +133,7 @@ public class Link implements Serializable {
 	 * @since 1.1
 	 */
 	public static Link of(String href) {
-		return new Link(href);
+		return new Link(href, IanaLinkRelations.SELF);
 	}
 
 	/**
@@ -210,7 +145,7 @@ public class Link implements Serializable {
 	 * @since 1.1
 	 */
 	public static Link of(String href, String relation) {
-		return new Link(href, relation);
+		return new Link(href, LinkRelation.of(relation));
 	}
 
 	/**
@@ -234,7 +169,7 @@ public class Link implements Serializable {
 	 * @since 1.1
 	 */
 	public static Link of(UriTemplate template, String relation) {
-		return new Link(template, relation);
+		return new Link(template, LinkRelation.of(relation));
 	}
 
 	/**

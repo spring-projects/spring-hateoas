@@ -22,7 +22,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Utility to glean what web stack is currently available.
- * 
+ *
  * @author Greg Turnquist
  */
 public enum WebStack {
@@ -73,15 +73,5 @@ public enum WebStack {
 		}
 
 		return configurations;
-	}
-
-	/**
-	 * Is this web stack on the classpath?
-	 *
-	 * @deprecated Will be removed in 1.2 in light of {@link #getAvailableConfigurations()}.
-	 */
-	@Deprecated
-	public boolean isAvailable() {
-		return this.isServerAvailable;
 	}
 }

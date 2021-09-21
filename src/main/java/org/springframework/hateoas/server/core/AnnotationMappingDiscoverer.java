@@ -42,10 +42,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Mark Paluch
  * @author Greg Turnquist
  * @author Réda Housni Alaoui
- * @deprecated since 1.2, not for removal but for hiding within the package in 1.3
  */
-@Deprecated
-public class AnnotationMappingDiscoverer implements MappingDiscoverer {
+class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;

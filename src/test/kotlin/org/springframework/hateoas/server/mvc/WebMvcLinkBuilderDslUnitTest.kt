@@ -52,7 +52,7 @@ class WebMvcLinkBuilderDslUnitTest : TestUtils() {
     @Test
     fun `adds links to wrapped domain object`() {
 
-        val customer = EntityModel(Customer("15", "John Doe"))
+        val customer = EntityModel.of(Customer("15", "John Doe"))
 
         customer.add(CustomerController::class) {
             linkTo { findById(it.content.id) } withRel IanaLinkRelations.SELF

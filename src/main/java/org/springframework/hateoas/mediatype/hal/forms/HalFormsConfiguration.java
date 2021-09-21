@@ -88,25 +88,6 @@ public class HalFormsConfiguration {
 	 * @param type must not be {@literal null}.
 	 * @param pattern must not be {@literal null} or empty.
 	 * @return will never be {@literal null}.
-	 * @deprecated prefer {@link #withPattern(Class, String)} that returns a fresh instance, to be removed with 1.3.
-	 */
-	@Deprecated
-	public HalFormsConfiguration registerPattern(Class<?> type, String pattern) {
-
-		Assert.notNull(type, "Type must not be null!");
-		Assert.hasText(pattern, "Pattern must not be null or empty!");
-
-		patterns.put(type, pattern);
-
-		return this;
-	}
-
-	/**
-	 * Registers a regular expression pattern to be used for form descriptions of the given type.
-	 *
-	 * @param type must not be {@literal null}.
-	 * @param pattern must not be {@literal null} or empty.
-	 * @return will never be {@literal null}.
 	 */
 	public HalFormsConfiguration withPattern(Class<?> type, String pattern) {
 

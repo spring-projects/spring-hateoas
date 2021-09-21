@@ -84,18 +84,6 @@ public class Links implements Iterable<Link> {
 	 *
 	 * @param source a comma separated list of {@link Link} representations.
 	 * @return the {@link Links} represented by the given {@link String}.
-	 * @deprecated use {@link #parse(String)} instead
-	 */
-	@Deprecated
-	public static Links valueOf(String source) {
-		return parse(source);
-	}
-
-	/**
-	 * Creates a {@link Links} instance from the given RFC-8288-compatible link format.
-	 *
-	 * @param source a comma separated list of {@link Link} representations.
-	 * @return the {@link Links} represented by the given {@link String}.
 	 */
 	public static Links parse(@Nullable String source) {
 

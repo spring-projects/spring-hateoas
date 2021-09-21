@@ -408,7 +408,6 @@ public class HalModelBuilder {
 		}
 
 		@JsonUnwrapped
-		@SuppressWarnings("deprecation")
 		public CollectionModel<?> getEmbeddeds() {
 
 			return new CollectionModel<Object>(embeddeds) {

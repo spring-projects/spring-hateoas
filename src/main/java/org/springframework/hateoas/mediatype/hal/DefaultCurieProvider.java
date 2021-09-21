@@ -154,10 +154,9 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		private final String name;
 
-		@SuppressWarnings("deprecation")
 		public Curie(String name, String href) {
 
-			super(href, "curies");
+			super(href, LinkRelation.of("curies"));
 			this.name = name;
 		}
 

@@ -50,31 +50,11 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 	 * Creates an empty {@link CollectionModel} instance.
 	 */
 	protected CollectionModel() {
-		this(new ArrayList<>());
+		this(Collections.emptyList());
 	}
 
-	/**
-	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s (optional).
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link CollectionModel}.
-	 * @deprecated since 1.1, use {@link #of(Iterable, Link...)} instead.
-	 */
-	@Deprecated
-	public CollectionModel(Iterable<T> content, Link... links) {
-		this(content, Arrays.asList(links));
-	}
-
-	/**
-	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s.
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link CollectionModel}.
-	 * @deprecated since 1.1, use {@link #of(Iterable, Iterable)} instead.
-	 */
-	@Deprecated
-	public CollectionModel(Iterable<T> content, Iterable<Link> links) {
-		this(content, links, null);
+	protected CollectionModel(Iterable<T> content) {
+		this(content, Links.NONE, null);
 	}
 
 	protected CollectionModel(Iterable<T> content, Iterable<Link> links, @Nullable ResolvableType fallbackType) {
@@ -200,7 +180,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content, Iterable<Link> links) {
-		return new CollectionModel<>(content, links);
+		return new CollectionModel<>(content, links, null);
 	}
 
 	/**

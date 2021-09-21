@@ -50,29 +50,11 @@ public class PagedModel<T> extends CollectionModel<T> {
 		this(new ArrayList<>(), null);
 	}
 
-	/**
-	 * Creates a new {@link PagedModel} from the given content, {@link PageMetadata} and {@link Link}s (optional).
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param metadata
-	 * @param links
-	 * @deprectated since 1.1, use {@link #of(Collection, PageMetadata, Link...)} instead.
-	 */
-	@Deprecated
-	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Link... links) {
-		this(content, metadata, Arrays.asList(links));
+	protected PagedModel(Collection<T> content, @Nullable PageMetadata metadata) {
+		this(content, metadata, Links.NONE);
 	}
 
-	/**
-	 * Creates a new {@link PagedModel} from the given content {@link PageMetadata} and {@link Link}s.
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param metadata
-	 * @param links
-	 * @deprectated since 1.1, use {@link #of(Collection, PageMetadata, Iterable)} instead.
-	 */
-	@Deprecated
-	public PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
+	protected PagedModel(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
 		this(content, metadata, links, null);
 	}
 

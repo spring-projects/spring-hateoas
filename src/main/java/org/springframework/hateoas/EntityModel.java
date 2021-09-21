@@ -57,16 +57,8 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 		this.content = null;
 	}
 
-	/**
-	 * Creates a new {@link EntityModel} with the given content and {@link Link}s (optional).
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param links the links to add to the {@link EntityModel}.
-	 * @deprecated since 1.1, use {@link #of(Object, Link...)} instead.
-	 */
-	@Deprecated
-	public EntityModel(T content, Link... links) {
-		this(content, Arrays.asList(links));
+	protected EntityModel(T content) {
+		this(content, Links.NONE);
 	}
 
 	/**
@@ -74,10 +66,8 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to add to the {@link EntityModel}.
-	 * @deprecated since 1.1, use {@link #of(Object, Iterable)} instead.
 	 */
-	@Deprecated
-	public EntityModel(T content, Iterable<Link> links) {
+	protected EntityModel(T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
 		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use CollectionModel instead!");
