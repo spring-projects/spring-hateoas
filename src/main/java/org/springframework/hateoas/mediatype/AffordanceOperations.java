@@ -22,7 +22,7 @@ import org.springframework.hateoas.Link;
  * Operations commons to all builder APIs.
  *
  * @author Oliver Drotbohm
- * @see AffordanceBuilder
+ * @see ConfigurableAffordance
  */
 public interface AffordanceOperations {
 

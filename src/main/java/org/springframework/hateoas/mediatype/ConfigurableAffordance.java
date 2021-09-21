@@ -166,15 +166,15 @@ public interface ConfigurableAffordance extends AffordanceOperations {
 	Affordances build();
 
 	/**
-	 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal target}.
+	 * Create a new {@link ConfigurableAffordance} by copying all attributes and replacing the {@literal target}.
 	 *
-	 * @param target
+	 * @param target must not be {@literal null}.
 	 * @return
 	 */
 	ConfigurableAffordance withTarget(Link target);
 
 	/**
-	 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal name}.
+	 * Create a new {@link ConfigurableAffordance} by copying all attributes and replacing the {@literal name}.
 	 *
 	 * @param name can be {@literal null}.
 	 * @return

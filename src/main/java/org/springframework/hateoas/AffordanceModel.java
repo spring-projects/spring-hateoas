@@ -241,7 +241,8 @@ public abstract class AffordanceModel {
 		 * @param <T>
 		 * @param target
 		 * @return
-		 * @deprecated since 1.3, prefer setting up the model types via {@link #createProperties(Function)}
+		 * @deprecated since 1.3, prefer setting up the model types via
+		 *             {@link AffordanceModel#createProperties(BiFunction)}.
 		 */
 		@Deprecated
 		default <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {

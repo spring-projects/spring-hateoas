@@ -1049,16 +1049,16 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
+					<version>3.3.1</version>
 					<configuration>
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
 						<source>${source.level}</source>
 						<quiet>true</quiet>
-						<additionalparam>-Xdoclint:none</additionalparam>
+						<doclint>none</doclint>
 						<links>
-							<link>https://docs.spring.io/spring/docs/5.1.x/javadoc-api</link>
-							<link>https://docs.oracle.com/javase/8/docs/api</link>
+							<link>https://docs.spring.io/spring/docs/${spring.version}/javadoc-api/</link>
+							<link>https://docs.oracle.com/javase/8/docs/api/</link>
 						</links>
 					</configuration>
 				</plugin>

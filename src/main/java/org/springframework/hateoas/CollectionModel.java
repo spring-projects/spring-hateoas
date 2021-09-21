@@ -168,7 +168,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 	 * @param content must not be {@literal null}.
 	 * @return
 	 * @since 1.1
-	 * @see #withFallbackType(Class)
+	 * @see #withFallbackType(Class, Class...)
 	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content) {
@@ -182,7 +182,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 	 * @param links the links to be added to the {@link CollectionModel}.
 	 * @return
 	 * @since 1.1
-	 * @see #withFallbackType(Class)
+	 * @see #withFallbackType(Class, Class...)
 	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content, Link... links) {
@@ -196,7 +196,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 	 * @param links the links to be added to the {@link CollectionModel}.
 	 * @return
 	 * @since 1.1
-	 * @see #withFallbackType(Class)
+	 * @see #withFallbackType(Class, Class...)
 	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content, Iterable<Link> links) {

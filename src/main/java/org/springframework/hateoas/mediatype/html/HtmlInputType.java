@@ -144,7 +144,7 @@ public class HtmlInputType {
 	/**
 	 * Returns the {@link HtmlInputType} derived from the given {@link ResolvableType}.
 	 *
-	 * @param resolvableType must not be {@literal null}.
+	 * @param type must not be {@literal null}.
 	 * @return
 	 */
 	@Nullable

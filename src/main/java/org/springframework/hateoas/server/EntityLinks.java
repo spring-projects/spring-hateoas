@@ -25,9 +25,9 @@ import org.springframework.util.Assert;
 
 /**
  * Accessor to links pointing to controllers backing an entity type. The {@link IllegalArgumentException} potentially
- * thrown by the declared methods will only appear if the {@link #supports(Class)} method has returned {@literal false}
- * and the method has been invoked anyway, i.e. if {@link #supports(Class)} returns {@literal true} it's safe to invoke
- * the interface methods an the exception will never be thrown.
+ * thrown by the declared methods will only appear if the {@link Plugin#supports(Class)} method has returned
+ * {@literal false} and the method has been invoked anyway, i.e. if {@link Plugin#supports(Class)} returns
+ * {@literal true} it's safe to invoke the interface methods an the exception will never be thrown.
  *
  * @author Oliver Gierke
  */
@@ -69,7 +69,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity type and identifier
 	 * extractor. Implementations will know about the URI structure being used to expose item-resource URIs.
 	 *
-	 * @param type the entity to point to, must not be {@literal null}.
+	 * @param entity the entity to point to, must not be {@literal null}.
 	 * @param identifierExtractor an extractor function to determine the id of the given entity, must not be
 	 *          {@literal null}.
 	 * @return the {@link LinkBuilder} pointing to the item resource identified by the given entity. Will never be
@@ -111,7 +111,7 @@ public interface EntityLinks extends Plugin<Class<?>> {
 	 * type of the link will be determined by the implementation class and should be defaulted to
 	 * {@link IanaLinkRelations#SELF}.
 	 *
-	 * @param type the entity to point to, must not be {@literal null}.
+	 * @param entity the entity to point to, must not be {@literal null}.
 	 * @param identifierExtractor an extractor function to determine the id of the given entity.
 	 * @return the {@link Link} pointing to the resource exposed for the given entity. Will never be {@literal null}.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.

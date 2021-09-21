@@ -30,7 +30,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.lang.Nullable;
-import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -251,7 +250,7 @@ public class HalModelBuilder {
 
 	/**
 	 * Initiates the setup of a preview given the current payload. Clients have to conclude the setup calling any of the
-	 * {@link EntityPreviewBuilder#forLink(Link)} methods. As an example, the call chain of:
+	 * {@link PreviewBuilder#forLink(Link)} methods. As an example, the call chain of:
 	 *
 	 * <pre>
 	 * ….preview(…).forLink("…", "relation")
@@ -314,7 +313,7 @@ public class HalModelBuilder {
 	/**
 	 * Add a {@link Link} to the whole thing.
 	 * <p/>
-	 * NOTE: This adds it to the top level. If you need a link inside an entity, then use the {@link Model.Builder} to
+	 * NOTE: This adds it to the top level. If you need a link inside an entity, then use the {@link HalModelBuilder} to
 	 * define it as well.
 	 *
 	 * @param link must not be {@literal null}.

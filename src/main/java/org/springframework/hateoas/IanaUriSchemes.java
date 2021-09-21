@@ -23,7 +23,7 @@ import java.util.HashSet;
  * A list of well-defined URI schemes governed by IANA.
  *
  * @author Oliver Drotbohm
- * @see <a href="https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml>Official IANA URI scheme registry</a>
+ * @see <a href="https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">Official IANA URI scheme registry</a>
  * @since 1.2
  */
 public class IanaUriSchemes {
