@@ -194,6 +194,7 @@ public class DummyInvocationUtils {
 		if (type.isInterface()) {
 			factory.addInterface(type);
 		} else {
+			factory.setOptimize(true);
 			factory.setTargetClass(type);
 			factory.setProxyTargetClass(true);
 		}
