@@ -136,6 +136,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(method, "Method must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
+		int expected = method.getParameterTypes().length;
+		int given = parameters.length;
+
+		Assert.isTrue(expected == given,
+				() -> String.format("Incorrect number of parameter values given. Expected %s, got %s!", expected, given));
+
 		return linkTo(DummyInvocationUtils.getLastInvocationAware(controller, method, parameters));
 	}
 

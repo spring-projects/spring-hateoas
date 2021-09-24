@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -667,6 +668,19 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		assertThat(linkTo(method, "someString").withSelfRel().getHref()).endsWith("?id=someString");
 		assertThat(linkTo(method, new Object[] { null }).withSelfRel().getHref()).endsWith("?id={id}");
+	}
+
+	@Test // #1653
+	void buildsLinkWithoutParameterValuesGiven() throws Exception {
+
+		Method method = ControllerWithMethods.class.getDeclaredMethod("myMethod", Object.class);
+
+		Stream.<ThrowingCallable> of( //
+				() -> linkTo(method, new Object[0]), //
+				() -> linkTo(ControllerWithMethods.class, method, new Object[0]) //
+		) //
+				.map(assertThatIllegalArgumentException()::isThrownBy) //
+				.forEach(it -> it.withMessageContaining("Expected 1, got 0"));
 	}
 
 	private static UriComponents toComponents(Link link) {

@@ -30,7 +30,8 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 
 	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} and expanding this mapping
-	 * using the given parameters.
+	 * using the given parameters. The number of parameter values has to match the length of the given method's expected
+	 * parameters.
 	 *
 	 * @param method must not be {@literal null}.
 	 * @param parameters
@@ -40,7 +41,8 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 
 	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} assuming it was invoked on an
-	 * object of the given type.
+	 * object of the given type. The number of parameter values has to match the length of the given method's expected
+	 * parameters.
 	 *
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.

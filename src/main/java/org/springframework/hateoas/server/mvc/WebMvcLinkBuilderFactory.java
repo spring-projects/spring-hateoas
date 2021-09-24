@@ -99,6 +99,15 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 		return WebMvcLinkBuilder.linkTo(controller, parameters);
 	}
 
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(method, parameters);
+	}
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method, java.lang.Object[])
@@ -137,15 +146,6 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 			return builder;
 
 		}, builderFactory, getConversionService());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
-		return WebMvcLinkBuilder.linkTo(method, parameters);
 	}
 
 	private static Supplier<ConversionService> getConversionService() {
