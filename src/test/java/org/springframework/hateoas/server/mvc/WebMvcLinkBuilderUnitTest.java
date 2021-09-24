@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -672,6 +673,24 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 						.withSelfRel();
 
 		assertThat(result.getHref()).endsWith("?param=first");
+	}
+
+	@Test // #1652
+	void buildsLinkWithoutParameterValuesGiven() throws Exception {
+
+		Method method = ControllerWithMethods.class.getDeclaredMethod("myMethod", Object.class);
+
+		Stream.<ThrowingCallable> of( //
+				() -> linkTo(method, new Object[0]), //
+				() -> linkTo(ControllerWithMethods.class, method, new Object[0]) //
+		) //
+				.map(assertThatIllegalArgumentException()::isThrownBy)
+				.forEach(it -> it.withMessageContaining("Expected 1, got 0"));
+
+		Stream.<ThrowingCallable> of( //
+				() -> linkTo(method), //
+				() -> linkTo(ControllerWithMethods.class, method) //
+		).forEach(assertThatNoException()::isThrownBy);
 	}
 
 	private static UriComponents toComponents(Link link) {

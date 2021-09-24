@@ -117,6 +117,16 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 	}
 
 	/*
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method)
+	 */
+	public static WebMvcLinkBuilder linkTo(Method method) {
+
+		Assert.notNull(method, "Method must not be null!");
+
+		return linkTo(method.getDeclaringClass(), method, new Object[method.getParameterTypes().length]);
+	}
+
+	/*
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method, Object...)
 	 */
 	public static WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
@@ -128,6 +138,17 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 	}
 
 	/*
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method)
+	 */
+	public static WebMvcLinkBuilder linkTo(Class<?> controller, Method method) {
+
+		Assert.notNull(controller, "Controller type must not be null!");
+		Assert.notNull(method, "Method must not be null!");
+
+		return linkTo(controller, method, new Object[method.getParameterTypes().length]);
+	}
+
+	/*
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
 	 */
 	public static WebMvcLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
@@ -135,6 +156,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
+
+		int expected = method.getParameterTypes().length;
+		int given = parameters.length;
+
+		Assert.isTrue(expected == given,
+				() -> String.format("Incorrect number of parameter values given. Expected %s, got %s!", expected, given));
 
 		return linkTo(DummyInvocationUtils.getLastInvocationAware(controller, method, parameters));
 	}

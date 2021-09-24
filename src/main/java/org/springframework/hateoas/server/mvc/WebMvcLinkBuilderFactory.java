@@ -105,6 +105,33 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 	/*
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method)
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Method method) {
+		return WebMvcLinkBuilder.linkTo(method);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(method, parameters);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method)
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Class<?> type, Method method) {
+		return WebMvcLinkBuilder.linkTo(type, method);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method, java.lang.Object[])
 	 */
 	@Override
@@ -159,15 +186,6 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 			return builder;
 
 		}, builderFactory, getConversionService());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
-		return WebMvcLinkBuilder.linkTo(method, parameters);
 	}
 
 	private static Supplier<ConversionService> getConversionService() {

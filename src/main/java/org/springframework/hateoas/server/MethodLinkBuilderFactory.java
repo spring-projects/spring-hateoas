@@ -30,7 +30,18 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 
 	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} and expanding this mapping
-	 * using the given parameters.
+	 * using {@literal null} values as parameters.
+	 *
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 1.4
+	 */
+	T linkTo(Method method);
+
+	/**
+	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} and expanding this mapping
+	 * using the given parameters. The number of parameter values has to match the length of the given method's expected
+	 * parameters.
 	 *
 	 * @param method must not be {@literal null}.
 	 * @param parameters
@@ -40,7 +51,19 @@ public interface MethodLinkBuilderFactory<T extends LinkBuilder> extends LinkBui
 
 	/**
 	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} assuming it was invoked on an
-	 * object of the given type.
+	 * object of the given type expanding the mapping using {@literal null} values as parameters.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 1.4
+	 */
+	T linkTo(Class<?> type, Method method);
+
+	/**
+	 * Returns a {@link LinkBuilder} pointing to the URI mapped to the given {@link Method} assuming it was invoked on an
+	 * object of the given type. The number of parameter values has to match the length of the given method's expected
+	 * parameters.
 	 *
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
