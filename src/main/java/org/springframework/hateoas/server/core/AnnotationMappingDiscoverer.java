@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Greg Turnquist
  * @author Réda Housni Alaoui
  */
-class AnnotationMappingDiscoverer implements MappingDiscoverer {
+public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private final Class<? extends Annotation> annotationType;
 	private final String mappingAttributeName;
