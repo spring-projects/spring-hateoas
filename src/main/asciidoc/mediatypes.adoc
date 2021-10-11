@@ -40,7 +40,7 @@ var customerLink = Link.of("/orders/{id}/customer") <2>
 
 var additional = …
 
-var model = HalModelBuilder.halModel(order)
+var model = HalModelBuilder.halModelOf(order)
   .preview(new CustomerSummary(customer)) <3>
   .forLink(customerLink) <4>
   .embed(additional) <5>
