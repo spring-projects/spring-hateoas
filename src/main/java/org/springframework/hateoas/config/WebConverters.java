@@ -114,7 +114,7 @@ public class WebConverters {
 			converter.registerObjectMappersForType(rootType, map -> map.putAll(mappers));
 		}
 
-		if (!includeGenericJsonTypes) {
+		if (!includeGenericJsonTypes || infos.isEmpty()) {
 			return;
 		}
 
