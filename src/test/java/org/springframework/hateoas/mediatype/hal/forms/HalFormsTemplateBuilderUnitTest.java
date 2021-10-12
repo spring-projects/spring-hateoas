@@ -230,6 +230,22 @@ class HalFormsTemplateBuilderUnitTest {
 		assertThat(HalFormsTemplate.forMethod(HttpMethod.POST).getMethod()).isEqualTo("POST");
 	}
 
+	@Test
+	void expandsAffordanceLinkForFormTarget() {
+
+		HalFormsConfiguration configuration = new HalFormsConfiguration();
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example{?foo}", LinkRelation.of("example"))) //
+						.afford(HttpMethod.POST) //
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
+				.findTemplates(models);
+
+		assertThat(templates.get("default").getTarget()).endsWith("/example");
+	}
+
 	@Getter
 	static class PatternExample extends RepresentationModel<PatternExample> {
 

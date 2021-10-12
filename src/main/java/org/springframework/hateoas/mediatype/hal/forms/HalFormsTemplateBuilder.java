@@ -70,7 +70,7 @@ class HalFormsTemplateBuilder {
 							.withProperties(factory.createProperties(it))
 							.withContentType(it.getInput().getPrimaryMediaType());
 
-					String target = it.getLink().getHref();
+					String target = it.getLink().expand().getHref();
 
 					if (selfLink == null || !target.equals(selfLink.getHref())) {
 						template = template.withTarget(target);
