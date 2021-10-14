@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3.5 (2021-10-14)
+----------------------------------------
+- #1675 - Upgrade to Reactor 2020.0.12.
+- #1674 - Upgrade to Spring Framework 5.3.11.
+- #1673 - Upgrade to Lombok 1.18.22.
+- #1663 - Fix sample of HalModelBuilder in documentation.
+- #1661 - IndexOutOfBoundException if no media type configurations registered.
+- #1653 - Better exception in case of wrong parameter array length in MethodLinkBuilderFactory.linkTo(…) methods.
+- #1649 - Irritating log output when pointing to controller methods that return a Mono.
+- #1643 - Upgrade Lombok to 1.18.20 for JDK 17 support.
+- #1642 - Upgrade compatibility builds to JDK 17.
+- #1641 - DummyInvocationUtils.methodOn(…) fails for methods returning Object on JDK 17.
+
 Changes in version 1.3.4 (2021-09-16)
 ----------------------------------------
 - #1622 - Upgrade to Jackson 2.12.5.
