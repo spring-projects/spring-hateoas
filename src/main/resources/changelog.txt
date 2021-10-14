@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2.10 (2021-10-14)
+----------------------------------------
+- #1671 - Upgrade to Lombok 1.18.22.
+- #1670 - Upgrade to Mockk 1.10.6.
+- #1668 - Upgrade to Reactor 2020.0.12.
+- #1667 - Upgrade Maven Wrapper to 3.8.3.
+- #1666 - Upgrade to Spring Framework 5.3.11.
+- #1664 - Fix sample of `HalModelBuilder` in documentation.
+- #1650 - Irritating log output when pointing to controller methods that return a `Mono`.
+- #1646 - `DummyInvocationUtils.methodOn(…)` fails for methods returning `Object` on JDK 17.
+- #1645 - Upgrade Lombok to 1.18.20 for JDK 17 support.
+- #1644 - Upgrade compatibility builds to JDK 17.
+
 Changes in version 1.2.9 (2021-09-16)
 ----------------------------------------
 - #1617 - Upgrade to Jackson 2.11.4.
