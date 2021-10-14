@@ -80,7 +80,7 @@
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.6.0</jsonpath.version>
 		<junit.version>5.8.1</junit.version>
-		<lombok.version>1.18.20</lombok.version>
+		<lombok.version>1.18.22</lombok.version>
 		<reactor-bom.version>2020.0.11</reactor-bom.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<spring.version>5.3.11</spring.version>
