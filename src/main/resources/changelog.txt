@@ -1,6 +1,26 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.4 RC1 (2021-10-14)
+----------------------------------------
+- #1681 - Upgrade to Kotlin 1.5.31.
+- #1680 - Upgrade to Reactor 2020.0.12.
+- #1679 - Upgrade to Lombok 1.18.22.
+- #1678 - Upgrade to JUnit 5.8.1.
+- #1677 - Upgrade to Jackson 2.13.0.
+- #1676 - Upgrade to AssertJ 3.21.0.
+- #1662 - HAL FORMS target must only contain URLs.
+- #1659 - Fix sample of HalModelBuilder in documentation.
+- #1658 - Re-expose AnnotationMappingDiscoverer.
+- #1657 - Prevent IndexOutOfBoundException if no media type configurations registered.
+- #1652 - Imprecise definition of how parameters are handled in MethodLinkBuilderFactory.linkTo(…) methods.
+- #1648 - Remove deprecations.
+- #1647 - Upgrade to Spring Framework 5.3.11.
+- #1640 - Upgrade compatibility builds to JDK 17.
+- #1638 - DummyInvocationUtils.methodOn(…) fails for methods returning Object on JDK 17.
+- #1637 - Upgrade Lombok to 1.18.20 for JDK 17 support.
+- #1448 - Irritating log output when pointing to controller methods that return a Mono.
+
 Changes in version 1.4 M3 (2021-09-16)
 ----------------------------------------
 - #1634 - Upgrade to AssertJ 3.20.2.
