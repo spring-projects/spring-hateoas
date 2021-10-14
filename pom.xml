@@ -17,16 +17,16 @@
 	<inceptionYear>2011</inceptionYear>
 
 	<organization>
-		<name>Pivotal, Inc.</name>
+		<name>VMware, Inc.</name>
 		<url>https://www.spring.io</url>
 	</organization>
 
 	<developers>
 		<developer>
-			<id>ogierke</id>
-			<name>Oliver Gierke</name>
-			<email>ogierke(at)pivotal.io</email>
-			<organization>Pivotal Software, Inc.</organization>
+			<id>odrotbohm</id>
+			<name>Oliver Drotbohm</name>
+			<email>odrotbohm(at)vmware.com</email>
+			<organization>VMware, Inc.</organization>
 			<roles>
 				<role>Project lead</role>
 			</roles>
@@ -35,8 +35,8 @@
 		<developer>
 			<id>gturnquist</id>
 			<name>Greg Turnquist</name>
-			<email>gturnquist(at)pivotal.io</email>
-			<organization>Pivotal Software, Inc.</organization>
+			<email>gturnquist(at)vmware.com</email>
+			<organization>VMware, Inc.</organization>
 			<roles>
 				<role>Contributor</role>
 			</roles>
@@ -49,7 +49,7 @@
 			<name>Apache License, Version 2.0</name>
 			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-				Copyright 2011-2020 the original author or authors.
+				Copyright 2011-2021 the original author or authors.
 
 				Licensed under the Apache License, Version 2.0 (the "License");
 				you may not use this file except in compliance with the License.
