@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration tests for {@link EntityModel}.
@@ -59,6 +62,22 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		assertThat(result.getContent().lastname).isEqualTo("Matthews");
 	}
 
+	@Test // #1686
+	void doesNotFailOnSerializingEmptyBean() {
+
+		ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
+
+		// Fail if we're supposed to
+		assertThatExceptionOfType(JsonMappingException.class) //
+				.isThrownBy(() -> mapper.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+						.writeValueAsString(EntityModel.of(new Empty())));
+
+		// Ignore empty bean if we're supposed to
+		assertThatNoException() //
+				.isThrownBy(() -> mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+						.writeValueAsString(EntityModel.of(new Empty())));
+	}
+
 	static class PersonModel extends EntityModel<Person> {
 
 		public PersonModel(Person person) {
@@ -74,4 +93,6 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		String firstname;
 		String lastname;
 	}
+
+	static class Empty {}
 }
