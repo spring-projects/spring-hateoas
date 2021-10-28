@@ -366,6 +366,15 @@ class UriTemplateUnitTest {
 		assertThat(uri).isEqualTo(URI.create("/foo/first/second"));
 	}
 
+	@Test // #1696
+	void adaptsRequestParamVariableToContinuationIfBaseUriContainsParameter() {
+
+		UriTemplate template = UriTemplate.of("/path/{bar}/foo.zip?type=foo")
+				.with(new TemplateVariable("foobar", VariableType.REQUEST_PARAM));
+
+		assertThat(template.toString()).isEqualTo("/path/{bar}/foo.zip?type=foo{&foobar}");
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}

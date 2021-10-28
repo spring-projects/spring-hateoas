@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
@@ -177,8 +178,9 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		for (TemplateVariable variable : variables) {
 
+			MultiValueMap<String, String> parameters = components.getQueryParams();
 			boolean isRequestParam = variable.isRequestParameterVariable();
-			boolean alreadyPresent = components.getQueryParams().containsKey(variable.getName());
+			boolean alreadyPresent = parameters.containsKey(variable.getName());
 
 			if (isRequestParam && alreadyPresent) {
 				continue;
@@ -186,6 +188,11 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 			if (variable.isFragment() && StringUtils.hasText(components.getFragment())) {
 				continue;
+			}
+
+			// Use request parameter continuation if base contains parameters already
+			if (!parameters.isEmpty() && variable.getType().equals(VariableType.REQUEST_PARAM)) {
+				variable = variable.withType(VariableType.REQUEST_PARAM_CONTINUED);
 			}
 
 			ExpandGroup existing = groups.findLastExpandGroupOfType(variable.getType());
