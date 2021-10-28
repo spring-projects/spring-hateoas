@@ -39,7 +39,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.hateoas.TemplateVariable.*;
+import org.springframework.hateoas.TemplateVariable.VariableType;
 
 /**
  * Unit tests for {@link UriTemplate}.
@@ -360,6 +360,15 @@ class UriTemplateUnitTest {
 
 		assertThat(UriTemplate.of("http://localhost/foo/bar/{_filter}").expand("value"))
 				.isEqualTo(URI.create("http://localhost/foo/bar/value"));
+	}
+
+	@Test // #1696
+	void adaptsRequestParamVariableToContinuationIfBaseUriContainsParameter() {
+
+		UriTemplate template = UriTemplate.of("/path/{bar}/foo.zip?type=foo")
+				.with(new TemplateVariable("foobar", VariableType.REQUEST_PARAM));
+
+		assertThat(template.toString()).isEqualTo("/path/{bar}/foo.zip?type=foo{&foobar}");
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
