@@ -29,7 +29,6 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.mediatype.MessageResolver;
-import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -84,8 +83,7 @@ class HalFormsPropertyFactory {
 
 		return model.createProperties((payload, metadata) -> {
 
-			String inputTypeSource = metadata.getInputType();
-			HtmlInputType inputType = inputTypeSource == null ? null : HtmlInputType.of(inputTypeSource);
+			String inputType = metadata.getInputType();
 			HalFormsOptions options = optionsFactory.getOptions(payload, metadata);
 
 			HalFormsProperty property = new HalFormsProperty()

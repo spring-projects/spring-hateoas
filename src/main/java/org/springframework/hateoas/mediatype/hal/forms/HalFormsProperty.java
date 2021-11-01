@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.hateoas.AffordanceModel.Named;
-import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -44,7 +43,7 @@ final class HalFormsProperty implements Named {
 	private final @JsonInclude(Include.NON_DEFAULT) boolean readOnly, required;
 	private final @Nullable Number min, max;
 	private final @Nullable Long minLength, maxLength;
-	private final @Nullable HtmlInputType type;
+	private final @Nullable String type;
 	private final @Nullable HalFormsOptions options;
 
 	HalFormsProperty() {
@@ -69,7 +68,7 @@ final class HalFormsProperty implements Named {
 	private HalFormsProperty(String name, boolean readOnly, @Nullable Object value, String prompt, String regex,
 			boolean templated, //
 			boolean required, boolean multi, String placeholder, @Nullable Number min, @Nullable Number max,
-			@Nullable Long minLength, @Nullable Long maxLength, @Nullable HtmlInputType type,
+			@Nullable Long minLength, @Nullable Long maxLength, @Nullable String type,
 			@Nullable HalFormsOptions options) {
 
 		Assert.notNull(name, "Name must not be null!");
@@ -294,7 +293,7 @@ final class HalFormsProperty implements Named {
 	 * @param type can be {@literal null}
 	 * @return will never be {@literal null}.
 	 */
-	HalFormsProperty withType(@Nullable HtmlInputType type) {
+	HalFormsProperty withType(@Nullable String type) {
 
 		return Objects.equals(this.type, type) ? this
 				: new HalFormsProperty(this.name, this.readOnly, this.value, this.prompt, this.regex, this.templated,
@@ -413,7 +412,7 @@ final class HalFormsProperty implements Named {
 	@Nullable
 	@JsonProperty
 	@JsonInclude(Include.NON_NULL)
-	HtmlInputType getType() {
+	String getType() {
 		return type;
 	}
 
