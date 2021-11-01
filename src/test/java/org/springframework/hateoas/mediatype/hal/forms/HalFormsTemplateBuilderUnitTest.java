@@ -34,6 +34,7 @@ import org.hibernate.validator.constraints.Range;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.hateoas.InputType;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
@@ -206,6 +207,23 @@ class HalFormsTemplateBuilderUnitTest {
 		});
 	}
 
+	@Test // #1697
+	void exposesCustomInputType() {
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("example"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(WithCustomInputType.class) //
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY).findTemplates(models);
+
+		assertThat(templates.get("default").getPropertyByName("property")).hasValueSatisfying(it -> {
+			assertThat(it.getType()).isEqualTo("custom");
+		});
+	}
+
 	@Getter
 	static class PatternExample extends RepresentationModel<PatternExample> {
 
@@ -238,5 +256,12 @@ class HalFormsTemplateBuilderUnitTest {
 
 		@Range(min = 8, max = 10) //
 		Integer range;
+	}
+
+	@Getter
+	static class WithCustomInputType {
+
+		@InputType("custom") //
+		String property;
 	}
 }
