@@ -206,6 +206,22 @@ class HalFormsTemplateBuilderUnitTest {
 		});
 	}
 
+	@Test // #1683
+	void allowHttpGetAffordances() {
+
+		Link link = Affordances.of(Link.of("/example", LinkRelation.of("getExample"))) //
+				.afford(HttpMethod.GET) //
+				.withName("getExample")
+				.toLink();
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
+
+		HalFormsTemplate defaultTemplate = templates.get("default");
+		assertThat(defaultTemplate).isNotNull();
+		assertThat(defaultTemplate.getHttpMethod()).isEqualTo(HttpMethod.GET);
+	}
+
 	@Getter
 	static class PatternExample extends RepresentationModel<PatternExample> {
 

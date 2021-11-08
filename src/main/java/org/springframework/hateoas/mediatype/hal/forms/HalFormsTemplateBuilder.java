@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
@@ -28,7 +27,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.MessageResolver;
-import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -63,7 +61,6 @@ class HalFormsTemplateBuilder {
 					Assert.notNull(it, "No HAL Forms affordance model found but expected!");
 				}) //
 				.map(HalFormsAffordanceModel.class::cast) //
-				.filter(it -> !it.hasHttpMethod(HttpMethod.GET)) //
 				.forEach(it -> {
 
 					HalFormsTemplate template = HalFormsTemplate.forMethod(it.getHttpMethod()) //
