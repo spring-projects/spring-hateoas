@@ -1,6 +1,16 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.4 GA (2021-11-11)
+----------------------------------------
+- #1716 - Upgrade to Spring Framework 5.3.13.
+- #1715 - Upgrade to Reactor 2020.0.13.
+- #1697 - Custom types not supported in HAL FORMS properties description.
+- #1696 - Adding request parameter template variables to a URI already containing one produce invalid template.
+- #1688 - Use Links.collector() in JsonPathLinksDiscoverer.
+- #1687 - Fix Javadoc in LinkDiscoverer.findLinkWithRel(…).
+- #1686 - Error serializing EntityModel when content is an empty bean and the ObjectMapper is configured to not to fail on those.
+
 Changes in version 1.4 RC1 (2021-10-14)
 ----------------------------------------
 - #1681 - Upgrade to Kotlin 1.5.31.
