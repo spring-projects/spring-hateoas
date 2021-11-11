@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.2.11 (2021-11-11)
+----------------------------------------
+- #1709 - Upgrade to Spring Framework 5.3.13.
+- #1708 - Upgrade to Reactor 2020.0.13.
+- #1694 - Error serializing `EntityModel` when content is an empty bean and the ObjectMapper is configured to not to fail on those.
+- #1692 - Use `Links.collector()` in `JsonPathLinksDiscoverer`.
+- #1690 - Fix Javadoc in `LinkDiscoverer.findLinkWithRel(…)`.
+
 Changes in version 1.2.10 (2021-10-14)
 ----------------------------------------
 - #1671 - Upgrade to Lombok 1.18.22.
