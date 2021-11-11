@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.3.6 (2021-11-11)
+----------------------------------------
+- #1712 - Upgrade to Spring Framework 5.3.13.
+- #1711 - Upgrade to Reactor 2020.0.13.
+- #1699 - Custom types not supported in HAL FORMS properties description.
+- #1693 - Error serializing EntityModel when content is an empty bean and the ObjectMapper is configured to not to fail on those.
+- #1691 - Use Links.collector() in JsonPathLinksDiscoverer.
+- #1689 - Fix Javadoc in LinkDiscoverer.findLinkWithRel(…).
+
 Changes in version 1.3.5 (2021-10-14)
 ----------------------------------------
 - #1675 - Upgrade to Reactor 2020.0.12.
