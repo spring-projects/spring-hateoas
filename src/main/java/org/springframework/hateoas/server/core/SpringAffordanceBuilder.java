@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class SpringAffordanceBuilder {
 
-	@SuppressWarnings("deprecation") //
 	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
 			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
 

@@ -78,7 +78,8 @@ public class WebHandler {
 			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler,
 			Function<String, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
 
-		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher, conversionService.get());
+		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher,
+				conversionService.get());
 	}
 
 	private static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
@@ -99,6 +100,8 @@ public class WebHandler {
 
 		return (finisher, conversionService) -> {
 
+			FormatterFactory factory = new FormatterFactory(conversionService);
+
 			UriComponentsBuilder builder = finisher.apply(mapping);
 			UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
 			Map<String, Object> values = new HashMap<>();
@@ -114,7 +117,7 @@ public class WebHandler {
 				Object source = classMappingParameters.next();
 
 				values.put(name, variable.prepareAndEncode(
-						HandlerMethodParameter.prepareValue(source, conversionService, TypeDescriptor.forObject(source))));
+						HandlerMethodParameter.prepareValue(source, factory, TypeDescriptor.forObject(source))));
 			}
 
 			Method method = invocation.getMethod();
@@ -126,7 +129,7 @@ public class WebHandler {
 				TemplateVariable variable = TemplateVariable.segment(parameter.getVariableName());
 				Object verifiedValue = parameter.getVerifiedValue(arguments);
 				Object preparedValue = verifiedValue == null ? verifiedValue
-						: parameter.prepareValue(verifiedValue, conversionService);
+						: parameter.prepareValue(verifiedValue, factory);
 
 				values.put(variable.getName(), variable.prepareAndEncode(preparedValue));
 			}
@@ -135,7 +138,7 @@ public class WebHandler {
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(RequestParam.class, arguments)) {
 
-				bindRequestParameters(builder, parameter, arguments, conversionService);
+				bindRequestParameters(builder, parameter, arguments, factory);
 
 				boolean isSkipValue = SKIP_VALUE.equals(parameter.getVerifiedValue(arguments));
 				boolean isMapParameter = Map.class.isAssignableFrom(parameter.parameter.getParameterType());
@@ -186,7 +189,7 @@ public class WebHandler {
 	 */
 	@SuppressWarnings("unchecked")
 	private static void bindRequestParameters(UriComponentsBuilder builder, HandlerMethodParameter parameter,
-			Object[] arguments, ConversionService conversionService) {
+			Object[] arguments, FormatterFactory factory) {
 
 		Object value = parameter.getVerifiedValue(arguments);
 
@@ -198,7 +201,7 @@ public class WebHandler {
 
 		if (value instanceof MultiValueMap) {
 
-			Map<String, List<?>> requestParams = (Map<String, List<?>>) parameter.prepareValue(value, conversionService);
+			Map<String, List<?>> requestParams = (Map<String, List<?>>) parameter.prepareValue(value, factory);
 
 			for (Entry<String, List<?>> entry : requestParams.entrySet()) {
 				for (Object element : entry.getValue()) {
@@ -212,7 +215,7 @@ public class WebHandler {
 
 		if (value instanceof Map) {
 
-			Map<String, ?> requestParams = (Map<String, ?>) parameter.prepareValue(value, conversionService);
+			Map<String, ?> requestParams = (Map<String, ?>) parameter.prepareValue(value, factory);
 
 			for (Entry<String, ?> entry : requestParams.entrySet()) {
 
@@ -234,7 +237,7 @@ public class WebHandler {
 
 		if (value instanceof Collection) {
 
-			Collection<?> collection = (Collection<?>) parameter.prepareValue(value, conversionService);
+			Collection<?> collection = (Collection<?>) parameter.prepareValue(value, factory);
 
 			if (parameter.isNonComposite()) {
 				builder.queryParam(key, variable.prepareAndEncode(collection));
@@ -256,29 +259,9 @@ public class WebHandler {
 
 		} else {
 			if (key != null) {
-				builder.queryParam(key, variable.prepareAndEncode(parameter.prepareValue(value, conversionService)));
+				builder.queryParam(key, variable.prepareAndEncode(parameter.prepareValue(value, factory)));
 			}
 		}
-	}
-
-	private static Function<Object, String> getFormatter(ConversionService conversionService, TypeDescriptor descriptor) {
-
-		return source -> {
-
-			if (String.class.isInstance(source)) {
-				return (String) source;
-			}
-
-			Object result = conversionService.canConvert(descriptor, STRING_DESCRIPTOR)
-					? conversionService.convert(source, descriptor, STRING_DESCRIPTOR)
-					: source == null ? null : source.toString();
-
-			if (result == null) {
-				throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", source));
-			}
-
-			return (String) result;
-		};
 	}
 
 	private static class HandlerMethodParameters {
@@ -419,7 +402,7 @@ public class WebHandler {
 			return variableName;
 		}
 
-		public Object prepareValue(Object value, ConversionService conversionService) {
+		public Object prepareValue(Object value, FormatterFactory conversionService) {
 
 			Object result = prepareValue(value, conversionService, typeDescriptor);
 
@@ -428,7 +411,7 @@ public class WebHandler {
 
 		@Nullable
 		@SuppressWarnings("unchecked")
-		public static Object prepareValue(@Nullable Object value, ConversionService conversionService,
+		public static Object prepareValue(@Nullable Object value, FormatterFactory factory,
 				@Nullable TypeDescriptor descriptor) {
 
 			if (descriptor == null || value == null) {
@@ -437,6 +420,10 @@ public class WebHandler {
 
 			value = ObjectUtils.unwrapOptional(value);
 
+			if (String.class.isInstance(value)) {
+				return value;
+			}
+
 			if (Collection.class.isInstance(value)) {
 
 				List<Object> prepared = new ArrayList<>();
@@ -444,7 +431,7 @@ public class WebHandler {
 				for (Object element : (Collection<?>) value) {
 
 					TypeDescriptor elementTypeDescriptor = descriptor.elementTypeDescriptor(element);
-					prepared.add(prepareValue(element, conversionService, elementTypeDescriptor));
+					prepared.add(prepareValue(element, factory, elementTypeDescriptor));
 				}
 
 				return prepared;
@@ -459,14 +446,14 @@ public class WebHandler {
 					TypeDescriptor keyTypeDescriptor = descriptor.getMapKeyTypeDescriptor(entry.getKey());
 					TypeDescriptor elementTypeDescriptor = descriptor.elementTypeDescriptor(entry.getValue());
 
-					prepared.put(prepareValue(entry.getKey(), conversionService, keyTypeDescriptor),
-							prepareValue(entry.getValue(), conversionService, elementTypeDescriptor));
+					prepared.put(prepareValue(entry.getKey(), factory, keyTypeDescriptor),
+							prepareValue(entry.getValue(), factory, elementTypeDescriptor));
 				}
 
 				return prepared;
 			}
 
-			return getFormatter(conversionService, descriptor).apply(value);
+			return factory.getFormatter(descriptor).apply(value);
 		}
 
 		private String determineVariableName() {
@@ -506,6 +493,60 @@ public class WebHandler {
 		}
 
 		public abstract boolean isRequired();
+	}
+
+	/**
+	 * Factory to create to-{@link String} converters by type. Caching, to avoid repeated calculations and
+	 * {@link Function} object creation.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	private static class FormatterFactory {
+
+		private static final Function<Object, String> DEFAULT = source -> source == null ? null : source.toString();
+
+		private final Map<TypeDescriptor, Function<Object, String>> formatters = new HashMap<>();
+		private final ConversionService conversionService;
+
+		/**
+		 * Creates a new {@link FormatterFactory} for the given {@link ConversionService}.
+		 *
+		 * @param conversionService must not be {@literal null}.
+		 */
+		public FormatterFactory(ConversionService conversionService) {
+			this.conversionService = conversionService;
+		}
+
+		/**
+		 * Return the formatting function to map objects of the given {@link TypeDescriptor} to String.
+		 *
+		 * @param descriptor must not be {@literal null}.
+		 * @return will never be {@literal null}.
+		 */
+		public Function<Object, String> getFormatter(TypeDescriptor descriptor) {
+
+			if (STRING_DESCRIPTOR.equals(descriptor)) {
+				return DEFAULT;
+			}
+
+			return formatters.computeIfAbsent(descriptor, it -> {
+
+				if (!conversionService.canConvert(descriptor, STRING_DESCRIPTOR)) {
+					return DEFAULT;
+				}
+
+				return source -> {
+
+					Object result = conversionService.convert(source, descriptor, STRING_DESCRIPTOR);
+
+					if (result == null) {
+						throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", source));
+					}
+
+					return (String) result;
+				};
+			});
+		}
 	}
 
 	/**

@@ -152,21 +152,25 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new, (builder, invocation) -> {
 
 			String[] primaryParams = SpringAffordanceBuilder.DISCOVERER.getParams(invocation.getMethod());
-			ParamsRequestCondition paramsRequestCondition = new ParamsRequestCondition(primaryParams);
 
-			for (NameValueExpression<String> expression : paramsRequestCondition.getExpressions()) {
+			if (primaryParams.length > 0) {
 
-				if (expression.isNegated()) {
-					continue;
+				ParamsRequestCondition paramsRequestCondition = new ParamsRequestCondition(primaryParams);
+
+				for (NameValueExpression<String> expression : paramsRequestCondition.getExpressions()) {
+
+					if (expression.isNegated()) {
+						continue;
+					}
+
+					String value = expression.getValue();
+
+					if (value == null) {
+						continue;
+					}
+
+					builder.queryParam(expression.getName(), value);
 				}
-
-				String value = expression.getValue();
-
-				if (value == null) {
-					continue;
-				}
-
-				builder.queryParam(expression.getName(), value);
 			}
 
 			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
