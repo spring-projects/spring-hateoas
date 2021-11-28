@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import org.apache.commons.io.output.WriterOutputStream;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.PagedModel.PageMetadata;
@@ -86,6 +88,7 @@ class Jackson2PagedResourcesIntegrationTest {
 		CollectionModel<?> someMethod();
 	}
 
+	@JsonPropertyOrder({"firstname", "lastname"})
 	static class User {
 		public String firstname, lastname;
 	}
