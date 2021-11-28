@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Integration tests for {@link EntityModel}.
@@ -54,6 +55,7 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 		}
 	}
 
+	@JsonPropertyOrder({"firstname", "lastname"})
 	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 	static class Person {
 
