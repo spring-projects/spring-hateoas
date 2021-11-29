@@ -21,8 +21,6 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
