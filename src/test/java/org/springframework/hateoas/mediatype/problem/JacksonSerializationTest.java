@@ -42,6 +42,7 @@ import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -332,6 +333,7 @@ class JacksonSerializationTest {
 	 */
 	@Value
 	@Getter(onMethod = @__(@JsonProperty))
+	@JsonPropertyOrder({"balance", "accounts"})
 	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 	@NoArgsConstructor(staticName = "empty", force = true)
 	@With
