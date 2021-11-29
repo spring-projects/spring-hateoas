@@ -406,6 +406,7 @@ public class HalModelBuilderUnitTest {
 
 	@Value
 	@AllArgsConstructor
+	@JsonPropertyOrder({"name", "price"})
 	static class Product {
 
 		private String name;
