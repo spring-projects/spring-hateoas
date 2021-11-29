@@ -21,6 +21,8 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,6 +60,7 @@ import org.springframework.lang.Nullable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -721,6 +724,9 @@ class Jackson2HalIntegrationTest {
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.setHandlerInstantiator(
 				new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), provider, MessageResolver.of(messageSource)));
+				
+		// the current alternative SerializationFeature.ORDERED_MAP_ENTRIES_BY_KEYS does not sort nested keys
+		mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 
 		return mapper;
 	}

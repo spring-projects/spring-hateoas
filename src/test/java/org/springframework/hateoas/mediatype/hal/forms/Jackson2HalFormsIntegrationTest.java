@@ -76,6 +76,7 @@ import org.springframework.lang.Nullable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.jsonpath.DocumentContext;
@@ -668,6 +669,8 @@ class Jackson2HalFormsIntegrationTest {
 		return MappingTestUtils.createMapper(Jackson2HalFormsIntegrationTest.class, configurer.andThen(it -> {
 			it.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(this.provider, provider,
 					resolver, new HalConfiguration(), factory));
+			// the current alternative SerializationFeature.ORDERED_MAP_ENTRIES_BY_KEYS does not sort nested keys
+			it.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
 		}));
 	}
 
