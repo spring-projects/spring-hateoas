@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.uber;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,7 +36,7 @@ import org.springframework.lang.Nullable;
  */
 class UberAffordanceModel extends AffordanceModel {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT,
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT,
 			HttpMethod.PATCH);
 
 	private final Collection<MediaType> mediaTypes = Collections.singleton(MediaTypes.UBER_JSON);

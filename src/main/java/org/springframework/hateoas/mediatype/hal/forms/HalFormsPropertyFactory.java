@@ -19,7 +19,6 @@ import static org.springframework.http.HttpMethod.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,7 +43,7 @@ import org.springframework.util.StringUtils;
  */
 class HalFormsPropertyFactory {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = Set.of(POST, PUT, PATCH);
 
 	private final HalFormsConfiguration configuration;
 	private final MessageResolver resolver;

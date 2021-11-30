@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.collectionjson;
 
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -37,7 +36,7 @@ import org.springframework.lang.Nullable;
  */
 class CollectionJsonAffordanceModel extends AffordanceModel {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(HttpMethod.POST, HttpMethod.PUT,
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = Set.of(HttpMethod.POST, HttpMethod.PUT,
 			HttpMethod.PATCH);
 
 	private final List<CollectionJsonData> inputProperties;
