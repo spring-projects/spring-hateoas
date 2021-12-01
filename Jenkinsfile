@@ -12,6 +12,9 @@ pipeline {
 
 	stages {
 		stage('Publish OpenJDK 8 + Graphviz + jq docker image') {
+		    when {
+		        changeset "ci/Dockerfile"
+		    }
 			agent any
 
 			steps {
