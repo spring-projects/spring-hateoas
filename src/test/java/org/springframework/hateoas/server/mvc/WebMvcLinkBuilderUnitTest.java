@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -683,6 +684,19 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 				.forEach(it -> it.withMessageContaining("Expected 1, got 0"));
 	}
 
+	@Test // #1729
+	@SuppressWarnings("null")
+	void linksPointingToTheSameMethodAreEqual() {
+
+		Link first = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestBody(null)).withSelfRel();
+		Link second = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestBody(null)).withSelfRel();
+
+		assertThat(first).isEqualTo(second);
+		assertThat(second).isEqualTo(first);
+		assertThat(first.hashCode()).isEqualTo(second.hashCode());
+		assertThat(second.hashCode()).isEqualTo(first.hashCode());
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -766,6 +780,12 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 		@RequestMapping(path = "/with-map") // #1548
 		HttpEntity<Void> methodWithMapRequestParam(@RequestParam Map<String, String> params) {
+			return null;
+		}
+
+		// #1729
+		@RequestMapping(method = RequestMethod.POST, path = "/with-request-body")
+		HttpEntity<Void> methodWithRequestBody(@RequestBody Person param) {
 			return null;
 		}
 	}
