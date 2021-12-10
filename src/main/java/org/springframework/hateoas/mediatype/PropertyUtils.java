@@ -135,7 +135,7 @@ public class PropertyUtils {
 
 		return METADATA_CACHE.computeIfAbsent(type, it -> {
 
-			ResolvableType domainType = unwrapDomainType(type);
+			ResolvableType domainType = unwrapDomainType(it);
 			Class<?> resolved = domainType.resolve(Object.class);
 
 			return Object.class.equals(resolved) //
