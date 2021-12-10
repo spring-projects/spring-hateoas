@@ -115,4 +115,42 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 	public List<MediaType> getMediaTypes() {
 		return mediaTypes;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this) {
+			return true;
+		}
+
+		if (!(obj instanceof TypeBasedPayloadMetadata)) {
+			return false;
+		}
+
+		TypeBasedPayloadMetadata that = (TypeBasedPayloadMetadata) obj;
+
+		return this.type.equals(that.type)
+				&& this.properties.equals(that.properties)
+				&& this.mediaTypes.equals(that.mediaTypes);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+
+		int result = 31;
+
+		result += 17 * type.hashCode();
+		result += 17 * properties.hashCode();
+		result += 17 * mediaTypes.hashCode();
+
+		return result;
+	}
 }
