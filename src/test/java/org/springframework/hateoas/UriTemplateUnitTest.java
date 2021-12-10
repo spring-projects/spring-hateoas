@@ -375,6 +375,13 @@ class UriTemplateUnitTest {
 		assertThat(template.toString()).isEqualTo("/path/{bar}/foo.zip?type=foo{&foobar}");
 	}
 
+	@Test // #1727
+	void supportsVariableInHostName() {
+
+		assertThatCode(() -> UriTemplate.of("https://{somehost}/somepath"))
+				.doesNotThrowAnyException();
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}

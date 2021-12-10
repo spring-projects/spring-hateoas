@@ -357,10 +357,14 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		String head = index == -1 ? template : template.substring(0, index);
 		String tail = index == -1 ? "" : template.substring(index);
-		String encodedBase = UriComponentsBuilder.fromUriString(head)
-				.encode()
-				.build()
-				.toUriString();
+
+		// Encode head if it's more than just the scheme
+		String encodedBase = head.endsWith("://") && tail.startsWith("{")
+				? head
+				: UriComponentsBuilder.fromUriString(head)
+						.encode()
+						.build()
+						.toUriString();
 
 		head = encodedBase.length() > head.length() ? encodedBase : head;
 
