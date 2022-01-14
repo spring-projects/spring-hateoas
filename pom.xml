@@ -84,7 +84,7 @@
 		<reactor-bom.version>2020.0.15</reactor-bom.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<spring.version>6.0.0-M2</spring.version>
-		<spring-plugin.version>3.0.0-SNAPSHOT</spring-plugin.version>
+		<spring-plugin.version>3.0.0-M1</spring-plugin.version>
 		<kotlin.version>1.6.10</kotlin.version>
 		<kotlinx-coroutines.version>1.6.0</kotlinx-coroutines.version>
 		<mockk.version>1.12.0</mockk.version>
@@ -1205,13 +1205,6 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/snapshot</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
 		</repository>
 	</repositories>
 
