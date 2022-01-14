@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5 M1 (2022-01-14)
+----------------------------------------
+- #1739 - Upgrade to Kotlin 1.6.10.
+- #1738 - Upgrade to Reactor 2020.0.15.
+- #1737 - Upgrade to Spring Framework 5.3.15.
+- #1729 - TypeBasedInputPayloadMetadata missing equals(…) and hashCode().
+- #1727 - UriTemplate throws exception for host variables.
+- #1701 - Potential memory leak in WebMvcLinkBuilder.
+
 Changes in version 1.4 GA (2021-11-11)
 ----------------------------------------
 - #1716 - Upgrade to Spring Framework 5.3.13.
