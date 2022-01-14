@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0 M1 (2022-01-17)
+----------------------------------------
+- #1752 - Upgarde to Spring Plugin 3.0 M1.
+- #1751 - Upgrade to Spring Framework 6.0 M2.
+- #1719 - Adapt to Framework's removal of DefaultUriTemplateHandler.
+- #1639 - Prepare 2.0 development.
+
 Changes in version 1.5 M1 (2022-01-14)
 ----------------------------------------
 - #1739 - Upgrade to Kotlin 1.6.10.
