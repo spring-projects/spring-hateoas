@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -158,9 +159,19 @@ class PropertyUtilsTest {
 			assertThat(it.isRequired()).isTrue();
 		});
 
+        assertThat(getProperty(metadata, "nonBlank")).hasValueSatisfying(it -> {
+            assertThat(it.isRequired()).isTrue();
+            assertThat(it.getPattern()).hasValue(PropertyUtils.NOT_BLANK_REGEX);
+        });
+
 		assertThat(getProperty(metadata, "pattern")).hasValueSatisfying(it -> {
 			assertThat(it.getPattern()).hasValue("\\w");
 		});
+
+        assertThat(getProperty(metadata, "nonBlankPattern")).hasValueSatisfying(it -> {
+            assertThat(it.isRequired()).isTrue();
+            assertThat(it.getPattern()).hasValue("\\w");
+        });
 
 		assertThat(getProperty(metadata, "annotated")).hasValueSatisfying(it -> {
 			assertThat(it.getPattern()).hasValue("regex");
@@ -250,7 +261,9 @@ class PropertyUtilsTest {
 	static class Jsr303SamplePayload {
 
 		@NotNull String nonNull;
+		@NotBlank String nonBlank;
 		@Pattern(regexp = "\\w") String pattern;
+        @NotBlank @Pattern(regexp = "\\w") String nonBlankPattern;
 		TypeAnnotated annotated;
 	}
 

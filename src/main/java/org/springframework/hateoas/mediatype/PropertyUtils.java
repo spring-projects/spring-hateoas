@@ -31,6 +31,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -67,6 +68,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Oliver Drotbohm
  */
 public class PropertyUtils {
+
+    static final String NOT_BLANK_REGEX = "^\\s*(\\S+\\s*)+$";
 
 	private static final Map<ResolvableType, ResolvableType> DOMAIN_TYPE_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Map<ResolvableType, InputPayloadMetadata> METADATA_CACHE = new ConcurrentReferenceHashMap<>();
@@ -550,7 +553,7 @@ public class PropertyUtils {
 	 */
 	private static class Jsr303AwarePropertyMetadata extends DefaultPropertyMetadata {
 
-		private static final Optional<Class<? extends Annotation>> LENGTH_ANNOTATION;
+        private static final Optional<Class<? extends Annotation>> LENGTH_ANNOTATION;
 		private static final @Nullable Class<? extends Annotation> URL_ANNOTATION, RANGE_ANNOTATION;
 		private static final Map<Class<? extends Annotation>, String> TYPE_MAP;
 
@@ -601,7 +604,9 @@ public class PropertyUtils {
 		 */
 		@Override
 		public boolean isRequired() {
-			return super.isRequired() || property.getAnnotation(NotNull.class).isPresent();
+			return super.isRequired()
+			    || property.getAnnotation(NotNull.class).isPresent()
+			    || property.getAnnotation(NotBlank.class).isPresent();
 		}
 
 		/*
@@ -610,7 +615,11 @@ public class PropertyUtils {
 		 */
 		@Override
 		public Optional<String> getPattern() {
-			return getAnnotationAttribute(Pattern.class, "regexp", String.class);
+			Optional<String> attribute = getAnnotationAttribute(Pattern.class, "regexp", String.class);
+			if (!attribute.isPresent() && property.getAnnotation(NotBlank.class).isPresent()) {
+			    attribute = Optional.of(NOT_BLANK_REGEX);
+			}
+            return attribute;
 		}
 
 		/*
