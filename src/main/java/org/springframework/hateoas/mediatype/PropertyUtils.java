@@ -69,8 +69,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public class PropertyUtils {
 
-	static final String NOT_BLANK_REGEX = "^\\s*(\\S+\\s*)+$";
-
 	private static final Map<ResolvableType, ResolvableType> DOMAIN_TYPE_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Map<ResolvableType, InputPayloadMetadata> METADATA_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Set<String> FIELDS_TO_IGNORE = new HashSet<>(Arrays.asList("class", "links"));
@@ -79,6 +77,8 @@ public class PropertyUtils {
 	private static final List<Class<?>> TYPES_TO_UNWRAP = new ArrayList<>(
 			Arrays.asList(EntityModel.class, CollectionModel.class, HttpEntity.class));
 	private static final ResolvableType OBJECT_TYPE = ResolvableType.forClass(Object.class);
+
+	static final String NOT_BLANK_REGEX = "^(?=\\s*\\S).*$";
 
 	static {
 		if (ClassUtils.isPresent("org.reactivestreams.Publisher", PropertyUtils.class.getClassLoader())) {
@@ -600,7 +600,7 @@ public class PropertyUtils {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mediatype.PropertyUtils.PropertyMetadata#isRequired()
+		 * @see org.springframework.hateoas.mediatype.PropertyUtils.DefaultPropertyMetadata#isRequired()
 		 */
 		@Override
 		public boolean isRequired() {
@@ -612,18 +612,23 @@ public class PropertyUtils {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mediatype.PropertyUtils.PropertyMetadata#getRegex()
+		 * @see org.springframework.hateoas.mediatype.PropertyUtils.DefaultPropertyMetadata#getPattern()
 		 */
 		@Override
 		public Optional<String> getPattern() {
 
 			Optional<String> attribute = getAnnotationAttribute(Pattern.class, "regexp", String.class);
 
-			if (!attribute.isPresent() && property.getAnnotation(NotBlank.class).isPresent()) {
-				attribute = Optional.of(NOT_BLANK_REGEX);
+			if (attribute.isPresent()) {
+				return attribute;
 			}
 
-			return attribute;
+			// Default pattern if @NonBlank is present
+			if (property.getAnnotation(NotBlank.class).isPresent()) {
+				return Optional.of(NOT_BLANK_REGEX);
+			}
+
+			return Optional.empty();
 		}
 
 		/*
