@@ -75,12 +75,17 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
 				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$._templates.*", hasSize(2)))
-				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist())
+				.andExpect(jsonPath("$._templates.*", hasSize(4)))
+				.andExpect(jsonPath("$._templates['default'].method", is("get")))
+
+				.andExpect(jsonPath("$._templates['all'].method", is("get")))
+				.andExpect(jsonPath("$._templates['all'].target", is("http://localhost/employees")))
+
+				.andExpect(jsonPath("$._templates['updateEmployee'].method", is("put")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[0].name", is("name")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[0].required").value(true))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[1].name", is("role")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].properties[1].required").doesNotExist())
 
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name")))
@@ -104,12 +109,18 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links.*", hasSize(1)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$._templates.*", hasSize(1)))
-				.andExpect(jsonPath("$._templates['default'].method", is("post")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
-				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist());
+				.andExpect(jsonPath("$._templates.*", hasSize(3)))
+
+				.andExpect(jsonPath("$._templates['default'].method", is("get")))
+
+				.andExpect(jsonPath("$._templates['search'].method", is("get")))
+				.andExpect(jsonPath("$._templates['search'].target", is("http://localhost/employees/search")))
+
+				.andExpect(jsonPath("$._templates['newEmployee'].method", is("post")))
+				.andExpect(jsonPath("$._templates['newEmployee'].properties[0].name", is("name")))
+				.andExpect(jsonPath("$._templates['newEmployee'].properties[0].required").value(true))
+				.andExpect(jsonPath("$._templates['newEmployee'].properties[1].name", is("role")))
+				.andExpect(jsonPath("$._templates['newEmployee'].properties[1].required").doesNotExist());
 	}
 
 	@Test
