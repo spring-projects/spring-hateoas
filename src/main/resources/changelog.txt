@@ -1,6 +1,11 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5 M2 (2022-02-17)
+----------------------------------------
+- #1758 - Upgrade to Spring 5.3.16.
+- #1753 - Add support for javax.validation.constraints.NotBlank.
+
 Changes in version 1.5 M1 (2022-01-14)
 ----------------------------------------
 - #1739 - Upgrade to Kotlin 1.6.10.
