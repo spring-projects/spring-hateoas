@@ -280,18 +280,21 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	 */
 	@Override
 	public String toString() {
-		return StringUtils.hasText(description) ? String.format("%s - %s", asString(), description) : asString();
+		return StringUtils.hasText(description) ? asString() + " - " + description : asString();
 	}
 
 	public String asString() {
-		return String.format("{%s%s}", type.toString(), essence());
+
+		return "{" + type.toString() + essence() + "}";
 	}
 
 	String essence() {
 
-		return String.format("%s%s%s", name,
-				limit != -1 ? ":".concat(String.valueOf(limit)) : "",
-				isComposite() ? "*" : "");
+		String result = name;
+		result += limit != -1 ? ":" + limit : "";
+		result += isComposite() ? "*" : "";
+
+		return result;
 	}
 
 	public String getName() {
