@@ -1043,10 +1043,11 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.3.1</version>
+					<version>3.3.2</version>
 					<configuration>
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
+						<javadocVersion>1.8</javadocVersion>
 						<source>${source.level}</source>
 						<quiet>true</quiet>
 						<doclint>none</doclint>
