@@ -35,7 +35,7 @@ class TemplateVariablesUnitTest {
 	 * @see #137
 	 */
 	@Test
-	void rendersNoTempalteVariablesAsEmptyString() {
+	void rendersNoTemplateVariablesAsEmptyString() {
 		assertThat(TemplateVariables.NONE.toString()).isEqualTo("");
 	}
 
@@ -47,6 +47,18 @@ class TemplateVariablesUnitTest {
 
 		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
 		assertThat(variables.toString()).isEqualTo("{/foo}");
+	}
+
+	@Test
+	void rendersCompositeVariableCorrectly() {
+		TemplateVariables variables = new TemplateVariables(new TemplateVariable("bars", SIMPLE).composite());
+		assertThat(variables.toString()).isEqualTo("{bars*}");
+	}
+
+	@Test
+	void rendersLimitedVariableCorrectly() {
+		TemplateVariables variables = new TemplateVariables(new TemplateVariable("apples", SIMPLE).limit(5));
+		assertThat(variables.toString()).isEqualTo("{apples:5}");
 	}
 
 	/**
@@ -151,7 +163,7 @@ class TemplateVariablesUnitTest {
 	 * @see #217
 	 */
 	@Test
-	void considersFragementVariable() {
+	void considersFragmentVariable() {
 
 		assertThat(new TemplateVariable("foo", VariableType.FRAGMENT).isFragment()).isTrue();
 		assertThat(new TemplateVariable("foo", VariableType.REQUEST_PARAM).isFragment()).isFalse();

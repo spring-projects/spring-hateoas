@@ -288,10 +288,14 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	}
 
 	String essence() {
-
-		return String.format("%s%s%s", name,
-				limit != -1 ? ":".concat(String.valueOf(limit)) : "",
-				isComposite() ? "*" : "");
+		StringBuilder essenceBuilder = new StringBuilder(name);
+		if (limit != -1) {
+			essenceBuilder = essenceBuilder.append(":").append(limit);
+		}
+		if (isComposite()) {
+			essenceBuilder = essenceBuilder.append("*");
+		}
+		return essenceBuilder.toString();
 	}
 
 	public String getName() {
