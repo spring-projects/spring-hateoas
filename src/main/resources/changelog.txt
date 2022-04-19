@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5 RC1 (2022-04-19)
+----------------------------------------
+- #1772 - Upgrade to Jackson 2.13.2.1.
+- #1771 - Upgrade to Reactor 2020.0.18.
+- #1770 - Upgrade to Spring Framework 5.3.19.
+- #1765 - Performance improvements in TemplateVariable.essence().
+
 Changes in version 1.5 M2 (2022-02-17)
 ----------------------------------------
 - #1758 - Upgrade to Spring 5.3.16.
