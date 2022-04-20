@@ -68,11 +68,12 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 		for (TemplateVariable variable : variables) {
 
-			processed.add(variable.isRequestParameterVariable() && requestParameterFound
+			boolean isRequestParameter = variable.isRequestParameterVariable();
+			processed.add(isRequestParameter && requestParameterFound
 					? variable.withType(REQUEST_PARAM_CONTINUED)
 					: variable);
 
-			if (variable.isRequestParameterVariable()) {
+			if (isRequestParameter) {
 				requestParameterFound = true;
 			}
 		}
@@ -100,12 +101,11 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 		List<TemplateVariable> result = new ArrayList<>(this.variables.size() + variables.size());
 		result.addAll(this.variables);
-
-		List<TemplateVariable> filtered = variables.stream() //
-				.filter(variable -> !containsEquivalentFor(variable)).collect(Collectors.toList());
-
-		result.addAll(filtered);
-
+		for (TemplateVariable otherVariable : variables) {
+			if (!containsEquivalentFor(otherVariable)) {
+				result.add(otherVariable);
+			}
+		}
 		return new TemplateVariables(result);
 	}
 
@@ -133,9 +133,12 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	}
 
 	private boolean containsEquivalentFor(TemplateVariable candidate) {
-
-		return this.variables.stream() //
-				.anyMatch(variable -> variable.isEquivalent(candidate));
+		for (TemplateVariable variable : variables) {
+			if (variable.isEquivalent(candidate)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/*

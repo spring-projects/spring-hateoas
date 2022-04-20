@@ -19,11 +19,7 @@ import static org.springframework.hateoas.TemplateVariable.VariableType.*;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -499,7 +495,7 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 		 */
 		COMPOSITE_PARAM("*", "", true);
 
-		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
+		private static final EnumSet<VariableType> COMBINABLE_TYPES = EnumSet.of(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 		static final String DEFAULT_SEPARATOR = ",";
 
 		private final String key, combiner;
