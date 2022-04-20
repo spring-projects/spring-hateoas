@@ -18,13 +18,7 @@ package org.springframework.hateoas;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -172,13 +166,10 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
+		MultiValueMap<String, String> parameters = components.getQueryParams();
 		List<TemplateVariable> result = new ArrayList<>();
-		String newOriginal = template;
-		ExpandGroups groups = this.groups;
 
 		for (TemplateVariable variable : variables) {
-
-			MultiValueMap<String, String> parameters = components.getQueryParams();
 			boolean isRequestParam = variable.isRequestParameterVariable();
 			boolean alreadyPresent = parameters.containsKey(variable.getName());
 
@@ -195,9 +186,20 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 				variable = variable.withType(VariableType.REQUEST_PARAM_CONTINUED);
 			}
 
-			ExpandGroup existing = groups.findLastExpandGroupOfType(variable.getType());
-			ExpandGroup group = new ExpandGroup(Collections.singletonList(variable));
+			result.add(variable);
+		}
 
+
+		String newOriginal = template;
+		ExpandGroups groups = this.groups;
+		LinkedHashMap<VariableType, List<TemplateVariable>> groupedByVariableType = result.stream()
+				.collect(
+						Collectors.groupingBy(TemplateVariable::getType, LinkedHashMap::new, Collectors.toList()));
+
+
+		for (Map.Entry<VariableType, List<TemplateVariable>> entry : groupedByVariableType.entrySet()) {
+			ExpandGroup existing = groups.findLastExpandGroupOfType(entry.getKey());
+			ExpandGroup group = new ExpandGroup(entry.getValue());
 			if (existing != null) {
 				group = existing.merge(group);
 				newOriginal = newOriginal.replace(existing.asString(), group.asString());
@@ -206,7 +208,6 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			}
 
 			groups = groups.addOrAugment(group);
-			result.add(variable);
 		}
 
 		return new UriTemplate(baseUri, newOriginal, this.variables.concat(result), groups);
