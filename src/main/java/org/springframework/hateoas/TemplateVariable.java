@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -499,7 +499,7 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 		 */
 		COMPOSITE_PARAM("*", "", true);
 
-		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
+		private static final EnumSet<VariableType> COMBINABLE_TYPES = EnumSet.of(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 		static final String DEFAULT_SEPARATOR = ",";
 
 		private final String key, combiner;
