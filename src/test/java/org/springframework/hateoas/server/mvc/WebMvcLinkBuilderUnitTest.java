@@ -16,6 +16,7 @@
 package org.springframework.hateoas.server.mvc;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
@@ -57,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -707,6 +709,18 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		assertThat(second.hashCode()).isEqualTo(first.hashCode());
 	}
 
+	@Test // #1776
+	void ignoresRequestParamMultipartFile() {
+
+		Stream.of(null, mock(MultipartFile.class)).forEach(it -> {
+
+			Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithMultipartFile(it)).withSelfRel();
+
+			assertThat(link.getVariables()).isEmpty();
+			assertThat(link.expand().getHref()).endsWith("/multipart-file");
+		});
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -816,6 +830,11 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		// #1729
 		@RequestMapping(method = RequestMethod.POST, path = "/with-request-body")
 		HttpEntity<Void> methodWithRequestBody(@RequestBody Person param) {
+			return null;
+		}
+
+		@RequestMapping("/multipart-file")
+		HttpEntity<Void> methodWithMultipartFile(@RequestParam("file") MultipartFile file) {
 			return null;
 		}
 	}
