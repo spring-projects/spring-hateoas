@@ -46,6 +46,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplate;
@@ -55,6 +56,7 @@ import org.springframework.web.util.UriTemplate;
  *
  * @author Greg Turnquist
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 public class WebHandler {
 
@@ -228,7 +230,10 @@ public class WebHandler {
 			return;
 		}
 
-		if (Map.class.isAssignableFrom(parameterType) && SKIP_VALUE.equals(value)) {
+		boolean isMap = Map.class.isAssignableFrom(parameterType);
+		boolean isMultipartFile = MultipartFile.class.isAssignableFrom(parameterType);
+
+		if (isMap && SKIP_VALUE.equals(value) || isMultipartFile) {
 			return;
 		}
 
