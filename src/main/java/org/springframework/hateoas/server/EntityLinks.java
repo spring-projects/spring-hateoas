@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * Accessor to links pointing to controllers backing an entity type. The {@link IllegalArgumentException} potentially
  * thrown by the declared methods will only appear if the {@link Plugin#supports(Class)} method has returned
  * {@literal false} and the method has been invoked anyway, i.e. if {@link Plugin#supports(Class)} returns
- * {@literal true} it's safe to invoke the interface methods an the exception will never be thrown.
+ * {@literal true} it's safe to invoke the interface methods and the exception will never be thrown.
  *
  * @author Oliver Gierke
  */
