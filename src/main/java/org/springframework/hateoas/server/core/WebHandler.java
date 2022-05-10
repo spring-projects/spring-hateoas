@@ -56,6 +56,7 @@ import org.springframework.web.util.UriTemplate;
  *
  * @author Greg Turnquist
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 public class WebHandler {
 
