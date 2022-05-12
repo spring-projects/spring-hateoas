@@ -1,6 +1,12 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.4.3 (2022-05-12)
+----------------------------------------
+- #1784 - Upgrade to Reactor 2020.0.19.
+- #1783 - Upgrade to Spring Framework 5.3.20.
+- #1780 - MultipartFile parameter must not be added as template variable.
+
 Changes in version 1.4.2 (2022-04-19)
 ----------------------------------------
 - #1774 - Upgrade to Jackson 2.13.2.1.
