@@ -246,7 +246,8 @@ class WebFluxLinkBuilderTest {
 		if (request != null) {
 
 			when(this.exchange.getRequest()).thenReturn(request);
-			mono = mono.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange));
+
+			mono = mono.contextWrite(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange));
 		}
 		mono.as(StepVerifier::create).expectNextMatches(signal -> {
 
