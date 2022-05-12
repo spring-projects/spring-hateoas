@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0 M3 (2022-05-12)
+----------------------------------------
+- #1788 - Upgrade to Reactor 2020.0.19.
+- #1787 - Upgrade to Spring Framework 6.0 M4.
+- #1776 - MultipartFile parameter must not be added as template variable.
+- #1764 - Performance improvements in TemplateVariable.essence().
+
 Changes in version 2.0 M2 (2022-02-17)
 ----------------------------------------
 - #1757 - Add support for javax.validation.constraints.NotBlank.
