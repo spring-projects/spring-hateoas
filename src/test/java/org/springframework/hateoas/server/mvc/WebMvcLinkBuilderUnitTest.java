@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -61,6 +62,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Unit tests for {@link ControllerLinkBuilder}.
@@ -721,6 +723,13 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		});
 	}
 
+	@Test // #1722
+	void toUriDoesNotDoubleEncodeRequestParameters() {
+
+		assertThat(linkTo(methodOn(MyController.class).test("I+will:be+double+encoded")).toUri().toString())
+				.endsWith(UriUtils.encode("I+will:be+double+encoded", Charset.defaultCharset()));
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -918,4 +927,10 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		}
 	}
 
+	// #1722
+	static class MyController {
+		HttpEntity<?> test(@RequestParam("param") String param) {
+			return null;
+		}
+	}
 }
