@@ -119,7 +119,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 * @see org.springframework.hateoas.LinkBuilder#toUri()
 	 */
 	public URI toUri() {
-		return components.toUri().normalize();
+		return URI.create(components.toUriString());
 	}
 
 	public T addAffordances(Collection<Affordance> affordances) {
