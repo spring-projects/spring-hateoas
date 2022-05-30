@@ -35,6 +35,7 @@ import org.springframework.hateoas.server.MethodLinkBuilderFactory;
 import org.springframework.hateoas.server.core.LinkBuilderSupport;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.server.core.SpringAffordanceBuilder;
+import org.springframework.hateoas.server.core.UriMapping;
 import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -146,8 +147,8 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 	@Override
 	public WebMvcLinkBuilder linkTo(Object invocationValue) {
 
-		Function<String, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory.getBuilder()
-				.path(mapping);
+		Function<UriMapping, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory
+				.forMapping(mapping);
 
 		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new, (builder, invocation) -> {
 

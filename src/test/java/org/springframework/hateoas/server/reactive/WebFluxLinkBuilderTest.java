@@ -155,7 +155,7 @@ class WebFluxLinkBuilderTest {
 
 		verify(request, link, result -> {
 			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
-			assertThat(result.getHref()).isEqualTo("http://localhost:8080");
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/");
 		});
 	}
 
@@ -275,7 +275,7 @@ class WebFluxLinkBuilderTest {
 	@RestController
 	static class TestController2 {
 
-		@GetMapping
+		@GetMapping("/")
 		Mono<Object> root() {
 			return Mono.empty();
 		}

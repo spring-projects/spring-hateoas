@@ -950,6 +950,8 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 
 	// #1722
 	static class MyController {
+
+		@RequestMapping("/someTestMapping")
 		HttpEntity<?> test(@RequestParam("param") String param) {
 			return null;
 		}

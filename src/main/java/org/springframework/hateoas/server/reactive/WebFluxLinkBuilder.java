@@ -32,6 +32,7 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
+import org.springframework.hateoas.server.core.UriMapping;
 import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.hateoas.server.core.WebHandler.PreparedWebHandler;
 import org.springframework.http.server.PathContainer;
@@ -258,7 +259,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 
 		PreparedWebHandler<WebFluxLinkBuilder> handler = WebHandler.linkTo(invocation, WebFluxLinkBuilder::new);
 
-		return builder.map(it -> handler.conclude(path -> it.builder.path(path), it.conversionService));
+		return builder.map(it -> handler.conclude(it::toBuilder, it.conversionService));
 	}
 
 	/**
@@ -299,6 +300,10 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 					: FALLBACK_CONVERSION_SERVICE;
 
 			return Mono.just(result);
+		}
+
+		UriComponentsBuilder toBuilder(UriMapping mapping) {
+			return builder.path(mapping.getMapping());
 		}
 	}
 }

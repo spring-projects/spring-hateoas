@@ -17,6 +17,7 @@ package org.springframework.hateoas.server.mvc;
 
 import java.net.URI;
 
+import org.springframework.hateoas.server.core.UriMapping;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
@@ -55,6 +56,10 @@ class UriComponentsBuilderFactory {
 		return baseUri != null //
 				? UriComponentsBuilder.fromUri(baseUri) //
 				: cacheBaseUri(ServletUriComponentsBuilder.fromCurrentServletMapping());
+	}
+
+	public static UriComponentsBuilder forMapping(UriMapping mapping) {
+		return getBuilder().path(mapping.getMapping());
 	}
 
 	public static UriComponents getComponents() {

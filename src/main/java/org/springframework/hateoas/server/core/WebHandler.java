@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.core.MethodParameter;
@@ -39,6 +37,8 @@ import org.springframework.hateoas.NonComposite;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
+import org.springframework.hateoas.server.core.UriMapping.MappingVariable;
+import org.springframework.hateoas.server.core.UriMapping.MappingVariables;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -51,7 +51,6 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
 
 /**
  * Utility for taking a method invocation and extracting a {@link LinkBuilder}.
@@ -69,7 +68,7 @@ public class WebHandler {
 	}
 
 	public interface PreparedWebHandler<T extends LinkBuilder> {
-		T conclude(Function<String, UriComponentsBuilder> finisher, ConversionService conversionService);
+		T conclude(Function<UriMapping, UriComponentsBuilder> finisher, ConversionService conversionService);
 	}
 
 	public static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
@@ -80,7 +79,7 @@ public class WebHandler {
 
 	public static <T extends LinkBuilder> T linkTo(Object invocationValue, LinkBuilderCreator<T> creator,
 			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler,
-			Function<String, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
+			Function<UriMapping, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
 
 		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher,
 				conversionService.get());
@@ -100,18 +99,12 @@ public class WebHandler {
 		}
 
 		MethodInvocation invocation = invocations.getLastInvocation();
-		String mapping = SpringAffordanceBuilder.getMapping(invocation.getTargetType(), invocation.getMethod());
+		UriMapping mapping = SpringAffordanceBuilder.getUriMapping(invocation.getTargetType(), invocation.getMethod());
 
 		return (finisher, conversionService) -> {
 
 			FormatterFactory factory = new FormatterFactory(conversionService);
-
-			UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
-			MappingVariables mappingVariables = new MappingVariables(template);
-
-			if (mapping != null && mapping.contains("{*")) {
-				finisher = new PathCapturingMappingPreparer(mappingVariables).andThen(finisher);
-			}
+			MappingVariables mappingVariables = mapping.getMappingVariables();
 
 			Map<String, Object> values = new HashMap<>();
 
@@ -648,174 +641,6 @@ public class WebHandler {
 		@Override
 		public boolean isRequired() {
 			return true;
-		}
-	}
-
-	private static class PathCapturingMappingPreparer implements Function<String, String> {
-
-		private static final Pattern PATH_CAPTURE = Pattern.compile("\\/\\{\\*(\\w+)\\}");
-
-		private final MappingVariables variables;
-
-		public PathCapturingMappingPreparer(MappingVariables variables) {
-			this.variables = variables;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.function.Function#apply(java.lang.Object)
-		 */
-		@Nullable
-		@Override
-		public String apply(@Nullable String source) {
-
-			if (source == null) {
-				return source;
-			}
-
-			Matcher matcher = PATH_CAPTURE.matcher(source);
-
-			while (matcher.find()) {
-
-				MappingVariable variable = variables.getVariable(matcher.group(1));
-
-				source = source.replace(matcher.group(0), variable.getPlaceholder());
-			}
-
-			return source;
-		}
-	}
-
-	/**
-	 * All {@link MappingVariable}s contained in a {@link UriTemplate}.
-	 *
-	 * @author Oliver Drotbohm
-	 */
-	static class MappingVariables implements Iterable<MappingVariable> {
-
-		private final List<MappingVariable> variables;
-
-		public MappingVariables(UriTemplate template) {
-			this.variables = template.getVariableNames().stream().map(MappingVariable::of).collect(Collectors.toList());
-		}
-
-		public boolean hasCapturingVariable() {
-			return variables.stream().anyMatch(it -> it.isCapturing());
-		}
-
-		/**
-		 * Returns the {@link MappingVariable} with the given name.
-		 *
-		 * @param name must not be {@literal null} or empty.
-		 * @return
-		 * @throws IllegalArgumentException if no {@link MappingVariable} with the given name can be found.
-		 */
-		public MappingVariable getVariable(String name) {
-
-			Assert.hasText(name, "Variable must not be null or empty!");
-
-			return variables.stream()
-					.filter(it -> it.hasName(name))
-					.findFirst()
-					.orElseThrow(() -> new IllegalArgumentException("No variable named " + name + " found!"));
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.lang.Iterable#iterator()
-		 */
-		@Override
-		public Iterator<MappingVariable> iterator() {
-			return variables.iterator();
-		}
-	}
-
-	/**
-	 * A variable present in a Spring MVC controller mapping. These variables follow slightly different semantics than URI
-	 * template variables. For example, a capturing pattern {@code {*…}} indicates all trailing path segments to be
-	 * mapped.
-	 *
-	 * @author Oliver Drotbohm
-	 */
-	static class MappingVariable {
-
-		private final String name;
-		private final boolean composite;
-
-		/**
-		 * Creates a new {@link MappingVariable} from the original source name as used in the mapping.
-		 *
-		 * @param source must not be {@literal null} or empty.
-		 * @return
-		 */
-		public static MappingVariable of(String source) {
-
-			Assert.hasText(source, "Variable source must not be null or empty!");
-
-			return source.startsWith("*") //
-					? new MappingVariable(source.substring(1), true) //
-					: new MappingVariable(source, false);
-		}
-
-		private MappingVariable(String name, boolean composite) {
-
-			this.name = name;
-			this.composite = composite;
-		}
-
-		/**
-		 * Returns whether the variable has the given name.
-		 *
-		 * @param candidate must not be {@literal null} or empty.
-		 * @return
-		 */
-		public boolean hasName(String candidate) {
-			return name.equals(candidate);
-		}
-
-		/**
-		 * Returns whether the variable is capturing one.
-		 *
-		 * @return
-		 */
-		public boolean isCapturing() {
-			return composite;
-		}
-
-		/**
-		 * Returns the key to be used for variable expansion.
-		 *
-		 * @return will never be {@literal null}.
-		 */
-		public String getKey() {
-			return composite ? "__composite-" + name + "__" : name;
-		}
-
-		/**
-		 * Returns the placeholder to be used when preparing the original mapping for capturing variables.
-		 *
-		 * @return will never be {@literal null}.
-		 */
-		public String getPlaceholder() {
-			return "{" + getKey() + "}";
-		}
-
-		/**
-		 * Returns a segment {@link TemplateVariable} for the current variable.
-		 *
-		 * @return will never be {@literal null}.
-		 */
-		public TemplateVariable toSegment() {
-			return TemplateVariable.segment(name);
-		}
-
-		/**
-		 * Returns the value to be used for expansion if the original value for it was absent.
-		 *
-		 * @return
-		 */
-		public Object getAbsentValue() {
-			return composite ? TemplateVariable.segment(name).composite().toString() : SKIP_VALUE;
 		}
 	}
 }
