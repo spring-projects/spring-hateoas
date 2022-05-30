@@ -33,7 +33,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -730,6 +733,24 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 				.endsWith(UriUtils.encode("I+will:be+double+encoded", Charset.defaultCharset()));
 	}
 
+	@TestFactory // #1793
+	Stream<DynamicTest> bindsCatchAllPathVariableCorrectly() {
+
+		Stream<Named<String[]>> tests = Stream.of(//
+				Named.of("Appends single", new String[] { "second", "/second" }),
+				Named.of("Appends multiple", new String[] { "second/second", "/second/second" }),
+				Named.of("Appends empty", new String[] { "", "/" }),
+				Named.of("Appends null", new String[] { null, "/first{/second*}" }));
+
+		return DynamicTest.stream(tests, it -> {
+
+			assertThat(
+					linkTo(methodOn(ControllerWithPathVariableCatchAll.class).test("first", it[0])).withSelfRel().getHref())
+							.endsWith(it[1]);
+		});
+
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -930,6 +951,15 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	// #1722
 	static class MyController {
 		HttpEntity<?> test(@RequestParam("param") String param) {
+			return null;
+		}
+	}
+
+	// #1793
+	static class ControllerWithPathVariableCatchAll {
+
+		@RequestMapping("/{first}/{*second}")
+		HttpEntity<?> test(@PathVariable String first, @PathVariable String second) {
 			return null;
 		}
 	}
