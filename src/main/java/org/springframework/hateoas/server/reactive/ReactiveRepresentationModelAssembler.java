@@ -30,7 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public interface ReactiveRepresentationModelAssembler<T, D extends RepresentationModel<D>> {
+public interface ReactiveRepresentationModelAssembler<T, D extends RepresentationModel<?>> {
 
 	/**
 	 * Converts the given entity into a {@code D}, which extends {@link RepresentationModel}.

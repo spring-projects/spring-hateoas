@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -161,5 +160,19 @@ class ReactiveResourceAssemblerUnitTest {
 	@AllArgsConstructor
 	class EmployeeResource extends RepresentationModel<EmployeeResource> {
 		private Employee employee;
+	}
+
+	// #1797 - Just to check that the implementation can be declared like that
+
+	class GenericAssembler implements ReactiveRepresentationModelAssembler<Employee, RepresentationModel<?>> {
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.server.reactive.ReactiveRepresentationModelAssembler#toModel(java.lang.Object, org.springframework.web.server.ServerWebExchange)
+		 */
+		@Override
+		public Mono<RepresentationModel<?>> toModel(Employee entity, ServerWebExchange exchange) {
+			return Mono.just(RepresentationModel.of(entity));
+		}
 	}
 }
