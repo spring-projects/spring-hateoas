@@ -18,7 +18,13 @@ package org.springframework.hateoas;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -26,6 +32,7 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriBuilderFactory;
@@ -189,17 +196,20 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			result.add(variable);
 		}
 
-
 		String newOriginal = template;
 		ExpandGroups groups = this.groups;
-		LinkedHashMap<VariableType, List<TemplateVariable>> groupedByVariableType = result.stream()
-				.collect(
-						Collectors.groupingBy(TemplateVariable::getType, LinkedHashMap::new, Collectors.toList()));
 
+		MultiValueMap<VariableType, TemplateVariable> groupedByVariableType = new LinkedMultiValueMap<>();
 
-		for (Map.Entry<VariableType, List<TemplateVariable>> entry : groupedByVariableType.entrySet()) {
+		for (TemplateVariable templateVariable : result) {
+			groupedByVariableType.add(templateVariable.getType(), templateVariable);
+		}
+
+		for (Entry<VariableType, List<TemplateVariable>> entry : groupedByVariableType.entrySet()) {
+
 			ExpandGroup existing = groups.findLastExpandGroupOfType(entry.getKey());
 			ExpandGroup group = new ExpandGroup(entry.getValue());
+
 			if (existing != null) {
 				group = existing.merge(group);
 				newOriginal = newOriginal.replace(existing.asString(), group.asString());
