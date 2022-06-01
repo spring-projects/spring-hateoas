@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
@@ -69,6 +68,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 		for (TemplateVariable variable : variables) {
 
 			boolean isRequestParameter = variable.isRequestParameterVariable();
+
 			processed.add(isRequestParameter && requestParameterFound
 					? variable.withType(REQUEST_PARAM_CONTINUED)
 					: variable);
