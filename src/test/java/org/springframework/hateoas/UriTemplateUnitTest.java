@@ -382,6 +382,14 @@ class UriTemplateUnitTest {
 				.doesNotThrowAnyException();
 	}
 
+	@Test // #1802
+	void supportsDotsInVariableName() {
+
+		UriTemplate template = UriTemplate.of("/path/{foo.bar}");
+
+		assertThat(template.getVariableNames()).contains("foo.bar");
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}
