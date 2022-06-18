@@ -50,8 +50,9 @@ import org.springframework.web.util.UriUtils;
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
-	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/\\.\\+\\;]?)([\\w(\\:\\d+)*%\\,*]+)\\}");
-	private static final Pattern ELEMENT_REGEX = Pattern.compile("([\\w\\%]+)(\\:\\d+)?(\\*)?");
+	private static final Pattern VARIABLE_REGEX = Pattern
+			.compile("\\{([\\?\\&#/\\.\\+\\;]?)([\\w\\.(\\:\\d+)*%\\,*]+)\\}");
+	private static final Pattern ELEMENT_REGEX = Pattern.compile("([\\w\\.\\%]+)(\\:\\d+)?(\\*)?");
 	private static final long serialVersionUID = -1007874653930162262L;
 
 	private final TemplateVariables variables;
