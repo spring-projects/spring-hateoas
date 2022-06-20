@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5.1 (2022-06-20)
+----------------------------------------
+- #1801 - UriTemplate can't recognize variable names that contain a dot.
+- #1797 - Optimization around constructing UriTemplate with multiple template variables of the same type.
+- #1794 - Path segment capturing {*…} not correctly expanded.
+- #1791 - LinkBuilderSupport.toUri() double-encodes request parameters.
+
 Changes in version 1.5 GA (2022-05-12)
 ----------------------------------------
 - #1782 - Upgrade to Reactor 2020.0.19.
