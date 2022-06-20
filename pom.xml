@@ -5,7 +5,7 @@
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>1.5.1</version>
+	<version>1.5.2-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
 	<url>https://github.com/spring-projects/spring-hateoas</url>
