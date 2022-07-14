@@ -82,7 +82,7 @@
 		<jsonpath.version>2.6.0</jsonpath.version>
 		<junit.version>5.8.1</junit.version>
 		<lombok.version>1.18.22</lombok.version>
-		<reactor-bom.version>2022.0.0-M2</reactor-bom.version>
+		<reactor-bom.version>2022.0.0-M4</reactor-bom.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<spring.version>6.0.0-M4</spring.version>
 		<spring-plugin.version>3.0.0-M1</spring-plugin.version>
@@ -96,7 +96,7 @@
 		<profile>
 			<id>spring-next</id>
 			<properties>
-				<reactor-bom.version>2020.0.20-SNAPSHOT</reactor-bom.version>
+				<reactor-bom.version>2022.0.0-SNAPSHOT</reactor-bom.version>
 				<spring.version>6.0.0-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
