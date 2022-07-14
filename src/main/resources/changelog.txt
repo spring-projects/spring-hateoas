@@ -1,6 +1,21 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0 M4 (2022-07-14)
+----------------------------------------
+- #1813 - Upgrade to Spring Framework 6.0 M5.
+- #1812 - Upgrade to Slf4j 1.7.36.
+- #1811 - Upgrade to Lombok 1.18.24.
+- #1810 - Upgrade to AssertJ 3.23.1.
+- #1809 - Upgrade to Reactor 2022.0.0 M4.
+- #1808 - Upgrade to Kotlin 1.7.
+- #1800 - UriTemplate can't recognize variable names that contain a dot.
+- #1796 - Change signature of ReactiveRepresentationModelAssembler.
+- #1793 - Path segment capturing {*…} not correctly expanded.
+- #1790 - Upgrade to Reactor 2022.0.0 M2.
+- #1775 - Optimization around constructing UriTemplate with multiple template variables of the same type.
+- #1722 - LinkBuilderSupport.toUri() double-encodes request parameters.
+
 Changes in version 2.0 M3 (2022-05-12)
 ----------------------------------------
 - #1788 - Upgrade to Reactor 2020.0.19.
