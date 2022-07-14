@@ -40,6 +40,19 @@ pipeline {
 			}
 		}
 
+		stage("test: compatibility (JDK 17, Spring.next)") {
+			agent {
+				docker {
+					image 'openjdk:17'
+					args '-v $HOME/.m2:/tmp/jenkins-home/.m2'
+				}
+			}
+			options { timeout(time: 30, unit: 'MINUTES') }
+			steps {
+				sh 'PROFILE=spring-next ci/test.sh'
+			}
+		}
+
 		stage('Deploy') {
 			agent {
 				docker {
