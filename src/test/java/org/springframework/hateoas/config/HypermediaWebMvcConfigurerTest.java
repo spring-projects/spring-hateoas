@@ -432,7 +432,7 @@ class HypermediaWebMvcConfigurerTest {
 			this.employees.add(new Employee("Frodo Baggins", "ring bearer"));
 		}
 
-		@GetMapping
+		@GetMapping("/")
 		RepresentationModel<?> root() {
 
 			RepresentationModel<?> root = new RepresentationModel<>();
