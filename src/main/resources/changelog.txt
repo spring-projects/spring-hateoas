@@ -1,6 +1,10 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0 M5 (2022-07-15)
+----------------------------------------
+- #1817 - Improve JavaConfig for AOT use cases.
+
 Changes in version 2.0 M4 (2022-07-14)
 ----------------------------------------
 - #1813 - Upgrade to Spring Framework 6.0 M5.
