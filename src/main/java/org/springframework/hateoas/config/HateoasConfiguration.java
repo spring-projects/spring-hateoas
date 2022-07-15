@@ -45,6 +45,7 @@ import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.config.EnablePluginRegistries;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
@@ -106,14 +107,15 @@ public class HateoasConfiguration {
 	}
 
 	@Bean
-	PluginRegistryFactoryBean<LinkRelationProvider, LookupContext> relProviderPluginRegistry() {
+	OrderAwarePluginRegistry<LinkRelationProvider, LookupContext> relProviderPluginRegistry(ApplicationContext context) {
 
 		PluginRegistryFactoryBean<LinkRelationProvider, LookupContext> factory = new PluginRegistryFactoryBean<>();
-
+		factory.setApplicationContext(context);
 		factory.setType(LinkRelationProvider.class);
 		factory.setExclusions(new Class[] { DelegatingLinkRelationProvider.class });
+		factory.afterPropertiesSet();
 
-		return factory;
+		return factory.getObject();
 	}
 
 	// LinkDiscoverers
