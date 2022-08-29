@@ -15,11 +15,7 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.springframework.core.MethodParameter;
-import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.MethodLinkBuilderFactory;
 import org.springframework.lang.Nullable;
@@ -60,9 +56,9 @@ public interface UriComponentsContributor {
 	 *
 	 * @param templateVariables will never be {@literal null}.
 	 * @param uriComponents will never be {@literal null}.
-	 * @param parameter can be {@literal null}.
+	 * @param parameter will never be {@literal null}.
 	 */
-	default TemplateVariables enhance(TemplateVariables templateVariables, UriComponents uriComponents, @Nullable MethodParameter parameter){
+	default TemplateVariables enhance(TemplateVariables templateVariables, UriComponents uriComponents, MethodParameter parameter){
 		return templateVariables;
 	}
 }
