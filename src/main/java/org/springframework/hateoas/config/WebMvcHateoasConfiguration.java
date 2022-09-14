@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas.config;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
+import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorHandlerMethodReturnValueHandler;
 import org.springframework.hateoas.server.mvc.RepresentationModelProcessorInvoker;
 import org.springframework.hateoas.server.mvc.UriComponentsContributor;
@@ -33,6 +37,8 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.NonNull;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
@@ -93,6 +99,15 @@ class WebMvcHateoasConfiguration {
 		public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 			hypermediaConverters.augmentServer(converters);
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurer#addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry)
+		 */
+		@Override
+		public void addInterceptors(InterceptorRegistry registry) {
+			registry.addInterceptor(DummyInvocationUtilsCacheClearer.INSTANCE);
+		}
 	}
 
 	/**
@@ -130,6 +145,27 @@ class WebMvcHateoasConfiguration {
 			}
 
 			return bean;
+		}
+	}
+
+	/**
+	 * {@link HandlerInterceptor} to clear the cache in {@link DummyInvocationUtils}.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	enum DummyInvocationUtilsCacheClearer implements HandlerInterceptor {
+
+		INSTANCE;
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.web.servlet.HandlerInterceptor#afterCompletion(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.Object, java.lang.Exception)
+		 */
+		@Override
+		public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+				throws Exception {
+
+			DummyInvocationUtils.resetCache();
 		}
 	}
 }

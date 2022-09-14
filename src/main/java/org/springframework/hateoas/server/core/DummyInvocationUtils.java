@@ -180,6 +180,10 @@ public class DummyInvocationUtils {
 		return new DefaultMethodInvocation(type, method, parameters);
 	}
 
+	public static void resetCache() {
+		CACHE.remove();
+	}
+
 	@SuppressWarnings("unchecked")
 	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
 			ClassLoader classLoader) {

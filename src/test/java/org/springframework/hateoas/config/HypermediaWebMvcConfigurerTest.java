@@ -42,6 +42,7 @@ import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule;
 import org.springframework.hateoas.mediatype.uber.Jackson2UberModule;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
+import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -51,7 +52,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.ConcurrentLruCache;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -263,6 +266,20 @@ class HypermediaWebMvcConfigurerTest {
 				.andExpect(status().isIAmATeapot());
 	}
 
+	@Test // #1830
+	void wipesDummyInvocationsCachePerRequest() throws Exception {
+
+		setUp(HalWebMvcConfig.class);
+
+		this.mockMvc.perform(get("/dynamicLink"))
+				.andExpect(status().isOk());
+
+		var cache = (ThreadLocal<ConcurrentLruCache<?, ?>>) ReflectionTestUtils.getField(null, DummyInvocationUtils.class,
+				"CACHE");
+
+		assertThat(cache.get().size()).isZero();
+	}
+
 	private void verifyRootUriServesHypermedia(MediaType mediaType) throws Exception {
 		verifyRootUriServesHypermedia(mediaType, mediaType);
 	}
@@ -467,6 +484,12 @@ class HypermediaWebMvcConfigurerTest {
 			this.employees.add(newEmployee);
 
 			return this.assembler.toModel(newEmployee);
+		}
+
+		@GetMapping("/dynamicLink")
+		EntityModel<Employee> dynamicLink() {
+			return EntityModel.of(employees.get(0)) //
+					.add(linkTo(methodOn(TestController.class).employee("1")).withSelfRel());
 		}
 	}
 
