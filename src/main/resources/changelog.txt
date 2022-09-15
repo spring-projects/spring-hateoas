@@ -1,6 +1,16 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5.2 (2022-09-15)
+----------------------------------------
+- #1843 - Upgrade to Spring Framework 5.3.23.
+- #1842 - Upgrade to Lombok 1.18.24.
+- #1841 - Upgrade to Jackson 2.13.4.
+- #1840 - Upgrade to Logback 1.2.11.
+- #1839 - Upgrade to Slf4j 1.7.36.
+- #1829 - Upgrade to Reactor 2020.0.23.
+- #1820 - DummyInvocationUtils's ThreadLocal cache causes classloader leak.
+
 Changes in version 1.5.1 (2022-06-20)
 ----------------------------------------
 - #1801 - UriTemplate can't recognize variable names that contain a dot.
