@@ -88,7 +88,7 @@
 		<spring-plugin.version>3.0.0-M2</spring-plugin.version>
 		<kotlin.version>1.7.10</kotlin.version>
 		<kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
-		<mockk.version>1.12.0</mockk.version>
+		<mockk.version>1.12.7</mockk.version>
 	</properties>
 
 	<profiles>
@@ -657,7 +657,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.mockk</groupId>
-			<artifactId>mockk</artifactId>
+			<artifactId>mockk-jvm</artifactId>
 			<version>${mockk.version}</version>
 			<scope>test</scope>
 		</dependency>
