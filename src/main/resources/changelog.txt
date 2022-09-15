@@ -1,6 +1,23 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0.0-M6 (2022-09-15)
+----------------------------------------
+- #1819 - Add build time initialization hint for native compilation for MediaTypes.
+- #1822 - Add required runtime hints for native compilation.
+- #1827 - Switch to Spring Asciidoctor backends for reference documentation.
+- #1828 - Upgrade to Reactor 2022.0.0 M6.
+- #1830 - DummyInvocationUtils's ThreadLocal cache causes classloader leak.
+- #1846 - Upgrade to Spring Plugin 3.0 M2.
+- #1847 - Upgrade to Spring Framework 6.0 M6.
+- #1848 - Upgrade to Mockk 1.12.7.
+- #1849 - Upgrade to JUnit 5.9.
+- #1850 - Upgrade to JSONPath 2.7.0.
+- #1851 - Upgrade to Jackson 2.13.4.
+- #1852 - Upgrade to JaCoCo 0.8.8.
+- #1853 - Upgrade to Logback 1.4.1.
+- #1854 - Upgrade to Artifactory Maven Plugin 3.4.0.
+
 Changes in version 2.0 M5 (2022-07-15)
 ----------------------------------------
 - #1817 - Improve JavaConfig for AOT use cases.
