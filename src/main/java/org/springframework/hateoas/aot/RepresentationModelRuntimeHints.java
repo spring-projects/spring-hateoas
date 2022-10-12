@@ -15,15 +15,29 @@
  */
 package org.springframework.hateoas.aot;
 
+import java.util.List;
+
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeReference;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
+ * Registers reflection metadata for {@link RepresentationModel} types.
+ *
  * @author Oliver Drotbohm
  */
-class HateoasRuntimeHints implements RuntimeHintsRegistrar {
+class RepresentationModelRuntimeHints implements RuntimeHintsRegistrar {
+
+	private static final List<Class<?>> REPRESENTATION_MODELS = List.of(RepresentationModel.class, //
+			EntityModel.class, //
+			CollectionModel.class, //
+			PagedModel.class,
+			PagedModel.PageMetadata.class);
 
 	/*
 	 * (non-Javadoc)
@@ -32,11 +46,9 @@ class HateoasRuntimeHints implements RuntimeHintsRegistrar {
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 
-		var serializeTypeReference = TypeReference
-				.of("org.springframework.hateoas.EntityModel$MapSuppressingUnwrappingSerializer");
+		ReflectionHints reflection = hints.reflection();
 
-		hints.reflection().registerType(serializeTypeReference, builder -> {
-			builder.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-		});
+		REPRESENTATION_MODELS.forEach(it -> reflection.registerType(it, //
+				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS));
 	}
 }

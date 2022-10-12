@@ -20,8 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
@@ -52,8 +50,8 @@ public @interface EnableHypermediaSupport {
 
 	/**
 	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
-	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components like
-	 * {@link WebClient} but don't want to use hypermedia operations with it.
+	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components
+	 * like {@link WebClient} but don't want to use hypermedia operations with it.
 	 *
 	 * @return
 	 */
@@ -73,39 +71,45 @@ public @interface EnableHypermediaSupport {
 		 * @see http://stateless.co/hal_specification.html
 		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
 		 */
-		HAL(MediaTypes.HAL_JSON),
+		HAL(MediaTypes.HAL_JSON, "hal"),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
 		 *
 		 * @see https://rwcbook.github.io/hal-forms/
 		 */
-		HAL_FORMS(MediaTypes.HAL_FORMS_JSON),
+		HAL_FORMS(MediaTypes.HAL_FORMS_JSON, "hal.forms"),
 
-		HTTP_PROBLEM_DETAILS(MediaTypes.HTTP_PROBLEM_DETAILS_JSON),
+		HTTP_PROBLEM_DETAILS(MediaTypes.HTTP_PROBLEM_DETAILS_JSON, "problem"),
 
 		/**
 		 * Collection+JSON
 		 *
 		 * @see http://amundsen.com/media-types/collection/format/
 		 */
-		COLLECTION_JSON(MediaTypes.COLLECTION_JSON),
+		COLLECTION_JSON(MediaTypes.COLLECTION_JSON, "collectionjson"),
 
 		/**
 		 * UBER Hypermedia
 		 *
 		 * @see https://rawgit.com/uber-hypermedia/specification/master/uber-hypermedia.html
 		 */
-		UBER(MediaTypes.UBER_JSON);
+		UBER(MediaTypes.UBER_JSON, "uber");
 
-		private final List<MediaType> mediaTypes;
+		private final MediaType mediaTypes;
+		private final String localPackageName;
 
-		HypermediaType(MediaType... mediaTypes) {
-			this.mediaTypes = Arrays.asList(mediaTypes);
+		HypermediaType(MediaType mediaType, String localPackageName) {
+			this.mediaTypes = mediaType;
+			this.localPackageName = localPackageName;
 		}
 
-		public List<MediaType> getMediaTypes() {
+		public MediaType getMediaType() {
 			return this.mediaTypes;
+		}
+
+		public String getLocalPackageName() {
+			return localPackageName;
 		}
 	}
 }

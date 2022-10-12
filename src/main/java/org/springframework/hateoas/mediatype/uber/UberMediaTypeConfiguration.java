@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,7 @@ class UberMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return HypermediaType.UBER.getMediaTypes();
+		return Collections.singletonList(HypermediaType.UBER.getMediaType());
 	}
 
 	/*
