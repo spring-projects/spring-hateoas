@@ -22,6 +22,7 @@ import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.util.Collections;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -29,6 +30,7 @@ import org.springframework.hateoas.mediatype.MediaTypeTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Disabled("Until RC2 - see https://github.com/spring-projects/spring-framework/issues/29307")
 public class HypermediaWebClientConfigurerTest {
 
 	private static MediaType FRODO_JSON = MediaType.parseMediaType("application/frodo+json");
@@ -80,7 +82,8 @@ public class HypermediaWebClientConfigurerTest {
 	}
 
 	@EnableHypermediaSupport(
-			type = { HypermediaType.HAL, HypermediaType.HAL_FORMS, HypermediaType.COLLECTION_JSON, HypermediaType.UBER })
+			type = { HypermediaType.HAL, HypermediaType.HAL_FORMS, HypermediaType.COLLECTION_JSON,
+					HypermediaType.UBER })
 	static class AllHypermediaConfig {
 
 	}
