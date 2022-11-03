@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0.0-RC2 (2022-11-03)
+----------------------------------------
+- #1869 - Upgrade to Spring Framework 6.0 RC3.
+- #1867 - Extract domain types from controller methods returning (Entity|Collection)Model instances for reflection.
+- #1866 - Extract types for AOT reflection from RepresentationModelAssemblers.
+- #1865 - Upgrade to Jackson 2.14 RC3.
+
 Changes in version 2.0.0-RC1 (2022-10-12)
 ----------------------------------------
 - #1861 - Upgrade to Reactor 2022.0 RC1.
