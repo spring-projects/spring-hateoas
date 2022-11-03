@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.aot;
 
+import static org.springframework.hateoas.aot.AotUtils.*;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.LastInvocationAware;
@@ -54,8 +57,7 @@ public class ControllerMethodReturnTypeAotProcessor implements BeanRegistrationA
 	private final Class<? extends Annotation> controllerAnnotationType;
 
 	/**
-	 * Creates a new {@link ControllerMethodReturnTypeAotProcessor} looking for classes annotated with
-	 * {@link Controller}.
+	 * Creates a new {@link ControllerMethodReturnTypeAotProcessor} looking for classes annotated with {@link Controller}.
 	 */
 	public ControllerMethodReturnTypeAotProcessor() {
 		this(Controller.class);
@@ -134,8 +136,13 @@ public class ControllerMethodReturnTypeAotProcessor implements BeanRegistrationA
 					return;
 				}
 
+				var runtimeHints = generationContext.getRuntimeHints();
+				var methodReturnType = ResolvableType.forMethodReturnType(method);
+
+				registerModelDomainTypesForReflection(methodReturnType, runtimeHints.reflection(), beanClass);
+
 				if (returnType.isInterface()) {
-					generationContext.getRuntimeHints().proxies().registerJdkProxy(returnType);
+					runtimeHints.proxies().registerJdkProxy(returnType);
 					return;
 				}
 
@@ -198,5 +205,4 @@ public class ControllerMethodReturnTypeAotProcessor implements BeanRegistrationA
 			return null;
 		}
 	}
-
 }
