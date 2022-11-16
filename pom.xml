@@ -151,26 +151,35 @@
 		</profile>
 
 		<profile>
-
-			<!-- Profile for SonarQube -->
-
-			<id>sonarqube</id>
-
+			<id>artifactory</id>
+			<properties>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.jacoco</groupId>
-						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>${jacoco}</version>
-						<configuration>
-							<destFile>${jacoco.destfile}</destFile>
-						</configuration>
+						<groupId>org.jfrog.buildinfo</groupId>
+						<artifactId>artifactory-maven-plugin</artifactId>
+						<version>${artifactory-maven-plugin.version}</version>
+						<inherited>false</inherited>
 						<executions>
 							<execution>
-								<id>jacoco-initialize</id>
+								<id>deploy-to-artifactory</id>
 								<goals>
-									<goal>prepare-agent</goal>
+									<goal>publish</goal>
 								</goals>
+								<configuration>
+									<publisher>
+										<contextUrl>https://repo.spring.io</contextUrl>
+										<username>${env.ARTIFACTORY_USERNAME}</username>
+										<password>${env.ARTIFACTORY_PASSWORD}</password>
+										<repoKey>libs-milestone-local</repoKey>
+										<snapshotRepoKey>libs-snapshot-local</snapshotRepoKey>
+									</publisher>
+									<buildInfo>
+										<buildName>CI build for Spring Modulith ${project.version}</buildName>
+									</buildInfo>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -179,21 +188,53 @@
 		</profile>
 
 		<profile>
+			<id>sonatype</id>
+			<properties>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<passphrase>${env.GPG_PASSPHRASE}</passphrase>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+			<distributionManagement>
+				<repository>
+					<id>sonatype-new</id>
+					<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
+		<profile>
 
 			<!--
 				Profile to be activated when building the docs artifacts.
 			-->
 
-			<id>distribute</id>
+			<id>documentation</id>
 
 			<properties>
 				<generated-docs.directory>${project.build.directory}/generated-docs</generated-docs.directory>
 				<maven.main.skip>true</maven.main.skip>
 				<maven.test.skip>true</maven.test.skip>
-				<maven.kotlin.skip>true</maven.kotlin.skip>
 				<maven.install.skip>true</maven.install.skip>
 				<maven.deploy.skip>true</maven.deploy.skip>
-				<skipTests>true</skipTests>
 			</properties>
 
 			<build>
@@ -219,47 +260,6 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<version>1.8</version>
-						<executions>
-
-							<execution>
-								<id>rename-reference-docs</id>
-								<phase>package</phase>
-								<configuration>
-									<target>
-
-										<!-- Copy files for the single-file HTML version -->
-										<copy failonerror="false"
-											  todir="target/site/reference/html/images">
-											<fileset dir="${generated-docs.directory}/images"/>
-										</copy>
-
-										<copy failonerror="false" todir="target/site/reference/html/">
-											<fileset dir="${generated-docs.directory}">
-												<include name="css/**"/>
-												<include name="img/**"/>
-												<include name="js/**"/>
-											</fileset>
-										</copy>
-
-										<copy failonerror="false" todir="target/site/reference/html/">
-											<fileset dir="${generated-docs.directory}" includes="*.html"/>
-										</copy>
-
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-
-						</executions>
-
 					</plugin>
 
 					<!--
@@ -297,16 +297,16 @@
 									<goal>process-asciidoc</goal>
 								</goals>
 								<configuration>
-									<sourceDocumentName>index.adoc</sourceDocumentName>
-									<backend>spring-html</backend>
-									<outputDirectory>${generated-docs.directory}</outputDirectory>
-									<sourceHighlighter>highlight.js</sourceHighlighter>
-									<attributes>
-										<highlightjsdir>js/highlight</highlightjsdir>
-										<highlightjs-theme>github</highlightjs-theme>
-										<toc>left</toc>
-									</attributes>
-								</configuration>
+										<backend>spring-html</backend>
+										<sourceDirectory>src/main/asciidoc</sourceDirectory>
+										<sourceDocumentName>index.adoc</sourceDocumentName>
+										<outputDirectory>${generated-docs.directory}/html</outputDirectory>
+										<attributes>
+											<source-highlighter>highlight.js</source-highlighter>
+											<highlightjsdir>js/highlight</highlightjsdir>
+											<highlightjs-theme>github</highlightjs-theme>
+										</attributes>
+									</configuration>
 							</execution>
 
 						</executions>
@@ -337,6 +337,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-assembly-plugin</artifactId>
+						<version>3.4.2</version>
 						<executions>
 							<execution>
 								<id>docs</id>
@@ -369,9 +370,6 @@
 								</goals>
 								<phase>deploy</phase>
 								<configuration>
-									<artifactory>
-										<includeEnvVars>false</includeEnvVars>
-									</artifactory>
 									<deployProperties>
 										<zip.name>spring-hateoas-docs</zip.name>
 										<zip.displayname>spring-hateoas-docs</zip.displayname>
@@ -384,12 +382,12 @@
 										<buildRetentionCount>1</buildRetentionCount>
 									</buildInfo>
 									<publisher>
-										<contextUrl>{{artifactory.server}}</contextUrl>
-										<username>{{artifactory.username}}</username>
-										<password>{{artifactory.password}}</password>
-										<repoKey>{{artifactory.distribution-repository}}</repoKey>
-										<snapshotRepoKey>{{artifactory.distribution-repository}}</snapshotRepoKey>
+										<contextUrl>https://repo.spring.io</contextUrl>
 										<includePatterns>*-docs.zip</includePatterns>
+										<username>${env.ARTIFACTORY_USERNAME}</username>
+										<password>${env.ARTIFACTORY_PASSWORD}</password>
+										<repoKey>temp-private-local</repoKey>
+										<snapshotRepoKey>temp-private-local</snapshotRepoKey>
 									</publisher>
 								</configuration>
 							</execution>
@@ -398,203 +396,6 @@
 				</plugins>
 			</build>
 		</profile>
-
-		<profile>
-			<id>snapshot</id>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.jfrog.buildinfo</groupId>
-						<artifactId>artifactory-maven-plugin</artifactId>
-						<version>${artifactory-maven-plugin.version}</version>
-						<inherited>false</inherited>
-						<executions>
-							<execution>
-								<id>build-info</id>
-								<goals>
-									<goal>publish</goal>
-								</goals>
-								<configuration>
-									<buildInfo>
-										<buildUrl>{{BUILD_URL}}</buildUrl>
-									</buildInfo>
-									<deployProperties>
-										<zip.name>spring-hateoas</zip.name>
-										<zip.displayname>spring-hateoas</zip.displayname>
-										<zip.deployed>false</zip.deployed>
-										<archives>*:*:*:*@zip</archives>
-									</deployProperties>
-									<publisher>
-										<contextUrl>https://repo.spring.io</contextUrl>
-										<username>{{ARTIFACTORY_USR}}</username>
-										<password>{{ARTIFACTORY_PSW}}</password>
-										<repoKey>libs-snapshot-local</repoKey>
-										<snapshotRepoKey>libs-snapshot-local</snapshotRepoKey>
-									</publisher>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
-		<profile>
-			<id>milestone</id>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.jfrog.buildinfo</groupId>
-						<artifactId>artifactory-maven-plugin</artifactId>
-						<version>${artifactory-maven-plugin.version}</version>
-						<inherited>false</inherited>
-						<executions>
-							<execution>
-								<id>build-info</id>
-								<goals>
-									<goal>publish</goal>
-								</goals>
-								<configuration>
-									<buildInfo>
-										<buildUrl>{{BUILD_URL}}</buildUrl>
-									</buildInfo>
-									<deployProperties>
-										<zip.name>spring-hateoas</zip.name>
-										<zip.displayname>spring-hateoas</zip.displayname>
-										<zip.deployed>false</zip.deployed>
-										<archives>*:*:*:*@zip</archives>
-									</deployProperties>
-									<publisher>
-										<contextUrl>https://repo.spring.io</contextUrl>
-										<username>{{ARTIFACTORY_USR}}</username>
-										<password>{{ARTIFACTORY_PSW}}</password>
-										<repoKey>libs-milestone-local</repoKey>
-										<snapshotRepoKey>libs-milestone-local</snapshotRepoKey>
-									</publisher>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
-		<profile>
-			<id>release</id>
-
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.jfrog.buildinfo</groupId>
-						<artifactId>artifactory-maven-plugin</artifactId>
-						<version>${artifactory-maven-plugin.version}</version>
-						<inherited>false</inherited>
-						<executions>
-							<execution>
-								<id>build-info</id>
-								<goals>
-									<goal>publish</goal>
-								</goals>
-								<configuration>
-									<buildInfo>
-										<buildUrl>{{BUILD_URL}}</buildUrl>
-									</buildInfo>
-									<deployProperties>
-										<zip.name>spring-hateoas</zip.name>
-										<zip.displayname>spring-hateoas</zip.displayname>
-										<zip.deployed>false</zip.deployed>
-										<archives>*:*:*:*@zip</archives>
-									</deployProperties>
-									<publisher>
-										<contextUrl>https://repo.spring.io</contextUrl>
-										<username>{{ARTIFACTORY_USR}}</username>
-										<password>{{ARTIFACTORY_PSW}}</password>
-										<repoKey>libs-release-local</repoKey>
-										<snapshotRepoKey>libs-release-local</snapshotRepoKey>
-									</publisher>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
-		<profile>
-			<id>central</id>
-			<build>
-				<pluginManagement>
-					<plugins>
-
-						<!-- Sign JARs -->
-
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-gpg-plugin</artifactId>
-							<version>1.6</version>
-							<executions>
-								<execution>
-									<id>sign-artifacts</id>
-									<phase>verify</phase>
-									<goals>
-										<goal>sign</goal>
-									</goals>
-									<configuration>
-										<gpgArguments>
-											<arg>--pinentry-mode</arg>
-											<arg>loopback</arg>
-										</gpgArguments>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-
-						<!-- Deploy to Sonatype OSS Nexus -->
-
-						<plugin>
-							<groupId>org.sonatype.plugins</groupId>
-							<artifactId>nexus-staging-maven-plugin</artifactId>
-							<version>1.6.8</version>
-							<extensions>true</extensions>
-							<configuration>
-								<serverId>sonatype</serverId>
-								<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-								<autoReleaseAfterClose>false</autoReleaseAfterClose>
-								<keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
-								<skipStagingRepositoryClose>true</skipStagingRepositoryClose>
-							</configuration>
-						</plugin>
-					</plugins>
-
-				</pluginManagement>
-
-				<plugins>
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-					</plugin>
-
-					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-					</plugin>
-
-				</plugins>
-
-			</build>
-
-			<distributionManagement>
-				<repository>
-					<id>sonatype</id>
-					<url>https://s01.oss.sonatype.org//service/local/staging/deploy/maven2/</url>
-				</repository>
-			</distributionManagement>
-
-		</profile>
-
 
 	</profiles>
 
@@ -874,6 +675,8 @@
 	</dependencies>
 
 	<build>
+
+		<defaultGoal>verify</defaultGoal>
 
 		<extensions>
 			<extension>

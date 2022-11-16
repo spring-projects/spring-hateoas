@@ -25,7 +25,7 @@
 				Adds reference manual (html and pdf) to the distribution archive
 				under the 'docs/reference' directory see pom.xml 'maven-javadoc-plugin' declaration.
 			-->
-			<directory>target/site/reference</directory>
+			<directory>target/generated-docs</directory>
 			<outputDirectory>reference</outputDirectory>
 		</fileSet>
 		<fileSet>
