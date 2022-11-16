@@ -118,7 +118,7 @@
 		<profile>
 			<id>jackson-next</id>
 			<properties>
-				<jackson-bom.version>2.14.0-rc1</jackson-bom.version>
+				<jackson-bom.version>2.14.0</jackson-bom.version>
 			</properties>
 		</profile>
 
@@ -1059,11 +1059,6 @@
 		<pluginRepository>
 			<id>spring-plugins-release</id>
 			<url>https://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>bintray-plugins</id>
-			<name>bintray-plugins</name>
-			<url>https://jcenter.bintray.com</url>
 		</pluginRepository>
 	</pluginRepositories>
 
