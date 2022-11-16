@@ -1045,16 +1045,6 @@
 		</plugins>
 	</build>
 
-	<repositories>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/snapshot</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-	</repositories>
-
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-plugins-release</id>
