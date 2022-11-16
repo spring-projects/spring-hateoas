@@ -33,6 +33,8 @@ class HateoasConfigurationIntegrationTest {
 	@Test // #1075
 	void loadsLanguageSpecificResourceBundle() throws Exception {
 
+		var original = (String) ReflectionTestUtils.getField(HateoasConfiguration.class, "I18N_BASE_NAME");
+
 		ReflectionTestUtils.setField(HateoasConfiguration.class, "I18N_BASE_NAME",
 				"org/springframework/hateoas/config/rest-messages");
 
@@ -45,6 +47,9 @@ class HateoasConfigurationIntegrationTest {
 			MessageResolver resolver = context.getBean(MessageResolver.class);
 
 			assertThat(resolver.resolve(() -> new String[] { "key" })).isEqualTo("Schlüssel");
+
+		} finally {
+			ReflectionTestUtils.setField(HateoasConfiguration.class, "I18N_BASE_NAME", original);
 		}
 	}
 }
