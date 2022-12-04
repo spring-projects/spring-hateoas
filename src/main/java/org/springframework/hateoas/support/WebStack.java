@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Utility to glean what web stack is currently available.
- * 
+ *
  * @author Greg Turnquist
  */
 public enum WebStack {
@@ -73,15 +73,5 @@ public enum WebStack {
 		}
 
 		return configurations;
-	}
-
-	/**
-	 * Is this web stack on the classpath?
-	 *
-	 * @deprecated Will be removed in 1.2 in light of {@link #getAvailableConfigurations()}.
-	 */
-	@Deprecated
-	public boolean isAvailable() {
-		return this.isServerAvailable;
 	}
 }

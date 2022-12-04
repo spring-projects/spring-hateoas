@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -32,38 +39,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> implements Iterable<T> {
+public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
+		implements Iterable<T>, ResolvableTypeProvider {
 
 	private final Collection<T> content;
+	private final @Nullable ResolvableType fallbackType;
+	private ResolvableType fullType;
 
 	/**
 	 * Creates an empty {@link CollectionModel} instance.
 	 */
 	protected CollectionModel() {
-		this(new ArrayList<>());
+		this(Collections.emptyList());
 	}
 
-	/**
-	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s (optional).
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link CollectionModel}.
-	 * @deprecated since 1.1, use {@link #of(Iterable, Link...)} instead.
-	 */
-	@Deprecated
-	public CollectionModel(Iterable<T> content, Link... links) {
-		this(content, Arrays.asList(links));
+	protected CollectionModel(Iterable<T> content) {
+		this(content, Links.NONE, null);
 	}
 
-	/**
-	 * Creates a {@link CollectionModel} instance with the given content and {@link Link}s.
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param links the links to be added to the {@link CollectionModel}.
-	 * @deprecated since 1.1, use {@link #of(Iterable, Iterable)} instead.
-	 */
-	@Deprecated
-	public CollectionModel(Iterable<T> content, Iterable<Link> links) {
+	protected CollectionModel(Iterable<T> content, Iterable<Link> links, @Nullable ResolvableType fallbackType) {
 
 		Assert.notNull(content, "Content must not be null!");
 
@@ -74,6 +68,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 		}
 
 		this.add(links);
+		this.fallbackType = fallbackType;
 	}
 
 	/**
@@ -85,6 +80,42 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 */
 	public static <T> CollectionModel<T> empty() {
 		return of(Collections.emptyList());
+	}
+
+	/**
+	 * Creates a new empty collection model with the given type defined as fallback type.
+	 *
+	 * @param <T>
+	 * @return
+	 * @since 1.4
+	 * @see #withFallbackType(Class, Class...)
+	 */
+	public static <T> CollectionModel<T> empty(Class<T> elementType, Class<?>... generics) {
+		return empty(ResolvableType.forClassWithGenerics(elementType, generics));
+	}
+
+	/**
+	 * Creates a new empty collection model with the given type defined as fallback type.
+	 *
+	 * @param <T>
+	 * @return
+	 * @since 1.4
+	 * @see #withFallbackType(ParameterizedTypeReference)
+	 */
+	public static <T> CollectionModel<T> empty(ParameterizedTypeReference<T> type) {
+		return empty(ResolvableType.forType(type.getType()));
+	}
+
+	/**
+	 * Creates a new empty collection model with the given type defined as fallback type.
+	 *
+	 * @param <T>
+	 * @return
+	 * @since 1.4
+	 * @see #withFallbackType(ResolvableType)
+	 */
+	public static <T> CollectionModel<T> empty(ResolvableType elementType) {
+		return new CollectionModel<>(Collections.emptyList(), Collections.emptyList(), elementType);
 	}
 
 	/**
@@ -117,6 +148,8 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 * @param content must not be {@literal null}.
 	 * @return
 	 * @since 1.1
+	 * @see #withFallbackType(Class, Class...)
+	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content) {
 		return of(content, Collections.emptyList());
@@ -129,6 +162,8 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 * @param links the links to be added to the {@link CollectionModel}.
 	 * @return
 	 * @since 1.1
+	 * @see #withFallbackType(Class, Class...)
+	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content, Link... links) {
 		return of(content, Arrays.asList(links));
@@ -141,9 +176,11 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 * @param links the links to be added to the {@link CollectionModel}.
 	 * @return
 	 * @since 1.1
+	 * @see #withFallbackType(Class, Class...)
+	 * @see #withFallbackType(ResolvableType)
 	 */
 	public static <T> CollectionModel<T> of(Iterable<T> content, Iterable<Link> links) {
-		return new CollectionModel<>(content, links);
+		return new CollectionModel<>(content, links, null);
 	}
 
 	/**
@@ -177,6 +214,74 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 		return Collections.unmodifiableCollection(content);
 	}
 
+	/**
+	 * Declares the given type as fallback element type in case the underlying collection is empty. This allows client
+	 * components to still apply type matches at runtime.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 */
+	public CollectionModel<T> withFallbackType(Class<? super T> type, Class<?>... generics) {
+
+		Assert.notNull(type, "Fallback type must not be null!");
+		Assert.notNull(generics, "Generics must not be null!");
+
+		return withFallbackType(ResolvableType.forClassWithGenerics(type, generics));
+	}
+
+	/**
+	 * Declares the given type as fallback element type in case the underlying collection is empty. This allows client
+	 * components to still apply type matches at runtime.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 */
+	public CollectionModel<T> withFallbackType(ParameterizedTypeReference<?> type) {
+
+		Assert.notNull(type, "Fallback type must not be null!");
+
+		return withFallbackType(ResolvableType.forType(type));
+	}
+
+	/**
+	 * Declares the given type as fallback element type in case the underlying collection is empty. This allows client
+	 * components to still apply type matches at runtime.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 */
+	public CollectionModel<T> withFallbackType(ResolvableType type) {
+
+		Assert.notNull(type, "Fallback type must not be null!");
+
+		return new CollectionModel<>(content, getLinks(), type);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.core.ResolvableTypeProvider#getResolvableType()
+	 */
+	@NonNull
+	@Override
+	@JsonIgnore
+	public ResolvableType getResolvableType() {
+
+		if (fullType == null) {
+
+			ResolvableType elementType = deriveElementType(this.content, fallbackType);
+			Class<?> type = this.getClass();
+
+			this.fullType = elementType == null || type.getTypeParameters().length == 0 //
+					? ResolvableType.forClass(type) //
+					: ResolvableType.forClassWithGenerics(type, elementType);
+		}
+
+		return fullType;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
@@ -192,7 +297,9 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 */
 	@Override
 	public String toString() {
-		return String.format("CollectionModel { content: %s, %s }", getContent(), super.toString());
+
+		return String.format("CollectionModel { content: %s, fallbackType: %s, %s }", //
+				getContent(), fallbackType, super.toString());
 	}
 
 	/*
@@ -212,8 +319,9 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 
 		CollectionModel<?> that = (CollectionModel<?>) obj;
 
-		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
-		return contentEqual && super.equals(obj);
+		return Objects.equals(this.content, that.content)
+				&& Objects.equals(this.fallbackType, that.fallbackType)
+				&& super.equals(obj);
 	}
 
 	/*
@@ -222,10 +330,28 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>> 
 	 */
 	@Override
 	public int hashCode() {
+		return super.hashCode() + Objects.hash(content, fallbackType);
+	}
 
-		int result = super.hashCode();
-		result += content == null ? 0 : 17 * content.hashCode();
+	/**
+	 * Determines the most common element type from the given elements defaulting to the given fallback type.
+	 *
+	 * @param elements must not be {@literal null}.
+	 * @param fallbackType can be {@literal null}.
+	 * @return
+	 */
+	@Nullable
+	private static ResolvableType deriveElementType(Collection<?> elements, @Nullable ResolvableType fallbackType) {
 
-		return result;
+		if (elements.isEmpty()) {
+			return fallbackType;
+		}
+
+		return elements.stream()
+				.filter(it -> it != null)
+				.<Class<?>> map(Object::getClass)
+				.reduce(ClassUtils::determineCommonAncestor)
+				.map(ResolvableType::forClass)
+				.orElse(fallbackType);
 	}
 }

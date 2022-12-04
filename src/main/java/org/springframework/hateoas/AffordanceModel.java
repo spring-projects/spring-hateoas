@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,8 @@ public abstract class AffordanceModel {
 		 * @param <T>
 		 * @param target
 		 * @return
-		 * @deprecated since 1.3, prefer setting up the model types via {@link #createProperties(Function)}
+		 * @deprecated since 1.3, prefer setting up the model types via
+		 *             {@link AffordanceModel#createProperties(BiFunction)}.
 		 */
 		@Deprecated
 		default <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {

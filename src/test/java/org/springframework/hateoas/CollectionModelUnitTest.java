@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,21 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import lombok.Value;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Unit tests for {@link CollectionModel}.
- * 
+ *
  * @author Oliver Gierke
  */
 class CollectionModelUnitTest {
@@ -69,4 +76,42 @@ class CollectionModelUnitTest {
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
 	}
+
+	@TestFactory // #1590
+	Stream<DynamicTest> exposesElementTypeForCollection() {
+		return DynamicTest.stream(Fixture.probes(), Fixture::toString, Fixture::verify);
+	}
+
+	@Value(staticConstructor = "$")
+	static class Fixture {
+
+		CollectionModel<?> model;
+		@Nullable Class<?> expectedElementType;
+
+		static Stream<Fixture> probes() {
+
+			return Stream.of(
+					$(CollectionModel.empty(), null),
+					$(CollectionModel.empty(String.class), String.class),
+					$(CollectionModel.of(Arrays.asList(new Person())).withFallbackType(Contact.class), Person.class),
+					$(CollectionModel.of(Arrays.asList(new Person(), new Company())).withFallbackType(Object.class),
+							Contact.class));
+		}
+
+		void verify() {
+			assertThat(model.getResolvableType().getGeneric(0).resolve()).isEqualTo(expectedElementType);
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Expect element type %s for collection model %s.", expectedElementType, model);
+		}
+	}
+
+	static class Contact {}
+
+	static class Person extends Contact {}
+
+	static class Company extends Contact {}
+
 }

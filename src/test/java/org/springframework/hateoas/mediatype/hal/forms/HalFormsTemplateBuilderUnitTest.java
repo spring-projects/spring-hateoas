@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.hibernate.validator.constraints.Range;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.hateoas.InputType;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.RepresentationModel;
@@ -225,6 +226,44 @@ class HalFormsTemplateBuilderUnitTest {
 		});
 	}
 
+	@Test // #1608
+	void exposesHttpMethodInAllCaps() {
+		assertThat(HalFormsTemplate.forMethod(HttpMethod.POST).getMethod()).isEqualTo("POST");
+	}
+
+	@Test
+	void expandsAffordanceLinkForFormTarget() {
+
+		HalFormsConfiguration configuration = new HalFormsConfiguration();
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example{?foo}", LinkRelation.of("example"))) //
+						.afford(HttpMethod.POST) //
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
+				.findTemplates(models);
+
+		assertThat(templates.get("default").getTarget()).endsWith("/example");
+	}
+
+	@Test // #1697
+	void exposesCustomInputType() {
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("example"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(WithCustomInputType.class) //
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
+				MessageResolver.DEFAULTS_ONLY).findTemplates(models);
+
+		assertThat(templates.get("default").getPropertyByName("property")).hasValueSatisfying(it -> {
+			assertThat(it.getType()).isEqualTo("custom");
+		});
+	}
+
 	@Getter
 	static class PatternExample extends RepresentationModel<PatternExample> {
 
@@ -261,5 +300,12 @@ class HalFormsTemplateBuilderUnitTest {
 		@DecimalMin("2.1") //
 		@DecimalMax("5.3") //
 		BigDecimal decimal;
+	}
+
+	@Getter
+	static class WithCustomInputType {
+
+		@InputType("custom") //
+		String property;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import static org.springframework.http.HttpMethod.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,7 +28,6 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.mediatype.MessageResolver;
-import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -45,7 +43,7 @@ import org.springframework.util.StringUtils;
  */
 class HalFormsPropertyFactory {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = EnumSet.of(POST, PUT, PATCH);
+	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = Set.of(POST, PUT, PATCH);
 
 	private final HalFormsConfiguration configuration;
 	private final MessageResolver resolver;
@@ -84,8 +82,7 @@ class HalFormsPropertyFactory {
 
 		return model.createProperties((payload, metadata) -> {
 
-			String inputTypeSource = metadata.getInputType();
-			HtmlInputType inputType = inputTypeSource == null ? null : HtmlInputType.of(inputTypeSource);
+			String inputType = metadata.getInputType();
 			HalFormsOptions options = optionsFactory.getOptions(payload, metadata);
 
 			HalFormsProperty property = new HalFormsProperty()

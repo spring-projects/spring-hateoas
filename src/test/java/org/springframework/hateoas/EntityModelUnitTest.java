@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -88,9 +90,23 @@ class EntityModelUnitTest {
 				.withMessageContaining("@JsonValue");
 	}
 
+	@Test // #1371
+	void rendersTypeIdentifiersCorrectly() throws Exception {
+
+		EntityModel<?> model = EntityModel.of(new TypeWithId());
+
+		assertThatNoException()
+				.isThrownBy(() -> new ObjectMapper().writeValueAsString(model));
+	}
+
 	// #1371
 
 	static class ValueType {
 		@JsonValue String type;
+	}
+
+	@JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "@jsonObjectId")
+	static class TypeWithId {
+
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class Affordances implements AffordanceOperations {
 	 * @param httpMethod must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	public AffordanceBuilder afford(HttpMethod httpMethod) {
+	public ConfigurableAffordance afford(HttpMethod httpMethod) {
 
 		Assert.notNull(httpMethod, "HTTP method must not be null!");
 
@@ -92,12 +92,10 @@ public class Affordances implements AffordanceOperations {
 	 * Builder API for {@link Affordance} instances.
 	 *
 	 * @author Oliver Drotbohm
-	 * @deprecated since 1.3, refer to {@link ConfiguredAffordance} instead. Will be made private in 1.4.
 	 * @see ConfigurableAffordance
 	 * @see ConfiguredAffordance
 	 */
-	@Deprecated
-	public static class AffordanceBuilder implements ConfigurableAffordance, ConfiguredAffordance {
+	private static class AffordanceBuilder implements ConfigurableAffordance, ConfiguredAffordance {
 
 		private final Affordances context;
 		private final HttpMethod method;
@@ -125,7 +123,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputAndOutput(java.lang.Class)
 		 */
 		@Override
-		public AffordanceBuilder withInputAndOutput(Class<?> type) {
+		public ConfigurableAffordance withInputAndOutput(Class<?> type) {
 			return withInput(type).withOutput(type);
 		}
 
@@ -134,7 +132,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputAndOutput(org.springframework.core.ResolvableType)
 		 */
 		@Override
-		public AffordanceBuilder withInputAndOutput(ResolvableType type) {
+		public ConfigurableAffordance withInputAndOutput(ResolvableType type) {
 			return withInput(type).withOutput(type);
 		}
 
@@ -143,7 +141,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInputAndOutput(org.springframework.hateoas.AffordanceModel.PayloadMetadata)
 		 */
 		@Override
-		public AffordanceBuilder withInputAndOutput(PayloadMetadata metadata) {
+		public ConfigurableAffordance withInputAndOutput(PayloadMetadata metadata) {
 			return withInput(metadata).withOutput(metadata);
 		}
 
@@ -152,7 +150,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInput(java.lang.Class)
 		 */
 		@Override
-		public AffordanceBuilder withInput(Class<?> type) {
+		public ConfigurableAffordance withInput(Class<?> type) {
 
 			Assert.notNull(type, "Type must not be null!");
 
@@ -164,7 +162,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInput(org.springframework.core.ResolvableType)
 		 */
 		@Override
-		public AffordanceBuilder withInput(ResolvableType type) {
+		public ConfigurableAffordance withInput(ResolvableType type) {
 
 			Assert.notNull(type, "Type must not be null!");
 
@@ -176,7 +174,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withInput(org.springframework.hateoas.AffordanceModel.PayloadMetadata)
 		 */
 		@Override
-		public AffordanceBuilder withInput(PayloadMetadata metadata) {
+		public ConfigurableAffordance withInput(PayloadMetadata metadata) {
 
 			InputPayloadMetadata inputMetadata = InputPayloadMetadata.from(metadata);
 
@@ -188,7 +186,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withOutput(java.lang.Class)
 		 */
 		@Override
-		public AffordanceBuilder withOutput(Class<?> type) {
+		public ConfigurableAffordance withOutput(Class<?> type) {
 			return withOutput(ResolvableType.forClass(type));
 		}
 
@@ -197,7 +195,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withOutput(org.springframework.core.ResolvableType)
 		 */
 		@Override
-		public AffordanceBuilder withOutput(ResolvableType type) {
+		public ConfigurableAffordance withOutput(ResolvableType type) {
 			return withOutput(PropertyUtils.getExposedProperties(type));
 		}
 
@@ -206,7 +204,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withOutput(org.springframework.hateoas.AffordanceModel.PayloadMetadata)
 		 */
 		@Override
-		public AffordanceBuilder withOutput(PayloadMetadata metadata) {
+		public ConfigurableAffordance withOutput(PayloadMetadata metadata) {
 			return new AffordanceBuilder(context, method, target, inputMetdata, metadata, parameters, name);
 		}
 
@@ -233,7 +231,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withParameters(org.springframework.hateoas.QueryParameter[])
 		 */
 		@Override
-		public AffordanceBuilder withParameters(QueryParameter... parameters) {
+		public ConfigurableAffordance withParameters(QueryParameter... parameters) {
 			return withParameters(Arrays.asList(parameters));
 		}
 
@@ -242,7 +240,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#withParameters(java.util.List)
 		 */
 		@Override
-		public AffordanceBuilder withParameters(List<QueryParameter> parameters) {
+		public ConfigurableAffordance withParameters(List<QueryParameter> parameters) {
 			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name);
 		}
 
@@ -251,7 +249,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#addParameters(org.springframework.hateoas.QueryParameter[])
 		 */
 		@Override
-		public AffordanceBuilder addParameters(QueryParameter... parameters) {
+		public ConfigurableAffordance addParameters(QueryParameter... parameters) {
 
 			List<QueryParameter> newParameters = new ArrayList<>(this.parameters.size() + parameters.length);
 			newParameters.addAll(this.parameters);
@@ -291,7 +289,7 @@ public class Affordances implements AffordanceOperations {
 		 * @see org.springframework.hateoas.mediatype.ConfigurableAffordance#andAfford(org.springframework.http.HttpMethod)
 		 */
 		@Override
-		public AffordanceBuilder andAfford(HttpMethod method) {
+		public ConfigurableAffordance andAfford(HttpMethod method) {
 			return build().afford(method);
 		}
 

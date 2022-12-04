@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.springframework.hateoas.server.mvc;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -99,11 +99,11 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	@Test
 	void usesDateTimeFormatForUriBinding() {
 
-		DateTime now = DateTime.now();
+		LocalDateTime now = LocalDateTime.now();
 
 		WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
 		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(now)).withSelfRel();
-		assertThat(link.getHref()).endsWith("/sample/" + ISODateTimeFormat.date().print(now));
+		assertThat(link.getHref()).endsWith("/sample/" + now.format(DateTimeFormatter.ISO_DATE));
 	}
 
 	/**
@@ -204,7 +204,7 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 		HttpEntity<?> sampleMethod(@PathVariable("id") Long id, SpecialType parameter);
 
 		@RequestMapping("/sample/{time}")
-		HttpEntity<?> sampleMethod(@PathVariable("time") @DateTimeFormat(iso = ISO.DATE) DateTime time);
+		HttpEntity<?> sampleMethod(@PathVariable("time") @DateTimeFormat(iso = ISO.DATE) LocalDateTime time);
 
 		@RequestMapping("/sample/mapsupport")
 		HttpEntity<?> sampleMethodWithMap(@RequestParam Map<String, String> queryParams);

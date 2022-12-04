@@ -1,0 +1,7 @@
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
+    org.springframework.hateoas.aot.ControllerMethodReturnTypeAotProcessor,\
+    org.springframework.hateoas.aot.HypermediaTypeAotProcessor,\
+    org.springframework.hateoas.aot.RepresentationModelAssemblerAotProcessor
+
+org.springframework.aot.hint.RuntimeHintsRegistrar=\
+    org.springframework.hateoas.aot.RepresentationModelRuntimeHints

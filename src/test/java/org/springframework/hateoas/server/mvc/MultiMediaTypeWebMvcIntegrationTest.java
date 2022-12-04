@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,8 +208,8 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")));
 
 		expectEmployeeProperties(actions, "default", "partiallyUpdateEmployee") //
-				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")));
+				.andExpect(jsonPath("$._templates['default'].method", is("PUT")))
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("PATCH")));
 	}
 
 	@Test
@@ -227,7 +227,7 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links.*", hasSize(1)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$._templates['default'].method", is("post")));
+				.andExpect(jsonPath("$._templates['default'].method", is("POST")));
 
 		expectEmployeeProperties(actions, "default");
 	}
@@ -251,8 +251,8 @@ class MultiMediaTypeWebMvcIntegrationTest {
 
 		expectEmployeeProperties(actions, "default", "partiallyUpdateEmployee") //
 
-				.andExpect(jsonPath("$._templates['default'].method", is("put")))
-				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("patch")));
+				.andExpect(jsonPath("$._templates['default'].method", is("PUT")))
+				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("PATCH")));
 	}
 
 	@Test

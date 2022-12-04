@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.server.core;
 
-import static java.util.Optional.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
@@ -42,9 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Mark Paluch
  * @author Greg Turnquist
  * @author Réda Housni Alaoui
- * @deprecated since 1.2, not for removal but for hiding within the package in 1.3
  */
-@Deprecated
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private final Class<? extends Annotation> annotationType;
@@ -179,7 +176,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		Annotation annotation = findMergedAnnotation(method, annotationType);
 		String[] params = (String[]) getValue(annotation, "params");
 
-		return ofNullable(params).orElseGet(() -> new String[0]);
+		return params == null ? new String[0] : params;
 	}
 
 	private String[] getMappingFrom(@Nullable Annotation annotation) {

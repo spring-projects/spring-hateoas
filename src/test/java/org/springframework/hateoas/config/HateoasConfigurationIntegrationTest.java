@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ class HateoasConfigurationIntegrationTest {
 	@Test // #1075
 	void loadsLanguageSpecificResourceBundle() throws Exception {
 
+		var original = (String) ReflectionTestUtils.getField(HateoasConfiguration.class, "I18N_BASE_NAME");
+
 		ReflectionTestUtils.setField(HateoasConfiguration.class, "I18N_BASE_NAME",
 				"org/springframework/hateoas/config/rest-messages");
 
@@ -45,6 +47,9 @@ class HateoasConfigurationIntegrationTest {
 			MessageResolver resolver = context.getBean(MessageResolver.class);
 
 			assertThat(resolver.resolve(() -> new String[] { "key" })).isEqualTo("Schlüssel");
+
+		} finally {
+			ReflectionTestUtils.setField(HateoasConfiguration.class, "I18N_BASE_NAME", original);
 		}
 	}
 }

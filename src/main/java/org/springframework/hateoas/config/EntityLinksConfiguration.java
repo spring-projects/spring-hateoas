@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.springframework.hateoas.config;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.DelegatingEntityLinks;
+import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 
@@ -33,13 +35,15 @@ import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 class EntityLinksConfiguration {
 
 	@Bean
-	PluginRegistryFactoryBean<EntityLinks, Class<?>> entityLinksPluginRegistry() {
+	OrderAwarePluginRegistry<EntityLinks, Class<?>> entityLinksPluginRegistry(ApplicationContext context) {
 
 		PluginRegistryFactoryBean<EntityLinks, Class<?>> registry = new PluginRegistryFactoryBean<>();
+		registry.setApplicationContext(context);
 		registry.setType(EntityLinks.class);
 		registry.setExclusions(new Class[] { DelegatingEntityLinks.class });
+		registry.afterPropertiesSet();
 
-		return registry;
+		return registry.getObject();
 	}
 
 	@Primary

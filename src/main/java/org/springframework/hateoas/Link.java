@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,76 +51,19 @@ public class Link implements Serializable {
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#SELF} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_SELF = IanaLinkRelations.SELF;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#FIRST} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_FIRST = IanaLinkRelations.FIRST;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#PREV} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_PREVIOUS = IanaLinkRelations.PREV;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#NEXT} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_NEXT = IanaLinkRelations.NEXT;
-
-	/**
-	 * @deprecated Use {@link IanaLinkRelations#LAST} instead.
-	 */
-	public static final @Deprecated LinkRelation REL_LAST = IanaLinkRelations.LAST;
-
 	private LinkRelation rel;
 	private String href;
-	private String hreflang;
-	private String media;
-	private String title;
-	private String type;
-	private String deprecation;
-	private String profile;
-	private String name;
+	private @Nullable String hreflang, media, title, type, deprecation, profile, name;
 	private @JsonIgnore @Nullable UriTemplate template;
 	private @JsonIgnore List<Affordance> affordances;
 
 	/**
-	 * Creates a new link to the given URI with the self rel.
-	 *
-	 * @see IanaLinkRelations#SELF
-	 * @param href must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(String)}
-	 */
-	@Deprecated
-	public Link(String href) {
-		this(href, IanaLinkRelations.SELF);
-	}
-
-	/**
 	 * Creates a new {@link Link} to the given URI with the given rel.
 	 *
 	 * @param href must not be {@literal null} or empty.
 	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(String, String)}.
 	 */
-	@Deprecated
-	public Link(String href, String rel) {
-		this(href, LinkRelation.of(rel));
-	}
-
-	/**
-	 * Creates a new {@link Link} to the given URI with the given rel.
-	 *
-	 * @param href must not be {@literal null} or empty.
-	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(String, LinkRelation)}.
-	 */
-	@Deprecated
-	public Link(String href, LinkRelation rel) {
+	protected Link(String href, LinkRelation rel) {
 		this(href, templateOrNull(href), rel, Collections.emptyList());
 	}
 
@@ -129,22 +72,8 @@ public class Link implements Serializable {
 	 *
 	 * @param template must not be {@literal null}.
 	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(UriTemplate, String)}.
 	 */
-	@Deprecated
-	public Link(UriTemplate template, String rel) {
-		this(template, LinkRelation.of(rel));
-	}
-
-	/**
-	 * Creates a new Link from the given {@link UriTemplate} and rel.
-	 *
-	 * @param template must not be {@literal null}.
-	 * @param rel must not be {@literal null} or empty.
-	 * @deprecated since 1.1, use {@link #of(UriTemplate, LinkRelation)}.
-	 */
-	@Deprecated
-	public Link(UriTemplate template, LinkRelation rel) {
+	protected Link(UriTemplate template, LinkRelation rel) {
 		this(template, rel, Collections.emptyList());
 	}
 
@@ -178,8 +107,9 @@ public class Link implements Serializable {
 		this.affordances = affordances;
 	}
 
-	private Link(LinkRelation rel, String href, String hreflang, String media, String title, String type,
-			String deprecation, String profile, String name, @Nullable UriTemplate template, List<Affordance> affordances) {
+	private Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
+			@Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
+			@Nullable UriTemplate template, List<Affordance> affordances) {
 
 		this.rel = rel;
 		this.href = href;
@@ -203,7 +133,7 @@ public class Link implements Serializable {
 	 * @since 1.1
 	 */
 	public static Link of(String href) {
-		return new Link(href);
+		return new Link(href, IanaLinkRelations.SELF);
 	}
 
 	/**
@@ -215,7 +145,7 @@ public class Link implements Serializable {
 	 * @since 1.1
 	 */
 	public static Link of(String href, String relation) {
-		return new Link(href, relation);
+		return new Link(href, LinkRelation.of(relation));
 	}
 
 	/**
@@ -239,7 +169,7 @@ public class Link implements Serializable {
 	 * @since 1.1
 	 */
 	public static Link of(UriTemplate template, String relation) {
-		return new Link(template, relation);
+		return new Link(template, LinkRelation.of(relation));
 	}
 
 	/**
@@ -329,6 +259,9 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<String> getVariableNames() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? Collections.emptyList() : template.getVariableNames();
 	}
 
@@ -339,6 +272,9 @@ public class Link implements Serializable {
 	 */
 	@JsonIgnore
 	public List<TemplateVariable> getVariables() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? Collections.emptyList() : template.getVariables();
 	}
 
@@ -348,6 +284,9 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public boolean isTemplated() {
+
+		UriTemplate template = this.template;
+
 		return template == null ? false : !template.getVariables().isEmpty();
 	}
 
@@ -357,7 +296,11 @@ public class Link implements Serializable {
 	 * @param arguments
 	 * @return
 	 */
+	@SuppressWarnings("null")
 	public Link expand(Object... arguments) {
+
+		UriTemplate template = this.template;
+
 		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
@@ -368,6 +311,9 @@ public class Link implements Serializable {
 	 * @return
 	 */
 	public Link expand(Map<String, ?> arguments) {
+
+		UriTemplate template = this.template;
+
 		return template == null ? this : of(template.expand(arguments).toString(), getRel());
 	}
 
@@ -462,37 +408,18 @@ public class Link implements Serializable {
 				throw new IllegalArgumentException("Link does not provide a rel attribute!");
 			}
 
-			Link link = of(matcher.group(1), attributes.get("rel"));
+			LinkRelation rel = LinkRelation.of(attributes.get("rel"));
+			String href = matcher.group(1);
+			String hrefLang = attributes.get("hreflang");
+			String media = attributes.get("media");
+			String title = attributes.get("title");
+			String type = attributes.get("type");
+			String deprecation = attributes.get("deprecation");
+			String profile = attributes.get("profile");
+			String name = attributes.get("name");
 
-			if (attributes.containsKey("hreflang")) {
-				link = link.withHreflang(attributes.get("hreflang"));
-			}
-
-			if (attributes.containsKey("media")) {
-				link = link.withMedia(attributes.get("media"));
-			}
-
-			if (attributes.containsKey("title")) {
-				link = link.withTitle(attributes.get("title"));
-			}
-
-			if (attributes.containsKey("type")) {
-				link = link.withType(attributes.get("type"));
-			}
-
-			if (attributes.containsKey("deprecation")) {
-				link = link.withDeprecation(attributes.get("deprecation"));
-			}
-
-			if (attributes.containsKey("profile")) {
-				link = link.withProfile(attributes.get("profile"));
-			}
-
-			if (attributes.containsKey("name")) {
-				link = link.withName(attributes.get("name"));
-			}
-
-			return link;
+			return new Link(rel, href, hrefLang, media, title, type, deprecation, profile, name, templateOrNull(href),
+					Collections.emptyList());
 
 		} else {
 			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
@@ -644,36 +571,43 @@ public class Link implements Serializable {
 		return this.href;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getHreflang() {
 		return this.hreflang;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getMedia() {
 		return this.media;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getTitle() {
 		return this.title;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getType() {
 		return this.type;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getDeprecation() {
 		return this.deprecation;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getProfile() {
 		return this.profile;
 	}
 
+	@Nullable
 	@JsonProperty
 	public String getName() {
 		return this.name;
@@ -681,7 +615,10 @@ public class Link implements Serializable {
 
 	@JsonProperty
 	public UriTemplate getTemplate() {
-		return template == null ? UriTemplate.of(href) : this.template;
+
+		UriTemplate template = this.template;
+
+		return template == null ? UriTemplate.of(href) : template;
 	}
 
 	/*
@@ -689,7 +626,7 @@ public class Link implements Serializable {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
 		if (this == o) {
 			return true;

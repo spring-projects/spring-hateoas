@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -76,6 +77,8 @@ public class PropertyUtils {
 	private static final List<Class<?>> TYPES_TO_UNWRAP = new ArrayList<>(
 			Arrays.asList(EntityModel.class, CollectionModel.class, HttpEntity.class));
 	private static final ResolvableType OBJECT_TYPE = ResolvableType.forClass(Object.class);
+
+	static final String NOT_BLANK_REGEX = "^(?=\\s*\\S).*$";
 
 	static {
 		if (ClassUtils.isPresent("org.reactivestreams.Publisher", PropertyUtils.class.getClassLoader())) {
@@ -135,7 +138,7 @@ public class PropertyUtils {
 
 		return METADATA_CACHE.computeIfAbsent(type, it -> {
 
-			ResolvableType domainType = unwrapDomainType(type);
+			ResolvableType domainType = unwrapDomainType(it);
 			Class<?> resolved = domainType.resolve(Object.class);
 
 			return Object.class.equals(resolved) //
@@ -229,7 +232,7 @@ public class PropertyUtils {
 		return type == null //
 				? Stream.empty() //
 				: getPropertyDescriptors(type) //
-						.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod())))
+						.map(it -> new AnnotatedProperty(new Property(type, it.getReadMethod(), it.getWriteMethod(), it.getName())))
 						.map(it -> JSR_303_PRESENT ? new Jsr303AwarePropertyMetadata(it) : new DefaultPropertyMetadata(it));
 	}
 
@@ -597,20 +600,25 @@ public class PropertyUtils {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mediatype.PropertyUtils.PropertyMetadata#isRequired()
+		 * @see org.springframework.hateoas.mediatype.PropertyUtils.DefaultPropertyMetadata#isRequired()
 		 */
 		@Override
 		public boolean isRequired() {
-			return super.isRequired() || property.getAnnotation(NotNull.class).isPresent();
+
+			return super.isRequired() //
+					|| property.getAnnotation(NotNull.class).isPresent() //
+					|| property.getAnnotation(NotBlank.class).isPresent();
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.mediatype.PropertyUtils.PropertyMetadata#getRegex()
+		 * @see org.springframework.hateoas.mediatype.PropertyUtils.DefaultPropertyMetadata#getPattern()
 		 */
 		@Override
 		public Optional<String> getPattern() {
-			return getAnnotationAttribute(Pattern.class, "regexp", String.class);
+
+			return getAnnotationAttribute(Pattern.class, "regexp", String.class) //
+					.or(this::getDefaultPatternForNonBlank);
 		}
 
 		/*
@@ -621,28 +629,11 @@ public class PropertyUtils {
 		@Override
 		public Number getMin() {
 
-			if (RANGE_ANNOTATION != null) {
-
-				Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "min", Long.class);
-
-				if (attribute.isPresent()) {
-					return attribute.get();
-				}
-			}
-
-			Optional<Long> minLong = getAnnotationAttribute(Min.class, "value", Long.class);
-
-			if (minLong.isPresent()) {
-				return minLong.get();
-			}
-
-			Optional<String> minDecimal = getAnnotationAttribute(DecimalMin.class, "value", String.class);
-
-			if (minDecimal.isPresent()) {
-				return new BigDecimal(minDecimal.get());
-			}
-
-			return null;
+			return Optional.ofNullable(RANGE_ANNOTATION) //
+					.flatMap(it -> getAnnotationAttribute(it, "min", Number.class)) //
+					.or(() -> getAnnotationAttribute(Min.class, "value", Number.class)) //
+					.or(() -> parsePropertyAnnotationValue(DecimalMin.class)) //
+					.orElse(null);
 		}
 
 		/*
@@ -653,28 +644,11 @@ public class PropertyUtils {
 		@Override
 		public Number getMax() {
 
-			if (RANGE_ANNOTATION != null) {
-
-				Optional<Long> attribute = getAnnotationAttribute(RANGE_ANNOTATION, "max", Long.class);
-
-				if (attribute.isPresent()) {
-					return attribute.get();
-				}
-			}
-
-			Optional<Long> maxLong = getAnnotationAttribute(Max.class, "value", Long.class);
-
-			if (maxLong.isPresent()) {
-				return maxLong.get();
-			}
-
-			Optional<String> maxDecimal = getAnnotationAttribute(DecimalMax.class, "value", String.class);
-
-			if (maxDecimal.isPresent()) {
-				return new BigDecimal(maxDecimal.get());
-			}
-
-			return null;
+			return Optional.ofNullable(RANGE_ANNOTATION) //
+					.flatMap(it -> getAnnotationAttribute(it, "max", Number.class)) //
+					.or(() -> getAnnotationAttribute(Max.class, "value", Number.class)) //
+					.or(() -> parsePropertyAnnotationValue(DecimalMax.class)) //
+					.orElse(null);
 		}
 
 		/*
@@ -722,6 +696,19 @@ public class PropertyUtils {
 			inputType = lookupFromTypeMap();
 
 			return cacheAndReturn(inputType != null ? inputType : super.getInputType());
+		}
+
+		private Optional<String> getDefaultPatternForNonBlank() {
+
+			return Optional.of(property.getAnnotation(NotBlank.class))
+					.filter(MergedAnnotation::isPresent)
+					.map(__ -> NOT_BLANK_REGEX);
+		}
+
+		private Optional<Number> parsePropertyAnnotationValue(Class<? extends Annotation> type) {
+
+			return getAnnotationAttribute(type, "value", String.class)
+					.map(BigDecimal::new);
 		}
 
 		private String cacheAndReturn(String value) {

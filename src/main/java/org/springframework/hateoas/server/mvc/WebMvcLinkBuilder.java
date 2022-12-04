@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.SpringAffordanceBuilder;
 import org.springframework.hateoas.server.core.TemplateVariableAwareLinkBuilderSupport;
 import org.springframework.util.Assert;
-import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -43,11 +43,10 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Greg Turnquist
  * @author Lars Michele
  */
-@SuppressWarnings("deprecation")
 public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<WebMvcLinkBuilder> {
 
 	private static final WebMvcLinkBuilderFactory FACTORY = new WebMvcLinkBuilderFactory();
-	private static final CustomUriTemplateHandler HANDLER = new CustomUriTemplateHandler();
+	private static final DefaultUriBuilderFactory URI_FACTORY = new DefaultUriBuilderFactory();
 
 	/**
 	 * Creates a new {@link WebMvcLinkBuilder} using the given {@link UriComponentsBuilder}.
@@ -86,10 +85,11 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		String mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
+		var mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
+		var defaulted = mapping == null ? "/" : mapping;
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
-		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
+		var uri = URI_FACTORY.expand(defaulted, parameters);
+		var uriComponents = UriComponentsBuilder.fromUri(uri).build();
 
 		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
 	}
@@ -108,12 +108,23 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		String mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
+		var mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
+		var defaulted = mapping == null ? "/" : mapping;
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(mapping == null ? "/" : mapping);
-		UriComponents uriComponents = HANDLER.expandAndEncode(builder, parameters);
+		var uri = URI_FACTORY.expand(defaulted, parameters);
+		var uriComponents = UriComponentsBuilder.fromUri(uri).build();
 
 		return new WebMvcLinkBuilder(UriComponentsBuilderFactory.getComponents()).slash(uriComponents, true);
+	}
+
+	/*
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Method)
+	 */
+	public static WebMvcLinkBuilder linkTo(Method method) {
+
+		Assert.notNull(method, "Method must not be null!");
+
+		return linkTo(method.getDeclaringClass(), method, new Object[method.getParameterTypes().length]);
 	}
 
 	/*
@@ -128,6 +139,17 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 	}
 
 	/*
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method)
+	 */
+	public static WebMvcLinkBuilder linkTo(Class<?> controller, Method method) {
+
+		Assert.notNull(controller, "Controller type must not be null!");
+		Assert.notNull(method, "Method must not be null!");
+
+		return linkTo(controller, method, new Object[method.getParameterTypes().length]);
+	}
+
+	/*
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(Class<?>, Method, Object...)
 	 */
 	public static WebMvcLinkBuilder linkTo(Class<?> controller, Method method, Object... parameters) {
@@ -135,6 +157,12 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller type must not be null!");
 		Assert.notNull(method, "Method must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
+
+		int expected = method.getParameterTypes().length;
+		int given = parameters.length;
+
+		Assert.isTrue(expected == given,
+				() -> String.format("Incorrect number of parameter values given. Expected %s, got %s!", expected, given));
 
 		return linkTo(DummyInvocationUtils.getLastInvocationAware(controller, method, parameters));
 	}
@@ -226,30 +254,5 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 	 */
 	public UriComponentsBuilder toUriComponentsBuilder() {
 		return UriComponentsBuilder.fromUri(toUri());
-	}
-
-	private static class CustomUriTemplateHandler extends DefaultUriTemplateHandler {
-
-		public CustomUriTemplateHandler() {
-			setStrictEncoding(true);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.util.Map)
-		 */
-		@Override
-		public UriComponents expandAndEncode(UriComponentsBuilder builder, Map<String, ?> uriVariables) {
-			return super.expandAndEncode(builder, uriVariables);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.web.util.DefaultUriTemplateHandler#expandAndEncode(org.springframework.web.util.UriComponentsBuilder, java.lang.Object[])
-		 */
-		@Override
-		public UriComponents expandAndEncode(UriComponentsBuilder builder, Object[] uriVariables) {
-			return super.expandAndEncode(builder, uriVariables);
-		}
 	}
 }

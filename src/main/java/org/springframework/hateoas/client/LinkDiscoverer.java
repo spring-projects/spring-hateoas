@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,21 +34,21 @@ public interface LinkDiscoverer extends Plugin<MediaType> {
 	/**
 	 * Finds a single link with the given {@link LinkRelation} in the given {@link String} representation.
 	 *
-	 * @param rel must not be {@literal null}.
+	 * @param relation must not be {@literal null}.
 	 * @param representation must not be {@literal null}.
 	 * @return the first link with the given relation type found, or {@link Optional#empty()} if none was found.
 	 */
-	Optional<Link> findLinkWithRel(LinkRelation rel, String representation);
+	Optional<Link> findLinkWithRel(LinkRelation relation, String representation);
 
 	/**
 	 * Finds a single link with the given relation type in the given {@link String} representation.
 	 *
-	 * @param rel must not be {@literal null} or empty.
+	 * @param relation must not be {@literal null} or empty.
 	 * @param representation must not be {@literal null}.
 	 * @return the first {@link Link} with the given link relation found, or {@link Optional#empty()} if none was found.
 	 */
-	default Optional<Link> findLinkWithRel(String rel, String representation) {
-		return findLinkWithRel(LinkRelation.of(rel), representation);
+	default Optional<Link> findLinkWithRel(String relation, String representation) {
+		return findLinkWithRel(LinkRelation.of(relation), representation);
 	}
 
 	/**

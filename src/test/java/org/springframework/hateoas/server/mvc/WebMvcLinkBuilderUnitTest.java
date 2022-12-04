@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,29 @@
 package org.springframework.hateoas.server.mvc;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -39,19 +48,24 @@ import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.core.MethodParameters;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.Sample.SampleConverter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Unit tests for {@link ControllerLinkBuilder}.
@@ -653,6 +667,90 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 				.doesNotContain(":", "+");
 	}
 
+	@Test // #1598
+	void usesRegisteredConverterForCollectionValues() {
+
+		ConfigurableConversionService conversionService = //
+				(ConfigurableConversionService) ReflectionTestUtils.getField(WebMvcLinkBuilderFactory.class,
+						"FALLBACK_CONVERSION_SERVICE");
+
+		conversionService.addConverter(SampleConverter.INSTANCE);
+
+		Link result = linkTo(
+				methodOn(ControllerWithMethods.class).methodWithCustomEnum(Collections.singletonList(Sample.ENUM)))
+						.withSelfRel();
+
+		assertThat(result.getHref()).endsWith("?param=first");
+	}
+
+	@Test // #1652
+	void buildsLinkWithoutParameterValuesGiven() throws Exception {
+
+		Method method = ControllerWithMethods.class.getDeclaredMethod("myMethod", Object.class);
+
+		Stream.<ThrowingCallable> of( //
+				() -> linkTo(method, new Object[0]), //
+				() -> linkTo(ControllerWithMethods.class, method, new Object[0]) //
+		) //
+				.map(assertThatIllegalArgumentException()::isThrownBy)
+				.forEach(it -> it.withMessageContaining("Expected 1, got 0"));
+
+		Stream.<ThrowingCallable> of( //
+				() -> linkTo(method), //
+				() -> linkTo(ControllerWithMethods.class, method) //
+		).forEach(assertThatNoException()::isThrownBy);
+	}
+
+	@Test // #1729
+	@SuppressWarnings("null")
+	void linksPointingToTheSameMethodAreEqual() {
+
+		Link first = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestBody(null)).withSelfRel();
+		Link second = linkTo(methodOn(ControllerWithMethods.class).methodWithRequestBody(null)).withSelfRel();
+
+		assertThat(first).isEqualTo(second);
+		assertThat(second).isEqualTo(first);
+		assertThat(first.hashCode()).isEqualTo(second.hashCode());
+		assertThat(second.hashCode()).isEqualTo(first.hashCode());
+	}
+
+	@Test // #1776
+	void ignoresRequestParamMultipartFile() {
+
+		Stream.of(null, mock(MultipartFile.class)).forEach(it -> {
+
+			Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithMultipartFile(it)).withSelfRel();
+
+			assertThat(link.getVariables()).isEmpty();
+			assertThat(link.expand().getHref()).endsWith("/multipart-file");
+		});
+	}
+
+	@Test // #1722
+	void toUriDoesNotDoubleEncodeRequestParameters() {
+
+		assertThat(linkTo(methodOn(MyController.class).test("I+will:be+double+encoded")).toUri().toString())
+				.endsWith(UriUtils.encode("I+will:be+double+encoded", Charset.defaultCharset()));
+	}
+
+	@TestFactory // #1793
+	Stream<DynamicTest> bindsCatchAllPathVariableCorrectly() {
+
+		Stream<Named<String[]>> tests = Stream.of(//
+				Named.of("Appends single", new String[] { "second", "/second" }),
+				Named.of("Appends multiple", new String[] { "second/second", "/second/second" }),
+				Named.of("Appends empty", new String[] { "", "/" }),
+				Named.of("Appends null", new String[] { null, "/first{/second*}" }));
+
+		return DynamicTest.stream(tests, it -> {
+
+			assertThat(
+					linkTo(methodOn(ControllerWithPathVariableCatchAll.class).test("first", it[0])).withSelfRel().getHref())
+							.endsWith(it[1]);
+		});
+
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -753,6 +851,22 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		HttpEntity<Void> methodWithOffsetDateTime(@RequestParam @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime date) {
 			return null;
 		}
+
+		@RequestMapping("/custom-enum")
+		HttpEntity<Void> methodWithCustomEnum(@RequestParam List<Sample> param) {
+			return null;
+		}
+
+		// #1729
+		@RequestMapping(method = RequestMethod.POST, path = "/with-request-body")
+		HttpEntity<Void> methodWithRequestBody(@RequestBody Person param) {
+			return null;
+		}
+
+		@RequestMapping("/multipart-file")
+		HttpEntity<Void> methodWithMultipartFile(@RequestParam("file") MultipartFile file) {
+			return null;
+		}
 	}
 
 	@RequestMapping("/parent")
@@ -801,10 +915,54 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		}
 	}
 
-	// #???
+	// #118
 	interface ControllerWithHandlerMethodParameterThatNeedsConversion {
 
 		@GetMapping("/{id}")
 		HttpEntity<?> method(@PathVariable Long id);
+	}
+
+	// #1598
+	enum Sample {
+
+		ENUM("first");
+
+		String label;
+
+		/**
+		 * @param label
+		 */
+		private Sample(String label) {
+			this.label = label;
+		}
+
+		enum SampleConverter implements Converter<Sample, String> {
+
+			INSTANCE;
+
+			@NonNull
+			@Override
+			public String convert(Sample source) {
+				return source.label;
+			}
+		}
+	}
+
+	// #1722
+	static class MyController {
+
+		@RequestMapping("/someTestMapping")
+		HttpEntity<?> test(@RequestParam("param") String param) {
+			return null;
+		}
+	}
+
+	// #1793
+	static class ControllerWithPathVariableCatchAll {
+
+		@RequestMapping("/{first}/{*second}")
+		HttpEntity<?> test(@PathVariable String first, @PathVariable String second) {
+			return null;
+		}
 	}
 }

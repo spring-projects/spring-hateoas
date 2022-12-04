@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.PagedModel.PageMetadata;
 
 /**
  * Unit tests for {@link PagedModel}.
- * 
+ *
  * @author Oliver Gierke
  */
 class PagedModelUnitTest {
@@ -113,5 +114,14 @@ class PagedModelUnitTest {
 	@Test
 	void calculatesTotalPagesCorrectly() {
 		assertThat(new PageMetadata(5, 0, 16).getTotalPages()).isEqualTo(4L);
+	}
+
+	@Test // #1590
+	void exposesElementTypeForEmpty() {
+
+		ResolvableType fallbackType = ResolvableType.forClassWithGenerics(EntityModel.class, String.class);
+		PagedModel<String> model = PagedModel.empty(fallbackType);
+
+		assertThat(model.getResolvableType().getGeneric(0).resolve()).isEqualTo(EntityModel.class);
 	}
 }

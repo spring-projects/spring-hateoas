@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFact
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
@@ -106,7 +105,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return HypermediaType.HAL_FORMS.getMediaTypes();
+		return getResolvedConfiguration().getMediaTypes();
 	}
 
 	HalFormsConfiguration getResolvedConfiguration() {

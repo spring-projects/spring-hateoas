@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,18 +77,6 @@ public class Links implements Iterable<Link> {
 	 */
 	public static Links of(Iterable<Link> links) {
 		return Links.class.isInstance(links) ? Links.class.cast(links) : new Links(links);
-	}
-
-	/**
-	 * Creates a {@link Links} instance from the given RFC-8288-compatible link format.
-	 *
-	 * @param source a comma separated list of {@link Link} representations.
-	 * @return the {@link Links} represented by the given {@link String}.
-	 * @deprecated use {@link #parse(String)} instead
-	 */
-	@Deprecated
-	public static Links valueOf(String source) {
-		return parse(source);
 	}
 
 	/**

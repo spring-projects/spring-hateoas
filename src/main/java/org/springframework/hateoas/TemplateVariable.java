@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -280,18 +280,21 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	 */
 	@Override
 	public String toString() {
-		return StringUtils.hasText(description) ? String.format("%s - %s", asString(), description) : asString();
+		return StringUtils.hasText(description) ? asString() + " - " + description : asString();
 	}
 
 	public String asString() {
-		return String.format("{%s%s}", type.toString(), essence());
+
+		return "{" + type.toString() + essence() + "}";
 	}
 
 	String essence() {
 
-		return String.format("%s%s%s", name,
-				limit != -1 ? ":".concat(String.valueOf(limit)) : "",
-				isComposite() ? "*" : "");
+		String result = name;
+		result += limit != -1 ? ":" + limit : "";
+		result += isComposite() ? "*" : "";
+
+		return result;
 	}
 
 	public String getName() {
@@ -496,7 +499,7 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 		 */
 		COMPOSITE_PARAM("*", "", true);
 
-		private static final List<VariableType> COMBINABLE_TYPES = Arrays.asList(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
+		private static final EnumSet<VariableType> COMBINABLE_TYPES = EnumSet.of(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 		static final String DEFAULT_SEPARATOR = ",";
 
 		private final String key, combiner;

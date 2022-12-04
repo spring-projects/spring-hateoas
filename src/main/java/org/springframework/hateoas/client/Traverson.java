@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -466,12 +466,14 @@ public class Traverson {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
 			UriStringAndHeaders that = (UriStringAndHeaders) o;
 			return Objects.equals(this.uri, that.uri) && Objects.equals(this.httpHeaders, that.httpHeaders);
 		}
@@ -481,6 +483,7 @@ public class Traverson {
 			return Objects.hash(this.uri, this.httpHeaders);
 		}
 
+		@Override
 		public String toString() {
 			return "Traverson.UriStringAndHeaders(uri=" + this.uri + ", httpHeaders=" + this.httpHeaders + ")";
 		}
@@ -509,12 +512,14 @@ public class Traverson {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (o == null || getClass() != o.getClass())
+			}
+			if (o == null || getClass() != o.getClass()) {
 				return false;
+			}
 			URIAndHeaders that = (URIAndHeaders) o;
 			return Objects.equals(this.uri, that.uri) && Objects.equals(this.httpHeaders, that.httpHeaders);
 		}
@@ -524,6 +529,7 @@ public class Traverson {
 			return Objects.hash(this.uri, this.httpHeaders);
 		}
 
+		@Override
 		public String toString() {
 			return "Traverson.URIAndHeaders(uri=" + this.uri + ", httpHeaders=" + this.httpHeaders + ")";
 		}

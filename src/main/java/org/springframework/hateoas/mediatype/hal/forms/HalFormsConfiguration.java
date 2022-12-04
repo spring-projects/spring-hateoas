@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -23,7 +26,9 @@ import java.util.function.Function;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -41,6 +46,7 @@ public class HalFormsConfiguration {
 	private final Map<Class<?>, String> patterns;
 	private final Consumer<ObjectMapper> objectMapperCustomizer;
 	private final HalFormsOptionsFactory options;
+	private final List<MediaType> mediaTypes;
 
 	/**
 	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
@@ -55,40 +61,25 @@ public class HalFormsConfiguration {
 	 * @param halConfiguration must not be {@literal null}.
 	 */
 	public HalFormsConfiguration(HalConfiguration halConfiguration) {
-		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {});
+		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {},
+				Collections.singletonList(MediaTypes.HAL_FORMS_JSON));
 	}
 
 	private HalFormsConfiguration(HalConfiguration halConfiguration, Map<Class<?>, String> patterns,
-			HalFormsOptionsFactory options, @Nullable Consumer<ObjectMapper> objectMapperCustomizer) {
+			HalFormsOptionsFactory options, @Nullable Consumer<ObjectMapper> objectMapperCustomizer,
+			List<MediaType> mediaTypes) {
 
 		Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
 		Assert.notNull(patterns, "Patterns must not be null!");
 		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
 		Assert.notNull(options, "HalFormsSuggests must not be null!");
+		Assert.notNull(mediaTypes, "Media types must not be null!");
 
 		this.halConfiguration = halConfiguration;
 		this.patterns = patterns;
 		this.objectMapperCustomizer = objectMapperCustomizer;
 		this.options = options;
-	}
-
-	/**
-	 * Registers a regular expression pattern to be used for form descriptions of the given type.
-	 *
-	 * @param type must not be {@literal null}.
-	 * @param pattern must not be {@literal null} or empty.
-	 * @return will never be {@literal null}.
-	 * @deprecated prefer {@link #withPattern(Class, String)} that returns a fresh instance, to be removed with 1.3.
-	 */
-	@Deprecated
-	public HalFormsConfiguration registerPattern(Class<?> type, String pattern) {
-
-		Assert.notNull(type, "Type must not be null!");
-		Assert.hasText(pattern, "Pattern must not be null or empty!");
-
-		patterns.put(type, pattern);
-
-		return this;
+		this.mediaTypes = new ArrayList<>(mediaTypes);
 	}
 
 	/**
@@ -106,7 +97,7 @@ public class HalFormsConfiguration {
 		Map<Class<?>, String> newPatterns = new HashMap<>(patterns);
 		newPatterns.put(type, pattern);
 
-		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer);
+		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -122,7 +113,30 @@ public class HalFormsConfiguration {
 
 		return this.objectMapperCustomizer == objectMapperCustomizer //
 				? this //
-				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer);
+				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes);
+	}
+
+	/**
+	 * Registers additional media types that are supposed to be aliases to {@link MediaTypes#HAL_FORMS_JSON}. Registered
+	 * {@link MediaType}s will be preferred over the default one, i.e. they'll be listed first in client's accept headers
+	 * etc.
+	 *
+	 * @param mediaType must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 1.4
+	 */
+	public HalFormsConfiguration withMediaType(MediaType mediaType) {
+
+		Assert.notNull(mediaType, "MediaType must not be null!");
+
+		if (mediaTypes.contains(mediaType)) {
+			return this;
+		}
+
+		List<MediaType> newMediaTypes = new ArrayList<>(mediaTypes);
+		newMediaTypes.add(mediaTypes.size() - 1, mediaType);
+
+		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, newMediaTypes);
 	}
 
 	/**
@@ -154,7 +168,7 @@ public class HalFormsConfiguration {
 			Function<PropertyMetadata, HalFormsOptions> creator) {
 
 		return new HalFormsConfiguration(halConfiguration, patterns, options.withOptions(type, property, creator),
-				objectMapperCustomizer);
+				objectMapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -179,9 +193,18 @@ public class HalFormsConfiguration {
 	 * Returns the regular expression pattern that is registered for the given type.
 	 *
 	 * @param type must not be {@literal null}.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
 	Optional<String> getTypePatternFor(ResolvableType type) {
 		return Optional.ofNullable(patterns.get(type.resolve(Object.class)));
+	}
+
+	/**
+	 * The {@link MediaType}s that we want to register this configuration for.
+	 *
+	 * @return will never be {@literal null}.
+	 */
+	List<MediaType> getMediaTypes() {
+		return Collections.unmodifiableList(mediaTypes);
 	}
 }

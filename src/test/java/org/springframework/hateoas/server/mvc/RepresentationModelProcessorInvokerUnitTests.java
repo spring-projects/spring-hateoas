@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,18 @@ public class RepresentationModelProcessorInvokerUnitTests {
 		GenericModel<?> model = new GenericModel<>();
 
 		invoker.invokeProcessorsFor(CollectionModel.of(singletonList(model)));
+
+		assertThat(processor.invoked).isTrue();
+	}
+
+	@Test // #1590
+	void invokesProcessorForEmptyCollectionModelIfFallbackTypeDefined() {
+
+		FirstEntityProcessor processor = new FirstEntityProcessor();
+		RepresentationModelProcessorInvoker invoker = new RepresentationModelProcessorInvoker(singletonList(processor));
+		CollectionModel<?> model = CollectionModel.empty(EntityModel.class, FirstEntity.class);
+
+		invoker.invokeProcessorsFor(model);
 
 		assertThat(processor.invoked).isTrue();
 	}

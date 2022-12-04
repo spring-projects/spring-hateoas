@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class WebMvcLinkBuilderDslUnitTest : TestUtils() {
     @Test
     fun `adds links to wrapped domain object`() {
 
-        val customer = EntityModel(Customer("15", "John Doe"))
+        val customer = EntityModel.of(Customer("15", "John Doe"))
 
         customer.add(CustomerController::class) {
             linkTo { findById(it.content.id) } withRel IanaLinkRelations.SELF

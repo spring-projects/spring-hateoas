@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -67,11 +67,13 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 		for (TemplateVariable variable : variables) {
 
-			processed.add(variable.isRequestParameterVariable() && requestParameterFound
+			boolean isRequestParameter = variable.isRequestParameterVariable();
+
+			processed.add(isRequestParameter && requestParameterFound
 					? variable.withType(REQUEST_PARAM_CONTINUED)
 					: variable);
 
-			if (variable.isRequestParameterVariable()) {
+			if (isRequestParameter) {
 				requestParameterFound = true;
 			}
 		}
@@ -99,12 +101,11 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 
 		List<TemplateVariable> result = new ArrayList<>(this.variables.size() + variables.size());
 		result.addAll(this.variables);
-
-		List<TemplateVariable> filtered = variables.stream() //
-				.filter(variable -> !containsEquivalentFor(variable)).collect(Collectors.toList());
-
-		result.addAll(filtered);
-
+		for (TemplateVariable otherVariable : variables) {
+			if (!containsEquivalentFor(otherVariable)) {
+				result.add(otherVariable);
+			}
+		}
 		return new TemplateVariables(result);
 	}
 
@@ -132,9 +133,12 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	}
 
 	private boolean containsEquivalentFor(TemplateVariable candidate) {
-
-		return this.variables.stream() //
-				.anyMatch(variable -> variable.isEquivalent(candidate));
+		for (TemplateVariable variable : variables) {
+			if (variable.isEquivalent(candidate)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/*
@@ -191,7 +195,7 @@ public final class TemplateVariables implements Iterable<TemplateVariable>, Seri
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
 		if (this == o) {
 			return true;

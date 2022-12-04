@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,7 @@ class CollectionJsonMediaTypeConfiguration implements HypermediaMappingInformati
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return HypermediaType.COLLECTION_JSON.getMediaTypes();
+		return Collections.singletonList(HypermediaType.COLLECTION_JSON.getMediaType());
 	}
 
 	/*

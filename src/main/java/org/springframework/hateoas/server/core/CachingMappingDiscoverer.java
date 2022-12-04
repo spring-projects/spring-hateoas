@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 
 	private static final Map<String, String> MAPPINGS = new ConcurrentReferenceHashMap<>();
 	private static final Map<String, Collection<HttpMethod>> METHODS = new ConcurrentReferenceHashMap<>();
+	private static final Map<String, String[]> PARAMS = new ConcurrentReferenceHashMap<>();
+	private static final Map<String, List<MediaType>> CONSUMES = new ConcurrentReferenceHashMap<>();
 
 	private final MappingDiscoverer delegate;
 
@@ -68,10 +70,7 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	@Nullable
 	@Override
 	public String getMapping(Method method) {
-
-		String key = key(method.getDeclaringClass(), method);
-
-		return MAPPINGS.computeIfAbsent(key, __ -> delegate.getMapping(method));
+		return MAPPINGS.computeIfAbsent(key(method), __ -> delegate.getMapping(method));
 	}
 
 	/*
@@ -102,7 +101,7 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	 */
 	@Override
 	public List<MediaType> getConsumes(Method method) {
-		return delegate.getConsumes(method);
+		return CONSUMES.computeIfAbsent(key(method), __ -> delegate.getConsumes(method));
 	}
 
 	/*
@@ -111,7 +110,11 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 	 */
 	@Override
 	public String[] getParams(Method method) {
-		return delegate.getParams(method);
+		return PARAMS.computeIfAbsent(key(method), __ -> delegate.getParams(method));
+	}
+
+	private static String key(Method method) {
+		return key(method.getDeclaringClass(), method);
 	}
 
 	private static String key(Class<?> type, @Nullable Method method) {

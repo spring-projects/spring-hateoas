@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -29,9 +30,14 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.ContextualSerializer;
+import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.util.NameTransformer;
@@ -53,16 +59,8 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 		this.content = null;
 	}
 
-	/**
-	 * Creates a new {@link EntityModel} with the given content and {@link Link}s (optional).
-	 *
-	 * @param content must not be {@literal null}.
-	 * @param links the links to add to the {@link EntityModel}.
-	 * @deprecated since 1.1, use {@link #of(Object, Link...)} instead.
-	 */
-	@Deprecated
-	public EntityModel(T content, Link... links) {
-		this(content, Arrays.asList(links));
+	protected EntityModel(T content) {
+		this(content, Links.NONE);
 	}
 
 	/**
@@ -70,10 +68,8 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param links the links to add to the {@link EntityModel}.
-	 * @deprecated since 1.1, use {@link #of(Object, Iterable)} instead.
 	 */
-	@Deprecated
-	public EntityModel(T content, Iterable<Link> links) {
+	protected EntityModel(T content, Iterable<Link> links) {
 
 		Assert.notNull(content, "Content must not be null!");
 		Assert.isTrue(!(content instanceof Collection), "Content must not be a collection! Use CollectionModel instead!");
@@ -197,10 +193,23 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 		return result;
 	}
 
-	private static class MapSuppressingUnwrappingSerializer extends StdSerializer<Object> {
+	private static class MapSuppressingUnwrappingSerializer extends StdSerializer<Object>
+			implements ContextualSerializer {
 
+		private static final long serialVersionUID = -8367255762553946324L;
+
+		private final @Nullable BeanProperty property;
+
+		@SuppressWarnings("unused")
 		public MapSuppressingUnwrappingSerializer() {
+			this(null);
+		}
+
+		private MapSuppressingUnwrappingSerializer(@Nullable BeanProperty property) {
+
 			super(Object.class);
+
+			this.property = property;
 		}
 
 		/*
@@ -208,7 +217,9 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
 		 */
 		@Override
-		public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+		@SuppressWarnings({ "null", "unchecked" })
+		public void serialize(@Nullable Object value, @Nullable JsonGenerator gen, @NonNull SerializerProvider provider)
+				throws IOException {
 
 			if (value == null || Map.class.isInstance(value)) {
 				return;
@@ -216,14 +227,33 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
 			JsonSerializer<Object> serializer = provider.findValueSerializer(value.getClass());
 
+			if (UnknownSerializer.class.isInstance(serializer)
+					&& !provider.isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS)) {
+				return;
+			}
+
 			if (JsonValueSerializer.class.isInstance(serializer)) {
 				throw new IllegalStateException(
 						"@JsonValue rendered classes can not be directly nested in EntityModel as they do not produce a document key!");
 			}
 
+			if (ContextualSerializer.class.isInstance(serializer)) {
+				serializer = (JsonSerializer<Object>) ((ContextualSerializer) serializer).createContextual(provider, property);
+			}
+
 			serializer //
 					.unwrappingSerializer(NameTransformer.NOP) //
 					.serialize(value, gen, provider);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 */
+		@Override
+		public JsonSerializer<?> createContextual(@Nullable SerializerProvider prov, @Nullable BeanProperty property)
+				throws JsonMappingException {
+			return new MapSuppressingUnwrappingSerializer(property);
 		}
 
 		/*

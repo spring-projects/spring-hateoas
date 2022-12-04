@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class HalFormsTemplateBuilder {
 							.withProperties(factory.createProperties(it))
 							.withContentType(it.getInput().getPrimaryMediaType());
 
-					String target = it.getLink().getHref();
+					String target = it.getLink().expand().getHref();
 
 					if (selfLink == null || !target.equals(selfLink.getHref())) {
 						template = template.withTarget(target);

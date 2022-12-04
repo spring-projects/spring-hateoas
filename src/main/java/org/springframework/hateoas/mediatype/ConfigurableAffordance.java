@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,13 @@ import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
-import org.springframework.hateoas.mediatype.Affordances.AffordanceBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
- * An affordance in creation. Superseding {@link AffordanceBuilder} to build up affordances manually to clearly
- * distinguish between building the affordance and consuming the configured state.
+ * An affordance in creation. API to build up affordances manually to clearly distinguish between building the
+ * affordance and consuming the configured state.
  *
  * @author Oliver Drotbohm
  * @since 1.3
@@ -167,15 +166,15 @@ public interface ConfigurableAffordance extends AffordanceOperations {
 	Affordances build();
 
 	/**
-	 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal target}.
+	 * Create a new {@link ConfigurableAffordance} by copying all attributes and replacing the {@literal target}.
 	 *
-	 * @param target
+	 * @param target must not be {@literal null}.
 	 * @return
 	 */
 	ConfigurableAffordance withTarget(Link target);
 
 	/**
-	 * Create a new {@link AffordanceBuilder} by copying all attributes and replacing the {@literal name}.
+	 * Create a new {@link ConfigurableAffordance} by copying all attributes and replacing the {@literal name}.
 	 *
 	 * @param name can be {@literal null}.
 	 * @return

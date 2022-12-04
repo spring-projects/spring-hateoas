@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,8 @@ import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,6 +36,8 @@ import org.springframework.hateoas.NonComposite;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
+import org.springframework.hateoas.server.core.UriMapping.MappingVariable;
+import org.springframework.hateoas.server.core.UriMapping.MappingVariables;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -53,9 +47,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
 
 /**
  * Utility for taking a method invocation and extracting a {@link LinkBuilder}.
@@ -66,12 +60,14 @@ import org.springframework.web.util.UriTemplate;
  */
 public class WebHandler {
 
+	private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
+
 	public interface LinkBuilderCreator<T extends LinkBuilder> {
 		T createBuilder(UriComponents components, TemplateVariables variables, List<Affordance> affordances);
 	}
 
 	public interface PreparedWebHandler<T extends LinkBuilder> {
-		T conclude(Function<String, UriComponentsBuilder> finisher, ConversionService conversionService);
+		T conclude(Function<UriMapping, UriComponentsBuilder> finisher, ConversionService conversionService);
 	}
 
 	public static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
@@ -81,9 +77,10 @@ public class WebHandler {
 
 	public static <T extends LinkBuilder> T linkTo(Object invocationValue, LinkBuilderCreator<T> creator,
 			@Nullable AdditionalUriHandler additionalUriHandler,
-			Function<String, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
+			Function<UriMapping, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
 
-		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher, conversionService.get());
+		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher,
+				conversionService.get());
 	}
 
 	private static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
@@ -100,39 +97,60 @@ public class WebHandler {
 		}
 
 		MethodInvocation invocation = invocations.getLastInvocation();
-		String mapping = SpringAffordanceBuilder.getMapping(invocation.getTargetType(), invocation.getMethod());
+		UriMapping mapping = SpringAffordanceBuilder.getUriMapping(invocation.getTargetType(), invocation.getMethod());
 
 		return (finisher, conversionService) -> {
 
-			UriComponentsBuilder builder = finisher.apply(mapping);
-			UriTemplate template = UriTemplateFactory.templateFor(mapping == null ? "/" : mapping);
+			FormatterFactory factory = new FormatterFactory(conversionService);
+			MappingVariables mappingVariables = mapping.getMappingVariables();
+
 			Map<String, Object> values = new HashMap<>();
 
-			List<String> variableNames = template.getVariableNames();
-			Iterator<String> names = variableNames.iterator();
+			UriComponentsBuilder builder = finisher.apply(mapping);
+			Iterator<MappingVariable> variablesIterator = mappingVariables.iterator();
 			Iterator<Object> classMappingParameters = invocations.getObjectParameters();
 
 			while (classMappingParameters.hasNext()) {
-				String name = names.next();
-				TemplateVariable variable = TemplateVariable.segment(name);
-				values.put(name, variable.prepareAndEncode(classMappingParameters.next()));
+
+				MappingVariable name = variablesIterator.next();
+				Object source = classMappingParameters.next();
+
+				values.put(name.getKey(), name.toSegment().prepareAndEncode(
+						HandlerMethodParameter.prepareValue(source, factory, TypeDescriptor.forObject(source))));
 			}
 
 			Method method = invocation.getMethod();
 			HandlerMethodParameters parameters = HandlerMethodParameters.of(method);
 			Object[] arguments = invocation.getArguments();
-			ConversionService resolved = conversionService;
+			List<String> optionalEmptyParameters = new ArrayList<>();
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(PathVariable.class, arguments)) {
-				TemplateVariable variable = TemplateVariable.segment(parameter.getVariableName());
-				values.put(variable.getName(), variable.prepareAndEncode(parameter.getValueAsString(arguments, resolved)));
-			}
 
-			List<String> optionalEmptyParameters = new ArrayList<>();
+				MappingVariable mappingVariable = mappingVariables.getVariable(parameter.getVariableName());
+				Object verifiedValue = parameter.getVerifiedValue(arguments);
+				Object preparedValue = verifiedValue == null ? verifiedValue
+						: parameter.prepareValue(verifiedValue, factory);
+
+				// Handling for special catch-all path segments syntax in mappings {*…}.
+				TemplateVariable segment = mappingVariable.toSegment();
+				String key = mappingVariable.getKey();
+
+				if (mappingVariable.isCapturing()) {
+
+					List<String> segments = Arrays.asList(((String) preparedValue).split("/"));
+					Object value = segments.size() != 0 ? "/" + segment.composite().prepareAndEncode(segments) : "";
+
+					values.put(key, value);
+
+				} else {
+
+					values.put(key, segment.prepareAndEncode(preparedValue));
+				}
+			}
 
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(RequestParam.class, arguments)) {
 
-				bindRequestParameters(builder, parameter, arguments, conversionService);
+				bindRequestParameters(builder, parameter, arguments, factory);
 
 				boolean isSkipValue = SKIP_VALUE.equals(parameter.getVerifiedValue(arguments));
 				boolean isMapParameter = Map.class.isAssignableFrom(parameter.parameter.getParameterType());
@@ -147,9 +165,9 @@ public class WebHandler {
 				}
 			}
 
-			for (String variable : variableNames) {
-				if (!values.containsKey(variable)) {
-					values.put(variable, SKIP_VALUE);
+			for (MappingVariable variable : mappingVariables) {
+				if (!values.containsKey(variable.getKey())) {
+					values.put(variable.getKey(), variable.getAbsentValue());
 				}
 			}
 
@@ -185,7 +203,7 @@ public class WebHandler {
 	 */
 	@SuppressWarnings("unchecked")
 	private static void bindRequestParameters(UriComponentsBuilder builder, HandlerMethodParameter parameter,
-			Object[] arguments, ConversionService conversionService) {
+			Object[] arguments, FormatterFactory factory) {
 
 		Object value = parameter.getVerifiedValue(arguments);
 
@@ -197,7 +215,7 @@ public class WebHandler {
 
 		if (value instanceof MultiValueMap) {
 
-			Map<String, List<?>> requestParams = (Map<String, List<?>>) value;
+			Map<String, List<?>> requestParams = (Map<String, List<?>>) parameter.prepareValue(value, factory);
 
 			for (Entry<String, List<?>> entry : requestParams.entrySet()) {
 				for (Object element : entry.getValue()) {
@@ -211,7 +229,7 @@ public class WebHandler {
 
 		if (value instanceof Map) {
 
-			Map<String, ?> requestParams = (Map<String, ?>) value;
+			Map<String, ?> requestParams = (Map<String, ?>) parameter.prepareValue(value, factory);
 
 			for (Entry<String, ?> entry : requestParams.entrySet()) {
 
@@ -224,7 +242,10 @@ public class WebHandler {
 			return;
 		}
 
-		if (Map.class.isAssignableFrom(parameterType) && SKIP_VALUE.equals(value)) {
+		boolean isMap = Map.class.isAssignableFrom(parameterType);
+		boolean isMultipartFile = MultipartFile.class.isAssignableFrom(parameterType);
+
+		if (isMap && SKIP_VALUE.equals(value) || isMultipartFile) {
 			return;
 		}
 
@@ -233,11 +254,13 @@ public class WebHandler {
 
 		if (value instanceof Collection) {
 
+			Collection<?> collection = (Collection<?>) parameter.prepareValue(value, factory);
+
 			if (parameter.isNonComposite()) {
-				builder.queryParam(key, variable.prepareAndEncode(value));
+				builder.queryParam(key, variable.prepareAndEncode(collection));
 
 			} else {
-				for (Object element : (Collection<?>) value) {
+				for (Object element : (Collection<?>) collection) {
 					if (key != null) {
 						builder.queryParam(key, variable.prepareAndEncode(element));
 					}
@@ -253,7 +276,7 @@ public class WebHandler {
 
 		} else {
 			if (key != null) {
-				builder.queryParam(key, variable.prepareAndEncode(parameter.getValueAsString(arguments, conversionService)));
+				builder.queryParam(key, variable.prepareAndEncode(parameter.prepareValue(value, factory)));
 			}
 		}
 	}
@@ -311,7 +334,6 @@ public class WebHandler {
 
 	private abstract static class HandlerMethodParameter {
 
-		private static final TypeDescriptor STRING_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 		private static final Map<Class<? extends Annotation>, Function<MethodParameter, ? extends HandlerMethodParameter>> FACTORY;
 		private static final String NO_PARAMETER_NAME = "Could not determine name of parameter %s! Make sure you compile with parameter information or explicitly define a parameter name in %s.";
 
@@ -397,29 +419,58 @@ public class WebHandler {
 			return variableName;
 		}
 
-		public String getValueAsString(Object[] values, ConversionService conversionService) {
+		public Object prepareValue(Object value, FormatterFactory conversionService) {
 
-			Object value = values[parameter.getParameterIndex()];
+			Object result = prepareValue(value, conversionService, typeDescriptor);
 
-			if (value == null) {
-				throw new IllegalArgumentException("Cannot turn null value into required String!");
-			}
+			return result == null ? value : result;
+		}
 
-			if (String.class.isInstance(value)) {
-				return (String) value;
+		@Nullable
+		@SuppressWarnings("unchecked")
+		public static Object prepareValue(@Nullable Object value, FormatterFactory factory,
+				@Nullable TypeDescriptor descriptor) {
+
+			if (descriptor == null || value == null) {
+				return value;
 			}
 
 			value = ObjectUtils.unwrapOptional(value);
 
-			Object result = conversionService.canConvert(typeDescriptor, STRING_DESCRIPTOR)
-					? conversionService.convert(value, typeDescriptor, STRING_DESCRIPTOR)
-					: value == null ? null : value.toString();
-
-			if (result == null) {
-				throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", value));
+			if (String.class.isInstance(value)) {
+				return value;
 			}
 
-			return (String) result;
+			if (Collection.class.isInstance(value)) {
+
+				List<Object> prepared = new ArrayList<>();
+
+				for (Object element : (Collection<?>) value) {
+
+					TypeDescriptor elementTypeDescriptor = descriptor.elementTypeDescriptor(element);
+					prepared.add(prepareValue(element, factory, elementTypeDescriptor));
+				}
+
+				return prepared;
+			}
+
+			if (Map.class.isInstance(value)) {
+
+				Map<Object, Object> prepared = new LinkedHashMap<>();
+
+				for (Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
+
+					TypeDescriptor keyTypeDescriptor = descriptor.getMapKeyTypeDescriptor(entry.getKey());
+					TypeDescriptor elementTypeDescriptor = descriptor.elementTypeDescriptor(entry.getValue());
+
+					prepared.put(prepareValue(entry.getKey(), factory, keyTypeDescriptor),
+							prepareValue(entry.getValue(), factory, elementTypeDescriptor));
+				}
+
+				return prepared;
+			}
+
+			return factory.getFormatter(descriptor).apply(value);
 		}
 
 		private String determineVariableName() {
@@ -459,6 +510,60 @@ public class WebHandler {
 		}
 
 		public abstract boolean isRequired();
+	}
+
+	/**
+	 * Factory to create to-{@link String} converters by type. Caching, to avoid repeated calculations and
+	 * {@link Function} object creation.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	private static class FormatterFactory {
+
+		private static final Function<Object, String> DEFAULT = source -> source == null ? null : source.toString();
+
+		private final Map<TypeDescriptor, Function<Object, String>> formatters = new HashMap<>();
+		private final ConversionService conversionService;
+
+		/**
+		 * Creates a new {@link FormatterFactory} for the given {@link ConversionService}.
+		 *
+		 * @param conversionService must not be {@literal null}.
+		 */
+		public FormatterFactory(ConversionService conversionService) {
+			this.conversionService = conversionService;
+		}
+
+		/**
+		 * Return the formatting function to map objects of the given {@link TypeDescriptor} to String.
+		 *
+		 * @param descriptor must not be {@literal null}.
+		 * @return will never be {@literal null}.
+		 */
+		public Function<Object, String> getFormatter(TypeDescriptor descriptor) {
+
+			if (STRING_DESCRIPTOR.equals(descriptor)) {
+				return DEFAULT;
+			}
+
+			return formatters.computeIfAbsent(descriptor, it -> {
+
+				if (!conversionService.canConvert(descriptor, STRING_DESCRIPTOR)) {
+					return DEFAULT;
+				}
+
+				return source -> {
+
+					Object result = conversionService.convert(source, descriptor, STRING_DESCRIPTOR);
+
+					if (result == null) {
+						throw new IllegalArgumentException(String.format("Conversion of value %s resulted in null!", source));
+					}
+
+					return (String) result;
+				};
+			});
+		}
 	}
 
 	/**

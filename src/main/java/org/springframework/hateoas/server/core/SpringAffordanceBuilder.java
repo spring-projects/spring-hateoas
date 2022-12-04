@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.hateoas.mediatype.Affordances;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentLruCache;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public class SpringAffordanceBuilder {
 
-	@SuppressWarnings("deprecation") //
 	public static final MappingDiscoverer DISCOVERER = CachingMappingDiscoverer
 			.of(new PropertyResolvingMappingDiscoverer(new AnnotationMappingDiscoverer(RequestMapping.class)));
 
@@ -76,10 +76,34 @@ public class SpringAffordanceBuilder {
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @return
+	 * @deprecated since 2.0, use {@link #getUriMapping(Class, Method)} instead.
 	 */
 	@Nullable
+	@Deprecated
 	public static String getMapping(Class<?> type, Method method) {
 		return DISCOVERER.getMapping(type, method);
+	}
+
+	/**
+	 * Returns the mapping for the given type's method.
+	 *
+	 * @param type must not be {@literal null}.
+	 * @param method must not be {@literal null}.
+	 * @return
+	 * @since 2.0
+	 */
+	public static UriMapping getUriMapping(Class<?> type, Method method) {
+
+		Assert.notNull(type, "Type must not be null!");
+		Assert.notNull(method, "Method must not be null!");
+
+		UriMapping mapping = DISCOVERER.getUriMapping(type, method);
+
+		if (mapping == null) {
+			throw new IllegalArgumentException("No mapping found for %s!".formatted(method.toString()));
+		}
+
+		return mapping;
 	}
 
 	private static Function<Affordances, List<Affordance>> create(Class<?> type, Method method) {

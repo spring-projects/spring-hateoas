@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,6 +364,27 @@ class UriTemplateUnitTest {
 				.expand(Collections.singletonMap("bar", Arrays.asList("first", "second")));
 
 		assertThat(uri).isEqualTo(URI.create("/foo/first/second"));
+	}
+
+	@Test // #1696
+	void adaptsRequestParamVariableToContinuationIfBaseUriContainsParameter() {
+
+		UriTemplate template = UriTemplate.of("/path/{bar}/foo.zip?type=foo")
+				.with(new TemplateVariable("foobar", VariableType.REQUEST_PARAM));
+
+		assertThat(template.toString()).isEqualTo("/path/{bar}/foo.zip?type=foo{&foobar}");
+	}
+
+	@Test // #1727
+	void supportsVariableInHostName() {
+
+		assertThatCode(() -> UriTemplate.of("https://{somehost}/somepath"))
+				.doesNotThrowAnyException();
+	}
+
+	@Test // #1800
+	void supportsDotsInVariableName() {
+		assertThat(UriTemplate.of("/path/{foo.bar}").getVariableNames()).contains("foo.bar");
 	}
 
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {

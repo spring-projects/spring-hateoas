@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -150,7 +151,7 @@ class PropertyUtilsTest {
 	}
 
 	@Test
-	void considersJsr303Annotations() {
+	void considersBasicJsr303Annotations() {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
 
@@ -201,6 +202,29 @@ class PropertyUtilsTest {
 		assertThat(getProperty(metadata, "renamed")).isPresent();
 	}
 
+	@Test // #1402
+	void detectesPropertiesWithRecordStyleAccessorsCorrectly() {
+
+		assertThatNoException()
+				.isThrownBy(() -> PropertyUtils.getExposedProperties(TypeWithRecordStyleAccessors.class));
+	}
+
+	@Test // #1753
+	void considersJsr303NotBlankAnnotation() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
+
+		assertThat(getProperty(metadata, "nonBlank")).hasValueSatisfying(it -> {
+			assertThat(it.isRequired()).isTrue();
+			assertThat(it.getPattern()).hasValue(PropertyUtils.NOT_BLANK_REGEX);
+		});
+
+		assertThat(getProperty(metadata, "nonBlankPattern")).hasValueSatisfying(it -> {
+			assertThat(it.isRequired()).isTrue();
+			assertThat(it.getPattern()).hasValue("\\w");
+		});
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -243,7 +267,9 @@ class PropertyUtilsTest {
 	static class Jsr303SamplePayload {
 
 		@NotNull String nonNull;
+		@NotBlank String nonBlank;
 		@Pattern(regexp = "\\w") String pattern;
+		@NotBlank @Pattern(regexp = "\\w") String nonBlankPattern;
 		TypeAnnotated annotated;
 	}
 
@@ -320,5 +346,19 @@ class PropertyUtilsTest {
 
 	private static Optional<PropertyMetadata> getProperty(PayloadMetadata metadata, String name) {
 		return metadata.stream().filter(it -> it.hasName(name)).findFirst();
+	}
+
+	// #1402
+	static class TypeWithRecordStyleAccessors {
+
+		private Boolean isActive;
+
+		public Boolean isActive() {
+			return isActive;
+		}
+
+		public void setActive(Boolean active) {
+			isActive = active;
+		}
 	}
 }

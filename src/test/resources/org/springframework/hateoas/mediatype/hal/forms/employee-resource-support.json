@@ -7,7 +7,7 @@
   },
   "_templates" : {
     "default" : {
-      "method" : "post",
+      "method" : "POST",
       "properties" : [ {
         "name" : "name",
         "type" : "text"

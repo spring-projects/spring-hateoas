@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ class WebFluxLinkBuilderTest {
 
 		verify(request, link, result -> {
 			assertThat(result.getRel()).isEqualTo(IanaLinkRelations.SELF);
-			assertThat(result.getHref()).isEqualTo("http://localhost:8080");
+			assertThat(result.getHref()).isEqualTo("http://localhost:8080/");
 		});
 	}
 
@@ -246,7 +246,8 @@ class WebFluxLinkBuilderTest {
 		if (request != null) {
 
 			when(this.exchange.getRequest()).thenReturn(request);
-			mono = mono.subscriberContext(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange));
+
+			mono = mono.contextWrite(Context.of(EXCHANGE_CONTEXT_ATTRIBUTE, this.exchange));
 		}
 		mono.as(StepVerifier::create).expectNextMatches(signal -> {
 
@@ -274,7 +275,7 @@ class WebFluxLinkBuilderTest {
 	@RestController
 	static class TestController2 {
 
-		@GetMapping
+		@GetMapping("/")
 		Mono<Object> root() {
 			return Mono.empty();
 		}

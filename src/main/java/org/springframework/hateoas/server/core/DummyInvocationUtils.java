@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 
 import org.aopalliance.intercept.MethodInterceptor;
@@ -28,6 +26,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -37,7 +36,14 @@ import org.springframework.util.ReflectionUtils;
  */
 public class DummyInvocationUtils {
 
-	private static final ThreadLocal<Map<CacheKey<?>, Object>> CACHE = ThreadLocal.withInitial(HashMap::new);
+	private static final ThreadLocal<ConcurrentLruCache<CacheKey, Object>> CACHE = ThreadLocal
+			.withInitial(() -> new ConcurrentLruCache<CacheKey, Object>(256,
+					it -> {
+
+						InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(it.type,
+								it.arguments);
+						return getProxyWithInterceptor(it.type, interceptor, it.type.getClassLoader());
+					}));
 
 	/**
 	 * Method interceptor that records the last method invocation and creates a proxy for the return value that exposes
@@ -127,12 +133,7 @@ public class DummyInvocationUtils {
 
 		Assert.notNull(type, "Given type must not be null!");
 
-		return (T) CACHE.get().computeIfAbsent(CacheKey.of(type, parameters), it -> {
-
-			InvocationRecordingMethodInterceptor interceptor = new InvocationRecordingMethodInterceptor(it.type,
-					it.arguments);
-			return getProxyWithInterceptor(it.type, interceptor, type.getClassLoader());
-		});
+		return (T) CACHE.get().get(CacheKey.of(type, parameters));
 	}
 
 	/**
@@ -144,6 +145,10 @@ public class DummyInvocationUtils {
 	 */
 	@Nullable
 	public static LastInvocationAware getLastInvocationAware(Object source) {
+
+		if (InvocationRecordingMethodInterceptor.class.isInstance(source)) {
+			return LastInvocationAware.class.cast(source);
+		}
 
 		return (LastInvocationAware) (Advised.class.isInstance(source)
 				? ((Advised) source).getAdvisors()[0].getAdvice()
@@ -175,9 +180,17 @@ public class DummyInvocationUtils {
 		return new DefaultMethodInvocation(type, method, parameters);
 	}
 
+	public static void resetCache() {
+		CACHE.remove();
+	}
+
 	@SuppressWarnings("unchecked")
 	private static <T> T getProxyWithInterceptor(Class<?> type, InvocationRecordingMethodInterceptor interceptor,
 			ClassLoader classLoader) {
+
+		if (type.equals(Object.class)) {
+			return (T) interceptor;
+		}
 
 		ProxyFactory factory = new ProxyFactory();
 		factory.addAdvice(interceptor);
@@ -186,6 +199,7 @@ public class DummyInvocationUtils {
 		if (type.isInterface()) {
 			factory.addInterface(type);
 		} else {
+			factory.setOptimize(true);
 			factory.setTargetClass(type);
 			factory.setProxyTargetClass(true);
 		}
@@ -193,19 +207,19 @@ public class DummyInvocationUtils {
 		return (T) factory.getProxy(classLoader);
 	}
 
-	private static final class CacheKey<T> {
+	private static final class CacheKey {
 
-		private final Class<T> type;
+		private final Class<?> type;
 		private final Object[] arguments;
 
-		private CacheKey(Class<T> type, Object[] arguments) {
+		private CacheKey(Class<?> type, Object[] arguments) {
 
 			this.type = type;
 			this.arguments = arguments;
 		}
 
-		public static <T> CacheKey<T> of(Class<T> type, Object[] arguments) {
-			return new CacheKey<T>(type, arguments);
+		public static CacheKey of(Class<?> type, Object[] arguments) {
+			return new CacheKey(type, arguments);
 		}
 
 		/*
@@ -223,7 +237,7 @@ public class DummyInvocationUtils {
 				return false;
 			}
 
-			CacheKey<?> cacheKey = (CacheKey<?>) o;
+			CacheKey cacheKey = (CacheKey) o;
 
 			return Objects.equals(this.type, cacheKey.type) //
 					&& Arrays.equals(this.arguments, cacheKey.arguments);

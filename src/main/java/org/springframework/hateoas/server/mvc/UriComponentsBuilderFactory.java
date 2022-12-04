@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.hateoas.server.mvc;
 
 import java.net.URI;
 
+import org.springframework.hateoas.server.core.UriMapping;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
@@ -55,6 +56,10 @@ class UriComponentsBuilderFactory {
 		return baseUri != null //
 				? UriComponentsBuilder.fromUri(baseUri) //
 				: cacheBaseUri(ServletUriComponentsBuilder.fromCurrentServletMapping());
+	}
+
+	public static UriComponentsBuilder forMapping(UriMapping mapping) {
+		return getBuilder().path(mapping.getMapping());
 	}
 
 	public static UriComponents getComponents() {

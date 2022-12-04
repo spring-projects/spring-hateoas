@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public final class QueryParameter {
 	private final @Nullable String value;
 	private final boolean required;
 
-	private QueryParameter(String name, String value, boolean required) {
+	private QueryParameter(String name, @Nullable String value, boolean required) {
 
 		this.name = name;
 		this.value = value;
@@ -97,7 +97,7 @@ public final class QueryParameter {
 
 	/**
 	 * Create a new {@link QueryParameter} by copying all attributes and applying the new {@literal value}.
-	 * 
+	 *
 	 * @param value
 	 * @return
 	 */
@@ -119,12 +119,14 @@ public final class QueryParameter {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		QueryParameter that = (QueryParameter) o;
 		return this.required == that.required && Objects.equals(this.name, that.name)
 				&& Objects.equals(this.value, that.value);
@@ -135,6 +137,7 @@ public final class QueryParameter {
 		return Objects.hash(this.name, this.value, this.required);
 	}
 
+	@Override
 	public String toString() {
 		return "QueryParameter(name=" + this.name + ", value=" + this.value + ", required=" + this.required + ")";
 	}

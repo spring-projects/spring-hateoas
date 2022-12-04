@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.framework.Advised;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
+import org.springframework.hateoas.server.core.DummyInvocationUtils;
+import org.springframework.hateoas.server.core.LastInvocationAware;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +51,16 @@ class DummyInvocationUtilsUnitTest extends TestUtils {
 		assertThat(link.getHref()).isEqualTo("http://localhost/sample/2/bar");
 	}
 
+	@Test // #1638
+	void doesNotTryToProxyObject() {
+
+		Object result = methodOn(SampleController.class).methodReturningObject();
+
+		assertThat(result).isInstanceOf(LastInvocationAware.class);
+		assertThat(result).isNotInstanceOf(Advised.class);
+		assertThat(DummyInvocationUtils.getLastInvocationAware(result)).isSameAs(result);
+	}
+
 	@RequestMapping("/sample")
 	static class SampleController {
 
@@ -59,6 +72,10 @@ class DummyInvocationUtilsUnitTest extends TestUtils {
 		@RequestMapping("/{otherName}/bar")
 		HttpEntity<Void> someOtherMethod(@PathVariable(name = "otherName") Long id) {
 			return new ResponseEntity<>(HttpStatus.OK);
+		}
+
+		Object methodReturningObject() {
+			return Void.class;
 		}
 	}
 }

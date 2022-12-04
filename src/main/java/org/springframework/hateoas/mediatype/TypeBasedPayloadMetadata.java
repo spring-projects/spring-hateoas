@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.Named;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 /**
@@ -88,6 +89,11 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 		return Arrays.asList(type.getName(), type.getSimpleName());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.AffordanceModel.PayloadMetadata#getType()
+	 */
+	@NonNull
 	public Class<?> getType() {
 		return this.type;
 	}
@@ -108,5 +114,43 @@ class TypeBasedPayloadMetadata implements InputPayloadMetadata {
 	@Override
 	public List<MediaType> getMediaTypes() {
 		return mediaTypes;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this) {
+			return true;
+		}
+
+		if (!(obj instanceof TypeBasedPayloadMetadata)) {
+			return false;
+		}
+
+		TypeBasedPayloadMetadata that = (TypeBasedPayloadMetadata) obj;
+
+		return this.type.equals(that.type)
+				&& this.properties.equals(that.properties)
+				&& this.mediaTypes.equals(that.mediaTypes);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+
+		int result = 31;
+
+		result += 17 * type.hashCode();
+		result += 17 * properties.hashCode();
+		result += 17 * mediaTypes.hashCode();
+
+		return result;
 	}
 }

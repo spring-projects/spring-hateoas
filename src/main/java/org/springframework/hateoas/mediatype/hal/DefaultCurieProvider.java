@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -153,13 +154,14 @@ public class DefaultCurieProvider implements CurieProvider {
 
 		private final String name;
 
-		@SuppressWarnings("deprecation")
 		public Curie(String name, String href) {
 
-			super(href, "curies");
+			super(href, LinkRelation.of("curies"));
 			this.name = name;
 		}
 
+		@Override
+		@NonNull
 		public String getName() {
 			return this.name;
 		}

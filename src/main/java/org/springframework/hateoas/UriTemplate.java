@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 the original author or authors.
+ * Copyright 2014-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
@@ -48,8 +50,9 @@ import org.springframework.web.util.UriUtils;
  */
 public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
-	private static final Pattern VARIABLE_REGEX = Pattern.compile("\\{([\\?\\&#/\\.\\+\\;]?)([\\w(\\:\\d+)*%\\,*]+)\\}");
-	private static final Pattern ELEMENT_REGEX = Pattern.compile("([\\w\\%]+)(\\:\\d+)?(\\*)?");
+	private static final Pattern VARIABLE_REGEX = Pattern
+			.compile("\\{([\\?\\&#/\\.\\+\\;]?)([\\w\\.(\\:\\d+)*%\\,*]+)\\}");
+	private static final Pattern ELEMENT_REGEX = Pattern.compile("([\\w\\.\\%]+)(\\:\\d+)?(\\*)?");
 	private static final long serialVersionUID = -1007874653930162262L;
 
 	private final TemplateVariables variables;
@@ -171,14 +174,12 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		}
 
 		UriComponents components = UriComponentsBuilder.fromUriString(baseUri).build();
+		MultiValueMap<String, String> parameters = components.getQueryParams();
 		List<TemplateVariable> result = new ArrayList<>();
-		String newOriginal = template;
-		ExpandGroups groups = this.groups;
 
 		for (TemplateVariable variable : variables) {
-
 			boolean isRequestParam = variable.isRequestParameterVariable();
-			boolean alreadyPresent = components.getQueryParams().containsKey(variable.getName());
+			boolean alreadyPresent = parameters.containsKey(variable.getName());
 
 			if (isRequestParam && alreadyPresent) {
 				continue;
@@ -188,8 +189,27 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 				continue;
 			}
 
-			ExpandGroup existing = groups.findLastExpandGroupOfType(variable.getType());
-			ExpandGroup group = new ExpandGroup(Collections.singletonList(variable));
+			// Use request parameter continuation if base contains parameters already
+			if (!parameters.isEmpty() && variable.getType().equals(VariableType.REQUEST_PARAM)) {
+				variable = variable.withType(VariableType.REQUEST_PARAM_CONTINUED);
+			}
+
+			result.add(variable);
+		}
+
+		String newOriginal = template;
+		ExpandGroups groups = this.groups;
+
+		MultiValueMap<VariableType, TemplateVariable> groupedByVariableType = new LinkedMultiValueMap<>();
+
+		for (TemplateVariable templateVariable : result) {
+			groupedByVariableType.add(templateVariable.getType(), templateVariable);
+		}
+
+		for (Entry<VariableType, List<TemplateVariable>> entry : groupedByVariableType.entrySet()) {
+
+			ExpandGroup existing = groups.findLastExpandGroupOfType(entry.getKey());
+			ExpandGroup group = new ExpandGroup(entry.getValue());
 
 			if (existing != null) {
 				group = existing.merge(group);
@@ -199,7 +219,6 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 			}
 
 			groups = groups.addOrAugment(group);
-			result.add(variable);
 		}
 
 		return new UriTemplate(baseUri, newOriginal, this.variables.concat(result), groups);
@@ -350,10 +369,14 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		String head = index == -1 ? template : template.substring(0, index);
 		String tail = index == -1 ? "" : template.substring(index);
-		String encodedBase = UriComponentsBuilder.fromUriString(head)
-				.encode()
-				.build()
-				.toUriString();
+
+		// Encode head if it's more than just the scheme
+		String encodedBase = head.endsWith("://") && tail.startsWith("{")
+				? head
+				: UriComponentsBuilder.fromUriString(head)
+						.encode()
+						.build()
+						.toUriString();
 
 		head = encodedBase.length() > head.length() ? encodedBase : head;
 

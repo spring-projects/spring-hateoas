@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.server.mvc;
 
+import jakarta.servlet.ServletContext;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import javax.servlet.ServletContext;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -38,6 +38,7 @@ import org.springframework.hateoas.server.core.LinkBuilderSupport;
 import org.springframework.hateoas.server.core.MethodInvocation;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.server.core.SpringAffordanceBuilder;
+import org.springframework.hateoas.server.core.UriMapping;
 import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -109,6 +110,33 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 
 	/*
 	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method)
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Method method) {
+		return WebMvcLinkBuilder.linkTo(method);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
+		return WebMvcLinkBuilder.linkTo(method, parameters);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method)
+	 */
+	@Override
+	public WebMvcLinkBuilder linkTo(Class<?> type, Method method) {
+		return WebMvcLinkBuilder.linkTo(type, method);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.Class, java.lang.reflect.Method, java.lang.Object[])
 	 */
 	@Override
@@ -123,20 +151,11 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 	@Override
 	public WebMvcLinkBuilder linkTo(Object invocationValue) {
 
-		Function<String, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory.getBuilder()
-				.path(mapping);
+		Function<UriMapping, UriComponentsBuilder> builderFactory = mapping -> UriComponentsBuilderFactory
+				.forMapping(mapping);
 
 		return WebHandler.linkTo(invocationValue, WebMvcLinkBuilder::new,
 				new UriComponentsContributorsAdditionalUriHandler(uriComponentsContributors), builderFactory, getConversionService());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.MethodLinkBuilderFactory#linkTo(java.lang.reflect.Method, java.lang.Object[])
-	 */
-	@Override
-	public WebMvcLinkBuilder linkTo(Method method, Object... parameters) {
-		return WebMvcLinkBuilder.linkTo(method, parameters);
 	}
 
 	private static class UriComponentsContributorsAdditionalUriHandler implements AdditionalUriHandler {
@@ -150,21 +169,25 @@ public class WebMvcLinkBuilderFactory implements MethodLinkBuilderFactory<WebMvc
 		@Override
 		public UriComponentsBuilder apply(UriComponentsBuilder builder, MethodInvocation invocation) {
 			String[] primaryParams = SpringAffordanceBuilder.DISCOVERER.getParams(invocation.getMethod());
-			ParamsRequestCondition paramsRequestCondition = new ParamsRequestCondition(primaryParams);
 
-			for (NameValueExpression<String> expression : paramsRequestCondition.getExpressions()) {
+			if (primaryParams.length > 0) {
 
-				if (expression.isNegated()) {
-					continue;
+				ParamsRequestCondition paramsRequestCondition = new ParamsRequestCondition(primaryParams);
+
+				for (NameValueExpression<String> expression : paramsRequestCondition.getExpressions()) {
+
+					if (expression.isNegated()) {
+						continue;
+					}
+
+					String value = expression.getValue();
+
+					if (value == null) {
+						continue;
+					}
+
+					builder.queryParam(expression.getName(), value);
 				}
-
-				String value = expression.getValue();
-
-				if (value == null) {
-					continue;
-				}
-
-				builder.queryParam(expression.getName(), value);
 			}
 
 			MethodParameters parameters = MethodParameters.of(invocation.getMethod());
