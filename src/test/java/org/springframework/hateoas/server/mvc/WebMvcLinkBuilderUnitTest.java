@@ -748,7 +748,18 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 					linkTo(methodOn(ControllerWithPathVariableCatchAll.class).test("first", it[0])).withSelfRel().getHref())
 							.endsWith(it[1]);
 		});
+	}
 
+	@Test // #1886
+	void doesNotAppendTrailingSlashForEmptyMapping() {
+
+		var controller = methodOn(PersonController.class);
+
+		assertThat(linkTo(controller.getMappingWithoutPath()).toString())
+				.isEqualTo("http://localhost/people");
+
+		assertThat(linkTo(controller.getMappingWithEmptyPath()).toString())
+				.isEqualTo("http://localhost/people");
 	}
 
 	private static UriComponents toComponents(Link link) {
@@ -760,7 +771,18 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	}
 
 	@RequestMapping("/people")
-	interface PersonController {}
+	interface PersonController {
+
+		@GetMapping
+		default Object getMappingWithoutPath() {
+			return null;
+		}
+
+		@GetMapping("")
+		default Object getMappingWithEmptyPath() {
+			return null;
+		}
+	}
 
 	class PersonControllerImpl implements PersonController {}
 

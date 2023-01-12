@@ -207,7 +207,7 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 	 * @return
 	 */
 	private static String join(String typeMapping, String mapping) {
-		return typeMapping.concat("/").concat(mapping);
+		return mapping.isBlank() ? typeMapping : typeMapping.concat("/").concat(mapping);
 	}
 
 	/**
