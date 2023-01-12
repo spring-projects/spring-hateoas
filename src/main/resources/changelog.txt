@@ -1,6 +1,19 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0.1 (2023-01-12)
+----------------------------------------
+- #1896 - Upgrade to Mockk 1.13.3.
+- #1895 - Upgrade to Kotlin 1.7.22.
+- #1894 - Upgrade to Spring Framework 6.0.4.
+- #1893 - Upgrade to Slf4j 2.0.6.
+- #1892 - Upgrade to Reactor 2022.0.2.
+- #1891 - Upgrade to JUnit 5.9.2.
+- #1890 - Upgrade to Jackson 2.14.1.
+- #1889 - Upgrade to Logback 1.4.5.
+- #1888 - Upgrade to Spring Asciidoctor Backends 0.0.4.
+- #1887 - Trailing slash added for request mappings with empty path.
+
 Changes in version 2.0.0 (2022-11-16)
 ----------------------------------------
 - #1880 - Upgrade to Spring Plugin 3.0.
