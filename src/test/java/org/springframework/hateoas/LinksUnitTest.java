@@ -98,7 +98,8 @@ class LinksUnitTest {
 	@Test
 	void parsesLinksWithComma() {
 
-		assertThat(Links.parse(LINKS)).isEqualTo(reference);
+		Link withComma = Link.of("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
+		assertThat(Links.parse(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
 	}
 
 	/**
