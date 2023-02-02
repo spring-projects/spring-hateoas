@@ -47,12 +47,18 @@ class LinksUnitTest {
 
 	static final String THIRD = "</something>;rel=\"foo\";hreflang=\"en\"";
 	static final String FOURTH = "</somethingElse>;rel=\"bar\";hreflang=\"de\"";
+	static final String FIVE = "</somethingElse>;rel=boo"; // "rel" value unquoted
+	static final String SIX = "</somethingElse>; rel=bee"; // "rel" value unquoted with whitespace
 
 	static final String LINKS2 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(THIRD, FOURTH));
+	static final String LINKS3 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIVE, SIX));
 
 	static final Links reference = Links.of(Link.of("/something", "foo"), Link.of("/somethingElse", "bar"));
 	static final Links reference2 = Links.of(Link.of("/something", "foo").withHreflang("en"),
 			Link.of("/somethingElse", "bar").withHreflang("de"));
+
+	static final Links reference3 = Links.of(Link.of("/somethingElse", "boo"),
+			Link.of("/somethingElse", "bee"));
 
 	@Test
 	void parsesLinkHeaderLinks() {
@@ -90,16 +96,37 @@ class LinksUnitTest {
 	 * @see #440
 	 */
 	@Test
-	void parsesLinkWithComma() {
+	void parsesLinksWithComma() {
 
-		Link withComma = Link.of("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
+		assertThat(Links.parse(LINKS)).isEqualTo(reference);
+	}
 
-		assertThat(Links.parse(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
+	/**
+	 * Extract from rfc8288 Section 3
+	 * Link Serialisation in HTTP Headers
+	 *
+	 *    The Link header field provides a means for serialising one or more
+	 *    links into HTTP headers.
+	 *
+	 *    The ABNF for the field value is:
+	 *
+	 *      Link       = #link-value
+	 *      link-value = "<" URI-Reference ">" *( OWS ";" OWS link-param )
+	 *      link-param = token BWS [ "=" BWS ( token / quoted-string ) ]
+	 *
+	 *    Note that any link-param can be generated with values using either
+	 *    the token or the quoted-string syntax; therefore, recipients MUST be
+	 *    able to parse both forms.  In other words, the following parameters
+	 *    are equivalent:
+	 *
+	 *      x=y
+	 *      x="y"
+	 *
+	 */
+	@Test
+	void parsesLinkWithUnquotedRel() {
 
-		Links twoWithCommaInFirst = Links.parse(WITH_COMMA.concat(",").concat(SECOND));
-
-		assertThat(twoWithCommaInFirst.getLink("foo")).hasValue(withComma);
-		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(Link.of("/somethingElse", "bar"));
+		assertThat(Links.parse(LINKS3)).isEqualTo(reference3);
 	}
 
 	/**
