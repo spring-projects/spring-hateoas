@@ -99,7 +99,11 @@ class LinksUnitTest {
 	void parsesLinkWithComma() {
 
 		Link withComma = Link.of("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
+
 		assertThat(Links.parse(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
+		Links twoWithCommaInFirst = Links.parse(WITH_COMMA.concat(",").concat(SECOND));
+		assertThat(twoWithCommaInFirst.getLink("foo")).hasValue(withComma);
+		assertThat(twoWithCommaInFirst.getLink("bar")).hasValue(Link.of("/somethingElse", "bar"));
 	}
 
 	/**
