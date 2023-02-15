@@ -45,7 +45,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public class Links implements Iterable<Link> {
 
 	public static final Links NONE = new Links(Collections.emptyList());
-	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\s*\\w+=\"?[^\"]*\"?)+)");
+	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\s*\\w+=\"?[^\",]*\"?)+)");
 
 	private final List<Link> links;
 
@@ -91,8 +91,8 @@ public class Links implements Iterable<Link> {
 			return NONE;
 		}
 
-		Matcher matcher = LINK_HEADER_PATTERN.matcher(source);
 		List<Link> links = new ArrayList<>();
+		Matcher matcher = LINK_HEADER_PATTERN.matcher(source);
 
 		while (matcher.find()) {
 
