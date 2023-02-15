@@ -54,6 +54,12 @@ class LinksUnitTest {
 	static final Links reference2 = Links.of(Link.of("/something", "foo").withHreflang("en"),
 			Link.of("/somethingElse", "bar").withHreflang("de"));
 
+	// #1899
+	static final String FIVE = "</somethingElse>;rel=boo";
+	static final String SIX = "</somethingElse>; rel=bee";
+	static final String LINKS3 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIVE, SIX));
+	static final Links reference3 = Links.of(Link.of("/somethingElse", "boo"), Link.of("/somethingElse", "bee"));
+
 	@Test
 	void parsesLinkHeaderLinks() {
 
@@ -262,6 +268,11 @@ class LinksUnitTest {
 
 		assertThat(Links.parse("<https://url.com?page=1>; rel=first").getRequiredLink("first").getHref())
 				.isEqualTo("https://url.com?page=1");
+	}
+
+	@Test // #1899
+	void parsesMultipleLinksContainingUnquotedRels() {
+		assertThat(Links.parse(LINKS3)).isEqualTo(reference3);
 	}
 
 	@Value(staticConstructor = "of")
