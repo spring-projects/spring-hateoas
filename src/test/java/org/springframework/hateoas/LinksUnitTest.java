@@ -55,10 +55,13 @@ class LinksUnitTest {
 			Link.of("/somethingElse", "bar").withHreflang("de"));
 
 	// #1899
-	static final String FIVE = "</somethingElse>;rel=boo";
+	static final String FIVE = "</somethingElse?foo=one,two>;rel=boo";
 	static final String SIX = "</somethingElse>; rel=bee";
-	static final String LINKS3 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIVE, SIX));
-	static final Links reference3 = Links.of(Link.of("/somethingElse", "boo"), Link.of("/somethingElse", "bee"));
+	static final String SEVEN = "</somethingElse>;rel=beeboo;title=sometitle";
+	static final String LINKS3 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIVE, SIX, SEVEN));
+	static final Links reference3 = Links.of(Link.of("/somethingElse?foo=one,two", "boo"), //
+			Link.of("/somethingElse", "bee"),
+			Link.of("/somethingElse", "beeboo").withTitle("sometitle"));
 
 	@Test
 	void parsesLinkHeaderLinks() {
