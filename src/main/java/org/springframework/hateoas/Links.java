@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -45,7 +44,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public class Links implements Iterable<Link> {
 
 	public static final Links NONE = new Links(Collections.emptyList());
-	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\s*\\w+=\"?[^\"]*\"?)+)");
+	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\s*\\w+=\"?[^\",]*\"?)+)");
 
 	private final List<Link> links;
 
@@ -91,12 +90,12 @@ public class Links implements Iterable<Link> {
 			return NONE;
 		}
 
-		Matcher matcher = LINK_HEADER_PATTERN.matcher(source);
-		List<Link> links = new ArrayList<>();
+		var links = new ArrayList<Link>();
+		var matcher = LINK_HEADER_PATTERN.matcher(source);
 
 		while (matcher.find()) {
 
-			Link link = Link.valueOf(matcher.group());
+			var link = Link.valueOf(matcher.group());
 
 			if (link != null) {
 				links.add(link);
