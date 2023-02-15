@@ -331,7 +331,6 @@ public class PropertyUtils {
 		 *
 		 * @param property must not be {@literal null}.
 		 */
-		@SuppressWarnings("unchecked")
 		public AnnotatedProperty(Property property) {
 
 			Assert.notNull(property, "Property must not be null!");
@@ -340,10 +339,10 @@ public class PropertyUtils {
 
 			Field field = ReflectionUtils.findField(property.getObjectType(), property.getName());
 
-			this.type = firstNonEmpty( //
-					() -> Optional.ofNullable(property.getReadMethod()).map(ResolvableType::forMethodReturnType), //
-					() -> Optional.ofNullable(property.getWriteMethod()).map(it -> ResolvableType.forMethodParameter(it, 0)), //
-					() -> Optional.ofNullable(field).map(ResolvableType::forField));
+			this.type = Optional.ofNullable(property.getReadMethod()).map(ResolvableType::forMethodReturnType)
+					.or(() -> Optional.ofNullable(property.getWriteMethod()).map(it -> ResolvableType.forMethodParameter(it, 0))) //
+					.or(() -> Optional.ofNullable(field).map(ResolvableType::forField))
+					.orElseThrow(() -> new IllegalStateException("Could not resolve value!"));
 
 			this.annotations = Stream.of(property.getReadMethod(), property.getWriteMethod(), field) //
 					.filter(it -> it != null) //
@@ -351,17 +350,6 @@ public class PropertyUtils {
 					.collect(Collectors.toList());
 
 			this.typeAnnotations = MergedAnnotations.from(this.type.resolve(Object.class));
-		}
-
-		@SuppressWarnings("unchecked")
-		private static <T> T firstNonEmpty(Supplier<Optional<T>>... suppliers) {
-
-			Assert.notNull(suppliers, "Suppliers must not be null!");
-
-			return Stream.of(suppliers) //
-					.map(Supplier::get).flatMap(it -> it.map(Stream::of).orElseGet(Stream::empty)) //
-					.findFirst() //
-					.orElseThrow(() -> new IllegalStateException("Could not resolve value!"));
 		}
 
 		/**
