@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0.2 (2023-02-16)
+----------------------------------------
+- #1916 - Upgrade to Jackson 2.14.2.
+- #1915 - Upgrade to Lombok 1.18.26.
+- #1914 - Upgrade to Reactor 2022.0.3.
+- #1906 - Upgrade to Spring Framework 6.0.5.
+- #1902 - Link header parsing breaks for multiple links with at least one containing unquoted values.
+- #1901 - Polish use of Optional in PropertyUtils.
+
 Changes in version 2.0.1 (2023-01-12)
 ----------------------------------------
 - #1896 - Upgrade to Mockk 1.13.3.
