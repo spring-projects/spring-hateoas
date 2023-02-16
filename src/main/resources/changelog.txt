@@ -1,6 +1,15 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5.3 (2023-02-16)
+----------------------------------------
+- #1912 - Upgrade to Jackson 2.13.5.
+- #1911 - Upgrade to Lombok 1.18.26.
+- #1910 - Upgrade to JUnit 5.8.2.
+- #1909 - Upgrade to Reactor 2020.0.28.
+- #1908 - Upgrade to Spring Framework 5.3.25.
+- #1903 - Link header parsing breaks for multiple links with at least one containing unquoted values.
+
 Changes in version 1.5.2 (2022-09-15)
 ----------------------------------------
 - #1843 - Upgrade to Spring Framework 5.3.23.
