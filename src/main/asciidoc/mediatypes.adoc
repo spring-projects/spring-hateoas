@@ -462,7 +462,7 @@ class CustomerRepresentation
 <3> We define `email` to be an email using the JSR-303 `@Email` annotation.
 
 Note that this type is not a domain type.
-It's intentionally designed to capture a wide range of potentially invalid input so that potentialy erroneous valies for the fields can be rejected at once.
+It's intentionally designed to capture a wide range of potentially invalid input so that potentially erroneous valies for the fields can be rejected at once.
 
 Let's continue by having a look at how a controller makes use of that model:
 
