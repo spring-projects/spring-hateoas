@@ -342,9 +342,9 @@ Each property will get the following attributes defined:
 |`readOnly`| Set to `true` if there's no setter method for the property. If that is present, use Jackson's `@JsonProperty(Access.READ_ONLY)` on the accessors or field explicitly. Not rendered by default, thus defaulting to `false`.
 |`regex`| Can be customized by using JSR-303's `@Pattern` annotation either on the field or a type. In case of the latter the pattern will be used for every property declared as that particular type. Not rendered by default.
 |`required`| Can be customized by using JSR-303's `@NotNull`. Not rendered by default and thus defaulting to `false`. Templates using `PATCH` as method will automatically have all properties set to not required.
-|`max`| The maximum value allowed for the property. Derived from Hibernate Validator's `@Range` or JSR-303's `@Max` and `@DecimalMax` annotations.
+|`max`| The maximum value allowed for the property. Derived from Derived from JSR-303's `@Size`, Hibernate Validator's `@Range` or JSR-303's `@Max` and `@DecimalMax` annotations.
 |`maxLength`| The maximum length value allowed for the property. Derived from Hibernate Validator's `@Length` annotation.
-|`min`| The minimum value allowed for the property. Derived from Hibernate Validator's `@Range` or JSR-303's `@Min` and `@DecimalMin` annotations.
+|`min`| The minimum value allowed for the property. Derived from JSR-303's `@Size`, Hibernate Validator's `@Range` or JSR-303's `@Min` and `@DecimalMin` annotations.
 |`minLength`| The minimum length value allowed for the property. Derived from Hibernate Validator's `@Length` annotation.
 |`options`| The options to select a value from when submitting the form. For details, see <<mediatypes.hal-forms.options>>.
 |`prompt`| The user readable prompt to use when rendering the form input. For details, see <<mediatypes.hal-forms.i18n.prompts>>. 
