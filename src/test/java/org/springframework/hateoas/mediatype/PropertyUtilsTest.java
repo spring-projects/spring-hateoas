@@ -34,6 +34,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
@@ -187,7 +188,8 @@ class PropertyUtilsTest {
 				InputTypes.of("url", HtmlInputType.URL), //
 				InputTypes.of("stringUrl", HtmlInputType.URL), //
 				InputTypes.of("email", HtmlInputType.EMAIL), //
-				InputTypes.of("ranged", HtmlInputType.RANGE));
+				InputTypes.of("ranged", HtmlInputType.RANGE),
+				InputTypes.of("sized", HtmlInputType.RANGE));
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(InputTypeSample.class);
 
@@ -222,6 +224,18 @@ class PropertyUtilsTest {
 		assertThat(getProperty(metadata, "nonBlankPattern")).hasValueSatisfying(it -> {
 			assertThat(it.isRequired()).isTrue();
 			assertThat(it.getPattern()).hasValue("\\w");
+		});
+	}
+
+	@Test // #1920
+	void exposesMinAndMaxFromJsr303AtSizeAnnotation() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
+		Optional<PropertyMetadata> property = metadata.stream().filter(it -> it.getName().equals("sized")).findFirst();
+
+		assertThat(property).hasValueSatisfying(it -> {
+			assertThat(it.getMin()).isEqualTo(41);
+			assertThat(it.getMax()).isEqualTo(4711);
 		});
 	}
 
@@ -271,6 +285,7 @@ class PropertyUtilsTest {
 		@Pattern(regexp = "\\w") String pattern;
 		@NotBlank @Pattern(regexp = "\\w") String nonBlankPattern;
 		TypeAnnotated annotated;
+		@Size(min = 41, max = 4711) int sized;
 	}
 
 	@Pattern(regexp = "regex")
@@ -316,6 +331,8 @@ class PropertyUtilsTest {
 		@URL String stringUrl;
 
 		@Range int ranged;
+
+		@Size int sized;
 	}
 
 	@Value

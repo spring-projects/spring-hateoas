@@ -34,6 +34,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import org.reactivestreams.Publisher;
 import org.springframework.beans.BeanUtils;
@@ -558,6 +559,7 @@ public class PropertyUtils {
 
 			Map<Class<? extends Annotation>, String> typeMap = new HashMap<>();
 			typeMap.put(Email.class, "email");
+			typeMap.put(Size.class, "range");
 
 			if (URL_ANNOTATION != null) {
 				typeMap.put(URL_ANNOTATION, "url");
@@ -617,8 +619,9 @@ public class PropertyUtils {
 		@Override
 		public Number getMin() {
 
-			return Optional.ofNullable(RANGE_ANNOTATION) //
-					.flatMap(it -> getAnnotationAttribute(it, "min", Number.class)) //
+			return getAnnotationAttribute(Size.class, "min", Number.class) //
+					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
+							.flatMap(it -> getAnnotationAttribute(it, "min", Number.class))) //
 					.or(() -> getAnnotationAttribute(Min.class, "value", Number.class)) //
 					.or(() -> parsePropertyAnnotationValue(DecimalMin.class)) //
 					.orElse(null);
@@ -632,8 +635,9 @@ public class PropertyUtils {
 		@Override
 		public Number getMax() {
 
-			return Optional.ofNullable(RANGE_ANNOTATION) //
-					.flatMap(it -> getAnnotationAttribute(it, "max", Number.class)) //
+			return getAnnotationAttribute(Size.class, "max", Number.class) //
+					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
+							.flatMap(it -> getAnnotationAttribute(it, "max", Number.class))) //
 					.or(() -> getAnnotationAttribute(Max.class, "value", Number.class)) //
 					.or(() -> parsePropertyAnnotationValue(DecimalMax.class)) //
 					.orElse(null);
