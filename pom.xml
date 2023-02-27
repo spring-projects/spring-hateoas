@@ -109,8 +109,8 @@
 		<profile>
 			<id>kotlin-next</id>
 			<properties>
-				<kotlin.version>1.6.10</kotlin.version>
-				<kotlinx-coroutines.version>1.6.0</kotlinx-coroutines.version>
+				<kotlin.version>1.8.20-Beta</kotlin.version>
+				<kotlinx-coroutines.version>1.6.4</kotlinx-coroutines.version>
 			</properties>
 		</profile>
 
