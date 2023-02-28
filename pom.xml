@@ -874,7 +874,7 @@
 		<url>https://github.com/spring-projects/spring-hateoas</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-hateoas.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com:spring-projects/spring-hateoas.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 
 </project>
