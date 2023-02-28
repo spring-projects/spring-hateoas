@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 
@@ -29,8 +28,11 @@ import org.springframework.hateoas.SlicedModel.SliceMetadata;
  * Unit tests for SlicedModel
  *
  * @author Michael Schout
+ * @author Oliver Drotbohm
+ * @since 2.1
  */
 class SlicedModelUnitTest {
+
 	static final SliceMetadata metadata = new SliceMetadata(10, 1);
 
 	SlicedModel<Object> resources;
@@ -40,38 +42,41 @@ class SlicedModelUnitTest {
 		resources = SlicedModel.of(Collections.emptyList(), metadata);
 	}
 
-	@Test
+	@Test // #1856
 	void discoversNextLink() {
+
 		resources.add(Link.of("foo", IanaLinkRelations.NEXT.value()));
 
 		assertThat(resources.getNextLink()).isNotNull();
 	}
 
-	@Test
+	@Test // #1856
 	void discoversPreviousLink() {
+
 		resources.add(Link.of("custom", IanaLinkRelations.PREV.value()));
 
 		assertThat(resources.getPreviousLink()).isNotNull();
 	}
 
-	@Test
+	@Test // #1856
 	void preventsNegativeSliceSize() {
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new SliceMetadata(-1, 0);
-		});
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new SliceMetadata(-1, 0));
 	}
 
-	@Test
+	@Test // #1856
 	void preventsNegativeSliceNumber() {
-		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new SliceMetadata(0, -1);
-		});
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new SliceMetadata(0, -1));
 	}
 
-	@Test
+	@Test // #1856
 	void exposesElementTypeForEmpty() {
-		ResolvableType fallbackType = ResolvableType.forClassWithGenerics(EntityModel.class, String.class);
-		SlicedModel<String> model = SlicedModel.empty(fallbackType);
+
+		var fallbackType = ResolvableType.forClassWithGenerics(EntityModel.class, String.class);
+		var model = SlicedModel.empty(fallbackType);
 
 		assertThat(model.getResolvableType().getGeneric(0).resolve()).isEqualTo(EntityModel.class);
 	}
