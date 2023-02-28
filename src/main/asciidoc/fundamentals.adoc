@@ -115,10 +115,12 @@ class RepresentationModel
 class EntityModel
 class CollectionModel
 class PagedModel
+class SlicedModel
 
 EntityModel -|> RepresentationModel
 CollectionModel -|> RepresentationModel
 PagedModel -|> CollectionModel
+SlicedModel -|> CollectionModel
 ....
 ====
 

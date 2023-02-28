@@ -281,6 +281,11 @@
 								<version>2.5.5</version>
 							</dependency>
 							<dependency>
+								<groupId>org.asciidoctor</groupId>
+								<artifactId>asciidoctorj-diagram</artifactId>
+								<version>2.2.4</version>
+							</dependency>
+							<dependency>
 								<groupId>io.spring.asciidoctor.backends</groupId>
 								<artifactId>spring-asciidoctor-backends</artifactId>
 								<version>${spring-asciidoctor-backends.version}</version>
