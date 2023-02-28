@@ -863,13 +863,6 @@
 		</plugins>
 	</build>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-plugins-release</id>
-			<url>https://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<scm>
 		<url>https://github.com/spring-projects/spring-hateoas</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-hateoas.git</connection>
