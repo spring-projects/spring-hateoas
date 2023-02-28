@@ -111,16 +111,19 @@ For more information on this, have a look at <<mediatypes>>.
 ====
 [plantuml, diagram-classes, format="svg"]
 ....
+hide fields
+hide methods
+
 class RepresentationModel
 class EntityModel
 class CollectionModel
 class PagedModel
 class SlicedModel
 
-EntityModel -|> RepresentationModel
-CollectionModel -|> RepresentationModel
-PagedModel -|> CollectionModel
-SlicedModel -|> CollectionModel
+EntityModel -up-|> RepresentationModel
+CollectionModel -up-|> RepresentationModel
+PagedModel -up-|> CollectionModel
+SlicedModel -up-|> CollectionModel
 ....
 ====
 

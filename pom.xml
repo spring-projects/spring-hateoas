@@ -331,6 +331,9 @@
 								<toclevels>4</toclevels>
 								<numbered>true</numbered>
 							</attributes>
+							<requires>
+								<require>asciidoctor-diagram</require>
+							</requires>
 						</configuration>
 
 					</plugin>
