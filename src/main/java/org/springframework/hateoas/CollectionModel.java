@@ -60,6 +60,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 	protected CollectionModel(Iterable<T> content, Iterable<Link> links, @Nullable ResolvableType fallbackType) {
 
 		Assert.notNull(content, "Content must not be null!");
+		Assert.notNull(links, "Links must not be null!");
 
 		this.content = new ArrayList<>();
 

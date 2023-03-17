@@ -36,8 +36,9 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	/**
 	 * Converts the given entity into a {@link EntityModel} wrapped in a {@link Mono}.
 	 *
-	 * @param entity
-	 * @return
+	 * @param entity must not be {@literal null}.
+	 * @param exchange must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	@Override
 	default Mono<EntityModel<T>> toModel(T entity, ServerWebExchange exchange) {
@@ -49,7 +50,9 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	/**
 	 * Define links to add to every individual {@link EntityModel}.
 	 *
-	 * @param resource
+	 * @param resource must not be {@literal null}.
+	 * @param exchange must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	default EntityModel<T> addLinks(EntityModel<T> resource, ServerWebExchange exchange) {
 		return resource;
@@ -58,9 +61,9 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	/**
 	 * Converts all given entities into resources and wraps the collection as a resource as well.
 	 *
-	 * @see #toResource(Object, ServerWebExchange)
+	 * @see #toModel(Object, ServerWebExchange)
 	 * @param entities must not be {@literal null}.
-	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}.
+	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}, will never be {@literal null}..
 	 */
 	default Mono<CollectionModel<EntityModel<T>>> toCollectionModel(Flux<? extends T> entities,
 			ServerWebExchange exchange) {
@@ -75,7 +78,8 @@ public interface SimpleReactiveRepresentationModelAssembler<T>
 	/**
 	 * Define links to add to the {@link CollectionModel} collection.
 	 *
-	 * @param resources
+	 * @param resources must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	default CollectionModel<EntityModel<T>> addLinks(CollectionModel<EntityModel<T>> resources,
 			ServerWebExchange exchange) {
