@@ -71,7 +71,7 @@
 		<source.level>17</source.level>
 		<artifactory-maven-plugin.version>3.4.0</artifactory-maven-plugin.version>
 		<assertj.version>3.24.2</assertj.version>
-		<spring-asciidoctor-backends.version>0.0.4</spring-asciidoctor-backends.version>
+		<spring-asciidoctor-backends.version>0.0.5</spring-asciidoctor-backends.version>
 		<evo.version>1.3</evo.version>
 		<logback.version>1.4.4</logback.version>
 		<jacoco>0.8.8</jacoco>
