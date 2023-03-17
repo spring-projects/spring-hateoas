@@ -46,7 +46,7 @@ public class TypedEntityLinks<T> {
 	 * Returns a {@link LinkBuilder} able to create links to the controller managing the given entity. Implementations
 	 * will know about the URI structure being used to expose item-resource URIs.
 	 *
-	 * @param type the entity to point to, must not be {@literal null}.
+	 * @param entity the entity to point to, must not be {@literal null}.
 	 * @return the {@link LinkBuilder} pointing to the item resource identified by the given entity. Will never be
 	 *         {@literal null}.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
@@ -59,7 +59,7 @@ public class TypedEntityLinks<T> {
 	 * Creates a {@link Link} pointing to item resource backing the given entity. The relation type of the link will be
 	 * determined by the implementation class and should be defaulted to {@link IanaLinkRelations#SELF}.
 	 *
-	 * @param type the entity to point to, must not be {@literal null}.
+	 * @param entity the entity to point to, must not be {@literal null}.
 	 * @return the {@link Link} pointing to the resource exposed for the given entity. Will never be {@literal null}.
 	 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
 	 */
@@ -91,7 +91,6 @@ public class TypedEntityLinks<T> {
 		 * Creates a {@link Link} pointing to the collection resource of the configured type. The relation type of the link
 		 * will be determined by the implementation class and should be defaulted to {@link IanaLinkRelations#SELF}.
 		 *
-		 * @param type the entity type to point to, must not be {@literal null}.
 		 * @return the {@link Link} pointing to the collection resource exposed for the configured entity type. Will never
 		 *         be {@literal null}.
 		 * @throws IllegalArgumentException in case the given type is unknown the entity links infrastructure.
