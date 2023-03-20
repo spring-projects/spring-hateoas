@@ -192,6 +192,7 @@ pipeline {
 				anyOf {
 					branch 'main'
 					branch 'release'
+					branch 'release-1.5'
 				}
 			}
 			agent {
