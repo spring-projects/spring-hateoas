@@ -1,6 +1,17 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0.3 (2023-03-20)
+----------------------------------------
+- #1946 - Upgrade to Spring Framework 6.0.7.
+- #1945 - Upgrade to Mockk 1.13.4.
+- #1944 - Update Jackson compatibility build to 2.15 RC1.
+- #1943 - Upgrade to Reactor 2022.0.5.
+- #1942 - Upgrade to Logback 1.4.6.
+- #1941 - Upgrade to Spring Asciidoctor Backends 0.0.5.
+- #1930 - Polish nullability and Javadoc.
+- #1918 - Upgrade CI build to use latest setup-java task.
+
 Changes in version 2.0.2 (2023-02-16)
 ----------------------------------------
 - #1916 - Upgrade to Jackson 2.14.2.
