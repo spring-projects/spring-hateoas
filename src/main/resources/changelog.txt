@@ -1,6 +1,13 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5.4 (2023-03-20)
+----------------------------------------
+- #1950 - Upgrade to Kotlin 1.6.21 and KotlinX 1.6.4.
+- #1949 - Upgrade to Reactor 2020.0.30.
+- #1948 - Make sure reference docs are deployed for 1.5.x releases.
+- #1947 - Upgrade to Spring Framework 5.3.26.
+
 Changes in version 1.5.3 (2023-02-16)
 ----------------------------------------
 - #1912 - Upgrade to Jackson 2.13.5.
