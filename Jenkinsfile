@@ -41,6 +41,11 @@ pipeline {
 		}
 
 		stage("Test other configurations") {
+			when {
+				anyOf {
+					branch '1.5.x'
+				}
+			}
 			parallel {
 				stage("test: baseline (jdk11)") {
 					agent {
