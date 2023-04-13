@@ -80,7 +80,7 @@ I.e. a list of orders would look like this in HAL:
 ----
 {
   "_embedded" : {
-    "orders : [
+    "order : [
       … <1>
     ]
   }
