@@ -17,6 +17,8 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import net.minidev.json.JSONArray;
 
@@ -28,9 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
