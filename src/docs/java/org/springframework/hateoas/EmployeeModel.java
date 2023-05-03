@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 /**
  * @author Oliver Drotbohm

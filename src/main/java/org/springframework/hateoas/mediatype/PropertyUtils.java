@@ -15,6 +15,15 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -25,15 +34,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.reactivestreams.Publisher;
 import org.springframework.beans.BeanUtils;
@@ -72,7 +72,7 @@ public class PropertyUtils {
 	private static final Map<ResolvableType, ResolvableType> DOMAIN_TYPE_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Map<ResolvableType, InputPayloadMetadata> METADATA_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Set<String> FIELDS_TO_IGNORE = new HashSet<>(Arrays.asList("class", "links"));
-	private static final boolean JSR_303_PRESENT = ClassUtils.isPresent("javax.validation.constraints.Email",
+	private static final boolean JSR_303_PRESENT = ClassUtils.isPresent("jakarta.validation.constraints.Email",
 			PropertyUtils.class.getClassLoader());
 	private static final List<Class<?>> TYPES_TO_UNWRAP = new ArrayList<>(
 			Arrays.asList(EntityModel.class, CollectionModel.class, HttpEntity.class));

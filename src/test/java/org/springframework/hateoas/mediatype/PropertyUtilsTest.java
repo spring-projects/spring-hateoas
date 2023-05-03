@@ -17,6 +17,10 @@ package org.springframework.hateoas.mediatype;
 
 import static org.assertj.core.api.Assertions.*;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -29,11 +33,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
