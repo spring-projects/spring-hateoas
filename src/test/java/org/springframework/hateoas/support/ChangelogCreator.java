@@ -38,66 +38,66 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 114;
-	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
+    private static final int MILESTONE_ID = 117;
+    private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
-	public static void main(String... args) {
+    public static void main(String... args) {
 
-		/*
-		 * If you run into github rate limiting issues, you can always use a Github Personal Token by adding
-		 * {@code .header(HttpHeaders.AUTHORIZATION, "token your-github-token")} to the webClient call.
-		 */
+        /*
+         * If you run into github rate limiting issues, you can always use a Github Personal Token by adding
+         * {@code .header(HttpHeaders.AUTHORIZATION, "token your-github-token")} to the webClient call.
+         */
 
-		WebClient webClient = WebClient.create();
+        WebClient webClient = WebClient.create();
 
-		HttpEntity<String> response = webClient //
-				.get().uri(URI_TEMPLATE, MILESTONE_ID) //
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)) //
-				.block(Duration.ofSeconds(10));
+        HttpEntity<String> response = webClient //
+                .get().uri(URI_TEMPLATE, MILESTONE_ID) //
+                .exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)) //
+                .block(Duration.ofSeconds(10));
 
-		boolean keepChecking = true;
-		boolean printHeader = true;
+        boolean keepChecking = true;
+        boolean printHeader = true;
 
-		while (keepChecking) {
+        while (keepChecking) {
 
-			readPage(response.getBody(), printHeader);
-			printHeader = false;
+            readPage(response.getBody(), printHeader);
+            printHeader = false;
 
-			List<String> linksInHeader = response.getHeaders().get(HttpHeaders.LINK);
-			Links links = linksInHeader == null ? Links.NONE : Links.parse(linksInHeader.get(0));
+            List<String> linksInHeader = response.getHeaders().get(HttpHeaders.LINK);
+            Links links = linksInHeader == null ? Links.NONE : Links.parse(linksInHeader.get(0));
 
-			if (links.getLink(IanaLinkRelations.NEXT).isPresent()) {
+            if (links.getLink(IanaLinkRelations.NEXT).isPresent()) {
 
-				response = webClient //
-						.get().uri(links.getRequiredLink(IanaLinkRelations.NEXT).expand().getHref()) //
-						.exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)) //
-						.block(Duration.ofSeconds(10));
+                response = webClient //
+                        .get().uri(links.getRequiredLink(IanaLinkRelations.NEXT).expand().getHref()) //
+                        .exchangeToMono(clientResponse -> clientResponse.toEntity(String.class)) //
+                        .block(Duration.ofSeconds(10));
 
-			} else {
-				keepChecking = false;
-			}
-		}
-	}
+            } else {
+                keepChecking = false;
+            }
+        }
+    }
 
-	private static void readPage(String content, boolean header) {
+    private static void readPage(String content, boolean header) {
 
-		JsonPath titlePath = JsonPath.compile("$[*].title");
-		JsonPath idPath = JsonPath.compile("$[*].number");
+        JsonPath titlePath = JsonPath.compile("$[*].title");
+        JsonPath idPath = JsonPath.compile("$[*].number");
 
-		JSONArray titles = titlePath.read(content);
-		Iterator<Object> ids = ((JSONArray) idPath.read(content)).iterator();
+        JSONArray titles = titlePath.read(content);
+        Iterator<Object> ids = ((JSONArray) idPath.read(content)).iterator();
 
-		if (header) {
-			System.out.println(
-					"Changes in version " + JsonPath.read(content, "$[0].milestone.title") + " (" + LocalDate.now()
-							+ ")");
-			System.out.println("----------------------------------------");
-		}
+        if (header) {
+            System.out.println(
+                    "Changes in version " + JsonPath.read(content, "$[0].milestone.title") + " (" + LocalDate.now()
+                            + ")");
+            System.out.println("----------------------------------------");
+        }
 
-		for (Object title : titles) {
+        for (Object title : titles) {
 
-			String format = String.format("- #%s - %s", ids.next(), title.toString().replaceAll("`", ""));
-			System.out.println(format.endsWith(".") ? format : format.concat("."));
-		}
-	}
+            String format = String.format("- #%s - %s", ids.next(), title.toString().replaceAll("`", ""));
+            System.out.println(format.endsWith(".") ? format : format.concat("."));
+        }
+    }
 }
