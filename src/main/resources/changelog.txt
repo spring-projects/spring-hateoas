@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.1.0 (2023-05-11)
+----------------------------------------
+- #1973 - Upgrade to Reactor 2022.0.7.
+- #1970 - Upgrade to Spring 6.0.9.
+- #1967 - Upgrade to Kotlin 1.8.21.
+- #1965 - Optional support for Validation API still on javax.… namespace.
+- #1963 - Upgrade to Jackson 2.15.
+
 Changes in version 2.1.0-RC1 (2023-04-13)
 ----------------------------------------
 - #1959 - Upgrade build plugins.
