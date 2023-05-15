@@ -285,7 +285,7 @@ public class WebHandler {
 
 		private static final List<Class<? extends Annotation>> ANNOTATIONS = Arrays.asList(RequestParam.class,
 				PathVariable.class);
-		private static final Map<Method, HandlerMethodParameters> CACHE = new ConcurrentHashMap<Method, HandlerMethodParameters>();
+		private static final Map<Method, HandlerMethodParameters> CACHE = new ConcurrentHashMap<>();
 
 		private final MultiValueMap<Class<? extends Annotation>, HandlerMethodParameter> byAnnotationCache;
 
