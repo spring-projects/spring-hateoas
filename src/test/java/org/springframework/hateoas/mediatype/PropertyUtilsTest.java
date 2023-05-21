@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,11 @@ package org.springframework.hateoas.mediatype;
 
 import static org.assertj.core.api.Assertions.*;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -29,11 +34,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
@@ -187,7 +187,8 @@ class PropertyUtilsTest {
 				InputTypes.of("url", HtmlInputType.URL), //
 				InputTypes.of("stringUrl", HtmlInputType.URL), //
 				InputTypes.of("email", HtmlInputType.EMAIL), //
-				InputTypes.of("ranged", HtmlInputType.RANGE));
+				InputTypes.of("ranged", HtmlInputType.RANGE),
+				InputTypes.of("sized", HtmlInputType.RANGE));
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(InputTypeSample.class);
 
@@ -222,6 +223,18 @@ class PropertyUtilsTest {
 		assertThat(getProperty(metadata, "nonBlankPattern")).hasValueSatisfying(it -> {
 			assertThat(it.isRequired()).isTrue();
 			assertThat(it.getPattern()).hasValue("\\w");
+		});
+	}
+
+	@Test // #1920
+	void exposesMinAndMaxFromJsr303AtSizeAnnotation() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
+		Optional<PropertyMetadata> property = metadata.stream().filter(it -> it.getName().equals("sized")).findFirst();
+
+		assertThat(property).hasValueSatisfying(it -> {
+			assertThat(it.getMin()).isEqualTo(41);
+			assertThat(it.getMax()).isEqualTo(4711);
 		});
 	}
 
@@ -271,6 +284,7 @@ class PropertyUtilsTest {
 		@Pattern(regexp = "\\w") String pattern;
 		@NotBlank @Pattern(regexp = "\\w") String nonBlankPattern;
 		TypeAnnotated annotated;
+		@Size(min = 41, max = 4711) int sized;
 	}
 
 	@Pattern(regexp = "regex")
@@ -316,6 +330,8 @@ class PropertyUtilsTest {
 		@URL String stringUrl;
 
 		@Range int ranged;
+
+		@Size int sized;
 	}
 
 	@Value

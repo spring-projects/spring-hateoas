@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.springframework.hateoas;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.*;
 import static org.springframework.hateoas.ArchitectureTest.Architecture.*;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -29,7 +32,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
-import com.tngtech.archunit.core.importer.ImportOptions;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 import com.tngtech.archunit.library.dependencies.SliceRule;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
@@ -42,7 +44,7 @@ import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 @TestInstance(Lifecycle.PER_CLASS)
 class ArchitectureTest {
 
-	ImportOptions options = new ImportOptions().with(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS);
+	Collection<ImportOption> options = List.of(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS);
 	JavaClasses classes = new ClassFileImporter(options) //
 			.importPackages("org.springframework.hateoas", "org.springframework");
 
@@ -99,14 +101,14 @@ class ArchitectureTest {
 
 				/*
 				 * (non-Javadoc)
-				 * @see com.tngtech.archunit.base.DescribedPredicate#apply(java.lang.Object)
+				 * @see java.util.function.Predicate#test(java.lang.Object)
 				 */
 				@Override
-				public boolean apply(@Nullable JavaClass input) {
+				public boolean test(@Nullable JavaClass input) {
 
 					return input != null && input.getDirectDependenciesFromSelf().stream() //
 							.map(Dependency::getTargetClass) //
-							.anyMatch(predicate::apply);
+							.anyMatch(predicate::test);
 				}
 			};
 		}

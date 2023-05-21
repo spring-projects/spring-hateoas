@@ -109,16 +109,21 @@ For more information on this, have a look at <<mediatypes>>.
 
 .The `RepresentationModel` class hierarchy
 ====
-[plantuml, diagram-classes, svg]
+[plantuml, diagram-classes, format="svg"]
 ....
+hide fields
+hide methods
+
 class RepresentationModel
 class EntityModel
 class CollectionModel
 class PagedModel
+class SlicedModel
 
-EntityModel -|> RepresentationModel
-CollectionModel -|> RepresentationModel
-PagedModel -|> CollectionModel
+EntityModel -up-|> RepresentationModel
+CollectionModel -up-|> RepresentationModel
+PagedModel -up-|> CollectionModel
+SlicedModel -up-|> CollectionModel
 ....
 ====
 
@@ -153,7 +158,7 @@ If you returned such an instance from a Spring MVC or WebFlux controller and the
 
 .The HAL representation generated for the person representation model
 ====
-[source javscript]
+[source, javscript]
 ----
 {
   "_links" : {

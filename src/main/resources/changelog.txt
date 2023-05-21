@@ -1,6 +1,49 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.1.0 (2023-05-11)
+----------------------------------------
+- #1973 - Upgrade to Reactor 2022.0.7.
+- #1970 - Upgrade to Spring 6.0.9.
+- #1967 - Upgrade to Kotlin 1.8.21.
+- #1965 - Optional support for Validation API still on javax.… namespace.
+- #1963 - Upgrade to Jackson 2.15.
+
+Changes in version 2.1.0-RC1 (2023-04-13)
+----------------------------------------
+- #1959 - Upgrade build plugins.
+- #1958 - Upgrade to ArchUnit 1.0.1.
+- #1957 - Upgrade to Kotlin 1.8.20.
+- #1956 - Upgrade to Reactor 2022.0.6.
+- #1955 - Upgrade to Spring Framework 6.0.8.
+- #1954 - Reference documentation on HAL use orders rel when should be order.
+- #1939 - Upgrade to Jackson 2.15 RC2.
+
+Changes in version 2.1.0-M1 (2023-03-20)
+----------------------------------------
+- #1938 - Upgrade to Spring Framework 6.0.7.
+- #1937 - Upgrade to Mockk 1.13.4.
+- #1936 - Upgrade to Slf4j 2.0.6.
+- #1935 - Upgrade to Reactor 2022.0.5.
+- #1934 - Upgrade to Lombok 1.18.26.
+- #1933 - Upgrade to JUnit 5.9.2.
+- #1932 - Upgrade to Jackson 2.14.2.
+- #1931 - Upgrade to Logback 1.4.6.
+- #1929 - Polish nullability and Javadoc.
+- #1928 - Upgrade to Spring Asciidoctor Backends 0.0.5.
+- #1927 - Upgrade to AssertJ 3.24.2.
+- #1925 - Upgrade to AsciidoctorJ 2.5.7.
+- #1924 - Upgrade to Spring Asciidoctor backends 0.0.4.
+- #1923 - Upgrade to Kotlin 1.8.10.
+- #1920 - Property metadata should support JSR-303 @Size.
+- #1919 - Upgrade CI build to use latest setup-java task.
+- #1905 - Upgrade to Spring Framework 6.0.5.
+- #1900 - Polish use of Optional in PropertyUtils.
+- #1899 - Link header parsing breaks for multiple links with at least one containing unquoted values.
+- #1886 - Trailing slash added for request mappings with empty path.
+- #1856 - Add SlicedModel class for representing Slice collections.
+- #1778 - Correct typo in JavaDoc of EntityLinks.
+
 Changes in version 2.0.0 (2022-11-16)
 ----------------------------------------
 - #1880 - Upgrade to Spring Plugin 3.0.

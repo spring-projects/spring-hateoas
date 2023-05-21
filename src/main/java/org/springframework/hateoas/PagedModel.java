@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -237,7 +238,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata can be {@literal null}.
-	 * @param links
+	 * @return will never be {@literal null}.
 	 */
 	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata) {
 		return new PagedModel<>(content, metadata);
@@ -248,10 +249,11 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata can be {@literal null}.
-	 * @param links
+	 * @param links must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata, Link... links) {
-		return new PagedModel<>(content, metadata, Arrays.asList(links));
+		return new PagedModel<>(content, metadata, List.of(links));
 	}
 
 	/**
@@ -259,7 +261,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 *
 	 * @param content must not be {@literal null}.
 	 * @param metadata can be {@literal null}.
-	 * @param links
+	 * @param links must not be {@literal null}.
 	 */
 	public static <T> PagedModel<T> of(Collection<T> content, @Nullable PageMetadata metadata, Iterable<Link> links) {
 		return new PagedModel<>(content, metadata, links);

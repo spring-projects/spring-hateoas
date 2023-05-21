@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 107;
+	private static final int MILESTONE_ID = 116;
 	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
 
 	public static void main(String... args) {

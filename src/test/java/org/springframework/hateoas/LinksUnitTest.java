@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,15 @@ class LinksUnitTest {
 	static final Links reference = Links.of(Link.of("/something", "foo"), Link.of("/somethingElse", "bar"));
 	static final Links reference2 = Links.of(Link.of("/something", "foo").withHreflang("en"),
 			Link.of("/somethingElse", "bar").withHreflang("de"));
+
+	// #1899
+	static final String FIVE = "</somethingElse?foo=one,two>;rel=boo";
+	static final String SIX = "</somethingElse>; rel=bee";
+	static final String SEVEN = "</somethingElse>;rel=beeboo;title=sometitle";
+	static final String LINKS3 = StringUtils.collectionToCommaDelimitedString(Arrays.asList(FIVE, SIX, SEVEN));
+	static final Links reference3 = Links.of(Link.of("/somethingElse?foo=one,two", "boo"), //
+			Link.of("/somethingElse", "bee"),
+			Link.of("/somethingElse", "beeboo").withTitle("sometitle"));
 
 	@Test
 	void parsesLinkHeaderLinks() {
@@ -262,6 +271,11 @@ class LinksUnitTest {
 
 		assertThat(Links.parse("<https://url.com?page=1>; rel=first").getRequiredLink("first").getHref())
 				.isEqualTo("https://url.com?page=1");
+	}
+
+	@Test // #1899
+	void parsesMultipleLinksContainingUnquotedRels() {
+		assertThat(Links.parse(LINKS3)).isEqualTo(reference3);
 	}
 
 	@Value(staticConstructor = "of")

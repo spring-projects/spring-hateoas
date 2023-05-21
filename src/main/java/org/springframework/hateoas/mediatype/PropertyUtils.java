@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,16 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -25,15 +35,6 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.reactivestreams.Publisher;
 import org.springframework.beans.BeanUtils;
@@ -72,7 +73,7 @@ public class PropertyUtils {
 	private static final Map<ResolvableType, ResolvableType> DOMAIN_TYPE_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Map<ResolvableType, InputPayloadMetadata> METADATA_CACHE = new ConcurrentReferenceHashMap<>();
 	private static final Set<String> FIELDS_TO_IGNORE = new HashSet<>(Arrays.asList("class", "links"));
-	private static final boolean JSR_303_PRESENT = ClassUtils.isPresent("javax.validation.constraints.Email",
+	private static final boolean JSR_303_PRESENT = ClassUtils.isPresent("jakarta.validation.constraints.Email",
 			PropertyUtils.class.getClassLoader());
 	private static final List<Class<?>> TYPES_TO_UNWRAP = new ArrayList<>(
 			Arrays.asList(EntityModel.class, CollectionModel.class, HttpEntity.class));
@@ -331,7 +332,6 @@ public class PropertyUtils {
 		 *
 		 * @param property must not be {@literal null}.
 		 */
-		@SuppressWarnings("unchecked")
 		public AnnotatedProperty(Property property) {
 
 			Assert.notNull(property, "Property must not be null!");
@@ -340,10 +340,10 @@ public class PropertyUtils {
 
 			Field field = ReflectionUtils.findField(property.getObjectType(), property.getName());
 
-			this.type = firstNonEmpty( //
-					() -> Optional.ofNullable(property.getReadMethod()).map(ResolvableType::forMethodReturnType), //
-					() -> Optional.ofNullable(property.getWriteMethod()).map(it -> ResolvableType.forMethodParameter(it, 0)), //
-					() -> Optional.ofNullable(field).map(ResolvableType::forField));
+			this.type = Optional.ofNullable(property.getReadMethod()).map(ResolvableType::forMethodReturnType)
+					.or(() -> Optional.ofNullable(property.getWriteMethod()).map(it -> ResolvableType.forMethodParameter(it, 0))) //
+					.or(() -> Optional.ofNullable(field).map(ResolvableType::forField))
+					.orElseThrow(() -> new IllegalStateException("Could not resolve value!"));
 
 			this.annotations = Stream.of(property.getReadMethod(), property.getWriteMethod(), field) //
 					.filter(it -> it != null) //
@@ -351,17 +351,6 @@ public class PropertyUtils {
 					.collect(Collectors.toList());
 
 			this.typeAnnotations = MergedAnnotations.from(this.type.resolve(Object.class));
-		}
-
-		@SuppressWarnings("unchecked")
-		private static <T> T firstNonEmpty(Supplier<Optional<T>>... suppliers) {
-
-			Assert.notNull(suppliers, "Suppliers must not be null!");
-
-			return Stream.of(suppliers) //
-					.map(Supplier::get).flatMap(it -> it.map(Stream::of).orElseGet(Stream::empty)) //
-					.findFirst() //
-					.orElseThrow(() -> new IllegalStateException("Could not resolve value!"));
 		}
 
 		/**
@@ -570,6 +559,7 @@ public class PropertyUtils {
 
 			Map<Class<? extends Annotation>, String> typeMap = new HashMap<>();
 			typeMap.put(Email.class, "email");
+			typeMap.put(Size.class, "range");
 
 			if (URL_ANNOTATION != null) {
 				typeMap.put(URL_ANNOTATION, "url");
@@ -629,8 +619,9 @@ public class PropertyUtils {
 		@Override
 		public Number getMin() {
 
-			return Optional.ofNullable(RANGE_ANNOTATION) //
-					.flatMap(it -> getAnnotationAttribute(it, "min", Number.class)) //
+			return getAnnotationAttribute(Size.class, "min", Number.class) //
+					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
+							.flatMap(it -> getAnnotationAttribute(it, "min", Number.class))) //
 					.or(() -> getAnnotationAttribute(Min.class, "value", Number.class)) //
 					.or(() -> parsePropertyAnnotationValue(DecimalMin.class)) //
 					.orElse(null);
@@ -644,8 +635,9 @@ public class PropertyUtils {
 		@Override
 		public Number getMax() {
 
-			return Optional.ofNullable(RANGE_ANNOTATION) //
-					.flatMap(it -> getAnnotationAttribute(it, "max", Number.class)) //
+			return getAnnotationAttribute(Size.class, "max", Number.class) //
+					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
+							.flatMap(it -> getAnnotationAttribute(it, "max", Number.class))) //
 					.or(() -> getAnnotationAttribute(Max.class, "value", Number.class)) //
 					.or(() -> parsePropertyAnnotationValue(DecimalMax.class)) //
 					.orElse(null);
