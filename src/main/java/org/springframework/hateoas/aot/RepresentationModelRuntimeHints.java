@@ -15,10 +15,11 @@
  */
 package org.springframework.hateoas.aot;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.hateoas.CollectionModel;
@@ -34,7 +35,7 @@ import org.springframework.hateoas.RepresentationModel;
 class RepresentationModelRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static final List<Class<?>> REPRESENTATION_MODELS = List.of(RepresentationModel.class, //
-			EntityModel.class, //
+			// EntityModel.class, // treated specially below
 			CollectionModel.class, //
 			PagedModel.class,
 			PagedModel.PageMetadata.class);
@@ -46,9 +47,12 @@ class RepresentationModelRuntimeHints implements RuntimeHintsRegistrar {
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 
-		ReflectionHints reflection = hints.reflection();
+		var reflection = hints.reflection();
+		var entityModelAndNested = Arrays.stream(EntityModel.class.getNestMembers());
 
-		REPRESENTATION_MODELS.forEach(it -> reflection.registerType(it, //
-				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS));
+		Stream.concat(REPRESENTATION_MODELS.stream(), entityModelAndNested).forEach(it -> { //
+			reflection.registerType(it, //
+					MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS);
+		});
 	}
 }
