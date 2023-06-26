@@ -21,18 +21,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 
 /**
  * Unit tests for {@link RepresentationModelRuntimeHints}.
  *
  * @author Oliver Drotbohm
  */
-class RepresentationModelRuntimeHintsUnitTests {
+class HateoasTypesRuntimeHintsUnitTests {
 
 	@Test // GH-1981
-	void registersHintsForMapSuppressingUnwrappingSerializer() {
+	void registersHintsForHateoasTypes() {
 
-		var registrar = new RepresentationModelRuntimeHints();
+		var registrar = new HateoasTypesRuntimeHints();
 		var hints = new RuntimeHints();
 
 		registrar.registerHints(hints, getClass().getClassLoader());
@@ -40,6 +42,8 @@ class RepresentationModelRuntimeHintsUnitTests {
 		assertThat(hints.reflection().typeHints())
 				.extracting(TypeHint::getType)
 				.extracting(TypeReference::getSimpleName)
-				.contains("MapSuppressingUnwrappingSerializer");
+				.contains("MapSuppressingUnwrappingSerializer", //
+						Link.class.getSimpleName(), //
+						Links.class.getSimpleName());
 	}
 }
