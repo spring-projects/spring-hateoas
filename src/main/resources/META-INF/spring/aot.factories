@@ -4,4 +4,4 @@ org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
     org.springframework.hateoas.aot.RepresentationModelAssemblerAotProcessor
 
 org.springframework.aot.hint.RuntimeHintsRegistrar=\
-    org.springframework.hateoas.aot.RepresentationModelRuntimeHints
+    org.springframework.hateoas.aot.HateoasTypesRuntimeHints

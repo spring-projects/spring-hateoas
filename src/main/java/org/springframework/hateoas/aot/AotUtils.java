@@ -15,19 +15,30 @@
  */
 package org.springframework.hateoas.aot;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.AssignableTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpEntity;
+import org.springframework.util.ClassUtils;
 
 /**
  * Some helper classes to register types for reflection.
@@ -114,5 +125,53 @@ class AotUtils {
 		return nested.stream()
 				.flatMap(it -> extractGenerics(it, unresolved).stream())
 				.findFirst();
+	}
+
+	public static FullTypeScanner getScanner(String packageName, TypeFilter... includeFilters) {
+
+		var provider = new ClassPathScanningCandidateComponentProvider(false);
+
+		if (includeFilters.length == 0) {
+			provider.addIncludeFilter(new AssignableTypeFilter(Object.class));
+		} else {
+			Arrays.stream(includeFilters).forEach(provider::addIncludeFilter);
+		}
+
+		provider.addExcludeFilter(new EnforcedPackageFilter(packageName));
+
+		return () -> provider.findCandidateComponents(packageName).stream()
+				.map(BeanDefinition::getBeanClassName)
+				.map(TypeReference::of);
+	}
+
+	/**
+	 * A {@link TypeFilter} to only match types <em>outside</em> the configured package. Usually used as exclude filter to
+	 * limit scans to not find nested packages.
+	 *
+	 * @author Oliver Drotbohm
+	 */
+	private static class EnforcedPackageFilter implements TypeFilter {
+
+		private final String referencePackage;
+
+		public EnforcedPackageFilter(String referencePackage) {
+			this.referencePackage = referencePackage;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.core.type.filter.TypeFilter#match(org.springframework.core.type.classreading.MetadataReader, org.springframework.core.type.classreading.MetadataReaderFactory)
+		 */
+		@Override
+		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
+				throws IOException {
+			return !referencePackage
+					.equals(ClassUtils.getPackageName(metadataReader.getClassMetadata().getClassName()));
+		}
+	}
+
+	static interface FullTypeScanner {
+
+		abstract Stream<TypeReference> findClasses();
 	}
 }

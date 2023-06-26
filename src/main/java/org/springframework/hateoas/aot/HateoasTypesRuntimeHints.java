@@ -15,16 +15,9 @@
  */
 package org.springframework.hateoas.aot;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
@@ -32,13 +25,7 @@ import org.springframework.hateoas.RepresentationModel;
  *
  * @author Oliver Drotbohm
  */
-class RepresentationModelRuntimeHints implements RuntimeHintsRegistrar {
-
-	private static final List<Class<?>> REPRESENTATION_MODELS = List.of(RepresentationModel.class, //
-			// EntityModel.class, // treated specially below
-			CollectionModel.class, //
-			PagedModel.class,
-			PagedModel.PageMetadata.class);
+class HateoasTypesRuntimeHints implements RuntimeHintsRegistrar {
 
 	/*
 	 * (non-Javadoc)
@@ -48,11 +35,11 @@ class RepresentationModelRuntimeHints implements RuntimeHintsRegistrar {
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 
 		var reflection = hints.reflection();
-		var entityModelAndNested = Arrays.stream(EntityModel.class.getNestMembers());
 
-		Stream.concat(REPRESENTATION_MODELS.stream(), entityModelAndNested).forEach(it -> { //
-			reflection.registerType(it, //
-					MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS);
-		});
+		AotUtils.getScanner(RepresentationModel.class.getPackageName()) //
+				.findClasses() //
+				.forEach(it -> reflection.registerType(it, //
+						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, //
+						MemberCategory.INVOKE_DECLARED_METHODS));
 	}
 }
