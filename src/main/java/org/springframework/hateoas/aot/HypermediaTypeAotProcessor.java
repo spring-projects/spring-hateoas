@@ -17,6 +17,7 @@ package org.springframework.hateoas.aot;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,22 +29,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.TypeReference;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.hateoas.aot.AotUtils.FullTypeScanner;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * A {@link BeanRegistrationAotProcessor} to register types that will be rendered by Jackson for reflection. The
@@ -75,7 +73,7 @@ class HypermediaTypeAotProcessor implements BeanRegistrationAotProcessor {
 		var mediaTypePackages = Stream.concat(fromConfig, Stream.of("alps", "problem"))
 				.map("org.springframework.hateoas.mediatype."::concat);
 
-		var packagesToScan = Stream.concat(Stream.of("org.springframework.hateoas"), mediaTypePackages).toList();
+		var packagesToScan = mediaTypePackages.toList();
 
 		return packagesToScan.isEmpty() ? null : new MediaTypeReflectionAotContribution(packagesToScan);
 	}
@@ -118,65 +116,18 @@ class HypermediaTypeAotProcessor implements BeanRegistrationAotProcessor {
 				packagesSeen.add(it);
 
 				// Register RepresentationModel types for full reflection
-				FullTypeScanner provider = new FullTypeScanner();
-				provider.addIncludeFilter(new JacksonAnnotationPresentFilter());
-				provider.addIncludeFilter(new JacksonSuperTypeFilter());
-
-				// Add filter to limit scan to sole package, not nested ones
-				provider.addExcludeFilter(new EnforcedPackageFilter(it));
+				FullTypeScanner provider = AotUtils.getScanner(it, //
+						new JacksonAnnotationPresentFilter(), //
+						new JacksonSuperTypeFilter());
 
 				LOGGER.info("Registering Spring HATEOAS types in {} for reflection.", it);
 
-				provider.findCandidateComponents(it).stream()
-						.map(BeanDefinition::getBeanClassName)
-						.sorted()
-						.peek(type -> LOGGER.debug("> {}", type))
-						.map(TypeReference::of)
+				provider.findClasses()
+						.sorted(Comparator.comparing(TypeReference::getName))
+						.peek(type -> LOGGER.debug("> {}", type.getName()))
 						.forEach(reference -> reflection.registerType(reference, //
 								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS));
 			});
-		}
-	}
-
-	static class FullTypeScanner extends ClassPathScanningCandidateComponentProvider {
-
-		public FullTypeScanner() {
-			super(false);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#isCandidateComponent(org.springframework.beans.factory.annotation.AnnotatedBeanDefinition)
-		 */
-		@Override
-		protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
-			return true;
-		}
-	}
-
-	/**
-	 * A {@link TypeFilter} to only match types <em>outside</em> the configured package. Usually used as exclude filter
-	 * to limit scans to not find nested packages.
-	 *
-	 * @author Oliver Drotbohm
-	 */
-	static class EnforcedPackageFilter implements TypeFilter {
-
-		private final String referencePackage;
-
-		public EnforcedPackageFilter(String referencePackage) {
-			this.referencePackage = referencePackage;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.core.type.filter.TypeFilter#match(org.springframework.core.type.classreading.MetadataReader, org.springframework.core.type.classreading.MetadataReaderFactory)
-		 */
-		@Override
-		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
-				throws IOException {
-			return !referencePackage
-					.equals(ClassUtils.getPackageName(metadataReader.getClassMetadata().getClassName()));
 		}
 	}
 
