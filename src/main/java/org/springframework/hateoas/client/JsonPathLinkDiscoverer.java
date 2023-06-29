@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.client;
 
-import net.minidev.json.JSONArray;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -161,13 +159,13 @@ public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 	 */
 	private Links createLinksFrom(Object parseResult, LinkRelation rel) {
 
-		if (JSONArray.class.isInstance(parseResult)) {
+		if (List.class.isInstance(parseResult)) {
 
-			JSONArray jsonArray = (JSONArray) parseResult;
+			List<?> list = (List<?>) parseResult;
 
-			return jsonArray.stream() //
-					.flatMap(it -> JSONArray.class.isInstance(it) ? ((JSONArray) it).stream() : Stream.of(it)) //
-					.map(it -> extractLink(it, rel)) //
+			return list.stream()
+					.flatMap(it -> List.class.isInstance(it) ? ((List<?>) it).stream() : Stream.of(it))
+					.map(it -> extractLink(it, rel))
 					.collect(Links.collector());
 		}
 
