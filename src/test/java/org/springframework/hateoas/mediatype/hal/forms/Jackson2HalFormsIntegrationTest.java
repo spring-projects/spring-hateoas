@@ -18,7 +18,6 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Getter;
-import net.minidev.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -601,8 +600,8 @@ class Jackson2HalFormsIntegrationTest {
 
 		Object actual = JsonPath.compile(path).read(json);
 
-		Object value = JSONArray.class.isInstance(actual) //
-				? JSONArray.class.cast(actual).get(0) //
+		Object value = List.class.isInstance(actual) //
+				? List.class.cast(actual).get(0) //
 				: actual;
 
 		assertThat(value).isEqualTo(expected);
