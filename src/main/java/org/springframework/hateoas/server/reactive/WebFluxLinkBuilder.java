@@ -289,7 +289,7 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 			ServerHttpRequest request = exchange.getRequest();
 			PathContainer contextPath = request.getPath().contextPath();
 
-			result.builder = UriComponentsBuilder.fromHttpRequest(request) //
+			result.builder = UriComponentsBuilder.fromUri(request.getURI()) //
 					.replacePath(contextPath.toString()) //
 					.replaceQuery("");
 
