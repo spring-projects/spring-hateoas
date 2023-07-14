@@ -1,6 +1,14 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 1.5.5 (2023-07-14)
+----------------------------------------
+- #2016 - Switch to UriComponentsBuilder.fromUri(…).
+- #2014 - Upgrade to Spring Framework 5.3.29.
+- #2007 - Upgrade to Reactor 2020.0.34.
+- #2001 - Upgrade to Lombok 1.18.28.
+- #1996 - Upgrade to Logback 1.12.12.
+
 Changes in version 1.5.4 (2023-03-20)
 ----------------------------------------
 - #1950 - Upgrade to Kotlin 1.6.21 and KotlinX 1.6.4.
