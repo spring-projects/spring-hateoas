@@ -73,7 +73,7 @@
 		<assertj.version>3.24.2</assertj.version>
 		<spring-asciidoctor-backends.version>0.0.5</spring-asciidoctor-backends.version>
 		<evo.version>1.3</evo.version>
-		<logback.version>1.4.6</logback.version>
+		<logback.version>1.4.8</logback.version>
 		<jacoco>0.8.8</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
 		<jackson-bom.version>2.15.0</jackson-bom.version>
