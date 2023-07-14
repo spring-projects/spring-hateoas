@@ -8,6 +8,7 @@ Changes in version 1.5.5 (2023-07-14)
 - #2007 - Upgrade to Reactor 2020.0.34.
 - #2001 - Upgrade to Lombok 1.18.28.
 - #1996 - Upgrade to Logback 1.12.12.
+- #1986 - Changing JsonPathProvider to Jackson breaks the JsonPathLinkDiscoverer.
 
 Changes in version 1.5.4 (2023-03-20)
 ----------------------------------------
