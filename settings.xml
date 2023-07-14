@@ -8,5 +8,10 @@
 			<username>${env.SONATYPE_USR}</username>
 			<password>${env.SONATYPE_PSW}</password>
 		</server>
+		<server>
+			<id>spring-release</id>
+			<username>${env.ARTIFACTORY_USR}</username>
+			<password>${env.ARTIFACTORY_PSW}</password>
+		</server>
 	</servers>
 </settings>
