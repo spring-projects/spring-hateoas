@@ -38,8 +38,8 @@ import com.jayway.jsonpath.JsonPath;
  */
 class ChangelogCreator {
 
-	private static final int MILESTONE_ID = 116;
-	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}&state=closed";
+	private static final int MILESTONE_ID = 120;
+	private static final String URI_TEMPLATE = "https://api.github.com/repos/spring-projects/spring-hateoas/issues?milestone={id}";
 
 	public static void main(String... args) {
 

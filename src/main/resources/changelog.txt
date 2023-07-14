@@ -1,6 +1,18 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.1.1 (2023-07-14)
+----------------------------------------
+- #2020 - Switch to UriComponentsBuilder.fromUri(…).
+- #2015 - Upgrade to Kotlin 1.8.22.
+- #2012 - Upgrade to Spring Framework 6.0.11.
+- #2009 - Upgrade to Slf4j 2.0.7.
+- #2004 - Upgrade to Reactor 2022.0.9.
+- #2003 - Upgrade to Lombok 1.18.28.
+- #1999 - Upgrade to JUnit 5.9.3.
+- #1995 - Upgrade to Jackson 2.15.2.
+- #1992 - Upgrade to Logback 1.4.8.
+
 Changes in version 2.1.0 (2023-05-11)
 ----------------------------------------
 - #1973 - Upgrade to Reactor 2022.0.7.
