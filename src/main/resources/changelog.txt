@@ -12,6 +12,8 @@ Changes in version 2.1.1 (2023-07-14)
 - #1999 - Upgrade to JUnit 5.9.3.
 - #1995 - Upgrade to Jackson 2.15.2.
 - #1992 - Upgrade to Logback 1.4.8.
+- #1984 - Changing JsonPathProvider to Jackson breaks the JsonPathLinkDiscoverer.
+- #1982 - AOT reflection metadata missing for EntityModel.MapSuppressingUnwrappingSerializer.
 
 Changes in version 2.1.0 (2023-05-11)
 ----------------------------------------
