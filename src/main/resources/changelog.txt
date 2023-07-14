@@ -4,7 +4,6 @@ Spring HATEOAS Changelog
 Changes in version 2.2.0-M1 (2023-07-14)
 ----------------------------------------
 - #2023 - Switch to UriComponentsBuilder.fromUri(…).
-- #2022 - Release 2.2 M1.
 - #2011 - Upgrade to Spring Framework 6.1 M1.
 - #2010 - Upgrade to Slf4j 2.0.7.
 - #2005 - Upgrade to Reactor 2022.0.9.
