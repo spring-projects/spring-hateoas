@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.aot;
 
-import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.hateoas.RepresentationModel;
@@ -34,12 +33,9 @@ class HateoasTypesRuntimeHints implements RuntimeHintsRegistrar {
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 
+		var packageName = RepresentationModel.class.getPackageName();
 		var reflection = hints.reflection();
 
-		AotUtils.getScanner(RepresentationModel.class.getPackageName()) //
-				.findClasses() //
-				.forEach(it -> reflection.registerType(it, //
-						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, //
-						MemberCategory.INVOKE_DECLARED_METHODS));
+		AotUtils.registerTypesForReflection(packageName, reflection);
 	}
 }

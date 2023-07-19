@@ -16,7 +16,9 @@
 package org.springframework.hateoas.aot;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.ResolvableType;
@@ -93,6 +96,20 @@ class AotUtils {
 		SEEN_TYPES.add(type);
 	}
 
+	public static void registerTypesForReflection(String packageName, ReflectionHints reflection, TypeFilter... filters) {
+
+		// Register RepresentationModel types for full reflection
+		var provider = AotUtils.getScanner(packageName, filters);
+
+		LOGGER.info("Registering Spring HATEOAS types in {} for reflection.", packageName);
+
+		provider.findClasses()
+				.sorted(Comparator.comparing(TypeReference::getName))
+				.peek(type -> LOGGER.debug("> {}", type.getName()))
+				.forEach(reference -> reflection.registerType(reference, //
+						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS));
+	}
+
 	/**
 	 * Extracts the generics from the given model type if the given {@link ResolvableType} is assignable.
 	 *
@@ -129,15 +146,28 @@ class AotUtils {
 
 	public static FullTypeScanner getScanner(String packageName, TypeFilter... includeFilters) {
 
-		var provider = new ClassPathScanningCandidateComponentProvider(false);
+		var provider = new ClassPathScanningCandidateComponentProvider(false) {
+
+			@Override
+			protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+				return super.isCandidateComponent(beanDefinition) || beanDefinition.getMetadata().isAbstract();
+			}
+		};
+
+		var filters = new ArrayList<TypeFilter>();
+		filters.add(new EnforcedPackageFilter(packageName));
+		filters.add(new AssignableTypeFilter(Object.class));
 
 		if (includeFilters.length == 0) {
-			provider.addIncludeFilter(new AssignableTypeFilter(Object.class));
-		} else {
-			Arrays.stream(includeFilters).forEach(provider::addIncludeFilter);
+			provider.addIncludeFilter(all(filters));
 		}
 
-		provider.addExcludeFilter(new EnforcedPackageFilter(packageName));
+		for (TypeFilter filter : includeFilters) {
+
+			var includeFilterComponents = new ArrayList<>(filters);
+			includeFilterComponents.add(filter);
+			provider.addIncludeFilter(all(includeFilterComponents));
+		}
 
 		return () -> provider.findCandidateComponents(packageName).stream()
 				.map(BeanDefinition::getBeanClassName)
@@ -150,7 +180,7 @@ class AotUtils {
 	 *
 	 * @author Oliver Drotbohm
 	 */
-	private static class EnforcedPackageFilter implements TypeFilter {
+	static class EnforcedPackageFilter implements TypeFilter {
 
 		private final String referencePackage;
 
@@ -165,9 +195,28 @@ class AotUtils {
 		@Override
 		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
 				throws IOException {
-			return !referencePackage
+			return referencePackage
 					.equals(ClassUtils.getPackageName(metadataReader.getClassMetadata().getClassName()));
 		}
+	}
+
+	private static TypeFilter all(Collection<TypeFilter> filters) {
+
+		return new TypeFilter() {
+
+			@Override
+			public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
+					throws IOException {
+
+				for (TypeFilter filter : filters) {
+					if (!filter.match(metadataReader, metadataReaderFactory)) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+		};
 	}
 
 	static interface FullTypeScanner {
