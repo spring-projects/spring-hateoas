@@ -15,30 +15,18 @@
  */
 package org.springframework.hateoas.aot;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.hateoas.aot.AotUtils.FullTypeScanner;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.util.Assert;
@@ -80,8 +68,6 @@ class HypermediaTypeAotProcessor implements BeanRegistrationAotProcessor {
 
 	static class MediaTypeReflectionAotContribution implements BeanRegistrationAotContribution {
 
-		private static final Logger LOGGER = LoggerFactory.getLogger(MediaTypeReflectionAotContribution.class);
-
 		private final List<String> mediaTypePackage;
 		private final Set<String> packagesSeen;
 
@@ -105,8 +91,6 @@ class HypermediaTypeAotProcessor implements BeanRegistrationAotProcessor {
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 
-			var reflection = generationContext.getRuntimeHints().reflection();
-
 			mediaTypePackage.forEach(it -> {
 
 				if (packagesSeen.contains(it)) {
@@ -115,97 +99,9 @@ class HypermediaTypeAotProcessor implements BeanRegistrationAotProcessor {
 
 				packagesSeen.add(it);
 
-				// Register RepresentationModel types for full reflection
-				FullTypeScanner provider = AotUtils.getScanner(it, //
-						new JacksonAnnotationPresentFilter(), //
-						new JacksonSuperTypeFilter());
-
-				LOGGER.info("Registering Spring HATEOAS types in {} for reflection.", it);
-
-				provider.findClasses()
-						.sorted(Comparator.comparing(TypeReference::getName))
-						.peek(type -> LOGGER.debug("> {}", type.getName()))
-						.forEach(reference -> reflection.registerType(reference, //
-								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_METHODS));
+				new HypermediaTypesRuntimeHints(it) //
+						.registerHints(generationContext.getRuntimeHints(), getClass().getClassLoader());
 			});
-		}
-	}
-
-	static abstract class TraversingTypeFilter implements TypeFilter {
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.core.type.filter.TypeFilter#match(org.springframework.core.type.classreading.MetadataReader, org.springframework.core.type.classreading.MetadataReaderFactory)
-		 */
-		@Override
-		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
-				throws IOException {
-
-			if (doMatch(metadataReader, metadataReaderFactory)) {
-				return true;
-			}
-
-			var classMetadata = metadataReader.getClassMetadata();
-
-			String superClassName = classMetadata.getSuperClassName();
-
-			if (superClassName != null && !superClassName.startsWith("java")
-					&& match(metadataReaderFactory.getMetadataReader(superClassName), metadataReaderFactory)) {
-				return true;
-			}
-
-			for (String names : classMetadata.getInterfaceNames()) {
-
-				MetadataReader reader = metadataReaderFactory.getMetadataReader(names);
-
-				if (match(reader, metadataReaderFactory)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		protected abstract boolean doMatch(MetadataReader reader, MetadataReaderFactory factory);
-	}
-
-	static class JacksonAnnotationPresentFilter extends TraversingTypeFilter {
-
-		private static final Predicate<String> IS_JACKSON_ANNOTATION = it -> it.startsWith("com.fasterxml.jackson");
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.aot.HateoasRuntimeHints.TraversingTypeFilter#doMatch(org.springframework.core.type.classreading.MetadataReader, org.springframework.core.type.classreading.MetadataReaderFactory)
-		 */
-		@Override
-		protected boolean doMatch(MetadataReader reader, MetadataReaderFactory factory) {
-
-			var annotationMetadata = reader.getAnnotationMetadata();
-
-			// Type annotations
-			return annotationMetadata
-					.getAnnotationTypes()
-					.stream()
-					.anyMatch(IS_JACKSON_ANNOTATION)
-
-					// Method annotations
-					|| annotationMetadata.getDeclaredMethods().stream()
-							.flatMap(it -> it.getAnnotations().stream())
-							.map(MergedAnnotation::getType)
-							.map(Class::getName)
-							.anyMatch(IS_JACKSON_ANNOTATION);
-		}
-	}
-
-	static class JacksonSuperTypeFilter extends TraversingTypeFilter {
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.aot.HateoasRuntimeHints.TraversingTypeFilter#doMatch(org.springframework.core.type.classreading.MetadataReader, org.springframework.core.type.classreading.MetadataReaderFactory)
-		 */
-		@Override
-		protected boolean doMatch(MetadataReader reader, MetadataReaderFactory factory) {
-			return reader.getClassMetadata().getClassName().startsWith("com.fasterxml.jackson");
 		}
 	}
 }
