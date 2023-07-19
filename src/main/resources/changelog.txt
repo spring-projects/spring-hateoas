@@ -1,6 +1,10 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.1.2 (2023-07-19)
+----------------------------------------
+- #2025 - Regression in AOT metadata generation.
+
 Changes in version 2.1.1 (2023-07-14)
 ----------------------------------------
 - #2020 - Switch to UriComponentsBuilder.fromUri(…).
