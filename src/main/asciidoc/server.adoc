@@ -19,7 +19,7 @@ class PersonController {
   @GetMapping("/people")
   HttpEntity<PersonModel> showAll() { … }
 
-  @GetMapping(value = "/{person}", method = RequestMethod.GET)
+  @GetMapping("/{person}")
   HttpEntity<PersonModel> show(@PathVariable Long person) { … }
 }
 ----
