@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.mediatype.MediaTypeConfigurationCustomizer;
+import org.springframework.hateoas.mediatype.MediaTypeConfigurationFactory;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
@@ -45,22 +47,32 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final DelegatingLinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
-	private final ObjectProvider<HalFormsConfiguration> halFormsConfiguration;
-	private final ObjectProvider<HalConfiguration> halConfiguration;
+	private final MediaTypeConfigurationFactory<HalFormsConfiguration, ? extends MediaTypeConfigurationCustomizer<HalFormsConfiguration>> configurationFactory;
 	private final MessageResolver resolver;
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
-	private HalFormsConfiguration resolvedConfiguration;
-
 	public HalFormsMediaTypeConfiguration(DelegatingLinkRelationProvider relProvider,
-			ObjectProvider<CurieProvider> curieProvider, ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
-			ObjectProvider<HalConfiguration> halConfiguration, MessageResolver resolver,
-			AbstractAutowireCapableBeanFactory beanFactory) {
+			ObjectProvider<CurieProvider> curieProvider,
+			ObjectProvider<HalConfiguration> halConfiguration,
+			ObjectProvider<MediaTypeConfigurationCustomizer<HalConfiguration>> halCustomizers,
+			ObjectProvider<HalFormsConfiguration> halFormsConfiguration,
+			ObjectProvider<MediaTypeConfigurationCustomizer<HalFormsConfiguration>> halFormsCustomizers,
+			MessageResolver resolver, AbstractAutowireCapableBeanFactory beanFactory) {
 
 		this.relProvider = relProvider;
 		this.curieProvider = curieProvider;
-		this.halFormsConfiguration = halFormsConfiguration;
-		this.halConfiguration = halConfiguration;
+
+		Supplier<HalFormsConfiguration> defaultConfig = () -> {
+
+			MediaTypeConfigurationFactory<HalConfiguration, ?> customizedHalConfiguration = new MediaTypeConfigurationFactory<>(
+					() -> halConfiguration.getIfAvailable(HalConfiguration::new), halCustomizers);
+
+			return new HalFormsConfiguration(
+					customizedHalConfiguration.getConfiguration());
+		};
+
+		this.configurationFactory = new MediaTypeConfigurationFactory<>(
+				() -> halFormsConfiguration.getIfAvailable(defaultConfig), halFormsCustomizers);
 		this.resolver = resolver;
 		this.beanFactory = beanFactory;
 	}
@@ -73,7 +85,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Bean
 	HalFormsTemplatePropertyWriter halFormsTemplatePropertyWriter() {
 
-		HalFormsConfiguration configuration = getResolvedConfiguration();
+		HalFormsConfiguration configuration = configurationFactory.getConfiguration();
 		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, resolver);
 
 		return new HalFormsTemplatePropertyWriter(builder);
@@ -86,7 +98,7 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		HalFormsConfiguration halFormsConfig = getResolvedConfiguration();
+		HalFormsConfiguration halFormsConfig = configurationFactory.getConfiguration();
 		CurieProvider provider = curieProvider.getIfAvailable(() -> CurieProvider.NONE);
 
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -105,18 +117,15 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return getResolvedConfiguration().getMediaTypes();
+		return configurationFactory.getConfiguration().getMediaTypes();
 	}
 
+	/**
+	 * For testing purposes.
+	 *
+	 * @return
+	 */
 	HalFormsConfiguration getResolvedConfiguration() {
-
-		Supplier<HalFormsConfiguration> defaultConfig = () -> new HalFormsConfiguration(
-				halConfiguration.getIfAvailable(HalConfiguration::new));
-
-		if (resolvedConfiguration == null) {
-			this.resolvedConfiguration = halFormsConfiguration.getIfAvailable(defaultConfig);
-		}
-
-		return resolvedConfiguration;
+		return configurationFactory.getConfiguration();
 	}
 }

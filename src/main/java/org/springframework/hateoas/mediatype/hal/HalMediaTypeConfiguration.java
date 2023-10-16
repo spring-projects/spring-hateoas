@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.hateoas.mediatype.MediaTypeConfigurationCustomizer;
+import org.springframework.hateoas.mediatype.MediaTypeConfigurationFactory;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.http.MediaType;
@@ -42,19 +44,19 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	private final LinkRelationProvider relProvider;
 	private final ObjectProvider<CurieProvider> curieProvider;
-	private final ObjectProvider<HalConfiguration> halConfiguration;
+	private final MediaTypeConfigurationFactory<HalConfiguration, ? extends MediaTypeConfigurationCustomizer<HalConfiguration>> configurationFactory;
 	private final @Qualifier("messageResolver") MessageResolver resolver;
 	private final AutowireCapableBeanFactory beanFactory;
 
-	private HalConfiguration resolvedConfiguration;
-
 	public HalMediaTypeConfiguration(LinkRelationProvider relProvider, ObjectProvider<CurieProvider> curieProvider,
-			ObjectProvider<HalConfiguration> halConfiguration, MessageResolver resolver,
-			AutowireCapableBeanFactory beanFactory) {
+			ObjectProvider<HalConfiguration> halConfiguration,
+			ObjectProvider<MediaTypeConfigurationCustomizer<HalConfiguration>> customizers,
+			MessageResolver resolver, AutowireCapableBeanFactory beanFactory) {
 
 		this.relProvider = relProvider;
 		this.curieProvider = curieProvider;
-		this.halConfiguration = halConfiguration;
+		this.configurationFactory = new MediaTypeConfigurationFactory<>(
+				() -> halConfiguration.getIfAvailable(HalConfiguration::new), customizers);
 		this.resolver = resolver;
 		this.beanFactory = beanFactory;
 	}
@@ -70,7 +72,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return getResolvedConfiguration().getMediaTypes();
+		return configurationFactory.getConfiguration().getMediaTypes();
 	}
 
 	/*
@@ -80,7 +82,7 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		HalConfiguration halConfiguration = getResolvedConfiguration();
+		HalConfiguration halConfiguration = configurationFactory.getConfiguration();
 
 		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		mapper.registerModule(new Jackson2HalModule());
@@ -90,19 +92,5 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 		halConfiguration.customize(mapper);
 
 		return mapper;
-	}
-
-	/**
-	 * Lookup and cache the {@link HalConfiguration} instance to be used.
-	 *
-	 * @return will never be {@literal null}.
-	 */
-	private HalConfiguration getResolvedConfiguration() {
-
-		if (resolvedConfiguration == null) {
-			this.resolvedConfiguration = halConfiguration.getIfAvailable(HalConfiguration::new);
-		}
-
-		return resolvedConfiguration;
 	}
 }
