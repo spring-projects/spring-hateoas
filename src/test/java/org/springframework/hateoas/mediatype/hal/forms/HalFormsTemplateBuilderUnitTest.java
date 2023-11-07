@@ -201,6 +201,44 @@ class HalFormsTemplateBuilderUnitTest {
 				});
 	}
 
+	@Test
+	void rendersStringValue() {
+		String value = "1234123412341234";
+
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
+				.withValues(PatternExample.class, "number", metadata -> value);
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(PatternExample.class) //
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
+				.findTemplates(models);
+
+		assertThat(templates.get("postPatternExample").getPropertyByName("number")) //
+				.hasValueSatisfying(it -> assertThat(it.getValue()).isEqualTo(value));
+	}
+
+	@Test
+	void rendersBooleanValue() {
+		HalFormsConfiguration configuration = new HalFormsConfiguration() //
+				.withValues(PatternExample.class, "number", metadata -> true);
+
+		RepresentationModel<?> models = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
+						.afford(HttpMethod.POST) //
+						.withInput(PatternExample.class) //
+						.toLink());
+
+		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
+				.findTemplates(models);
+
+		assertThat(templates.get("postPatternExample").getPropertyByName("number")) //
+				.hasValueSatisfying(it -> assertThat(it.getValue()).isEqualTo(true));
+	}
+
 	@Test // #1510
 	void propagatesSelectedValueToProperty() {
 
