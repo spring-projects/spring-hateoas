@@ -25,6 +25,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.springframework.lang.Nullable;
@@ -556,6 +557,16 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 
 		int findIndexWithin(String template) {
 			return template.indexOf(key);
+		}
+
+		Stream<VariableType> getFollowingTypes() {
+
+			return switch (this) {
+				case PATH_SEGMENT -> Stream.of(PATH_STYLE_PARAMETER, REQUEST_PARAM, FRAGMENT);
+				case PATH_STYLE_PARAMETER -> Stream.of(REQUEST_PARAM, FRAGMENT);
+				case REQUEST_PARAM, REQUEST_PARAM_CONTINUED -> Stream.of(FRAGMENT);
+				default -> Stream.<VariableType> empty();
+			};
 		}
 
 		/**
