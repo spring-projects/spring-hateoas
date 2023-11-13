@@ -390,6 +390,21 @@ class UriTemplateUnitTest {
 		assertThat(template.getVariableNames()).contains("foo.bar");
 	}
 
+	@Test // #2036
+	void addsPathSegmentAtTheRightPositionWithinTheUri() {
+
+		UriTemplate template = UriTemplate.of("/api?foo=bar#baz");
+
+		assertThat(template.with("p", VariableType.REQUEST_PARAM).toString())
+				.isEqualTo("/api?foo=bar{&p}#baz");
+
+		assertThat(template.with("p", VariableType.PATH_SEGMENT).toString())
+				.isEqualTo("/api{/p}?foo=bar#baz");
+
+		assertThat(template.with("p", VariableType.PATH_STYLE_PARAMETER).toString())
+				.isEqualTo("/api{;p}?foo=bar#baz");
+	}
+
 	private static void assertVariables(UriTemplate template, TemplateVariable... variables) {
 		assertVariables(template, Arrays.asList(variables));
 	}
