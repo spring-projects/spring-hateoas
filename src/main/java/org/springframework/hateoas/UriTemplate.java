@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas;
 
+import static org.springframework.hateoas.TemplateVariable.VariableType.*;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
@@ -35,7 +38,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -178,6 +180,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		List<TemplateVariable> result = new ArrayList<>();
 
 		for (TemplateVariable variable : variables) {
+
 			boolean isRequestParam = variable.isRequestParameterVariable();
 			boolean alreadyPresent = parameters.containsKey(variable.getName());
 
@@ -215,7 +218,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 				group = existing.merge(group);
 				newOriginal = newOriginal.replace(existing.asString(), group.asString());
 			} else {
-				newOriginal = newOriginal.concat(group.asString());
+				newOriginal = group.insertInto(newOriginal);
 			}
 
 			groups = groups.addOrAugment(group);
@@ -468,6 +471,28 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 		boolean canBeCombinedWith(VariableType type) {
 			return this.type.canBeCombinedWith(type);
+		}
+
+		/**
+		 * Inserts the current {@link ExpandGroup} into the given URI template.
+		 *
+		 * @param template must not be {@literal null} or empty.
+		 * @return will never be {@literal null}.
+		 */
+		String insertInto(String template) {
+
+			var followingTypes = switch (type) {
+				case PATH_SEGMENT -> Stream.of(PATH_STYLE_PARAMETER, REQUEST_PARAM, FRAGMENT);
+				case PATH_STYLE_PARAMETER -> Stream.of(REQUEST_PARAM, FRAGMENT);
+				case REQUEST_PARAM, REQUEST_PARAM_CONTINUED -> Stream.of(FRAGMENT);
+				default -> Stream.<VariableType> empty();
+			};
+
+			return followingTypes.map(it -> it.findIndexWithin(template))
+					.filter(it -> it != -1)
+					.findFirst()
+					.map(it -> template.substring(0, it) + toString() + template.substring(it))
+					.orElseGet(() -> template.concat(toString()));
 		}
 
 		/*

@@ -554,6 +554,10 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 			return this.equals(type) || COMBINABLE_TYPES.contains(this) && COMBINABLE_TYPES.contains(type);
 		}
 
+		int findIndexWithin(String template) {
+			return template.indexOf(key);
+		}
+
 		/**
 		 * Returns the {@link VariableType} for the given variable key.
 		 *
