@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas;
 
-import static org.springframework.hateoas.TemplateVariable.VariableType.*;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +28,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.lang.Nullable;
@@ -481,14 +478,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 		 */
 		String insertInto(String template) {
 
-			var followingTypes = switch (type) {
-				case PATH_SEGMENT -> Stream.of(PATH_STYLE_PARAMETER, REQUEST_PARAM, FRAGMENT);
-				case PATH_STYLE_PARAMETER -> Stream.of(REQUEST_PARAM, FRAGMENT);
-				case REQUEST_PARAM, REQUEST_PARAM_CONTINUED -> Stream.of(FRAGMENT);
-				default -> Stream.<VariableType> empty();
-			};
-
-			return followingTypes.map(it -> it.findIndexWithin(template))
+			return type.getFollowingTypes().map(it -> it.findIndexWithin(template))
 					.filter(it -> it != -1)
 					.findFirst()
 					.map(it -> template.substring(0, it) + toString() + template.substring(it))
