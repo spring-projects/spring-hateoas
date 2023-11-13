@@ -45,7 +45,7 @@ class TemplateVariablesUnitTest {
 	@Test
 	void rendersSingleVariableCorrectly() {
 
-		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
+		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", PATH_SEGMENT));
 		assertThat(variables.toString()).isEqualTo("{/foo}");
 	}
 
@@ -69,7 +69,7 @@ class TemplateVariablesUnitTest {
 	@Test
 	void combinesMultipleVariablesOfTheDifferentType() {
 
-		TemplateVariable first = new TemplateVariable("foo", SEGMENT);
+		TemplateVariable first = new TemplateVariable("foo", PATH_SEGMENT);
 		TemplateVariable second = new TemplateVariable("bar", REQUEST_PARAM);
 
 		TemplateVariables variables = new TemplateVariables(first, second);
@@ -83,7 +83,7 @@ class TemplateVariablesUnitTest {
 	@Test
 	void concatsVariables() {
 
-		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", SEGMENT));
+		TemplateVariables variables = new TemplateVariables(new TemplateVariable("foo", PATH_SEGMENT));
 		variables = variables.concat(new TemplateVariable("bar", REQUEST_PARAM));
 
 		assertThat(variables.toString()).isEqualTo("{/foo}{?bar}");
@@ -179,7 +179,7 @@ class TemplateVariablesUnitTest {
 	void variableRejectsEmptyName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new TemplateVariable("", PATH_VARIABLE);
+			new TemplateVariable("", SIMPLE);
 		});
 	}
 
@@ -190,7 +190,7 @@ class TemplateVariablesUnitTest {
 	void variableRejectsNullName() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new TemplateVariable(null, PATH_VARIABLE);
+			new TemplateVariable(null, SIMPLE);
 		});
 	}
 
@@ -212,7 +212,7 @@ class TemplateVariablesUnitTest {
 	void variableRejectsNullDescription() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new TemplateVariable("foo", PATH_VARIABLE, null, Cardinality.SINGULAR);
+			new TemplateVariable("foo", SIMPLE, null, Cardinality.SINGULAR);
 		});
 	}
 
@@ -220,7 +220,7 @@ class TemplateVariablesUnitTest {
 	void variableRejectsNullCardinality() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new TemplateVariable("foo", PATH_VARIABLE, "description", null);
+			new TemplateVariable("foo", SIMPLE, "description", null);
 		});
 	}
 }
