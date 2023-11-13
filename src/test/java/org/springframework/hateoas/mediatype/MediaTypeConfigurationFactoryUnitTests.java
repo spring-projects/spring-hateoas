@@ -27,6 +27,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
+ * Unit tests for {@link MediaTypeConfigurationFactory};
+ *
  * @author Oliver Drotbohm
  */
 @ExtendWith(MockitoExtension.class)
