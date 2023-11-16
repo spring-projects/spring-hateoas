@@ -1,6 +1,22 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.2.0 (2023-11-16)
+----------------------------------------
+- #2056 - Enable compatibility builds for all 2.x branches.
+- #2053 - Upgrade to Spring Framework 6.1.
+- #2052 - Upgrade to Mockk 1.13.7.
+- #2051 - Upgrade to Slf4j 2.0.9.
+- #2050 - Upgrade to Reactor 2023.0.0.
+- #2049 - Upgrade to Lombok 1.8.30.
+- #2048 - Upgrade to JUnit 5.10.1.
+- #2047 - Upgrade to Logback 1.4.11.
+- #2046 - Upgrade to Kotlin 1.9.20.
+- #2045 - Upgrade to Jackson 2.15.3.
+- #2044 - Enable CI builds for 2.1.x branch.
+- #2036 - UriTemplate.with(…) should not only append variables at the end.
+- #2035 - Allow selective customization of media type configuration.
+
 Changes in version 2.2.0-RC1 (2023-10-12)
 ----------------------------------------
 - #2033 - Upgrade to Spring Framework 6.1 RC1.
