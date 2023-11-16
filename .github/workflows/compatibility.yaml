@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '5 6 * * *'
-branches:
-  - 'main'
-  - '2.1.x'
-  - '2.0.x'
 
 jobs:
   compatibility:
@@ -16,16 +12,19 @@ jobs:
 
     strategy:
       matrix:
-        spring: ['', 'spring-next']
-        kotlin: ['', 'kotlin-next']
+        branch: ['main', '2.1.x', '2.0.x']
+        spring: ['', 'spring-next', 'spring-61-next']
+        kotlin: ['', 'kotlin-next', 'kotlin-2-next']
         jackson: ['', 'jackson-next']
 
-    name: Compatibility ${{ matrix.spring }} ${{ matrix.kotlin }} ${{ matrix.jackson }}
+    name: ${{ matrix.branch }} - ${{ matrix.spring }} ${{ matrix.kotlin }} ${{ matrix.jackson }}
 
     steps:
 
     - name: Check out sources
       uses: actions/checkout@v3
+      with:
+          ref: ${{ matrix.branch }}
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
