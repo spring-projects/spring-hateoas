@@ -4,7 +4,6 @@ Spring HATEOAS Changelog
 Changes in version 1.5.6 (2023-11-16)
 ----------------------------------------
 - #2074 - Upgrade to Lombok 1.18.30.
-- #2073 - Upgrade to Mockk 1.12.8.
 - #2072 - Upgrade to Reactor 2020.0.38.
 - #2071 - Upgrade to Spring Framework 5.3.31.
 - #2043 - UriTemplate.with(…) should not only append variables at the end.
