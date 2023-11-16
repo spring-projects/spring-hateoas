@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         spring: ['', 'spring-next', 'spring-61-next']
-        kotlin: ['', 'kotlin-next']
+        kotlin: ['', 'kotlin-next', 'kotlin-2-next']
         jackson: ['', 'jackson-next']
 
     name: Compatibility ${{ matrix.spring }} ${{ matrix.kotlin }} ${{ matrix.jackson }}

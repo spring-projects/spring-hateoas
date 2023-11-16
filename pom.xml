@@ -123,8 +123,16 @@
 		<profile>
 			<id>kotlin-next</id>
 			<properties>
-				<kotlin.version>1.8.21</kotlin.version>
-				<kotlinx-coroutines.version>1.7.0-RC</kotlinx-coroutines.version>
+				<kotlin.version>1.9.20</kotlin.version>
+				<kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>kotlin-2-next</id>
+			<properties>
+				<kotlin.version>2.0.0-Beta1</kotlin.version>
+				<kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
 			</properties>
 		</profile>
 
