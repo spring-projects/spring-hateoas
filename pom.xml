@@ -83,7 +83,7 @@
 		<lombok.version>1.18.30</lombok.version>
 		<reactor-bom.version>2023.0.0</reactor-bom.version>
 		<slf4j.version>2.0.9</slf4j.version>
-		<spring.version>6.1.0-RC1</spring.version>
+		<spring.version>6.1.0-SNAPSHOT</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
 		<kotlin.version>1.9.20</kotlin.version>
 		<kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
@@ -875,8 +875,18 @@
 
 	<repositories>
 		<repository>
+			<id>spring-snapshot</id>
+			<url>https://repo.spring.io/snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+		<repository>
 			<id>spring-milestone</id>
 			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
