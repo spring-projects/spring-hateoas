@@ -1,6 +1,17 @@
 Spring HATEOAS Changelog
 ========================
 
+Changes in version 2.0.7 (2023-11-16)
+----------------------------------------
+- #2070 - Upgrade to Reactor 2022.0.13.
+- #2069 - Upgrade to Lombok 1.18.30.
+- #2068 - Upgrade to Logback 1.4.11.
+- #2067 - Upgrade compatibility profiles to latest Kotlin releases.
+- #2066 - Upgrade to Mockk 1.13.7.
+- #2065 - Upgrade to Spring Framework 6.0.14.
+- #2058 - Enable compatibility builds for all 2.x branches.
+- #2042 - UriTemplate.with(…) should not only append variables at the end.
+
 Changes in version 2.0.6 (2023-07-19)
 ----------------------------------------
 - #2026 - Regression in AOT metadata generation.
