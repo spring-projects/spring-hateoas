@@ -112,7 +112,7 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist())
 
 				// @see #1728
-				.andExpect(jsonPath("$._templates['anotherOperation'].method", is("post")))
+				.andExpect(jsonPath("$._templates['anotherOperation'].method", is("POST")))
 				.andExpect(jsonPath("$._templates['anotherOperation'].target", is("http://localhost/anotherOperation?params={params}")));
 	}
 
