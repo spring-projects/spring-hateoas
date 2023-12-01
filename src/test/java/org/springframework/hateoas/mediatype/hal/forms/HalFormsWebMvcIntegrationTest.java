@@ -104,12 +104,16 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links.*", hasSize(1)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$._templates.*", hasSize(1)))
+				.andExpect(jsonPath("$._templates.*", hasSize(2)))
 				.andExpect(jsonPath("$._templates['default'].method", is("POST")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].name", is("name")))
 				.andExpect(jsonPath("$._templates['default'].properties[0].required").value(true))
 				.andExpect(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist());
+				.andExpect(jsonPath("$._templates['default'].properties[1].required").doesNotExist())
+
+				// @see #1728
+				.andExpect(jsonPath("$._templates['anotherOperation'].method", is("post")))
+				.andExpect(jsonPath("$._templates['anotherOperation'].target", is("http://localhost/anotherOperation?params={params}")));
 	}
 
 	@Test

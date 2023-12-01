@@ -20,10 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
@@ -163,6 +160,37 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 	}
 
 	/**
+	 * @see #1728
+	 */
+	@Test
+	void createsLinkToControllerMethodWithListRequestParam() {
+
+		List<String> queryParams = new ArrayList<>();
+		queryParams.add("value1");
+		queryParams.add("value2");
+
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithList(queryParams)).withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+		assertThat(link.getHref()) //
+				.endsWith("/sample/listsupport?queryParams=value1&queryParams=value2");
+	}
+
+	/**
+	 * @see #1728
+	 */
+	@Test
+	void createsLinkToControllerMethodWithNullListRequestParam() {
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethodWithList(null)).withSelfRel();
+
+		assertPointsToMockServer(link);
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+		assertThat(link.getHref()) //
+				.endsWith("/sample/listsupport?queryParams={queryParams}");
+	}
+
+	/**
 	 * @see #372
 	 */
 	@Test
@@ -197,6 +225,9 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 
 		@RequestMapping("/sample/multivaluemapsupport")
 		HttpEntity<?> sampleMethodWithMap(@RequestParam MultiValueMap<String, String> queryParams);
+
+		@RequestMapping("/sample/listsupport")
+		HttpEntity<?> sampleMethodWithList(@RequestParam List<String> queryParams);
 	}
 
 	static class SampleUriComponentsContributor implements UriComponentsContributor {
