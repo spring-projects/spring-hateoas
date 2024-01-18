@@ -476,7 +476,7 @@ public class Link implements Serializable {
 	 * @param hreflang
 	 * @return
 	 */
-	public Link withHreflang(String hreflang) {
+	public Link withHreflang(@Nullable String hreflang) {
 
 		return this.hreflang == hreflang ? this
 				: new Link(this.rel, this.href, hreflang, this.media, this.title, this.type, this.deprecation, this.profile,
@@ -489,7 +489,7 @@ public class Link implements Serializable {
 	 * @param media
 	 * @return
 	 */
-	public Link withMedia(String media) {
+	public Link withMedia(@Nullable String media) {
 
 		return this.media == media ? this
 				: new Link(this.rel, this.href, this.hreflang, media, this.title, this.type, this.deprecation, this.profile,
@@ -502,7 +502,7 @@ public class Link implements Serializable {
 	 * @param title
 	 * @return
 	 */
-	public Link withTitle(String title) {
+	public Link withTitle(@Nullable String title) {
 
 		return this.title == title ? this
 				: new Link(this.rel, this.href, this.hreflang, this.media, title, this.type, this.deprecation, this.profile,
@@ -515,7 +515,7 @@ public class Link implements Serializable {
 	 * @param type
 	 * @return
 	 */
-	public Link withType(String type) {
+	public Link withType(@Nullable String type) {
 
 		return this.type == type ? this
 				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, type, this.deprecation, this.profile,
@@ -528,7 +528,7 @@ public class Link implements Serializable {
 	 * @param deprecation
 	 * @return
 	 */
-	public Link withDeprecation(String deprecation) {
+	public Link withDeprecation(@Nullable String deprecation) {
 
 		return this.deprecation == deprecation ? this
 				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, deprecation, this.profile,
@@ -541,7 +541,7 @@ public class Link implements Serializable {
 	 * @param profile
 	 * @return
 	 */
-	public Link withProfile(String profile) {
+	public Link withProfile(@Nullable String profile) {
 
 		return this.profile == profile ? this
 				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation, profile,
@@ -554,7 +554,7 @@ public class Link implements Serializable {
 	 * @param name
 	 * @return
 	 */
-	public Link withName(String name) {
+	public Link withName(@Nullable String name) {
 
 		return this.name == name ? this
 				: new Link(this.rel, this.href, this.hreflang, this.media, this.title, this.type, this.deprecation,
