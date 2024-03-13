@@ -85,7 +85,7 @@
 		<slf4j.version>2.0.12</slf4j.version>
 		<spring.version>6.1.5-SNAPSHOT</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
-		<kotlin.version>1.9.20</kotlin.version>
+		<kotlin.version>1.9.23</kotlin.version>
 		<kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
 		<mockk.version>1.13.7</mockk.version>
 	</properties>
