@@ -244,7 +244,7 @@ public class Link implements Serializable {
 	 * Creats a new {@link Link} with the given {@link Affordance}s.
 	 *
 	 * @param affordances must not be {@literal null}.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
 	public Link withAffordances(List<Affordance> affordances) {
 
@@ -321,7 +321,7 @@ public class Link implements Serializable {
 	 * Creates a new {@link Link} with the same href but given {@link LinkRelation}.
 	 *
 	 * @param relation must not be {@literal null}.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
 	public Link withRel(LinkRelation relation) {
 
@@ -334,7 +334,7 @@ public class Link implements Serializable {
 	 * Creates a new {@link Link} with the same href but given {@link LinkRelation}.
 	 *
 	 * @param relation must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 */
 	public Link withRel(String relation) {
 		return withRel(LinkRelation.of(relation));
@@ -460,8 +460,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal href}.
 	 *
-	 * @param href
-	 * @return
+	 * @param href can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withHref(String href) {
 
@@ -473,8 +473,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal hrefleng}.
 	 *
-	 * @param hreflang
-	 * @return
+	 * @param hreflang can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withHreflang(@Nullable String hreflang) {
 
@@ -486,8 +486,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal media}.
 	 *
-	 * @param media
-	 * @return
+	 * @param media can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withMedia(@Nullable String media) {
 
@@ -499,8 +499,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal title}.
 	 *
-	 * @param title
-	 * @return
+	 * @param title can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withTitle(@Nullable String title) {
 
@@ -512,8 +512,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal type}.
 	 *
-	 * @param type
-	 * @return
+	 * @param type can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withType(@Nullable String type) {
 
@@ -525,8 +525,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal deprecation}.
 	 *
-	 * @param deprecation
-	 * @return
+	 * @param deprecation can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withDeprecation(@Nullable String deprecation) {
 
@@ -538,8 +538,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal profile}.
 	 *
-	 * @param profile
-	 * @return
+	 * @param profile can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withProfile(@Nullable String profile) {
 
@@ -551,8 +551,8 @@ public class Link implements Serializable {
 	/**
 	 * Create a new {@link Link} by copying all attributes and applying the new {@literal name}.
 	 *
-	 * @param name
-	 * @return
+	 * @param name can be {@literal null}
+	 * @return will never be {@literal null}.
 	 */
 	public Link withName(@Nullable String name) {
 
