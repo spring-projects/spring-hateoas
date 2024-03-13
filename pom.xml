@@ -83,7 +83,7 @@
 		<lombok.version>1.18.30</lombok.version>
 		<reactor-bom.version>2023.0.4</reactor-bom.version>
 		<slf4j.version>2.0.12</slf4j.version>
-		<spring.version>6.1.0</spring.version>
+		<spring.version>6.1.5-SNAPSHOT</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
 		<kotlin.version>1.9.23</kotlin.version>
 		<kotlinx-coroutines.version>1.8.0</kotlinx-coroutines.version>
