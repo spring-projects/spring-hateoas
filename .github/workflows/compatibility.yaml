@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        branch: ['main', '2.1.x', '2.0.x']
+        branch: ['main', '2.2.x', '2.1.x']
         spring: ['', 'spring-next', 'spring-61-next']
         kotlin: ['', 'kotlin-next', 'kotlin-2-next']
         jackson: ['', 'jackson-next']
