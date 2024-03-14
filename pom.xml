@@ -83,7 +83,7 @@
 		<lombok.version>1.18.30</lombok.version>
 		<reactor-bom.version>2023.0.4</reactor-bom.version>
 		<slf4j.version>2.0.12</slf4j.version>
-		<spring.version>6.1.5-SNAPSHOT</spring.version>
+		<spring.version>6.1.5</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
 		<kotlin.version>1.9.23</kotlin.version>
 		<kotlinx-coroutines.version>1.7.3</kotlinx-coroutines.version>
@@ -96,7 +96,7 @@
 			<id>spring-next</id>
 			<properties>
 				<reactor-bom.version>2023.0.5-SNAPSHOT</reactor-bom.version>
-				<spring.version>6.1.5-SNAPSHOT</spring.version>
+				<spring.version>6.1.6-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -872,22 +872,5 @@
 		<developerConnection>scm:git:ssh://git@github.com:spring-projects/spring-hateoas.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-
-	<repositories>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/snapshot</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>spring-milestone</id>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 </project>
