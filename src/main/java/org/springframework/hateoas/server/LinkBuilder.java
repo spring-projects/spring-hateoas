@@ -39,6 +39,16 @@ public interface LinkBuilder {
 	LinkBuilder slash(@Nullable Object object);
 
 	/**
+	 * Adds {@link String} representation of the given object as identifier of an item resource
+	 * from the current collection resource.
+	 *
+	 * This method is an optimized version of {@link #slash(Object)} mean to be used only for identifiers.
+	 *
+	 * @param id can be {@literal null}.
+	 */
+	LinkBuilder slashId(@Nullable Object id);
+
+	/**
 	 * Creates a URI of the link built by the current builder instance.
 	 *
 	 * @return
