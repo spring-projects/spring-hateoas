@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
+@JsonPropertyOrder({"type", "title", "detail", "instance"})
 @JsonInclude(Include.NON_NULL)
 public class Problem {
 
