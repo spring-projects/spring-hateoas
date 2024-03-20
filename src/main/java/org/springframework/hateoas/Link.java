@@ -538,7 +538,7 @@ public class Link implements Serializable {
 	 */
 	@Deprecated
 	public static Link valueOf(String element) {
-        return valueOfInt(element, new int[]{0});
+		return valueOfInt(element, new int[]{0});
 	}
 
 	/**

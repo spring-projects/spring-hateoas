@@ -92,12 +92,12 @@ public class Links implements Iterable<Link> {
 		int[] pos = {0}; // single-element array used as a mutable integer
 		int l = source.length();
 		boolean inLink = true; // true if we're expecting to find a link; false if we're expecting end of input, or a comma
-        while (pos[0] < l) {
-            char ch = source.charAt(pos[0]);
-            if (Character.isWhitespace(ch)) {
-                pos[0]++;
-                continue;
-            }
+		while (pos[0] < l) {
+			char ch = source.charAt(pos[0]);
+			if (Character.isWhitespace(ch)) {
+				pos[0]++;
+				continue;
+			}
 			if (inLink) {
 				if (ch == '<') {
 					// start of a link, consume it using the Link class
@@ -126,7 +126,7 @@ public class Links implements Iterable<Link> {
 					inLink = true;
 					continue;
 				}
-            }
+			}
 			// The parsing algorithm in appendix B.2 of RFC-8288 suggests ignoring unexpected content at the end of a link.
 			// At the same time it specifies that implementations aren't required to support them. We believe that missing
 			// terminal `>` or unexpected data after the end point to more serious problem, and we throw an exception
@@ -134,7 +134,7 @@ public class Links implements Iterable<Link> {
 			throw new IllegalArgumentException("Unexpected data at the end of Link header at index " + pos[0]);
 		}
 
-        if (links.isEmpty()) {
+		if (links.isEmpty()) {
 			return NONE;
 		}
 
