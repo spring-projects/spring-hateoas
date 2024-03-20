@@ -19,16 +19,12 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -41,13 +37,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @author Jens Schauder
+ * @author Viliam Durina
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(value = { "templated", "template" }, ignoreUnknown = true)
 public class Link implements Serializable {
 
 	private static final long serialVersionUID = -9037755944661782121L;
-	private static final Pattern URI_AND_ATTRIBUTES_PATTERN = Pattern.compile("<(.*)>;(.*)");
 
 	public static final String ATOM_NAMESPACE = "http://www.w3.org/2005/Atom";
 
@@ -107,9 +103,9 @@ public class Link implements Serializable {
 		this.affordances = affordances;
 	}
 
-	private Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
-			@Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
-			@Nullable UriTemplate template, List<Affordance> affordances) {
+	Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
+         @Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
+         @Nullable UriTemplate template, List<Affordance> affordances) {
 
 		this.rel = rel;
 		this.href = href;
@@ -241,7 +237,7 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Creats a new {@link Link} with the given {@link Affordance}s.
+	 * Creates a new {@link Link} with the given {@link Affordance}s.
 	 *
 	 * @param affordances must not be {@literal null}.
 	 * @return
@@ -390,71 +386,12 @@ public class Link implements Serializable {
 	 * @param element an RFC-8288 compatible representation of a link.
 	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-8288.
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
-	 * @return
+	 * @return The parsed link
+	 * @deprecated Use {@link Links#parse(String)} instead. This method parses only the first link from a list of links.
 	 */
+	@Deprecated
 	public static Link valueOf(String element) {
-
-		if (!StringUtils.hasText(element)) {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
-		}
-
-		Matcher matcher = URI_AND_ATTRIBUTES_PATTERN.matcher(element);
-
-		if (matcher.find()) {
-
-			Map<String, String> attributes = getAttributeMap(matcher.group(2));
-
-			if (!attributes.containsKey("rel")) {
-				throw new IllegalArgumentException("Link does not provide a rel attribute!");
-			}
-
-			LinkRelation rel = LinkRelation.of(attributes.get("rel"));
-			String href = matcher.group(1);
-			String hrefLang = attributes.get("hreflang");
-			String media = attributes.get("media");
-			String title = attributes.get("title");
-			String type = attributes.get("type");
-			String deprecation = attributes.get("deprecation");
-			String profile = attributes.get("profile");
-			String name = attributes.get("name");
-
-			return new Link(rel, href, hrefLang, media, title, type, deprecation, profile, name, templateOrNull(href),
-					Collections.emptyList());
-
-		} else {
-			throw new IllegalArgumentException(String.format("Given link header %s is not RFC-8288 compliant!", element));
-		}
-	}
-
-	/**
-	 * Parses the links attributes from the given source {@link String}.
-	 *
-	 * @param source
-	 * @return
-	 */
-	private static Map<String, String> getAttributeMap(String source) {
-
-		if (!StringUtils.hasText(source)) {
-			return Collections.emptyMap();
-		}
-
-		String[] parts = source.split(";");
-		Map<String, String> attributes = new HashMap<>();
-
-		for (String part : parts) {
-
-			int delimiter = part.indexOf('=');
-
-			String key = part.substring(0, delimiter).trim();
-			String value = part.substring(delimiter + 1).trim();
-
-			// Potentially unquote value
-			value = value.startsWith("\"") ? value.substring(1, value.length() - 1) : value;
-
-			attributes.put(key, value);
-		}
-
-		return attributes;
+		return LinkParser.parseLink(element, new int[]{0});
 	}
 
 	/**
@@ -471,7 +408,7 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Create a new {@link Link} by copying all attributes and applying the new {@literal hrefleng}.
+	 * Create a new {@link Link} by copying all attributes and applying the new {@literal hreflang}.
 	 *
 	 * @param hreflang
 	 * @return
@@ -659,42 +596,75 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
-
-		String linkString = String.format("<%s>;rel=\"%s\"", href, rel.value());
+		StringBuilder result = new StringBuilder(64);
+		result.append('<')
+				// We only url-encode the `>`. We expect other special chars to already be escaped. `;` and `,` need not
+				// be escaped within the URL
+				.append(href.replace(">", "%3e"))
+				.append(">;rel=");
+		quoteParamValue(rel.value(), result);
 
 		if (hreflang != null) {
-			linkString += ";hreflang=\"" + hreflang + "\"";
+			result.append(";hreflang=");
+			quoteParamValue(hreflang, result);
 		}
 
 		if (media != null) {
-			linkString += ";media=\"" + media + "\"";
+			result.append(";media=");
+			quoteParamValue(media, result);
 		}
 
 		if (title != null) {
-			linkString += ";title=\"" + title + "\"";
+			result.append(";title=");
+			quoteParamValue(title, result);
 		}
 
 		if (type != null) {
-			linkString += ";type=\"" + type + "\"";
+			result.append(";type=");
+			quoteParamValue(type, result);
 		}
 
 		if (deprecation != null) {
-			linkString += ";deprecation=\"" + deprecation + "\"";
+			result.append(";deprecation=");
+			quoteParamValue(deprecation, result);
 		}
 
 		if (profile != null) {
-			linkString += ";profile=\"" + profile + "\"";
+			result.append(";profile=");
+			quoteParamValue(profile, result);
 		}
 
 		if (name != null) {
-			linkString += ";name=\"" + name + "\"";
+			result.append(";name=");
+			quoteParamValue(name, result);
 		}
 
-		return linkString;
+		return result.toString();
+	}
+
+	/**
+	 * Quotes the given string `s` and appends the result to the `target`. This method appends the start quote, the
+	 * escaped text, and the end quote.
+	 *
+	 * @param s      Text to quote
+	 * @param target StringBuilder to append to
+	 */
+	private void quoteParamValue(String s, StringBuilder target) {
+		// we reserve extra 4 chars: two for the start and end quote, another two are a reserve for potential escaped chars
+		target.ensureCapacity(target.length() + s.length() + 4);
+		target.append('"');
+		for (int i = 0, l = s.length(); i < l; i++) {
+			char ch = s.charAt(i);
+			if (ch == '"' || ch == '\\') {
+				target.append('\\');
+			}
+			target.append(ch);
+		}
+		target.append('"');
 	}
 
 	@Nullable
-	private static UriTemplate templateOrNull(String href) {
+	static UriTemplate templateOrNull(String href) {
 
 		Assert.notNull(href, "Href must not be null!");
 
