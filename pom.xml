@@ -76,7 +76,7 @@
 		<logback.version>1.5.6</logback.version>
 		<jacoco>0.8.12</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson-bom.version>2.17.0</jackson-bom.version>
+		<jackson-bom.version>2.17.1</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.9.0</jsonpath.version>
 		<junit.version>5.10.2</junit.version>
