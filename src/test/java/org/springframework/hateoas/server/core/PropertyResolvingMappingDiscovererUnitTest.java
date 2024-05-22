@@ -16,6 +16,7 @@
 package org.springframework.hateoas.server.core;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Method;
 
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.TestPropertySource;
@@ -37,16 +40,9 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Lars Michele
  * @author Oliver Drotbohm
  */
-@SpringJUnitWebConfig(classes = PropertyResolvingMappingDiscovererUnitTest.Config.class)
-@TestPropertySource(properties = { "test.parent=resolvedparent", "test.child=resolvedchild" })
+@SpringJUnitWebConfig(classes = {PropertyResolvingMappingDiscovererUnitTest.Config.class, StaticEnvironmentProvider.class})
+@TestPropertySource(properties = {"test.parent=resolvedparent", "test.child=resolvedchild"})
 class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
-
-	@Autowired WebApplicationContext context;
-
-	@BeforeEach
-	void contextLoading() {
-		new ContextLoader(context).initWebApplicationContext(new MockServletContext());
-	}
 
 	/**
 	 * @see #361
@@ -72,6 +68,14 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 				.isEqualTo("/resolvedparent/resolvedchild");
 	}
 
+	@Test
+	void resolvesVariablesInLinkToMethodOnController() {
+
+		Link link = linkTo(methodOn(ResolveMethodEndpointController.class).method()).withSelfRel();
+		assertThat(link.getRel()).isEqualTo(IanaLinkRelations.SELF);
+		assertThat(link.getHref()).endsWith("/resolvedparent/resolvedchild");
+	}
+
 	@RequestMapping("/${test.parent}")
 	interface ResolveEndpointController {}
 
@@ -79,7 +83,7 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 	interface ResolveMethodEndpointController {
 
 		@RequestMapping("/${test.child}")
-		void method();
+		Object method();
 	}
 
 	@Configuration
