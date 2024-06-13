@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,6 +88,7 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 		protected PersonModel() {}
 	}
 
+	@JsonPropertyOrder({"firstname", "lastname"})
 	@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 	static class Person {
 
