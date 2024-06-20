@@ -75,7 +75,8 @@ public class WebMvcEmployeeController {
 
 		Link selfLink = linkTo(controller.all()).withSelfRel() //
 				.andAffordance(afford(controller.newEmployee(null))) //
-				.andAffordance(afford(controller.search(null, null)));
+				.andAffordance(afford(controller.search(null, null)))
+				.andAffordance(afford(controller.anotherOperation(null)));
 
 		// Return the collection of employee resources along with the composite affordance
 		return IntStream.range(0, EMPLOYEES.size()) //
@@ -223,5 +224,15 @@ public class WebMvcEmployeeController {
 				.withTitle("Employee-based problem") //
 				.withStatus(HttpStatus.BAD_REQUEST) //
 				.withDetail("This is a test case"));
+	}
+
+	/**
+	 * @see #1728
+	 */
+	@PostMapping("/anotherOperation")
+	public ResponseEntity<?> anotherOperation(
+			@RequestParam List<String> params
+	) {
+		return ResponseEntity.noContent().build();
 	}
 }
