@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Viliam Durina
  */
 class LinksUnitTest {
 
@@ -74,8 +75,20 @@ class LinksUnitTest {
 
 	@Test
 	void skipsEmptyLinkElements() {
+		// extra commas at the end
 		assertThat(Links.parse(LINKS + ",,,")).isEqualTo(reference);
 		assertThat(Links.parse(LINKS2 + ",,,")).isEqualTo(reference2);
+
+		// extra commas inside
+		assertThat(Links.parse("<url1>;rel= \"foo\",,<url2>;rel= \"bar\"")).isEqualTo(
+				Links.of(Link.of("url1", "foo"), Link.of("url2", "bar")));
+
+		// extra commas at the beginning
+		assertThat(Links.parse(",,<url1>;rel= \"foo\"")).isEqualTo(Links.of(Link.of("url1", "foo")));
+
+		// extra commas everywhere with whitespace
+		assertThat(Links.parse(" , , <url1>;rel= \"foo\" , , <url2>;rel= \"bar\"  ,  , ")).isEqualTo(
+				Links.of(Link.of("url1", "foo"), Link.of("url2", "bar")));
 	}
 
 	@Test
@@ -276,6 +289,189 @@ class LinksUnitTest {
 	@Test // #1899
 	void parsesMultipleLinksContainingUnquotedRels() {
 		assertThat(Links.parse(LINKS3)).isEqualTo(reference3);
+	}
+
+	// ### tests added after https://github.com/spring-projects/spring-hateoas/issues/2099 ###
+
+	@Test
+	void parsingUnexpectedData() {
+		// two URLs without a comma - the second URL is an unexpected text
+		assertThatThrownBy(() -> Links.parse("<url1>;rel=\"foo\"<url2>;rel= \"bar\"")).isInstanceOf(
+				IllegalArgumentException.class).hasMessage("Unexpected data at the end of Link header at index 16");
+		assertThatThrownBy(() -> Links.parse("<url1>; rel=\"foo\" <url2>;rel= \"bar\"")).isInstanceOf(
+				IllegalArgumentException.class).hasMessage("Unexpected data at the end of Link header at index 18");
+		assertThatThrownBy(() -> Links.parse("<url1> ; rel= \"foo\" <url2>;rel= \"bar\"")).isInstanceOf(
+				IllegalArgumentException.class).hasMessage("Unexpected data at the end of Link header at index 20");
+
+		// unexpected text after a quoted string
+		assertThatThrownBy(() -> Links.parse("<url1>;rel=\"foo\"#")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Unexpected data at the end of Link header at index 16");
+		assertThatThrownBy(() -> Links.parse("<url1>;rel=\"foo\" foo bar")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Unexpected data at the end of Link header at index 17");
+
+		// if the value isn't quoted, it can't be unexpected; all is part of the value
+		assertThat(Links.parse("<url1>;rel=foo#")).isEqualTo(Links.of(Link.of("url1", "foo#")));
+
+		// extra text after a comma - looks like a legit value for rel, but comma is special and starts a new link
+		assertThatThrownBy(() -> Links.parse("<url1>;rel=foo,bar")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Unexpected data at the end of Link header at index 15");
+
+		// a trailing comma is ignored
+		assertThat(Links.parse("<url1>;rel=foo,")).isEqualTo(Links.of(Link.of("url1", "foo")));
+
+		// a trailing semicolon is also ignored
+		assertThat(Links.parse("<url1>;rel=foo;")).isEqualTo(Links.of(Link.of("url1", "foo")));
+
+		// unexpected text at the beginning
+		assertThatThrownBy(() -> Links.parse("foo bar <url>;rel=\"next\"")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Unexpected data at the end of Link header at index 0");
+	}
+
+	@Test
+	void parsingMissingData() {
+		// missing trailing bracket
+		assertThatThrownBy(() -> Links.parse("<https://example.com/;rel=next")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Missing closing '>' at index 30");
+
+		// missing end quote
+		assertThatThrownBy(() -> Links.parse("<https://example.com/>;rel=\"next")).isInstanceOf(
+				IllegalArgumentException.class).hasMessage("Missing final quote at index 32");
+		assertThatThrownBy(() -> Links.parse("<https://example.com/>;rel='next")).isInstanceOf(
+				IllegalArgumentException.class).hasMessage("Missing final quote at index 32");
+	}
+
+	@Test
+	void parsingGreedyCapture() {
+		// no greedy capture until `>`
+		assertThat(Links.parse("<url>;title=foo>;rel=\"next\"")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo>")));
+
+		// no greedy capture until `;`
+		assertThat(Links.parse("<url>;title=\"foo;bar\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo;bar")));
+
+		// no greedy capture until `,`
+		assertThat(Links.parse("<url>;title=\"foo,bar\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo,bar")));
+	}
+
+	@Test
+	void parsingQuotedText() {
+		// unquoting of double quotes
+		assertThat(Links.parse("<url>;title=\"\\\"bar\\\"\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("\"bar\"")));
+
+		// unquoting of single quotes
+		assertThat(Links.parse("<url>;title='\\'bar\\'';rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("'bar'")));
+
+		// single quote is literal in double-quoted string
+		assertThat(Links.parse("<url>;title=\"'bar'\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("'bar'")));
+
+		// double quote is literal in single-quoted string
+		assertThat(Links.parse("<url>;title='\"bar\"';rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("\"bar\"")));
+
+		// backslash unquoting
+		assertThat(Links.parse("<url>;title=\"foo\\\\bar\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo\\bar")));
+		assertThat(Links.parse("<url>;title='foo\\\\bar';rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo\\bar")));
+
+		// unquoting of unnecessarily quoted text
+		assertThat(Links.parse("<url>;title=\"\\f\\o\\o\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo")));
+		assertThat(Links.parse("<url>;title='\\f\\o\\o';rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo")));
+
+		// no java-style special characters
+		assertThat(Links.parse("<url>;title=\"\\r\\n\\t\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("rnt")));
+		assertThat(Links.parse("<url>;title='\\r\\n\\t';rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("rnt")));
+
+		// quote within a token value - the quote, if it's not the first character, is literal
+		assertThat(Links.parse("<url>;title=foo\"bar\";rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo\"bar\"")));
+		assertThat(Links.parse("<url>;title=foo'bar';rel=next")).isEqualTo(
+				Links.of(Link.of("url", "next").withTitle("foo'bar'")));
+	}
+
+	@Test
+	void parsingEmptyString() {
+		// at the end
+		Links expected = Links.of(Link.of("url", "next").withTitle(""));
+		// value missing
+		assertThat(Links.parse("<url>;rel=next;title")).isEqualTo(expected);
+		// empty token-style value
+		assertThat(Links.parse("<url>;rel=next;title=")).isEqualTo(expected);
+		// empty double-quoted string
+		assertThat(Links.parse("<url>;rel=next;title=\"\"")).isEqualTo(expected);
+		// empty single-quoted string
+		assertThat(Links.parse("<url>;rel=next;title=''")).isEqualTo(expected);
+
+		// not at the end
+		expected = Links.of(Link.of("url", "next").withTitle("").withName("a"));
+		assertThat(Links.parse("<url>;rel=next;title;name=a")).isEqualTo(expected);
+		assertThat(Links.parse("<url>;rel=next;title=;name=a")).isEqualTo(expected);
+		assertThat(Links.parse("<url>;rel=next;title=\"\";name=a")).isEqualTo(expected);
+		assertThat(Links.parse("<url>;rel=next;title='';name=a")).isEqualTo(expected);
+	}
+
+	@Test
+	void parsingMultipleRels() {
+		assertThat(Links.parse("<url>;rel=next last")).isEqualTo(Links.of(Link.of("url", "next"), Link.of("url", "last")));
+		assertThat(Links.parse("<url>;rel=\"next last\"")).isEqualTo(
+				Links.of(Link.of("url", "next"), Link.of("url", "last")));
+		assertThat(Links.parse("</prev>;rel=prev first,</next>;rel=next last")).isEqualTo(
+				Links.of(Link.of("/prev", "prev"), Link.of("/prev", "first"), Link.of("/next", "next"),
+						Link.of("/next", "last")));
+	}
+
+	@Test
+	void parsingSpecialChars() {
+		// within the href, `,` and `;` aren't special
+		assertThat(Links.parse("<http://example.com/?param=foo,bar;baz>;rel=next")).isEqualTo(
+				Links.of(Link.of("http://example.com/?param=foo,bar;baz", "next")));
+	}
+
+	@Test
+	void parsingWhitespaceOtherThanSpace() {
+		assertThat(Links.parse(
+				"\n\r\t <url1>\n\r\t ;\n\r\t rel\n\r\t =\r\n\t next \r\n\t , \r\n\t ," + " \r\n\t <url2>\r\n\t ;\r\n\t rel \r\n\t = \r\n\t \"foo\"\r\n\t ; title=\"\r\n\t bar\r\n\t \"\r\n\t ")).isEqualTo(
+				Links.of(Link.of("url1", "next"), Link.of("url2", "foo").withTitle("\r\n\t bar\r\n\t ")));
+	}
+
+	@Test
+	void parsingEmptyRel() {
+		// rel is empty string
+		assertThatThrownBy(() -> Links.parse("<url>;rel=''")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Missing 'rel' attribute at index 12");
+
+		// rel is a single space - if we split by whitespace, there's no value
+		assertThatThrownBy(() -> Links.parse("<url>;rel=' '")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Missing 'rel' attribute at index 13");
+	}
+
+	@Test
+	void toStringEscaping() {
+		assertThat(Links.of(Link.of("/path?formula=a>b", "next").withTitle("foo\"bar\\baz")).toString()).isEqualTo(
+				"</path?formula=a%3eb>;rel=\"next\";title=\"foo\\\"bar\\\\baz\"");
+		assertThat(Links.of(Link.of("/path?formula=a>b", "next").withTitle("")).toString()).isEqualTo(
+				"</path?formula=a%3eb>;rel=\"next\";title=\"\"");
+	}
+
+	@Test
+	void directLinkParsing() {
+		// here we test only code that isn't covered by the tests using `Links.parse`
+
+		// leading whitespace
+		assertThat(Link.valueOf("  <url>;rel=next")).isEqualTo(Link.of("url", "next"));
+
+		// unexpected data at the beginning
+		assertThatThrownBy(() -> Link.valueOf("foo <url>;rel=next")).isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Expecting '<' at index 0");
 	}
 
 	@Value(staticConstructor = "of")

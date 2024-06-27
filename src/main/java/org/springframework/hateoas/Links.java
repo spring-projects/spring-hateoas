@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,15 +39,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Viliam Durina
  */
 public class Links implements Iterable<Link> {
 
 	public static final Links NONE = new Links(Collections.emptyList());
-	private static final Pattern LINK_HEADER_PATTERN = Pattern.compile("(<[^>]*>(;\\s*\\w+=\"?[^\",]*\"?)+)");
 
 	private final List<Link> links;
 
-	private Links(Iterable<Link> links) {
+	Links(Iterable<Link> links) {
 
 		Assert.notNull(links, "Links must not be null!");
 
@@ -85,23 +84,14 @@ public class Links implements Iterable<Link> {
 	 * @return the {@link Links} represented by the given {@link String}.
 	 */
 	public static Links parse(@Nullable String source) {
-
-		if (!StringUtils.hasText(source)) {
+		if (source == null) {
 			return NONE;
 		}
 
-		var links = new ArrayList<Link>();
-		var matcher = LINK_HEADER_PATTERN.matcher(source);
-
-		while (matcher.find()) {
-
-			var link = Link.valueOf(matcher.group());
-
-			if (link != null) {
-				links.add(link);
-			}
+		List<Link> links = LinkParser.parseLinks(source);
+		if (links.isEmpty()) {
+			return NONE;
 		}
-
 		return new Links(links);
 	}
 
