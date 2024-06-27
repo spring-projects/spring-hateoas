@@ -66,6 +66,7 @@ class LinksUnitTest {
 
 	@Test
 	void parsesLinkHeaderLinks() {
+
 		assertThat(Links.parse(LINKS)).isEqualTo(reference);
 		assertThat(Links.parse(LINKS2)).isEqualTo(reference2);
 		assertThat(reference.toString()).isEqualTo(LINKS);
@@ -92,6 +93,7 @@ class LinksUnitTest {
 
 	@Test
 	void returnsNullForNullOrEmptySource() {
+
 		assertThat(Links.parse(null)).isEqualTo(Links.NONE);
 		assertThat(Links.parse("")).isEqualTo(Links.NONE);
 	}
@@ -111,6 +113,7 @@ class LinksUnitTest {
 	 */
 	@Test
 	void parsesLinkWithComma() {
+
 		Link withComma = Link.of("http://localhost:8080/test?page=0&filter=foo,bar", "foo");
 
 		assertThat(Links.parse(WITH_COMMA).getLink("foo")).isEqualTo(Optional.of(withComma));
@@ -131,6 +134,7 @@ class LinksUnitTest {
 
 	@Test // #805
 	void returnsRequiredLink() {
+
 		Link reference = Link.of("http://localhost", "someRel");
 		Links links = Links.of(reference);
 
@@ -139,6 +143,7 @@ class LinksUnitTest {
 
 	@Test // #805
 	void rejectsMissingLinkWithIllegalArgumentException() {
+
 		Links links = Links.of();
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
@@ -148,6 +153,7 @@ class LinksUnitTest {
 
 	@Test
 	void detectsContainedLinks() {
+
 		Link first = Link.of("http://localhost", "someRel");
 		Link second = Link.of("http://localhost", "someOtherRel");
 
@@ -161,6 +167,7 @@ class LinksUnitTest {
 
 	@TestFactory // #1322, #1341
 	Stream<DynamicTest> conditionallyAddsLink() {
+
 		Links links = Links.NONE;
 		Link link = Link.of("/foo");
 
@@ -187,6 +194,7 @@ class LinksUnitTest {
 
 	@Test // #1322
 	void doesNotEvaluateSupplierIfAddConditionIsFalse() {
+
 		assertThatCode(() -> Links.NONE.andIf(false, () -> {
 			throw new IllegalStateException();
 		})).doesNotThrowAnyException();
@@ -194,6 +202,7 @@ class LinksUnitTest {
 
 	@TestFactory // #1340
 	Stream<DynamicTest> addsStreamOfLinks() {
+
 		Links links = Links.NONE;
 		Link link = Link.of("/foo");
 
@@ -208,6 +217,7 @@ class LinksUnitTest {
 
 	@TestFactory // #1340
 	Stream<DynamicTest> mergesStreamOfLinks() {
+
 		Links links = Links.NONE.and(Link.of("/foo"));
 		Link same = Link.of("/foo");
 		Link sameRel = Link.of("/bar");
@@ -225,6 +235,7 @@ class LinksUnitTest {
 
 	@TestFactory // #1340
 	Stream<DynamicTest> replacesLinksViaMerge() {
+
 		Links links = Links.of(Link.of("/foo"));
 		Link sameRel = Link.of("/bar");
 
@@ -244,6 +255,7 @@ class LinksUnitTest {
 
 	@Test
 	void basics() {
+
 		Links none = Links.NONE;
 
 		assertThat(none.isEmpty()).isTrue();
@@ -269,6 +281,7 @@ class LinksUnitTest {
 
 	@Test // #1458
 	void supportsUnquotedAttributes() {
+
 		assertThat(Links.parse("<https://url.com?page=1>; rel=first").getRequiredLink("first").getHref())
 				.isEqualTo("https://url.com?page=1");
 	}
