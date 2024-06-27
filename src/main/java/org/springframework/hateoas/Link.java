@@ -19,12 +19,10 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -32,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.util.StringUtils;
 
 /**
  * Value object for links.
@@ -106,9 +103,9 @@ public class Link implements Serializable {
 		this.affordances = affordances;
 	}
 
-	private Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
-			@Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
-			@Nullable UriTemplate template, List<Affordance> affordances) {
+	Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
+         @Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
+         @Nullable UriTemplate template, List<Affordance> affordances) {
 
 		this.rel = rel;
 		this.href = href;
@@ -383,150 +380,6 @@ public class Link implements Serializable {
 	}
 
 	/**
-	 * Internal method to parse and consume one link from input string.
-	 *
-	 * @param input The input string
-	 * @param pos Position to start from. It must be a 1-element array. The element will be
-	 *              mutated to point to the first non-consumed character (either ',' or the end of input).
-	 * @return a non-null Link
-	 */
-	@NonNull
-	static Link valueOfInt(@NonNull String input, @NonNull int[] pos) {
-		assert pos.length == 1;
-		int l = input.length();
-		while (pos[0] < l && Character.isWhitespace(input.charAt(pos[0]))) {
-			pos[0]++;
-		}
-		if (input.charAt(pos[0]) != '<') {
-			throw new IllegalArgumentException("Expecting '<' at index " + pos[0]);
-		}
-		pos[0]++;
-		int urlEnd = input.indexOf('>', pos[0]);
-		if (urlEnd < 0) {
-			throw new IllegalArgumentException("Missing closing '>' at index " + input.length());
-		}
-		String url = input.substring(pos[0], urlEnd);
-		pos[0] = urlEnd + 1;
-
-		// parse parameters
-		Map<String, String> params = new HashMap<>();
-		enum State { INITIAL, IN_KEY, BEFORE_VALUE, IN_VALUE };
-		State state = State.INITIAL;
-		StringBuilder
-				key = new StringBuilder(),
-				value = new StringBuilder();
-
-		outer:
-		while (pos[0] <= l) {
-			boolean eoi = pos[0] == l; // EOI - end of input
-			char ch = eoi ? 0 : input.charAt(pos[0]);
-			switch (state) {
-				// searching for the initial `;`
-				case INITIAL:
-					if (Character.isWhitespace(ch)) {
-						pos[0]++;
-					}
-					else if (ch == ';') {
-						state = State.IN_KEY;
-						pos[0]++;
-					}
-					else {
-						// if there's something else, it's the end of this link
-						break outer;
-					}
-					break;
-
-				// consuming the key up to `=`
-				case IN_KEY:
-					if (ch == '=') {
-						state = State.BEFORE_VALUE;
-					}
-					// value isn't mandatory, so param separator, link separator, or end of input all create a new param
-					else if (ch == ';' || ch == ',' || eoi) {
-						if (!key.isEmpty()) {
-							params.put(key.toString().trim(), "");
-							key.setLength(0);
-						}
-					} else {
-						key.append(ch);
-					}
-					pos[0]++;
-					break;
-
-				case BEFORE_VALUE:
-					if (Character.isWhitespace(ch)) {
-						pos[0]++;
-					}
-					else if (ch == '"' || ch == '\'') {
-						consumeQuotedString(input, value, pos);
-						params.putIfAbsent(key.toString().trim(), value.toString());
-						key.setLength(0);
-						value.setLength(0);
-						state = State.INITIAL;
-					} else {
-						state = State.IN_VALUE;
-					}
-					break;
-
-				case IN_VALUE:
-					if (ch == ';' || ch == ',' || eoi) {
-						params.putIfAbsent(key.toString().trim(), value.toString().trim());
-						key.setLength(0);
-						value.setLength(0);
-						state = State.INITIAL;
-					} else {
-						value.append(ch);
-						pos[0]++;
-					}
-					break;
-
-				default:
-					throw new AssertionError();
-			}
-		}
-
-		String sRel = params.get("rel");
-		if (!StringUtils.hasText(sRel)) {
-			throw new IllegalArgumentException("Missing 'rel' attribute at index " + pos[0]);
-		}
-		LinkRelation rel = LinkRelation.of(sRel);
-		String hrefLang = params.get("hreflang");
-		String media = params.get("media");
-		String title = params.get("title");
-		String type = params.get("type");
-		String deprecation = params.get("deprecation");
-		String profile = params.get("profile");
-		String name = params.get("name");
-
-		return new Link(rel, url, hrefLang, media, title, type, deprecation, profile, name, templateOrNull(url),
-				Collections.emptyList());
-	}
-
-	/**
-	 * Consume a quoted string from `input`, adding its contents to `target`. The starting position should be at
-	 * starting quote. After consuming, the ending position will be just after the last final quote.
-	 */
-	private static void consumeQuotedString(String input, StringBuilder target, int[] pos) {
-		int l = input.length();
-		char quotingChar = input.charAt(pos[0]);
-		assert quotingChar == '"' || quotingChar == '\'';
-		// skip quoting char
-		pos[0]++;
-		for (; pos[0] < l; pos[0]++) {
-			char ch = input.charAt(pos[0]);
-			if (ch == quotingChar) {
-				pos[0]++; // consume the final quote
-				return;
-			}
-			if (ch == '\\') {
-				ch = input.charAt(++pos[0]);
-			}
-			target.append(ch);
-		}
-		throw new IllegalArgumentException("Missing final quote at index " + pos[0]);
-	}
-
-	/**
 	 * Factory method to easily create {@link Link} instances from RFC-8288 compatible {@link String} representations of a
 	 * link.
 	 *
@@ -538,7 +391,7 @@ public class Link implements Serializable {
 	 */
 	@Deprecated
 	public static Link valueOf(String element) {
-		return valueOfInt(element, new int[]{0});
+		return LinkParser.parseLink(element, new int[]{0});
 	}
 
 	/**
@@ -797,8 +650,8 @@ public class Link implements Serializable {
 	 * @param target StringBuilder to append to
 	 */
 	private void quoteParamValue(String s, StringBuilder target) {
-		// we reserve extra 6 chars: two for the start and end quote, 2 is a reserve for potential escaped chars
-		target.ensureCapacity(target.length() + s.length() + 2);
+		// we reserve extra 4 chars: two for the start and end quote, another two are a reserve for potential escaped chars
+		target.ensureCapacity(target.length() + s.length() + 4);
 		target.append('"');
 		for (int i = 0, l = s.length(); i < l; i++) {
 			char ch = s.charAt(i);
@@ -811,7 +664,7 @@ public class Link implements Serializable {
 	}
 
 	@Nullable
-	private static UriTemplate templateOrNull(String href) {
+	static UriTemplate templateOrNull(String href) {
 
 		Assert.notNull(href, "Href must not be null!");
 

@@ -88,7 +88,11 @@ public class Links implements Iterable<Link> {
 			return NONE;
 		}
 
-		return LinkParser.parse(source);
+		List<Link> links = LinkParser.parseLinks(source);
+		if (links.isEmpty()) {
+			return NONE;
+		}
+		return new Links(links);
 	}
 
 	/**
