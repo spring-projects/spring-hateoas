@@ -646,7 +646,7 @@ public class Link implements Serializable {
 	 * Quotes the given string `s` and appends the result to the `target`. This method appends the start quote, the
 	 * escaped text, and the end quote.
 	 *
-	 * @param s Text to quote
+	 * @param s      Text to quote
 	 * @param target StringBuilder to append to
 	 */
 	private void quoteParamValue(String s, StringBuilder target) {
