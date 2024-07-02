@@ -104,8 +104,8 @@ public class Link implements Serializable {
 	}
 
 	Link(LinkRelation rel, String href, @Nullable String hreflang, @Nullable String media, @Nullable String title,
-         @Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
-         @Nullable UriTemplate template, List<Affordance> affordances) {
+			@Nullable String type, @Nullable String deprecation, @Nullable String profile, @Nullable String name,
+			@Nullable UriTemplate template, List<Affordance> affordances) {
 
 		this.rel = rel;
 		this.href = href;
@@ -383,15 +383,13 @@ public class Link implements Serializable {
 	 * Factory method to easily create {@link Link} instances from RFC-8288 compatible {@link String} representations of a
 	 * link.
 	 *
-	 * @param element an RFC-8288 compatible representation of a link.
+	 * @param source an RFC-8288 compatible representation of a link.
 	 * @throws IllegalArgumentException if a {@link String} was given that does not adhere to RFC-8288.
 	 * @throws IllegalArgumentException if no {@code rel} attribute could be found.
-	 * @return The parsed link
-	 * @deprecated Use {@link Links#parse(String)} instead. This method parses only the first link from a list of links.
+	 * @return will never be {@literal null}.
 	 */
-	@Deprecated
-	public static Link valueOf(String element) {
-		return LinkParser.parseLink(element, new int[]{0});
+	public static Link valueOf(String source) {
+		return LinkParser.parseLink(source, new int[] { 0 });
 	}
 
 	/**
@@ -596,12 +594,15 @@ public class Link implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder(64);
+
+		var result = new StringBuilder(64);
+
 		result.append('<')
 				// We only url-encode the `>`. We expect other special chars to already be escaped. `;` and `,` need not
 				// be escaped within the URL
 				.append(href.replace(">", "%3e"))
 				.append(">;rel=");
+
 		quoteParamValue(rel.value(), result);
 
 		if (hreflang != null) {
@@ -646,20 +647,26 @@ public class Link implements Serializable {
 	 * Quotes the given string `s` and appends the result to the `target`. This method appends the start quote, the
 	 * escaped text, and the end quote.
 	 *
-	 * @param s      Text to quote
+	 * @param s Text to quote
 	 * @param target StringBuilder to append to
 	 */
-	private void quoteParamValue(String s, StringBuilder target) {
+	private static void quoteParamValue(String s, StringBuilder target) {
+
 		// we reserve extra 4 chars: two for the start and end quote, another two are a reserve for potential escaped chars
 		target.ensureCapacity(target.length() + s.length() + 4);
 		target.append('"');
+
 		for (int i = 0, l = s.length(); i < l; i++) {
+
 			char ch = s.charAt(i);
+
 			if (ch == '"' || ch == '\\') {
 				target.append('\\');
 			}
+
 			target.append(ch);
 		}
+
 		target.append('"');
 	}
 
