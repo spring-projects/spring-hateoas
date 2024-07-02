@@ -84,15 +84,14 @@ public class Links implements Iterable<Link> {
 	 * @return the {@link Links} represented by the given {@link String}.
 	 */
 	public static Links parse(@Nullable String source) {
+
 		if (source == null) {
 			return NONE;
 		}
 
 		List<Link> links = LinkParser.parseLinks(source);
-		if (links.isEmpty()) {
-			return NONE;
-		}
-		return new Links(links);
+
+		return links.isEmpty() ? NONE : new Links(links);
 	}
 
 	/**

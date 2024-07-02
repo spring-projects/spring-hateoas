@@ -325,4 +325,13 @@ class LinkUnitTest {
 	void createsUriForTemplateWithOptionalParameters() {
 		assertThat(Link.of("/something{?parameter}").toUri()).isEqualTo(URI.create("/something"));
 	}
+
+	@Test // GH-2099
+	void toStringEscaping() {
+
+		assertThat(Link.of("/path?formula=a>b", "next").withTitle("foo\"bar\\baz").toString()) //
+				.isEqualTo("</path?formula=a%3eb>;rel=\"next\";title=\"foo\\\"bar\\\\baz\"");
+		assertThat(Link.of("/path?formula=a>b", "next").withTitle("").toString()) //
+				.isEqualTo("</path?formula=a%3eb>;rel=\"next\";title=\"\"");
+	}
 }
