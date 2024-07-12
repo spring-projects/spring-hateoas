@@ -109,15 +109,15 @@
 		<profile>
 			<id>kotlin-next</id>
 			<properties>
-				<kotlin.version>2.0.0-Beta4</kotlin.version>
-				<kotlinx-coroutines.version>1.8.0</kotlinx-coroutines.version>
+				<kotlin.version>2.0.20-Beta2</kotlin.version>
+				<kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
 			</properties>
 		</profile>
 
 		<profile>
 			<id>jackson-next</id>
 			<properties>
-				<jackson-bom.version>2.17.0</jackson-bom.version>
+				<jackson-bom.version>2.17.2</jackson-bom.version>
 			</properties>
 		</profile>
 
