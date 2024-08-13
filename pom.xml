@@ -85,7 +85,7 @@
 		<slf4j.version>2.0.13</slf4j.version>
 		<spring.version>6.1.11</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
-		<kotlin.version>1.9.24</kotlin.version>
+		<kotlin.version>1.9.25</kotlin.version>
 		<kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
 		<mockk.version>1.13.11</mockk.version>
 	</properties>
@@ -109,7 +109,8 @@
 		<profile>
 			<id>kotlin-next</id>
 			<properties>
-				<kotlin.version>2.0.0-RC3</kotlin.version>
+				<kotlin.version>2.0.20-RC</kotlin.version>
+				<kotlinx-coroutines.version>1.9.0-RC</kotlinx-coroutines.version>
 			</properties>
 		</profile>
 
