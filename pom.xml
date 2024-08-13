@@ -87,7 +87,7 @@
 		<spring-plugin.version>3.0.0</spring-plugin.version>
 		<kotlin.version>1.9.25</kotlin.version>
 		<kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
-		<mockk.version>1.13.11</mockk.version>
+		<mockk.version>1.13.12</mockk.version>
 	</properties>
 
 	<profiles>
