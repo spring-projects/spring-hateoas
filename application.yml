@@ -1,0 +1,13 @@
+changelog:
+  repository: spring-projects/spring-hateoas
+  sections:
+  - title: ":star: New Features"
+    labels: ["type: new feature"]
+  - title: ":bulb: Improvements"
+    labels: ["type: enhancement"]
+  - title: ":beetle: Bugs"
+    labels: ["type: bug"]
+  - title: ":book: Documentation"
+    labels: ["in: documentation"]
+  - title: ":hammer: Dependency Upgrades"
+    labels: ["type: dependency-upgrade"]

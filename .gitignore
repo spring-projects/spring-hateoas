@@ -8,3 +8,4 @@ target/
 *.orig
 .springBeans
 credentials.yml
+changelog.txt
