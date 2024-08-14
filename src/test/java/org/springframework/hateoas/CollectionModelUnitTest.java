@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.lang.Nullable;
@@ -79,11 +80,11 @@ class CollectionModelUnitTest {
 
 	@TestFactory // #1590
 	Stream<DynamicTest> exposesElementTypeForCollection() {
-		return DynamicTest.stream(Fixture.probes(), Fixture::toString, Fixture::verify);
+		return DynamicTest.stream(Fixture.probes());
 	}
 
 	@Value(staticConstructor = "$")
-	static class Fixture {
+	static class Fixture implements NamedExecutable {
 
 		CollectionModel<?> model;
 		@Nullable Class<?> expectedElementType;
@@ -98,12 +99,13 @@ class CollectionModelUnitTest {
 							Contact.class));
 		}
 
-		void verify() {
+		@Override
+		public void execute() throws Throwable {
 			assertThat(model.getResolvableType().getGeneric(0).resolve()).isEqualTo(expectedElementType);
 		}
 
 		@Override
-		public String toString() {
+		public String getName() {
 			return String.format("Expect element type %s for collection model %s.", expectedElementType, model);
 		}
 	}

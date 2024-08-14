@@ -27,6 +27,7 @@ import java.time.LocalTime;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
@@ -60,21 +61,22 @@ public class HtmlInputTypeUnitTests {
 				$.of(URI.class, HtmlInputType.URL) //
 		);
 
-		return DynamicTest.stream(Stream.concat(numbers, others), $::toString, $::verify);
+		return DynamicTest.stream(Stream.concat(numbers, others));
 	}
 
 	@Value(staticConstructor = "of")
-	static class $ {
+	static class $ implements NamedExecutable {
 
 		Class<?> type;
 		HtmlInputType expected;
 
-		public void verify() {
+		@Override
+		public void execute() throws Throwable {
 			assertThat(HtmlInputType.from(type)).isEqualTo(expected);
 		}
 
 		@Override
-		public String toString() {
+		public String getName() {
 			return String.format("Derives %s from %s.", expected, type);
 		}
 	}

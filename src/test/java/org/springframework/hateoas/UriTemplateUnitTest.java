@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.hateoas.TemplateVariable.VariableType;
@@ -228,7 +229,7 @@ class UriTemplateUnitTest {
 						put("state", "TN");
 					}
 				}) //
-				.verify();
+				.execute();
 	}
 
 	@Test // #483
@@ -237,7 +238,7 @@ class UriTemplateUnitTest {
 		of("/foo{?bar,foobar*}", "/foo?bar=barExpanded&foobar=foo1&foobar=foo2") //
 				.param("bar", "barExpanded") //
 				.param("foobar", Arrays.asList("foo1", "foo2")) //
-				.verify();
+				.execute();
 	}
 
 	@Test // #483
@@ -246,7 +247,7 @@ class UriTemplateUnitTest {
 		of("/foo{?bar,foobar*}", "/foo?bar=barExpanded&foobar=singleValue") //
 				.param("bar", "barExpanded") //
 				.param("foobar", "singleValue") //
-				.verify();
+				.execute();
 	}
 
 	@Test // #1127
@@ -254,15 +255,15 @@ class UriTemplateUnitTest {
 
 		of("https://example.org/foo and bar/{baz}", "https://example.org/foo%20and%20bar/xyzzy") //
 				.param("baz", "xyzzy") //
-				.verify();
+				.execute();
 
-		of("/foo?foo=bar{&baz}", "/foo?foo=bar&baz=xyz").param("baz", "xyz").verify();
-		of("?foo=bar{&baz}", "?foo=bar&baz=xyz").param("baz", "xyz").verify();
+		of("/foo?foo=bar{&baz}", "/foo?foo=bar&baz=xyz").param("baz", "xyz").execute();
+		of("?foo=bar{&baz}", "?foo=bar&baz=xyz").param("baz", "xyz").execute();
 	}
 
 	@TestFactory // #593
 	public Stream<DynamicTest> uriTemplateExpansionsShouldWork() {
-		return DynamicTest.stream(getEncodingFixtures(), EncodingFixture::toString, EncodingFixture::verify);
+		return DynamicTest.stream(getEncodingFixtures());
 	}
 
 	@Test // #593
@@ -420,7 +421,7 @@ class UriTemplateUnitTest {
 
 	@TestFactory
 	Stream<DynamicTest> rfcExamples() {
-		return DynamicTest.stream(foo(), EncodingFixture::toShortString, EncodingFixture::verify);
+		return DynamicTest.stream(foo());
 	}
 
 	private static Stream<EncodingFixture> foo() {
@@ -622,7 +623,7 @@ class UriTemplateUnitTest {
 				of("/foo/b%22ar{?x}", "/foo/b%22ar?x=1").param("x", 1));
 	}
 
-	static class EncodingFixture {
+	static class EncodingFixture implements NamedExecutable {
 
 		private final String template;
 		private final URI uri;
@@ -657,7 +658,8 @@ class UriTemplateUnitTest {
 			return new EncodingFixture(template, uri, parameters, false);
 		}
 
-		public void verify() {
+		@Override
+		public void execute() {
 
 			UriTemplate uriTemplate = UriTemplate.of(template);
 
@@ -668,7 +670,8 @@ class UriTemplateUnitTest {
 			}
 		}
 
-		public String toShortString() {
+		@Override
+		public String getName() {
 			return String.format("Expanding %s to %s", template, uri);
 		}
 
