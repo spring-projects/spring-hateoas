@@ -6,5 +6,6 @@ target/
 *.iml
 .idea
 *.orig
+.flattened-pom.xml
 .springBeans
 credentials.yml
