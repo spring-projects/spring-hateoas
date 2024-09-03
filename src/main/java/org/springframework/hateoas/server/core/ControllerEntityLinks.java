@@ -133,7 +133,7 @@ public class ControllerEntityLinks extends AbstractEntityLinks {
 	 */
 	@Override
 	public Link linkToItemResource(Class<?> entity, Object id) {
-		return linkFor(entity).slash(id).withSelfRel();
+		return linkFor(entity).slashId(id).withSelfRel();
 	}
 
 	/*
