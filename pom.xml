@@ -860,6 +860,7 @@
 					<releaseProfiles>sonatype</releaseProfiles>
 					<pushChanges>false</pushChanges>
 					<localCheckout>true</localCheckout>
+					<signTag>true</signTag>
 				</configuration>
 			</plugin>
 
