@@ -48,8 +48,8 @@ class HalFormsTemplateBuilder {
 	/**
 	 * Extract template details from a {@link RepresentationModel}'s {@link Affordance}s.
 	 *
-	 * @param resource
-	 * @return
+	 * @param resource must not be {@literal null}.
+	 * @return will never be {@literal null}.
 	 */
 	public Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource) {
 

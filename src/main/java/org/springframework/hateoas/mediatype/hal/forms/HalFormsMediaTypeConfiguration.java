@@ -83,11 +83,14 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	}
 
 	@Bean
-	HalFormsTemplatePropertyWriter halFormsTemplatePropertyWriter() {
+	HalFormsTemplateBuilder halFormsTemplateBuilder() {
 
 		HalFormsConfiguration configuration = configurationFactory.getConfiguration();
-		HalFormsTemplateBuilder builder = new HalFormsTemplateBuilder(configuration, resolver);
+		return new HalFormsTemplateBuilder(configuration, resolver);
+	}
 
+	@Bean
+	HalFormsTemplatePropertyWriter halFormsTemplatePropertyWriter(HalFormsTemplateBuilder builder) {
 		return new HalFormsTemplatePropertyWriter(builder);
 	}
 
