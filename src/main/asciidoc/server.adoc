@@ -138,10 +138,153 @@ assertThat(link.getHref()).endsWith("/people?names=Matthews,Beauford"); <3>
 NOTE: The reason we're exposing `@NonComposite` is that the composite way of rendering request parameters is baked into the internals of Spring's `UriComponents` builder and we only introduced that non-composite style in Spring HATEOAS 1.4.
 If we started from scratch today, we'd probably default to that style and rather let users opt into the composite style explicitly rather than the other way around.
 
+[[server.link-builder.webmvc.kotlin]]
+=== Kotlin extensions
+The following Kotlin extensions simplify creating links and adding them to the model:
+
+====
+[source, kotlin]
+----
+import org.springframework.hateoas.server.mvc.*
+
+val link: Link = linkTo<CustomerController> { findById("15") } withRel IanaLinkRelations.SELF
+
+val customer = EntityModel.of(Customer("15", "John Doe"))
+customer.add(CustomerController::class) {
+    linkTo { findById(it.content.id) } withRel IanaLinkRelations.SELF
+    linkTo { findProductsById(it.content.id) } withRel REL_PRODUCTS
+}
+----
+====
+
 [[server.link-builder.webflux]]
 == Building links in Spring WebFlux
 
-TODO
+Assume you have your Spring WebFlux controller implemented as follows:
+
+====
+[source, java]
+----
+@Controller
+@RequestMapping("/people")
+class PersonController {
+
+  @GetMapping
+  Flux<PersonModel> showAll() { … }
+
+  @GetMapping("/{person}")
+  Mono<PersonModel> show(@PathVariable Long person) { … }
+}
+----
+====
+
+We see two conventions here. The first is a collection resource that is exposed through @GetMapping annotation of the controller method, with individual elements of that collection exposed as direct sub resources. The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as /people/{id}/addresses). Suppose you would like to link to the collection resource of all people. Following the approach from above would cause two problems:
+
+* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values. This is cumbersome and requires ugly manual string concatenation code.
+* You probably do not want to concatenate the /people on top of your base URI, because you would then have to maintain the information in multiple places. If you change the mapping, you then have to change all the clients pointing to it.
+
+Spring HATEOAS provides a `WebFluxLinkBuilder` that lets you create links by pointing to controller methods.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+import static org.sfw.hateoas.server.reactive.WebFluxLinkBuilder.*;
+
+Mono<Link> link = linkTo(methodOn(PersonController.class).showAll()).withRel("people").toMono();
+
+StepVerifier.create(link)
+        .expectNextMatches(l -> {
+            assertThat(l.getRel()).isEqualTo(LinkRelation.of("people"));
+            assertThat(l.getHref()).endsWith("/people");
+            return true;
+        })
+        .verifyComplete();
+----
+====
+
+The `WebFluxLinkBuilder` uses Spring’s `UriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at http://localhost:8080, this is exactly the URI on top of which you are constructing additional parts. The builder now inspects the given controller method for its request mapping and thus ends up with http://localhost:8080/people. You can also build more nested links as well.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+var person = new PersonController.Person(1L);
+//                                                     /people
+var baseLink = linkTo(methodOn(PersonController.class).showAll());
+//                  /            1
+var link = baseLink.slash(person.id().toString()).withSelfRel().toMono();
+
+StepVerifier.create(link)
+        .expectNextMatches(l -> {
+            assertThat(l.getRel()).isEqualTo(IanaLinkRelations.SELF);
+            assertThat(l.getHref()).endsWith("/people/1");
+            return true;
+        })
+        .verifyComplete();
+----
+====
+
+The builder also allows creating URI instances to build up (for example, response header values):
+
+====
+[source, java]
+----
+var baseLink = linkTo(methodOn(PersonController.class).showAll());
+return baseLink.slash(person.toString()).withSelfRel().toMono()
+        .map(l -> {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(l.toUri());
+            return new ResponseEntity<PersonModel>(headers, HttpStatus.CREATED);
+        });
+----
+====
+
+You can also pass arguments to controller methods. These arguments will be used to create the links.
+The following example shows how to do so:
+
+====
+[source, java]
+----
+var link = linkTo(methodOn(PersonController.class).show(1L))
+        .withSelfRel().toMono();
+
+StepVerifier.create(link)
+        .expectNextMatches(l -> {
+            assertThat(l.getRel()).isEqualTo(IanaLinkRelations.SELF);
+            assertThat(l.getHref()).endsWith("/people/1");
+            return true;
+        })
+        .verifyComplete();
+----
+====
+
+`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method for which we want to obtain the mapping. However, there are a few constraints on the methods that can be obtained by using this technique:
+
+* The return type has to be capable of proxying, as we need to expose the method invocation on it.
+* The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
+
+[[server.link-builder.webflux.kotlin]]
+=== Kotlin extensions
+The following Kotlin extensions simplify creating links and adding them to the model:
+
+====
+[source, kotlin]
+----
+import org.springframework.hateoas.server.reactive.*
+
+val link: Mono<Link> = linkTo<CustomerController> { findById("15") } withRel SELF
+
+val customer: Mono<EntityModel<Customer>> = EntityModel.of(Customer("15", "John Doe"))
+            .add(CustomerController::class) { entity ->
+                linkTo { findById(entity.content.id) } withRel SELF
+                linkTo { findProductsById(entity.content.id) } withRel REL_PRODUCTS
+            }
+
+val customerWithLink: Mono<CustomerModel> = Mono.just(CustomerModel("15", "John Doe"))
+            .add { linkTo<CustomerController> { findById(it.id) } withRel SELF }
+----
+====
 
 [[server.affordances]]
 == Affordances

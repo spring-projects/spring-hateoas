@@ -16,6 +16,7 @@
 
 package org.springframework.hateoas.server.reactive
 
+import org.reactivestreams.Publisher
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.LinkRelation
 import org.springframework.hateoas.RepresentationModel
@@ -40,6 +41,19 @@ inline fun <reified C> linkTo(func: C.() -> Unit): WebFluxLinkBuilder.WebFluxBui
  */
 infix fun WebFluxLinkBuilder.WebFluxBuilder.withRel(rel: LinkRelation): Mono<Link> = withRel(rel).toMono()
 infix fun WebFluxLinkBuilder.WebFluxBuilder.withRel(rel: String): Mono<Link> = withRel(rel).toMono()
+
+/**
+ * Adds the given [links] to this model.
+ *
+ * @author Christoph Huber
+ */
+infix fun <R : RepresentationModel<R>> Mono<R>.add(links: (R) -> Publisher<Link>) = flatMap { model ->
+    when (val linksToAdd = links(model)) {
+        is Flux<Link> -> linksToAdd.collectList().map { model.add(it) }
+        is Mono<Link> -> linksToAdd.map { model.add(it) }
+        else -> Mono.error(IllegalStateException("Unsupported Publisher $linksToAdd"))
+    }
+}
 
 /**
  * Add [links] to the [R] resource.

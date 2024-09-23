@@ -18,8 +18,10 @@ package org.springframework.hateoas.server.reactive
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.hateoas.*
+import org.springframework.hateoas.IanaLinkRelations.SELF
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
@@ -33,11 +35,11 @@ class WebFluxLinkBuilderDslUnitTest {
     @Test
     fun `creates link to controller method`() {
 
-        val self = linkTo<CustomerController> { findById("15") } withRel IanaLinkRelations.SELF
+        val self = linkTo<CustomerController> { findById("15") } withRel SELF
 
         StepVerifier.create(self)
             .expectNextMatches {
-                assertThat(it.rel).isEqualTo(IanaLinkRelations.SELF)
+                assertThat(it.rel).isEqualTo(SELF)
                 assertThat(it.href).isEqualTo("/customers/15")
                 true
             }
@@ -49,13 +51,13 @@ class WebFluxLinkBuilderDslUnitTest {
 
         val customer = EntityModel.of(Customer("15", "John Doe"))
             .add(CustomerController::class) { entity ->
-                linkTo { findById(entity.content.id) } withRel IanaLinkRelations.SELF
+                linkTo { findById(entity.content.id) } withRel SELF
                 linkTo { findProductsById(entity.content.id) } withRel REL_PRODUCTS
             }
 
         StepVerifier.create(customer)
             .expectNextMatches {
-                assertThat(it.hasLink(IanaLinkRelations.SELF)).isTrue()
+                assertThat(it.hasLink(SELF)).isTrue()
                 assertThat(it.hasLink(REL_PRODUCTS)).isTrue()
                 true
             }
@@ -67,17 +69,45 @@ class WebFluxLinkBuilderDslUnitTest {
 
         val customer = CustomerModel("15", "John Doe")
             .add(CustomerController::class) {
-                linkTo { findById(it.id) } withRel IanaLinkRelations.SELF
+                linkTo { findById(it.id) } withRel SELF
                 linkTo { findProductsById(it.id) } withRel REL_PRODUCTS
             }
 
         StepVerifier.create(customer)
             .expectNextMatches {
-                assertThat(it.hasLink(IanaLinkRelations.SELF)).isTrue()
+                assertThat(it.hasLink(SELF)).isTrue()
                 assertThat(it.hasLink(REL_PRODUCTS)).isTrue()
                 true
             }
             .verifyComplete()
+    }
+
+    @Test
+    fun `add link to mono`() {
+        val customer = Mono.just(CustomerModel("15", "John Doe"))
+            .add { linkTo<CustomerController> { findById(it.id) } withRel SELF }
+        StepVerifier.create(customer)
+            .expectNextMatches {
+                assertThat(it.hasLink(SELF)).isTrue()
+                true
+            }
+    }
+
+    @Test
+    fun `add links to mono`() {
+        val customer = Mono.just(CustomerModel("15", "John Doe"))
+            .add {
+                Flux.concat(
+                    linkTo<CustomerController> { findById(it.id) } withRel SELF,
+                    linkTo<CustomerController> { findProductsById(it.id) } withRel REL_PRODUCTS
+                )
+            }
+        StepVerifier.create(customer)
+            .expectNextMatches {
+                assertThat(it.hasLink(SELF)).isTrue()
+                assertThat(it.hasLink(REL_PRODUCTS)).isTrue()
+                true
+            }
     }
 
     data class Customer(val id: String, val name: String)
