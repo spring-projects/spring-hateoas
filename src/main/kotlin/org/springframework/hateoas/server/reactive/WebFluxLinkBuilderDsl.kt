@@ -16,6 +16,7 @@
 
 package org.springframework.hateoas.server.reactive
 
+import kotlinx.coroutines.reactor.awaitSingle
 import org.reactivestreams.Publisher
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.LinkRelation
@@ -41,6 +42,8 @@ inline fun <reified C> linkTo(func: C.() -> Unit): WebFluxLinkBuilder.WebFluxBui
  */
 infix fun WebFluxLinkBuilder.WebFluxBuilder.withRel(rel: LinkRelation): Mono<Link> = withRel(rel).toMono()
 infix fun WebFluxLinkBuilder.WebFluxBuilder.withRel(rel: String): Mono<Link> = withRel(rel).toMono()
+suspend infix fun WebFluxLinkBuilder.WebFluxBuilder.awaitRel(rel: LinkRelation): Link = withRel(rel).toMono().awaitSingle()
+suspend infix fun WebFluxLinkBuilder.WebFluxBuilder.awaitRel(rel: String): Link = withRel(rel).toMono().awaitSingle()
 
 /**
  * Adds the given [links] to this model.

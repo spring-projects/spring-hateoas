@@ -6,12 +6,14 @@
 [[server.link-builder.webmvc]]
 == [[fundamentals.obtaining-links]] [[fundamentals.obtaining-links.builder]] Building links in Spring MVC
 
-Now we have the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link` instances in a less fragile way. Right now, we would have to duplicate URI strings all over the place. Doing so is brittle and unmaintainable.
+Now we have the domain vocabulary in place, but the main challenge remains: how to create the actual URIs to be wrapped into `Link` instances in a less fragile way.
+Right now, we would have to duplicate URI strings all over the place.
+Doing so is brittle and unmaintainable.
 
 Assume you have your Spring MVC controllers implemented as follows:
 
 ====
-[source, java]
+[source,java]
 ----
 @Controller
 class PersonController {
@@ -25,16 +27,22 @@ class PersonController {
 ----
 ====
 
-We see two conventions here. The first is a collection resource that is exposed through `@GetMapping` annotation of the controller method, with individual elements of that collection exposed as direct sub resources. The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as `/people/{id}/addresses`). Suppose you would like to link to the collection resource of all people. Following the approach from above would cause two problems:
+We see two conventions here.
+The first is a collection resource that is exposed through `@GetMapping` annotation of the controller method, with individual elements of that collection exposed as direct sub resources.
+The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as `/people/{id}/addresses`).
+Suppose you would like to link to the collection resource of all people.
+Following the approach from above would cause two problems:
 
-* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values. This is cumbersome and requires ugly manual string concatenation code.
-* You probably do not want to concatenate the `/people` on top of your base URI, because you would then have to maintain the information in multiple places. If you change the mapping, you then have to change all the clients pointing to it.
+* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values.
+This is cumbersome and requires ugly manual string concatenation code.
+* You probably do not want to concatenate the `/people` on top of your base URI, because you would then have to maintain the information in multiple places.
+If you change the mapping, you then have to change all the clients pointing to it.
 
 Spring HATEOAS now provides a `WebMvcLinkBuilder` that lets you create links by pointing to controller classes.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 import static org.sfw.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -45,11 +53,14 @@ assertThat(link.getHref()).endsWith("/people");
 ----
 ====
 
-The `WebMvcLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at `http://localhost:8080/your-app`, this is exactly the URI on top of which you are constructing additional parts. The builder now inspects the given controller class for its root mapping and thus ends up with `http://localhost:8080/your-app/people`. You can also build more nested links as well.
+The `WebMvcLinkBuilder` uses Spring's `ServletUriComponentsBuilder` under the hood to obtain the basic URI information from the current request.
+Assuming your application runs at `http://localhost:8080/your-app`, this is exactly the URI on top of which you are constructing additional parts.
+The builder now inspects the given controller class for its root mapping and thus ends up with `http://localhost:8080/your-app/people`.
+You can also build more nested links as well.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 Person person = new Person(1L, "Dave", "Matthews");
 //                 /person                 /     1
@@ -62,7 +73,7 @@ assertThat(link.getHref(), endsWith("/people/1"));
 The builder also allows creating URI instances to build up (for example, response header values):
 
 ====
-[source, java]
+[source,java]
 ----
 HttpHeaders headers = new HttpHeaders();
 headers.setLocation(linkTo(PersonController.class).slash(person).toUri());
@@ -79,7 +90,7 @@ The first approach is to hand a `Method` instance to the `WebMvcLinkBuilder`.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 Method method = PersonController.class.getMethod("show", Long.class);
 Link link = linkTo(method, 2L).withSelfRel();
@@ -88,11 +99,13 @@ assertThat(link.getHref()).endsWith("/people/2"));
 ----
 ====
 
-This is still a bit dissatisfying, as we have to first get a `Method` instance, which throws an exception and is generally quite cumbersome. At least we do not repeat the mapping. An even better approach is to have a dummy method invocation of the target method on a controller proxy, which we can create by using the `methodOn(…)` helper.
+This is still a bit dissatisfying, as we have to first get a `Method` instance, which throws an exception and is generally quite cumbersome.
+At least we do not repeat the mapping.
+An even better approach is to have a dummy method invocation of the target method on a controller proxy, which we can create by using the `methodOn(…)` helper.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 Link link = linkTo(methodOn(PersonController.class).show(2L)).withSelfRel();
 
@@ -100,7 +113,9 @@ assertThat(link.getHref()).endsWith("/people/2");
 ----
 ====
 
-`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method for which we want to obtain the mapping. However, there are a few constraints on the methods that can be obtained by using this technique:
+`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method.
+This allows the fluent expression of the method for which we want to obtain the mapping.
+However, there are a few constraints on the methods that can be obtained by using this technique:
 
 * The return type has to be capable of proxying, as we need to expose the method invocation on it.
 * The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
@@ -115,7 +130,7 @@ Rendering the values defaults to the composite style by default.
 If you want the values to be rendered in the non-composite style, you can use the `@NonComposite` annotation with the request parameter handler method parameter:
 
 ====
-[source, java]
+[source,java]
 ----
 @Controller
 class PersonController {
@@ -130,6 +145,7 @@ var link = linkTo(methodOn(PersonController.class).showAll(values)).withSelfRel(
 
 assertThat(link.getHref()).endsWith("/people?names=Matthews,Beauford"); <3>
 ----
+
 <1> We use the `@NonComposite` annotation to declare we want values to be rendered comma-separated.
 <2> We invoke the method using a list of values.
 <3> See how the request parameter is rendered in the expected format.
@@ -140,10 +156,11 @@ If we started from scratch today, we'd probably default to that style and rather
 
 [[server.link-builder.webmvc.kotlin]]
 === Kotlin extensions
+
 The following Kotlin extensions simplify creating links and adding them to the model:
 
 ====
-[source, kotlin]
+[source,kotlin]
 ----
 import org.springframework.hateoas.server.mvc.*
 
@@ -163,7 +180,7 @@ customer.add(CustomerController::class) {
 Assume you have your Spring WebFlux controller implemented as follows:
 
 ====
-[source, java]
+[source,java]
 ----
 @Controller
 @RequestMapping("/people")
@@ -178,16 +195,22 @@ class PersonController {
 ----
 ====
 
-We see two conventions here. The first is a collection resource that is exposed through @GetMapping annotation of the controller method, with individual elements of that collection exposed as direct sub resources. The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as /people/{id}/addresses). Suppose you would like to link to the collection resource of all people. Following the approach from above would cause two problems:
+We see two conventions here.
+The first is a collection resource that is exposed through @GetMapping annotation of the controller method, with individual elements of that collection exposed as direct sub resources.
+The collection resource might be exposed at a simple URI (as just shown) or more complex ones (such as /people/{id}/addresses).
+Suppose you would like to link to the collection resource of all people.
+Following the approach from above would cause two problems:
 
-* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values. This is cumbersome and requires ugly manual string concatenation code.
-* You probably do not want to concatenate the /people on top of your base URI, because you would then have to maintain the information in multiple places. If you change the mapping, you then have to change all the clients pointing to it.
+* To create an absolute URI, you would need to look up the protocol, hostname, port, servlet base, and other values.
+This is cumbersome and requires ugly manual string concatenation code.
+* You probably do not want to concatenate the /people on top of your base URI, because you would then have to maintain the information in multiple places.
+If you change the mapping, you then have to change all the clients pointing to it.
 
 Spring HATEOAS provides a `WebFluxLinkBuilder` that lets you create links by pointing to controller methods.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 import static org.sfw.hateoas.server.reactive.WebFluxLinkBuilder.*;
 
@@ -203,11 +226,14 @@ StepVerifier.create(link)
 ----
 ====
 
-The `WebFluxLinkBuilder` uses Spring’s `UriComponentsBuilder` under the hood to obtain the basic URI information from the current request. Assuming your application runs at http://localhost:8080, this is exactly the URI on top of which you are constructing additional parts. The builder now inspects the given controller method for its request mapping and thus ends up with http://localhost:8080/people. You can also build more nested links as well.
+The `WebFluxLinkBuilder` uses Spring’s `UriComponentsBuilder` under the hood to obtain the basic URI information from the current request.
+Assuming your application runs at http://localhost:8080, this is exactly the URI on top of which you are constructing additional parts.
+The builder now inspects the given controller method for its request mapping and thus ends up with http://localhost:8080/people.
+You can also build more nested links as well.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 var person = new PersonController.Person(1L);
 //                                                     /people
@@ -228,7 +254,7 @@ StepVerifier.create(link)
 The builder also allows creating URI instances to build up (for example, response header values):
 
 ====
-[source, java]
+[source,java]
 ----
 var baseLink = linkTo(methodOn(PersonController.class).showAll());
 return baseLink.slash(person.toString()).withSelfRel().toMono()
@@ -240,11 +266,12 @@ return baseLink.slash(person.toString()).withSelfRel().toMono()
 ----
 ====
 
-You can also pass arguments to controller methods. These arguments will be used to create the links.
+You can also pass arguments to controller methods.
+These arguments will be used to create the links.
 The following example shows how to do so:
 
 ====
-[source, java]
+[source,java]
 ----
 var link = linkTo(methodOn(PersonController.class).show(1L))
         .withSelfRel().toMono();
@@ -259,17 +286,20 @@ StepVerifier.create(link)
 ----
 ====
 
-`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method. This allows the fluent expression of the method for which we want to obtain the mapping. However, there are a few constraints on the methods that can be obtained by using this technique:
+`methodOn(…)` creates a proxy of the controller class that records the method invocation and exposes it in a proxy created for the return type of the method.
+This allows the fluent expression of the method for which we want to obtain the mapping.
+However, there are a few constraints on the methods that can be obtained by using this technique:
 
 * The return type has to be capable of proxying, as we need to expose the method invocation on it.
 * The parameters handed into the methods are generally neglected (except the ones referred to through `@PathVariable`, because they make up the URI).
 
 [[server.link-builder.webflux.kotlin]]
 === Kotlin extensions
+
 The following Kotlin extensions simplify creating links and adding them to the model:
 
 ====
-[source, kotlin]
+[source,kotlin]
 ----
 import org.springframework.hateoas.server.reactive.*
 
@@ -286,12 +316,23 @@ val customerWithLink: Mono<CustomerModel> = Mono.just(CustomerModel("15", "John 
 ----
 ====
 
+If you use Kotlin coroutines, you can use the following instead:
+
+====
+[source,kotlin]
+----
+linkTo<CustomerController> { findById("15") } awaitRel IanaLinkRelations.SELF
+----
+====
+
 [[server.affordances]]
 == Affordances
 
-[quote, James J. Gibson, The Ecological Approach to Visual Perception (page 126)]
+[quote,James J. Gibson,The Ecological Approach to Visual Perception (page 126)]
 ____
-The affordances of the environment are what it offers …​ what it provides or furnishes, either for good or ill. The verb 'to afford' is found in the dictionary, but the noun 'affordance' is not. I have made it up.
+The affordances of the environment are what it offers …​ what it provides or furnishes, either for good or ill.
+The verb 'to afford' is found in the dictionary, but the noun 'affordance' is not.
+I have made it up.
 ____
 
 REST-based resources provide not just data but controls.
@@ -303,10 +344,11 @@ The following code shows how to take a *self* link and associate two more afford
 
 .Connecting affordances to `GET /employees/{id}`
 ====
-[source, java, indent=0, tabsize=2]
+[source,java,indent=0,tabsize=2]
 ----
 include::{code-dir}/EmployeeController.java[tag=get]
 ----
+
 <1> Create the *self* link.
 <2> Associate the `updateEmployee` method with the `self` link.
 <3> Associate the `partiallyUpdateEmployee` method with the `self` link.
@@ -317,7 +359,7 @@ Imagine that the related methods *afforded* above look like this:
 
 .`updateEmpoyee` method that responds to `PUT /employees/{id}`
 ====
-[source, java, indent=0, tabsize=2]
+[source,java,indent=0,tabsize=2]
 ----
 include::{code-dir}/EmployeeController.java[tag=put]
 ----
@@ -325,7 +367,7 @@ include::{code-dir}/EmployeeController.java[tag=put]
 
 .`partiallyUpdateEmployee` method that responds to `PATCH /employees/{id}`
 ====
-[source, java, indent=0, tabsize=2]
+[source,java,indent=0,tabsize=2]
 ----
 include::{code-dir}/EmployeeController.java[tag=patch]
 ----
@@ -341,13 +383,18 @@ This can be achieved by using the `Affordances` API:
 
 .Using the `Affordances` API to manually register affordances
 ====
-[source, java, indent=0, tabsize=2]
+[source,java,indent=0,tabsize=2]
 ----
 include::{code-dir}/AffordancesSample.java[tag=affordances]
 ----
+
 <1> You start by creating an instance of `Affordances` from a `Link` instance creating the context for describing the affordances.
-<2> Each affordance starts with the HTTP method it's supposed to support. We then register a type as payload description and name the affordance explicitly. The latter can be omitted and a default name will be derived from the HTTP method and input type name. This effectively creates the same affordance as the pointer to `EmployeeController.newEmployee(…)` created.
-<3> The next affordance is built to reflect what's happening for the pointer to `EmployeeController.search(…)`. Here we define `Employee` to be the model for the response created and explicitly register ``QueryParameter``s.
+<2> Each affordance starts with the HTTP method it's supposed to support.
+We then register a type as payload description and name the affordance explicitly.
+The latter can be omitted and a default name will be derived from the HTTP method and input type name.
+This effectively creates the same affordance as the pointer to `EmployeeController.newEmployee(…)` created.
+<3> The next affordance is built to reflect what's happening for the pointer to `EmployeeController.search(…)`.
+Here we define `Employee` to be the model for the response created and explicitly register ``QueryParameter``s.
 ====
 
 Affordances are backed by media type specific affordance models that translate the general affordance metadata into specific representations.
@@ -372,7 +419,7 @@ In a Spring Boot application those components can be simply declared as Spring b
 
 .Registering a `ForwardedHeaderFilter`
 ====
-[source, java, tabsize=2, indent=0]
+[source,java,tabsize=2,indent=0]
 ----
 include::{code-dir}/ForwardedEnabledConfig.java[tags=code-1]
 ----
@@ -385,7 +432,7 @@ For a Spring WebFlux application, the reactive counterpart is `ForwardedHeaderTr
 
 .Registering a `ForwardedHeaderTransformer`
 ====
-[source, java, tabsize=2, indent=0]
+[source,java,tabsize=2,indent=0]
 ----
 include::{code-dir}/ForwardedEnabledConfig.java[tags=code-2]
 ----
@@ -398,7 +445,7 @@ With configuration as shown above in place, a request passing `X-Forwarded-…` 
 
 .A request using `X-Forwarded-…` headers
 ====
-[source, bash]
+[source,bash]
 ----
 curl -v localhost:8080/employees \
     -H 'X-Forwarded-Proto: https' \
@@ -409,7 +456,7 @@ curl -v localhost:8080/employees \
 
 .The corresponding response with the links generated to consider those headers
 ====
-[source, javascript]
+[source,javascript]
 ----
 {
   "_embedded": {
@@ -456,7 +503,7 @@ The methods essentially return links that point either to the collection resourc
 The following example shows how to use `EntityLinks`:
 
 ====
-[source, java]
+[source,java]
 ----
 EntityLinks links = …;
 LinkBuilder builder = links.linkFor(Customer.class);
@@ -483,7 +530,7 @@ Beyond that, we assume that you adhere to the following URI mapping setup and co
 The following example shows an implementation of an `EntityLinks`-capable controller:
 
 ====
-[source, java]
+[source,java]
 ----
 @Controller
 @ExposesResourceFor(Order.class) <1>
@@ -497,16 +544,18 @@ class OrderController {
   ResponseEntity order(@PathVariable("id") … ) { … }
 }
 ----
+
 <1> The controller indicates it's exposing collection and item resources for the entity `Order`.
 <2> Its collection resource is exposed under `/orders`
-<3> That collection resource can handle `GET` requests. Add more methods for other HTTP methods at your convenience.
+<3> That collection resource can handle `GET` requests.
+Add more methods for other HTTP methods at your convenience.
 <4> An additional controller method to handle a subordinate resource taking a path variable to expose an item resource, i.e. a single `Order`.
 ====
 
 With this in place, when you enable `EntityLinks` `@EnableHypermediaSupport` in your Spring MVC configuration, you can create links to the controller as follows:
 
 ====
-[source, java]
+[source,java]
 ----
 @Controller
 class PaymentController {
@@ -525,6 +574,7 @@ class PaymentController {
   }
 }
 ----
+
 <1> Inject `EntityLinks` made available by `@EnableHypermediaSupport` in your configuration.
 <2> Use the APIs to build links by using the entity types instead of controller classes.
 ====
@@ -543,7 +593,7 @@ This usually looks like this:
 
 .Obtaining a link to an item resource
 ====
-[source, java]
+[source,java]
 ----
 entityLinks.linkToItemResource(order, order.getId());
 ----
@@ -552,12 +602,13 @@ entityLinks.linkToItemResource(order, order.getId());
 If you find yourself repeating those method calls the identifier extraction step can be pulled out into a reusable `Function` to be reused throughout different invocations:
 
 ====
-[source, java]
+[source,java]
 ----
 Function<Order, Object> idExtractor = Order::getId; <1>
 
 entityLinks.linkToItemResource(order, idExtractor); <2>
 ----
+
 <1> The identifier extraction is externalized so that it can be held in a field or constant.
 <2> The link lookup using the extractor.
 ====
@@ -570,7 +621,7 @@ We can centralize the identifier extraction logic even more by obtaining a `Type
 
 .Using TypedEntityLinks
 ====
-[source, java]
+[source,java]
 ----
 class OrderController {
 
@@ -589,6 +640,7 @@ class OrderController {
   }
 }
 ----
+
 <1> Inject an `EntityLinks` instance.
 <2> Indicate you're going to look up `Order` instances with a certain identifier extractor function.
 <3> Look up item resource links based on a sole `Order` instance.
@@ -604,7 +656,7 @@ Making those available to the `EntityLinks` instance available for injection is 
 
 .Declaring a custom EntityLinks implementation
 ====
-[source, java]
+[source,java]
 ----
 @Configuration
 class CustomEntityLinksConfiguration {
@@ -624,7 +676,8 @@ If you want to make use of these, simply inject `RepositoryEntityLinks` explicit
 [[server.representation-model-assembler]]
 == [[fundamentals.resource-assembler]] Representation model assembler
 
-As the mapping from an entity to a representation model must be used in multiple places, it makes sense to create a dedicated class responsible for doing so. The conversion contains very custom steps but also a few boilerplate steps:
+As the mapping from an entity to a representation model must be used in multiple places, it makes sense to create a dedicated class responsible for doing so.
+The conversion contains very custom steps but also a few boilerplate steps:
 
 . Instantiation of the model class
 . Adding a link with a `rel` of `self` pointing to the resource that gets rendered.
@@ -633,7 +686,7 @@ Spring HATEOAS now provides a `RepresentationModelAssemblerSupport` base class t
 The following example shows how to use it:
 
 ====
-[source, java]
+[source,java]
 ----
 class PersonModelAssembler extends RepresentationModelAssemblerSupport<Person, PersonModel> {
 
@@ -650,19 +703,23 @@ class PersonModelAssembler extends RepresentationModelAssemblerSupport<Person, P
   }
 }
 ----
-NOTE: `createResource(...)` is code you write to instantiate a `PersonModel` object given a `Person` object. It should only focus on setting attributes, not populating `Links`.
+
+NOTE: `createResource(...)` is code you write to instantiate a `PersonModel` object given a `Person` object.
+It should only focus on setting attributes, not populating `Links`.
 ====
 
 Setting the class up as we did in the preceding example gives you the following benefits:
 
-* There are a handful of `createModelWithId(…)` methods that let you create an instance of the resource and have a `Link` with a rel of `self` added to it. The href of that link is determined by the configured controller's request mapping plus the ID of the entity (for example, `/people/1`).
-* The resource type gets instantiated by reflection and expects a no-arg constructor. If you want to use a dedicated constructor or avoid the reflection performance overhead, you can override `instantiateModel(…)`.
+* There are a handful of `createModelWithId(…)` methods that let you create an instance of the resource and have a `Link` with a rel of `self` added to it.
+The href of that link is determined by the configured controller's request mapping plus the ID of the entity (for example, `/people/1`).
+* The resource type gets instantiated by reflection and expects a no-arg constructor.
+If you want to use a dedicated constructor or avoid the reflection performance overhead, you can override `instantiateModel(…)`.
 
 You can then use the assembler to either assemble a `RepresentationModel` or a `CollectionModel`.
 The following example creates a `CollectionModel` of `PersonModel` instances:
 
 ====
-[source, java]
+[source,java]
 ----
 Person person = new Person(…);
 Iterable<Person> people = Collections.singletonList(person);
@@ -671,6 +728,26 @@ PersonModelAssembler assembler = new PersonModelAssembler();
 PersonModel model = assembler.toModel(person);
 CollectionModel<PersonModel> model = assembler.toCollectionModel(people);
 ----
+====
+
+NOTE: If you are fine with a `RepresentationModelAssembler` based purely on the domain type, you can use the `SimpleRepresentationModelAssembler` instead.
+
+=== Reactive model assembler
+
+With Spring WebFlux, you can use the `ReactiveRepresentationModelAssembler` or its `SimpleReactiveRepresentationModelAssembler` implementation.
+If you prefer WebFlux with Kotlin coroutines, there are according `CoroutineRepresentationModelAssembler` and `SimpleCoroutineRepresentationModelAssembler` interfaces.
+The following example transforms a `ReactiveRepresentationModelAssembler` to a coroutine model:
+
+====
+[source,kotlin]
+----
+runBlocking {
+    val model = resourceAssembler.toModelAndAwait(Employee("Frodo"), exchange)
+    assertThat(model.content.name).isEqualTo("Frodo")
+}
+----
+
+NOTE: `toCollectionModelAndAwait()` does the same for collection resources.
 ====
 
 [[server.processors]]
@@ -683,21 +760,21 @@ A perfect example is when you have a controller that deals with order fulfillmen
 Imagine having your ordering system producing this type of hypermedia:
 
 ====
-[source, json, tabsize=2]
+[source,json,tabsize=2]
 ----
 include::{resource-dir}/docs/order-plain.json[]
 ----
 ====
 
-You wish to add a link so the client can make payment, but don't want to mix details about your `PaymentController` into
-the `OrderController`.
+You wish to add a link so the client can make payment, but don't want to mix details about your `PaymentController` into the `OrderController`.
 Instead of polluting the details of your ordering system, you can write a `RepresentationModelProcessor` like this:
 
 ====
-[source, java, tabsize=2]
+[source,java,tabsize=2]
 ----
 include::{code-dir}/PaymentProcessor.java[tag=code]
 ----
+
 <1> This processor will only be applied to `EntityModel<Order>` objects.
 <2> Manipulate the existing `EntityModel` object by adding an unconditional link.
 <3> Return the `EntityModel` so it can be serialized into the requested media type.
@@ -706,7 +783,7 @@ include::{code-dir}/PaymentProcessor.java[tag=code]
 Register the processor with your application:
 
 ====
-[source, java, tabsize=2]
+[source,java,tabsize=2]
 ----
 include::{code-dir}/PaymentProcessingApp.java[tag=code]
 ----
@@ -715,10 +792,11 @@ include::{code-dir}/PaymentProcessingApp.java[tag=code]
 Now when you issue a hypermedia respresentation of an `Order`, the client receives this:
 
 ====
-[source, java, tabsize=2]
+[source,java,tabsize=2]
 ----
 include::{resource-dir}/docs/order-with-payment-link.json[]
 ----
+
 <1> You see the `LinkRelation.of("payments")` plugged in as this link's relation.
 <2> The URI was provided by the processor.
 ====
@@ -729,8 +807,10 @@ This example is quite simple, but you can easily:
 * Inject any services needed to conditionally add other links (e.g. `cancel`, `amend`) that are driven by state.
 * Leverage cross cutting services like Spring Security to add, remove, or revise links based upon the current user's context.
 
-Also, in this example, the `PaymentProcessor` alters the provided `EntityModel<Order>`. You also have the power to
-_replace_ it with another object. Just be advised the API requires the return type to equal the input type.
+Also, in this example, the `PaymentProcessor` alters the provided `EntityModel<Order>`.
+You also have the power to
+_replace_ it with another object.
+Just be advised the API requires the return type to equal the input type.
 
 [[server.processors.empty-collections]]
 === Processing empty collection models
@@ -744,11 +824,15 @@ See <<fundamentals.collection-model>> for details.
 [[server.rel-provider]]
 == [[spis.rel-provider]] Using the `LinkRelationProvider` API
 
-When building links, you usually need to determine the relation type to be used for the link. In most cases, the relation type is directly associated with a (domain) type. We encapsulate the detailed algorithm to look up the relation types behind a `LinkRelationProvider` API that lets you determine the relation types for single and collection resources. The algorithm for looking up the relation type follows:
+When building links, you usually need to determine the relation type to be used for the link.
+In most cases, the relation type is directly associated with a (domain) type.
+We encapsulate the detailed algorithm to look up the relation types behind a `LinkRelationProvider` API that lets you determine the relation types for single and collection resources.
+The algorithm for looking up the relation type follows:
 
 . If the type is annotated with `@Relation`, we use the values configured in the annotation.
 . If not, we default to the uncapitalized simple class name plus an appended `List` for the collection `rel`.
 . If the https://github.com/atteo/evo-inflector[EVO inflector] JAR is in the classpath, we use the plural of the single resource `rel` provided by the pluralizing algorithm.
 . `@Controller` classes annotated with `@ExposesResourceFor` (see <<server.entity-links>> for details) transparently look up the relation types for the type configured in the annotation, so that you can use `LinkRelationProvider.getItemResourceRelFor(MyController.class)` and get the relation type of the domain type exposed.
 
-A `LinkRelationProvider` is automatically exposed as a Spring bean when you use `@EnableHypermediaSupport`. You can plug in custom providers by implementing the interface and exposing them as Spring beans in turn.
+A `LinkRelationProvider` is automatically exposed as a Spring bean when you use `@EnableHypermediaSupport`.
+You can plug in custom providers by implementing the interface and exposing them as Spring beans in turn.
