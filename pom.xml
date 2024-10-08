@@ -86,7 +86,7 @@
 		<spring.version>6.2.0-RC1</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
 		<kotlin.version>1.9.25</kotlin.version>
-		<kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
+		<kotlinx-coroutines.version>1.9.0</kotlinx-coroutines.version>
 		<mockk.version>1.13.12</mockk.version>
 	</properties>
 
