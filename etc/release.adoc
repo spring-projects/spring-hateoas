@@ -1,0 +1,123 @@
+= Build and Release procedure
+
+NOTE: Many of the commands shown here will have to be used multiple times and are essentially parameterized.
+It's advisable to use a text expansion tool of your choice.
+The ones for Typinator are listed <<typinator-shortcuts, below>>.
+
+. Verify dependency updates have been performed.
+. Run the Maven release plugin:
++
+[source, bash]
+----
+$ mvn release:prepare \
+    -DreleaseVersion="1.2.3" \
+    -DdevelopmentVersion="1.2.4-SNAPSHOT" \
+    -DscmReleaseCommitComment="4711 - Release version 1.2.3." \
+    -DscmDevelopmentCommitComment="4711 - Prepare next development iteration." \
+    -Dtag="1.2.3"
+----
+. Reset the release branch to the tag created
++
+.For GA and service releases
+[source, bash]
+----
+$ git checkout release/release
+$ git reset --hard 1.2.3
+$ git push --force-with-lease
+----
++
+.For preview releases
+[source, bash]
+----
+$ git checkout release/milestone
+$ git reset --hard 1.3.0-M1
+$ git push --force-with-lease
+----
++
+This will kick of the CI workflows that fully publish the releases to the corresponding repositories.
+GA and service releases got to Maven Central, preview releases go to the Spring Artifactory.
+
+
+
+== Updating dependency versions
+
+Prior to a release we make sure that all dependencies have been updated to the latest ones corresponding to the policy applicable to the branch to be released.
+Bug fix branches usually only upgrade to bugfix versions of dependencies while the main branch can incorporate minor and major upgrades depending on the version step.
+As most dependency versions are declared in properties, you can use the following command to get an overview about what update candidates exist:
+
+.On bugfix branches
+[source, bash]
+----
+$ mvn versions:display-property-updates -DallowMinorUpdates=false
+----
+
+.On `main` branch (skip trailing property if major version update)
+[source, bash]
+----
+$ mvn versions:display-property-updates -DallowMajorUpdates=false
+----
+
+For each of the libraries
+
+. Create an upgrade ticket:
++
+[source, bash]
+----
+gh issue create \
+  --title "Upgrade to Library 1.2.3" \
+  --body "" \
+  --label "in: infrastructure,type: dependency-upgrade" \
+  --assignee "@me" \
+  --milestone "$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed -e "s/-SNAPSHOT//")"
+----
+
+. Tweak the property in the `pom.xml`
+. Commit the changes, push them and close the ticket:
++
+[source, bash]
+----
+git add . \
+  && git commit -m "GH-4711 - Upgrade to Library 1.2.3." \
+  && git push \
+  && gh issue close 4711
+----
+
+[[typinator-shortcuts]]
+== Typinator shortcuts
+
+.List property updates
+[source, bash]
+----
+mvn versions:display-property-updates -DallowMinorUpdates=false
+----
+
+.Create dependency upgrade ticket
+[source, bash]
+----
+gh issue create \
+  --title "{{?Title<Upgrade to >}}" \
+  --body "" \
+  --label "{{?Lables<in: infrastructure,type: dependency-upgrade>}}" \
+  --assignee "@me" \
+  --milestone "{{?Version<$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed -e "s/-SNAPSHOT//")>}}"
+----
+
+.Commit dependency update and close ticket
+[source, bash]
+----
+git add . \
+  && git commit -m "GH-{{ticketId=?Ticket ID<>}}{{ticketId}} - {{?Title<Upgrade to >}}." \
+  && git push \
+  && gh issue close {{ticketId}}
+----
+
+.Run Maven release plugin
+[source, bash]
+----
+mvn release:prepare \
+  -DreleaseVersion="{{version=?Release version}}{{version}}" \
+  -DdevelopmentVersion="{{devVersion=?Development version}}{{devVersion}}" \
+  -DscmReleaseCommitComment="{{ticketId=?Ticket}}{{ticketId}} - Release version {{version}}." \
+  -DscmDevelopmentCommitComment="{{ticketId}} - Prepare next development iteration." \
+  -Dtag="{{version}}"
+----

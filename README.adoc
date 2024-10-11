@@ -24,65 +24,7 @@ git config core.commentchar "/"
 
 == Making a release
 
-1. Create a new release (on the main branch).
-+
-----
-% ci/create-release.sh <release ticket without hash> <release version> <next snapshot version>
-----
-+
-2. With the release tagged, push the tagged version to the release branch.
-+
-----
-% git checkout -b release
-% git reset --hard <tag>
-% git push -f origin release
-----
-
-NOTE: You can chain the previous set of commands together using `&&`.
-
-The pipeline will build and release the "release" branch. It will also build a new snapshot and stage it on artifactory.
-And if it's a `.RELEASE`, the pipeline will push it out to Maven Central. To complete a release on Maven Central, you must login
-to the server shown in `pom.xml`, close, and release. This is a stop gap to guard against bad releases accidentally getting pushed
-out to Maven Central.
-
-=== Running CI tasks locally
-
-Since the pipeline uses Docker, it's easy to:
-
-* Debug what went wrong on your local machine.
-* Test out a a tweak to your `test.sh` script before sending it out.
-* Experiment against a new image before submitting your pull request.
-
-All of these use cases are great reasons to essentially run what Jenkins does on your local machine.
-
-IMPORTANT: To do this you must have Docker installed on your machine.
-
-1. `docker run -it --mount type=bind,source="$(pwd)",target=/spring-hateoas-github adoptopenjdk/openjdk8:latest /bin/bash`
-+
-This will launch the Docker image and mount your source code at `spring-hateoas-github`.
-+
-2. `cd spring-hateoas-github`
-+
-Next, run the `test.sh` script from inside the container:
-+
-2. `PROFILE=none ci/test.sh`
-
-Since the container is binding to your source, you can make edits from your IDE and continue to run build jobs.
-
-If you need to test the `build.sh` script, then do this:
-
-1. `docker run -it --mount type=bind,source="$(pwd)",target=/spring-hateoas-github --mount type=bind,source="/tmp/spring-hateoas-artifactory",target=/spring-hateoas-artifactory adoptopenjdk/openjdk8:latest /bin/bash`
-+
-This will launch the Docker image and mount your source code at `spring-hateoas-github` and the temporary
-artifactory output directory at `spring-hateoas-artifactory`.
-+
-Next, run the `build.sh` script from inside the container:
-+
-2. `ci/build.sh`
-
-IMPORTANT: `build.sh` will attempt to push to Artifactory. If you don't supply credentials, it will fail.
-
-NOTE: Docker containers can eat up disk space fast! From time to time, run `docker system prune` to clean out old images.
+Release instructions can be found https://github.com/spring-projects/spring-hateoas/tree/main/etc/release.adoc[here].
 
 == Resources
 
