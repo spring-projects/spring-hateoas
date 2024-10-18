@@ -12,8 +12,8 @@ The ones for Typinator are listed <<typinator-shortcuts, below>>.
 $ mvn release:prepare \
     -DreleaseVersion="1.2.3" \
     -DdevelopmentVersion="1.2.4-SNAPSHOT" \
-    -DscmReleaseCommitComment="4711 - Release version 1.2.3." \
-    -DscmDevelopmentCommitComment="4711 - Prepare next development iteration." \
+    -DscmReleaseCommitComment="GH-4711 - Release version 1.2.3." \
+    -DscmDevelopmentCommitComment="GH-4711 - Prepare next development iteration." \
     -Dtag="1.2.3"
 ----
 . Reset the release branch to the tag created
@@ -36,8 +36,6 @@ $ git push --force-with-lease
 +
 This will kick of the CI workflows that fully publish the releases to the corresponding repositories.
 GA and service releases got to Maven Central, preview releases go to the Spring Artifactory.
-
-
 
 == Updating dependency versions
 
@@ -117,7 +115,7 @@ git add . \
 mvn release:prepare \
   -DreleaseVersion="{{version=?Release version}}{{version}}" \
   -DdevelopmentVersion="{{devVersion=?Development version}}{{devVersion}}" \
-  -DscmReleaseCommitComment="{{ticketId=?Ticket}}{{ticketId}} - Release version {{version}}." \
-  -DscmDevelopmentCommitComment="{{ticketId}} - Prepare next development iteration." \
+  -DscmReleaseCommitComment="GH-{{ticketId=?Ticket}}{{ticketId}} - Release version {{version}}." \
+  -DscmDevelopmentCommitComment="GH-{{ticketId}} - Prepare next development iteration." \
   -Dtag="{{version}}"
 ----
