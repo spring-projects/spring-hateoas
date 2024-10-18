@@ -36,6 +36,22 @@ $ git push --force-with-lease
 +
 This will kick of the CI workflows that fully publish the releases to the corresponding repositories.
 GA and service releases got to Maven Central, preview releases go to the Spring Artifactory.
+. Push tags
++
+[source, bash]
+----
+$ git push --tags
+----
+. Generate change log using https://github.com/spring-io/github-changelog-generator[Spring IO changelog generator]
++
+[source, bash]
+----
+$ java -jar $pathToChangelogGenerator 1.2.3 changelog.txt
+----
+. Create a new release on GitHub for the tag just pushed and use contents from `changelog.txt` as release description.
+. Close release ticket and release milestone.
+. Add new milestone for upcoming version.
+. Announce release in Google Chat channel.
 
 == Updating dependency versions
 
