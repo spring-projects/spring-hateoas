@@ -260,7 +260,7 @@
 								</goals>
 								<phase>package</phase>
 								<configuration>
-									<outputDirectory>${project.root}/target/site/apidocs</outputDirectory>
+									<outputDirectory>${project.basedir}/target/site</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>
