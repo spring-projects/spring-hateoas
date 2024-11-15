@@ -21,20 +21,6 @@ jobs:
         java-version: 17
         cache: 'maven'
 
-    - name: Install GPG key
-      run: |
-        echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg.asc
-        echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import gpg.asc
-
-    - name: Release to Sonatype OSSRH
-      env:
-          SONATYPE_USER: ${{ secrets.OSSRH_S01_TOKEN_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.OSSRH_S01_TOKEN_PASSWORD }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      run: |
-        ./mvnw -B clean install -DskipTests
-        ./mvnw -B clean deploy -Pci,sonatype -s settings.xml
-
     - name: Setup Graphviz
       uses: ts-graphviz/setup-graphviz@v2
 
