@@ -21,6 +21,7 @@ import lombok.Data;
 import lombok.With;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Greg Turnquist
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @With
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({"name", "role"})
 public class Employee {
 
 	private @NotNull String name;

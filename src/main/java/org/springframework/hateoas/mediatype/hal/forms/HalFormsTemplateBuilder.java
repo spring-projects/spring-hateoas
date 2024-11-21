@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -53,7 +53,7 @@ class HalFormsTemplateBuilder {
 	 */
 	public Map<String, HalFormsTemplate> findTemplates(RepresentationModel<?> resource) {
 
-		Map<String, HalFormsTemplate> templates = new HashMap<>();
+		Map<String, HalFormsTemplate> templates = new LinkedHashMap<>();
 		Link selfLink = resource.getLink(IanaLinkRelations.SELF).orElse(null);
 
 		resource.getLinks().stream() //
