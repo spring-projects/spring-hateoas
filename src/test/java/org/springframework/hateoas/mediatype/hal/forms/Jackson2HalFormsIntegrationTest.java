@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -83,6 +84,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 /**
  * @author Greg Turnquist
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  */
 class Jackson2HalFormsIntegrationTest {
 
@@ -569,6 +571,44 @@ class Jackson2HalFormsIntegrationTest {
 
 		assertThat(JsonPath.parse(mapper.writeObject(inline)).read("$.inline[0].prompt", String.class))
 				.isEqualTo("My Prompt");
+	}
+
+	@Test
+		// #2257
+	void rendersFullInlineOptions() {
+		Inline inline = HalFormsOptions.inline(Map.of("my-prompt-field", "foo","my-value-field", "bar")).withPromptField("my-prompt-field")
+				.withValueField("my-value-field")
+				.withMinItems(2L)
+				.withMaxItems(3L);
+
+		DocumentContext result = JsonPath.parse(getCuriedObjectMapper().writeObject(inline));
+		assertThat(result.read("$.inline[0].my-prompt-field", String.class)).isEqualTo("foo");
+		assertThat(result.read("$.inline[0].my-value-field", String.class)).isEqualTo("bar");
+		assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
+		assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
+		assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
+		assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
+	}
+
+	@Test
+		// #2257
+	void rendersFullRemoteOptions() {
+		Link link = Link.of("/foo{?bar}").withType(MediaType.APPLICATION_JSON_VALUE);
+
+		Remote remote = HalFormsOptions.remote(link)
+				.withPromptField("my-prompt-field")
+				.withValueField("my-value-field")
+				.withMinItems(2L)
+				.withMaxItems(3L);
+
+		DocumentContext result = JsonPath.parse(getCuriedObjectMapper().writeObject(remote));
+		assertThat(result.read("$.link.href", String.class)).isEqualTo("/foo{?bar}");
+		assertThat(result.read("$.link.type", String.class)).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(result.read("$.link.templated", boolean.class)).isTrue();
+		assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
+		assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
+		assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
+		assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
 	}
 
 	@Test // #1483

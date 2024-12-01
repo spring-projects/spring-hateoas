@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Representation of HAL-FORMS {@code options} attribute.
  *
  * @author Oliver Drotbohm
+ * @author Réda Housni Alaoui
  * @see https://rwcbook.github.io/hal-forms/#options-element
  * @since 1.3
  */
@@ -151,6 +152,7 @@ public interface HalFormsOptions {
 		 */
 		@Nullable
 		@Override
+		@JsonProperty
 		public String getPromptField() {
 			return promptField;
 		}
@@ -161,6 +163,7 @@ public interface HalFormsOptions {
 		 */
 		@Nullable
 		@Override
+		@JsonProperty
 		public String getValueField() {
 			return valueField;
 		}
@@ -171,6 +174,7 @@ public interface HalFormsOptions {
 		 */
 		@Nullable
 		@Override
+		@JsonProperty
 		public Long getMinItems() {
 			return minItems;
 		}
@@ -181,6 +185,7 @@ public interface HalFormsOptions {
 		 */
 		@Nullable
 		@Override
+		@JsonProperty
 		public Long getMaxItems() {
 			return maxItems;
 		}
