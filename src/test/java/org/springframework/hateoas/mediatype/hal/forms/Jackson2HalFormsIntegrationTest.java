@@ -573,44 +573,6 @@ class Jackson2HalFormsIntegrationTest {
 				.isEqualTo("My Prompt");
 	}
 
-	@Test
-		// #2257
-	void rendersFullInlineOptions() {
-		Inline inline = HalFormsOptions.inline(Map.of("my-prompt-field", "foo","my-value-field", "bar")).withPromptField("my-prompt-field")
-				.withValueField("my-value-field")
-				.withMinItems(2L)
-				.withMaxItems(3L);
-
-		DocumentContext result = JsonPath.parse(getCuriedObjectMapper().writeObject(inline));
-		assertThat(result.read("$.inline[0].my-prompt-field", String.class)).isEqualTo("foo");
-		assertThat(result.read("$.inline[0].my-value-field", String.class)).isEqualTo("bar");
-		assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
-		assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
-		assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
-		assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
-	}
-
-	@Test
-		// #2257
-	void rendersFullRemoteOptions() {
-		Link link = Link.of("/foo{?bar}").withType(MediaType.APPLICATION_JSON_VALUE);
-
-		Remote remote = HalFormsOptions.remote(link)
-				.withPromptField("my-prompt-field")
-				.withValueField("my-value-field")
-				.withMinItems(2L)
-				.withMaxItems(3L);
-
-		DocumentContext result = JsonPath.parse(getCuriedObjectMapper().writeObject(remote));
-		assertThat(result.read("$.link.href", String.class)).isEqualTo("/foo{?bar}");
-		assertThat(result.read("$.link.type", String.class)).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
-		assertThat(result.read("$.link.templated", boolean.class)).isTrue();
-		assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
-		assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
-		assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
-		assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
-	}
-
 	@Test // #1483
 	void rendersRemoteOptions() {
 
@@ -623,6 +585,47 @@ class Jackson2HalFormsIntegrationTest {
 		assertThat(result.read("$.link.href", String.class)).isEqualTo("/foo{?bar}");
 		assertThat(result.read("$.link.type", String.class)).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
 		assertThat(result.read("$.link.templated", boolean.class)).isTrue();
+	}
+
+	@Test // #2257
+	void rendersFullInlineOptions() {
+
+		var options = HalFormsOptions.inline(Map.of("my-prompt-field", "foo", "my-value-field", "bar"))
+				.withPromptField("my-prompt-field")
+				.withValueField("my-value-field")
+				.withMinItems(2L)
+				.withMaxItems(3L);
+
+		var result = JsonPath.parse(getCuriedObjectMapper().writeObject(options));
+
+		assertThat(result.read("$.inline[0].my-prompt-field", String.class)).isEqualTo("foo");
+		assertThat(result.read("$.inline[0].my-value-field", String.class)).isEqualTo("bar");
+		assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
+		assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
+		assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
+		assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
+	}
+
+	@Test // #2257
+	void rendersFullRemoteOptions() {
+
+		var link = Link.of("/foo{?bar}").withType(MediaType.APPLICATION_JSON_VALUE);
+
+		var options = HalFormsOptions.remote(link)
+				.withPromptField("my-prompt-field")
+				.withValueField("my-value-field")
+				.withMinItems(2L)
+				.withMaxItems(3L);
+
+		var result = JsonPath.parse(getCuriedObjectMapper().writeObject(options));
+
+		assertThat(result.read("$.link.href", String.class)).isEqualTo("/foo{?bar}");
+		assertThat(result.read("$.link.type", String.class)).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(result.read("$.link.templated", boolean.class)).isTrue();
+		assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
+		assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
+		assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
+		assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
 	}
 
 	private void assertThatPathDoesNotExist(Object toMarshall, String path) throws Exception {

@@ -45,7 +45,7 @@ public interface HalFormsOptions {
 	 * @param values must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T> Inline inline(T... values) {
 
 		Assert.notNull(values, "Values must not be null!");
