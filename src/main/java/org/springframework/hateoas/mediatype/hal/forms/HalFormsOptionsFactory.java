@@ -17,10 +17,12 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
+import org.springframework.hateoas.AffordanceModel.PropertyCreationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -34,7 +36,7 @@ import org.springframework.util.Assert;
  */
 class HalFormsOptionsFactory {
 
-	private final Map<Class<?>, Map<String, Function<PropertyMetadata, HalFormsOptions>>> options;
+	private final Map<Class<?>, Map<String, BiFunction<PropertyMetadata, PropertyCreationContext, HalFormsOptions>>> options;
 
 	/**
 	 * Creates a new, empty {@link HalFormsOptionsFactory}.
@@ -48,7 +50,7 @@ class HalFormsOptionsFactory {
 	 *
 	 * @param options must not be {@literal null}.
 	 */
-	private HalFormsOptionsFactory(Map<Class<?>, Map<String, Function<PropertyMetadata, HalFormsOptions>>> options) {
+	private HalFormsOptionsFactory(Map<Class<?>, Map<String, BiFunction<PropertyMetadata, PropertyCreationContext, HalFormsOptions>>> options) {
 		this.options = options;
 	}
 
@@ -64,13 +66,13 @@ class HalFormsOptionsFactory {
 	 * @see HalFormsOptions#remote(org.springframework.hateoas.Link)
 	 */
 	HalFormsOptionsFactory withOptions(Class<?> type, String property,
-			Function<PropertyMetadata, HalFormsOptions> creator) {
+			BiFunction<PropertyMetadata, PropertyCreationContext, HalFormsOptions> creator) {
 
 		Assert.notNull(type, "Type must not be null!");
 		Assert.hasText(property, "Property must not be null or empty!");
 		Assert.notNull(creator, "Creator function must not be null!");
 
-		Map<Class<?>, Map<String, Function<PropertyMetadata, HalFormsOptions>>> options = new HashMap<>(this.options);
+		Map<Class<?>, Map<String, BiFunction<PropertyMetadata, PropertyCreationContext, HalFormsOptions>>> options = new HashMap<>(this.options);
 
 		options.compute(type, (it, map) -> {
 
@@ -95,7 +97,7 @@ class HalFormsOptionsFactory {
 	 * @return
 	 */
 	@Nullable
-	HalFormsOptions getOptions(PayloadMetadata payload, PropertyMetadata property) {
+	HalFormsOptions getOptions(PayloadMetadata payload, PropertyMetadata property, PropertyCreationContext context) {
 
 		Assert.notNull(payload, "Payload metadata must not be null!");
 		Assert.notNull(property, "Property metadata must not be null!");
@@ -103,14 +105,14 @@ class HalFormsOptionsFactory {
 		Class<?> type = payload.getType();
 		String name = property.getName();
 
-		Map<String, Function<PropertyMetadata, HalFormsOptions>> map = options.get(type);
+		Map<String, BiFunction<PropertyMetadata, PropertyCreationContext, HalFormsOptions>> map = options.get(type);
 
 		if (map == null) {
 			return null;
 		}
 
-		Function<PropertyMetadata, HalFormsOptions> function = map.get(name);
+		BiFunction<PropertyMetadata, PropertyCreationContext, HalFormsOptions> function = map.get(name);
 
-		return function == null ? null : function.apply(property);
+		return function == null ? null : function.apply(property, context);
 	}
 }
