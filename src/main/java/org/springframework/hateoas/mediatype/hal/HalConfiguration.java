@@ -16,14 +16,12 @@
 package org.springframework.hateoas.mediatype.hal;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -70,7 +68,7 @@ public class HalConfiguration {
 	public HalConfiguration() {
 
 		this(RenderSingleLinks.AS_SINGLE, new LinkedHashMap<>(), true, true, __ -> {},
-				Collections.singletonList(MediaTypes.HAL_JSON));
+				List.of(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON));
 	}
 
 	private HalConfiguration(RenderSingleLinks renderSingleLinks, Map<String, RenderSingleLinks> singleLinksPerPattern,

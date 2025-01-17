@@ -79,7 +79,7 @@ class HypermediaConfigurationImportSelector implements ImportSelector, ResourceL
 		List<MediaType> types = attributes == null //
 				? Collections.emptyList() //
 				: Arrays.stream((HypermediaType[]) attributes.get("type")) //
-						.map(it -> it.getMediaType()) //
+						.flatMap(it -> it.getMediaTypes().stream()) //
 						.collect(Collectors.toList());
 
 		if (!beanFactory.containsBean("hateoasMediaTypeConfigurer")) {

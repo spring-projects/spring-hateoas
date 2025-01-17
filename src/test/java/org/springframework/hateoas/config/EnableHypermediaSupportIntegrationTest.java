@@ -110,6 +110,8 @@ class EnableHypermediaSupportIntegrationTest {
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
 					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.VND_HAL_JSON))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 			assertRelProvidersSetUp(context);
 		});
 	}
@@ -137,6 +139,8 @@ class EnableHypermediaSupportIntegrationTest {
 
 			assertThat(discoverers).isNotNull();
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_JSON))
+					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
+			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.VND_HAL_JSON))
 					.hasValueSatisfying(HalLinkDiscoverer.class::isInstance);
 
 			assertThat(discoverers.getLinkDiscovererFor(MediaTypes.HAL_FORMS_JSON))

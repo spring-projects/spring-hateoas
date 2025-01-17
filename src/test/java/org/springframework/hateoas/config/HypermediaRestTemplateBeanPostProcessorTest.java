@@ -28,7 +28,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
-import org.springframework.hateoas.config.RestTemplateHateoasConfiguration.HypermediaRestTemplateBeanPostProcessor;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -55,6 +54,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
+							MediaTypes.VND_HAL_JSON, //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json"));
 		});
@@ -71,6 +71,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
+							MediaTypes.VND_HAL_JSON, //
 							MediaTypes.COLLECTION_JSON, //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json"));
@@ -88,6 +89,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
+							MediaTypes.VND_HAL_JSON, //
 							MediaTypes.HAL_FORMS_JSON, //
 							MediaTypes.COLLECTION_JSON, //
 							MediaTypes.UBER_JSON, //
@@ -104,6 +106,7 @@ class HypermediaRestTemplateBeanPostProcessorTest {
 			assertThat(getSupportedHypermediaTypes(context, REST_TEMPLATE_EXTRACTOR)) //
 					.containsExactlyInAnyOrder( //
 							MediaTypes.HAL_JSON, //
+							MediaTypes.VND_HAL_JSON, //
 							MediaType.parseMediaType("application/frodo+json"), //
 							MediaType.APPLICATION_JSON, //
 							MediaType.parseMediaType("application/*+json") //

@@ -40,7 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class HalTraversonDefaults implements TraversonDefaults {
 
-	private static final List<MediaType> HAL_FLAVORS = Collections.singletonList(MediaTypes.HAL_JSON);
+	private static final List<MediaType> HAL_FLAVORS = List.of(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON,
+			MediaTypes.HAL_FORMS_JSON);
 
 	/*
 	 * (non-Javadoc)
@@ -70,8 +71,8 @@ class HalTraversonDefaults implements TraversonDefaults {
 	@Override
 	public List<LinkDiscoverer> getLinkDiscoverers(Collection<MediaType> mediaTypes) {
 
-		return mediaTypes.stream().anyMatch(it -> it.isCompatibleWith(MediaTypes.HAL_JSON)) //
-				? Collections.singletonList(new HalLinkDiscoverer()) //
+		return mediaTypes.stream().anyMatch(it -> HAL_FLAVORS.stream().anyMatch(it::isCompatibleWith)) //
+				? List.of(new HalLinkDiscoverer()) //
 				: Collections.emptyList();
 	}
 

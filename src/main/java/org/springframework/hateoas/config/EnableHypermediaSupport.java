@@ -20,13 +20,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.support.WebStack;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans to support all
@@ -50,8 +49,8 @@ public @interface EnableHypermediaSupport {
 
 	/**
 	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
-	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components
-	 * like {@link WebClient} but don't want to use hypermedia operations with it.
+	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components like
+	 * {@link WebClient} but don't want to use hypermedia operations with it.
 	 *
 	 * @return
 	 */
@@ -69,9 +68,9 @@ public @interface EnableHypermediaSupport {
 		 * HAL - Hypermedia Application Language.
 		 *
 		 * @see http://stateless.co/hal_specification.html
-		 * @see https://tools.ietf.org/html/draft-kelly-json-hal-05
+		 * @see https://tools.ietf.org/html/draft-kelly-json-hal
 		 */
-		HAL(MediaTypes.HAL_JSON, "hal"),
+		HAL(List.of(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON), "hal"),
 
 		/**
 		 * HAL-FORMS - Independent, backward-compatible extension of the HAL designed to add runtime FORM support
@@ -96,16 +95,31 @@ public @interface EnableHypermediaSupport {
 		 */
 		UBER(MediaTypes.UBER_JSON, "uber");
 
-		private final MediaType mediaTypes;
+		private final List<MediaType> mediaTypes;
 		private final String localPackageName;
 
 		HypermediaType(MediaType mediaType, String localPackageName) {
-			this.mediaTypes = mediaType;
+			this.mediaTypes = List.of(mediaType);
 			this.localPackageName = localPackageName;
 		}
 
-		public MediaType getMediaType() {
+		HypermediaType(List<MediaType> mediaTypes, String localPackageName) {
+			this.mediaTypes = mediaTypes;
+			this.localPackageName = localPackageName;
+		}
+
+		public List<MediaType> getMediaTypes() {
 			return this.mediaTypes;
+		}
+
+		/**
+		 * @deprecated since 2.5, in favor of {@link #getMediaTypes()} as a logical media type might have been associated
+		 *             with multiple media type identifiers (see {@link #HAL}).
+		 * @return will never be {@literal null}.
+		 */
+		@Deprecated(since = "2.5", forRemoval = true)
+		public MediaType getMediaType() {
+			return this.mediaTypes.get(0);
 		}
 
 		public String getLocalPackageName() {

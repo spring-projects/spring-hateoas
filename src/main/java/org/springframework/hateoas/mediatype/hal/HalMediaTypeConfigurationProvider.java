@@ -44,6 +44,8 @@ class HalMediaTypeConfigurationProvider implements MediaTypeConfigurationProvide
 	 */
 	@Override
 	public boolean supportsAny(Collection<MediaType> mediaTypes) {
-		return mediaTypes.contains(MediaTypes.HAL_JSON);
+
+		return mediaTypes.contains(MediaTypes.HAL_JSON)
+				|| mediaTypes.contains(MediaTypes.VND_HAL_JSON);
 	}
 }

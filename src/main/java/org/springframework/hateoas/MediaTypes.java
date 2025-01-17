@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 
 /**
  * Constants for well-known hypermedia types.
- * 
+ *
  * @author Oliver Gierke
  * @author Przemek Nowak
  * @author Drummond Dawson
@@ -36,6 +36,20 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/hal+json}.
 	 */
 	public static final MediaType HAL_JSON = MediaType.valueOf(HAL_JSON_VALUE);
+
+	/**
+	 * A String equivalent of {@link MediaTypes#VND_HAL_JSON}.
+	 *
+	 * @since 2.5
+	 */
+	public static final String VND_HAL_JSON_VALUE = "application/vnd.hal+json";
+
+	/**
+	 * Public constant media type for {@code application/vnd.hal+json}.
+	 *
+	 * @since 2.5
+	 */
+	public static final MediaType VND_HAL_JSON = MediaType.valueOf(VND_HAL_JSON_VALUE);
 
 	/**
 	 * A String equivalent of {@link MediaTypes#ALPS_JSON}.
@@ -76,7 +90,7 @@ public class MediaTypes {
 	 * Public constant media type for {@code application/vnd.amundsen-uber+json}.
 	 */
 	public static final MediaType UBER_JSON = MediaType.parseMediaType(UBER_JSON_VALUE);
-	
+
 	/**
 	 * A String equivalent of {@link MediaTypes#VND_ERROR_JSON}.
 	 */

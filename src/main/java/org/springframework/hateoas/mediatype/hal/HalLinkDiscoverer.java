@@ -21,7 +21,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
-import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.http.MediaType;
 
 /**
@@ -36,7 +35,7 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 	 * Constructor for {@link MediaTypes#HAL_JSON}.
 	 */
 	public HalLinkDiscoverer() {
-		this(MediaTypes.HAL_JSON);
+		this(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON);
 	}
 
 	protected HalLinkDiscoverer(MediaType... mediaTypes) {

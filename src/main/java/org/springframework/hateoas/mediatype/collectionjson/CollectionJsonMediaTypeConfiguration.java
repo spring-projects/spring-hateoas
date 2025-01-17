@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -48,7 +47,7 @@ class CollectionJsonMediaTypeConfiguration implements HypermediaMappingInformati
 	 */
 	@Override
 	public List<MediaType> getMediaTypes() {
-		return Collections.singletonList(HypermediaType.COLLECTION_JSON.getMediaType());
+		return HypermediaType.COLLECTION_JSON.getMediaTypes();
 	}
 
 	/*
