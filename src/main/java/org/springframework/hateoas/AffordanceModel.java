@@ -147,11 +147,33 @@ public abstract class AffordanceModel {
 	 * @return will never be {@literal null}.
 	 * @since 1.3
 	 */
-	public <T> List<T> createProperties(BiFunction<InputPayloadMetadata, PropertyMetadata, T> creator) {
+	public <T> List<T> createProperties(PropertyCreator<T> creator) {
 
+		PropertyCreationContext context = new PropertyCreationContext(getLink());
 		return input.stream() //
-				.map(it -> creator.apply(input, it)) //
+				.map(it -> creator.apply(input, it, context)) //
 				.collect(Collectors.toList());
+	}
+
+	@FunctionalInterface
+	public interface PropertyCreator<T> {
+		T apply(InputPayloadMetadata payload, PropertyMetadata metadata, PropertyCreationContext context);
+	}
+
+	public static final class PropertyCreationContext {
+
+		private final Link link;
+
+		private PropertyCreationContext(Link link) {
+			this.link = link;
+		}
+
+		/**
+		 * {@link Link} for the URI of the resource.
+		 */
+		public Link link() {
+			return link;
+		}
 	}
 
 	/*
