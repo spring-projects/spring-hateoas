@@ -207,7 +207,7 @@
 							</execution>
 						</executions>
 						<configuration>
-							<passphrase>${env.GPG_PASSPHRASE}</passphrase>
+							<!-- Password via MAVEN_GPG_PASSWORD -->
 						</configuration>
 					</plugin>
 					 <plugin>
