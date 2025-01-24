@@ -2,7 +2,7 @@ name: CI Build
 
 on:
   push:
-    branches: [ main, 2.3.x, 2.2.x, 2.1.x, 2.0.x, 1.5.x ]
+    branches: [ main, 3.0.x, 2.3.x, 2.2.x, 2.1.x, 2.0.x, 1.5.x ]
   pull_request:
     branches: [ main ]
 
