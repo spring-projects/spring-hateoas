@@ -37,9 +37,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
 /**
  * @author Greg Turnquist
+ * @author Christoph Strobl
  */
 class CustomHypermediaWebFluxTest {
 
@@ -56,8 +58,7 @@ class CustomHypermediaWebFluxTest {
 
 		this.testClient = WebTestClient.bindToApplicationContext(ctx).build() //
 				.mutate() //
-				.exchangeStrategies(
-						it -> it.codecs(inner -> inner.defaultCodecs().configureDefaultCodec(webClientConfigurer.customizer))) //
+				.exchangeStrategies(ExchangeStrategies.builder().codecs(it -> it.defaultCodecs().configureDefaultCodec(webClientConfigurer.customizer)).build())
 				.build();
 	}
 
