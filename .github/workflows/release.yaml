@@ -2,7 +2,7 @@ name: Release to Maven Central
 
 on:
   push:
-    branches: [ release/release ]
+    branches: [ "release/release", "release/milestone" ]
 
 jobs:
   build:
