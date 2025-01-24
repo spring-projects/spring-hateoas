@@ -76,18 +76,18 @@
 		<logback.version>1.5.12</logback.version>
 		<jacoco>0.8.12</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson-bom.version>2.18.1</jackson-bom.version>
+		<jackson-bom.version>2.18.2</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.9.0</jsonpath.version>
 		<junit.version>5.11.3</junit.version>
 		<lombok.version>1.18.36</lombok.version>
-		<reactor-bom.version>2024.0.0</reactor-bom.version>
+		<reactor-bom.version>2024.0.2</reactor-bom.version>
 		<slf4j.version>2.0.16</slf4j.version>
-		<spring.version>6.2.0</spring.version>
+		<spring.version>7.0.0-M1</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
-		<kotlin.version>1.9.25</kotlin.version>
-		<kotlinx-coroutines.version>1.9.0</kotlinx-coroutines.version>
-		<mockk.version>1.13.13</mockk.version>
+		<kotlin.version>2.1.0</kotlin.version>
+		<kotlinx-coroutines.version>1.10.1</kotlinx-coroutines.version>
+		<mockk.version>1.13.14</mockk.version>
 	</properties>
 
 	<profiles>
