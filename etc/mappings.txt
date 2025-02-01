@@ -1,3 +1,4 @@
+assertj=AssertJ
 jackson-bom=Jackson
 junit=JUnit
 kotlin=Kotlin

@@ -10,7 +10,7 @@ if [ -z "$1" ] || [[ ! "$1" =~ ^(bugfix|minor|major)$ ]]; then
 fi
 
 # Check GH milestones extension installed
-if [ -z $(gh extension list | grep "^gh milestone") ]; then
+if [ -z "$(gh extension list | grep "^gh milestone")" ]; then
     echo "gh milestones extension not installed. Install via: gh extension install valeriobelli/gh-milestone."
     exit 1;
 fi
@@ -60,13 +60,17 @@ while IFS= read -r line; do
 
     if [[ $line =~ \$\{([[:alnum:]-]+)\.version\}[[:space:]\.]*([0-9]+\.[0-9]+\.[0-9]+.*)[[:space:]]\-\>[[:space:]]([0-9]+\.[0-9]+\.[0-9]+.*) ]]; then
 
+        echo "---"
+        echo "Processing line: $line"
+
         property_name="${BASH_REMATCH[1]}"
         old_version="${BASH_REMATCH[2]}"
         new_version="${BASH_REMATCH[3]}"
 
         # Skip if new version matches pattern (case insensitive)
         if echo "$new_version" | grep -qiE "(-m[0-9]|-rc[0-9]|alpha|beta)"; then
-            echo "Skipping milestone/alpha/beta version: $new_version"
+            echo "Skipping preview version: $new_version."
+            echo "---"
             continue
         fi
 
@@ -94,8 +98,6 @@ while IFS= read -r line; do
         fi
 
         matches_found=$((matches_found + 1))
-
-        echo "Processing line: $line"
         
         # Look up the mapping directly
         mapping=$(grep "^${property_name}=" "$mapping_file" | cut -d '=' -f2)
@@ -116,7 +118,7 @@ while IFS= read -r line; do
             echo "Created GitHub issue GH-${issue_number} - ${issue_title}."
             
             # Update the version using Maven versions plugin
-            ./mvn versions:set-property -q \
+            ./mvnw versions:set-property -q \
                 -DgenerateBackupPoms=false \
                 -Dproperty=${property_name}.version \
                 -DnewVersion=${new_version}
@@ -136,7 +138,8 @@ while IFS= read -r line; do
             echo "Pushed changes and closed issue GH-${issue_number}"
             echo "---"
         else
-            echo "Warning: No mapping found for property: $property_name"
+            echo "No mapping found for property: $property_name. Skipping."
+            echo "---"
         fi
     fi
 done < "$mvn_output_file"
