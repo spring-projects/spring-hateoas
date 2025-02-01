@@ -60,6 +60,16 @@ while IFS= read -r line; do
 
     if [[ $line =~ \$\{([[:alnum:]-]+)\.version\}[[:space:]\.]*([0-9]+\.[0-9]+\.[0-9]+.*)[[:space:]]\-\>[[:space:]]([0-9]+\.[0-9]+\.[0-9]+.*) ]]; then
 
+        property_name="${BASH_REMATCH[1]}"
+        old_version="${BASH_REMATCH[2]}"
+        new_version="${BASH_REMATCH[3]}"
+
+        # Skip if new version matches pattern (case insensitive)
+        if echo "$new_version" | grep -qiE "(-m[0-9]|-rc[0-9]|alpha|beta)"; then
+            echo "Skipping milestone/alpha/beta version: $new_version"
+            continue
+        fi
+
         # On first match
         if [ $matches_found -eq 0 ]; then
 
@@ -86,10 +96,6 @@ while IFS= read -r line; do
         matches_found=$((matches_found + 1))
 
         echo "Processing line: $line"
-
-        property_name="${BASH_REMATCH[1]}"
-        old_version="${BASH_REMATCH[2]}"
-        new_version="${BASH_REMATCH[3]}"
         
         # Look up the mapping directly
         mapping=$(grep "^${property_name}=" "$mapping_file" | cut -d '=' -f2)
