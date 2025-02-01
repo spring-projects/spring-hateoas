@@ -1,0 +1,7 @@
+jackson-bom=Jackson
+junit=JUnit
+kotlin=Kotlin
+logback=Logback
+mockk=Mockk
+reactor-bom=Reactor
+spring=Spring Framework
