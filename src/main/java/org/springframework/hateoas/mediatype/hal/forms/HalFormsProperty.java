@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Describe a parameter for the associated state transition in a HAL-FORMS document. A {@link HalFormsTemplate} may
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @see https://mamund.site44.com/misc/hal-forms/
  */
 @JsonInclude(Include.NON_DEFAULT)
+@JsonPropertyOrder({"name", "prompt", "regex", "placeholder", "value", "templated", "multi", "readOnly", "required", "min", "max", "minLength", "maxLength", "type", "options"})
 final class HalFormsProperty implements Named {
 
 	private final String name, prompt, regex, placeholder;
