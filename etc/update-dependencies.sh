@@ -69,7 +69,16 @@ while IFS= read -r line; do
 
         # Skip if new version matches pattern (case insensitive)
         if echo "$new_version" | grep -qiE "(-m[0-9]|-rc[0-9]|alpha|beta)"; then
-            echo "Skipping preview version: $new_version."
+            echo -e "\u274C - Skipping preview version: $new_version."
+            echo "---"
+            continue
+        fi
+
+        # Look up the mapping directly
+        mapping=$(grep "^${property_name}=" "$mapping_file" | cut -d '=' -f2)
+        
+        if [ -z "$mapping" ]; then
+            echo -e "\u274C - No mapping found for property: $property_name. Skipping."
             echo "---"
             continue
         fi
@@ -98,49 +107,40 @@ while IFS= read -r line; do
         fi
 
         matches_found=$((matches_found + 1))
-        
-        # Look up the mapping directly
-        mapping=$(grep "^${property_name}=" "$mapping_file" | cut -d '=' -f2)
-        
-        if [ -n "$mapping" ]; then
 
-            creationResult=$(gh issue create \
-                --title "Upgrade ${mapping} to ${new_version}" \
-                --body "" \
-                --label "in: infrastructure,type: dependency-upgrade" \
-                --assignee "@me" \
-                --milestone "${targetVersion}")
-            
-            # Create GitHub issue and capture the issue number
-            issue_title="Upgrade ${mapping} to ${new_version}"
-            issue_number=$(echo $creationResult | grep -o '[0-9]*$')
-            
-            echo "Created GitHub issue GH-${issue_number} - ${issue_title}."
-            
-            # Update the version using Maven versions plugin
-            ./mvnw versions:set-property -q \
-                -DgenerateBackupPoms=false \
-                -Dproperty=${property_name}.version \
-                -DnewVersion=${new_version}
-            
-            echo "Updated ${property_name}.version from ${old_version} to ${new_version}."
-            
-            # Commit the change with the issue number
-            git add pom.xml
-            git commit -m "GH-${issue_number} - Update ${mapping} to ${new_version}."
-            
-            # Push changes to remote
-            git push
-            
-            # Close the issue
-            gh issue close ${issue_number}
-            
-            echo "Pushed changes and closed issue GH-${issue_number}"
-            echo "---"
-        else
-            echo "No mapping found for property: $property_name. Skipping."
-            echo "---"
-        fi
+        creationResult=$(gh issue create \
+            --title "Upgrade ${mapping} to ${new_version}" \
+            --body "" \
+            --label "in: infrastructure,type: dependency-upgrade" \
+            --assignee "@me" \
+            --milestone "${targetVersion}")
+        
+        # Create GitHub issue and capture the issue number
+        issue_title="Upgrade ${mapping} to ${new_version}"
+        issue_number=$(echo $creationResult | grep -o '[0-9]*$')
+        
+        echo "Created GitHub issue GH-${issue_number} - ${issue_title}."
+        
+        # Update the version using Maven versions plugin
+        ./mvnw versions:set-property -q \
+            -DgenerateBackupPoms=false \
+            -Dproperty=${property_name}.version \
+            -DnewVersion=${new_version}
+        
+        echo "Updated ${property_name}.version from ${old_version} to ${new_version}."
+        
+        # Commit the change with the issue number
+        git add pom.xml
+        git commit -m "GH-${issue_number} - Update ${mapping} to ${new_version}."
+        
+        # Push changes to remote
+        git push
+        
+        # Close the issue
+        gh issue close ${issue_number}
+        
+        echo "Pushed changes and closed issue GH-${issue_number}"
+        echo "---"
     fi
 done < "$mvn_output_file"
 
