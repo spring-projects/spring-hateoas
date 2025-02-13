@@ -182,7 +182,7 @@ class HalFormsTemplateBuilderUnitTest {
 		List<String> values = Arrays.asList("1234123412341234", "4321432143214321");
 
 		HalFormsConfiguration configuration = new HalFormsConfiguration() //
-				.withOptions(PatternExample.class, "number", metadata -> HalFormsOptions.inline(values));
+				.withOptions(PatternExample.class, "number", (metadata, context) -> HalFormsOptions.inline(values));
 
 		RepresentationModel<?> models = new RepresentationModel<>(
 				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
@@ -209,7 +209,7 @@ class HalFormsTemplateBuilderUnitTest {
 
 		HalFormsConfiguration configuration = new HalFormsConfiguration() //
 				.withOptions(PatternExample.class, "number",
-						metadata -> HalFormsOptions.inline(values).withSelectedValue(selected));
+						(metadata, context) -> HalFormsOptions.inline(values).withSelectedValue(selected));
 
 		RepresentationModel<?> models = new RepresentationModel<>(
 				Affordances.of(Link.of("/example", LinkRelation.of("create"))) //
