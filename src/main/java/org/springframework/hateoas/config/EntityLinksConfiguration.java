@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -35,13 +35,12 @@ import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 class EntityLinksConfiguration {
 
 	@Bean
-	OrderAwarePluginRegistry<EntityLinks, Class<?>> entityLinksPluginRegistry(ApplicationContext context) {
+	OrderAwarePluginRegistry<EntityLinks, Class<?>> entityLinksPluginRegistry(ListableBeanFactory beanFactory) {
 
 		PluginRegistryFactoryBean<EntityLinks, Class<?>> registry = new PluginRegistryFactoryBean<>();
-		registry.setApplicationContext(context);
+		registry.setBeanFactory(beanFactory);
 		registry.setType(EntityLinks.class);
 		registry.setExclusions(new Class[] { DelegatingEntityLinks.class });
-		registry.afterPropertiesSet();
 
 		return registry.getObject();
 	}
