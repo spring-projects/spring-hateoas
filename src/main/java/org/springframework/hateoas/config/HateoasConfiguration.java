@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
@@ -107,13 +108,13 @@ public class HateoasConfiguration {
 	}
 
 	@Bean
-	OrderAwarePluginRegistry<LinkRelationProvider, LookupContext> relProviderPluginRegistry(ApplicationContext context) {
+	OrderAwarePluginRegistry<LinkRelationProvider, LookupContext> relProviderPluginRegistry(
+			ListableBeanFactory beanFactory) {
 
 		PluginRegistryFactoryBean<LinkRelationProvider, LookupContext> factory = new PluginRegistryFactoryBean<>();
-		factory.setApplicationContext(context);
+		factory.setBeanFactory(beanFactory);
 		factory.setType(LinkRelationProvider.class);
 		factory.setExclusions(new Class[] { DelegatingLinkRelationProvider.class });
-		factory.afterPropertiesSet();
 
 		return factory.getObject();
 	}

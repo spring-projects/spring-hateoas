@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
-import org.springframework.plugin.core.SimplePluginRegistry;
+import org.springframework.plugin.core.OrderAwarePluginRegistry;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -43,7 +43,7 @@ class DelegatingEntityLinksUnitTest extends TestUtils {
 	@Test
 	void throwsExceptionForUnsupportedClass() {
 
-		EntityLinks links = new DelegatingEntityLinks(SimplePluginRegistry.empty());
+		EntityLinks links = new DelegatingEntityLinks(OrderAwarePluginRegistry.empty());
 
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 				.isThrownBy(() -> links.linkFor(String.class)) //
@@ -84,7 +84,7 @@ class DelegatingEntityLinksUnitTest extends TestUtils {
 	}
 
 	private EntityLinks createDelegatingEntityLinks(EntityLinks target) {
-		return new DelegatingEntityLinks(SimplePluginRegistry.of(target));
+		return new DelegatingEntityLinks(OrderAwarePluginRegistry.of(target));
 	}
 
 	@ExposesResourceFor(String.class)
