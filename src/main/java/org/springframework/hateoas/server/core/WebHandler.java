@@ -140,7 +140,7 @@ public class WebHandler {
 				if (mappingVariable.isCapturing()) {
 
 					List<String> segments = Arrays.asList(((String) preparedValue).split("/"));
-					Object value = segments.size() != 0 ? "/" + segment.composite().prepareAndEncode(segments) : "";
+					Object value = !segments.isEmpty() ? "/" + segment.composite().prepareAndEncode(segments) : "";
 
 					values.put(key, value);
 
