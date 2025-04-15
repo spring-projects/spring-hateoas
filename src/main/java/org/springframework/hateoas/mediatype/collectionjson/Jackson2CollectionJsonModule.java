@@ -523,7 +523,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		@Override
 		@SuppressWarnings("null")
 		public boolean isEmpty(PagedModel<?> value) {
-			return value.getContent().size() == 0;
+			return value.getContent().isEmpty();
 		}
 
 		/*
