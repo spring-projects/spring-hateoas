@@ -82,7 +82,7 @@
 		<junit.version>5.11.4</junit.version>
 		<lombok.version>1.18.38</lombok.version>
 		<reactor-bom.version>2024.0.5</reactor-bom.version>
-		<slf4j.version>2.0.16</slf4j.version>
+		<slf4j.version>2.0.17</slf4j.version>
 		<spring.version>6.2.6</spring.version>
 		<spring-plugin.version>3.0.0</spring-plugin.version>
 		<kotlin.version>1.9.25</kotlin.version>
