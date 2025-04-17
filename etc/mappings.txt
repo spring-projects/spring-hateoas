@@ -2,6 +2,7 @@ assertj=AssertJ
 jackson-bom=Jackson
 junit=JUnit
 kotlin=Kotlin
+kotlinx-coroutines=Kotlin Koroutines
 logback=Logback
 lombok=Lombok
 mockk=Mockk
