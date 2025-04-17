@@ -28,8 +28,9 @@ import org.springframework.hateoas.support.WebStack;
 import org.springframework.http.MediaType;
 
 /**
- * Activates hypermedia support in the {@link ApplicationContext}. Will register infrastructure beans to support all
- * appropriate web stacks based on selected {@link HypermediaMappingInformation}-type as well as the classpath.
+ * Activates hypermedia support in the {@link org.springframework.context.ApplicationContext}. Will register
+ * infrastructure beans to support all appropriate web stacks based on selected
+ * {@link HypermediaMappingInformation}-type as well as the classpath.
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
@@ -50,7 +51,8 @@ public @interface EnableHypermediaSupport {
 	/**
 	 * Configures which {@link WebStack}s we're supposed to enable support for. By default we're activating it for all
 	 * available ones if they happen to be in use. Configure this explicitly in case you're using WebFlux components like
-	 * {@link WebClient} but don't want to use hypermedia operations with it.
+	 * {@link org.springframework.web.reactive.function.client.WebClient} but don't want to use hypermedia operations with
+	 * it.
 	 *
 	 * @return
 	 */

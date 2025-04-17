@@ -24,7 +24,7 @@ import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
 import org.springframework.http.MediaType;
 
 /**
- * {@link LinkDiscoverer} implementation based on HAL link structure.
+ * {@link org.springframework.hateoas.client.LinkDiscoverer} implementation based on HAL link structure.
  *
  * @author Oliver Gierke
  * @author Greg Turnquist

@@ -271,12 +271,12 @@ public class HalConfiguration {
 	public enum RenderSingleLinks {
 
 		/**
-		 * A single {@link Link} is rendered as a JSON object.
+		 * A single {@link org.springframework.hateoas.Link} is rendered as a JSON object.
 		 */
 		AS_SINGLE,
 
 		/**
-		 * A single {@link Link} is rendered as a JSON Array.
+		 * A single {@link org.springframework.hateoas.Link} is rendered as a JSON Array.
 		 */
 		AS_ARRAY
 	}
