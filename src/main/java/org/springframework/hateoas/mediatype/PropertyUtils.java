@@ -49,6 +49,7 @@ import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.InputEdition;
 import org.springframework.hateoas.InputType;
 import org.springframework.http.HttpEntity;
 import org.springframework.lang.Nullable;
@@ -470,6 +471,11 @@ public class PropertyUtils {
 		 */
 		@Override
 		public boolean isReadOnly() {
+
+			MergedAnnotation<InputEdition> inputEditionAnnotation = property.getAnnotation(InputEdition.class);
+			if (inputEditionAnnotation.isPresent()) {
+				return inputEditionAnnotation.getEnum("value", InputEdition.Mode.class) == InputEdition.Mode.READ_ONLY;
+			}
 
 			if (!property.hasWriteMethod()) {
 				return true;
