@@ -39,7 +39,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 
-	private final List<Link> links;
+	// Cannot be final in Jackson 3 as MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS is now false by default
+	private List<Link> links;
 
 	public RepresentationModel() {
 		this.links = new ArrayList<>();
@@ -206,7 +207,7 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 	 *
 	 * @return
 	 */
-	@JsonProperty("links")
+	@JsonProperty
 	public Links getLinks() {
 		return Links.of(links);
 	}

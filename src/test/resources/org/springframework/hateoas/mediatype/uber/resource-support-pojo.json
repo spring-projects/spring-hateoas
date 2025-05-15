@@ -8,7 +8,7 @@
       "rel" : [ "employees" ],
       "url" : "/employees"
     }, {
-      "name" : "employeeResource",
+      "name" : "employeeModel",
       "data" : [ {
         "name" : "role",
         "value" : "ring bearer"

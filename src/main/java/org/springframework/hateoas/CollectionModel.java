@@ -42,8 +42,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 		implements Iterable<T>, ResolvableTypeProvider {
 
-	private final Collection<T> content;
-	private final @Nullable ResolvableType fallbackType;
+	// Not final to allow population by Jackson
+	private Collection<T> content;
+	private @Nullable ResolvableType fallbackType;
 	private @Nullable ResolvableType fullType;
 
 	/**

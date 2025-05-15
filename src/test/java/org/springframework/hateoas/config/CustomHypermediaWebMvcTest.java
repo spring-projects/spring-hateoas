@@ -15,10 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import static org.springframework.hateoas.support.CustomHypermediaType.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -29,8 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -54,8 +53,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ContextConfiguration
 class CustomHypermediaWebMvcTest {
 
-	private @Autowired WebApplicationContext context;
-	private MockMvc mockMvc;
+	@Autowired WebApplicationContext context;
+	MockMvc mockMvc;
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	@BeforeEach
 	void setUp() {
@@ -65,13 +65,12 @@ class CustomHypermediaWebMvcTest {
 	@Test // #833
 	void getUsingCustomMediaType() throws Exception {
 
-		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString())) //
-				.andReturn() //
-				.getResponse() //
-				.getContentAsString();
-
-		assertThat(results).isEqualTo(read(new ClassPathResource("webmvc-frodo.json", getClass())));
+		$.assertDeserializesFile("webmvc-frodo.json")
+				.into(mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
+						.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString())) //
+						.andReturn() //
+						.getResponse() //
+						.getContentAsString());
 	}
 
 	@Configuration

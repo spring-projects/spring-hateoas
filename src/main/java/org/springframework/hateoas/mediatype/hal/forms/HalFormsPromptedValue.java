@@ -15,12 +15,13 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.databind.annotation.JsonSerialize;
+
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.hateoas.mediatype.MessageSourceResolvableSerializer;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * A value object to describe prompted values for HAL-FORMS {@code options}' {@code inline} attribute or responses of

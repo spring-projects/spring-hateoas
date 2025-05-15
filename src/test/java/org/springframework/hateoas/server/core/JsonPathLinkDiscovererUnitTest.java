@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.server.core;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;

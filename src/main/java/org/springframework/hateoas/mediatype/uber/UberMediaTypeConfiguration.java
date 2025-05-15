@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
+import tools.jackson.databind.JacksonModule;
+
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -24,8 +26,6 @@ import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.Module;
 
 /**
  * Spring configuration for Uber media type support.
@@ -56,7 +56,7 @@ class UberMediaTypeConfiguration implements HypermediaMappingInformation {
 	 */
 	@NonNull
 	@Override
-	public Module getJacksonModule() {
-		return new Jackson2UberModule();
+	public JacksonModule getJacksonModule() {
+		return new UberJacksonModule();
 	}
 }

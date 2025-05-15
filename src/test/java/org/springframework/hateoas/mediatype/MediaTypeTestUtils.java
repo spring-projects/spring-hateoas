@@ -23,12 +23,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.AbstractJacksonDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -82,8 +81,8 @@ public class MediaTypeTestUtils {
 	public static List<MediaType> getSupportedHypermediaTypes(List<HttpMessageConverter<?>> converters, Class<?> type) {
 
 		return converters.stream() //
-				.filter(MappingJackson2HttpMessageConverter.class::isInstance) //
-				.map(MappingJackson2HttpMessageConverter.class::cast) //
+				.filter(JacksonJsonHttpMessageConverter.class::isInstance) //
+				.map(JacksonJsonHttpMessageConverter.class::cast) //
 				.findFirst() //
 				.map(it -> it.getSupportedMediaTypes(type)) //
 				.orElseGet(() -> Collections.emptyList()); //
@@ -99,7 +98,7 @@ public class MediaTypeTestUtils {
 		return exchangeStrategies(client).messageReaders().stream() //
 				.filter(DecoderHttpMessageReader.class::isInstance) //
 				.map(DecoderHttpMessageReader.class::cast) //
-				.filter(it -> Jackson2JsonDecoder.class.isInstance(it.getDecoder()))
+				.filter(it -> AbstractJacksonDecoder.class.isInstance(it.getDecoder()))
 				.findFirst() //
 				.map(it -> it.getReadableMediaTypes(ResolvableType.forClass(type))) //
 				.orElseGet(() -> Collections.emptyList());
@@ -112,7 +111,6 @@ public class MediaTypeTestUtils {
 	 * @param webClient
 	 * @return
 	 */
-	@SuppressWarnings("null")
 	private static ExchangeStrategies exchangeStrategies(WebClient webClient) {
 
 		return (ExchangeStrategies) ReflectionTestUtils

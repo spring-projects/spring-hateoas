@@ -19,7 +19,7 @@ import java.util.Locale;
 
 /**
  * An enum for ALPS descriptor types
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.15
@@ -33,7 +33,8 @@ public enum Type {
 	 * (non-Javadoc)
 	 * @see java.lang.Enum#toString()
 	 */
+	@Override
 	public String toString() {
-		return name().toLowerCase(Locale.US);
+		return name().toUpperCase(Locale.US);
 	}
 }

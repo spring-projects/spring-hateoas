@@ -2,19 +2,23 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 /**
  * Integration tests for {@link EntityModel}.
- * 
+ *
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2ResourceIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
+
+	ContextualMapper mapper = MappingTestUtils.createMapper();
 
 	/**
 	 * @see #27
@@ -23,14 +27,14 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void inlinesContent() throws Exception {
 
-		Person person = new Person();
+		var person = new Person();
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		EntityModel<Person> resource = EntityModel.of(person);
-		resource.add(Link.of("localhost"));
+		var resource = EntityModel.of(person)
+				.add(Link.of("localhost"));
 
-		assertThat(write(resource)).isEqualTo(REFERENCE);
+		mapper.assertSerializes(resource).into(REFERENCE);
 	}
 
 	/**
@@ -39,26 +43,24 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void readsResourceSupportCorrectly() throws Exception {
 
-		PersonResource result = read(REFERENCE, PersonResource.class);
+		mapper.assertDeserializes(REFERENCE)
+				.into(PersonResource.class)
+				.matching(result -> {
 
-		assertThat(result.getLinks()).hasSize(1);
-		assertThat(result.getLinks()).contains(Link.of("localhost"));
-		assertThat(result.getContent().firstname).isEqualTo("Dave");
-		assertThat(result.getContent().lastname).isEqualTo("Matthews");
+					assertThat(result.getLinks()).hasSize(1);
+					assertThat(result.getLinks()).contains(Link.of("localhost"));
+					assertThat(result.getContent().firstname).isEqualTo("Dave");
+					assertThat(result.getContent().lastname).isEqualTo("Matthews");
+				});
 	}
 
 	static class PersonResource extends EntityModel<Person> {
 
-		public PersonResource() {
-
-		}
+		public PersonResource() {}
 	}
 
 	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 	static class Person {
-
-		String firstname;
-		String lastname;
+		@Nullable String firstname, lastname;
 	}
-
 }

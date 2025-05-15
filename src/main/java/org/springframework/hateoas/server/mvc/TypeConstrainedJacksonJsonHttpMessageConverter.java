@@ -15,24 +15,24 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import java.lang.reflect.Type;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Extension of {@link MappingJackson2HttpMessageConverter} to constrain the ability to read and write HTTP message
- * based on the target type. Useful in case the {@link ObjectMapper} about to be configured has customizations that
- * shall only be applied to object trees of a certain base type.
+ * based on the target type. Useful in case the {@link JsonMapper} about to be configured has customizations that shall
+ * only be applied to object trees of a certain base type.
  *
  * @author Oliver Gierke
  */
-public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJackson2HttpMessageConverter {
+public class TypeConstrainedJacksonJsonHttpMessageConverter extends JacksonJsonHttpMessageConverter {
 
 	private final Class<?> type;
 
@@ -41,7 +41,7 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 	 *
 	 * @param type must not be {@literal null}.
 	 */
-	public TypeConstrainedMappingJackson2HttpMessageConverter(Class<?> type) {
+	public TypeConstrainedJacksonJsonHttpMessageConverter(Class<?> type) {
 
 		Assert.notNull(type, "Type must not be null!");
 		this.type = type;
@@ -52,14 +52,16 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 	 *
 	 * @param type
 	 * @param supportedMediaTypes
-	 * @param objectMapper
+	 * @param mapper
 	 */
-	public TypeConstrainedMappingJackson2HttpMessageConverter(Class<?> type, List<MediaType> supportedMediaTypes,
-			ObjectMapper objectMapper) {
+	public TypeConstrainedJacksonJsonHttpMessageConverter(Class<?> type, List<MediaType> supportedMediaTypes,
+			JsonMapper mapper) {
 
-		this(type);
+		super(mapper);
+
 		setSupportedMediaTypes(supportedMediaTypes);
-		setObjectMapper(objectMapper);
+
+		this.type = type;
 	}
 
 	/*
@@ -73,12 +75,13 @@ public class TypeConstrainedMappingJackson2HttpMessageConverter extends MappingJ
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.http.converter.json.MappingJackson2HttpMessageConverter#canRead(java.lang.reflect.Type, java.lang.Class, org.springframework.http.MediaType)
+	 * @see org.springframework.http.converter.AbstractJacksonHttpMessageConverter#canRead(org.springframework.core.ResolvableType, org.springframework.http.MediaType)
 	 */
 	@Override
-	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
-		return this.type.isAssignableFrom(getJavaType(type, contextClass).getRawClass())
-				&& super.canRead(type, contextClass, mediaType);
+	public boolean canRead(ResolvableType type, @Nullable MediaType mediaType) {
+
+		return this.type.isAssignableFrom(getJavaType(type.getType(), null).getRawClass())
+				&& super.canRead(type, mediaType);
 	}
 
 	/*

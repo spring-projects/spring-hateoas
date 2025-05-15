@@ -15,13 +15,13 @@
  */
 package org.springframework.hateoas;
 
-import static org.assertj.core.api.Assertions.*;
+import lombok.Value;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link StringLinkRelation}.
@@ -30,27 +30,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class StringLinkRelationUnitTest {
 
+	ContextualMapper $ = MappingTestUtils.createMapper();
+
 	@Test
 	void serializesAsPlainString() throws Exception {
 
-		Sample sample = new Sample();
-		sample.relation = StringLinkRelation.of("foo");
-
-		ObjectMapper mapper = new ObjectMapper();
-
-		assertThat(mapper.writeValueAsString(sample)).isEqualTo("{\"relation\":\"foo\"}");
+		$.assertSerializes(new Sample(StringLinkRelation.of("foo")))
+				.into("{\"relation\":\"foo\"}")
+				.andBack();
 	}
 
-	@Test
-	void deserializesUsingFactoryMethod() throws Exception {
-
-		ObjectMapper mapper = new ObjectMapper();
-
-		Sample result = mapper.readValue("{\"relation\":\"foo\"}", Sample.class);
-
-		assertThat(result.relation).isEqualTo(StringLinkRelation.of("foo"));
-	}
-
+	@Value
 	@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 	static class Sample {
 		StringLinkRelation relation;

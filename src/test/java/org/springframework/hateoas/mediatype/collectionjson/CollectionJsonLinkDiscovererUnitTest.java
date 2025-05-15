@@ -17,15 +17,12 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.IOException;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.support.MappingUtils;
 
 /**
  * Unit tests for {@link CollectionJsonLinkDiscoverer}.
@@ -36,6 +33,7 @@ import org.springframework.hateoas.support.MappingUtils;
 class CollectionJsonLinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer;
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	@BeforeEach
 	void setUp() {
@@ -43,38 +41,38 @@ class CollectionJsonLinkDiscovererUnitTest {
 	}
 
 	@Test
-	void spec1Links() throws IOException {
+	void spec1Links() {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
+		$.assertFileContent("spec-part1.json").satisfies(content -> {
 
-		Optional<Link> link = this.discoverer.findLinkWithRel("self", specBasedJson);
-
-		assertThat(link) //
-				.map(Link::getHref) //
-				.hasValue("https://example.org/friends/");
+			assertThat(discoverer.findLinkWithRel("self", content)) //
+					.map(Link::getHref) //
+					.hasValue("https://example.org/friends/");
+		});
 	}
 
 	@Test
-	void spec2Links() throws IOException {
+	void spec2Links() {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
+		$.assertFileContent("spec-part2.json").satisfies(content -> {
 
-		assertThat(this.discoverer.findLinkWithRel("self", specBasedJson)) //
-				.map(Link::getHref) //
-				.hasValue("https://example.org/friends/");
+			assertThat(discoverer.findLinkWithRel("self", content)) //
+					.map(Link::getHref) //
+					.hasValue("https://example.org/friends/");
 
-		assertThat(this.discoverer.findLinkWithRel("feed", specBasedJson)) //
-				.map(Link::getHref) //
-				.hasValue("https://example.org/friends/rss");
+			assertThat(discoverer.findLinkWithRel("feed", content)) //
+					.map(Link::getHref) //
+					.hasValue("https://example.org/friends/rss");
 
-		assertThat(this.discoverer.findLinksWithRel("blog", specBasedJson)) //
-				.extracting("href") //
-				.containsExactlyInAnyOrder("https://examples.org/blogs/jdoe", "https://examples.org/blogs/msmith",
-						"https://examples.org/blogs/rwilliams");
+			assertThat(discoverer.findLinksWithRel("blog", content)) //
+					.extracting("href") //
+					.containsExactlyInAnyOrder("https://examples.org/blogs/jdoe", "https://examples.org/blogs/msmith",
+							"https://examples.org/blogs/rwilliams");
 
-		assertThat(this.discoverer.findLinksWithRel("avatar", specBasedJson)) //
-				.extracting("href") //
-				.containsExactlyInAnyOrder("https://examples.org/images/jdoe", "https://examples.org/images/msmith",
-						"https://examples.org/images/rwilliams");
+			assertThat(discoverer.findLinksWithRel("avatar", content)) //
+					.extracting("href") //
+					.containsExactlyInAnyOrder("https://examples.org/images/jdoe", "https://examples.org/images/msmith",
+							"https://examples.org/images/rwilliams");
+		});
 	}
 }

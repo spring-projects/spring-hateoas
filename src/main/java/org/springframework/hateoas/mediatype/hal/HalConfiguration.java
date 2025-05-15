@@ -15,12 +15,14 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.json.JsonMapper.Builder;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
@@ -28,8 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HAL specific configuration.
@@ -48,7 +48,7 @@ public class HalConfiguration {
 	 */
 	private final RenderSingleLinks renderSingleLinks;
 	private final Map<String, RenderSingleLinks> singleLinksPerPattern;
-	private final Consumer<ObjectMapper> objectMapperCustomizer;
+	private final UnaryOperator<Builder> mapperCustomizer;
 	private final List<MediaType> mediaTypes;
 
 	/**
@@ -68,23 +68,24 @@ public class HalConfiguration {
 	 */
 	public HalConfiguration() {
 
-		this(RenderSingleLinks.AS_SINGLE, new LinkedHashMap<>(), true, true, __ -> {}, DEFAULT_MEDIA_TYPES);
+		this(RenderSingleLinks.AS_SINGLE, new LinkedHashMap<>(), true, true, UnaryOperator.identity(),
+				List.of(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON));
 	}
 
 	private HalConfiguration(RenderSingleLinks renderSingleLinks, Map<String, RenderSingleLinks> singleLinksPerPattern,
 			boolean applyPropertyNamingStrategy, boolean enforceEmbeddedCollections,
-			Consumer<ObjectMapper> objectMapperCustomizer, List<MediaType> mediaTypes) {
+			UnaryOperator<Builder> mapperCustomizer, List<MediaType> mediaTypes) {
 
 		Assert.notNull(renderSingleLinks, "RenderSingleLinks must not be null!");
 		Assert.notNull(singleLinksPerPattern, "Single links per pattern map must not be null!");
-		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
+		Assert.notNull(mapperCustomizer, "Mapper customizer must not be null!");
 		Assert.notNull(mediaTypes, "MediaTypes must not be null!");
 
 		this.renderSingleLinks = renderSingleLinks;
 		this.singleLinksPerPattern = singleLinksPerPattern;
 		this.applyPropertyNamingStrategy = applyPropertyNamingStrategy;
 		this.enforceEmbeddedCollections = enforceEmbeddedCollections;
-		this.objectMapperCustomizer = objectMapperCustomizer;
+		this.mapperCustomizer = mapperCustomizer;
 		this.mediaTypes = mediaTypes;
 	}
 
@@ -152,7 +153,7 @@ public class HalConfiguration {
 		return this.renderSingleLinks == renderSingleLinks //
 				? this //
 				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
-						enforceEmbeddedCollections, objectMapperCustomizer, mediaTypes);
+						enforceEmbeddedCollections, mapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -168,7 +169,7 @@ public class HalConfiguration {
 		return this.singleLinksPerPattern == singleLinksPerPattern //
 				? this //
 				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
-						enforceEmbeddedCollections, objectMapperCustomizer, mediaTypes);
+						enforceEmbeddedCollections, mapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -183,7 +184,7 @@ public class HalConfiguration {
 		return this.applyPropertyNamingStrategy == applyPropertyNamingStrategy //
 				? this //
 				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
-						enforceEmbeddedCollections, objectMapperCustomizer, mediaTypes);
+						enforceEmbeddedCollections, mapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -198,22 +199,24 @@ public class HalConfiguration {
 		return this.enforceEmbeddedCollections == enforceEmbeddedCollections //
 				? this //
 				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
-						enforceEmbeddedCollections, objectMapperCustomizer, mediaTypes);
+						enforceEmbeddedCollections, mapperCustomizer, mediaTypes);
 	}
 
 	/**
-	 * Configures an {@link ObjectMapper} customizer to tweak the instance after it has been pre-configured with all HAL
-	 * specific setup.
+	 * Configures an {@link JsonMapper.Builder} customizer to tweak the instance after it has been pre-configured with all
+	 * HAL specific setup.
 	 *
-	 * @param objectMapperCustomizer must not be {@literal null}.
+	 * @param customizer must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	public HalConfiguration withObjectMapperCustomizer(Consumer<ObjectMapper> objectMapperCustomizer) {
+	public HalConfiguration withMapperBuilderCustomizer(UnaryOperator<Builder> customizer) {
 
-		return this.objectMapperCustomizer == objectMapperCustomizer //
+		Assert.notNull(customizer, "Customizer must not be null!");
+
+		return this.mapperCustomizer == customizer //
 				? this //
 				: new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
-						enforceEmbeddedCollections, objectMapperCustomizer, mediaTypes);
+						enforceEmbeddedCollections, customizer, mediaTypes);
 	}
 
 	/**
@@ -239,7 +242,7 @@ public class HalConfiguration {
 		newMediaTypes.add(index, mediaType);
 
 		return new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
-				enforceEmbeddedCollections, objectMapperCustomizer, newMediaTypes);
+				enforceEmbeddedCollections, mapperCustomizer, newMediaTypes);
 	}
 
 	public RenderSingleLinks getRenderSingleLinks() {
@@ -254,11 +257,8 @@ public class HalConfiguration {
 		return enforceEmbeddedCollections;
 	}
 
-	public HalConfiguration customize(ObjectMapper mapper) {
-
-		this.objectMapperCustomizer.accept(mapper);
-
-		return this;
+	public Builder customize(Builder mapper) {
+		return mapperCustomizer.apply(mapper);
 	}
 
 	List<MediaType> getMediaTypes() {

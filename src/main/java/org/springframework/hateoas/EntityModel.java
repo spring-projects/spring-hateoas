@@ -15,7 +15,17 @@
  */
 package org.springframework.hateoas;
 
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.impl.UnknownSerializer;
+import tools.jackson.databind.ser.jackson.JsonValueSerializer;
+import tools.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.databind.util.NameTransformer;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,25 +33,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
-import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.fasterxml.jackson.databind.util.NameTransformer;
 
 /**
  * A simple {@link EntityModel} wrapping a domain object and adding links to it.
@@ -176,8 +173,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
 		EntityModel<?> that = (EntityModel<?>) obj;
 
-		boolean contentEqual = this.content == null ? that.content == null : this.content.equals(that.content);
-		return contentEqual && super.equals(obj);
+		return super.equals(obj) && Objects.equals(this.content, that.content);
 	}
 
 	/*
@@ -186,16 +182,10 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 	 */
 	@Override
 	public int hashCode() {
-
-		int result = super.hashCode();
-		result += content == null ? 0 : 17 * content.hashCode();
-		return result;
+		return super.hashCode() + Objects.hash(content);
 	}
 
-	private static class MapSuppressingUnwrappingSerializer extends StdSerializer<Object>
-			implements ContextualSerializer {
-
-		private static final long serialVersionUID = -8367255762553946324L;
+	private static class MapSuppressingUnwrappingSerializer extends StdSerializer<Object> {
 
 		private final @Nullable BeanProperty property;
 
@@ -213,18 +203,18 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see tools.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, tools.jackson.core.JsonGenerator, tools.jackson.databind.SerializationContext)
 		 */
 		@Override
-		@SuppressWarnings({ "null", "unchecked" })
-		public void serialize(@Nullable Object value, @Nullable JsonGenerator gen, @NonNull SerializerProvider provider)
-				throws IOException {
+		@SuppressWarnings({ "unchecked" })
+		public void serialize(@Nullable Object value, @Nullable JsonGenerator gen,
+				@Nullable SerializationContext provider) {
 
-			if (value == null || Map.class.isInstance(value)) {
+			if (value == null || Map.class.isInstance(value) || provider == null) {
 				return;
 			}
 
-			JsonSerializer<Object> serializer = provider.findValueSerializer(value.getClass());
+			var serializer = provider.findValueSerializer(value.getClass());
 
 			if (UnknownSerializer.class.isInstance(serializer)
 					&& !provider.isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS)) {
@@ -236,9 +226,7 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 						"@JsonValue rendered classes can not be directly nested in EntityModel as they do not produce a document key!");
 			}
 
-			if (ContextualSerializer.class.isInstance(serializer)) {
-				serializer = (JsonSerializer<Object>) ((ContextualSerializer) serializer).createContextual(provider, property);
-			}
+			serializer = (ValueSerializer<Object>) serializer.createContextual(provider, property);
 
 			serializer //
 					.unwrappingSerializer(NameTransformer.NOP) //
@@ -247,17 +235,16 @@ public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see tools.jackson.databind.ValueSerializer#createContextual(tools.jackson.databind.SerializationContext, tools.jackson.databind.BeanProperty)
 		 */
 		@Override
-		public JsonSerializer<?> createContextual(@Nullable SerializerProvider prov, @Nullable BeanProperty property)
-				throws JsonMappingException {
+		public ValueSerializer<?> createContextual(@Nullable SerializationContext prov, @Nullable BeanProperty property) {
 			return new MapSuppressingUnwrappingSerializer(property);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonSerializer#isUnwrappingSerializer()
+		 * @see tools.jackson.databind.ValueSerializer#isUnwrappingSerializer()
 		 */
 		@Override
 		public boolean isUnwrappingSerializer() {

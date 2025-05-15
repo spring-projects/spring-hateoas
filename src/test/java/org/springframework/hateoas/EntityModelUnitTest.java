@@ -17,6 +17,9 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -24,8 +27,6 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link EntityModel}.
@@ -37,15 +38,15 @@ class EntityModelUnitTest {
 	@Test
 	void equalsForSelfReference() {
 
-		EntityModel<String> resource = EntityModel.of("foo");
+		var resource = EntityModel.of("foo");
 		assertThat(resource).isEqualTo(resource);
 	}
 
 	@Test
 	void equalsWithEqualContent() {
 
-		EntityModel<String> left = EntityModel.of("foo");
-		EntityModel<String> right = EntityModel.of("foo");
+		var left = EntityModel.of("foo");
+		var right = EntityModel.of("foo");
 
 		assertThat(left).isEqualTo(right);
 		assertThat(right).isEqualTo(left);
@@ -54,8 +55,8 @@ class EntityModelUnitTest {
 	@Test
 	void notEqualForDifferentContent() {
 
-		EntityModel<String> left = EntityModel.of("foo");
-		EntityModel<String> right = EntityModel.of("bar");
+		var left = EntityModel.of("foo");
+		var right = EntityModel.of("bar");
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -64,9 +65,9 @@ class EntityModelUnitTest {
 	@Test
 	void notEqualForDifferentLinks() {
 
-		EntityModel<String> left = EntityModel.of("foo");
-		EntityModel<String> right = EntityModel.of("foo");
-		right.add(Link.of("localhost"));
+		var left = EntityModel.of("foo");
+		var right = EntityModel.of("foo")
+				.add(Link.of("localhost"));
 
 		assertThat(left).isNotEqualTo(right);
 		assertThat(right).isNotEqualTo(left);
@@ -83,20 +84,20 @@ class EntityModelUnitTest {
 	@Test // #1371
 	void producesProperExceptionWhenRenderingAJsonValue() throws Exception {
 
-		EntityModel<?> model = EntityModel.of(new ValueType());
+		var model = EntityModel.of(new ValueType());
 
-		assertThatExceptionOfType(JsonMappingException.class)
-				.isThrownBy(() -> new ObjectMapper().writeValueAsString(model))
+		assertThatExceptionOfType(DatabindException.class)
+				.isThrownBy(() -> new JsonMapper().writeValueAsString(model))
 				.withMessageContaining("@JsonValue");
 	}
 
 	@Test // #1371
 	void rendersTypeIdentifiersCorrectly() throws Exception {
 
-		EntityModel<?> model = EntityModel.of(new TypeWithId());
+		var model = EntityModel.of(new TypeWithId());
 
 		assertThatNoException()
-				.isThrownBy(() -> new ObjectMapper().writeValueAsString(model));
+				.isThrownBy(() -> new JsonMapper().writeValueAsString(model));
 	}
 
 	// #1371
@@ -106,7 +107,5 @@ class EntityModelUnitTest {
 	}
 
 	@JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "@jsonObjectId")
-	static class TypeWithId {
-
-	}
+	static class TypeWithId {}
 }

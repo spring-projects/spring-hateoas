@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -44,7 +43,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Oliver Drotbohm
  */
 @JsonInclude(Include.NON_NULL)
-@NullUnmarked
 public class Problem {
 
 	private static Problem EMPTY = new Problem();
@@ -56,14 +54,22 @@ public class Problem {
 	private final @Nullable URI instance;
 
 	@JsonCreator
-	public Problem(@JsonProperty("type") URI type, @JsonProperty("title") String title,
-			@JsonProperty("status") int status, @JsonProperty("detail") String detail,
-			@JsonProperty("instance") URI instance) {
+	public Problem(
+			@JsonProperty("type") @Nullable URI type,
+			@JsonProperty("title") @Nullable String title,
+			@JsonProperty("status") @Nullable Integer status,
+			@JsonProperty("detail") @Nullable String detail,
+			@JsonProperty("instance") @Nullable URI instance) {
 
-		this(type, title, HttpStatus.resolve(status), detail, instance);
+		this(type, title, status == null ? null : HttpStatus.resolve(status), detail, instance);
 	}
 
-	private Problem(URI type, String title, HttpStatus status, String detail, URI instance) {
+	protected Problem(
+			@Nullable URI type,
+			@Nullable String title,
+			@Nullable HttpStatus status,
+			@Nullable String detail,
+			@Nullable URI instance) {
 
 		this.type = type;
 		this.title = title;
@@ -72,8 +78,8 @@ public class Problem {
 		this.instance = instance;
 	}
 
-	protected Problem() {
-		this(null, null, null, null, null);
+	private Problem() {
+		this(null, null, (HttpStatus) null, null, null);
 	}
 
 	/**
@@ -247,12 +253,15 @@ public class Problem {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof Problem)) {
+
+		if (!(o instanceof Problem problem)) {
 			return false;
 		}
-		Problem problem = (Problem) o;
-		return Objects.equals(this.type, problem.type) && Objects.equals(this.title, problem.title)
-				&& this.status == problem.status && Objects.equals(this.detail, problem.detail)
+
+		return Objects.equals(this.type, problem.type)
+				&& Objects.equals(this.title, problem.title)
+				&& Objects.equals(this.status, problem.status)
+				&& Objects.equals(this.detail, problem.detail)
 				&& Objects.equals(this.instance, problem.instance);
 	}
 
@@ -263,27 +272,38 @@ public class Problem {
 
 	@Override
 	public String toString() {
-		return "Problem(type=" + this.type + ", title=" + this.title + ", status=" + this.status + ", detail=" + this.detail
-				+ ", instance=" + this.instance + ")";
+
+		return "Problem(type=" + this.type
+				+ ", title=" + this.title
+				+ ", status=" + this.status
+				+ ", detail=" + this.detail
+				+ ", instance=" + this.instance
+				+ ")";
 	}
 
 	public static final class ExtendedProblem<T> extends Problem {
 
-		private T extendedProperties;
+		private @Nullable T extendedProperties;
 
-		ExtendedProblem(@Nullable URI type, @Nullable String title, @Nullable HttpStatus status, @Nullable String detail,
-				@Nullable URI instance, @Nullable T properties) {
+		@JsonCreator
+		ExtendedProblem(@JsonProperty @Nullable URI type,
+				@JsonProperty @Nullable String title,
+				@JsonProperty @Nullable Integer status,
+				@JsonProperty @Nullable String detail,
+				@JsonProperty @Nullable URI instance,
+				@JsonProperty @Nullable T extendedProperties) {
 
 			super(type, title, status, detail, instance);
 
-			this.extendedProperties = properties;
+			this.extendedProperties = extendedProperties;
 		}
 
-		private ExtendedProblem() {
+		ExtendedProblem(@Nullable URI type, @Nullable String title, @Nullable HttpStatus status, @Nullable String detail,
+				@Nullable URI instance, @Nullable T extendedProperties) {
 
-			super(null, null, null, null, null);
+			super(type, title, status, detail, instance);
 
-			this.extendedProperties = null;
+			this.extendedProperties = extendedProperties;
 		}
 
 		public ExtendedProblem(T extendedProperties) {
@@ -342,7 +362,7 @@ public class Problem {
 		 */
 		@JsonIgnore
 		public T getProperties() {
-			return extendedProperties;
+			return Objects.requireNonNull(extendedProperties);
 		}
 
 		/*
@@ -375,6 +395,11 @@ public class Problem {
 
 		@JsonAnySetter
 		void setPropertiesAsMap(String key, Object value) {
+
+			if (extendedProperties != null && !Map.class.isInstance(extendedProperties)) {
+				return;
+			}
+
 			getOrInitAsMap().put(key, value);
 		}
 
@@ -394,13 +419,15 @@ public class Problem {
 			if (this == o) {
 				return true;
 			}
-			if (!(o instanceof ExtendedProblem)) {
+
+			if (!(o instanceof ExtendedProblem that)) {
 				return false;
 			}
-			if (!super.equals(o)) {
+
+			if (!super.equals(that)) {
 				return false;
 			}
-			ExtendedProblem<?> that = (ExtendedProblem<?>) o;
+
 			return Objects.equals(this.extendedProperties, that.extendedProperties);
 		}
 
@@ -413,6 +440,5 @@ public class Problem {
 		public String toString() {
 			return "Problem.ExtendedProblem(extendedProperties=" + this.extendedProperties + ")";
 		}
-
 	}
 }

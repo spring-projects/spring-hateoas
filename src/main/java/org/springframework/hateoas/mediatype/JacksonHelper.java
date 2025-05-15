@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import tools.jackson.databind.JavaType;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-
-import com.fasterxml.jackson.databind.JavaType;
 
 /**
  * Jackson utility methods.
@@ -26,7 +26,8 @@ import com.fasterxml.jackson.databind.JavaType;
 public final class JacksonHelper {
 
 	/**
-	 * Navigate a chain of parametric types (e.g. Resources&lt;Resource&lt;String&gt;&gt;) until you find the innermost type (String).
+	 * Navigate a chain of parametric types (e.g. Resources&lt;Resource&lt;String&gt;&gt;) until you find the innermost
+	 * type (String).
 	 *
 	 * @param contentType
 	 * @return
@@ -42,15 +43,13 @@ public final class JacksonHelper {
 
 	/**
 	 * Is this a {@literal Resources<Resource<?>>}?
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */
 	public static boolean isResourcesOfResource(JavaType type) {
 
-		return
-			CollectionModel.class.isAssignableFrom(type.getRawClass())
-			&&
-			EntityModel.class.isAssignableFrom(type.containedType(0).getRawClass());
+		return CollectionModel.class.isAssignableFrom(type.getRawClass())
+				&& EntityModel.class.isAssignableFrom(type.containedType(0).getRawClass());
 	}
 }

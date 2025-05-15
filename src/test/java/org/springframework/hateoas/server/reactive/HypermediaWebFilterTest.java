@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.server.reactive;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 

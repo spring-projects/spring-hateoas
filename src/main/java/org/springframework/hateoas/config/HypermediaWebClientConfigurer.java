@@ -18,7 +18,7 @@ package org.springframework.hateoas.config;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Assembles {@link Jackson2JsonEncoder}s and {@link Jackson2JsonDecoder}s needed to wire a {@link WebClient} with
+ * Assembles {@link Jackson2JsonEncoder}s and {@link AbstractJacksonDecoder}s needed to wire a {@link WebClient} with
  * hypermedia support.
  *
  * @author Greg Turnquist
@@ -30,18 +30,17 @@ public class HypermediaWebClientConfigurer {
 	final WebfluxCodecCustomizer customizer;
 
 	/**
-	 * Creates a new {@link HypermediaWebClientConfigurer} for the given {@link ObjectMapper} and
-	 * {@link HypermediaMappingInformation}s.
+	 * Creates a new {@link HypermediaWebClientConfigurer} for the given {@link WebfluxCodecCustomizer}.
 	 *
-	 * @param mapper must not be {@literal null}.
-	 * @param hypermediaTypes must not be {@literal null}.
+	 * @param customizer must not be {@literal null}.
 	 */
 	HypermediaWebClientConfigurer(WebfluxCodecCustomizer customizer) {
 		this.customizer = customizer;
 	}
 
 	/**
-	 * Apply the proper {@link Jackson2JsonEncoder}s and {@link Jackson2JsonDecoder}s to this {@link WebClient.Builder}.
+	 * Apply the proper {@link Jackson2JsonEncoder}s and {@link AbstractJacksonDecoder}s to this
+	 * {@link WebClient.Builder}.
 	 *
 	 * @param builder
 	 * @return {@link WebClient.Builder} registered to handle hypermedia types.

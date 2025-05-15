@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mediatype.hal;
+package org.springframework.hateoas.mediatype.hal.forms;
 
-import static org.assertj.core.api.Assertions.*;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
+import tools.jackson.databind.SerializationFeature;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,21 +39,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 /**
  * @author Greg Turnquist
  */
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-class HalObjectMapperCustomizerTest {
+class HalFormsMapperCustomizerTest {
 
 	@Autowired WebApplicationContext context;
 
 	MockMvc mockMvc;
-
-	MappingTestUtils.ContextualMapper mapper = MappingTestUtils.createMapper(getClass());
+	ContextualMapper mapper = MappingTestUtils.createMapper();
 
 	@BeforeEach
 	void setUp() {
@@ -60,24 +60,26 @@ class HalObjectMapperCustomizerTest {
 	}
 
 	@Test // #1382
-	void objectMapperCustomizerShouldBeApplied() throws Exception {
+	void mapperCustomizerShouldBeApplied() throws Exception {
 
-		String actualHalJson = this.mockMvc.perform(get("/employees/0")).andReturn().getResponse().getContentAsString();
-		String expectedHalJson = this.mapper.readFileContent("hal-custom.json");
+		String actualHalFormsJson = mockMvc.perform(get("/employees/0")).andReturn().getResponse()
+				.getContentAsString();
+		String expectedHalFormsJson = mapper.readFileContent("hal-forms-custom.json");
 
-		assertThat(actualHalJson).isEqualTo(expectedHalJson);
+		assertThatJson(actualHalFormsJson).isEqualTo(expectedHalFormsJson);
 	}
 
 	@Configuration
 	@EnableWebMvc
-	@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
+	@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL_FORMS)
 	@Import(WebMvcEmployeeController.class)
 	static class TestConfig {
 
 		@Bean
-		HalConfiguration halConfiguration() {
-			return new HalConfiguration()
-					.withObjectMapperCustomizer(objectMapper -> objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true));
+		HalFormsConfiguration halFormsConfiguration() {
+			return new HalFormsConfiguration()
+					.withMapperBuilderCustomizer(
+							builder -> builder.configure(SerializationFeature.INDENT_OUTPUT, true));
 		}
 	}
 }

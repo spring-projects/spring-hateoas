@@ -16,14 +16,15 @@
 
 package org.springframework.hateoas.mediatype.uber;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.Arrays;
 
 import org.jspecify.annotations.Nullable;
-import org.springframework.hateoas.mediatype.uber.Jackson2UberModule.UberActionDeserializer;
+import org.springframework.hateoas.mediatype.uber.UberJacksonModule.UberActionDeserializer;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Embodies possible actions for an {@literal UBER+JSON} representation, mapped onto {@link HttpMethod}s.

@@ -18,6 +18,8 @@ package org.springframework.hateoas.client;
 import static net.jadler.Jadler.*;
 import static org.hamcrest.Matchers.*;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -33,16 +35,13 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.hateoas.mediatype.hal.HalJacksonModule;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EvoInflectorLinkRelationProvider;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for integration tests.
@@ -53,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Server implements Closeable {
 
-	private final ObjectMapper mapper;
+	private final JsonMapper mapper;
 	private final LinkRelationProvider relProvider;
 
 	private final MultiValueMap<Link, Link> baseResources = new LinkedMultiValueMap<>();
@@ -62,10 +61,12 @@ public class Server implements Closeable {
 
 		this.relProvider = new EvoInflectorLinkRelationProvider();
 
-		this.mapper = new ObjectMapper();
-		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(
-				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
+		this.mapper = JsonMapper.builder()
+				.addModule(new HalJacksonModule())
+				.handlerInstantiator(
+						new HalJacksonModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
+								MessageResolver.DEFAULTS_ONLY))
+				.build();
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //
@@ -217,15 +218,11 @@ public class Server implements Closeable {
 
 		path = path.startsWith(rootResource()) ? path.substring(rootResource().length()) : path;
 
-		try {
-			onRequest(). //
-					havingMethodEqualTo("GET"). //
-					havingPathEqualTo(path). //
-					respond().//
-					withBody(mapper.writeValueAsString(response));
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		onRequest(). //
+				havingMethodEqualTo("GET"). //
+				havingPathEqualTo(path). //
+				respond().//
+				withBody(mapper.writeValueAsString(response));
 	}
 
 	/*

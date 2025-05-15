@@ -15,15 +15,14 @@
  */
 package org.springframework.hateoas.support;
 
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper.Builder;
+
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
@@ -41,15 +40,10 @@ public class CustomHypermediaType implements HypermediaMappingInformation {
 	}
 
 	/**
-	 * Copy the incoming {@link ObjectMapper} and change it's output format along with disabling failure on unknown
-	 * properties.
+	 * Change mappers output format to indenting.
 	 */
 	@Override
-	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
-
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-		return mapper;
+	public Builder configureJsonMapper(Builder builder) {
+		return builder.enable(SerializationFeature.INDENT_OUTPUT);
 	}
 }

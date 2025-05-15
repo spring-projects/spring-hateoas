@@ -18,7 +18,6 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.support.JsonPathUtils.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -49,6 +49,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 class CollectionJsonWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	@BeforeEach
 	void setUp() {
@@ -138,44 +139,46 @@ class CollectionJsonWebFluxIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String specBasedJson = read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
+		$.assertFileContent("spec-part7-adjusted.json").satisfies(specBasedJson -> {
 
-		this.testClient.post().uri("http://localhost/employees") //
-				.contentType(MediaTypes.COLLECTION_JSON) //
-				.bodyValue(specBasedJson) //
-				.exchange() //
-				.expectStatus().isCreated() //
-				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
+			testClient.post().uri("http://localhost/employees") //
+					.contentType(MediaTypes.COLLECTION_JSON) //
+					.bodyValue(specBasedJson) //
+					.exchange() //
+					.expectStatus().isCreated() //
+					.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
 
-		this.testClient.get().uri("http://localhost/employees/2") //
-				.accept(MediaTypes.COLLECTION_JSON) //
-				.exchange() //
-				.expectStatus().isOk() //
-				.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
-				.expectBody(String.class) //
+			testClient.get().uri("http://localhost/employees/2") //
+					.accept(MediaTypes.COLLECTION_JSON) //
+					.exchange() //
+					.expectStatus().isOk() //
+					.expectHeader().contentType(MediaTypes.COLLECTION_JSON) //
+					.expectBody(String.class) //
 
-				.value(jsonPath("$.collection.version", is("1.0")))
-				.value(jsonPath("$.collection.href", is("http://localhost/employees/2")))
+					.value(jsonPath("$.collection.version", is("1.0")))
+					.value(jsonPath("$.collection.href", is("http://localhost/employees/2")))
 
-				.value(jsonPath("$.collection.links.*", hasSize(1)))
-				.value(jsonPath("$.collection.links[0].rel", is("employees")))
-				.value(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
+					.value(jsonPath("$.collection.links.*", hasSize(1)))
+					.value(jsonPath("$.collection.links[0].rel", is("employees")))
+					.value(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
 
-				.value(jsonPath("$.collection.items.*", hasSize(1)))
-				.value(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.value(jsonPath("$.collection.items[0].data[1].value", is("W. Chandry")))
-				.value(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.value(jsonPath("$.collection.items[0].data[0].value", is("developer")))
+					.value(jsonPath("$.collection.items.*", hasSize(1)))
+					.value(jsonPath("$.collection.items[0].data[1].name", is("name")))
+					.value(jsonPath("$.collection.items[0].data[1].value", is("W. Chandry")))
+					.value(jsonPath("$.collection.items[0].data[0].name", is("role")))
+					.value(jsonPath("$.collection.items[0].data[0].value", is("developer")))
 
-				.value(jsonPath("$.collection.items[0].links.*", hasSize(1)))
-				.value(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
-				.value(jsonPath("$.collection.items[0].links[0].href", is("http://localhost/employees")))
+					.value(jsonPath("$.collection.items[0].links.*", hasSize(1)))
+					.value(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
+					.value(jsonPath("$.collection.items[0].links[0].href", is("http://localhost/employees")))
 
-				.value(jsonPath("$.collection.template.*", hasSize(1)))
-				.value(jsonPath("$.collection.template.data[0].name", is("name")))
-				.value(jsonPath("$.collection.template.data[0].value", is("")))
-				.value(jsonPath("$.collection.template.data[1].name", is("role")))
-				.value(jsonPath("$.collection.template.data[1].value", is("")));
+					.value(jsonPath("$.collection.template.*", hasSize(1)))
+					.value(jsonPath("$.collection.template.data[0].name", is("name")))
+					.value(jsonPath("$.collection.template.data[0].value", is("")))
+					.value(jsonPath("$.collection.template.data[1].name", is("role")))
+					.value(jsonPath("$.collection.template.data[1].value", is("")));
+		});
+
 	}
 
 	@Configuration

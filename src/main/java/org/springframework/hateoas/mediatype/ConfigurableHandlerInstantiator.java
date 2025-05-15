@@ -15,24 +15,24 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import tools.jackson.databind.DeserializationConfig;
+import tools.jackson.databind.KeyDeserializer;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.cfg.HandlerInstantiator;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.Annotated;
+import tools.jackson.databind.jsontype.TypeIdResolver;
+import tools.jackson.databind.jsontype.TypeResolverBuilder;
+import tools.jackson.databind.ser.VirtualBeanPropertyWriter;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
-import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
-import com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter;
 
 /**
  * A {@link HandlerInstantiator} that will use instances explicitly registered with it but fall back to lookup or even
@@ -84,9 +84,9 @@ public class ConfigurableHandlerInstantiator extends HandlerInstantiator {
 	 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#deserializerInstance(com.fasterxml.jackson.databind.DeserializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 	 */
 	@Override
-	public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
+	public ValueDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated,
 			Class<?> deserClass) {
-		return (JsonDeserializer<?>) findOrCreateInstance(deserClass);
+		return (ValueDeserializer<?>) findOrCreateInstance(deserClass);
 	}
 
 	/*
@@ -104,8 +104,8 @@ public class ConfigurableHandlerInstantiator extends HandlerInstantiator {
 	 * @see com.fasterxml.jackson.databind.cfg.HandlerInstantiator#serializerInstance(com.fasterxml.jackson.databind.SerializationConfig, com.fasterxml.jackson.databind.introspect.Annotated, java.lang.Class)
 	 */
 	@Override
-	public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
-		return (JsonSerializer<?>) findOrCreateInstance(serClass);
+	public ValueSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> serClass) {
+		return (ValueSerializer<?>) findOrCreateInstance(serClass);
 	}
 
 	/*

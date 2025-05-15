@@ -15,25 +15,23 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.databind.json.JsonMapper.Builder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HAL-FORMS specific configuration extension of {@link HalConfiguration}.
@@ -45,7 +43,7 @@ public class HalFormsConfiguration {
 
 	private final HalConfiguration halConfiguration;
 	private final Map<Class<?>, String> patterns;
-	private final Consumer<ObjectMapper> objectMapperCustomizer;
+	private final UnaryOperator<Builder> mapperCustomizer;
 	private final HalFormsOptionsFactory options;
 	private final List<MediaType> mediaTypes;
 	private final boolean defaultSingleTemplate;
@@ -63,23 +61,23 @@ public class HalFormsConfiguration {
 	 * @param halConfiguration must not be {@literal null}.
 	 */
 	public HalFormsConfiguration(HalConfiguration halConfiguration) {
-		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {},
+		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), UnaryOperator.identity(),
 				Collections.singletonList(MediaTypes.HAL_FORMS_JSON), false);
 	}
 
 	private HalFormsConfiguration(HalConfiguration halConfiguration, Map<Class<?>, String> patterns,
-			HalFormsOptionsFactory options, @Nullable Consumer<ObjectMapper> objectMapperCustomizer,
-			List<MediaType> mediaTypes, boolean defaultSingleTemplate) {
+			HalFormsOptionsFactory options, UnaryOperator<Builder> mapperCustomizer, List<MediaType> mediaTypes,
+			boolean defaultSingleTemplate) {
 
 		Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
 		Assert.notNull(patterns, "Patterns must not be null!");
-		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
+		Assert.notNull(mapperCustomizer, "Mapper customizer must not be null!");
 		Assert.notNull(options, "HalFormsSuggests must not be null!");
 		Assert.notNull(mediaTypes, "Media types must not be null!");
 
 		this.halConfiguration = halConfiguration;
 		this.patterns = patterns;
-		this.objectMapperCustomizer = objectMapperCustomizer;
+		this.mapperCustomizer = mapperCustomizer;
 		this.options = options;
 		this.mediaTypes = new ArrayList<>(mediaTypes);
 		this.defaultSingleTemplate = defaultSingleTemplate;
@@ -100,25 +98,21 @@ public class HalFormsConfiguration {
 		Map<Class<?>, String> newPatterns = new HashMap<>(patterns);
 		newPatterns.put(type, pattern);
 
-		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer, mediaTypes,
+		return new HalFormsConfiguration(halConfiguration, newPatterns, options, mapperCustomizer, mediaTypes,
 				defaultSingleTemplate);
 	}
 
 	/**
-	 * Register the given {@link Consumer} to apply additional customizations on the {@link ObjectMapper} used to render
-	 * HAL documents.
+	 * Register the given {@link UnaryOperator} to apply additional customizations on the {@link JsonMapper.Builder} used
+	 * to render HAL documents.
 	 *
-	 * @param objectMapperCustomizer must not be {@literal null}.
+	 * @param customizer must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	public HalFormsConfiguration withObjectMapperCustomizer(Consumer<ObjectMapper> objectMapperCustomizer) {
+	public HalFormsConfiguration withMapperBuilderCustomizer(UnaryOperator<Builder> customizer) {
 
-		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
-
-		return this.objectMapperCustomizer == objectMapperCustomizer //
-				? this //
-				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes,
-						defaultSingleTemplate);
+		return new HalFormsConfiguration(halConfiguration, patterns, options, customizer, mediaTypes,
+				defaultSingleTemplate);
 	}
 
 	/**
@@ -141,25 +135,22 @@ public class HalFormsConfiguration {
 		List<MediaType> newMediaTypes = new ArrayList<>(mediaTypes);
 		newMediaTypes.add(mediaTypes.size() - 1, mediaType);
 
-		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, newMediaTypes,
+		return new HalFormsConfiguration(halConfiguration, patterns, options, mapperCustomizer, newMediaTypes,
 				defaultSingleTemplate);
 	}
 
 	/**
-	 * Customizes the given {@link ObjectMapper} with the registered callback.
+	 * Customizes the given {@link JsonMapper} with the registered callback.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @return will never be {@literal null}.
-	 * @see #withObjectMapperCustomizer(Consumer)
+	 * @see #withMapperBuilderCustomizer(UnaryOperator)
 	 */
-	@Contract("_ -> this")
-	public HalFormsConfiguration customize(ObjectMapper mapper) {
+	public Builder customize(Builder builder) {
 
-		Assert.notNull(mapper, "ObjectMapper must not be null!");
+		Assert.notNull(builder, "Mapper must not be null!");
 
-		objectMapperCustomizer.accept(mapper);
-
-		return this;
+		return mapperCustomizer == null ? builder : mapperCustomizer.apply(builder);
 	}
 
 	/**
@@ -175,7 +166,7 @@ public class HalFormsConfiguration {
 			Function<PropertyMetadata, HalFormsOptions> creator) {
 
 		return new HalFormsConfiguration(halConfiguration, patterns, options.withOptions(type, property, creator),
-				objectMapperCustomizer, mediaTypes, defaultSingleTemplate);
+				mapperCustomizer, mediaTypes, defaultSingleTemplate);
 	}
 
 	/**
@@ -188,7 +179,7 @@ public class HalFormsConfiguration {
 	 */
 	public HalFormsConfiguration withDefaultSingleTemplate(boolean defaultSingleTemplate) {
 
-		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes,
+		return new HalFormsConfiguration(halConfiguration, patterns, options, mapperCustomizer, mediaTypes,
 				defaultSingleTemplate);
 	}
 

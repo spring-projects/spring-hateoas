@@ -34,16 +34,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
-import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -71,6 +70,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 class CollectionJsonWebMvcIntegrationTest {
 
 	@Autowired WebApplicationContext context;
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	MockMvc mockMvc;
 
@@ -151,39 +151,41 @@ class CollectionJsonWebMvcIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
+		$.assertFileContent("spec-part7-adjusted.json").satisfies(specBasedJson -> {
 
-		this.mockMvc.perform(post("/employees") //
-				.content(specBasedJson) //
-				.contentType(MediaTypes.COLLECTION_JSON_VALUE)) //
-				.andExpect(status().isCreated()) //
-				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
+			mockMvc.perform(post("/employees") //
+					.content(specBasedJson) //
+					.contentType(MediaTypes.COLLECTION_JSON_VALUE)) //
+					.andExpect(status().isCreated()) //
+					.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 
-		this.mockMvc.perform(get("/employees/2").accept(MediaTypes.COLLECTION_JSON)) //
-				.andExpect(status().isOk()) //
+			mockMvc.perform(get("/employees/2").accept(MediaTypes.COLLECTION_JSON)) //
+					.andExpect(status().isOk()) //
 
-				.andExpect(jsonPath("$.collection.version", is("1.0")))
-				.andExpect(jsonPath("$.collection.href", is("http://localhost/employees/2")))
+					.andExpect(jsonPath("$.collection.version", is("1.0")))
+					.andExpect(jsonPath("$.collection.href", is("http://localhost/employees/2")))
 
-				.andExpect(jsonPath("$.collection.links.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.links[0].rel", is("employees")))
-				.andExpect(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
+					.andExpect(jsonPath("$.collection.links.*", hasSize(1)))
+					.andExpect(jsonPath("$.collection.links[0].rel", is("employees")))
+					.andExpect(jsonPath("$.collection.links[0].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$.collection.items.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
-				.andExpect(jsonPath("$.collection.items[0].data[1].value", is("W. Chandry")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
-				.andExpect(jsonPath("$.collection.items[0].data[0].value", is("developer")))
+					.andExpect(jsonPath("$.collection.items.*", hasSize(1)))
+					.andExpect(jsonPath("$.collection.items[0].data[1].name", is("name")))
+					.andExpect(jsonPath("$.collection.items[0].data[1].value", is("W. Chandry")))
+					.andExpect(jsonPath("$.collection.items[0].data[0].name", is("role")))
+					.andExpect(jsonPath("$.collection.items[0].data[0].value", is("developer")))
 
-				.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
-				.andExpect(jsonPath("$.collection.items[0].links[0].href", is("http://localhost/employees")))
+					.andExpect(jsonPath("$.collection.items[0].links.*", hasSize(1)))
+					.andExpect(jsonPath("$.collection.items[0].links[0].rel", is("employees")))
+					.andExpect(jsonPath("$.collection.items[0].links[0].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$.collection.template.*", hasSize(1)))
-				.andExpect(jsonPath("$.collection.template.data[0].name", is("name")))
-				.andExpect(jsonPath("$.collection.template.data[0].value", is("")))
-				.andExpect(jsonPath("$.collection.template.data[1].name", is("role")))
-				.andExpect(jsonPath("$.collection.template.data[1].value", is("")));
+					.andExpect(jsonPath("$.collection.template.*", hasSize(1)))
+					.andExpect(jsonPath("$.collection.template.data[0].name", is("name")))
+					.andExpect(jsonPath("$.collection.template.data[0].value", is("")))
+					.andExpect(jsonPath("$.collection.template.data[1].name", is("role")))
+					.andExpect(jsonPath("$.collection.template.data[1].value", is("")));
+		});
+
 	}
 
 	@RestController
@@ -203,7 +205,7 @@ class CollectionJsonWebMvcIntegrationTest {
 			}
 
 			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
+			var selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
 					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)))
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
@@ -220,12 +222,13 @@ class CollectionJsonWebMvcIntegrationTest {
 
 			// Fetch each Resource<Employee> using the controller's findOne method.
 			for (int i = 0; i < EMPLOYEES.size(); i++) {
-				EntityModel<Employee> employeeResource = findOne(i);
 
-				boolean nameMatches = Optional.ofNullable(name).map(s -> employeeResource.getContent().getName().contains(s))
+				var employeeResource = findOne(i);
+
+				var nameMatches = Optional.ofNullable(name).map(s -> employeeResource.getContent().getName().contains(s))
 						.orElse(true);
 
-				boolean roleMatches = Optional.ofNullable(role).map(s -> employeeResource.getContent().getRole().contains(s))
+				var roleMatches = Optional.ofNullable(role).map(s -> employeeResource.getContent().getRole().contains(s))
 						.orElse(true);
 
 				if (nameMatches && roleMatches) {
@@ -234,7 +237,7 @@ class CollectionJsonWebMvcIntegrationTest {
 			}
 
 			// Generate an "Affordance" based on this method (the "self" link)
-			Link selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
+			var selfLink = linkTo(methodOn(EmployeeController.class).all()).withSelfRel()
 					.andAffordance(afford(methodOn(EmployeeController.class).newEmployee(null)))
 					.andAffordance(afford(methodOn(EmployeeController.class).search(null, null)));
 
@@ -246,10 +249,10 @@ class CollectionJsonWebMvcIntegrationTest {
 		public EntityModel<Employee> findOne(@PathVariable Integer id) {
 
 			// Start the affordance with the "self" link, i.e. this method.
-			Link findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
+			var findOneLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
 
 			// Define final link as means to find entire collection.
-			Link employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
+			var employeesLink = linkTo(methodOn(EmployeeController.class).all()).withRel("employees");
 
 			// Return the affordance + a link back to the entire collection resource.
 			return EntityModel.of(EMPLOYEES.get(id),
@@ -287,7 +290,7 @@ class CollectionJsonWebMvcIntegrationTest {
 		public ResponseEntity<?> partiallyUpdateEmployee(@RequestBody EntityModel<Employee> employee,
 				@PathVariable Integer id) {
 
-			Employee newEmployee = EMPLOYEES.get(id);
+			var newEmployee = EMPLOYEES.get(id);
 
 			if (employee.getContent().getName() != null) {
 				newEmployee = newEmployee.withName(employee.getContent().getName());

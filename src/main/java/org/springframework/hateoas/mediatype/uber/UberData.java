@@ -43,7 +43,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -55,20 +54,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @since 1.0
  */
 @JsonInclude(Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 @NullUnmarked
 final class UberData {
 
-	private @Nullable final String id, name, label;
-	private @Nullable final List<LinkRelation> rel;
-	private @Nullable final String url;
-	private @Nullable final UberAction action;
+	private final @Nullable String id, name, label;
+	private final @Nullable List<LinkRelation> rel;
+	private final @Nullable String url;
+	private final @Nullable UberAction action;
 	private final boolean transclude;
-	private @Nullable final String model;
-	private @Nullable final List<String> sending;
-	private @Nullable final List<String> accepting;
-	private @Nullable final Object value;
-	private @Nullable final List<UberData> data;
+	private final @Nullable String model;
+	private final @Nullable List<String> sending;
+	private final @Nullable List<String> accepting;
+	private final @Nullable Object value;
+	private final @Nullable List<UberData> data;
 
 	/**
 	 * Simple scalar types that can be encoded by value, not type.
@@ -82,12 +80,17 @@ final class UberData {
 			Arrays.asList(RepresentationModel.class, EntityModel.class, CollectionModel.class, PagedModel.class));
 
 	@JsonCreator
-	UberData(@JsonProperty("id") @Nullable String id, @JsonProperty("name") @Nullable String name,
-			@JsonProperty("label") @Nullable String label, @JsonProperty("rel") @Nullable List<LinkRelation> rel,
-			@JsonProperty("url") @Nullable String url, @JsonProperty("action") UberAction action,
-			@JsonProperty("transclude") boolean transclude, @JsonProperty("model") @Nullable String model,
+	UberData(@JsonProperty("id") @Nullable String id,
+			@JsonProperty("name") @Nullable String name,
+			@JsonProperty("label") @Nullable String label,
+			@JsonProperty("rel") @Nullable List<LinkRelation> rel,
+			@JsonProperty("url") @Nullable String url,
+			@JsonProperty("action") UberAction action,
+			@JsonProperty("transclude") @Nullable Boolean transclude,
+			@JsonProperty("model") @Nullable String model,
 			@JsonProperty("sending") @Nullable List<String> sending,
-			@JsonProperty("accepting") @Nullable List<String> accepting, @JsonProperty("value") @Nullable Object value,
+			@JsonProperty("accepting") @Nullable List<String> accepting,
+			@JsonProperty("value") @Nullable Object value,
 			@JsonProperty("data") @Nullable List<UberData> data) {
 
 		this.id = id;
@@ -96,7 +99,7 @@ final class UberData {
 		this.rel = rel;
 		this.url = url;
 		this.action = action;
-		this.transclude = transclude;
+		this.transclude = transclude == null ? false : transclude;
 		this.model = model;
 		this.sending = sending;
 		this.accepting = accepting;

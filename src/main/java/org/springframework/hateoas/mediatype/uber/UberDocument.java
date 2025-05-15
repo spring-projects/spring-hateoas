@@ -15,10 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import java.util.List;
 import java.util.Objects;
-
-import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,17 +30,12 @@ final class UberDocument {
 
 	private final Uber uber;
 
-	@JsonCreator
-	UberDocument(@JsonProperty("version") String version, @JsonProperty("data") @Nullable List<UberData> data,
-			@JsonProperty("error") @Nullable UberError error) {
-		this.uber = new Uber(version, data, error);
-	}
-
 	UberDocument() {
-		this("1.0", null, null);
+		this(new Uber());
 	}
 
-	UberDocument(Uber uber) {
+	@JsonCreator
+	UberDocument(@JsonProperty Uber uber) {
 		this.uber = uber;
 	}
 
@@ -59,10 +51,12 @@ final class UberDocument {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof UberDocument))
+		}
+		if (!(o instanceof UberDocument)) {
 			return false;
+		}
 		UberDocument that = (UberDocument) o;
 		return Objects.equals(this.uber, that.uber);
 	}
@@ -72,6 +66,7 @@ final class UberDocument {
 		return Objects.hash(this.uber);
 	}
 
+	@Override
 	public String toString() {
 		return "UberDocument(uber=" + this.uber + ")";
 	}

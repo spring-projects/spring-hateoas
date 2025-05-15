@@ -172,13 +172,13 @@ class TypeReferencesIntegrationTest {
 
 		server.expect(requestTo("/resources")).andRespond(withSuccess(RESOURCES_OF_RESOURCE_HAL, MediaTypes.HAL_JSON));
 
-		ResponseEntity<CollectionModel<EntityModel<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
+		var response = template.exchange("/resources", HttpMethod.GET, null,
 				new CollectionModelType<EntityModel<User>>() {});
-		CollectionModel<EntityModel<User>> body = response.getBody();
+		var body = response.getBody();
 
 		assertThat(body.hasLink("self")).isTrue();
 
-		Collection<EntityModel<User>> nested = body.getContent();
+		var nested = body.getContent();
 
 		assertThat(nested).hasSize(1);
 		assertExpectedUserResource(nested.iterator().next());
@@ -193,13 +193,13 @@ class TypeReferencesIntegrationTest {
 		server.expect(requestTo("/resources"))
 				.andRespond(withSuccess(RESOURCES_OF_RESOURCE_COLLECTION_JSON, MediaTypes.COLLECTION_JSON));
 
-		ResponseEntity<CollectionModel<EntityModel<User>>> response = template.exchange("/resources", HttpMethod.GET, null,
+		var response = template.exchange("/resources", HttpMethod.GET, null,
 				new CollectionModelType<EntityModel<User>>() {});
-		CollectionModel<EntityModel<User>> body = response.getBody();
+		var body = response.getBody();
 
 		assertThat(body.hasLink("self")).isTrue();
 
-		Collection<EntityModel<User>> nested = body.getContent();
+		var nested = body.getContent();
 
 		assertThat(nested).hasSize(1);
 		assertExpectedUserResource(nested.iterator().next());
