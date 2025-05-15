@@ -15,13 +15,11 @@
  */
 package org.springframework.hateoas.mediatype;
 
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 import org.springframework.context.MessageSourceResolvable;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * A Jackson serializer triggering message resolution via a {@link MessageResolver} for {@link MessageSourceResolvable}
@@ -31,8 +29,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * @since 1.3
  */
 public class MessageSourceResolvableSerializer extends StdSerializer<MessageSourceResolvable> {
-
-	private static final long serialVersionUID = 4302540100251549622L;
 
 	private final MessageResolver resolver;
 
@@ -50,12 +46,11 @@ public class MessageSourceResolvableSerializer extends StdSerializer<MessageSour
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+	 * @see tools.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, tools.jackson.core.JsonGenerator, tools.jackson.databind.SerializationContext)
 	 */
 	@Override
 	@SuppressWarnings("null")
-	public void serialize(MessageSourceResolvable value, JsonGenerator gen, SerializerProvider provider)
-			throws IOException {
+	public void serialize(MessageSourceResolvable value, JsonGenerator gen, SerializationContext provider) {
 		gen.writeString(resolver.resolve(value));
 	}
 }

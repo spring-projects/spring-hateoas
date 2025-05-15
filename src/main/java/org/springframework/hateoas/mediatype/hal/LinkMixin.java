@@ -15,15 +15,16 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.annotation.JsonSerialize;
+
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.TrueOnlyBooleanSerializer;
+import org.springframework.hateoas.mediatype.hal.HalJacksonModule.TrueOnlyBooleanSerializer;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Custom mixin to avoid rel attributes being rendered for HAL.

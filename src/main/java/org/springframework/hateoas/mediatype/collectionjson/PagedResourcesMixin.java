@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.CollectionJsonPagedResourcesDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonJacksonModule.CollectionJsonPagedResourcesDeserializer;
 
 /**
  * Jackson 2 mixin to handle {@link PagedModel}.

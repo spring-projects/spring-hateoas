@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 final class CollectionJsonDocument<T> {
 
-	private final CollectionJson<T> collection;
+	private CollectionJson<T> collection;
 
 	@JsonCreator
 	CollectionJsonDocument(@JsonProperty("version") String version, //
@@ -66,10 +66,12 @@ final class CollectionJsonDocument<T> {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		CollectionJsonDocument<?> that = (CollectionJsonDocument<?>) o;
 		return Objects.equals(this.collection, that.collection);
 	}
@@ -79,6 +81,7 @@ final class CollectionJsonDocument<T> {
 		return Objects.hash(this.collection);
 	}
 
+	@Override
 	public String toString() {
 		return "CollectionJsonDocument(collection=" + this.collection + ")";
 	}

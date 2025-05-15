@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.hateoas.mediatype.hal.forms;
+package org.springframework.hateoas.mediatype.hal;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
+import tools.jackson.core.json.JsonWriteFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,20 +40,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 /**
  * @author Greg Turnquist
  */
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
-class HalFormsObjectMapperCustomizerTest {
+class HalMapperCustomizerTest {
 
 	@Autowired WebApplicationContext context;
-
 	MockMvc mockMvc;
-	ContextualMapper mapper = MappingTestUtils.createMapper(getClass());
+	ContextualMapper $ = MappingTestUtils.createMapper(it -> it.addModule(new HalJacksonModule()));
 
 	@BeforeEach
 	void setUp() {
@@ -60,25 +60,30 @@ class HalFormsObjectMapperCustomizerTest {
 	}
 
 	@Test // #1382
-	void objectMapperCustomizerShouldBeApplied() throws Exception {
+	void mapperCustomizerShouldBeApplied() throws Exception {
 
-		String actualHalFormsJson = mockMvc.perform(get("/employees/0")).andReturn().getResponse()
-				.getContentAsString();
-		String expectedHalFormsJson = mapper.readFileContent("hal-forms-custom.json");
-
-		assertThat(actualHalFormsJson).isEqualTo(expectedHalFormsJson);
+		$.assertDeserializesFile("hal-custom.json")
+				.into(mockMvc.perform(get("/employees/0")).andReturn().getResponse().getContentAsString());
 	}
 
 	@Configuration
 	@EnableWebMvc
-	@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL_FORMS)
+	@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 	@Import(WebMvcEmployeeController.class)
 	static class TestConfig {
 
 		@Bean
-		HalFormsConfiguration halFormsConfiguration() {
-			return new HalFormsConfiguration()
-					.withObjectMapperCustomizer(objectMapper -> objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true));
+		JsonMapper mapper() {
+
+			return JsonMapper.builder()
+					.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
+					.enable(SerializationFeature.INDENT_OUTPUT)
+					.build();
+		}
+
+		@Bean
+		HalConfiguration halConfiguration() {
+			return new HalConfiguration();
 		}
 	}
 }

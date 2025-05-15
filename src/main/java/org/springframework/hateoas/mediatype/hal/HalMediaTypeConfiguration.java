@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.json.JsonMapper.Builder;
+
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -29,9 +31,6 @@ import org.springframework.hateoas.mediatype.MediaTypeConfigurationFactory;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring configuration to set up HAL support.
@@ -77,20 +76,18 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureObjectMapper(com.fasterxml.jackson.databind.ObjectMapper)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureJsonMapper(tools.jackson.databind.json.JsonMapper.Builder)
 	 */
 	@Override
-	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
+	public Builder configureJsonMapper(Builder builder) {
 
 		HalConfiguration halConfiguration = configurationFactory.getConfiguration();
 
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, halConfiguration, beanFactory));
+		var prepared = builder
+				.addModule(new HalJacksonModule())
+				.handlerInstantiator(new HalJacksonModule.HalHandlerInstantiator(relProvider,
+						curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, halConfiguration, beanFactory));
 
-		halConfiguration.customize(mapper);
-
-		return mapper;
+		return halConfiguration.customize(prepared);
 	}
 }

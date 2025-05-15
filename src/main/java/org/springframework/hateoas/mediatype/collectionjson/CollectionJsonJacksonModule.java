@@ -1,5 +1,5 @@
 /*
-stand bisher hauptsächlich darin, dass  * Copyright 2015-2024 the original author or authors.
+ * Copyright 2015-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,22 @@ stand bisher hauptsächlich darin, dass  * Copyright 2015-2024 the original auth
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.Version;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.deser.std.ContainerDeserializerBase;
+import tools.jackson.databind.jsontype.TypeSerializer;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.StdContainerSerializer;
+import tools.jackson.databind.type.TypeFactory;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,25 +53,6 @@ import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.ContainerSerializer;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-
 /**
  * Jackson 2 module implementation to render {@link CollectionModel}, {@link EntityModel}, and
  * {@link RepresentationModel} instances in Collection+JSON compatible JSON.
@@ -64,11 +60,12 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-public class Jackson2CollectionJsonModule extends SimpleModule {
+public class CollectionJsonJacksonModule extends SimpleModule {
 
 	private static final long serialVersionUID = -6540574644565592709L;
+	private static final TypeFactory TYPE_FACTORY = TypeFactory.createDefaultInstance();
 
-	public Jackson2CollectionJsonModule() {
+	public CollectionJsonJacksonModule() {
 
 		super("collection-json-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 
@@ -86,14 +83,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 	}
 
 	/**
-	 * Custom {@link JsonSerializer} to render Link instances in JSON Collection compatible JSON.
+	 * Custom {@link ValueSerializer} to render Link instances in JSON Collection compatible JSON.
 	 *
 	 * @author Alexander Baetz
 	 * @author Oliver Gierke
 	 */
-	static class CollectionJsonLinksSerializer extends ContainerSerializer<Links> {
-
-		private static final long serialVersionUID = 5959299073301391055L;
+	static class CollectionJsonLinksSerializer extends StdContainerSerializer<Links> {
 
 		CollectionJsonLinksSerializer() {
 			super(Links.class);
@@ -101,11 +96,11 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see tools.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, tools.jackson.core.JsonGenerator, tools.jackson.databind.SerializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public void serialize(Links links, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(Links links, JsonGenerator jgen, SerializationContext provider) {
 
 			JavaType type = provider.getTypeFactory().constructCollectionType(List.class, Link.class);
 
@@ -115,36 +110,36 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#isEmpty(tools.jackson.databind.SerializationContext, java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public boolean isEmpty(SerializerProvider provider, Links value) {
+		public boolean isEmpty(SerializationContext provider, Links value) {
 			return value.isEmpty();
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentType()
 		 */
 		@Override
 		public JavaType getContentType() {
-			return TypeFactory.defaultInstance().constructType(Link.class);
+			return TYPE_FACTORY.constructType(Link.class);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentSerializer()
 		 */
 		@Override
 		@Nullable
-		public JsonSerializer<?> getContentSerializer() {
+		public ValueSerializer<?> getContentSerializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
@@ -154,20 +149,17 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
 		@Nullable
 		@SuppressWarnings("null")
-		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+		protected StdContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	static class CollectionJsonResourceSupportSerializer extends ContainerSerializer<RepresentationModel<?>>
-			implements ContextualSerializer {
-
-		private static final long serialVersionUID = 6127711241993352699L;
+	static class CollectionJsonResourceSupportSerializer extends StdContainerSerializer<RepresentationModel<?>> {
 
 		private final @Nullable BeanProperty property;
 
@@ -177,18 +169,17 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		CollectionJsonResourceSupportSerializer(@Nullable BeanProperty property) {
 
-			super(RepresentationModel.class, false);
+			super(RepresentationModel.class);
 			this.property = property;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see tools.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, tools.jackson.core.JsonGenerator, tools.jackson.databind.SerializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public void serialize(RepresentationModel<?> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
+		public void serialize(RepresentationModel<?> value, JsonGenerator jgen, SerializationContext context) {
 
 			String href = value.getRequiredLink(IanaLinkRelations.SELF.value()).getHref();
 
@@ -210,23 +201,23 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider.findValueSerializer(CollectionJsonDocument.class, property).serialize(doc, jgen, provider);
+			context.findPrimaryPropertySerializer(CollectionJsonDocument.class, property)
+					.serialize(doc, jgen, context);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializationContext, com.fasterxml.jackson.databind.BeanProperty)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-				throws JsonMappingException {
+		public ValueSerializer<?> createContextual(SerializationContext prov, BeanProperty property) {
 			return new CollectionJsonResourceSupportSerializer(property);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentType()
 		 */
 		@Override
 		@Nullable
@@ -236,17 +227,26 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentSerializer()
 		 */
 		@Override
 		@Nullable
-		public JsonSerializer<?> getContentSerializer() {
+		public ValueSerializer<?> getContentSerializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#isEmpty(tools.jackson.databind.SerializationContext, java.lang.Object)
+		 */
+		@Override
+		public boolean isEmpty(SerializationContext prov, RepresentationModel<?> value) {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
@@ -256,20 +256,17 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
 		@Nullable
 		@SuppressWarnings("null")
-		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+		protected StdContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	static class CollectionJsonResourceSerializer extends ContainerSerializer<EntityModel<?>>
-			implements ContextualSerializer {
-
-		private static final long serialVersionUID = 2212535956767860364L;
+	static class CollectionJsonResourceSerializer extends StdContainerSerializer<EntityModel<?>> {
 
 		private final @Nullable BeanProperty property;
 
@@ -279,17 +276,17 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		CollectionJsonResourceSerializer(@Nullable BeanProperty property) {
 
-			super(EntityModel.class, false);
+			super(EntityModel.class);
 			this.property = property;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see tools.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, tools.jackson.core.JsonGenerator, tools.jackson.databind.SerializationContext)
 		 */
 		@Override
-		@SuppressWarnings("null")
-		public void serialize(EntityModel<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(EntityModel<?> value, JsonGenerator gen, SerializationContext provider)
+				throws JacksonException {
 
 			String href = value.getRequiredLink(IanaLinkRelations.SELF).getHref();
 			Links withoutSelfLink = value.getLinks().without(IanaLinkRelations.SELF);
@@ -307,24 +304,22 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider.findValueSerializer(CollectionJsonDocument.class, property) //
-					.serialize(doc, jgen, provider);
+			provider.findPrimaryPropertySerializer(CollectionJsonDocument.class, property) //
+					.serialize(doc, gen, provider);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see tools.jackson.databind.ValueSerializer#createContextual(tools.jackson.databind.SerializationContext, tools.jackson.databind.BeanProperty)
 		 */
 		@Override
-		@SuppressWarnings("null")
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-				throws JsonMappingException {
+		public ValueSerializer<?> createContextual(SerializationContext ctxt, BeanProperty property) {
 			return new CollectionJsonResourceSerializer(property);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentType()
 		 */
 		@Override
 		@Nullable
@@ -334,17 +329,26 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentSerializer()
 		 */
 		@Override
 		@Nullable
-		public JsonSerializer<?> getContentSerializer() {
+		public ValueSerializer<?> getContentSerializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#isEmpty(tools.jackson.databind.SerializationContext, java.lang.Object)
+		 */
+		@Override
+		public boolean isEmpty(SerializationContext prov, EntityModel<?> value) {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
@@ -354,32 +358,29 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#_withValueTypeSerializer(tools.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
 		@Nullable
 		@SuppressWarnings("null")
-		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+		protected StdContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	static class CollectionJsonResourcesSerializer extends ContainerSerializer<CollectionModel<?>> {
-
-		private static final long serialVersionUID = -278986431091914402L;
+	static class CollectionJsonResourcesSerializer extends StdContainerSerializer<CollectionModel<?>> {
 
 		CollectionJsonResourcesSerializer() {
-			super(CollectionModel.class, false);
+			super(CollectionModel.class);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public void serialize(CollectionModel<?> value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
+		public void serialize(CollectionModel<?> value, JsonGenerator jgen, SerializationContext context) {
 
 			CollectionJson<Object> collectionJson = new CollectionJson<>() //
 					.withVersion("1.0") //
@@ -391,13 +392,13 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider.findValueSerializer(CollectionJsonDocument.class) //
-					.serialize(doc, jgen, provider);
+			context.findValueSerializer(CollectionJsonDocument.class) //
+					.serialize(doc, jgen, context);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentType()
 		 */
 		@Override
 		@Nullable
@@ -407,27 +408,27 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentSerializer()
 		 */
 		@Override
 		@Nullable
-		public JsonSerializer<?> getContentSerializer() {
+		public ValueSerializer<?> getContentSerializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(com.fasterxml.jackson.databind.SerializerProvider, java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#isEmpty(tools.jackson.databind.SerializationContext, java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public boolean isEmpty(SerializerProvider provider, CollectionModel<?> value) {
+		public boolean isEmpty(SerializationContext provider, CollectionModel<?> value) {
 			return value.getContent().isEmpty();
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
@@ -437,20 +438,17 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
 		 */
 		@Override
 		@Nullable
 		@SuppressWarnings("null")
-		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+		protected StdContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
-	static class CollectionJsonPagedResourcesSerializer extends ContainerSerializer<PagedModel<?>>
-			implements ContextualSerializer {
-
-		private static final long serialVersionUID = -6703190072925382402L;
+	static class CollectionJsonPagedResourcesSerializer extends StdContainerSerializer<PagedModel<?>> {
 
 		private final @Nullable BeanProperty property;
 
@@ -460,17 +458,17 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		CollectionJsonPagedResourcesSerializer(@Nullable BeanProperty property) {
 
-			super(CollectionModel.class, false);
+			super(CollectionModel.class);
 			this.property = property;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+		 * @see com.fasterxml.jackson.databind.ser.std.StdSerializer#serialize(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public void serialize(PagedModel<?> value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+		public void serialize(PagedModel<?> value, JsonGenerator jgen, SerializationContext context) {
 
 			CollectionJson<?> collectionJson = new CollectionJson<>() //
 					.withVersion("1.0") //
@@ -482,23 +480,22 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			CollectionJsonDocument<?> doc = new CollectionJsonDocument<>(collectionJson);
 
-			provider.findValueSerializer(CollectionJsonDocument.class, property).serialize(doc, jgen, provider);
+			context.findPrimaryPropertySerializer(CollectionJsonDocument.class, property)
+					.serialize(doc, jgen, context);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContextualSerializer#createContextual(com.fasterxml.jackson.databind.SerializerProvider, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see tools.jackson.databind.ValueSerializer#createContextual(tools.jackson.databind.SerializationContext, tools.jackson.databind.BeanProperty)
 		 */
 		@Override
-		@SuppressWarnings("null")
-		public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property)
-				throws JsonMappingException {
+		public ValueSerializer<?> createContextual(SerializationContext ctxt, BeanProperty property) {
 			return new CollectionJsonPagedResourcesSerializer(property);
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentType()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentType()
 		 */
 		@Override
 		@Nullable
@@ -508,27 +505,26 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#getContentSerializer()
+		 * @see com.fasterxml.jackson.databind.ser.StdContainerSerializer#getContentSerializer()
 		 */
 		@Override
 		@Nullable
-		public JsonSerializer<?> getContentSerializer() {
+		public ValueSerializer<?> getContentSerializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonSerializer#isEmpty(java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#isEmpty(tools.jackson.databind.SerializationContext, java.lang.Object)
 		 */
 		@Override
-		@SuppressWarnings("null")
-		public boolean isEmpty(PagedModel<?> value) {
+		public boolean isEmpty(SerializationContext prov, PagedModel<?> value) {
 			return value.getContent().isEmpty();
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#hasSingleElement(java.lang.Object)
+		 * @see tools.jackson.databind.ser.std.StdContainerSerializer#hasSingleElement(java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("null")
@@ -538,22 +534,19 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.ser.ContainerSerializer#_withValueTypeSerializer(com.fasterxml.jackson.databind.jsontype.TypeSerializer)
+		 * @see org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.CollectionJsonPagedResourcesSerializer#_withValueTypeSerializer(tools.jackson.databind.jsontype.TypeSerializer)
 		 */
-		@Override
 		@Nullable
-		@SuppressWarnings("null")
-		protected ContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
+		@Override
+		protected StdContainerSerializer<?> _withValueTypeSerializer(TypeSerializer vts) {
 			return null;
 		}
 	}
 
 	static class CollectionJsonLinksDeserializer extends ContainerDeserializerBase<Links> {
 
-		private static final long serialVersionUID = 4260899521055619665L;
-
 		CollectionJsonLinksDeserializer() {
-			super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
+			super(TYPE_FACTORY.constructCollectionLikeType(List.class, Link.class));
 		}
 
 		/*
@@ -572,33 +565,30 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		 */
 		@Override
 		@Nullable
-		public JsonDeserializer<Object> getContentDeserializer() {
+		public ValueDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see com.fasterxml.jackson.databind.ValueDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public Links deserialize(JsonParser jp, DeserializationContext ctx) throws IOException {
+		public Links deserialize(JsonParser jp, DeserializationContext ctx) {
 
 			JavaType type = ctx.getTypeFactory().constructCollectionLikeType(List.class, Link.class);
 
-			return Links.of(jp.getCodec().<List<Link>> readValue(jp, type));
+			return Links.of(jp.<List<Link>> readValueAs(type));
 		}
 	}
 
-	static class CollectionJsonResourceSupportDeserializer extends ContainerDeserializerBase<RepresentationModel<?>>
-			implements ContextualDeserializer {
-
-		private static final long serialVersionUID = 502737712634617739L;
+	static class CollectionJsonResourceSupportDeserializer extends ContainerDeserializerBase<RepresentationModel<?>> {
 
 		private final JavaType contentType;
 
 		CollectionJsonResourceSupportDeserializer() {
-			this(TypeFactory.defaultInstance().constructType(RepresentationModel.class));
+			this(TYPE_FACTORY.constructType(RepresentationModel.class));
 		}
 
 		CollectionJsonResourceSupportDeserializer(JavaType contentType) {
@@ -622,25 +612,25 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		 */
 		@Override
 		@Nullable
-		public JsonDeserializer<Object> getContentDeserializer() {
+		public ValueDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see com.fasterxml.jackson.databind.ValueDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
 		 */
 		@Override
 		@Nullable
 		@SuppressWarnings("null")
-		public RepresentationModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+		public RepresentationModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) {
 
 			TypeFactory typeFactory = ctxt.getTypeFactory();
 
 			JavaType rootType = typeFactory.constructSimpleType(Object.class, new JavaType[] {});
 			JavaType wrappedType = typeFactory.constructParametricType(CollectionJsonDocument.class, rootType);
 
-			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
+			CollectionJsonDocument<?> document = jp.readValueAs(wrappedType);
 			CollectionJson<?> collection = document.getCollection();
 
 			List<? extends CollectionJsonItem<?>> items = collection.getItems();
@@ -685,12 +675,11 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see tools.jackson.databind.ValueDeserializer#createContextual(tools.jackson.databind.DeserializationContext, tools.jackson.databind.BeanProperty)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public JsonDeserializer<?> createContextual(DeserializationContext context, @Nullable BeanProperty property)
-				throws JsonMappingException {
+		public ValueDeserializer<?> createContextual(DeserializationContext context, @Nullable BeanProperty property) {
 
 			JavaType type = property == null //
 					? context.getContextualType() //
@@ -700,15 +689,12 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<EntityModel<?>>
-			implements ContextualDeserializer {
-
-		private static final long serialVersionUID = -5911687423054932523L;
+	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<EntityModel<?>> {
 
 		private final JavaType contentType;
 
 		CollectionJsonResourceDeserializer() {
-			this(TypeFactory.defaultInstance().constructType(CollectionJson.class));
+			this(TYPE_FACTORY.constructType(CollectionJson.class));
 		}
 
 		CollectionJsonResourceDeserializer(JavaType contentType) {
@@ -719,35 +705,26 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
-		 */
-		@Override
-		public JavaType getContentType() {
-			return this.contentType;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
 		@Nullable
-		public JsonDeserializer<Object> getContentDeserializer() {
+		public ValueDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see tools.jackson.databind.ValueDeserializer#deserialize(tools.jackson.core.JsonParser, tools.jackson.databind.DeserializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public EntityModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+		public EntityModel<?> deserialize(JsonParser jp, DeserializationContext ctxt) {
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
 
-			CollectionJsonDocument<?> document = jp.getCodec().readValue(jp, wrappedType);
+			CollectionJsonDocument<?> document = jp.readValueAs(wrappedType);
 
 			CollectionJson<?> collection = document.getCollection();
 			List<? extends CollectionJsonItem<?>> items = collection.getItems();
@@ -784,30 +761,27 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
-				throws JsonMappingException {
+		public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
 
 			return new CollectionJsonResourceDeserializer(
 					property == null ? ctxt.getContextualType() : property.getType().getContentType());
 		}
 	}
 
-	static abstract class CollectionJsonDeserializerBase<T extends CollectionModel<?>>
-			extends ContainerDeserializerBase<T> implements ContextualDeserializer {
-
-		private static final long serialVersionUID = 1007769482339850545L;
+	static abstract class CollectionValueDeserializerBase<T extends CollectionModel<?>>
+			extends ContainerDeserializerBase<T> {
 
 		private final JavaType contentType;
 		private final BiFunction<List<Object>, Links, T> finalizer;
-		private final Function<JavaType, CollectionJsonDeserializerBase<T>> creator;
+		private final Function<JavaType, CollectionValueDeserializerBase<T>> creator;
 
-		CollectionJsonDeserializerBase(BiFunction<List<Object>, Links, T> finalizer,
-				Function<JavaType, CollectionJsonDeserializerBase<T>> creator) {
-			this(TypeFactory.defaultInstance().constructType(CollectionJson.class), finalizer, creator);
+		CollectionValueDeserializerBase(BiFunction<List<Object>, Links, T> finalizer,
+				Function<JavaType, CollectionValueDeserializerBase<T>> creator) {
+			this(TYPE_FACTORY.constructType(CollectionJson.class), finalizer, creator);
 		}
 
-		private CollectionJsonDeserializerBase(JavaType contentType, BiFunction<List<Object>, Links, T> finalizer,
-				Function<JavaType, CollectionJsonDeserializerBase<T>> creator) {
+		private CollectionValueDeserializerBase(JavaType contentType, BiFunction<List<Object>, Links, T> finalizer,
+				Function<JavaType, CollectionValueDeserializerBase<T>> creator) {
 
 			super(contentType);
 
@@ -818,7 +792,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
 		public JavaType getContentType() {
@@ -827,22 +801,21 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
 		@Nullable
-		public JsonDeserializer<Object> getContentDeserializer() {
+		public ValueDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see tools.jackson.databind.ValueDeserializer#createContextual(tools.jackson.databind.DeserializationContext, tools.jackson.databind.BeanProperty)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, @Nullable BeanProperty property)
-				throws JsonMappingException {
+		public ValueDeserializer<?> createContextual(DeserializationContext ctxt, @Nullable BeanProperty property) {
 
 			JavaType contextualType = property == null //
 					? ctxt.getContextualType() //
@@ -853,16 +826,16 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see tools.jackson.databind.ValueDeserializer#deserialize(tools.jackson.core.JsonParser, tools.jackson.databind.DeserializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+		public T deserialize(JsonParser parser, DeserializationContext ctxt) {
 
 			JavaType rootType = JacksonHelper.findRootType(contentType);
 			JavaType wrappedType = ctxt.getTypeFactory().constructParametricType(CollectionJsonDocument.class, rootType);
 
-			CollectionJsonDocument<?> document = parser.getCodec().readValue(parser, wrappedType);
+			CollectionJsonDocument<?> document = parser.readValueAs(wrappedType);
 			CollectionJson<?> collection = document.getCollection().withOwnSelfLink();
 
 			Links links = collection.getLinks();
@@ -882,11 +855,10 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonResourcesDeserializer extends CollectionJsonDeserializerBase<CollectionModel<?>> {
+	static class CollectionJsonResourcesDeserializer extends CollectionValueDeserializerBase<CollectionModel<?>> {
 
-		private static final long serialVersionUID = 6406522912020578141L;
 		private static final BiFunction<List<Object>, Links, CollectionModel<?>> FINISHER = CollectionModel::of;
-		private static final Function<JavaType, CollectionJsonDeserializerBase<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
+		private static final Function<JavaType, CollectionValueDeserializerBase<CollectionModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonResourcesDeserializer::new;
 
 		CollectionJsonResourcesDeserializer() {
 			super(FINISHER, CONTEXTUAL_CREATOR);
@@ -897,12 +869,11 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 		}
 	}
 
-	static class CollectionJsonPagedResourcesDeserializer extends CollectionJsonDeserializerBase<PagedModel<?>> {
+	static class CollectionJsonPagedResourcesDeserializer extends CollectionValueDeserializerBase<PagedModel<?>> {
 
-		private static final long serialVersionUID = -7465448422501330790L;
 		private static final BiFunction<List<Object>, Links, PagedModel<?>> FINISHER = (content, links) -> PagedModel
 				.of(content, null, links);
-		private static final Function<JavaType, CollectionJsonDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
+		private static final Function<JavaType, CollectionValueDeserializerBase<PagedModel<?>>> CONTEXTUAL_CREATOR = CollectionJsonPagedResourcesDeserializer::new;
 
 		CollectionJsonPagedResourcesDeserializer() {
 			super(FINISHER, CONTEXTUAL_CREATOR);

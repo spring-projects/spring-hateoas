@@ -15,15 +15,15 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2CodecSupport;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.codec.JacksonCodecSupport;
 
 /**
  * @author Oliver Drotbohm
@@ -33,18 +33,18 @@ class WebfluxCodecCustomizer implements Consumer<Object> {
 	private static final MediaType ANY_JSON = MediaType.parseMediaType("application/*+json");
 
 	private final List<HypermediaMappingInformation> mappingInformations;
-	private final ObjectMapper mapper;
+	private final JsonMapper mapper;
 	private final boolean withGenericJsonTypes;
 
 	/**
 	 * @param mappingInformations
 	 * @param mapper
 	 */
-	public WebfluxCodecCustomizer(List<HypermediaMappingInformation> mappingInformations, ObjectMapper mapper) {
+	public WebfluxCodecCustomizer(List<HypermediaMappingInformation> mappingInformations, JsonMapper mapper) {
 		this(mappingInformations, mapper, false);
 	}
 
-	private WebfluxCodecCustomizer(List<HypermediaMappingInformation> mappingInformations, ObjectMapper mapper,
+	private WebfluxCodecCustomizer(List<HypermediaMappingInformation> mappingInformations, JsonMapper mapper,
 			boolean withGenericJsonTypes) {
 
 		this.mappingInformations = mappingInformations;
@@ -61,26 +61,27 @@ class WebfluxCodecCustomizer implements Consumer<Object> {
 	 * @see java.util.function.Consumer#accept(java.lang.Object)
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public void accept(@Nullable Object it) {
 
-		if (it == null || !Jackson2CodecSupport.class.isInstance(it)) {
+		if (it == null || !JacksonCodecSupport.class.isInstance(it)) {
 			return;
 		}
 
-		Jackson2CodecSupport codec = (Jackson2CodecSupport) it;
-		ObjectMapper firstMapper = null;
+		var codec = (JacksonCodecSupport<JsonMapper>) it;
+		JsonMapper firstMapper = null;
 
 		for (HypermediaMappingInformation information : mappingInformations) {
 
-			ObjectMapper objectMapper = information.configureObjectMapper(mapper.copy());
+			var configured = information.configureJsonMapper(mapper.rebuild()).build();
 
 			if (firstMapper == null) {
-				firstMapper = objectMapper;
+				firstMapper = configured;
 			}
 
 			for (MediaType mediaType : information.getMediaTypes()) {
-				codec.registerObjectMappersForType(information.getRootType(), map -> {
-					map.put(mediaType, objectMapper);
+				codec.registerMappersForType(information.getRootType(), map -> {
+					map.put(mediaType, configured);
 				});
 			}
 		}
@@ -90,9 +91,9 @@ class WebfluxCodecCustomizer implements Consumer<Object> {
 		}
 
 		Class<?> type = mappingInformations.get(0).getRootType();
-		ObjectMapper mapper = firstMapper;
+		JsonMapper mapper = firstMapper;
 
-		codec.registerObjectMappersForType(type, map -> {
+		codec.registerMappersForType(type, map -> {
 			Stream.of(MediaType.APPLICATION_JSON, ANY_JSON).forEach(mediaType -> map.put(mediaType, mapper));
 		});
 	}

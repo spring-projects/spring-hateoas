@@ -18,7 +18,6 @@ package org.springframework.hateoas.mediatype.uber;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.support.JsonPathUtils.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -50,9 +50,14 @@ class UberWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
 
+	ContextualMapper $;
+
 	@BeforeEach
 	void setUp() {
+
 		WebFluxEmployeeController.reset();
+
+		this.$ = MappingTestUtils.createMapper();
 	}
 
 	/**
@@ -187,7 +192,7 @@ class UberWebFluxIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String input = read(new ClassPathResource("create-employee.json", getClass()));
+		var input = $.readFileContent("create-employee.json");
 
 		this.testClient.post().uri("http://localhost/employees") //
 				.contentType(MediaTypes.UBER_JSON) //

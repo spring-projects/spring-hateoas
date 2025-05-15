@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,10 +30,7 @@ import org.springframework.hateoas.client.TraversonDefaults;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 
 /**
  * Traverson defaults to support HAL.
@@ -83,16 +82,13 @@ class HalTraversonDefaults implements TraversonDefaults {
 	 */
 	private static HttpMessageConverter<?> getHalConverter(List<MediaType> halFlavours) {
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		var mapper = JsonMapper.builder()
+				.addModule(new HalJacksonModule())
+				.build();
 
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-
-		converter.setObjectMapper(mapper);
+		var converter = new JacksonJsonHttpMessageConverter(mapper);
 		converter.setSupportedMediaTypes(halFlavours);
 
 		return converter;
 	}
-
 }

@@ -17,6 +17,8 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
@@ -25,8 +27,6 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link HalFormsLinkDiscoverer}.
@@ -37,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class HalFormsLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalFormsLinkDiscoverer();
-	static final ContextualMapper mapper = ContextualMapper.of(HalFormsLinkDiscovererUnitTest.class, new ObjectMapper());
+	static final ContextualMapper mapper = ContextualMapper.of(HalFormsLinkDiscovererUnitTest.class, new JsonMapper());
 
 	/**
 	 * @see #314

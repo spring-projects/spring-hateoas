@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -27,8 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Spring WebFlux HATEOAS configuration.
  *
@@ -40,11 +40,11 @@ class WebClientHateoasConfiguration {
 
 	@Bean
 	@Lazy
-	HypermediaWebClientConfigurer webClientConfigurer(ObjectProvider<ObjectMapper> mapper,
+	HypermediaWebClientConfigurer webClientConfigurer(ObjectProvider<JsonMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
 
 		WebfluxCodecCustomizer withGenericJsonTypes = new WebfluxCodecCustomizer(hypermediaTypes,
-				mapper.getIfAvailable(ObjectMapper::new)).withGenericJsonTypes();
+				mapper.getIfAvailable(JsonMapper::new)).withGenericJsonTypes();
 
 		return new HypermediaWebClientConfigurer(withGenericJsonTypes);
 	}

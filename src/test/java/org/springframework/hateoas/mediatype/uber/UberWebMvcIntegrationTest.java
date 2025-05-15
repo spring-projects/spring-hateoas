@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.uber;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -28,7 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -187,7 +186,7 @@ class UberWebMvcIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String input = read(new ClassPathResource("create-employee.json", getClass()));
+		String input = MappingTestUtils.createMapper().readFileContent("create-employee.json");
 
 		this.mockMvc.perform(post("/employees") //
 				.content(input) //

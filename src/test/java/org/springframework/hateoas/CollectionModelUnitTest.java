@@ -18,13 +18,13 @@ package org.springframework.hateoas;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Value;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;

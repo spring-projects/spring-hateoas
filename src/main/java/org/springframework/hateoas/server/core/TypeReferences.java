@@ -62,6 +62,8 @@ public class TypeReferences {
 	public static class PagedModelType<T>
 			extends SyntheticParameterizedTypeReference<org.springframework.hateoas.PagedModel<T>> {}
 
+	public static class $$<T> extends SyntheticParameterizedTypeReference<T> {}
+
 	/**
 	 * Special {@link ParameterizedTypeReference} to customize the generic type detection and eventually return a
 	 * synthetic {@link ParameterizedType} to represent the resource type along side its generic parameter.

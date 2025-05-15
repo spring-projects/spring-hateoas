@@ -21,11 +21,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import tools.jackson.databind.SerializationFeature;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,11 +33,10 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
-
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration test for Jackson 2 JSON+Collection
@@ -45,24 +44,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  */
-class Jackson2CollectionJsonIntegrationTest {
+class CollectionJsonJacksonModuleIntegrationTest {
 
 	static final Links PAGINATION_LINKS = Links.of( //
 			Link.of("localhost", IanaLinkRelations.SELF), //
 			Link.of("foo", IanaLinkRelations.NEXT), //
 			Link.of("bar", IanaLinkRelations.PREV));
 
-	MappingTestUtils.ContextualMapper mapper;
-
-	@BeforeEach
-	void setUpModule() {
-
-		this.mapper = MappingTestUtils.createMapper(getClass(), mapper -> {
-
-			mapper.registerModule(new Jackson2CollectionJsonModule());
-			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-		});
-	}
+	ContextualMapper $ = MappingTestUtils.createMapper(mapper -> mapper.addModule(new CollectionJsonJacksonModule())
+			.enable(SerializationFeature.INDENT_OUTPUT));
 
 	@Test
 	void rendersSingleLinkAsObject() {
@@ -70,7 +60,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(Link.of("localhost").withSelfRel());
 
-		assertThat(mapper.writeObject(resourceSupport)).isEqualTo(mapper.readFileContent("resource-support.json"));
+		assertThat($.writeObject(resourceSupport)).isEqualTo($.readFileContent("resource-support.json"));
 	}
 
 	@Test
@@ -79,7 +69,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		RepresentationModel<?> expected = new RepresentationModel<>();
 		expected.add(Link.of("localhost"));
 
-		assertThat(mapper.readFile("resource-support.json")).isEqualTo(expected);
+		assertThat($.readFile("resource-support.json")).isEqualTo(expected);
 	}
 
 	@Test
@@ -89,7 +79,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		resourceSupport.add(Link.of("localhost"));
 		resourceSupport.add(Link.of("localhost2").withRel("orders"));
 
-		assertThat(mapper.writeObject(resourceSupport)).isEqualTo(mapper.readFileContent("resource-support-2.json"));
+		assertThat($.writeObject(resourceSupport)).isEqualTo($.readFileContent("resource-support-2.json"));
 	}
 
 	@Test
@@ -98,7 +88,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		ResourceWithAttributes resource = new ResourceWithAttributes("test value");
 		resource.add(Link.of("localhost").withSelfRel());
 
-		assertThat(mapper.writeObject(resource)).isEqualTo(mapper.readFileContent("resource-support-3.json"));
+		assertThat($.writeObject(resource)).isEqualTo($.readFileContent("resource-support-3.json"));
 	}
 
 	@Test
@@ -107,7 +97,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		ResourceWithAttributes expected = new ResourceWithAttributes("test value");
 		expected.add(Link.of("localhost").withSelfRel());
 
-		assertThat(mapper.readFile("resource-support-3.json", ResourceWithAttributes.class)).isEqualTo(expected);
+		assertThat($.readFile("resource-support-3.json", ResourceWithAttributes.class)).isEqualTo(expected);
 	}
 
 	@Test
@@ -117,7 +107,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		expected.add(Link.of("localhost"));
 		expected.add(Link.of("localhost2").withRel("orders"));
 
-		assertThat(mapper.readFile("resource-support-2.json").getLinks()).containsAll(expected.getLinks());
+		assertThat($.readFile("resource-support-2.json").getLinks()).containsAll(expected.getLinks());
 	}
 
 	@Test
@@ -130,7 +120,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		CollectionModel<String> resources = CollectionModel.of(content);
 		resources.add(Link.of("localhost"));
 
-		assertThat(mapper.writeObject(resources)).isEqualTo(mapper.readFileContent("resources.json"));
+		assertThat($.writeObject(resources)).isEqualTo($.readFileContent("resources.json"));
 	}
 
 	@Test
@@ -143,7 +133,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		CollectionModel<String> expected = CollectionModel.of(content);
 		expected.add(Link.of("localhost"));
 
-		CollectionModel<String> result = mapper.readFile("resources.json", CollectionModel.class, String.class);
+		CollectionModel<String> result = $.readFile("resources.json", CollectionModel.class, String.class);
 
 		assertThat(result).isEqualTo(expected);
 	}
@@ -151,14 +141,14 @@ class Jackson2CollectionJsonIntegrationTest {
 	@Test
 	void renderResource() {
 
-		assertThat(mapper.writeObject(EntityModel.of("first", Link.of("localhost")))) //
-				.isEqualTo(mapper.readFileContent("resource.json"));
+		assertThat($.writeObject(EntityModel.of("first", Link.of("localhost")))) //
+				.isEqualTo($.readFileContent("resource.json"));
 	}
 
 	@Test
 	void deserializeResource() {
 
-		EntityModel<String> actual = mapper.readFile("resource.json", EntityModel.class, String.class);
+		EntityModel<String> actual = $.readFile("resource.json", EntityModel.class, String.class);
 
 		assertThat(actual).isEqualTo(EntityModel.of("first", Link.of("localhost")));
 	}
@@ -174,7 +164,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		resources.add(Link.of("localhost"));
 		resources.add(Link.of("/page/2").withRel("next"));
 
-		assertThat(mapper.writeObject(resources)).isEqualTo(mapper.readFileContent("resources-with-resource-objects.json"));
+		assertThat($.writeObject(resources)).isEqualTo($.readFileContent("resources-with-resource-objects.json"));
 	}
 
 	@Test
@@ -188,7 +178,7 @@ class Jackson2CollectionJsonIntegrationTest {
 		expected.add(Link.of("localhost"));
 		expected.add(Link.of("/page/2").withRel("next"));
 
-		CollectionModel<?> actual = mapper.readFile("resources-with-resource-objects.json", CollectionModel.class,
+		CollectionModel<?> actual = $.readFile("resources-with-resource-objects.json", CollectionModel.class,
 				EntityModel.class, String.class);
 
 		assertThat(actual).isEqualTo(expected);
@@ -205,20 +195,20 @@ class Jackson2CollectionJsonIntegrationTest {
 		resources.add(Link.of("localhost"));
 		resources.add(Link.of("/page/2").withRel("next"));
 
-		assertThat(mapper.writeObject(resources)).isEqualTo(mapper.readFileContent("resources-simple-pojos.json"));
+		assertThat($.writeObject(resources)).isEqualTo($.readFileContent("resources-simple-pojos.json"));
 	}
 
 	@Test
 	void serializesPagedResource() throws Exception {
 
-		assertThat(mapper.writeObject(setupAnnotatedPagedResources())) //
-				.isEqualTo(mapper.readFileContent("paged-resources.json"));
+		assertThat($.writeObject(setupAnnotatedPagedResources())) //
+				.isEqualTo($.readFileContent("paged-resources.json"));
 	}
 
 	@Test
 	void deserializesPagedResource() throws Exception {
 
-		PagedModel<?> result = mapper.readFile("paged-resources.json", PagedModel.class, EntityModel.class,
+		PagedModel<?> result = $.readFile("paged-resources.json", PagedModel.class, EntityModel.class,
 				SimplePojo.class);
 
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());

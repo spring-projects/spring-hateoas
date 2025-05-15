@@ -15,18 +15,17 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Value type to handle registration of hypermedia related {@link HttpMessageConverter}s.
@@ -38,30 +37,30 @@ public class WebConverters {
 	private static MediaType ANY_JSON = MediaType.parseMediaType("application/*+json");
 
 	private final List<HypermediaMappingInformation> infos;
-	private final ObjectMapper mapper;
+	private final JsonMapper mapper;
 
 	/**
-	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and {@link HypermediaMappingInformation}s.
+	 * Creates a new {@link WebConverters} from the given {@link JsonMapper} and {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param mappingInformation must not be {@literal null}.
 	 */
-	private WebConverters(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
+	private WebConverters(JsonMapper mapper, List<HypermediaMappingInformation> mappingInformation) {
 
 		this.mapper = mapper;
 		this.infos = mappingInformation;
 	}
 
 	/**
-	 * Creates a new {@link WebConverters} from the given {@link ObjectMapper} and {@link HypermediaMappingInformation}s.
+	 * Creates a new {@link WebConverters} from the given {@link JsonMapper} and {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param mappingInformations must not be {@literal null}.
 	 * @return
 	 */
-	public static WebConverters of(ObjectMapper mapper, List<HypermediaMappingInformation> mappingInformations) {
+	public static WebConverters of(JsonMapper mapper, List<HypermediaMappingInformation> mappingInformations) {
 
-		Assert.notNull(mapper, "ObjectMapper must not be null!");
+		Assert.notNull(mapper, "JsonMapper must not be null!");
 		Assert.notNull(mappingInformations, "Mapping information must not be null!");
 
 		return new WebConverters(mapper, mappingInformations);
@@ -91,39 +90,38 @@ public class WebConverters {
 
 		Assert.notNull(converters, "HttpMessageConverters must not be null!");
 
-		MappingJackson2HttpMessageConverter converter = converters.stream()
-				.filter(it -> MappingJackson2HttpMessageConverter.class.equals(it.getClass()))
-				.map(MappingJackson2HttpMessageConverter.class::cast)
+		var converter = converters.stream()
+				.filter(it -> JacksonJsonHttpMessageConverter.class.equals(it.getClass()))
+				.map(JacksonJsonHttpMessageConverter.class::cast)
 				.findFirst()
-				.orElseGet(() -> new MappingJackson2HttpMessageConverter(mapper));
+				.orElseGet(() -> new JacksonJsonHttpMessageConverter(mapper));
 
-		ObjectMapper first = null;
+		JsonMapper first = null;
 
-		for (HypermediaMappingInformation info : infos) {
+		for (var info : infos) {
 
-			Class<?> rootType = info.getRootType();
-			ObjectMapper objectMapper = info.configureObjectMapper(mapper.copy());
+			var rootType = info.getRootType();
+			var configured = info.configureJsonMapper(mapper.rebuild()).build();
 
 			if (first == null) {
-				first = objectMapper;
+				first = configured;
 			}
 
-			Map<MediaType, ObjectMapper> mappers = info.getMediaTypes().stream().distinct()
-					.collect(Collectors.toMap(Function.identity(), __ -> objectMapper));
+			var mappers = info.getMediaTypes().stream().distinct()
+					.collect(Collectors.toMap(Function.identity(), __ -> configured));
 
-			converter.registerObjectMappersForType(rootType, map -> map.putAll(mappers));
+			converter.registerMappersForType(rootType, map -> map.putAll(mappers));
 		}
 
 		if (!includeGenericJsonTypes || infos.isEmpty()) {
 			return;
 		}
 
-		Class<?> rootType = infos.get(0).getRootType();
-		ObjectMapper mapper = first;
+		var rootType = infos.get(0).getRootType();
+		var mapper = first;
 
-		converter.registerObjectMappersForType(rootType, map -> {
-			Stream.of(MediaType.APPLICATION_JSON, ANY_JSON)
-					.forEach(it -> map.put(it, mapper));
+		converter.registerMappersForType(rootType, map -> {
+			Stream.of(MediaType.APPLICATION_JSON, ANY_JSON).forEach(it -> map.put(it, mapper));
 		});
 	}
 }

@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import tools.jackson.databind.JavaType;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +35,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JavaType;
 
 /**
  * Representation of an "item" in a Collection+JSON document.

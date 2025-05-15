@@ -41,8 +41,8 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	public static PagedModel<?> NO_PAGE = new PagedModel<>();
 
-	private final @Nullable PageMetadata metadata;
-	private final @Nullable ResolvableType fallbackType;
+	private @Nullable PageMetadata metadata;
+	private @Nullable ResolvableType fallbackType;
 
 	/**
 	 * Default constructor to allow instantiation by reflection.

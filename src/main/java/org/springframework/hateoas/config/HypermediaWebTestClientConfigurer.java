@@ -15,25 +15,25 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
- * Assembles {@link Jackson2JsonEncoder}s and {@link Jackson2JsonDecoder}s needed to wire a {@link WebTestClient} with
- * hypermedia support.
+ * Assembles {@link Jackson2JsonEncoder}s and {@link AbstractJacksonDecoder}s needed to wire a {@link WebTestClient}
+ * with hypermedia support.
  *
  * @author Greg Turnquist
  * @since 1.1
@@ -43,29 +43,29 @@ public class HypermediaWebTestClientConfigurer implements WebTestClientConfigure
 	private Consumer<ClientCodecConfigurer> configurer;
 
 	/**
-	 * Creates a new {@link HypermediaWebTestClientConfigurer} for the given {@link ObjectMapper} and
+	 * Creates a new {@link HypermediaWebTestClientConfigurer} for the given {@link JsonMapper} and
 	 * {@link HypermediaMappingInformation}s.
 	 *
 	 * @param mapper must not be {@literal null}.
 	 * @param hypermediaTypes must not be {@literal null}.
 	 */
-	HypermediaWebTestClientConfigurer(ObjectMapper mapper, List<HypermediaMappingInformation> hypermediaTypes) {
+	HypermediaWebTestClientConfigurer(JsonMapper mapper, List<HypermediaMappingInformation> hypermediaTypes) {
 
 		Assert.notNull(mapper, "mapper must not be null!");
 		Assert.notNull(hypermediaTypes, "hypermediaTypes must not be null!");
 
 		this.configurer = clientCodecConfigurer -> hypermediaTypes.forEach(hypermediaType -> {
 
-			ObjectMapper objectMapper = hypermediaType.configureObjectMapper(mapper.copy());
-			MimeType[] mimeTypes = hypermediaType.getMediaTypes().toArray(new MimeType[0]);
+			var customized = hypermediaType.configureJsonMapper(mapper.rebuild()).build();
+			var mimeTypes = hypermediaType.getMediaTypes().toArray(new MimeType[0]);
 
-			clientCodecConfigurer.customCodecs().registerWithDefaultConfig(new Jackson2JsonEncoder(objectMapper, mimeTypes));
-			clientCodecConfigurer.customCodecs().registerWithDefaultConfig(new Jackson2JsonDecoder(objectMapper, mimeTypes));
+			clientCodecConfigurer.customCodecs().registerWithDefaultConfig(new JacksonJsonEncoder(customized, mimeTypes));
+			clientCodecConfigurer.customCodecs().registerWithDefaultConfig(new JacksonJsonDecoder(customized, mimeTypes));
 		});
 	}
 
 	/**
-	 * Register the proper {@link Jackson2JsonEncoder}s and {@link Jackson2JsonDecoder}s for a given
+	 * Register the proper {@link Jackson2JsonEncoder}s and {@link AbstractJacksonDecoder}s for a given
 	 * {@link WebTestClient}.
 	 */
 	@Override

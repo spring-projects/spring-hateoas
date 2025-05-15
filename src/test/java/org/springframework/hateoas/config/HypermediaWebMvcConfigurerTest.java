@@ -23,8 +23,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
+import tools.jackson.databind.DeserializationFeature;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -35,14 +36,17 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
-import org.springframework.hateoas.mediatype.hal.forms.Jackson2HalFormsModule;
-import org.springframework.hateoas.mediatype.uber.Jackson2UberModule;
+import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonJacksonModule;
+import org.springframework.hateoas.mediatype.hal.HalJacksonModule;
+import org.springframework.hateoas.mediatype.hal.forms.HalFormsJacksonModule;
+import org.springframework.hateoas.mediatype.uber.UberJacksonModule;
 import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
+import org.springframework.hateoas.server.core.TypeReferences.CollectionModelType;
 import org.springframework.hateoas.support.Employee;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -65,20 +69,17 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * @author Greg Turnquist
  */
 class HypermediaWebMvcConfigurerTest {
 
 	MockMvc mockMvc;
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	void setUp(Class<?> context) {
 
-		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+		var ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(context);
 		ctx.setServletContext(new MockServletContext());
 		ctx.refresh();
@@ -286,18 +287,18 @@ class HypermediaWebMvcConfigurerTest {
 
 	private void verifyRootUriServesHypermedia(MediaType requestType, MediaType responseType) throws Exception {
 
-		String json = this.mockMvc.perform(get("/").accept(requestType)) //
-				.andExpect(status().isOk()) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
-				.andReturn() //
-				.getResponse().getContentAsString(); //
+		getMapper(responseType)
+				.assertDeserializes(mockMvc.perform(get("/").accept(requestType)) //
+						.andExpect(status().isOk()) //
+						.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
+						.andReturn() //
+						.getResponse().getContentAsString())
+				.into(RepresentationModel.class)
+				.matching(model -> {
 
-		ObjectMapper mapper = getMapper(responseType);
-
-		RepresentationModel<?> model = mapper.readValue(json, RepresentationModel.class);
-
-		assertThat(model.getLinks()) //
-				.containsExactlyInAnyOrder(Link.of("/", IanaLinkRelations.SELF), Link.of("/employees", "employees"));
+					assertThat(model.getLinks()) //
+							.containsExactlyInAnyOrder(Link.of("/", IanaLinkRelations.SELF), Link.of("/employees", "employees"));
+				});
 	}
 
 	private void verifyAggregateRootServesHypermedia(MediaType mediaType) throws Exception {
@@ -306,30 +307,27 @@ class HypermediaWebMvcConfigurerTest {
 
 	private void verifyAggregateRootServesHypermedia(MediaType requestType, MediaType responseType) throws Exception {
 
-		String json = this.mockMvc.perform(get("/employees").accept(requestType)) //
-				.andExpect(status().isOk()) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
-				.andReturn().getResponse().getContentAsString();
+		getMapper(requestType)
+				.assertDeserializes(mockMvc.perform(get("/employees").accept(requestType)) //
+						.andExpect(status().isOk()) //
+						.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
+						.andReturn().getResponse().getContentAsString())
+				.into(new CollectionModelType<EntityModel<Employee>>() {})
+				.matching(resources -> {
 
-		ObjectMapper mapper = getMapper(responseType);
+					assertThat(resources.getLinks())
+							.containsExactlyInAnyOrder(Link.of("/employees", IanaLinkRelations.SELF));
+					assertThat(resources.getContent())
+							.hasSize(1)
+							.element(0)
+							.satisfies(resource -> {
 
-		JavaType entityModelType = mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class);
-		JavaType collectionModelType = mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-				entityModelType);
-
-		CollectionModel<EntityModel<Employee>> resources = mapper.readValue(json, collectionModelType);
-
-		assertThat(resources.getLinks()).containsExactlyInAnyOrder(Link.of("/employees", IanaLinkRelations.SELF));
-
-		Collection<EntityModel<Employee>> content = resources.getContent();
-		assertThat(content).hasSize(1);
-
-		EntityModel<Employee> resource = content.iterator().next();
-
-		assertThat(resource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
-		assertThat(resource.getLinks()) //
-				.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
-						Link.of("/employees", "employees"));
+								assertThat(resource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
+								assertThat(resource.getLinks()) //
+										.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+												Link.of("/employees", "employees"));
+							});
+				});
 	}
 
 	private void verifySingleItemResourceServesHypermedia(MediaType mediaType) throws Exception {
@@ -339,20 +337,21 @@ class HypermediaWebMvcConfigurerTest {
 	private void verifySingleItemResourceServesHypermedia(MediaType requestType, MediaType responseType)
 			throws Exception {
 
-		String json = this.mockMvc.perform(get("/employees/1").accept(requestType)) //
-				.andExpect(status().isOk()) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
-				.andReturn().getResponse().getContentAsString();
+		getMapper(responseType)
+				.assertDeserializes(mockMvc.perform(get("/employees/1").accept(requestType)) //
+						.andExpect(status().isOk()) //
+						.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
+						.andReturn().getResponse().getContentAsString())
+				.intoEntityModel(Employee.class)
+				.matching(result -> {
 
-		ObjectMapper mapper = getMapper(responseType);
+					assertThat(result.getContent())
+							.isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
+					assertThat(result.getLinks())
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
+				});
 
-		JavaType entityModelType = mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class);
-
-		EntityModel<Employee> employeeResource = mapper.readValue(json, entityModelType);
-
-		assertThat(employeeResource.getContent()).isEqualTo(new Employee("Frodo Baggins", "ring bearer"));
-		assertThat(employeeResource.getLinks()).containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
-				Link.of("/employees", "employees"));
 	}
 
 	private void verifyCreatingNewEntityWorks(MediaType mediaType) throws Exception {
@@ -365,44 +364,44 @@ class HypermediaWebMvcConfigurerTest {
 
 	private void verifyCreation(String uri, MediaType contentType, MediaType responseType) throws Exception {
 
-		ObjectMapper mapper = getMapper(responseType);
+		getMapper(responseType)
+				.assertSerializes(new Employee("Samwise Gamgee", "gardener"))
+				.map(payload -> mockMvc.perform( //
+						post(uri) //
+								.accept(contentType) //
+								.contentType(contentType) //
+								.content(payload)) //
+						.andExpect(status().isOk()) //
+						.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
+						.andReturn().getResponse().getContentAsString())
+				.intoEntityModel(Employee.class)
+				.matching(result -> {
+					assertThat(result.getContent()).isEqualTo(new Employee("Samwise Gamgee", "gardener"));
+					assertThat(result.getLinks()) //
+							.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
+									Link.of("/employees", "employees"));
+				});
 
-		String json = this.mockMvc.perform( //
-				post(uri) //
-						.accept(contentType) //
-						.contentType(contentType) //
-						.content(mapper.writeValueAsBytes(new Employee("Samwise Gamgee", "gardener")))) //
-				.andExpect(status().isOk()) //
-				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, responseType.toString())) //
-				.andReturn().getResponse().getContentAsString();
-
-		JavaType entityModelType = mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class);
-
-		EntityModel<Employee> resource = mapper.readValue(json, entityModelType);
-
-		assertThat(resource.getContent()).isEqualTo(new Employee("Samwise Gamgee", "gardener"));
-		assertThat(resource.getLinks()) //
-				.containsExactlyInAnyOrder(Link.of("/employees/1", IanaLinkRelations.SELF),
-						Link.of("/employees", "employees"));
 	}
 
-	private static ObjectMapper getMapper(MediaType mediaType) {
+	private static ContextualMapper getMapper(MediaType mediaType) {
 
-		ObjectMapper mapper = new ObjectMapper();
+		return MappingTestUtils.createMapper(builder -> {
 
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			builder = builder.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-		if (mediaType == MediaTypes.HAL_JSON) {
-			mapper.registerModule(new Jackson2HalModule());
-		} else if (mediaType == MediaTypes.UBER_JSON) {
-			mapper.registerModule(new Jackson2UberModule());
-		} else if (mediaType == MediaTypes.HAL_FORMS_JSON) {
-			mapper.registerModule(new Jackson2HalFormsModule());
-		} else if (mediaType == MediaTypes.COLLECTION_JSON) {
-			mapper.registerModule(new Jackson2CollectionJsonModule());
-		}
+			if (mediaType == MediaTypes.HAL_JSON) {
+				return builder.addModule(new HalJacksonModule());
+			} else if (mediaType == MediaTypes.UBER_JSON) {
+				return builder.addModule(new UberJacksonModule());
+			} else if (mediaType == MediaTypes.HAL_FORMS_JSON) {
+				return builder.addModule(new HalFormsJacksonModule());
+			} else if (mediaType == MediaTypes.COLLECTION_JSON) {
+				return builder.addModule(new CollectionJsonJacksonModule());
+			}
 
-		return mapper;
+			return builder;
+		});
 	}
 
 	@Configuration

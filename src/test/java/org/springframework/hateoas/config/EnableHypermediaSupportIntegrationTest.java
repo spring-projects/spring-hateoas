@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -54,9 +55,9 @@ import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingEntityLinks;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
@@ -67,9 +68,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Integration tests for {@link EnableHypermediaSupport}.
@@ -206,6 +204,7 @@ class EnableHypermediaSupportIntegrationTest {
 		});
 	}
 
+	@Nullable
 	private static Object assertMediaTypeSupported(ApplicationContext context, MediaType mediaType, Class<?> type) {
 		return assertMediaTypeSupported(context, mediaType, type, null);
 	}
@@ -232,7 +231,7 @@ class EnableHypermediaSupportIntegrationTest {
 				List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) ReflectionTestUtils
 						.getField(processor, "messageConverters");
 
-				assertMediaTypeSupported(converters, MediaTypes.HAL_FORMS_JSON, RepresentationModel.class);
+				assertMediaTypeSupported(converters, mediaType, RepresentationModel.class);
 			}
 		}
 
@@ -251,13 +250,13 @@ class EnableHypermediaSupportIntegrationTest {
 	private static String assertMediaTypeSupported(List<HttpMessageConverter<?>> converters, MediaType mediaType,
 			Class<?> type, @Nullable Object source) {
 
-		Optional<AbstractJackson2HttpMessageConverter> result = converters.stream()//
-				.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
+		Optional<AbstractJacksonHttpMessageConverter<?>> result = converters.stream()//
+				.filter(AbstractJacksonHttpMessageConverter.class::isInstance) //
 				.findFirst() //
-				.map(AbstractJackson2HttpMessageConverter.class::cast);
+				.map(AbstractJacksonHttpMessageConverter.class::cast);
 
 		assertThat(result).hasValueSatisfying(it -> {
-			assertThat(it.getSupportedMediaTypes(type));
+			assertThat(it.getSupportedMediaTypes(type)).contains(mediaType);
 		});
 
 		if (source == null) {
@@ -273,15 +272,15 @@ class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
+	void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(Link.of("localhost").withSelfRel());
 
 		withServletContext(HalConfig.class, context -> {
 
-			assertMediaTypeSupported(context.getBean(RestTemplate.class).getMessageConverters(), MediaTypes.HAL_FORMS_JSON,
-					RepresentationModel.class);
+			assertMediaTypeSupported(context.getBean(RestTemplate.class).getMessageConverters(),
+					MediaTypes.HAL_JSON, RepresentationModel.class);
 
 			String result = assertMediaTypeSupported(context, MediaTypes.HAL_JSON, RepresentationModel.class,
 					resourceSupport);
@@ -397,7 +396,7 @@ class EnableHypermediaSupportIntegrationTest {
 
 			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
 			assertThat(rmha.getMessageConverters())
-					.anySatisfy(it -> assertThat(it).isInstanceOf(MappingJackson2HttpMessageConverter.class));
+					.anySatisfy(it -> assertThat(it).isInstanceOf(JacksonJsonHttpMessageConverter.class));
 		});
 	}
 

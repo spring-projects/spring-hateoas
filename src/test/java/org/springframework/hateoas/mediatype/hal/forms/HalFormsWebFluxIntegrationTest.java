@@ -29,13 +29,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.mediatype.problem.Problem;
-import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,6 +54,7 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 class HalFormsWebFluxIntegrationTest {
 
 	@Autowired WebTestClient testClient;
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	@BeforeEach
 	void setUp() {
@@ -66,7 +67,7 @@ class HalFormsWebFluxIntegrationTest {
 	@Test
 	void singleEmployee() {
 
-		this.testClient.get().uri("http://localhost/employees/0").accept(MediaTypes.HAL_FORMS_JSON).exchange()
+		testClient.get().uri("http://localhost/employees/0").accept(MediaTypes.HAL_FORMS_JSON).exchange()
 
 				.expectStatus().isOk() //
 				.expectHeader().contentType(MediaTypes.HAL_FORMS_JSON) //
@@ -99,7 +100,7 @@ class HalFormsWebFluxIntegrationTest {
 	@Test
 	void collectionOfEmployees() {
 
-		this.testClient.get().uri("http://localhost/employees").accept(MediaTypes.HAL_FORMS_JSON).exchange().expectStatus()
+		testClient.get().uri("http://localhost/employees").accept(MediaTypes.HAL_FORMS_JSON).exchange().expectStatus()
 				.isOk().expectHeader().contentType(MediaTypes.HAL_FORMS_JSON).expectBody(String.class)
 				.value(jsonPath("$._embedded.employees[0].name", is("Frodo Baggins")))
 				.value(jsonPath("$._embedded.employees[0].role", is("ring bearer")))
@@ -125,19 +126,20 @@ class HalFormsWebFluxIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
+		$.assertFileContent("new-employee.json").satisfies(specBasedJson -> {
 
-		this.testClient.post().uri("http://localhost/employees").contentType(MediaTypes.HAL_FORMS_JSON)
-				.bodyValue(specBasedJson) //
-				.exchange() //
-				.expectStatus().isCreated() //
-				.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
+			testClient.post().uri("http://localhost/employees").contentType(MediaTypes.HAL_FORMS_JSON)
+					.bodyValue(specBasedJson) //
+					.exchange() //
+					.expectStatus().isCreated() //
+					.expectHeader().valueEquals(HttpHeaders.LOCATION, "http://localhost/employees/2");
+		});
 	}
 
 	@Test // #786
 	void problemReturningControllerMethod() {
 
-		Problem problem = this.testClient.get().uri("http://localhost/employees/problem")
+		var problem = testClient.get().uri("http://localhost/employees/problem")
 				.accept(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
 				.exchange() //
 				.expectStatus().isBadRequest() //

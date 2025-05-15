@@ -15,16 +15,15 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.json.JsonMapper.Builder;
+
 import java.util.List;
-import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Interface for registering custom hypermedia handlers.
@@ -53,31 +52,33 @@ public interface HypermediaMappingInformation {
 	}
 
 	/**
-	 * Configure an {@link ObjectMapper} and register custom serializers and deserializers for the supported media types.
-	 * If all you want to do is register a Jackson {@link Module}, prefer implementing {@link #getJacksonModule()}.
+	 * Configure an {@link JsonMapper.Builder} and register custom serializers and deserializers for the supported media
+	 * types. If all you want to do is register a Jackson {@link Module}, prefer implementing {@link #getJacksonModule()}.
 	 *
-	 * @return
+	 * @param builder will never be {@literal null}.
+	 * @return must not be {@literal null}.
 	 * @see #getJacksonModule()
 	 */
-	default ObjectMapper configureObjectMapper(ObjectMapper mapper) {
+	default Builder configureJsonMapper(Builder builder) {
 
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		var configured = builder
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-		Optional.ofNullable(getJacksonModule()).ifPresent(mapper::registerModule);
+		var module = getJacksonModule();
 
-		return mapper;
+		return module == null ? configured : configured.addModule(module);
 	}
 
 	/**
 	 * Optionally return the Jackson {@link Module} to be used to customize the serialization of representation models.
-	 * Override this if there's nothing but the module to be done to setup the {@link ObjectMapper}. For more advanced
-	 * needs, see {@link #configureObjectMapper(ObjectMapper)}.
+	 * Override this if there's nothing but the {@link JacksonModule} to be registered to setup the
+	 * {@link tools.jackson.databind.json.JsonMapper}. For more advanced needs, see {@link #configureJsonMapper(Builder)}.
 	 *
 	 * @return
-	 * @see #configureObjectMapper(ObjectMapper)
+	 * @see #configureJsonMapper(Builder)
 	 */
 	@Nullable
-	default Module getJacksonModule() {
+	default JacksonModule getJacksonModule() {
 		return null;
 	}
 }

@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -52,8 +54,6 @@ import org.springframework.plugin.core.config.EnablePluginRegistries;
 import org.springframework.plugin.core.support.PluginRegistryFactoryBean;
 import org.springframework.util.ClassUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Common HATEOAS specific configuration.
  *
@@ -77,12 +77,12 @@ public class HateoasConfiguration {
 	}
 
 	@Bean
-	WebConverters hypermediaWebMvcConverters(ObjectProvider<ObjectMapper> mapper,
+	WebConverters hypermediaWebMvcConverters(ObjectProvider<JsonMapper> mapper,
 			List<HypermediaMappingInformation> information, Optional<HypermediaMappingInformationComparator> comparator) {
 
 		comparator.ifPresent(information::sort);
 
-		return WebConverters.of(mapper.getIfUnique(ObjectMapper::new), information);
+		return WebConverters.of(mapper.getIfUnique(JsonMapper::new), information);
 	}
 
 	// RelProvider

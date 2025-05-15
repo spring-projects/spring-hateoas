@@ -15,14 +15,15 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Custom mixin to render {@link Link}s in HAL.
@@ -36,7 +37,7 @@ public abstract class RepresentationModelMixin extends RepresentationModel<Repre
 	@Override
 	@JsonProperty("_links")
 	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalModule.HalLinkListSerializer.class)
-	@JsonDeserialize(using = Jackson2HalModule.HalLinkListDeserializer.class)
+	@JsonSerialize(using = HalJacksonModule.HalLinkListSerializer.class)
+	@JsonDeserialize(using = HalJacksonModule.HalLinkListDeserializer.class)
 	public abstract Links getLinks();
 }

@@ -30,7 +30,7 @@ import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -47,7 +47,7 @@ class Jackson2PagedResourcesIntegrationTest {
 	static {
 
 		try {
-			SPRING_4_2_WRITE_METHOD = MappingJackson2HttpMessageConverter.class.getMethod("write", Object.class, Type.class,
+			SPRING_4_2_WRITE_METHOD = JacksonJsonHttpMessageConverter.class.getMethod("write", Object.class, Type.class,
 					MediaType.class, HttpOutputMessage.class);
 		} catch (Exception e) {}
 	}
@@ -74,7 +74,7 @@ class Jackson2PagedResourcesIntegrationTest {
 		when(outputMessage.getBody()).thenReturn(new WriterOutputStream(writer));
 		when(outputMessage.getHeaders()).thenReturn(new HttpHeaders());
 
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+		JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
 
 		ReflectionUtils.invokeMethod(SPRING_4_2_WRITE_METHOD, converter, resources, method.getGenericReturnType(),
 				MediaType.APPLICATION_JSON, outputMessage);

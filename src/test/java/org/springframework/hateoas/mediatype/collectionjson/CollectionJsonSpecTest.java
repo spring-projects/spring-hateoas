@@ -18,25 +18,17 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Data;
+import tools.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.support.Employee;
-import org.springframework.hateoas.support.MappingUtils;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Unit tests leveraging spec fragments of JSON. NOTE: Fields that don't map into Java property names (e.g.
@@ -47,16 +39,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 class CollectionJsonSpecTest {
 
-	ObjectMapper mapper;
-
-	@BeforeEach
-	void setUp() {
-
-		mapper = new ObjectMapper();
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.registerModule(new Jackson2CollectionJsonModule());
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-	}
+	ContextualMapper $ = MappingTestUtils.createMapper(it -> it.addModule(new CollectionJsonJacksonModule())
+			.enable(SerializationFeature.INDENT_OUTPUT));
 
 	/**
 	 * @see http://amundsen.com/media-types/collection/examples/ - Section 1. Minimal Representation
@@ -65,12 +49,13 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart1() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
-
-		RepresentationModel<?> resource = mapper.readValue(specBasedJson, RepresentationModel.class);
-
-		assertThat(resource.getLinks()).hasSize(1);
-		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("https://example.org/friends/"));
+		$.assertDeserializesFile("spec-part1.json")
+				.into(RepresentationModel.class)
+				.matching(model -> {
+					assertThat(model.getLinks()).hasSize(1);
+					assertThat(model.getRequiredLink(IanaLinkRelations.SELF))
+							.isEqualTo(Link.of("https://example.org/friends/"));
+				});
 	}
 
 	/**
@@ -80,43 +65,54 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart2() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
+		$.assertDeserializesFile("spec-part2.json")
+				.intoCollectionEntityModel(Friend.class)
+				.matching(resources -> {
 
-		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
+					assertThat(resources.getLinks()).hasSize(2);
+					assertThat(resources.getRequiredLink(IanaLinkRelations.SELF))
+							.isEqualTo(Link.of("https://example.org/friends/"));
+					assertThat(resources.getRequiredLink("feed")).isEqualTo(Link.of("https://example.org/friends/rss", "feed"));
+					assertThat(resources.getContent()).hasSize(3);
 
-		assertThat(resources.getLinks()).hasSize(2);
-		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("https://example.org/friends/"));
-		assertThat(resources.getRequiredLink("feed")).isEqualTo(Link.of("https://example.org/friends/rss", "feed"));
-		assertThat(resources.getContent()).hasSize(3);
+					var friends = assertThat(resources.getContent());
 
-		List<EntityModel<Friend>> friends = new ArrayList<>(resources.getContent());
+					friends.element(0).satisfies(friend -> {
 
-		assertThat(friends.get(0).getContent().getEmail()).isEqualTo("jdoe@example.org");
-		assertThat(friends.get(0).getContent().getFullname()).isEqualTo("J. Doe");
-		assertThat(friends.get(0).getRequiredLink(IanaLinkRelations.SELF))
-				.isEqualTo(Link.of("https://example.org/friends/jdoe"));
-		assertThat(friends.get(0).getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/jdoe", "blog"));
-		assertThat(friends.get(0).getRequiredLink("avatar"))
-				.isEqualTo(Link.of("https://examples.org/images/jdoe", "avatar"));
+						assertThat(friend.getContent().getEmail()).isEqualTo("jdoe@example.org");
+						assertThat(friend.getContent().getFullname()).isEqualTo("J. Doe");
+						assertThat(friend.getRequiredLink(IanaLinkRelations.SELF))
+								.isEqualTo(Link.of("https://example.org/friends/jdoe"));
+						assertThat(friend.getRequiredLink("blog"))
+								.isEqualTo(Link.of("https://examples.org/blogs/jdoe", "blog"));
+						assertThat(friend.getRequiredLink("avatar"))
+								.isEqualTo(Link.of("https://examples.org/images/jdoe", "avatar"));
+					});
 
-		assertThat(friends.get(1).getContent().getEmail()).isEqualTo("msmith@example.org");
-		assertThat(friends.get(1).getContent().getFullname()).isEqualTo("M. Smith");
-		assertThat(friends.get(1).getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(Link.of("https://example.org/friends/msmith"));
-		assertThat(friends.get(1).getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/msmith", "blog"));
-		assertThat(friends.get(1).getRequiredLink("avatar"))
-				.isEqualTo(Link.of("https://examples.org/images/msmith", "avatar"));
+					friends.element(1).satisfies(friend -> {
 
-		assertThat(friends.get(2).getContent().getEmail()).isEqualTo("rwilliams@example.org");
-		assertThat(friends.get(2).getContent().getFullname()).isEqualTo("R. Williams");
-		assertThat(friends.get(2).getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(Link.of("https://example.org/friends/rwilliams"));
-		assertThat(friends.get(2).getRequiredLink("blog"))
-				.isEqualTo(Link.of("https://examples.org/blogs/rwilliams", "blog"));
-		assertThat(friends.get(2).getRequiredLink("avatar"))
-				.isEqualTo(Link.of("https://examples.org/images/rwilliams", "avatar"));
+						assertThat(friend.getContent().getEmail()).isEqualTo("msmith@example.org");
+						assertThat(friend.getContent().getFullname()).isEqualTo("M. Smith");
+						assertThat(friend.getRequiredLink(IanaLinkRelations.SELF.value()))
+								.isEqualTo(Link.of("https://example.org/friends/msmith"));
+						assertThat(friend.getRequiredLink("blog"))
+								.isEqualTo(Link.of("https://examples.org/blogs/msmith", "blog"));
+						assertThat(friend.getRequiredLink("avatar"))
+								.isEqualTo(Link.of("https://examples.org/images/msmith", "avatar"));
+					});
+
+					friends.element(2).satisfies(friend -> {
+
+						assertThat(friend.getContent().getEmail()).isEqualTo("rwilliams@example.org");
+						assertThat(friend.getContent().getFullname()).isEqualTo("R. Williams");
+						assertThat(friend.getRequiredLink(IanaLinkRelations.SELF.value()))
+								.isEqualTo(Link.of("https://example.org/friends/rwilliams"));
+						assertThat(friend.getRequiredLink("blog"))
+								.isEqualTo(Link.of("https://examples.org/blogs/rwilliams", "blog"));
+						assertThat(friend.getRequiredLink("avatar"))
+								.isEqualTo(Link.of("https://examples.org/images/rwilliams", "avatar"));
+					});
+				});
 	}
 
 	/**
@@ -126,23 +122,25 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart3() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part3.json", getClass()));
+		$.assertDeserializesFile("spec-part3.json")
+				.intoEntityModel(Friend.class)
+				.matching(resource -> {
 
-		EntityModel<Friend> resource = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class));
+					assertThat(resource.getLinks()).hasSize(6);
+					assertThat(resource.getRequiredLink(IanaLinkRelations.SELF))
+							.isEqualTo(Link.of("https://example.org/friends/jdoe"));
+					assertThat(resource.getRequiredLink("feed")).isEqualTo(Link.of("https://example.org/friends/rss", "feed"));
+					assertThat(resource.getRequiredLink("queries"))
+							.isEqualTo(Link.of("https://example.org/friends/?queries", "queries"));
+					assertThat(resource.getRequiredLink("template"))
+							.isEqualTo(Link.of("https://example.org/friends/?template", "template"));
+					assertThat(resource.getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/jdoe", "blog"));
+					assertThat(resource.getRequiredLink("avatar"))
+							.isEqualTo(Link.of("https://examples.org/images/jdoe", "avatar"));
 
-		assertThat(resource.getLinks()).hasSize(6);
-		assertThat(resource.getRequiredLink(IanaLinkRelations.SELF)).isEqualTo(Link.of("https://example.org/friends/jdoe"));
-		assertThat(resource.getRequiredLink("feed")).isEqualTo(Link.of("https://example.org/friends/rss", "feed"));
-		assertThat(resource.getRequiredLink("queries"))
-				.isEqualTo(Link.of("https://example.org/friends/?queries", "queries"));
-		assertThat(resource.getRequiredLink("template"))
-				.isEqualTo(Link.of("https://example.org/friends/?template", "template"));
-		assertThat(resource.getRequiredLink("blog")).isEqualTo(Link.of("https://examples.org/blogs/jdoe", "blog"));
-		assertThat(resource.getRequiredLink("avatar")).isEqualTo(Link.of("https://examples.org/images/jdoe", "avatar"));
-
-		assertThat(resource.getContent().getEmail()).isEqualTo("jdoe@example.org");
-		assertThat(resource.getContent().getFullname()).isEqualTo("J. Doe");
+					assertThat(resource.getContent().getEmail()).isEqualTo("jdoe@example.org");
+					assertThat(resource.getContent().getFullname()).isEqualTo("J. Doe");
+				});
 	}
 
 	/**
@@ -152,15 +150,14 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart4() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part4.json", getClass()));
+		$.assertDeserializesFile("spec-part4.json")
+				.intoCollectionEntityModel(Friend.class)
+				.matching(resources -> {
 
-		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
-
-		assertThat(resources.getContent()).hasSize(0);
-		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(Link.of("https://example.org/friends/"));
+					assertThat(resources.getContent()).hasSize(0);
+					assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
+							.isEqualTo(Link.of("https://example.org/friends/"));
+				});
 	}
 
 	/**
@@ -170,15 +167,14 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart5() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part5.json", getClass()));
+		$.assertDeserializesFile("spec-part5.json")
+				.intoCollectionEntityModel(Friend.class)
+				.matching(model -> {
 
-		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
-
-		assertThat(resources.getContent()).hasSize(0);
-		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(Link.of("https://example.org/friends/"));
+					assertThat(model.getContent()).hasSize(0);
+					assertThat(model.getRequiredLink(IanaLinkRelations.SELF.value()))
+							.isEqualTo(Link.of("https://example.org/friends/"));
+				});
 	}
 
 	/**
@@ -188,15 +184,14 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart6() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part6.json", getClass()));
+		$.assertDeserializesFile("spec-part6.json")
+				.intoCollectionEntityModel(Friend.class)
+				.matching(model -> {
 
-		CollectionModel<EntityModel<Friend>> resources = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(CollectionModel.class,
-						mapper.getTypeFactory().constructParametricType(EntityModel.class, Friend.class)));
-
-		assertThat(resources.getContent()).hasSize(0);
-		assertThat(resources.getRequiredLink(IanaLinkRelations.SELF.value()))
-				.isEqualTo(Link.of("https://example.org/friends/"));
+					assertThat(model.getContent()).hasSize(0);
+					assertThat(model.getRequiredLink(IanaLinkRelations.SELF.value()))
+							.isEqualTo(Link.of("https://example.org/friends/"));
+				});
 	}
 
 	/**
@@ -206,13 +201,13 @@ class CollectionJsonSpecTest {
 	@Test
 	void specPart7() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
+		$.assertDeserializesFile("spec-part7-adjusted.json")
+				.intoEntityModel(Employee.class)
+				.matching(model -> {
 
-		EntityModel<Employee> resource = mapper.readValue(specBasedJson,
-				mapper.getTypeFactory().constructParametricType(EntityModel.class, Employee.class));
-
-		assertThat(resource.getContent()).isEqualTo(new Employee("W. Chandry", "developer"));
-		assertThat(resource.getLinks()).isEmpty();
+					assertThat(model.getContent()).isEqualTo(new Employee("W. Chandry", "developer"));
+					assertThat(model.getLinks()).isEmpty();
+				});
 	}
 
 	@Data

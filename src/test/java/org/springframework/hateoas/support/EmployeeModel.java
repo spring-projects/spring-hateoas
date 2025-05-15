@@ -31,11 +31,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Getter(onMethod = @__(@JsonProperty))
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
-public class EmployeeResource extends RepresentationModel<EmployeeResource> {
+public class EmployeeModel extends RepresentationModel<EmployeeModel> {
 
 	private String name;
 
-	public EmployeeResource(EmployeeResource employeeResource) {
+	public EmployeeModel(EmployeeModel employeeResource) {
 
 		this.name = employeeResource.getName();
 		add(employeeResource.getLinks());

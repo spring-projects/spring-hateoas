@@ -15,6 +15,14 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.core.Version;
+import tools.jackson.databind.annotation.JsonAppend;
+import tools.jackson.databind.annotation.JsonAppend.Prop;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.ToStringSerializer;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -24,13 +32,6 @@ import org.springframework.hateoas.server.mvc.JacksonSerializers.MediaTypeDeseri
 import org.springframework.http.MediaType;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * Serialize / deserialize all the parts of HAL-FORMS documents using Jackson.
@@ -39,11 +40,11 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
  * @author Greg Turnquist
  * @author Oliver Gierke
  */
-public class Jackson2HalFormsModule extends SimpleModule {
+public class HalFormsJacksonModule extends SimpleModule {
 
 	private static final long serialVersionUID = -4496351128468451196L;
 
-	public Jackson2HalFormsModule() {
+	public HalFormsJacksonModule() {
 
 		super("hal-forms-module", new Version(1, 0, 0, null, "org.springframework.hateoas", "spring-hateoas"));
 

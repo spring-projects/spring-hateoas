@@ -1,24 +1,4 @@
 {
-  "_embedded" : {
-    "author" : {
-      "name" : "Alan Watts",
-      "born" : "January 6, 1915",
-      "died" : "November 16, 1973",
-      "_links" : {
-        "self" : {
-          "href" : "/people/alan-watts"
-        }
-      }
-    },
-    "illustrator" : {
-      "name" : "John Smith",
-      "_links" : {
-        "self" : {
-          "href" : "/people/john-smith"
-        }
-      }
-    }
-  },
   "_links" : {
     "self" : {
       "href" : "/books/the-way-of-zen"
@@ -28,6 +8,26 @@
     },
     "illustrator" : {
       "href" : "/people/john-smith"
+    }
+  },
+  "_embedded" : {
+    "author" : {
+      "_links" : {
+        "self" : {
+          "href" : "/people/alan-watts"
+        }
+      },
+      "name" : "Alan Watts",
+      "born" : "January 6, 1915",
+      "died" : "November 16, 1973"
+    },
+    "illustrator" : {
+      "_links" : {
+        "self" : {
+          "href" : "/people/john-smith"
+        }
+      },
+      "name" : "John Smith"
     }
   }
 }

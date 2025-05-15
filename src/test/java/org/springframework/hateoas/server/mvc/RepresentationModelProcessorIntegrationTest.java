@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,9 +52,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
@@ -219,11 +218,11 @@ public class RepresentationModelProcessorIntegrationTest {
 		}
 
 		@Bean
-		ObjectMapper testMapper() {
+		JsonMapper testMapper() {
 
-			ObjectMapper objectMapper = new ObjectMapper();
-			objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-			return objectMapper;
+			return JsonMapper.builder()
+					.enable(SerializationFeature.INDENT_OUTPUT)
+					.build();
 		}
 	}
 }

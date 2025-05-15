@@ -15,38 +15,24 @@
  */
 package org.springframework.hateoas.mediatype.alps;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mediatype.alps.Alps.*;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Scanner;
+import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 
 /**
  * Unit tests for serialization of ALPS documents.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
 class JacksonSerializationTest {
 
-	ObjectMapper mapper;
-
-	@BeforeEach
-	void setUp() {
-
-		mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-	}
+	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	/**
 	 * @see #141
@@ -54,9 +40,9 @@ class JacksonSerializationTest {
 	@Test
 	void writesSampleDocument() throws Exception {
 
-		Alps alps = alps().//
+		var alps = alps().//
 				doc(doc().href("https://example.org/samples/full/doc.html").build()). //
-				descriptor(Arrays.asList(//
+				descriptor(List.of(//
 						descriptor().id("search").type(Type.SAFE).//
 								doc(new Doc("A search form with two inputs.", Format.TEXT)).//
 								descriptor(Arrays.asList( //
@@ -69,25 +55,6 @@ class JacksonSerializationTest {
 								).build())//
 				).build();
 
-		assertThat(mapper.writeValueAsString(alps)).isEqualTo(read(new ClassPathResource("reference.json", getClass())));
-	}
-
-	private static String read(Resource resource) throws IOException {
-
-		try (Scanner scanner = new Scanner(resource.getInputStream())) {
-
-			StringBuilder builder = new StringBuilder();
-
-			while (scanner.hasNextLine()) {
-
-				builder.append(scanner.nextLine());
-
-				if (scanner.hasNextLine()) {
-					builder.append(System.getProperty("line.separator"));
-				}
-			}
-
-			return builder.toString();
-		}
+		$.assertSerializes(alps).intoContentOf("reference.json");
 	}
 }

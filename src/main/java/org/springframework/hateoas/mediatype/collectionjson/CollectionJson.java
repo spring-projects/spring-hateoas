@@ -38,13 +38,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 final class CollectionJson<T> {
 
 	private final String version;
-	private @Nullable final String href;
+	private final @Nullable String href;
 
-	private @JsonInclude(Include.NON_EMPTY) final Links links;
-	private @JsonInclude(Include.NON_EMPTY) final List<CollectionJsonItem<T>> items;
-	private @JsonInclude(Include.NON_EMPTY) final List<CollectionJsonQuery> queries;
-	private @JsonInclude(Include.NON_NULL) @Nullable final CollectionJsonTemplate template;
-	private @JsonInclude(Include.NON_NULL) @Nullable final CollectionJsonError error;
+	private final @JsonInclude(Include.NON_EMPTY) Links links;
+	private final @JsonInclude(Include.NON_EMPTY) List<CollectionJsonItem<T>> items;
+	private final @JsonInclude(Include.NON_EMPTY) List<CollectionJsonQuery> queries;
+	private final @JsonInclude(Include.NON_NULL) @Nullable CollectionJsonTemplate template;
+	private final @JsonInclude(Include.NON_NULL) @Nullable CollectionJsonError error;
 
 	@JsonCreator
 	CollectionJson(@JsonProperty("version") String version, //
@@ -94,7 +94,7 @@ final class CollectionJson<T> {
 
 	/**
 	 * Create a new {@link CollectionJson} by copying attributes and replacing the {@link Link}s .
-	 * 
+	 *
 	 * @param links
 	 * @return
 	 */
@@ -192,7 +192,7 @@ final class CollectionJson<T> {
 
 	/**
 	 * Check if there are any {@literal items}.
-	 * 
+	 *
 	 * @return
 	 */
 	boolean hasItems() {
@@ -240,10 +240,12 @@ final class CollectionJson<T> {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		CollectionJson<?> that = (CollectionJson<?>) o;
 		return Objects.equals(this.version, that.version) && Objects.equals(this.href, that.href)
 				&& Objects.equals(this.links, that.links) && Objects.equals(this.items, that.items)

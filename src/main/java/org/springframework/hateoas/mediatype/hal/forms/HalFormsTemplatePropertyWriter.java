@@ -15,25 +15,23 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.AnnotatedClass;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.ser.VirtualBeanPropertyWriter;
+import tools.jackson.databind.util.Annotations;
+
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
-import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter;
-import com.fasterxml.jackson.databind.util.Annotations;
 
 /**
  * @author Oliver Drotbohm
  */
 @SuppressWarnings("null")
 class HalFormsTemplatePropertyWriter extends VirtualBeanPropertyWriter {
-
-	private static final long serialVersionUID = 6271264033606657428L;
 
 	private final HalFormsTemplateBuilder builder;
 
@@ -64,10 +62,10 @@ class HalFormsTemplatePropertyWriter extends VirtualBeanPropertyWriter {
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter#value(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider)
+	 * @see com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter#value(java.lang.Object, com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializationContext)
 	 */
 	@Override
-	protected Object value(Object bean, JsonGenerator gen, SerializerProvider prov) throws Exception {
+	protected Object value(Object bean, JsonGenerator gen, SerializationContext prov) throws Exception {
 
 		RepresentationModel<?> model = (RepresentationModel<?>) bean;
 

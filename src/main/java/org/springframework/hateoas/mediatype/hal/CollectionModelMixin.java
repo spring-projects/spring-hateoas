@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+
 import java.util.Collection;
 
 import org.springframework.hateoas.CollectionModel;
@@ -23,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Custom mixin to to render collection content as {@literal _embedded}.
@@ -39,7 +40,7 @@ public abstract class CollectionModelMixin<T> extends CollectionModel<T> {
 	@Override
 	@JsonProperty("_embedded")
 	@JsonInclude(Include.NON_EMPTY)
-	@JsonSerialize(using = Jackson2HalModule.HalResourcesSerializer.class)
-	@JsonDeserialize(using = Jackson2HalModule.HalResourcesDeserializer.class)
+	@JsonSerialize(using = HalJacksonModule.HalResourcesSerializer.class)
+	@JsonDeserialize(using = HalJacksonModule.HalResourcesDeserializer.class)
 	public abstract Collection<T> getContent();
 }

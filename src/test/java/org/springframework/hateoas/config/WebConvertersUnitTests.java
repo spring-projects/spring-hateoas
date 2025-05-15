@@ -17,11 +17,11 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link WebConverters}.
@@ -33,7 +33,7 @@ class WebConvertersUnitTests {
 	@Test // #1657
 	void augmentsConvertersWithoutHypermediaInformationsRegistered() {
 
-		WebConverters converters = WebConverters.of(new ObjectMapper(), Collections.emptyList());
+		WebConverters converters = WebConverters.of(new JsonMapper(), Collections.emptyList());
 
 		assertThatNoException() //
 				.isThrownBy(() -> converters.augmentClient(Collections.emptyList()));

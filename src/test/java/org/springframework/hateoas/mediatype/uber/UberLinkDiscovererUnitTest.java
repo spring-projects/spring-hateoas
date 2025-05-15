@@ -16,16 +16,15 @@
 package org.springframework.hateoas.mediatype.uber;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
-import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 
 /**
  * Unit tests for {@link HalLinkDiscoverer}.
@@ -35,14 +34,16 @@ import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 class UberLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer = new UberLinkDiscoverer();
+	ContextualMapper $ = MappingTestUtils.createMapper();
 	String sample;
 
 	@BeforeEach
 	void setUp() throws IOException {
 
 		this.discoverer = new UberLinkDiscoverer();
-		this.sample = read(new ClassPathResource("link-discovery.json", getClass()));
+		this.sample = $.readFileContent("link-discovery.json");
 	}
+
 	/**
 	 * @see #314
 	 * @see #784

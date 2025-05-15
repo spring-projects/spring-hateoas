@@ -18,7 +18,6 @@ package org.springframework.hateoas.server.reactive;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Data;
-
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 

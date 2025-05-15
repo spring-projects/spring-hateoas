@@ -15,14 +15,14 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Configuration for Spring TEST-specific things
@@ -36,8 +36,8 @@ class WebTestHateoasConfiguration {
 
 	@Bean
 	@Lazy
-	HypermediaWebTestClientConfigurer webTestClientConfigurer(ObjectProvider<ObjectMapper> mapper,
+	HypermediaWebTestClientConfigurer webTestClientConfigurer(ObjectProvider<JsonMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
-		return new HypermediaWebTestClientConfigurer(mapper.getIfAvailable(ObjectMapper::new), hypermediaTypes);
+		return new HypermediaWebTestClientConfigurer(mapper.getIfAvailable(JsonMapper::new), hypermediaTypes);
 	}
 }
