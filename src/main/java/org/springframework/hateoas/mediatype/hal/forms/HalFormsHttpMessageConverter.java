@@ -15,20 +15,21 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
+import org.springframework.hateoas.server.mvc.TypeConstrainedJacksonJsonHttpMessageConverter;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A {@link TypeConstrainedMappingJackson2HttpMessageConverter} that will inspect the returned
@@ -38,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Oliver Drotbohm
  * @since 2.4
  */
-public class HalFormsHttpMessageConverter extends TypeConstrainedMappingJackson2HttpMessageConverter {
+public class HalFormsHttpMessageConverter extends TypeConstrainedJacksonJsonHttpMessageConverter {
 
 	private final HalFormsTemplateBuilder builder;
 
@@ -60,14 +61,15 @@ public class HalFormsHttpMessageConverter extends TypeConstrainedMappingJackson2
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter#writeInternal(java.lang.Object, java.lang.reflect.Type, org.springframework.http.HttpOutputMessage)
+	 * @see org.springframework.http.converter.AbstractJacksonHttpMessageConverter#writeInternal(java.lang.Object, org.springframework.core.ResolvableType, org.springframework.http.HttpOutputMessage, java.util.Map)
 	 */
 	@Override
-	protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object object, ResolvableType type, HttpOutputMessage outputMessage,
+			@Nullable Map<String, Object> hints)
 			throws IOException, HttpMessageNotWritableException {
 
 		if (!(object instanceof RepresentationModel model)) {
-			super.writeInternal(object, type, outputMessage);
+			super.writeInternal(object, type, outputMessage, hints);
 			return;
 		}
 
@@ -79,6 +81,6 @@ public class HalFormsHttpMessageConverter extends TypeConstrainedMappingJackson2
 			headers.setContentType(MediaTypes.HAL_JSON);
 		}
 
-		super.writeInternal(object, type, outputMessage);
+		super.writeInternal(object, type, outputMessage, hints);
 	}
 }

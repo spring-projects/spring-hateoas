@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
@@ -44,6 +45,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Oliver Drotbohm
  */
 @JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder({ "type", "title", "detail", "instance" })
 @NullUnmarked
 public class Problem {
 
@@ -56,11 +58,13 @@ public class Problem {
 	private final @Nullable URI instance;
 
 	@JsonCreator
-	public Problem(@JsonProperty("type") URI type, @JsonProperty("title") String title,
-			@JsonProperty("status") int status, @JsonProperty("detail") String detail,
+	public Problem(@JsonProperty("type") URI type,
+			@JsonProperty("title") String title,
+			@JsonProperty("status") Integer status,
+			@JsonProperty("detail") String detail,
 			@JsonProperty("instance") URI instance) {
 
-		this(type, title, HttpStatus.resolve(status), detail, instance);
+		this(type, title, status == null ? null : HttpStatus.resolve(status), detail, instance);
 	}
 
 	private Problem(URI type, String title, HttpStatus status, String detail, URI instance) {
@@ -73,7 +77,7 @@ public class Problem {
 	}
 
 	protected Problem() {
-		this(null, null, null, null, null);
+		this(null, null, (HttpStatus) null, null, null);
 	}
 
 	/**
@@ -271,6 +275,19 @@ public class Problem {
 
 		private T extendedProperties;
 
+		@JsonCreator
+		ExtendedProblem(@JsonProperty @Nullable URI type,
+				@JsonProperty @Nullable String title,
+				@JsonProperty @Nullable Integer status,
+				@JsonProperty @Nullable String detail,
+				@JsonProperty @Nullable URI instance,
+				@JsonProperty @Nullable T properties) {
+
+			super(type, title, status, detail, instance);
+
+			this.extendedProperties = properties;
+		}
+
 		ExtendedProblem(@Nullable URI type, @Nullable String title, @Nullable HttpStatus status, @Nullable String detail,
 				@Nullable URI instance, @Nullable T properties) {
 
@@ -281,7 +298,7 @@ public class Problem {
 
 		private ExtendedProblem() {
 
-			super(null, null, null, null, null);
+			super(null, null, (HttpStatus) null, null, null);
 
 			this.extendedProperties = null;
 		}
@@ -413,6 +430,5 @@ public class Problem {
 		public String toString() {
 			return "Problem.ExtendedProblem(extendedProperties=" + this.extendedProperties + ")";
 		}
-
 	}
 }

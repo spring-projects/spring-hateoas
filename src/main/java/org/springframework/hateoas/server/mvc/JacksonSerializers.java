@@ -15,13 +15,11 @@
  */
 package org.springframework.hateoas.server.mvc;
 
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * Simple Jackson serializers and deserializers.
@@ -31,14 +29,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 public class JacksonSerializers {
 
 	/**
-	 * Custom {@link JsonDeserializer} for Spring's {@link MediaType} using the {@link MediaType#parseMediaType(String)}
+	 * Custom {@link ValueDeserializer} for Spring's {@link MediaType} using the {@link MediaType#parseMediaType(String)}
 	 * method.
 	 *
 	 * @author Oliver Gierke
 	 */
 	public static class MediaTypeDeserializer extends StdDeserializer<MediaType> {
-
-		private static final long serialVersionUID = 391537719262033410L;
 
 		public MediaTypeDeserializer() {
 			super(MediaType.class);
@@ -46,12 +42,11 @@ public class JacksonSerializers {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see tools.jackson.databind.ValueDeserializer#deserialize(tools.jackson.core.JsonParser, tools.jackson.databind.DeserializationContext)
 		 */
 		@Override
-		@SuppressWarnings("null")
-		public MediaType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-			return MediaType.parseMediaType(p.getText());
+		public MediaType deserialize(JsonParser p, DeserializationContext ctxt) {
+			return MediaType.parseMediaType(p.getString());
 		}
 	}
 }

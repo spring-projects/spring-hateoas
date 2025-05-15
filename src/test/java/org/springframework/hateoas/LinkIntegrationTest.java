@@ -18,22 +18,25 @@ package org.springframework.hateoas;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 
 /**
  * Integration tests for {@link Link} marshaling.
  *
  * @author Oliver Gierke
  */
-class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class LinkIntegrationTest {
 
 	private static final String REFERENCE = "{\"rel\":\"something\",\"href\":\"location\"}";
+
+	ContextualMapper contextual = MappingTestUtils.createMapper(getClass());
 
 	/**
 	 * @see #14
 	 */
 	@Test
 	void writesLinkCorrectly() throws Exception {
-		assertThat(write(Link.of("location", "something"))).isEqualTo(REFERENCE);
+		assertThat(contextual.writeObject(Link.of("location", "something"))).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -42,7 +45,8 @@ class LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
 	@Test
 	void readsLinkCorrectly() throws Exception {
 
-		Link result = read(REFERENCE, Link.class);
+		var result = contextual.readObject(REFERENCE, Link.class);
+
 		assertThat(result.getHref()).isEqualTo("location");
 		assertThat(result.getRel()).isEqualTo(LinkRelation.of("something"));
 		assertThat(result.getAffordances()).hasSize(0);

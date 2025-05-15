@@ -18,6 +18,8 @@ package org.springframework.hateoas.mediatype.alps;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.hateoas.mediatype.alps.Alps.*;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -26,14 +28,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.hateoas.MappingTestUtils;
 
 /**
  * Unit tests for serialization of ALPS documents.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
@@ -43,9 +42,7 @@ class JacksonSerializationTest {
 
 	@BeforeEach
 	void setUp() {
-
-		mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		this.mapper = MappingTestUtils.defaultObjectMapper();
 	}
 
 	/**

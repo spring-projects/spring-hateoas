@@ -45,9 +45,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.event.annotation.AfterTestClass;
-import org.springframework.test.context.event.annotation.BeforeTestClass;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -282,13 +280,13 @@ class TraversonTest {
 
 		assertThat(converters).hasSize(2);
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
-		assertThat(converters.get(1)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
+		assertThat(converters.get(1)).isInstanceOf(JacksonJsonHttpMessageConverter.class);
 
 		converters = Traverson.getDefaultMessageConverters(MediaTypes.HAL_JSON);
 
 		assertThat(converters).hasSize(2);
 		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
-		assertThat(converters.get(1)).isInstanceOf(MappingJackson2HttpMessageConverter.class);
+		assertThat(converters.get(1)).isInstanceOf(JacksonJsonHttpMessageConverter.class);
 	}
 
 	/**

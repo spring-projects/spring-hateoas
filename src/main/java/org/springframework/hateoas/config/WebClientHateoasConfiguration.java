@@ -15,6 +15,8 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.List;
 
 import org.jspecify.annotations.NonNull;
@@ -26,8 +28,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring WebFlux HATEOAS configuration.

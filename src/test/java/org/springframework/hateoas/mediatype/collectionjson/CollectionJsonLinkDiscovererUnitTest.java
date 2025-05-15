@@ -22,10 +22,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.client.LinkDiscoverer;
-import org.springframework.hateoas.support.MappingUtils;
 
 /**
  * Unit tests for {@link CollectionJsonLinkDiscoverer}.
@@ -36,6 +36,7 @@ import org.springframework.hateoas.support.MappingUtils;
 class CollectionJsonLinkDiscovererUnitTest {
 
 	LinkDiscoverer discoverer;
+	ContextualMapper contextual = MappingTestUtils.createMapper(getClass());
 
 	@BeforeEach
 	void setUp() {
@@ -45,7 +46,7 @@ class CollectionJsonLinkDiscovererUnitTest {
 	@Test
 	void spec1Links() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part1.json", getClass()));
+		String specBasedJson = contextual.readFileContent("spec-part1.json");
 
 		Optional<Link> link = this.discoverer.findLinkWithRel("self", specBasedJson);
 
@@ -57,7 +58,7 @@ class CollectionJsonLinkDiscovererUnitTest {
 	@Test
 	void spec2Links() throws IOException {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part2.json", getClass()));
+		String specBasedJson = contextual.readFileContent("spec-part2.json");
 
 		assertThat(this.discoverer.findLinkWithRel("self", specBasedJson)) //
 				.map(Link::getHref) //

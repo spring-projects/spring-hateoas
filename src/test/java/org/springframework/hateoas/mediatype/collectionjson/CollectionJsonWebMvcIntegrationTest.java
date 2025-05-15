@@ -34,16 +34,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.Employee;
-import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -151,7 +150,8 @@ class CollectionJsonWebMvcIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
+		var contextual = MappingTestUtils.createMapper(getClass());
+		var specBasedJson = contextual.readFileContent("spec-part7-adjusted.json");
 
 		this.mockMvc.perform(post("/employees") //
 				.content(specBasedJson) //

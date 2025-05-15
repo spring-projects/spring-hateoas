@@ -24,6 +24,8 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.With;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,22 +35,14 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.mediatype.problem.Problem.ExtendedProblem;
-import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 /**
@@ -60,31 +54,29 @@ import com.jayway.jsonpath.JsonPath;
 class JacksonSerializationTest {
 
 	ObjectMapper mapper;
+	ContextualMapper contextual;
 
 	@BeforeEach
 	void setUp() {
 
-		this.mapper = MappingTestUtils.defaultObjectMapper();
-		this.mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		this.mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		this.mapper = MappingTestUtils.defaultObjectMapper(builder -> builder.enable(SerializationFeature.INDENT_OUTPUT));
+		this.contextual = MappingTestUtils.createMapper(getClass());
 	}
 
 	@Test // #786
 	void httpStatusProblemSerialize() throws IOException {
 
-		Problem problem = Problem.statusOnly(HttpStatus.NOT_FOUND);
+		var problem = Problem.statusOnly(HttpStatus.NOT_FOUND);
+		var actual = this.mapper.writeValueAsString(problem);
 
-		String actual = this.mapper.writeValueAsString(problem);
-
-		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("http-status-problem.json", getClass())));
+		assertThat(actual).isEqualTo(contextual.readFileContent("http-status-problem.json"));
 	}
 
 	@Test // #786
 	void httpStatusProblemDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("http-status-problem.json", getClass()));
-
-		Problem actual = this.mapper.readValue(expected, Problem.class);
+		var expected = contextual.readFileContent("http-status-problem.json");
+		var actual = this.mapper.readValue(expected, Problem.class);
 
 		assertThat(actual.getType()).isEqualTo(URI.create("about:blank"));
 		assertThat(actual.getTitle()).isEqualTo("Not Found");
@@ -96,18 +88,17 @@ class JacksonSerializationTest {
 	@Test // #786
 	void typeOnlySerialize() throws IOException {
 
-		Problem problem = new Problem().withType(URI.create("http://example.com/problem-details"));
+		var problem = new Problem().withType(URI.create("http://example.com/problem-details"));
+		var actual = this.mapper.writeValueAsString(problem);
 
-		String actual = this.mapper.writeValueAsString(problem);
-		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("type-only.json", getClass())));
+		assertThat(actual).isEqualTo(contextual.readFileContent("type-only.json"));
 	}
 
 	@Test // #786
 	void typeOnlyDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("type-only.json", getClass()));
-
-		Problem actual = this.mapper.readValue(expected, Problem.class);
+		var expected = contextual.readFileContent("type-only.json");
+		var actual = this.mapper.readValue(expected, Problem.class);
 
 		assertThat(actual.getType()).isEqualTo(URI.create("http://example.com/problem-details"));
 		assertThat(actual.getTitle()).isNull();
@@ -119,18 +110,17 @@ class JacksonSerializationTest {
 	@Test // #786
 	void titleOnlySerialize() throws IOException {
 
-		Problem problem = new Problem().withTitle("test title");
+		var problem = new Problem().withTitle("test title");
+		var actual = this.mapper.writeValueAsString(problem);
 
-		String actual = this.mapper.writeValueAsString(problem);
-		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("title-only.json", getClass())));
+		assertThat(actual).isEqualTo(contextual.readFileContent("title-only.json"));
 	}
 
 	@Test // #786
 	void titleOnlyDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("title-only.json", getClass()));
-
-		Problem actual = this.mapper.readValue(expected, Problem.class);
+		var expected = contextual.readFileContent("title-only.json");
+		var actual = this.mapper.readValue(expected, Problem.class);
 
 		assertThat(actual.getType()).isNull();
 		assertThat(actual.getTitle()).isEqualTo("test title");
@@ -142,18 +132,17 @@ class JacksonSerializationTest {
 	@Test // #786
 	void statusOnlySerialize() throws IOException {
 
-		Problem problem = new Problem().withStatus(HttpStatus.BAD_GATEWAY);
+		var problem = new Problem().withStatus(HttpStatus.BAD_GATEWAY);
+		var actual = this.mapper.writeValueAsString(problem);
 
-		String actual = this.mapper.writeValueAsString(problem);
-		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("status-only.json", getClass())));
+		assertThat(actual).isEqualTo(contextual.readFileContent("status-only.json"));
 	}
 
 	@Test // #786
 	void statusOnlyDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("status-only.json", getClass()));
-
-		Problem actual = this.mapper.readValue(expected, Problem.class);
+		var expected = contextual.readFileContent("status-only.json");
+		var actual = this.mapper.readValue(expected, Problem.class);
 
 		assertThat(actual.getType()).isNull();
 		assertThat(actual.getTitle()).isNull();
@@ -165,18 +154,17 @@ class JacksonSerializationTest {
 	@Test // #786
 	void detailOnlySerialize() throws IOException {
 
-		Problem problem = Problem.create().withDetail("test detail");
+		var problem = Problem.create().withDetail("test detail");
+		var reference = contextual.readFileContent("detail-only.json");
 
-		assertThat(this.mapper.writeValueAsString(problem)) //
-				.isEqualTo(MappingUtils.read(new ClassPathResource("detail-only.json", getClass())));
+		assertThat(this.mapper.writeValueAsString(problem)).isEqualTo(reference);
 	}
 
 	@Test // #786
 	void detailOnlyDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("detail-only.json", getClass()));
-
-		Problem actual = this.mapper.readValue(expected, Problem.class);
+		var expected = contextual.readFileContent("detail-only.json");
+		var actual = this.mapper.readValue(expected, Problem.class);
 
 		assertThat(actual.getType()).isNull();
 		assertThat(actual.getTitle()).isNull();
@@ -188,19 +176,17 @@ class JacksonSerializationTest {
 	@Test // #786
 	void instanceOnlySerialize() throws IOException {
 
-		Problem problem = Problem.create() //
+		var problem = Problem.create() //
 				.withInstance(URI.create("http://example.com/employees/1471"));
 
-		assertThat(mapper.writeValueAsString(problem)) //
-				.isEqualTo(MappingUtils.read(new ClassPathResource("instance-only.json", getClass())));
+		assertThat(mapper.writeValueAsString(problem)).isEqualTo(contextual.readFileContent("instance-only.json"));
 	}
 
 	@Test // #786
 	void instanceOnlyDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("instance-only.json", getClass()));
-
-		Problem actual = mapper.readValue(expected, Problem.class);
+		var expected = contextual.readFileContent("instance-only.json");
+		var actual = mapper.readValue(expected, Problem.class);
 
 		assertThat(actual.getType()).isNull();
 		assertThat(actual.getTitle()).isNull();
@@ -212,28 +198,28 @@ class JacksonSerializationTest {
 	@Test // #786
 	void extensionSerialize() throws IOException {
 
-		AccountProblemDetails details = AccountProblemDetails.empty() //
+		var details = AccountProblemDetails.empty() //
 				.withBalance(30) //
 				.withAccounts("/account/12345", "/account/67890");
 
-		ExtendedProblem<AccountProblemDetails> problem = Problem.create(details)
+		var problem = Problem.create(details)
 				.withType(URI.create("https://example.com/probs/out-of-credit")) //
 				.withTitle("You do not have enough credit.") //
 				.withStatus(HttpStatus.BAD_REQUEST) //
 				.withDetail("Your current balance is 30, but that costs 50.") //
 				.withInstance(URI.create("/account/12345/msgs/abc"));
 
-		String actual = this.mapper.writeValueAsString(problem);
+		var actual = this.mapper.writeValueAsString(problem);
 
-		assertThat(actual).isEqualTo(MappingUtils.read(new ClassPathResource("extension.json", getClass())));
+		assertThat(actual).isEqualTo(contextual.readFileContent("extension.json"));
 	}
 
 	@Test // #786
 	void extensionDeserialize() throws IOException {
 
-		String expected = MappingUtils.read(new ClassPathResource("extension.json", getClass()));
+		var expected = contextual.readFileContent("extension.json");
 
-		JavaType type = this.mapper.getTypeFactory().constructParametricType(ExtendedProblem.class,
+		var type = this.mapper.getTypeFactory().constructParametricType(ExtendedProblem.class,
 				AccountProblemDetails.class);
 
 		ExtendedProblem<AccountProblemDetails> actual = this.mapper.readValue(expected, type);
@@ -250,17 +236,16 @@ class JacksonSerializationTest {
 	@Test // #786
 	void reference1Deserialize() throws IOException {
 
-		JavaType type = mapper.getTypeFactory().constructParametricType(ExtendedProblem.class, AccountProblemDetails.class);
+		var type = mapper.getTypeFactory().constructParametricType(ExtendedProblem.class, AccountProblemDetails.class);
 
-		ExtendedProblem<AccountProblemDetails> accountProblem = this.mapper
-				.readValue(MappingUtils.read(new ClassPathResource("reference-1.json", getClass())), type);
+		ExtendedProblem<AccountProblemDetails> accountProblem = contextual.readFile("reference-1.json", type);
 
 		assertThat(accountProblem.getType()).isEqualTo(URI.create("https://example.com/probs/out-of-credit"));
 		assertThat(accountProblem.getTitle()).isEqualTo("You do not have enough credit.");
 		assertThat(accountProblem.getDetail()).isEqualTo("Your current balance is 30, but that costs 50.");
 		assertThat(accountProblem.getInstance()).isEqualTo(URI.create("/account/12345/msgs/abc"));
 
-		AccountProblemDetails details = accountProblem.getProperties();
+		var details = accountProblem.getProperties();
 
 		assertThat(details.getBalance()).isEqualTo(30);
 		assertThat(details.getAccounts()).containsExactlyInAnyOrder("/account/12345", "/account/67890");
@@ -269,17 +254,17 @@ class JacksonSerializationTest {
 	@Test // #786
 	void reference2Deserialize() throws IOException {
 
-		JavaType type = mapper.getTypeFactory().constructParametricType(ExtendedProblem.class, InvalidParameters.class);
+		var type = mapper.getTypeFactory().constructParametricType(ExtendedProblem.class, InvalidParameters.class);
 
 		ExtendedProblem<InvalidParameters> invalidParameters = this.mapper
-				.readValue(MappingUtils.read(new ClassPathResource("reference-2.json", getClass())), type);
+				.readValue(contextual.readFileContent("reference-2.json"), type);
 
 		assertThat(invalidParameters.getType()).isEqualTo(URI.create("https://example.net/validation-error"));
 		assertThat(invalidParameters.getTitle()).isEqualTo("Your request parameters didn't validate.");
 		assertThat(invalidParameters.getDetail()).isNull();
 		assertThat(invalidParameters.getInstance()).isNull();
 
-		List<InvalidParameter> parameters = invalidParameters.getProperties().getInvalidParameters();
+		var parameters = invalidParameters.getProperties().getInvalidParameters();
 
 		assertThat(parameters).hasSize(2);
 		assertThat(parameters).containsExactly( //
@@ -289,15 +274,15 @@ class JacksonSerializationTest {
 	}
 
 	@Test // #786
-	public void addsPropertiesViaCallback() throws JsonProcessingException {
+	public void addsPropertiesViaCallback() {
 
-		ExtendedProblem<Map<String, Object>> problem = Problem.create() //
+		var problem = Problem.create() //
 				.withStatus(HttpStatus.BAD_GATEWAY) //
 				.withProperties(map -> {
 					map.put("key", "value");
 				});
 
-		DocumentContext parse = JsonPath.parse(mapper.writeValueAsString(problem));
+		var parse = JsonPath.parse(mapper.writeValueAsString(problem));
 
 		assertThat(parse.read("$.status", int.class)).isEqualTo(502);
 		assertThat(parse.read("$.key", String.class)).isEqualTo("value");
@@ -306,10 +291,10 @@ class JacksonSerializationTest {
 	@Test // #786
 	void deserializesIntoExtendedProblemWithMap() throws Exception {
 
-		TypeFactory factory = mapper.getTypeFactory();
+		var factory = mapper.getTypeFactory();
 
-		JavaType mapType = factory.constructParametricType(Map.class, String.class, Object.class);
-		JavaType problemType = factory.constructParametricType(ExtendedProblem.class, mapType);
+		var mapType = factory.constructParametricType(Map.class, String.class, Object.class);
+		var problemType = factory.constructParametricType(ExtendedProblem.class, mapType);
 
 		ExtendedProblem<Map<String, Object>> result = mapper
 				.readValue("{ \"balance\" : 30, \"accounts\" : [ \"/first\", \"/second\" ] }", problemType);

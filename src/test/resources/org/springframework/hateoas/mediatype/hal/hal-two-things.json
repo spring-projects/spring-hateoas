@@ -1,5 +1,4 @@
 {
-  "name" : "Greg L. Turnquist",
   "_links" : {
     "self" : {
       "href" : "http://localhost/author/1"
@@ -8,6 +7,7 @@
       "href" : "http://localhost/authors"
     }
   },
+  "name" : "Greg L. Turnquist",
   "_embedded" : {
     "product" : {
       "name" : "Alf alarm clock",

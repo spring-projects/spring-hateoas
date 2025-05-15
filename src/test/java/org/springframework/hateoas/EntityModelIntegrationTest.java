@@ -17,13 +17,14 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.SerializationFeature;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration tests for {@link EntityModel}.
@@ -31,21 +32,23 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author Oliver Gierke
  * @author Greg Turnquist
  */
-class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class EntityModelIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
+
+	ContextualMapper contextual = MappingTestUtils.createMapper(getClass());
 
 	@Test
 	void inlinesContent() throws Exception {
 
-		Person person = new Person();
+		var person = new Person();
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		EntityModel<Person> resource = EntityModel.of(person);
-		resource.add(Link.of("localhost"));
+		var resource = EntityModel.of(person)
+				.add(Link.of("localhost"));
 
-		assertThat(write(resource)).isEqualTo(REFERENCE);
+		assertThat(contextual.writeObject(resource)).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -54,7 +57,7 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	@Test
 	void readsResourceSupportCorrectly() throws Exception {
 
-		PersonModel result = read(REFERENCE, PersonModel.class);
+		var result = contextual.readObject(REFERENCE, PersonModel.class);
 
 		assertThat(result.getLinks()).hasSize(1);
 		assertThat(result.getLinks()).contains(Link.of("localhost"));
@@ -65,16 +68,21 @@ class EntityModelIntegrationTest extends AbstractJackson2MarshallingIntegrationT
 	@Test // #1686
 	void doesNotFailOnSerializingEmptyBean() {
 
-		ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
+		var mapper = MappingTestUtils.defaultObjectMapper();
 
 		// Fail if we're supposed to
-		assertThatExceptionOfType(JsonMappingException.class) //
-				.isThrownBy(() -> mapper.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+		assertThatExceptionOfType(DatabindException.class) //
+				.isThrownBy(() -> mapper
+						.rebuild()
+						.enable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+						.build()
 						.writeValueAsString(EntityModel.of(new Empty())));
 
 		// Ignore empty bean if we're supposed to
 		assertThatNoException() //
-				.isThrownBy(() -> mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.isThrownBy(() -> mapper.rebuild()
+						.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+						.build()
 						.writeValueAsString(EntityModel.of(new Empty())));
 	}
 

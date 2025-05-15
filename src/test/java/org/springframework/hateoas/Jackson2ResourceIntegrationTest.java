@@ -2,19 +2,23 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 /**
  * Integration tests for {@link EntityModel}.
- * 
+ *
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2ResourceIntegrationTest {
 
 	static final String REFERENCE = "{\"firstname\":\"Dave\",\"lastname\":\"Matthews\",\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
+
+	ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
 
 	/**
 	 * @see #27
@@ -23,14 +27,14 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void inlinesContent() throws Exception {
 
-		Person person = new Person();
+		var person = new Person();
 		person.firstname = "Dave";
 		person.lastname = "Matthews";
 
-		EntityModel<Person> resource = EntityModel.of(person);
-		resource.add(Link.of("localhost"));
+		var resource = EntityModel.of(person)
+				.add(Link.of("localhost"));
 
-		assertThat(write(resource)).isEqualTo(REFERENCE);
+		assertThat(mapper.writeValueAsString(resource)).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -39,7 +43,7 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 	@Test
 	void readsResourceSupportCorrectly() throws Exception {
 
-		PersonResource result = read(REFERENCE, PersonResource.class);
+		var result = mapper.readValue(REFERENCE, PersonResource.class);
 
 		assertThat(result.getLinks()).hasSize(1);
 		assertThat(result.getLinks()).contains(Link.of("localhost"));
@@ -49,9 +53,7 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 
 	static class PersonResource extends EntityModel<Person> {
 
-		public PersonResource() {
-
-		}
+		public PersonResource() {}
 	}
 
 	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -60,5 +62,4 @@ class Jackson2ResourceIntegrationTest extends AbstractJackson2MarshallingIntegra
 		String firstname;
 		String lastname;
 	}
-
 }

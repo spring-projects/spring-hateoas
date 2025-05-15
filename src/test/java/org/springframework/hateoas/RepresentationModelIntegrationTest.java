@@ -18,29 +18,32 @@ package org.springframework.hateoas;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 
 /**
  * Integration tests for {@link RepresentationModel}.
  *
  * @author Oliver Gierke
  */
-class RepresentationModelIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class RepresentationModelIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
+
+	ContextualMapper contextual = MappingTestUtils.createMapper(getClass());
 
 	@Test // #7
 	void doesNotRenderId() throws Exception {
 
-		RepresentationModel<?> model = new RepresentationModel<>();
-		model.add(Link.of("localhost"));
+		var model = new RepresentationModel<>()
+				.add(Link.of("localhost"));
 
-		assertThat(write(model)).isEqualTo(REFERENCE);
+		assertThat(contextual.writeObject(model)).isEqualTo(REFERENCE);
 	}
 
 	@Test // #14
 	void readResourceSupportCorrectly() throws Exception {
 
-		RepresentationModel<?> model = read(REFERENCE, RepresentationModel.class);
+		var model = contextual.readObject(REFERENCE, RepresentationModel.class);
 
 		assertThat(model.getLinks()).hasSize(1);
 		assertThat(model.getLinks()).contains(Link.of("localhost"));

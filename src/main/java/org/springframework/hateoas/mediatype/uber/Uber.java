@@ -39,11 +39,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 final class Uber {
 
 	private final String version;
-	private final List<UberData> data;
-	private final UberError error;
+	private final @Nullable List<UberData> data;
+	private final @Nullable UberError error;
 
 	@JsonCreator
-	Uber(@JsonProperty("version") String version, @JsonProperty("data") @Nullable List<UberData> data,
+	Uber(@JsonProperty("version") String version,
+			@JsonProperty("data") @Nullable List<UberData> data,
 			@JsonProperty("error") @Nullable UberError error) {
 
 		this.version = version;
@@ -107,11 +108,13 @@ final class Uber {
 		return this.version;
 	}
 
+	@Nullable
 	@JsonProperty
 	public List<UberData> getData() {
 		return this.data;
 	}
 
+	@Nullable
 	@JsonProperty
 	public UberError getError() {
 		return this.error;
@@ -123,11 +126,13 @@ final class Uber {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof Uber)) {
+
+		if (!(o instanceof Uber uber)) {
 			return false;
 		}
-		Uber uber = (Uber) o;
-		return Objects.equals(this.version, uber.version) && Objects.equals(this.data, uber.data)
+
+		return Objects.equals(this.version, uber.version)
+				&& Objects.equals(this.data, uber.data)
 				&& Objects.equals(this.error, uber.error);
 	}
 

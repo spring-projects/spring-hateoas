@@ -15,6 +15,11 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -29,9 +34,6 @@ import org.springframework.hateoas.mediatype.MediaTypeConfigurationFactory;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring configuration to set up HAL support.
@@ -77,20 +79,29 @@ public class HalMediaTypeConfiguration implements HypermediaMappingInformation {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureObjectMapper(com.fasterxml.jackson.databind.ObjectMapper)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureObjectMapper(tools.jackson.databind.ObjectMapper)
 	 */
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
+		return configureObjectMapper(mapper.rebuild()).build();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureObjectMapper(tools.jackson.databind.cfg.MapperBuilder)
+	 */
+	@Override
+	public MapperBuilder<ObjectMapper, ?> configureObjectMapper(MapperBuilder<ObjectMapper, ?> builder) {
 
 		HalConfiguration halConfiguration = configurationFactory.getConfiguration();
 
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
-				curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, halConfiguration, beanFactory));
+		var prepared = builder
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+				.enable(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS)
+				.addModule(new Jackson2HalModule())
+				.handlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider,
+						curieProvider.getIfAvailable(() -> CurieProvider.NONE), resolver, halConfiguration, beanFactory));
 
-		halConfiguration.customize(mapper);
-
-		return mapper;
+		return halConfiguration.customize(prepared);
 	}
 }

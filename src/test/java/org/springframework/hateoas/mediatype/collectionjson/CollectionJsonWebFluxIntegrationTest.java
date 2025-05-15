@@ -18,7 +18,6 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
 import static org.springframework.hateoas.support.JsonPathUtils.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -138,7 +137,8 @@ class CollectionJsonWebFluxIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String specBasedJson = read(new ClassPathResource("spec-part7-adjusted.json", getClass()));
+		var contextual = MappingTestUtils.createMapper(getClass());
+		var specBasedJson = contextual.readFileContent("spec-part7-adjusted.json");
 
 		this.testClient.post().uri("http://localhost/employees") //
 				.contentType(MediaTypes.COLLECTION_JSON) //

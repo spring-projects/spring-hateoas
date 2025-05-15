@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
+import tools.jackson.databind.SerializationFeature;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +38,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
@@ -78,7 +78,8 @@ class HalFormsObjectMapperCustomizerTest {
 		@Bean
 		HalFormsConfiguration halFormsConfiguration() {
 			return new HalFormsConfiguration()
-					.withObjectMapperCustomizer(objectMapper -> objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true));
+					.withObjectMapperBuilderCustomizer(
+							builder -> builder.configure(SerializationFeature.INDENT_OUTPUT, true));
 		}
 	}
 }

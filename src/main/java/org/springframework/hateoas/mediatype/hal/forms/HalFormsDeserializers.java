@@ -15,24 +15,21 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.std.ContainerDeserializerBase;
+import tools.jackson.databind.type.TypeFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Collection of components needed to deserialize a HAL-FORMS document.
@@ -41,10 +38,9 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
  */
 class HalFormsDeserializers {
 
-	static class HalFormsCollectionModelDeserializer extends ContainerDeserializerBase<List<Object>>
-			implements ContextualDeserializer {
+	private static final TypeFactory TYPE_FACTORY = TypeFactory.createDefaultInstance();
 
-		private static final long serialVersionUID = -7325599536381465624L;
+	static class HalFormsCollectionModelDeserializer extends ContainerDeserializerBase<List<Object>> {
 
 		private JavaType contentType;
 
@@ -55,26 +51,26 @@ class HalFormsDeserializers {
 		}
 
 		HalFormsCollectionModelDeserializer() {
-			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class));
+			this(TYPE_FACTORY.constructCollectionLikeType(List.class, Object.class));
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see tools.jackson.databind.ValueDeserializer#deserialize(tools.jackson.core.JsonParser, tools.jackson.databind.DeserializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+		public List<Object> deserialize(JsonParser jp, DeserializationContext ctxt) {
 
 			List<Object> result = new ArrayList<>();
-			JsonDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
+			ValueDeserializer<Object> deser = ctxt.findRootValueDeserializer(contentType);
 			Object object;
 
 			// links is an object, so we parse till we find its end.
 			while (!JsonToken.END_OBJECT.equals(jp.nextToken())) {
 
-				if (!JsonToken.FIELD_NAME.equals(jp.getCurrentToken())) {
-					throw new JsonParseException(jp, "Expected relation name");
+				if (!JsonToken.PROPERTY_NAME.equals(jp.currentToken())) {
+					throw new StreamReadException(jp, "Expected relation name");
 				}
 
 				if (JsonToken.START_ARRAY.equals(jp.nextToken())) {
@@ -93,7 +89,7 @@ class HalFormsDeserializers {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
 		public JavaType getContentType() {
@@ -102,22 +98,21 @@ class HalFormsDeserializers {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
 		@Nullable
-		public JsonDeserializer<Object> getContentDeserializer() {
+		public ValueDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.ContextualDeserializer#createContextual(com.fasterxml.jackson.databind.DeserializationContext, com.fasterxml.jackson.databind.BeanProperty)
+		 * @see tools.jackson.databind.ValueDeserializer#createContextual(tools.jackson.databind.DeserializationContext, tools.jackson.databind.BeanProperty)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
-				throws JsonMappingException {
+		public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
 
 			return new HalFormsCollectionModelDeserializer(
 					property == null ? ctxt.getContextualType() : property.getType().getContentType());
@@ -129,15 +124,13 @@ class HalFormsDeserializers {
 	 */
 	static class MediaTypesDeserializer extends ContainerDeserializerBase<List<MediaType>> {
 
-		private static final long serialVersionUID = -7218376603548438390L;
-
 		public MediaTypesDeserializer() {
-			super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, MediaType.class));
+			super(TYPE_FACTORY.constructCollectionLikeType(List.class, MediaType.class));
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentType()
 		 */
 		@Override
 		@Nullable
@@ -147,22 +140,22 @@ class HalFormsDeserializers {
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
+		 * @see tools.jackson.databind.deser.std.ContainerDeserializerBase#getContentDeserializer()
 		 */
 		@Override
 		@Nullable
-		public JsonDeserializer<Object> getContentDeserializer() {
+		public ValueDeserializer<Object> getContentDeserializer() {
 			return null;
 		}
 
 		/*
 		 * (non-Javadoc)
-		 * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+		 * @see tools.jackson.databind.ValueDeserializer#deserialize(tools.jackson.core.JsonParser, tools.jackson.databind.DeserializationContext)
 		 */
 		@Override
 		@SuppressWarnings("null")
-		public List<MediaType> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-			return MediaType.parseMediaTypes(p.getText());
+		public List<MediaType> deserialize(JsonParser p, DeserializationContext ctxt) {
+			return MediaType.parseMediaTypes(p.getString());
 		}
 	}
 }

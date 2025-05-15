@@ -17,6 +17,8 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,16 +27,18 @@ import org.junit.jupiter.api.Test;
  * @author Oliver Gierke
  * @author Jon Brisbin
  */
-class Jackson2LinkIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2LinkIntegrationTest {
 
 	private static final String REFERENCE = "{\"rel\":\"something\",\"href\":\"location\"}";
+
+	ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
 
 	/**
 	 * @see #27
 	 */
 	@Test
 	void writesLinkCorrectly() throws Exception {
-		assertThat(write(Link.of("location", "something"))).isEqualTo(REFERENCE);
+		assertThat(mapper.writeValueAsString(Link.of("location", "something"))).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -42,7 +46,9 @@ class Jackson2LinkIntegrationTest extends AbstractJackson2MarshallingIntegration
 	 */
 	@Test
 	void readsLinkCorrectly() throws Exception {
-		Link result = read(REFERENCE, Link.class);
+
+		var result = mapper.readValue(REFERENCE, Link.class);
+
 		assertThat(result.getHref()).isEqualTo("location");
 		assertThat(result.getRel()).isEqualTo(LinkRelation.of("something"));
 	}

@@ -206,7 +206,7 @@ public class RepresentationModel<T extends RepresentationModel<? extends T>> {
 	 *
 	 * @return
 	 */
-	@JsonProperty("links")
+	@JsonProperty
 	public Links getLinks() {
 		return Links.of(links);
 	}

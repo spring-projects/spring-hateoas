@@ -18,6 +18,9 @@ package org.springframework.hateoas.client;
 import static net.jadler.Jadler.*;
 import static org.hamcrest.Matchers.*;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -41,9 +44,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Helper class for integration tests.
  *
@@ -62,10 +62,12 @@ public class Server implements Closeable {
 
 		this.relProvider = new EvoInflectorLinkRelationProvider();
 
-		this.mapper = new ObjectMapper();
-		this.mapper.registerModule(new Jackson2HalModule());
-		this.mapper.setHandlerInstantiator(
-				new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
+		this.mapper = JsonMapper.builder()
+				.addModule(new Jackson2HalModule())
+				.handlerInstantiator(
+						new Jackson2HalModule.HalHandlerInstantiator(relProvider, CurieProvider.NONE,
+								MessageResolver.DEFAULTS_ONLY))
+				.build();
 
 		initJadler() //
 				.withDefaultResponseContentType(MediaTypes.HAL_JSON.toString()) //
@@ -217,15 +219,11 @@ public class Server implements Closeable {
 
 		path = path.startsWith(rootResource()) ? path.substring(rootResource().length()) : path;
 
-		try {
-			onRequest(). //
-					havingMethodEqualTo("GET"). //
-					havingPathEqualTo(path). //
-					respond().//
-					withBody(mapper.writeValueAsString(response));
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		onRequest(). //
+				havingMethodEqualTo("GET"). //
+				havingPathEqualTo(path). //
+				respond().//
+				withBody(mapper.writeValueAsString(response));
 	}
 
 	/*

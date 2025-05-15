@@ -19,6 +19,11 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
+import tools.jackson.core.json.JsonWriteFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,8 +41,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
@@ -50,7 +54,7 @@ class HalObjectMapperCustomizerTest {
 
 	MockMvc mockMvc;
 
-	MappingTestUtils.ContextualMapper mapper = MappingTestUtils.createMapper(getClass());
+	ContextualMapper contextual = MappingTestUtils.createMapper(getClass(), it -> it.addModule(new Jackson2HalModule()));
 
 	@BeforeEach
 	void setUp() {
@@ -63,7 +67,7 @@ class HalObjectMapperCustomizerTest {
 	void objectMapperCustomizerShouldBeApplied() throws Exception {
 
 		String actualHalJson = this.mockMvc.perform(get("/employees/0")).andReturn().getResponse().getContentAsString();
-		String expectedHalJson = this.mapper.readFileContent("hal-custom.json");
+		String expectedHalJson = this.contextual.readFileContent("hal-custom.json");
 
 		assertThat(actualHalJson).isEqualTo(expectedHalJson);
 	}
@@ -75,9 +79,17 @@ class HalObjectMapperCustomizerTest {
 	static class TestConfig {
 
 		@Bean
+		ObjectMapper objectMapper() {
+
+			return JsonMapper.builder()
+					.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
+					.enable(SerializationFeature.INDENT_OUTPUT)
+					.build();
+		}
+
+		@Bean
 		HalConfiguration halConfiguration() {
-			return new HalConfiguration()
-					.withObjectMapperCustomizer(objectMapper -> objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true));
+			return new HalConfiguration();
 		}
 	}
 }

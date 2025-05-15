@@ -35,11 +35,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
@@ -47,7 +47,6 @@ import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDi
 import org.springframework.hateoas.mediatype.hal.forms.HalFormsLinkDiscoverer;
 import org.springframework.hateoas.mediatype.uber.UberLinkDiscoverer;
 import org.springframework.hateoas.support.Employee;
-import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -163,8 +162,8 @@ class MultiMediaTypeWebMvcIntegrationTest {
 	@Test
 	void createNewEmployeeCollectionJson() throws Exception {
 
-		String specBasedJson = MappingUtils
-				.read(new ClassPathResource("spec-part7-adjusted.json", CollectionJsonLinkDiscoverer.class));
+		var contextual = MappingTestUtils.createMapper(CollectionJsonLinkDiscoverer.class);
+		var specBasedJson = contextual.readFileContent("spec-part7-adjusted.json");
 
 		this.mockMvc.perform(post("/employees").content(specBasedJson).contentType(MediaTypes.COLLECTION_JSON_VALUE))
 				.andExpect(status().isCreated())
@@ -235,7 +234,8 @@ class MultiMediaTypeWebMvcIntegrationTest {
 	@Test
 	void createNewEmployeeHalForms() throws Exception {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", HalFormsLinkDiscoverer.class));
+		var contextual = MappingTestUtils.createMapper(HalFormsLinkDiscoverer.class);
+		var specBasedJson = contextual.readFileContent("new-employee.json");
 
 		this.mockMvc.perform(post("/employees").content(specBasedJson).contentType(MediaTypes.HAL_FORMS_JSON_VALUE))
 				.andExpect(status().isCreated())
@@ -371,7 +371,8 @@ class MultiMediaTypeWebMvcIntegrationTest {
 	@Test
 	void createNewEmployeeUber() throws Exception {
 
-		String input = MappingUtils.read(new ClassPathResource("create-employee.json", UberLinkDiscoverer.class));
+		var contextual = MappingTestUtils.createMapper(UberLinkDiscoverer.class);
+		var input = contextual.readFileContent("create-employee.json");
 
 		this.mockMvc.perform(post("/employees").content(input).contentType(MediaTypes.UBER_JSON))
 				.andExpect(status().isCreated())

@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
-import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,8 +32,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +43,6 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -75,8 +77,6 @@ import org.springframework.http.MediaType;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -95,20 +95,19 @@ class Jackson2HalFormsIntegrationTest {
 
 	final LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 			HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
-	final Consumer<ObjectMapper> configurer = it -> {
 
-		it.registerModule(new Jackson2HalFormsModule());
-		it.configure(SerializationFeature.INDENT_OUTPUT, true);
-	};
+	final UnaryOperator<MapperBuilder<ObjectMapper, ?>> configurer = it -> it.addModule(new Jackson2HalFormsModule())
+			.enable(SerializationFeature.INDENT_OUTPUT);
 
 	final ContextualMapper mapper = MappingTestUtils.createMapper(Jackson2HalFormsIntegrationTest.class,
 			configurer.andThen(it -> {
 
-				GenericApplicationContext context = new AnnotationConfigApplicationContext(
-						HalFormsMediaTypeConfiguration.class, HateoasConfiguration.class);
+				var context = new AnnotationConfigApplicationContext(HalFormsMediaTypeConfiguration.class,
+						HateoasConfiguration.class);
+				var instantiator = new Jackson2HalModule.HalHandlerInstantiator(provider, CurieProvider.NONE,
+						MessageResolver.DEFAULTS_ONLY, new HalConfiguration(), context.getAutowireCapableBeanFactory());
 
-				it.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(provider, CurieProvider.NONE,
-						MessageResolver.DEFAULTS_ONLY, new HalConfiguration(), context.getAutowireCapableBeanFactory()));
+				return it.handlerInstantiator(instantiator);
 			}));
 
 	@BeforeEach
@@ -308,9 +307,8 @@ class Jackson2HalFormsIntegrationTest {
 	@Test
 	void deserializesMultipleAnnotatedResourceResourcesAsEmbedded() throws Exception {
 
-		CollectionModel<EntityModel<SimpleAnnotatedPojo>> result = mapper.readFile(
-				"annotated-embedded-resources-reference.json", CollectionModel.class, EntityModel.class,
-				SimpleAnnotatedPojo.class);
+		var result = mapper.readFile("annotated-embedded-resources-reference.json", CollectionModel.class,
+				EntityModel.class, SimpleAnnotatedPojo.class);
 
 		assertThat(result).isEqualTo(setupAnnotatedResources());
 	}
@@ -707,7 +705,7 @@ class Jackson2HalFormsIntegrationTest {
 		factory.registerSingleton("foobar", new HalFormsTemplatePropertyWriter(builder));
 
 		return MappingTestUtils.createMapper(Jackson2HalFormsIntegrationTest.class, configurer.andThen(it -> {
-			it.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(this.provider, provider,
+			return it.handlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(this.provider, provider,
 					resolver, new HalConfiguration(), factory));
 		}));
 	}

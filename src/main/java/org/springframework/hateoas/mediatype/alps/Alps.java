@@ -93,14 +93,17 @@ public final class Alps {
 		return Ext.builder();
 	}
 
+	@JsonProperty
 	public String getVersion() {
 		return this.version;
 	}
 
+	@JsonProperty
 	public Doc getDoc() {
 		return this.doc;
 	}
 
+	@JsonProperty
 	public List<Descriptor> getDescriptor() {
 		return this.descriptor;
 	}

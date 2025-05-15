@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -56,7 +57,7 @@ import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
@@ -67,9 +68,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolverCompo
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Integration tests for {@link EnableHypermediaSupport}.
@@ -273,7 +271,7 @@ class EnableHypermediaSupportIntegrationTest {
 	}
 
 	@Test
-	void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() throws JsonProcessingException {
+	void verifyDefaultHalConfigurationRendersSingleItemAsSingleItem() {
 
 		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
 		resourceSupport.add(Link.of("localhost").withSelfRel());
@@ -397,7 +395,7 @@ class EnableHypermediaSupportIntegrationTest {
 
 			RequestMappingHandlerAdapter rmha = context.getBean(RequestMappingHandlerAdapter.class);
 			assertThat(rmha.getMessageConverters())
-					.anySatisfy(it -> assertThat(it).isInstanceOf(MappingJackson2HttpMessageConverter.class));
+					.anySatisfy(it -> assertThat(it).isInstanceOf(JacksonJsonHttpMessageConverter.class));
 		});
 	}
 

@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.assertj.core.matcher.AssertionMatcher;
 import org.hamcrest.Matcher;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.test.util.JsonPathExpectationsHelper;
 
 /**

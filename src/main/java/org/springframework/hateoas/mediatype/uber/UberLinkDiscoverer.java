@@ -15,7 +15,9 @@
  */
 package org.springframework.hateoas.mediatype.uber;
 
-import java.io.IOException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -25,8 +27,6 @@ import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Find links by rel in an {@literal UBER+JSON} representation. TODO: Pending
@@ -43,8 +43,9 @@ public class UberLinkDiscoverer implements LinkDiscoverer {
 
 	UberLinkDiscoverer() {
 
-		this.mapper = new ObjectMapper();
-		this.mapper.registerModules(new Jackson2UberModule());
+		this.mapper = JsonMapper.builder()
+				.addModule(new Jackson2UberModule())
+				.build();
 	}
 
 	/*
@@ -111,12 +112,7 @@ public class UberLinkDiscoverer implements LinkDiscoverer {
 	 * @return
 	 */
 	private Links getLinks(String json) {
-
-		try {
-			return this.mapper.readValue(json, UberDocument.class).getUber().getLinks();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return this.mapper.readValue(json, UberDocument.class).getUber().getLinks();
 	}
 
 	/**
@@ -126,11 +122,6 @@ public class UberLinkDiscoverer implements LinkDiscoverer {
 	 * @return
 	 */
 	private Links getLinks(InputStream stream) {
-
-		try {
-			return this.mapper.readValue(stream, UberDocument.class).getUber().getLinks();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return this.mapper.readValue(stream, UberDocument.class).getUber().getLinks();
 	}
 }

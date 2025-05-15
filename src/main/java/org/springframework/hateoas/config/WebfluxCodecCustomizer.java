@@ -15,15 +15,15 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2CodecSupport;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.codec.JacksonCodecSupport;
 
 /**
  * @author Oliver Drotbohm
@@ -63,16 +63,16 @@ class WebfluxCodecCustomizer implements Consumer<Object> {
 	@Override
 	public void accept(@Nullable Object it) {
 
-		if (it == null || !Jackson2CodecSupport.class.isInstance(it)) {
+		if (it == null || !JacksonCodecSupport.class.isInstance(it)) {
 			return;
 		}
 
-		Jackson2CodecSupport codec = (Jackson2CodecSupport) it;
+		JacksonCodecSupport codec = (JacksonCodecSupport) it;
 		ObjectMapper firstMapper = null;
 
 		for (HypermediaMappingInformation information : mappingInformations) {
 
-			ObjectMapper objectMapper = information.configureObjectMapper(mapper.copy());
+			ObjectMapper objectMapper = information.configureObjectMapper(mapper);
 
 			if (firstMapper == null) {
 				firstMapper = objectMapper;

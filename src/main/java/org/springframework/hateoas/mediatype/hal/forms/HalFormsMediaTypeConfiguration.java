@@ -15,6 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -32,9 +36,6 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Spring configuration for HAL Forms support.
@@ -101,17 +102,35 @@ class HalFormsMediaTypeConfiguration implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		HalFormsConfiguration halFormsConfig = configurationFactory.getConfiguration();
-		CurieProvider provider = curieProvider.getIfAvailable(() -> CurieProvider.NONE);
+		var halFormsConfig = configurationFactory.getConfiguration();
+		var provider = curieProvider.getIfAvailable(() -> CurieProvider.NONE);
 
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.registerModule(new Jackson2HalFormsModule());
-		mapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, provider,
-				resolver, halFormsConfig.getHalConfiguration(), beanFactory));
+		var builder = mapper.rebuild()
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+				.addModule(new Jackson2HalFormsModule())
+				.handlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, provider,
+						resolver, halFormsConfig.getHalConfiguration(), beanFactory));
 
-		halFormsConfig.customize(mapper);
+		return halFormsConfig.customize(builder).build();
+	}
 
-		return mapper;
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.config.HypermediaMappingInformation#configureObjectMapper(tools.jackson.databind.cfg.MapperBuilder)
+	 */
+	@Override
+	public MapperBuilder<ObjectMapper, ?> configureObjectMapper(MapperBuilder<ObjectMapper, ?> builder) {
+
+		var halFormsConfig = configurationFactory.getConfiguration();
+		var provider = curieProvider.getIfAvailable(() -> CurieProvider.NONE);
+
+		builder = builder
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+				.addModule(new Jackson2HalFormsModule())
+				.handlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(relProvider, provider,
+						resolver, halFormsConfig.getHalConfiguration(), beanFactory));
+
+		return halFormsConfig.customize(builder);
 	}
 
 	/*

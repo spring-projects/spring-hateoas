@@ -15,10 +15,17 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.*;
 import static org.assertj.core.api.Assertions.*;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,16 +45,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.StaticMessageSource;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.Links;
-import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.*;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.PagedModel.PageMetadata;
-import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
@@ -56,13 +56,6 @@ import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -107,10 +100,12 @@ class Jackson2HalIntegrationTest {
 	static final String SINGLE_WITH_ALL_EXTRA_ATTRIBUTES = "{\"_links\":{\"self\":{\"href\":\"localhost\",\"hreflang\":\"en\",\"title\":\"the title\",\"type\":\"the type\",\"deprecation\":\"/customers/deprecated\"}}}";
 
 	private ObjectMapper mapper;
+	private ContextualMapper contextual;
 
 	@BeforeEach
 	void setUpModule() {
 		this.mapper = HalTestUtils.halObjectMapper();
+		this.contextual = HalTestUtils.getMapper(new HalConfiguration());
 	}
 
 	/**
@@ -119,10 +114,9 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void rendersSingleLinkAsObject() throws Exception {
 
-		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(Link.of("localhost"));
+		var resourceSupport = new RepresentationModel<>().add(Link.of("localhost"));
 
-		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_LINK_REFERENCE);
+		assertThatJson(contextual.writeObject(resourceSupport)).isEqualTo(SINGLE_LINK_REFERENCE);
 	}
 
 	/**
@@ -131,15 +125,15 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void rendersAllExtraRFC8288Attributes() throws Exception {
 
-		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(Link.of("localhost", "self") //
-				.withHreflang("en") //
-				.withTitle("the title") //
-				.withType("the type") //
-				.withMedia("the media") //
-				.withDeprecation("/customers/deprecated"));
+		var model = new RepresentationModel<>()
+				.add(Link.of("localhost", "self") //
+						.withHreflang("en") //
+						.withTitle("the title") //
+						.withType("the type") //
+						.withMedia("the media") //
+						.withDeprecation("/customers/deprecated"));
 
-		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES);
+		assertThatJson(contextual.writeObject(model)).isEqualTo(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES);
 	}
 
 	/**
@@ -150,14 +144,14 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void deserializeAllExtraRFC8288Attributes() throws Exception {
 
-		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(Link.of("localhost", "self") //
-				.withHreflang("en") //
-				.withTitle("the title") //
-				.withType("the type") //
-				.withDeprecation("/customers/deprecated"));
+		var model = new RepresentationModel<>()
+				.add(Link.of("localhost", "self") //
+						.withHreflang("en") //
+						.withTitle("the title") //
+						.withType("the type") //
+						.withDeprecation("/customers/deprecated"));
 
-		assertThat(mapper.readValue(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES, RepresentationModel.class)).isEqualTo(expected);
+		assertThat(contextual.readObject(SINGLE_WITH_ALL_EXTRA_ATTRIBUTES)).isEqualTo(model);
 	}
 
 	@Test
@@ -183,8 +177,10 @@ class Jackson2HalIntegrationTest {
 
 	@Test
 	void deserializeSingleLink() throws Exception {
-		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(Link.of("localhost"));
+
+		var expected = new RepresentationModel<>()
+				.add(Link.of("localhost"));
+
 		assertThat(mapper.readValue(SINGLE_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
 	}
 
@@ -204,9 +200,9 @@ class Jackson2HalIntegrationTest {
 	@Test
 	void deserializeMultipleLinks() throws Exception {
 
-		RepresentationModel<?> expected = new RepresentationModel<>();
-		expected.add(Link.of("localhost"));
-		expected.add(Link.of("localhost2"));
+		var expected = new RepresentationModel<>()
+				.add(Link.of("localhost"))
+				.add(Link.of("localhost2"));
 
 		assertThat(mapper.readValue(LIST_LINK_REFERENCE, RepresentationModel.class)).isEqualTo(expected);
 	}
@@ -531,15 +527,16 @@ class Jackson2HalIntegrationTest {
 	}
 
 	@Test // #1132
-	void forwardsPropertyNamingStrategyToNonIanaLinkRelations() throws JsonProcessingException {
+	void forwardsPropertyNamingStrategyToNonIanaLinkRelations() {
 
 		CollectionModel<Object> model = CollectionModel.of(Arrays.asList(new SomeSample()));
 		model.add(Link.of("/foo", LinkRelation.of("someSample")));
 		model.add(Link.of("/foo/form", IanaLinkRelations.EDIT_FORM));
 
-		ObjectMapper objectMapper = mapper.copy() //
-				.setPropertyNamingStrategy(SnakeCaseStrategy.INSTANCE) //
-				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+		ObjectMapper objectMapper = mapper.rebuild() //
+				.propertyNamingStrategy(new SnakeCaseStrategy()) //
+				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+				.build();
 
 		String result = objectMapper.writeValueAsString(model);
 
@@ -555,15 +552,15 @@ class Jackson2HalIntegrationTest {
 	@Test // #1132
 	void doesNotApplyPropertyNamingStrategyToLinkRelationsIfConfigurationOptsOut() throws Exception {
 
-		CollectionModel<Object> model = CollectionModel.of(Arrays.asList(new SomeSample()));
-		model.add(Link.of("/foo", LinkRelation.of("someSample")));
+		var model = CollectionModel.of(Arrays.asList(new SomeSample()))
+				.add(Link.of("/foo", LinkRelation.of("someSample")));
 
-		ObjectMapper mapper = HalTestUtils.halObjectMapper(new HalConfiguration() //
-				.withApplyPropertyNamingStrategy(false)) //
-				.setPropertyNamingStrategy(SnakeCaseStrategy.INSTANCE) //
-				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+		var configuration = new HalConfiguration().withApplyPropertyNamingStrategy(false);
+		var mapper = HalTestUtils.halObjectMapper(configuration,
+				it -> it.propertyNamingStrategy(new SnakeCaseStrategy()) //
+						.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS));
 
-		String result = mapper.writeValueAsString(model);
+		var result = mapper.writeValueAsString(model);
 
 		Stream.of("$._embedded", "$._links") //
 				.map(JsonPath::compile) //
@@ -640,7 +637,9 @@ class Jackson2HalIntegrationTest {
 	@Test // #1515
 	void rendersLinksWhenMapEntrySortingIsEnabled() throws Exception {
 
-		mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+		mapper.rebuild()
+				.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+				.build()
 				.writeValueAsString(new RepresentationModel<>().add(Link.of("/href")));
 	}
 
@@ -649,14 +648,18 @@ class Jackson2HalIntegrationTest {
 
 		List<SimplePojo> embbededs = Arrays.asList(new SimplePojo(), new SimpleAnnotatedPojo());
 
-		mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+		mapper.rebuild()
+				.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+				.build()
 				.writeValueAsString(CollectionModel.of(embbededs));
 	}
 
 	@Test // #1516
 	void considersNamingBase() throws Exception {
 
-		mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+		mapper.rebuild()
+				.propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+				.build()
 				.writeValueAsString(new RepresentationModel<>().add(Link.of("/href", "fooBar")));
 	}
 
@@ -717,11 +720,10 @@ class Jackson2HalIntegrationTest {
 
 	private ObjectMapper getCuriedObjectMapper(CurieProvider provider, @Nullable MessageSource messageSource) {
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(new AnnotationLinkRelationProvider(), provider, MessageResolver.of(messageSource)));
+		var reslProvider = new AnnotationLinkRelationProvider();
+		var instantiator = new HalHandlerInstantiator(reslProvider, provider, MessageResolver.of(messageSource));
 
-		return mapper;
+		return MappingTestUtils
+				.defaultObjectMapper(it -> it.addModule(new Jackson2HalModule()).handlerInstantiator(instantiator));
 	}
 }

@@ -16,14 +16,14 @@
 package org.springframework.hateoas.mediatype.hal;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 
@@ -36,6 +36,7 @@ import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	static final LinkDiscoverer discoverer = new HalLinkDiscoverer();
+	private static final ContextualMapper CONTEXTUAL = MappingTestUtils.createMapper(HalLinkDiscovererUnitTest.class);
 
 	/**
 	 * @see #314
@@ -54,7 +55,7 @@ class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 	@Test
 	void discoversAllTheLinkAttributes() throws IOException {
 
-		String linkText = read(new ClassPathResource("hal-link.json", getClass()));
+		String linkText = CONTEXTUAL.readFileContent("hal-link.json");
 
 		Link expected = Link.valueOf("</customer/1>;" //
 				+ "rel=\"self\";" //
@@ -77,12 +78,7 @@ class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 	@Override
 	protected String getInputString() {
-
-		try {
-			return read(new ClassPathResource("hal-link-discoverer.json", getClass()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return CONTEXTUAL.readFileContent("hal-link-discoverer.json");
 	}
 
 	@Override

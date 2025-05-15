@@ -15,15 +15,15 @@
  */
 package org.springframework.hateoas.support;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * @author Greg Turnquist
@@ -47,9 +47,9 @@ public class CustomHypermediaType implements HypermediaMappingInformation {
 	@Override
 	public ObjectMapper configureObjectMapper(ObjectMapper mapper) {
 
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-		return mapper;
+		return mapper.rebuild()
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+				.enable(SerializationFeature.INDENT_OUTPUT)
+				.build();
 	}
 }

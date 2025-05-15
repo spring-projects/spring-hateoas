@@ -17,6 +17,9 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -24,8 +27,6 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link EntityModel}.
@@ -85,7 +86,7 @@ class EntityModelUnitTest {
 
 		EntityModel<?> model = EntityModel.of(new ValueType());
 
-		assertThatExceptionOfType(JsonMappingException.class)
+		assertThatExceptionOfType(DatabindException.class)
 				.isThrownBy(() -> new ObjectMapper().writeValueAsString(model))
 				.withMessageContaining("@JsonValue");
 	}

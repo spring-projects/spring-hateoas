@@ -31,6 +31,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
@@ -430,6 +431,12 @@ public class HalModelBuilder {
 				public CollectionModel<Object> add(Link link) {
 					HalRepresentationModel.this.add(link);
 					return this;
+				}
+
+				@JsonIgnore
+				@Override
+				public Links getLinks() {
+					return super.getLinks();
 				}
 			};
 		}

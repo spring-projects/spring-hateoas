@@ -21,14 +21,14 @@ import static org.springframework.http.MediaType.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.http.converter.GenericHttpMessageConverter;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
 
 /**
- * Unit tests for {@link TypeConstrainedMappingJackson2HttpMessageConverter}.
- * 
+ * Unit tests for {@link TypeConstrainedJacksonJsonHttpMessageConverter}.
+ *
  * @author Oliver Gierke
  */
-class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
+class TypeConstrainedJacksonJsonHttpMessageConverterUnitTest {
 
 	/**
 	 * @see #219
@@ -37,7 +37,7 @@ class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	void rejectsNullType() {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> {
-			new TypeConstrainedMappingJackson2HttpMessageConverter(null);
+			new TypeConstrainedJacksonJsonHttpMessageConverter(null);
 		});
 	}
 
@@ -47,8 +47,7 @@ class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	@Test
 	void canReadTypeIfAssignableToConfiguredType() {
 
-		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
-				RepresentationModel.class);
+		var converter = new TypeConstrainedJacksonJsonHttpMessageConverter(RepresentationModel.class);
 
 		assertCanRead(converter, Object.class, false);
 		assertCanRead(converter, RepresentationModel.class, true);
@@ -61,7 +60,7 @@ class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 	@Test
 	void canWriteTypeIfAssignableToConfiguredType() {
 
-		GenericHttpMessageConverter<Object> converter = new TypeConstrainedMappingJackson2HttpMessageConverter(
+		AbstractHttpMessageConverter<Object> converter = new TypeConstrainedJacksonJsonHttpMessageConverter(
 				RepresentationModel.class);
 
 		assertCanWrite(converter, Object.class, false);
@@ -69,13 +68,11 @@ class TypeConstrainedMappingJackson2HttpMessageConverterUnitTest {
 		assertCanWrite(converter, EntityModel.class, true);
 	}
 
-	private static void assertCanRead(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
-
+	private static void assertCanRead(AbstractHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
 		assertThat(converter.canRead(type, APPLICATION_JSON)).isEqualTo(expected);
-		assertThat(converter.canRead(type, type, APPLICATION_JSON)).isEqualTo(expected);
 	}
 
-	private static void assertCanWrite(GenericHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
+	private static void assertCanWrite(AbstractHttpMessageConverter<Object> converter, Class<?> type, boolean expected) {
 
 		assertThat(converter.canWrite(type, APPLICATION_JSON)).isEqualTo(expected);
 	}

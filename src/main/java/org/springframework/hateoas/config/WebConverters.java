@@ -15,18 +15,17 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Value type to handle registration of hypermedia related {@link HttpMessageConverter}s.
@@ -91,24 +90,24 @@ public class WebConverters {
 
 		Assert.notNull(converters, "HttpMessageConverters must not be null!");
 
-		MappingJackson2HttpMessageConverter converter = converters.stream()
-				.filter(it -> MappingJackson2HttpMessageConverter.class.equals(it.getClass()))
-				.map(MappingJackson2HttpMessageConverter.class::cast)
+		JacksonJsonHttpMessageConverter converter = converters.stream()
+				.filter(it -> JacksonJsonHttpMessageConverter.class.equals(it.getClass()))
+				.map(JacksonJsonHttpMessageConverter.class::cast)
 				.findFirst()
-				.orElseGet(() -> new MappingJackson2HttpMessageConverter(mapper));
+				.orElseGet(() -> new JacksonJsonHttpMessageConverter(mapper));
 
 		ObjectMapper first = null;
 
-		for (HypermediaMappingInformation info : infos) {
+		for (var info : infos) {
 
-			Class<?> rootType = info.getRootType();
-			ObjectMapper objectMapper = info.configureObjectMapper(mapper.copy());
+			var rootType = info.getRootType();
+			var objectMapper = info.configureObjectMapper(mapper);
 
 			if (first == null) {
 				first = objectMapper;
 			}
 
-			Map<MediaType, ObjectMapper> mappers = info.getMediaTypes().stream().distinct()
+			var mappers = info.getMediaTypes().stream().distinct()
 					.collect(Collectors.toMap(Function.identity(), __ -> objectMapper));
 
 			converter.registerObjectMappersForType(rootType, map -> map.putAll(mappers));

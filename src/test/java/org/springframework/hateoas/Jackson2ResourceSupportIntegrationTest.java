@@ -17,6 +17,8 @@ package org.springframework.hateoas;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -24,9 +26,11 @@ import org.junit.jupiter.api.Test;
  *
  * @author Oliver Gierke
  */
-class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2MarshallingIntegrationTest {
+class Jackson2ResourceSupportIntegrationTest {
 
 	static final String REFERENCE = "{\"links\":[{\"rel\":\"self\",\"href\":\"localhost\"}]}";
+
+	ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
 
 	/**
 	 * @see #27
@@ -34,10 +38,10 @@ class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	void doesNotRenderId() throws Exception {
 
-		RepresentationModel<?> resourceSupport = new RepresentationModel<>();
-		resourceSupport.add(Link.of("localhost"));
+		var resourceSupport = new RepresentationModel<>()
+				.add(Link.of("localhost"));
 
-		assertThat(write(resourceSupport)).isEqualTo(REFERENCE);
+		assertThat(mapper.writeValueAsString(resourceSupport)).isEqualTo(REFERENCE);
 	}
 
 	/**
@@ -46,7 +50,7 @@ class Jackson2ResourceSupportIntegrationTest extends AbstractJackson2Marshalling
 	@Test
 	void readResourceSupportCorrectly() throws Exception {
 
-		RepresentationModel<?> result = read(REFERENCE, RepresentationModel.class);
+		var result = mapper.readValue(REFERENCE, RepresentationModel.class);
 
 		assertThat(result.getLinks()).hasSize(1);
 		assertThat(result.getLinks()).contains(Link.of("localhost"));

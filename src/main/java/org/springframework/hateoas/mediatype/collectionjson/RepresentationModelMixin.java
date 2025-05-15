@@ -15,6 +15,9 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.CollectionJsonLinksDeserializer;
@@ -23,8 +26,6 @@ import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJs
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Jackson 2 mixin to invoke the related serializer/deserializer.

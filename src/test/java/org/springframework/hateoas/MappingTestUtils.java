@@ -15,21 +15,25 @@
  */
 package org.springframework.hateoas;
 
+import static org.assertj.core.api.Assertions.*;
+
 import lombok.RequiredArgsConstructor;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.json.JsonWriteFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.type.TypeFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
-import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.springframework.core.io.ClassPathResource;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * @author Oliver Drotbohm
@@ -37,30 +41,29 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 public class MappingTestUtils {
 
 	public static ObjectMapper defaultObjectMapper() {
+		return defaultObjectMapper(UnaryOperator.identity());
+	}
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+	public static ObjectMapper defaultObjectMapper(
+			Function<MapperBuilder<ObjectMapper, ?>, MapperBuilder<ObjectMapper, ?>> consumer) {
 
-		// Disable auto-detection to make sure our model classes work in that scenario
-		mapper.disable(MapperFeature.AUTO_DETECT_CREATORS) //
-				.disable(MapperFeature.AUTO_DETECT_FIELDS) //
-				.disable(MapperFeature.AUTO_DETECT_GETTERS) //
-				.disable(MapperFeature.AUTO_DETECT_IS_GETTERS) //
-				.disable(MapperFeature.AUTO_DETECT_SETTERS);
+		ObjectMapper mapper = JsonMapper.builder()
+				.enable(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS)
+				.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
+				.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+				.build();
 
-		return mapper;
+		return consumer.apply(mapper.rebuild()).build();
 	}
 
 	public static ContextualMapper createMapper(Class<?> context) {
-		return createMapper(context, it -> {});
+		return createMapper(context, Function.identity());
 	}
 
-	public static ContextualMapper createMapper(Class<?> context, Consumer<ObjectMapper> configurer) {
+	public static ContextualMapper createMapper(Class<?> context,
+			Function<MapperBuilder<ObjectMapper, ?>, MapperBuilder<ObjectMapper, ?>> configurer) {
 
-		ObjectMapper mapper = defaultObjectMapper();
-		configurer.accept(mapper);
-
-		return ContextualMapper.of(context, mapper);
+		return ContextualMapper.of(context, defaultObjectMapper(configurer));
 	}
 
 	@RequiredArgsConstructor(staticName = "of")
@@ -78,20 +81,15 @@ public class MappingTestUtils {
 		}
 
 		public String writeObject(Object source) {
-
-			try {
-				return mapper.writeValueAsString(source);
-			} catch (JsonProcessingException o_O) {
-				throw new RuntimeException(o_O);
-			}
+			return mapper.writeValueAsString(source);
 		}
 
 		public RepresentationModel<?> readObject(String serialized) {
-			try {
-				return mapper.readValue(serialized, RepresentationModel.class);
-			} catch (JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
+			return mapper.readValue(serialized, RepresentationModel.class);
+		}
+
+		public <T> T readObject(String serialized, Class<T> type) {
+			return mapper.readValue(serialized, type);
 		}
 
 		public RepresentationModel<?> readFile(String filename) {
@@ -100,8 +98,8 @@ public class MappingTestUtils {
 
 		public <T> T readFile(String filename, Class<T> type) {
 
-			TypeFactory factory = mapper.getTypeFactory();
-			JavaType javaType = factory.constructType(type);
+			var factory = mapper.getTypeFactory();
+			var javaType = factory.constructType(type);
 
 			return readFile(filename, javaType);
 		}
@@ -112,6 +110,18 @@ public class MappingTestUtils {
 			JavaType javaType = factory.constructParametricType(type, elementType);
 
 			return readFile(filename, javaType);
+		}
+
+		public <S> EntityModel<S> readEntityModel(String filename, Class<S> type) {
+			return readFile(filename, EntityModel.class, type);
+		}
+
+		public <S> CollectionModel<EntityModel<S>> readEntityCollectionModel(String filename, Class<S> type) {
+			return readFile(filename, CollectionModel.class, EntityModel.class, type);
+		}
+
+		public <S> PagedModel<EntityModel<S>> readEntityPagedModel(String filename, Class<S> type) {
+			return readFile(filename, PagedModel.class, EntityModel.class, type);
 		}
 
 		public <S> S readFile(String filename, Class<?> type, Class<?> elementType, Class<?> nested) {
@@ -160,5 +170,8 @@ public class MappingTestUtils {
 			}
 		}
 
+		public void assertSerializesTo(Object source, String filename) {
+			assertThat(writeObject(source)).isEqualTo(readFileContent(filename));
+		}
 	}
 }

@@ -29,13 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.mediatype.problem.Problem;
-import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -125,7 +124,8 @@ class HalFormsWebFluxIntegrationTest {
 	@Test
 	void createNewEmployee() throws Exception {
 
-		String specBasedJson = MappingUtils.read(new ClassPathResource("new-employee.json", getClass()));
+		var contextual = MappingTestUtils.createMapper(getClass());
+		var specBasedJson = contextual.readFileContent("new-employee.json");
 
 		this.testClient.post().uri("http://localhost/employees").contentType(MediaTypes.HAL_FORMS_JSON)
 				.bodyValue(specBasedJson) //
@@ -137,7 +137,7 @@ class HalFormsWebFluxIntegrationTest {
 	@Test // #786
 	void problemReturningControllerMethod() {
 
-		Problem problem = this.testClient.get().uri("http://localhost/employees/problem")
+		var problem = this.testClient.get().uri("http://localhost/employees/problem")
 				.accept(MediaTypes.HTTP_PROBLEM_DETAILS_JSON) //
 				.exchange() //
 				.expectStatus().isBadRequest() //

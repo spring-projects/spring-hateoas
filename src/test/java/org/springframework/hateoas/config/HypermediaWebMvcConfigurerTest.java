@@ -23,6 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -65,10 +70,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * @author Greg Turnquist
  */
@@ -78,7 +79,7 @@ class HypermediaWebMvcConfigurerTest {
 
 	void setUp(Class<?> context) {
 
-		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+		var ctx = new AnnotationConfigWebApplicationContext();
 		ctx.register(context);
 		ctx.setServletContext(new MockServletContext());
 		ctx.refresh();
@@ -388,21 +389,21 @@ class HypermediaWebMvcConfigurerTest {
 
 	private static ObjectMapper getMapper(MediaType mediaType) {
 
-		ObjectMapper mapper = new ObjectMapper();
+		var builder = JsonMapper.builder();
 
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		builder.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		if (mediaType == MediaTypes.HAL_JSON) {
-			mapper.registerModule(new Jackson2HalModule());
+			builder.addModule(new Jackson2HalModule());
 		} else if (mediaType == MediaTypes.UBER_JSON) {
-			mapper.registerModule(new Jackson2UberModule());
+			builder.addModule(new Jackson2UberModule());
 		} else if (mediaType == MediaTypes.HAL_FORMS_JSON) {
-			mapper.registerModule(new Jackson2HalFormsModule());
+			builder.addModule(new Jackson2HalFormsModule());
 		} else if (mediaType == MediaTypes.COLLECTION_JSON) {
-			mapper.registerModule(new Jackson2CollectionJsonModule());
+			builder.addModule(new Jackson2CollectionJsonModule());
 		}
 
-		return mapper;
+		return builder.build();
 	}
 
 	@Configuration

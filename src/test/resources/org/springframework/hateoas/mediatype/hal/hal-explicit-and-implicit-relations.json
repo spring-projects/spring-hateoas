@@ -1,4 +1,12 @@
 {
+  "_links" : {
+    "self" : {
+      "href" : "/people/alan-watts"
+    },
+    "frodo" : {
+      "href" : "/people/frodo-baggins"
+    }
+  },
   "_embedded" : {
     "staffs" : [ {
       "name" : "Frodo Baggins",
@@ -21,14 +29,6 @@
     "burglars" : {
       "name" : "Bilbo Baggins",
       "role" : "burglar"
-    }
-  },
-  "_links" : {
-    "self" : {
-      "href" : "/people/alan-watts"
-    },
-    "frodo" : {
-      "href" : "/people/frodo-baggins"
     }
   }
 }

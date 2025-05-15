@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import tools.jackson.databind.SerializationFeature;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +34,10 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
-
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Integration test for Jackson 2 JSON+Collection
@@ -52,16 +52,14 @@ class Jackson2CollectionJsonIntegrationTest {
 			Link.of("foo", IanaLinkRelations.NEXT), //
 			Link.of("bar", IanaLinkRelations.PREV));
 
-	MappingTestUtils.ContextualMapper mapper;
+	ContextualMapper mapper;
 
 	@BeforeEach
 	void setUpModule() {
 
-		this.mapper = MappingTestUtils.createMapper(getClass(), mapper -> {
-
-			mapper.registerModule(new Jackson2CollectionJsonModule());
-			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-		});
+		this.mapper = MappingTestUtils.createMapper(getClass(),
+				mapper -> mapper.addModule(new Jackson2CollectionJsonModule())
+						.enable(SerializationFeature.INDENT_OUTPUT));
 	}
 
 	@Test

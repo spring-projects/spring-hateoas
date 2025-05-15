@@ -15,14 +15,17 @@
  */
 package org.springframework.hateoas.mediatype.hal.forms;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.ResolvableType;
@@ -30,10 +33,7 @@ import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HAL-FORMS specific configuration extension of {@link HalConfiguration}.
@@ -45,7 +45,7 @@ public class HalFormsConfiguration {
 
 	private final HalConfiguration halConfiguration;
 	private final Map<Class<?>, String> patterns;
-	private final Consumer<ObjectMapper> objectMapperCustomizer;
+	private final UnaryOperator<MapperBuilder<ObjectMapper, ?>> objectMapperCustomizer;
 	private final HalFormsOptionsFactory options;
 	private final List<MediaType> mediaTypes;
 	private final boolean defaultSingleTemplate;
@@ -63,12 +63,12 @@ public class HalFormsConfiguration {
 	 * @param halConfiguration must not be {@literal null}.
 	 */
 	public HalFormsConfiguration(HalConfiguration halConfiguration) {
-		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {},
+		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), UnaryOperator.identity(),
 				Collections.singletonList(MediaTypes.HAL_FORMS_JSON), false);
 	}
 
 	private HalFormsConfiguration(HalConfiguration halConfiguration, Map<Class<?>, String> patterns,
-			HalFormsOptionsFactory options, @Nullable Consumer<ObjectMapper> objectMapperCustomizer,
+			HalFormsOptionsFactory options, @Nullable UnaryOperator<MapperBuilder<ObjectMapper, ?>> objectMapperCustomizer,
 			List<MediaType> mediaTypes, boolean defaultSingleTemplate) {
 
 		Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
@@ -111,14 +111,22 @@ public class HalFormsConfiguration {
 	 * @param objectMapperCustomizer must not be {@literal null}.
 	 * @return will never be {@literal null}.
 	 */
-	public HalFormsConfiguration withObjectMapperCustomizer(Consumer<ObjectMapper> objectMapperCustomizer) {
+	public HalFormsConfiguration withObjectMapperCustomizer(Function<ObjectMapper, ObjectMapper> objectMapperCustomizer) {
 
 		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
 
-		return this.objectMapperCustomizer == objectMapperCustomizer //
+		UnaryOperator<MapperBuilder<ObjectMapper, ?>> customizer = it -> objectMapperCustomizer.apply(it.build()).rebuild();
+
+		return this.objectMapperCustomizer == customizer //
 				? this //
-				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes,
-						defaultSingleTemplate);
+				: new HalFormsConfiguration(halConfiguration, patterns, options, customizer, mediaTypes, defaultSingleTemplate);
+	}
+
+	public HalFormsConfiguration withObjectMapperBuilderCustomizer(
+			UnaryOperator<MapperBuilder<ObjectMapper, ?>> objectMapperCustomizer) {
+
+		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes,
+				defaultSingleTemplate);
 	}
 
 	/**
@@ -152,14 +160,18 @@ public class HalFormsConfiguration {
 	 * @return will never be {@literal null}.
 	 * @see #withObjectMapperCustomizer(Consumer)
 	 */
-	@Contract("_ -> this")
-	public HalFormsConfiguration customize(ObjectMapper mapper) {
+	public ObjectMapper customize(ObjectMapper mapper) {
 
 		Assert.notNull(mapper, "ObjectMapper must not be null!");
 
-		objectMapperCustomizer.accept(mapper);
+		return objectMapperCustomizer.apply(mapper.rebuild()).build();
+	}
 
-		return this;
+	public MapperBuilder<ObjectMapper, ?> customize(MapperBuilder<ObjectMapper, ?> mapper) {
+
+		Assert.notNull(mapper, "ObjectMapper must not be null!");
+
+		return objectMapperCustomizer.apply(mapper);
 	}
 
 	/**

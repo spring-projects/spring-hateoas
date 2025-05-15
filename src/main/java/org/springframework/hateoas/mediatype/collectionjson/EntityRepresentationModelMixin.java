@@ -15,10 +15,10 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
+
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.mediatype.collectionjson.Jackson2CollectionJsonModule.CollectionJsonResourceDeserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Jackson 2 mixin to invoke the related serializer/deserizer.

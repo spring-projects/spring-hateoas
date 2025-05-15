@@ -72,14 +72,17 @@ public final class Doc {
 		return new DocBuilder();
 	}
 
+	@JsonProperty
 	public String getHref() {
 		return this.href;
 	}
 
+	@JsonProperty
 	public String getValue() {
 		return this.value;
 	}
 
+	@JsonProperty
 	public Format getFormat() {
 		return this.format;
 	}
@@ -95,7 +98,9 @@ public final class Doc {
 			return false;
 		}
 
-		return Objects.equals(this.href, that.href) && Objects.equals(this.value, that.value) && this.format == that.format;
+		return Objects.equals(this.href, that.href)
+				&& Objects.equals(this.value, that.value)
+				&& this.format == that.format;
 	}
 
 	@Override

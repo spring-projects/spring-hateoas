@@ -85,9 +85,10 @@ final class UberData {
 	UberData(@JsonProperty("id") @Nullable String id, @JsonProperty("name") @Nullable String name,
 			@JsonProperty("label") @Nullable String label, @JsonProperty("rel") @Nullable List<LinkRelation> rel,
 			@JsonProperty("url") @Nullable String url, @JsonProperty("action") UberAction action,
-			@JsonProperty("transclude") boolean transclude, @JsonProperty("model") @Nullable String model,
+			@JsonProperty("transclude") @Nullable Boolean transclude, @JsonProperty("model") @Nullable String model,
 			@JsonProperty("sending") @Nullable List<String> sending,
-			@JsonProperty("accepting") @Nullable List<String> accepting, @JsonProperty("value") @Nullable Object value,
+			@JsonProperty("accepting") @Nullable List<String> accepting,
+			@JsonProperty("value") @Nullable Object value,
 			@JsonProperty("data") @Nullable List<UberData> data) {
 
 		this.id = id;
@@ -96,7 +97,7 @@ final class UberData {
 		this.rel = rel;
 		this.url = url;
 		this.action = action;
-		this.transclude = transclude;
+		this.transclude = transclude == null ? false : transclude;
 		this.model = model;
 		this.sending = sending;
 		this.accepting = accepting;

@@ -1,4 +1,9 @@
 {
+  "_links" : {
+    "self" : {
+      "href" : "/people/alan-watts"
+    }
+  },
   "_embedded" : {
     "staffs" : [ {
       "name" : "Frodo Baggins",
@@ -14,10 +19,5 @@
       "name" : "Saruman's staff",
       "price" : 9.99
     } ]
-  },
-  "_links" : {
-    "self" : {
-      "href" : "/people/alan-watts"
-    }
   }
 }

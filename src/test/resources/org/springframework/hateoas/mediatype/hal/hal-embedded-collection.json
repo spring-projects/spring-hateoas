@@ -1,7 +1,11 @@
 {
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost/authors"
+    }
+  },
   "_embedded" : {
     "authors" : [ {
-      "name" : "Greg L. Turnquist",
       "_links" : {
         "self" : {
           "href" : "http://localhost/author/1"
@@ -9,9 +13,9 @@
         "authors" : {
           "href" : "http://localhost/authors"
         }
-      }
+      },
+      "name" : "Greg L. Turnquist"
     }, {
-      "name" : "Craig Walls",
       "_links" : {
         "self" : {
           "href" : "http://localhost/author/2"
@@ -19,9 +23,9 @@
         "authors" : {
           "href" : "http://localhost/authors"
         }
-      }
+      },
+      "name" : "Craig Walls"
     }, {
-      "name" : "Oliver Drotbohm",
       "_links" : {
         "self" : {
           "href" : "http://localhost/author/3"
@@ -29,12 +33,8 @@
         "authors" : {
           "href" : "http://localhost/authors"
         }
-      }
+      },
+      "name" : "Oliver Drotbohm"
     } ]
-  },
-  "_links" : {
-    "self" : {
-      "href" : "http://localhost/authors"
-    }
   }
 }

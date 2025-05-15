@@ -17,7 +17,6 @@ package org.springframework.hateoas.config;
 
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static org.springframework.hateoas.support.CustomHypermediaType.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 
 import reactor.core.publisher.Mono;
 
@@ -28,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -50,20 +49,23 @@ class CustomHypermediaWebFluxTest {
 	@BeforeEach
 	void setUp() {
 
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		var ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TestConfig.class);
 		ctx.refresh();
 
-		HypermediaWebClientConfigurer webClientConfigurer = ctx.getBean(HypermediaWebClientConfigurer.class);
+		var webClientConfigurer = ctx.getBean(HypermediaWebClientConfigurer.class);
 
 		this.testClient = WebTestClient.bindToApplicationContext(ctx).build() //
 				.mutate() //
-				.exchangeStrategies(ExchangeStrategies.builder().codecs(it -> it.defaultCodecs().configureDefaultCodec(webClientConfigurer.customizer)).build())
+				.exchangeStrategies(ExchangeStrategies.builder()
+						.codecs(it -> it.defaultCodecs().configureDefaultCodec(webClientConfigurer.customizer)).build())
 				.build();
 	}
 
 	@Test // #833
 	void getUsingCustomMediaType() throws IOException {
+
+		var contextual = MappingTestUtils.createMapper(getClass());
 
 		this.testClient.get().uri("http://localhost/employees/1") //
 				.accept(FRODO_MEDIATYPE) //
@@ -71,7 +73,7 @@ class CustomHypermediaWebFluxTest {
 				.expectStatus().isOk() //
 				.expectHeader().contentType(FRODO_MEDIATYPE.toString()) //
 				.expectBody(String.class) //
-				.isEqualTo(read(new ClassPathResource("webflux-frodo.json", getClass())));
+				.isEqualTo(contextual.readFileContent("webflux-frodo.json"));
 	}
 
 	@Configuration

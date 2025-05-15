@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas.support;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 

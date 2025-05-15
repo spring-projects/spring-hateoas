@@ -15,17 +15,21 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+
+import java.util.function.UnaryOperator;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MappingTestUtils;
+import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerInstantiator;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test utilities for HAL.
@@ -50,20 +54,37 @@ public class HalTestUtils {
 	 * @return
 	 */
 	public static ObjectMapper halObjectMapper(HalConfiguration configuration) {
+		return halObjectMapper(configuration, UnaryOperator.identity());
+	}
+
+	public static ObjectMapper halObjectMapper(HalConfiguration configuration,
+			UnaryOperator<MapperBuilder<ObjectMapper, ?>> customizer) {
 
 		Assert.notNull(configuration, "HalConfiguration must not be null!");
 
-		ObjectMapper mapper = MappingTestUtils.defaultObjectMapper();
-
-		LinkRelationProvider provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
+		var provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
 				HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
+		var instantiator = new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
+				configuration, new DefaultListableBeanFactory());
 
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.setHandlerInstantiator(
-				new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, configuration,
-						new DefaultListableBeanFactory()));
+		UnaryOperator<MapperBuilder<ObjectMapper, ?>> customizations = it -> it.addModule(new Jackson2HalModule())
+				.handlerInstantiator(instantiator);
 
-		return mapper;
+		return MappingTestUtils.defaultObjectMapper(customizations.andThen(customizer));
+	}
+
+	public static ContextualMapper getMapper(HalConfiguration configuration) {
+
+		return MappingTestUtils.createMapper(HalTestUtils.class, builder -> {
+
+			var provider = new DelegatingLinkRelationProvider(new AnnotationLinkRelationProvider(),
+					HalTestUtils.DefaultLinkRelationProvider.INSTANCE);
+			var instantiator = new HalHandlerInstantiator(provider, CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY,
+					configuration, new DefaultListableBeanFactory());
+
+			return builder.addModule(new Jackson2HalModule())
+					.handlerInstantiator(instantiator);
+		});
 	}
 
 	public enum DefaultLinkRelationProvider implements LinkRelationProvider {

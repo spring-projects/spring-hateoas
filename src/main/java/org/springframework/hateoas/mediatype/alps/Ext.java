@@ -52,14 +52,17 @@ public final class Ext {
 		return new ExtBuilder();
 	}
 
+	@JsonProperty
 	public String getId() {
 		return this.id;
 	}
 
+	@JsonProperty
 	public String getHref() {
 		return this.href;
 	}
 
+	@JsonProperty
 	public String getValue() {
 		return this.value;
 	}
@@ -70,11 +73,15 @@ public final class Ext {
 		if (this == o) {
 			return true;
 		}
+
 		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
+
 		Ext ext = (Ext) o;
-		return Objects.equals(this.id, ext.id) && Objects.equals(this.href, ext.href)
+
+		return Objects.equals(this.id, ext.id)
+				&& Objects.equals(this.href, ext.href)
 				&& Objects.equals(this.value, ext.value);
 	}
 

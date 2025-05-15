@@ -69,34 +69,42 @@ public final class Descriptor {
 		return new DescriptorBuilder();
 	}
 
+	@JsonProperty
 	public @Nullable String getId() {
 		return this.id;
 	}
 
+	@JsonProperty
 	public @Nullable String getHref() {
 		return this.href;
 	}
 
+	@JsonProperty
 	public @Nullable String getName() {
 		return this.name;
 	}
 
+	@JsonProperty
 	public @Nullable Doc getDoc() {
 		return this.doc;
 	}
 
+	@JsonProperty
 	public @Nullable Type getType() {
 		return this.type;
 	}
 
+	@JsonProperty
 	public @Nullable Ext getExt() {
 		return this.ext;
 	}
 
+	@JsonProperty
 	public @Nullable String getRt() {
 		return this.rt;
 	}
 
+	@JsonProperty
 	public @Nullable List<Descriptor> getDescriptor() {
 		return this.descriptor;
 	}

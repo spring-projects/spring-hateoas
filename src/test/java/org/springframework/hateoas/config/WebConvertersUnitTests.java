@@ -17,11 +17,11 @@ package org.springframework.hateoas.config;
 
 import static org.assertj.core.api.Assertions.*;
 
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link WebConverters}.

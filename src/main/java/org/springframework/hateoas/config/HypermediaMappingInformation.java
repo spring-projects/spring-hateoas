@@ -15,16 +15,16 @@
  */
 package org.springframework.hateoas.config;
 
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.MapperBuilder;
+
 import java.util.List;
-import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Interface for registering custom hypermedia handlers.
@@ -58,14 +58,21 @@ public interface HypermediaMappingInformation {
 	 *
 	 * @return
 	 * @see #getJacksonModule()
+	 * @deprecated since 3.0
 	 */
+	@Deprecated
 	default ObjectMapper configureObjectMapper(ObjectMapper mapper) {
+		return configureObjectMapper(mapper.rebuild()).build();
+	}
 
-		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+	default MapperBuilder<ObjectMapper, ?> configureObjectMapper(MapperBuilder<ObjectMapper, ?> builder) {
 
-		Optional.ofNullable(getJacksonModule()).ifPresent(mapper::registerModule);
+		var configured = builder
+				.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-		return mapper;
+		var module = getJacksonModule();
+
+		return module == null ? configured : configured.addModule(module);
 	}
 
 	/**
@@ -77,7 +84,7 @@ public interface HypermediaMappingInformation {
 	 * @see #configureObjectMapper(ObjectMapper)
 	 */
 	@Nullable
-	default Module getJacksonModule() {
+	default JacksonModule getJacksonModule() {
 		return null;
 	}
 }

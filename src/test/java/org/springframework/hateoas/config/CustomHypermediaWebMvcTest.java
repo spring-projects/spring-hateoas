@@ -18,7 +18,6 @@ package org.springframework.hateoas.config;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import static org.springframework.hateoas.support.CustomHypermediaType.*;
-import static org.springframework.hateoas.support.MappingUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -29,8 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.support.CustomHypermediaType;
 import org.springframework.hateoas.support.Employee;
@@ -65,13 +64,15 @@ class CustomHypermediaWebMvcTest {
 	@Test // #833
 	void getUsingCustomMediaType() throws Exception {
 
-		String results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
+		var contextual = MappingTestUtils.createMapper(getClass());
+
+		var results = this.mockMvc.perform(get("/employees/1").accept(FRODO_MEDIATYPE)) //
 				.andExpect(header().string(HttpHeaders.CONTENT_TYPE, FRODO_MEDIATYPE.toString())) //
 				.andReturn() //
 				.getResponse() //
 				.getContentAsString();
 
-		assertThat(results).isEqualTo(read(new ClassPathResource("webmvc-frodo.json", getClass())));
+		assertThat(results).isEqualTo(contextual.readFileContent("webmvc-frodo.json"));
 	}
 
 	@Configuration
