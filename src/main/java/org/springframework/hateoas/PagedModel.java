@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DTO to implement binding response representations of pageable collections.
@@ -390,6 +391,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 *
 	 * @author Oliver Gierke
 	 */
+	@JsonPropertyOrder({"size", "totalElements", "totalPages", "number"})
 	public static class PageMetadata {
 
 		@JsonProperty private long size;

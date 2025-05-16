@@ -24,6 +24,8 @@ import lombok.Data;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -218,6 +220,7 @@ class TypeReferencesIntegrationTest {
 	}
 
 	@Data
+	@JsonPropertyOrder({"firstname", "lastname"})
 	static class User {
 		public String firstname, lastname;
 	}
