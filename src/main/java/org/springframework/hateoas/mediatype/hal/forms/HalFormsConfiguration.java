@@ -46,6 +46,7 @@ public class HalFormsConfiguration {
 	private final Map<Class<?>, String> patterns;
 	private final Consumer<ObjectMapper> objectMapperCustomizer;
 	private final HalFormsOptionsFactory options;
+	private final HalFormsValueFactory values;
 	private final List<MediaType> mediaTypes;
 
 	/**
@@ -61,24 +62,26 @@ public class HalFormsConfiguration {
 	 * @param halConfiguration must not be {@literal null}.
 	 */
 	public HalFormsConfiguration(HalConfiguration halConfiguration) {
-		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {},
+		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), new HalFormsValueFactory(), __ -> {},
 				Collections.singletonList(MediaTypes.HAL_FORMS_JSON));
 	}
 
 	private HalFormsConfiguration(HalConfiguration halConfiguration, Map<Class<?>, String> patterns,
-			HalFormsOptionsFactory options, @Nullable Consumer<ObjectMapper> objectMapperCustomizer,
+			HalFormsOptionsFactory options, HalFormsValueFactory values, @Nullable Consumer<ObjectMapper> objectMapperCustomizer,
 			List<MediaType> mediaTypes) {
 
 		Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
 		Assert.notNull(patterns, "Patterns must not be null!");
 		Assert.notNull(objectMapperCustomizer, "ObjectMapper customizer must not be null!");
 		Assert.notNull(options, "HalFormsSuggests must not be null!");
+		Assert.notNull(values, "HalFormsValueFactory must not be null!");
 		Assert.notNull(mediaTypes, "Media types must not be null!");
 
 		this.halConfiguration = halConfiguration;
 		this.patterns = patterns;
 		this.objectMapperCustomizer = objectMapperCustomizer;
 		this.options = options;
+		this.values = values;
 		this.mediaTypes = new ArrayList<>(mediaTypes);
 	}
 
@@ -97,7 +100,7 @@ public class HalFormsConfiguration {
 		Map<Class<?>, String> newPatterns = new HashMap<>(patterns);
 		newPatterns.put(type, pattern);
 
-		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer, mediaTypes);
+		return new HalFormsConfiguration(halConfiguration, newPatterns, options, values, objectMapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -113,7 +116,7 @@ public class HalFormsConfiguration {
 
 		return this.objectMapperCustomizer == objectMapperCustomizer //
 				? this //
-				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes);
+				: new HalFormsConfiguration(halConfiguration, patterns, options, values, objectMapperCustomizer, mediaTypes);
 	}
 
 	/**
@@ -136,7 +139,7 @@ public class HalFormsConfiguration {
 		List<MediaType> newMediaTypes = new ArrayList<>(mediaTypes);
 		newMediaTypes.add(mediaTypes.size() - 1, mediaType);
 
-		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, newMediaTypes);
+		return new HalFormsConfiguration(halConfiguration, patterns, options, values, objectMapperCustomizer, newMediaTypes);
 	}
 
 	/**
@@ -167,7 +170,14 @@ public class HalFormsConfiguration {
 	public <T> HalFormsConfiguration withOptions(Class<T> type, String property,
 			Function<PropertyMetadata, HalFormsOptions> creator) {
 
-		return new HalFormsConfiguration(halConfiguration, patterns, options.withOptions(type, property, creator),
+		return new HalFormsConfiguration(halConfiguration, patterns, options.withOptions(type, property, creator), values,
+				objectMapperCustomizer, mediaTypes);
+	}
+
+	public <T> HalFormsConfiguration withValues(Class<T> type, String property,
+			Function<PropertyMetadata, String> creator) {
+
+		return new HalFormsConfiguration(halConfiguration, patterns, options, values.withValues(type, property, creator),
 				objectMapperCustomizer, mediaTypes);
 	}
 
@@ -187,6 +197,15 @@ public class HalFormsConfiguration {
 	 */
 	HalFormsOptionsFactory getOptionsFactory() {
 		return options;
+	}
+
+	/**
+	 * Returns the {@link HalFormsValueFactory} to look up value from payload and property metadata.
+	 *
+	 * @return will never be {@literal null}.
+	 */
+	HalFormsValueFactory getValuesFactory() {
+		return values;
 	}
 
 	/**
