@@ -31,6 +31,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.TemplateVariable;
+import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.TestUtils;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.ControllerWithMethods;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.PersonControllerImpl;
@@ -41,6 +43,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -184,6 +187,17 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 		assertThat(link.getHref()).endsWith("/something/foo?a=1&b=2");
 	}
 
+	@Test
+	void appliesTemplateVariableIfContributorConfigured() {
+
+		WebMvcLinkBuilderFactory factory = new WebMvcLinkBuilderFactory();
+		factory.setUriComponentsContributors(Collections.singletonList(new SampleUriComponentsContributor()));
+
+		Link link = factory.linkTo(methodOn(SampleController.class).sampleMethod(1L, null)).withSelfRel();
+		assertPointsToMockServer(link);
+		assertThat(link.getHref()).endsWith("/sample/1{?foo}");
+	}
+
 	interface SampleController {
 
 		@RequestMapping("/sample/{id}")
@@ -208,7 +222,18 @@ class WebMvcLinkBuilderFactoryUnitTest extends TestUtils {
 
 		@Override
 		public void enhance(UriComponentsBuilder builder, MethodParameter parameter, Object value) {
+			if (value == null) {
+				return;
+			}
 			builder.queryParam("foo", ((SpecialType) value).parameterValue);
+		}
+
+		@Override
+		public TemplateVariables enhance(TemplateVariables templateVariables, UriComponents uriComponents, MethodParameter parameter) {
+			if (uriComponents.getQueryParams().containsKey("foo")) {
+				return templateVariables;
+			}
+			return templateVariables.concat(TemplateVariable.requestParameter("foo"));
 		}
 	}
 

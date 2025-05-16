@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -73,12 +72,11 @@ public class WebHandler {
 
 	public static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
 			LinkBuilderCreator<T> creator) {
-		return linkTo(invocationValue, creator,
-				(BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder>) null);
+		return linkTo(invocationValue, creator, null);
 	}
 
 	public static <T extends LinkBuilder> T linkTo(Object invocationValue, LinkBuilderCreator<T> creator,
-			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler,
+			@Nullable AdditionalUriHandler additionalUriHandler,
 			Function<UriMapping, UriComponentsBuilder> finisher, Supplier<ConversionService> conversionService) {
 
 		return linkTo(invocationValue, creator, additionalUriHandler).conclude(finisher,
@@ -87,7 +85,7 @@ public class WebHandler {
 
 	private static <T extends LinkBuilder> PreparedWebHandler<T> linkTo(Object invocationValue,
 			LinkBuilderCreator<T> creator,
-			@Nullable BiFunction<UriComponentsBuilder, MethodInvocation, UriComponentsBuilder> additionalUriHandler) {
+			@Nullable AdditionalUriHandler additionalUriHandler) {
 
 		Assert.isInstanceOf(LastInvocationAware.class, invocationValue);
 
@@ -177,7 +175,9 @@ public class WebHandler {
 					? builder.buildAndExpand(values) //
 					: additionalUriHandler.apply(builder, invocation).buildAndExpand(values);
 
-			TemplateVariables variables = NONE;
+			TemplateVariables variables = additionalUriHandler == null
+					? NONE
+					: additionalUriHandler.apply(NONE, components, invocation);
 
 			for (String parameter : optionalEmptyParameters) {
 
