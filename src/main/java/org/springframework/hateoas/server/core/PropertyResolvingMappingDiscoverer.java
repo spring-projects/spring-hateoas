@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -108,10 +109,10 @@ class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 			return mapping;
 		}
 
-		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
+		Environment environment = StaticEnvironmentProvider.get();
 
-		return context == null //
+		return environment == null //
 				? mapping //
-				: context.getEnvironment().resolvePlaceholders(mapping);
+				: environment.resolvePlaceholders(mapping);
 	}
 }
