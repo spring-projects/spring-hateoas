@@ -17,10 +17,9 @@ package org.springframework.hateoas.server;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider.LookupContext;
-import org.springframework.hateoas.server.core.DelegatingLinkRelationProvider;
-import org.springframework.lang.Nullable;
 import org.springframework.plugin.core.Plugin;
 import org.springframework.util.Assert;
 
@@ -73,16 +72,12 @@ public interface LinkRelationProvider extends Plugin<LookupContext> {
 		private final Class<?> type;
 		private final @Nullable ResourceType resourceType;
 
-		private LookupContext(Class<?> type, ResourceType resourceType) {
+		private LookupContext(Class<?> type, @Nullable ResourceType resourceType) {
 
 			Assert.notNull(type, "type must not be null!");
 
 			this.type = type;
 			this.resourceType = resourceType;
-		}
-
-		private static LookupContext of(Class<?> type, ResourceType resourceType) {
-			return new LookupContext(type, resourceType);
 		}
 
 		public Class<?> getType() {
@@ -154,10 +149,12 @@ public interface LinkRelationProvider extends Plugin<LookupContext> {
 		@Override
 		public boolean equals(Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (!(o instanceof LookupContext))
+			}
+			if (!(o instanceof LookupContext)) {
 				return false;
+			}
 			LookupContext that = (LookupContext) o;
 			return Objects.equals(this.type, that.type) && this.resourceType == that.resourceType;
 		}

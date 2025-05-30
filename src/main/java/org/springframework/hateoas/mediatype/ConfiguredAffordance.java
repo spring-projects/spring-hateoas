@@ -17,8 +17,6 @@ package org.springframework.hateoas.mediatype;
 
 import java.util.List;
 
-import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;

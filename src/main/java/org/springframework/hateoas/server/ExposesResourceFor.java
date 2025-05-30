@@ -22,8 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.hateoas.server.core.ControllerEntityLinks;
-
 /**
  * Annotation to demarcate controllers that expose URI templates of a structure according to
  * {@link ControllerEntityLinks}.

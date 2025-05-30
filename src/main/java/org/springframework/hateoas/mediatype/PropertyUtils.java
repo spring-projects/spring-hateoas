@@ -36,6 +36,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -51,7 +52,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.InputType;
 import org.springframework.http.HttpEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -703,14 +703,14 @@ public class PropertyUtils {
 					.map(BigDecimal::new);
 		}
 
-		private String cacheAndReturn(String value) {
+		private @Nullable String cacheAndReturn(@Nullable String value) {
 
 			this.inputType = Optional.ofNullable(value);
 
 			return value;
 		}
 
-		private String lookupFromTypeMap() {
+		private @Nullable String lookupFromTypeMap() {
 
 			return TYPE_MAP.entrySet().stream() //
 					.flatMap(it -> {

@@ -17,6 +17,8 @@ package org.springframework.hateoas.server.core;
 
 import java.util.Iterator;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * @author Oliver Drotbohm
  * @author Greg Turnquist
@@ -25,5 +27,6 @@ public interface LastInvocationAware {
 
 	Iterator<Object> getObjectParameters();
 
+	@Nullable
 	MethodInvocation getLastInvocation();
 }

@@ -17,7 +17,6 @@ package org.springframework.hateoas.server;
 
 import java.util.function.Function;
 
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.TypedEntityLinks.ExtendedTypedEntityLinks;
 import org.springframework.plugin.core.Plugin;

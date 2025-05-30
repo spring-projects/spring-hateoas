@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonAutoDetect(getterVisibility = Visibility.NON_PRIVATE)
 @JsonIgnoreProperties({ "httpMethod", "contentTypes" })
 @JsonPropertyOrder({ "title", "method", "contentType", "properties" })
+@NullUnmarked
 final class HalFormsTemplate {
 
 	static final String DEFAULT_KEY = "default";

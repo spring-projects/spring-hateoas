@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
@@ -498,6 +498,7 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 		/**
 		 * @deprecated since 1.4. Use the actual type and call {@link TemplateVariable#composite()}.
 		 */
+		@Deprecated
 		COMPOSITE_PARAM("*", "", true);
 
 		private static final EnumSet<VariableType> COMBINABLE_TYPES = EnumSet.of(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);

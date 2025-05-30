@@ -18,7 +18,8 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author Greg Turnquist
  */
+@NullUnmarked
 final class CollectionJsonTemplate {
 
 	private final List<CollectionJsonData> data;
@@ -48,13 +50,15 @@ final class CollectionJsonTemplate {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(Object obj) {
 
-		if (this == o)
+		if (this == obj) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (obj == null || getClass() != obj.getClass()) {
 			return false;
-		CollectionJsonTemplate that = (CollectionJsonTemplate) o;
+		}
+		CollectionJsonTemplate that = (CollectionJsonTemplate) obj;
 		return Objects.equals(this.data, that.data);
 	}
 
@@ -63,6 +67,7 @@ final class CollectionJsonTemplate {
 		return Objects.hash(this.data);
 	}
 
+	@Override
 	public String toString() {
 		return "CollectionJsonTemplate(data=" + this.data + ")";
 	}

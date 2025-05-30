@@ -18,8 +18,9 @@ package org.springframework.hateoas.mediatype.uber;
 import java.util.List;
 import java.util.Objects;
 
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.Links;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @since 1.0
  */
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 final class Uber {
 
 	private final String version;
@@ -118,10 +120,12 @@ final class Uber {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof Uber))
+		}
+		if (!(o instanceof Uber)) {
 			return false;
+		}
 		Uber uber = (Uber) o;
 		return Objects.equals(this.version, uber.version) && Objects.equals(this.data, uber.data)
 				&& Objects.equals(this.error, uber.error);

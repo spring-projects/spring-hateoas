@@ -27,9 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	private final Class<? extends Annotation> annotationType;
-	private final String mappingAttributeName;
+	private final @Nullable String mappingAttributeName;
 
 	/**
 	 * Creates an {@link AnnotationMappingDiscoverer} for the given annotation type. Will lookup the {@code value}

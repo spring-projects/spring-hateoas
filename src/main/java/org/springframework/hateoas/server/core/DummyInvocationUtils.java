@@ -21,10 +21,9 @@ import java.util.Iterator;
 import java.util.Objects;
 
 import org.aopalliance.intercept.MethodInterceptor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.EmptyTargetSource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.ReflectionUtils;
@@ -55,7 +54,7 @@ public class DummyInvocationUtils {
 
 		private final Class<?> targetType;
 		private final Object[] objectParameters;
-		private MethodInvocation invocation;
+		private @Nullable MethodInvocation invocation;
 
 		/**
 		 * Creates a new {@link InvocationRecordingMethodInterceptor} carrying the given parameters forward that might be
@@ -101,7 +100,7 @@ public class DummyInvocationUtils {
 		 * @see org.springframework.hateoas.core.DummyInvocationUtils.LastInvocationAware#getLastInvocation()
 		 */
 		@Override
-		public MethodInvocation getLastInvocation() {
+		public @Nullable MethodInvocation getLastInvocation() {
 			return invocation;
 		}
 

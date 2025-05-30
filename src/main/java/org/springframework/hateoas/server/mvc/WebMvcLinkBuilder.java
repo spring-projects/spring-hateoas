@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.SpringAffordanceBuilder;

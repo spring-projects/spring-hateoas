@@ -18,8 +18,8 @@ package org.springframework.hateoas.mediatype;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.DeserializationConfig;

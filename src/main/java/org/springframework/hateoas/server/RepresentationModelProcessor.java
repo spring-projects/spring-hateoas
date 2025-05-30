@@ -15,8 +15,6 @@
  */
 package org.springframework.hateoas.server;
 
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 
 /**

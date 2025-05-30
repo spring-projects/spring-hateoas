@@ -1,7 +1,5 @@
 /**
  * Vnd.Error media type.
  */
-@NonNullApi
+@org.jspecify.annotations.NullMarked
 package org.springframework.hateoas.mediatype.vnderrors;
-
-import org.springframework.lang.NonNullApi;

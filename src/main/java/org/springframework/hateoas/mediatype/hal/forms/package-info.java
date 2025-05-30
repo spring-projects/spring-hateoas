@@ -1,7 +1,5 @@
 /**
  * HAL-FORMS extension media type.
  */
-@NonNullApi
+@org.jspecify.annotations.NullMarked
 package org.springframework.hateoas.mediatype.hal.forms;
-
-import org.springframework.lang.NonNullApi;

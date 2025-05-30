@@ -18,9 +18,9 @@ package org.springframework.hateoas.config;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.Module;

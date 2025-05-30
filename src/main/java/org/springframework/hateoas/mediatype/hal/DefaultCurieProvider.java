@@ -20,12 +20,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.UriTemplate;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class DefaultCurieProvider implements CurieProvider {
 
 	private final Map<String, UriTemplate> curies;
-	private final String defaultCurie;
+	private final @Nullable String defaultCurie;
 
 	/**
 	 * Creates a new {@link DefaultCurieProvider} for the given name and {@link UriTemplate}. The curie will be used to

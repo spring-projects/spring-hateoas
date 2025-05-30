@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 import com.jayway.jsonpath.InvalidPathException;

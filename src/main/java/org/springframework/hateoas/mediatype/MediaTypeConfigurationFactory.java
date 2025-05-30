@@ -18,6 +18,7 @@ package org.springframework.hateoas.mediatype;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.util.Assert;
 
@@ -33,7 +34,7 @@ public class MediaTypeConfigurationFactory<T, S extends MediaTypeConfigurationCu
 	private final Supplier<T> supplier;
 	private final Supplier<Stream<S>> customizers;
 
-	private T resolved;
+	private @Nullable T resolved;
 
 	/**
 	 * Creates a new {@link MediaTypeConfigurationFactory} for the given supplier of the original instance and all

@@ -21,8 +21,6 @@ import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.springframework.web.bind.annotation.RequestParam;
-
 /**
  * Annotation to be used in combination with {@link RequestParam} to indicate that collection based values are supposed
  * to be rendered as non-composite values, i.e. like {@code param=value1,value2,value3} rather than

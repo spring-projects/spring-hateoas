@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  * @author Oliver Drotbohm
  */
 @JsonInclude(Include.NON_NULL)
+@NullUnmarked
 public class Problem {
 
 	private static Problem EMPTY = new Problem();
@@ -242,10 +244,12 @@ public class Problem {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof Problem))
+		}
+		if (!(o instanceof Problem)) {
 			return false;
+		}
 		Problem problem = (Problem) o;
 		return Objects.equals(this.type, problem.type) && Objects.equals(this.title, problem.title)
 				&& this.status == problem.status && Objects.equals(this.detail, problem.detail)
@@ -257,6 +261,7 @@ public class Problem {
 		return Objects.hash(this.type, this.title, this.status, this.detail, this.instance);
 	}
 
+	@Override
 	public String toString() {
 		return "Problem(type=" + this.type + ", title=" + this.title + ", status=" + this.status + ", detail=" + this.detail
 				+ ", instance=" + this.instance + ")";
@@ -386,12 +391,15 @@ public class Problem {
 		@Override
 		public boolean equals(Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (!(o instanceof ExtendedProblem))
+			}
+			if (!(o instanceof ExtendedProblem)) {
 				return false;
-			if (!super.equals(o))
+			}
+			if (!super.equals(o)) {
 				return false;
+			}
 			ExtendedProblem<?> that = (ExtendedProblem<?>) o;
 			return Objects.equals(this.extendedProperties, that.extendedProperties);
 		}
@@ -401,6 +409,7 @@ public class Problem {
 			return Objects.hash(super.hashCode(), extendedProperties);
 		}
 
+		@Override
 		public String toString() {
 			return "Problem.ExtendedProblem(extendedProperties=" + this.extendedProperties + ")";
 		}

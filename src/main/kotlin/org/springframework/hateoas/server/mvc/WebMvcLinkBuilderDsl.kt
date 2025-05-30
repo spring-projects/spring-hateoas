@@ -32,7 +32,7 @@ import kotlin.reflect.KClass
  * @author Greg Turnquist
  * @since 1.0
  */
-inline fun <reified C> linkTo(func: C.() -> Unit): WebMvcLinkBuilder = linkTo(methodOn(C::class.java).apply(func))
+inline fun <reified C> linkTo(func: C.() -> Any): WebMvcLinkBuilder = linkTo(methodOn(C::class.java as Class<C & Any>).run(func))
 
 /**
  * Create a [Link] with the given [rel].
@@ -49,7 +49,7 @@ infix fun WebMvcLinkBuilder.withRel(rel: String): Link = withRel(rel)
  * @author Roland Kulcsár
  * @since 1.0
  */
-fun <C, R : RepresentationModel<R>> R.add(controller: Class<C>, links: WebMvcLinkBuilderDsl<C, R>.(R) -> Unit): R {
+fun <C, R : RepresentationModel<R>> R.add(controller: Class<C & Any>, links: WebMvcLinkBuilderDsl<C & Any, R>.(R) -> Unit): R {
     
     val builder = WebMvcLinkBuilderDsl(controller, this)
     builder.links(this)
@@ -68,17 +68,17 @@ fun <C : Any, R : RepresentationModel<R>> R.add(controller: KClass<C>, links: We
 }
 
 /**
- * Provide a [LinkBuilder] DSL to help write idiomatic Kotlin code.
+ * Provide a [WebMvcLinkBuilder] DSL to help write idiomatic Kotlin code.
  *
  * @author Roland Kulcsár
  * @since 1.0
  */
-open class WebMvcLinkBuilderDsl<C, R : RepresentationModel<R>>(val controller: Class<C>, val resource: R) {
+open class WebMvcLinkBuilderDsl<C, R : RepresentationModel<R>>(val controller: Class<C & Any>, val resource: R) {
 
     /**
      * Create a [WebMvcLinkBuilder] pointing to [func] method.
      */
-    fun <R> linkTo(func: C.() -> R): WebMvcLinkBuilder = linkTo(methodOn(controller).run(func))
+    fun <R> linkTo(func: C.() -> R & Any): WebMvcLinkBuilder = linkTo(methodOn(controller).run(func))
 
     /**
      * Add a link with the given [rel] to the [resource].

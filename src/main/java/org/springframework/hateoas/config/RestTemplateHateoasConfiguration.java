@@ -15,13 +15,13 @@
  */
 package org.springframework.hateoas.config;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 
 /**

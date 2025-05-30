@@ -20,12 +20,10 @@ import java.util.Map;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.LinkBuilderFactory;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * {@link EntityLinks} implementation which assumes a certain URI mapping structure:

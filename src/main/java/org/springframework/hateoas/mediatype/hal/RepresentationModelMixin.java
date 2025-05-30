@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.mediatype.hal;
 
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 

@@ -17,9 +17,9 @@ package org.springframework.hateoas.server.core;
 
 import java.lang.annotation.Annotation;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 public class AnnotationAttribute {
 
 	private final Class<? extends Annotation> annotationType;
-	private final String attributeName;
+	private final @Nullable String attributeName;
 
 	/**
 	 * Creates a new {@link AnnotationAttribute} to the {@code value} attribute of the given {@link Annotation} type.

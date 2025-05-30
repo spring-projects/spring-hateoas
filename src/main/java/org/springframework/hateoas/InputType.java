@@ -22,8 +22,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.springframework.hateoas.mediatype.html.HtmlInputType;
-
 /**
  * Annotation to declare a dedicated input type for a property of an representation model. Input types are usually
  * derived from the property's type or JSR-303 validation annotations. Use this annotation to override the type.

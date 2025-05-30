@@ -17,11 +17,10 @@ package org.springframework.hateoas.aot;
 
 import static org.springframework.hateoas.aot.AotUtils.*;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.support.RegisteredBean;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 /**
@@ -38,11 +37,11 @@ class RepresentationModelAssemblerAotProcessor implements BeanRegistrationAotPro
 	 * @see org.springframework.beans.factory.aot.BeanRegistrationAotProcessor#processAheadOfTime(org.springframework.beans.factory.support.RegisteredBean)
 	 */
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 
 		var beanClass = registeredBean.getBeanClass();
 
-		if (!RepresentationModelAssembler.class.isAssignableFrom(beanClass)) {
+		if (beanClass == null || !RepresentationModelAssembler.class.isAssignableFrom(beanClass)) {
 			return null;
 		}
 

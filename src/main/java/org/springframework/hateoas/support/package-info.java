@@ -1,7 +1,5 @@
 /**
  * Support utilities for hypermedia handling.
  */
-@NonNullApi
+@org.jspecify.annotations.NullMarked
 package org.springframework.hateoas.support;
-
-import org.springframework.lang.NonNullApi;

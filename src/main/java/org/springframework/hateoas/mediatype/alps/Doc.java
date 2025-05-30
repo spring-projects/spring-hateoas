@@ -17,6 +17,8 @@ package org.springframework.hateoas.mediatype.alps;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * A value object for an ALPS doc element.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.15
@@ -34,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({ "format", "href", "value" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NullUnmarked
 public final class Doc {
 
 	private final String href;
@@ -42,11 +45,11 @@ public final class Doc {
 
 	/**
 	 * Creates a new {@link Doc} instance with the given value and {@link Format}.
-	 * 
+	 *
 	 * @param value must not be {@literal null} or empty.
 	 * @param format must not be {@literal null}.
 	 */
-	public Doc(String value, Format format) {
+	public Doc(@NonNull String value, @NonNull Format format) {
 
 		Assert.hasText(value, "Value must not be null or empty!");
 		Assert.notNull(format, "Format must not be null!");
@@ -82,14 +85,17 @@ public final class Doc {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(Object obj) {
 
-		if (this == o)
+		if (this == obj) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+
+		if (!(obj instanceof Doc that)) {
 			return false;
-		Doc doc = (Doc) o;
-		return Objects.equals(this.href, doc.href) && Objects.equals(this.value, doc.value) && this.format == doc.format;
+		}
+
+		return Objects.equals(this.href, that.href) && Objects.equals(this.value, that.value) && this.format == that.format;
 	}
 
 	@Override
@@ -97,6 +103,7 @@ public final class Doc {
 		return Objects.hash(this.href, this.value, this.format);
 	}
 
+	@Override
 	public String toString() {
 		return "Doc(href=" + this.href + ", value=" + this.value + ", format=" + this.format + ")";
 	}
@@ -109,19 +116,19 @@ public final class Doc {
 
 		DocBuilder() {}
 
-		public Doc.DocBuilder href(String href) {
+		public Doc.DocBuilder href(@NonNull String href) {
 
 			this.href = href;
 			return this;
 		}
 
-		public Doc.DocBuilder value(String value) {
+		public Doc.DocBuilder value(@NonNull String value) {
 
 			this.value = value;
 			return this;
 		}
 
-		public Doc.DocBuilder format(Format format) {
+		public Doc.DocBuilder format(@NonNull Format format) {
 
 			this.format = format;
 			return this;
@@ -131,6 +138,7 @@ public final class Doc {
 			return new Doc(this.href, this.value, this.format);
 		}
 
+		@Override
 		public String toString() {
 			return "Doc.DocBuilder(href=" + this.href + ", value=" + this.value + ", format=" + this.format + ")";
 		}

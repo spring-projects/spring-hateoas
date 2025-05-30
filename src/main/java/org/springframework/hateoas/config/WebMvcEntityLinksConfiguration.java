@@ -18,7 +18,6 @@ package org.springframework.hateoas.config;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.ControllerEntityLinksFactoryBean;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderFactory;
 import org.springframework.stereotype.Controller;

@@ -17,10 +17,9 @@ package org.springframework.hateoas.server;
 
 import java.net.URI;
 
-import org.springframework.hateoas.IanaLinkRelations;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.lang.Nullable;
 
 /**
  * Builder to ease building {@link Link} instances.

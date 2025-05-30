@@ -17,8 +17,8 @@ package org.springframework.hateoas.server.mvc;
 
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.server.core.UriMapping;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;

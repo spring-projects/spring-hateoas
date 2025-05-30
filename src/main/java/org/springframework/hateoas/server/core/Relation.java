@@ -21,8 +21,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 
 /**
  * Annotation to configure the relation to be used when embedding objects in HAL representations of {@link EntityModel}s

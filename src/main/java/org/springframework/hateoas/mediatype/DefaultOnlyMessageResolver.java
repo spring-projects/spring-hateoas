@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link MessageResolver} to always resort to the {@link MessageSourceResolvable}'s default message.

@@ -17,7 +17,6 @@ package org.springframework.hateoas.server.core;
 
 import org.atteo.evo.inflector.English;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.server.LinkRelationProvider;
 
 /**
  * {@link LinkRelationProvider} implementation using the Evo Inflector implementation of an algorithmic approach to

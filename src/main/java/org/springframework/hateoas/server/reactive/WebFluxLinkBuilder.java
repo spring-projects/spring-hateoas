@@ -22,11 +22,11 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.hateoas.Affordance;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.TemplateVariables;
@@ -37,7 +37,6 @@ import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.hateoas.server.core.WebHandler.PreparedWebHandler;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponents;
@@ -274,32 +273,32 @@ public class WebFluxLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<
 		private UriComponentsBuilder builder;
 		private ConversionService conversionService;
 
+		private CurrentRequest(UriComponentsBuilder builder, ConversionService conversionService) {
+
+			this.builder = builder;
+			this.conversionService = conversionService;
+		}
+
 		public static Mono<CurrentRequest> of(@Nullable ServerWebExchange exchange) {
 
-			CurrentRequest result = new CurrentRequest();
-
 			if (exchange == null) {
-
-				result.builder = UriComponentsBuilder.fromPath("/");
-				result.conversionService = FALLBACK_CONVERSION_SERVICE;
-
-				return Mono.just(result);
+				return Mono.just(new CurrentRequest(UriComponentsBuilder.fromPath("/"), FALLBACK_CONVERSION_SERVICE));
 			}
 
 			ServerHttpRequest request = exchange.getRequest();
 			PathContainer contextPath = request.getPath().contextPath();
 
-			result.builder = UriComponentsBuilder.fromUri(request.getURI()) //
+			var builder = UriComponentsBuilder.fromUri(request.getURI()) //
 					.replacePath(contextPath.toString()) //
 					.replaceQuery("");
 
 			ApplicationContext context = exchange.getApplicationContext();
 
-			result.conversionService = context != null && context.containsBean("webFluxConversionService")
+			var conversionService = context != null && context.containsBean("webFluxConversionService")
 					? context.getBean("webFluxConversionService", ConversionService.class)
 					: FALLBACK_CONVERSION_SERVICE;
 
-			return Mono.just(result);
+			return Mono.just(new CurrentRequest(builder, conversionService));
 		}
 
 		UriComponentsBuilder toBuilder(UriMapping mapping) {

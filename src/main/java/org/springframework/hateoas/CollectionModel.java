@@ -22,11 +22,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -44,7 +44,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 
 	private final Collection<T> content;
 	private final @Nullable ResolvableType fallbackType;
-	private ResolvableType fullType;
+	private @Nullable ResolvableType fullType;
 
 	/**
 	 * Creates an empty {@link CollectionModel} instance.

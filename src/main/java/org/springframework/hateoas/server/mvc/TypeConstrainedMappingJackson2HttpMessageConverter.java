@@ -18,9 +18,9 @@ package org.springframework.hateoas.server.mvc;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

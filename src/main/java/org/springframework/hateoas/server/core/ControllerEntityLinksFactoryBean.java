@@ -18,9 +18,11 @@ package org.springframework.hateoas.server.core;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-import org.springframework.beans.factory.FactoryBean;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -28,7 +30,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.LinkBuilderFactory;
-import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 /**
@@ -40,9 +41,9 @@ import org.springframework.util.Assert;
 public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<ControllerEntityLinks>
 		implements ApplicationContextAware {
 
-	private Class<? extends Annotation> annotation;
-	private LinkBuilderFactory<? extends LinkBuilder> linkBuilderFactory;
-	private ApplicationContext context;
+	private @Nullable Class<? extends Annotation> annotation;
+	private @Nullable LinkBuilderFactory<? extends LinkBuilder> linkBuilderFactory;
+	private @Nullable ApplicationContext context;
 
 	/**
 	 * Configures the annotation type to inspect the {@link ApplicationContext} for beans that carry the given annotation.
@@ -89,6 +90,10 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 	@Override
 	protected ControllerEntityLinks createInstance() {
 
+		Assert.state(annotation != null, "No annotation configured!");
+		Assert.state(linkBuilderFactory != null, "No LinkBuilderFactory configured!");
+		Assert.state(context != null, "No ApplicationContext configured!");
+
 		Collection<Class<?>> controllerTypes = new HashSet<>();
 
 		for (Class<?> controllerType : getBeanTypesWithAnnotation(annotation)) {
@@ -116,9 +121,10 @@ public class ControllerEntityLinksFactoryBean extends AbstractFactoryBean<Contro
 
 		Set<Class<?>> annotatedTypes = new HashSet<>();
 
-		for (String beanName : context.getBeanDefinitionNames()) {
+		for (String beanName : Objects.requireNonNull(context).getBeanDefinitionNames()) {
 
 			Annotation annotation = context.findAnnotationOnBean(beanName, type);
+
 			if (annotation != null) {
 				annotatedTypes.add(context.getType(beanName));
 			}

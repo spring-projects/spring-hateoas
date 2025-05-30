@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.aot;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.hateoas.RepresentationModel;
@@ -31,7 +32,7 @@ class HateoasTypesRuntimeHints implements RuntimeHintsRegistrar {
 	 * @see org.springframework.aot.hint.RuntimeHintsRegistrar#registerHints(org.springframework.aot.hint.RuntimeHints, java.lang.ClassLoader)
 	 */
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 
 		var packageName = RepresentationModel.class.getPackageName();
 		var reflection = hints.reflection();

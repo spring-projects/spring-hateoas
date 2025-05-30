@@ -18,6 +18,10 @@ package org.springframework.hateoas.mediatype.alps;
 import java.util.List;
 import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * A value object for an ALPS descriptor.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.15
@@ -33,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({ "id", "href", "name", "type", "doc", "descriptor", "ext" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NullUnmarked
 public final class Descriptor {
 
 	private final String id;
@@ -60,49 +65,51 @@ public final class Descriptor {
 		this.descriptor = descriptor;
 	}
 
-	public static DescriptorBuilder builder() {
+	public static @NonNull DescriptorBuilder builder() {
 		return new DescriptorBuilder();
 	}
 
-	public String getId() {
+	public @Nullable String getId() {
 		return this.id;
 	}
 
-	public String getHref() {
+	public @Nullable String getHref() {
 		return this.href;
 	}
 
-	public String getName() {
+	public @Nullable String getName() {
 		return this.name;
 	}
 
-	public Doc getDoc() {
+	public @Nullable Doc getDoc() {
 		return this.doc;
 	}
 
-	public Type getType() {
+	public @Nullable Type getType() {
 		return this.type;
 	}
 
-	public Ext getExt() {
+	public @Nullable Ext getExt() {
 		return this.ext;
 	}
 
-	public String getRt() {
+	public @Nullable String getRt() {
 		return this.rt;
 	}
 
-	public List<Descriptor> getDescriptor() {
+	public @Nullable List<Descriptor> getDescriptor() {
 		return this.descriptor;
 	}
 
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		Descriptor that = (Descriptor) o;
 		return Objects.equals(this.id, that.id) && Objects.equals(this.href, that.href)
 				&& Objects.equals(this.name, that.name) && Objects.equals(this.doc, that.doc) && this.type == that.type
@@ -115,6 +122,7 @@ public final class Descriptor {
 		return Objects.hash(this.id, this.href, this.name, this.doc, this.type, this.ext, this.rt, this.descriptor);
 	}
 
+	@Override
 	public String toString() {
 
 		return "Descriptor(id=" + this.id + ", href=" + this.href + ", name=" + this.name + ", doc=" + this.doc + ", type="
@@ -134,49 +142,49 @@ public final class Descriptor {
 
 		DescriptorBuilder() {}
 
-		public Descriptor.DescriptorBuilder id(String id) {
+		public Descriptor.DescriptorBuilder id(@Nullable String id) {
 
 			this.id = id;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder href(String href) {
+		public Descriptor.DescriptorBuilder href(@Nullable String href) {
 
 			this.href = href;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder name(String name) {
+		public Descriptor.DescriptorBuilder name(@Nullable String name) {
 
 			this.name = name;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder doc(Doc doc) {
+		public Descriptor.DescriptorBuilder doc(@Nullable Doc doc) {
 
 			this.doc = doc;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder type(Type type) {
+		public Descriptor.DescriptorBuilder type(@Nullable Type type) {
 
 			this.type = type;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder ext(Ext ext) {
+		public Descriptor.DescriptorBuilder ext(@Nullable Ext ext) {
 
 			this.ext = ext;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder rt(String rt) {
+		public Descriptor.DescriptorBuilder rt(@Nullable String rt) {
 
 			this.rt = rt;
 			return this;
 		}
 
-		public Descriptor.DescriptorBuilder descriptor(List<Descriptor> descriptor) {
+		public Descriptor.DescriptorBuilder descriptor(@Nullable List<Descriptor> descriptor) {
 
 			this.descriptor = descriptor;
 			return this;
@@ -186,6 +194,7 @@ public final class Descriptor {
 			return new Descriptor(this.id, this.href, this.name, this.doc, this.type, this.ext, this.rt, this.descriptor);
 		}
 
+		@Override
 		public String toString() {
 
 			return "Descriptor.DescriptorBuilder(id=" + this.id + ", href=" + this.href + ", name=" + this.name + ", doc="

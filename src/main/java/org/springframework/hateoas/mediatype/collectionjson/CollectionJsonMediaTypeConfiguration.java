@@ -17,13 +17,13 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import java.util.List;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 
 import com.fasterxml.jackson.databind.Module;
 

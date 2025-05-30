@@ -16,7 +16,6 @@
 package org.springframework.hateoas.mediatype.hal.forms;
 
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
 import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 
 /**

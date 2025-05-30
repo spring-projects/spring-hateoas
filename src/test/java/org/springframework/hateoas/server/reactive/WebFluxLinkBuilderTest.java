@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static org.springframework.web.filter.reactive.ServerWebExchangeContextFilter.*;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
@@ -34,7 +35,6 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.WebFluxLink;
 import org.springframework.http.HttpEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

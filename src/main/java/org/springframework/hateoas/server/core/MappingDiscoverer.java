@@ -19,9 +19,9 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface to discover a URI mapping and related {@link org.springframework.hateoas.Affordance}s for either a

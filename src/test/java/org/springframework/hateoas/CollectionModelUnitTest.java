@@ -18,6 +18,7 @@ package org.springframework.hateoas;
 import static org.assertj.core.api.Assertions.*;
 
 import lombok.Value;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * Unit tests for {@link CollectionModel}.

@@ -18,9 +18,9 @@ package org.springframework.hateoas.mediatype.uber;
 
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.mediatype.uber.Jackson2UberModule.UberActionDeserializer;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

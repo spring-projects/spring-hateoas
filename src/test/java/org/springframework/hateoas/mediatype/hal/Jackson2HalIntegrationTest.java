@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +54,6 @@ import org.springframework.hateoas.mediatype.hal.Jackson2HalModule.HalHandlerIns
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;

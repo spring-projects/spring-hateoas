@@ -21,12 +21,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.hateoas.Affordance;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.AffordanceModel;
-import org.springframework.hateoas.QueryParameter;
 import org.springframework.hateoas.mediatype.ConfiguredAffordance;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 
 /**
  * {@link AffordanceModel} for Collection+JSON.

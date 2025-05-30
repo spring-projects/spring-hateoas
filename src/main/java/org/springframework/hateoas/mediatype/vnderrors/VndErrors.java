@@ -23,12 +23,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -50,6 +51,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "message", "logref", "total", "_links", "_embedded" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated
+@NullUnmarked
 public class VndErrors extends CollectionModel<VndErrors.VndError> {
 
 	/**

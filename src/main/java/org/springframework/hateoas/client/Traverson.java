@@ -27,18 +27,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.UriTemplate;
 import org.springframework.hateoas.client.Rels.Rel;
-import org.springframework.hateoas.mediatype.hal.HalLinkDiscoverer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestOperations;
@@ -109,9 +108,8 @@ public class Traverson {
 
 		this.mediaTypes = mediaTypes;
 		this.baseUri = baseUri;
-
-		setLinkDiscoverers(DEFAULTS.getLinkDiscoverers(mediaTypes));
-		setRestOperations(createDefaultTemplate(this.mediaTypes));
+		this.discoverers = defaultLinkDiscoverers(DEFAULTS.getLinkDiscoverers(mediaTypes));
+		this.operations = createDefaultTemplate(this.mediaTypes);
 	}
 
 	/**
@@ -141,27 +139,21 @@ public class Traverson {
 	 */
 	public Traverson setRestOperations(@Nullable RestOperations operations) {
 
-		this.operations = operations == null //
-				? createDefaultTemplate(this.mediaTypes) //
-				: operations;
+		this.operations = defaultRestOperations(operations);
 
 		return this;
 	}
 
 	/**
 	 * Sets the {@link LinkDiscoverers} to use. By default a single {@link HalLinkDiscoverer} is registered. If
-	 * {@literal null} is provided the default is reapplied.
+	 * {@literal null} is provided the default is re-applied.
 	 *
 	 * @param discoverer can be {@literal null}.
 	 * @return
 	 */
 	public Traverson setLinkDiscoverers(@Nullable List<? extends LinkDiscoverer> discoverer) {
 
-		List<? extends LinkDiscoverer> defaultedDiscoverers = discoverer == null //
-				? DEFAULTS.getLinkDiscoverers(mediaTypes) //
-				: discoverer;
-
-		this.discoverers = new LinkDiscoverers(PluginRegistry.of(defaultedDiscoverers));
+		this.discoverers = defaultLinkDiscoverers(discoverer);
 
 		return this;
 	}
@@ -185,6 +177,17 @@ public class Traverson {
 	 */
 	public TraversalBuilder follow(Hop hop) {
 		return new TraversalBuilder().follow(hop);
+	}
+
+	private RestOperations defaultRestOperations(@Nullable RestOperations operations) {
+		return operations == null ? createDefaultTemplate(this.mediaTypes) : operations;
+	}
+
+	private LinkDiscoverers defaultLinkDiscoverers(@Nullable List<? extends LinkDiscoverer> discoverer) {
+
+		var defaultedDiscoverers = discoverer == null ? DEFAULTS.getLinkDiscoverers(mediaTypes) : discoverer;
+
+		return new LinkDiscoverers(PluginRegistry.of(defaultedDiscoverers));
 	}
 
 	private HttpEntity<?> prepareRequest(HttpHeaders headers) {

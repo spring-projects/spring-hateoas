@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -184,7 +184,10 @@ public class Link implements Serializable {
 	 * Empty constructor required by the marshaling framework.
 	 */
 	protected Link() {
+
 		this.affordances = new ArrayList<>();
+		this.rel = LinkRelation.of("__synthetic__");
+		this.href = "__synthetic__";
 	}
 
 	/**

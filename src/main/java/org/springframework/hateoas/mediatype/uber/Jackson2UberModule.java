@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -37,7 +38,6 @@ import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -129,7 +129,7 @@ public class Jackson2UberModule extends SimpleModule {
 			implements ContextualSerializer {
 
 		private static final long serialVersionUID = -572866287910993300L;
-		private final BeanProperty property;
+		private final @Nullable BeanProperty property;
 
 		UberRepresentationModelSerializer(@Nullable BeanProperty property) {
 
@@ -220,7 +220,7 @@ public class Jackson2UberModule extends SimpleModule {
 
 		private static final long serialVersionUID = -5538560800604582741L;
 
-		private final BeanProperty property;
+		private final @Nullable BeanProperty property;
 
 		UberEntityModelSerializer(@Nullable BeanProperty property) {
 
@@ -310,7 +310,7 @@ public class Jackson2UberModule extends SimpleModule {
 
 		private static final long serialVersionUID = 3422019794262694127L;
 
-		private BeanProperty property;
+		private @Nullable BeanProperty property;
 
 		UberCollectionModelSerializer(@Nullable BeanProperty property) {
 
@@ -400,7 +400,7 @@ public class Jackson2UberModule extends SimpleModule {
 
 		private static final long serialVersionUID = -7892297813593085984L;
 
-		private BeanProperty property;
+		private @Nullable BeanProperty property;
 
 		UberPagedModelSerializer(@Nullable BeanProperty property) {
 

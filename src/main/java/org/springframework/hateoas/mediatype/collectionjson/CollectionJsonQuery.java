@@ -18,7 +18,8 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author Greg Turnquist
  */
+@NullUnmarked
 final class CollectionJsonQuery {
 
 	private @JsonInclude(Include.NON_NULL) final String rel;
@@ -108,10 +110,12 @@ final class CollectionJsonQuery {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		CollectionJsonQuery that = (CollectionJsonQuery) o;
 		return Objects.equals(this.rel, that.rel) && Objects.equals(this.href, that.href)
 				&& Objects.equals(this.prompt, that.prompt) && Objects.equals(this.data, that.data);
@@ -122,6 +126,7 @@ final class CollectionJsonQuery {
 		return Objects.hash(this.rel, this.href, this.prompt, this.data);
 	}
 
+	@Override
 	public String toString() {
 
 		return "CollectionJsonQuery(rel=" + this.rel + ", href=" + this.href + ", prompt=" + this.prompt + ", data="

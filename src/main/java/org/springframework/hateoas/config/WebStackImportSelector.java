@@ -48,7 +48,7 @@ class WebStackImportSelector implements ImportSelector {
 
 		WebStack[] stacks = (WebStack[]) attributes.get("stacks");
 
-		if (stacks.length == 0) {
+		if (stacks == null || stacks.length == 0) {
 			throw new IllegalStateException(String.format(WEB_STACK_MISSING, metadata.getClassName()));
 		}
 

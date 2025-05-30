@@ -21,11 +21,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.Links.MergeMode;
 import org.springframework.hateoas.mediatype.PropertyUtils;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,6 +40,7 @@ import com.fasterxml.jackson.databind.JavaType;
  *
  * @author Greg Turnquist
  */
+@NullUnmarked
 final class CollectionJsonItem<T> {
 
 	private @Nullable final String href;
@@ -86,7 +88,7 @@ final class CollectionJsonItem<T> {
 
 	/**
 	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@link Links}.
-	 * 
+	 *
 	 * @param links
 	 * @return
 	 */
@@ -97,7 +99,7 @@ final class CollectionJsonItem<T> {
 	/**
 	 * Create new {@link CollectionJsonItem} by copying attributes and replacing the {@literal links} with a
 	 * {@literal self} link.
-	 * 
+	 *
 	 * @return
 	 */
 	CollectionJsonItem<T> withOwnSelfLink() {
@@ -210,10 +212,12 @@ final class CollectionJsonItem<T> {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		CollectionJsonItem<?> that = (CollectionJsonItem<?>) o;
 		return Objects.equals(this.href, that.href) && Objects.equals(this.data, that.data)
 				&& Objects.equals(this.links, that.links) && Objects.equals(this.rawData, that.rawData);
@@ -224,6 +228,7 @@ final class CollectionJsonItem<T> {
 		return Objects.hash(this.href, this.data, this.links, this.rawData);
 	}
 
+	@Override
 	public String toString() {
 
 		return "CollectionJsonItem(href=" + this.href + ", data=" + this.data + ", links=" + this.links + ", rawData="

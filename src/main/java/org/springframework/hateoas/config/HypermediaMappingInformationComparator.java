@@ -18,8 +18,8 @@ package org.springframework.hateoas.config;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**

@@ -15,8 +15,7 @@
  */
 package org.springframework.hateoas.mediatype;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * SPI interface for components that can derive an input type from a {@link ResolvableType}. Primary usage to enable to

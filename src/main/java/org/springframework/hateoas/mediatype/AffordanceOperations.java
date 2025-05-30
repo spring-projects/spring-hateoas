@@ -15,7 +15,6 @@
  */
 package org.springframework.hateoas.mediatype;
 
-import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.Link;
 
 /**

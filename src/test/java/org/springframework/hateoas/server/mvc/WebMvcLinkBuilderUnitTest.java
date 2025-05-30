@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.jspecify.annotations.NonNull;
+
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
@@ -51,7 +53,6 @@ import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.Sample.SampleConverter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;

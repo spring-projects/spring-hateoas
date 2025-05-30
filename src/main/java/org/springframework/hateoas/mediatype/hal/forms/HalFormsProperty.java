@@ -18,8 +18,9 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.AffordanceModel.Named;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @see https://mamund.site44.com/misc/hal-forms/
  */
 @JsonInclude(Include.NON_DEFAULT)
+@NullUnmarked
 final class HalFormsProperty implements Named {
 
 	private final String name, prompt, regex, placeholder;

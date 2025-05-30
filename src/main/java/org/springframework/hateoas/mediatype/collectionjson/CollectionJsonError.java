@@ -17,7 +17,8 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * @author Greg Turnquist
  */
+@NullUnmarked
 final class CollectionJsonError {
 
 	private final String title;
@@ -89,10 +91,12 @@ final class CollectionJsonError {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		CollectionJsonError that = (CollectionJsonError) o;
 		return Objects.equals(this.title, that.title) && Objects.equals(this.code, that.code)
 				&& Objects.equals(this.message, that.message);
@@ -103,6 +107,7 @@ final class CollectionJsonError {
 		return Objects.hash(this.title, this.code, this.message);
 	}
 
+	@Override
 	public String toString() {
 		return "CollectionJsonError(title=" + this.title + ", code=" + this.code + ", message=" + this.message + ")";
 	}

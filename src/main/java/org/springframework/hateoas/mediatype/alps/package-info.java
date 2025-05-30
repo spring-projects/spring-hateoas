@@ -3,5 +3,5 @@
  *
  * @see https://alps.io
  */
-@org.springframework.lang.NonNullApi
+@org.jspecify.annotations.NullMarked
 package org.springframework.hateoas.mediatype.alps;

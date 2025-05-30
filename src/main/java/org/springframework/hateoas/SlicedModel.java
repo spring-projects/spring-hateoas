@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,7 +42,7 @@ public class SlicedModel<T> extends CollectionModel<T> {
 
 	public static SlicedModel<?> NO_SLICE = new SlicedModel<>();
 
-	private final SliceMetadata metadata;
+	private final @Nullable SliceMetadata metadata;
 	private final @Nullable ResolvableType fallbackType;
 
 	/**
@@ -290,9 +290,8 @@ public class SlicedModel<T> extends CollectionModel<T> {
 	 *
 	 * @return the metadata can be {@literal null}.
 	 */
-	@Nullable
 	@JsonProperty("page")
-	public SliceMetadata getMetadata() {
+	public @Nullable SliceMetadata getMetadata() {
 		return metadata;
 	}
 

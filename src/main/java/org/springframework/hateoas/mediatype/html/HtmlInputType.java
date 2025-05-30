@@ -24,10 +24,9 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.Constants;
 import org.springframework.core.Constants.ConstantException;
-import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonValue;

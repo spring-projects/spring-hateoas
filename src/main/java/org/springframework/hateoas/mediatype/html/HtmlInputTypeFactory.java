@@ -15,8 +15,8 @@
  */
 package org.springframework.hateoas.mediatype.html;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.mediatype.InputTypeFactory;
-import org.springframework.lang.Nullable;
 
 /**
  * An {@link InputTypeFactory} based on {@link HtmlInputType}.

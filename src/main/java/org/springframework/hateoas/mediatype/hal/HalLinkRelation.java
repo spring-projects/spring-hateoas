@@ -19,11 +19,12 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.IanaUriSchemes;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -184,8 +185,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	 * @see org.springframework.context.MessageSourceResolvable#getCodes()
 	 */
 	@Override
-	@org.springframework.lang.NonNull
-	public String[] getCodes() {
+	public String @NonNull[] getCodes() {
 
 		return Stream.of(value(), localPart) //
 				.map(it -> String.format(RELATION_MESSAGE_TEMPLATE, it)) //
@@ -197,7 +197,7 @@ public class HalLinkRelation implements LinkRelation, MessageSourceResolvable {
 	 * @see org.springframework.context.MessageSourceResolvable#getDefaultMessage()
 	 */
 	@Override
-	@org.springframework.lang.NonNull
+	@NonNull
 	public String getDefaultMessage() {
 		return "";
 	}

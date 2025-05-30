@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
@@ -39,7 +39,6 @@ import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.MessageSourceResolvableSerializer;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
 import org.springframework.hateoas.server.LinkRelationProvider;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -293,7 +292,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private final EmbeddedMapper embeddedMapper;
 		private final HalConfiguration configuration;
-		private final BeanProperty property;
+		private final @Nullable BeanProperty property;
 
 		public HalResourcesSerializer(EmbeddedMapper embeddedMapper, HalConfiguration configuration) {
 			this(embeddedMapper, configuration, null);
@@ -617,7 +616,7 @@ public class Jackson2HalModule extends SimpleModule {
 
 		private static final long serialVersionUID = 4755806754621032622L;
 
-		private JavaType contentType;
+		private @Nullable JavaType contentType;
 
 		public HalResourcesDeserializer() {
 			this(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Object.class), null);
@@ -905,7 +904,7 @@ public class Jackson2HalModule extends SimpleModule {
 	static class HalLink {
 
 		private final Link link;
-		private final String title;
+		private final @Nullable String title;
 
 		public HalLink(Link link, @Nullable String title) {
 

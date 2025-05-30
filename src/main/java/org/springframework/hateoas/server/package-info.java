@@ -1,7 +1,5 @@
 /**
  * Server-side components for hypermedia handling.
  */
-@NonNullApi
+@org.jspecify.annotations.NullMarked
 package org.springframework.hateoas.server;
-
-import org.springframework.lang.NonNullApi;

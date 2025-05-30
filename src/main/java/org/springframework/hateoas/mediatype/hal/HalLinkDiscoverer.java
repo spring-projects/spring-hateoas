@@ -22,6 +22,7 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.hateoas.client.LinkDiscoverer} implementation based on HAL link structure.
@@ -54,9 +55,12 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 			return super.extractLink(element, rel);
 		}
 
-		Map<String, String> json = (Map<String, String>) element;
+		var json = (Map<String, String>) element;
+		var href = json.get("href");
 
-		return Link.of(json.get("href"), rel) //
+		Assert.state(href != null, "No href found in link data!");
+
+		return Link.of(href, rel) //
 				.withHreflang(json.get("hreflang")) //
 				.withMedia(json.get("media")) //
 				.withTitle(json.get("title")) //

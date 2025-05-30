@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.alps;
 
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
-import org.springframework.hateoas.client.LinkDiscoverer;
 
 /**
  * {@link LinkDiscoverer} implementation to find ALPS-based links.

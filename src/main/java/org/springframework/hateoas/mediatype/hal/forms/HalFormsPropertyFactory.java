@@ -24,13 +24,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -157,13 +157,13 @@ class HalFormsPropertyFactory {
 			return "";
 		}
 
+
 		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.context.MessageSourceResolvable#getCodes()
 		 */
-		@NonNull
 		@Override
-		public String[] getCodes() {
+		public String @NonNull[] getCodes() {
 
 			String globalCode = String.format(template, property.getName());
 

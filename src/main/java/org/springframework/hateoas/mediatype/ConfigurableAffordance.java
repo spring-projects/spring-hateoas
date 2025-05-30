@@ -17,14 +17,13 @@ package org.springframework.hateoas.mediatype;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ResolvableType;
-import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.QueryParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 
 /**
  * An affordance in creation. API to build up affordances manually to clearly distinguish between building the

@@ -19,8 +19,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Hold the {@link AffordanceModel}s for all supported media types.
@@ -42,13 +43,30 @@ public final class Affordance implements Iterable<AffordanceModel> {
 	/**
 	 * Look up the {@link AffordanceModel} for the requested {@link MediaType}.
 	 *
-	 * @param mediaType
-	 * @return
+	 * @param mediaType must not be {@literal null}.
+	 * @return can be {@literal null}.
 	 */
 	@Nullable
 	@SuppressWarnings("unchecked")
 	public <T extends AffordanceModel> T getAffordanceModel(MediaType mediaType) {
 		return (T) this.models.get(mediaType);
+	}
+
+	/**
+	 * Look up the {@link AffordanceModel} for the requested {@link MediaType}.
+	 *
+	 * @param mediaType must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 3.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends AffordanceModel> T getRequiredAffordanceModel(MediaType mediaType) {
+
+		var result = getAffordanceModel(mediaType);
+
+		Assert.notNull(result, () -> "No affordance model found for %s!".formatted(mediaType));
+
+		return (T) result;
 	}
 
 	/*

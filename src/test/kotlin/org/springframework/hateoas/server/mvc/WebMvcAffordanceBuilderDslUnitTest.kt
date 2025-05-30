@@ -39,7 +39,7 @@ class WebMvcAffordanceBuilderDslUnitTest : TestUtils() {
 
         val delete = afford<CustomerController> { delete("15") }
 
-        val affordanceModel = delete.getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON)
+        val affordanceModel = delete.getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON)
 
         assertThat(affordanceModel.httpMethod).isEqualTo(HttpMethod.DELETE)
         assertThat(affordanceModel.name).isEqualTo("delete")
@@ -62,14 +62,14 @@ class WebMvcAffordanceBuilderDslUnitTest : TestUtils() {
         assertThat(selfWithAffordances.href).isEqualTo("http://localhost/customers/15")
         
         assertThat(selfWithAffordances.affordances).hasSize(3)
-        assertThat(selfWithAffordances.affordances[0].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.GET)
-        assertThat(selfWithAffordances.affordances[0].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("findById")
+        assertThat(selfWithAffordances.affordances[0].getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.GET)
+        assertThat(selfWithAffordances.affordances[0].getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("findById")
 
-        assertThat(selfWithAffordances.affordances[1].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.PUT)
-        assertThat(selfWithAffordances.affordances[1].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("update")
+        assertThat(selfWithAffordances.affordances[1].getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.PUT)
+        assertThat(selfWithAffordances.affordances[1].getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("update")
 
-        assertThat(selfWithAffordances.affordances[2].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.DELETE)
-        assertThat(selfWithAffordances.affordances[2].getAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("delete")
+        assertThat(selfWithAffordances.affordances[2].getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).httpMethod).isEqualTo(HttpMethod.DELETE)
+        assertThat(selfWithAffordances.affordances[2].getRequiredAffordanceModel<AffordanceModel>(MediaTypes.HAL_FORMS_JSON).name).isEqualTo("delete")
 
         assertThat(selfWithAffordances.hashCode()).isNotEqualTo(self.hashCode())
         assertThat(selfWithAffordances).isNotEqualTo(self)

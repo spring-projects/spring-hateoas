@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.aot;
 
+import static java.util.Objects.*;
 import static org.springframework.hateoas.aot.AotUtils.*;
 
 import java.lang.annotation.Annotation;
@@ -23,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopConfigException;
@@ -36,9 +38,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.hateoas.server.core.DummyInvocationUtils;
 import org.springframework.hateoas.server.core.LastInvocationAware;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -176,8 +176,8 @@ public class ControllerMethodReturnTypeAotProcessor implements BeanRegistrationA
 
 				reflection.registerType(result, MemberCategory.INVOKE_DECLARED_METHODS);
 
-				reflection.registerField(ReflectionUtils.findField(result, "CGLIB$FACTORY_DATA"));
-				reflection.registerField(ReflectionUtils.findField(result, "CGLIB$CALLBACK_FILTER"));
+				reflection.registerField(requireNonNull(ReflectionUtils.findField(result, "CGLIB$FACTORY_DATA")));
+				reflection.registerField(requireNonNull(ReflectionUtils.findField(result, "CGLIB$CALLBACK_FILTER")));
 			}
 
 			return result;

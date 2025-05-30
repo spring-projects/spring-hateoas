@@ -23,12 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.hateoas.EntityModel;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
 import org.springframework.hateoas.server.core.EmbeddedWrapper;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -87,6 +86,10 @@ class HalEmbeddedBuilder {
 	 * @param source can be {@literal null}.
 	 */
 	void add(@Nullable Object source) {
+
+		if (source == null) {
+			return;
+		}
 
 		EmbeddedWrapper wrapper = wrappers.wrap(source);
 
@@ -160,7 +163,7 @@ class HalEmbeddedBuilder {
 
 	/**
 	 * Create new {@link HalEmbeddedBuilder} by copying attributes and replacing the {@literal relationTransformer}.
-	 * 
+	 *
 	 * @param relationTransformer
 	 * @return
 	 */

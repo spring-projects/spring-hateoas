@@ -1,5 +1,5 @@
 /**
  * Value objects to build Problem representations.
  */
-@org.springframework.lang.NonNullApi
+@org.jspecify.annotations.NullMarked
 package org.springframework.hateoas.mediatype.problem;

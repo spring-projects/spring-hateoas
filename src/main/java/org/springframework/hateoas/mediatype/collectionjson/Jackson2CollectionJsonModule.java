@@ -23,7 +23,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.hateoas.Affordance;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -36,7 +36,6 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.JacksonHelper;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -170,7 +169,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		private static final long serialVersionUID = 6127711241993352699L;
 
-		private final BeanProperty property;
+		private final @Nullable BeanProperty property;
 
 		CollectionJsonResourceSupportSerializer() {
 			this(null);
@@ -272,7 +271,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		private static final long serialVersionUID = 2212535956767860364L;
 
-		private final BeanProperty property;
+		private final @Nullable BeanProperty property;
 
 		CollectionJsonResourceSerializer() {
 			this(null);
@@ -453,7 +452,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 		private static final long serialVersionUID = -6703190072925382402L;
 
-		private final BeanProperty property;
+		private final @Nullable BeanProperty property;
 
 		CollectionJsonPagedResourcesSerializer() {
 			this(null);

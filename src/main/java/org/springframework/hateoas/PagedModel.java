@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -41,7 +41,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 
 	public static PagedModel<?> NO_PAGE = new PagedModel<>();
 
-	private final PageMetadata metadata;
+	private final @Nullable PageMetadata metadata;
 	private final @Nullable ResolvableType fallbackType;
 
 	/**
@@ -273,8 +273,7 @@ public class PagedModel<T> extends CollectionModel<T> {
 	 * @return the metadata
 	 */
 	@JsonProperty("page")
-	@Nullable
-	public PageMetadata getMetadata() {
+	public @Nullable PageMetadata getMetadata() {
 		return metadata;
 	}
 

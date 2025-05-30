@@ -18,6 +18,9 @@ package org.springframework.hateoas.mediatype.alps;
 import java.util.List;
 import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NullUnmarked;
 import org.springframework.hateoas.mediatype.alps.Descriptor.DescriptorBuilder;
 import org.springframework.hateoas.mediatype.alps.Doc.DocBuilder;
 import org.springframework.hateoas.mediatype.alps.Ext.ExtBuilder;
@@ -29,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * An ALPS document.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.15
@@ -38,6 +41,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({ "version", "doc", "descriptor" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@NullUnmarked
 public final class Alps {
 
 	private final String version;
@@ -58,13 +62,13 @@ public final class Alps {
 	 *
 	 * @return
 	 */
-	public static AlpsBuilder alps() {
+	public static @NullMarked AlpsBuilder alps() {
 		return new AlpsBuilder();
 	}
 
 	/**
 	 * Returns a new {@link DescriptorBuilder}.
-	 * 
+	 *
 	 * @return
 	 */
 	public static DescriptorBuilder descriptor() {
@@ -73,7 +77,7 @@ public final class Alps {
 
 	/**
 	 * Returns a new {@link DocBuilder}.
-	 * 
+	 *
 	 * @return
 	 */
 	public static DocBuilder doc() {
@@ -82,7 +86,7 @@ public final class Alps {
 
 	/**
 	 * Returns a new {@link ExtBuilder}.
-	 * 
+	 *
 	 * @return
 	 */
 	public static ExtBuilder ext() {
@@ -104,13 +108,17 @@ public final class Alps {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+
+		if (!(o instanceof Alps that)) {
 			return false;
-		Alps alps = (Alps) o;
-		return Objects.equals(this.version, alps.version) && Objects.equals(this.doc, alps.doc)
-				&& Objects.equals(this.descriptor, alps.descriptor);
+		}
+
+		return Objects.equals(this.version, that.version)
+				&& Objects.equals(this.doc, that.doc)
+				&& Objects.equals(this.descriptor, that.descriptor);
 	}
 
 	@Override
@@ -118,6 +126,7 @@ public final class Alps {
 		return Objects.hash(this.version, this.doc, this.descriptor);
 	}
 
+	@Override
 	public String toString() {
 		return "Alps(version=" + this.version + ", doc=" + this.doc + ", descriptor=" + this.descriptor + ")";
 	}
@@ -130,28 +139,29 @@ public final class Alps {
 
 		AlpsBuilder() {}
 
-		public Alps.AlpsBuilder version(String version) {
+		public Alps.AlpsBuilder version(@NonNull String version) {
 
 			this.version = version;
 			return this;
 		}
 
-		public Alps.AlpsBuilder doc(Doc doc) {
+		public Alps.AlpsBuilder doc(@NonNull Doc doc) {
 
 			this.doc = doc;
 			return this;
 		}
 
-		public Alps.AlpsBuilder descriptor(List<Descriptor> descriptor) {
+		public Alps.AlpsBuilder descriptor(@NonNull List<Descriptor> descriptor) {
 
 			this.descriptor = descriptor;
 			return this;
 		}
 
-		public Alps build() {
+		public @NonNull Alps build() {
 			return new Alps(this.version, this.doc, this.descriptor);
 		}
 
+		@Override
 		public String toString() {
 			return "Alps.AlpsBuilder(version=" + this.version + ", doc=" + this.doc + ", descriptor=" + this.descriptor + ")";
 		}

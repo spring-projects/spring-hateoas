@@ -24,7 +24,6 @@ import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
-import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.util.Assert;
 
 /**

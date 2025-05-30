@@ -29,6 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -39,7 +40,6 @@ import org.springframework.hateoas.TemplateVariables;
 import org.springframework.hateoas.server.LinkBuilder;
 import org.springframework.hateoas.server.core.UriMapping.MappingVariable;
 import org.springframework.hateoas.server.core.UriMapping.MappingVariables;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -98,7 +98,7 @@ public class WebHandler {
 			throw new IllegalStateException(String.format("Could not obtain previous invocation from %s!", invocationValue));
 		}
 
-		MethodInvocation invocation = invocations.getLastInvocation();
+		MethodInvocation invocation = Objects.requireNonNull(invocations.getLastInvocation());
 		UriMapping mapping = SpringAffordanceBuilder.getUriMapping(invocation.getTargetType(), invocation.getMethod());
 
 		return (finisher, conversionService) -> {
@@ -139,7 +139,8 @@ public class WebHandler {
 
 				if (mappingVariable.isCapturing()) {
 
-					List<String> segments = Arrays.asList(((String) preparedValue).split("/"));
+					List<String> segments = preparedValue == null ? Collections.emptyList()
+							: Arrays.asList(((String) preparedValue).split("/"));
 					Object value = segments.size() != 0 ? "/" + segment.composite().prepareAndEncode(segments) : "";
 
 					values.put(key, value);
@@ -348,7 +349,7 @@ public class WebHandler {
 		private final TypeDescriptor typeDescriptor;
 		private final boolean isNonComposite;
 
-		private String variableName;
+		private @Nullable String variableName;
 
 		/**
 		 * Creates a new {@link HandlerMethodParameter} for the given {@link MethodParameter} and
@@ -364,7 +365,7 @@ public class WebHandler {
 
 			int nestingIndex = Optional.class.isAssignableFrom(parameter.getParameterType()) ? 1 : 0;
 
-			this.typeDescriptor = TypeDescriptor.nested(parameter, nestingIndex);
+			this.typeDescriptor = Objects.requireNonNull(TypeDescriptor.nested(parameter, nestingIndex));
 			this.isNonComposite = parameter.hasParameterAnnotation(NonComposite.class);
 
 			if (isNonComposite) {
@@ -479,7 +480,9 @@ public class WebHandler {
 
 				this.variableName = parameter.getParameterName();
 
-				return variableName;
+				if (variableName != null) {
+					return variableName;
+				}
 			}
 
 			Annotation annotation = parameter.getParameterAnnotation(attribute.getAnnotationType());
@@ -601,7 +604,7 @@ public class WebHandler {
 
 		/*
 		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#verifyValue(java.lang.Object[])
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#getVerifiedValue(java.lang.Object[])
 		 */
 		@Override
 		@Nullable
@@ -619,7 +622,7 @@ public class WebHandler {
 
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
-			return annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? SKIP_VALUE : null;
+			return annotation != null && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? SKIP_VALUE : null;
 		}
 	}
 

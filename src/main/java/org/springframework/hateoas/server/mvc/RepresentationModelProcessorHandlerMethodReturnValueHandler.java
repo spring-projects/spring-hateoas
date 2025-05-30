@@ -17,18 +17,18 @@ package org.springframework.hateoas.server.mvc;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.hateoas.server.core.HeaderLinksResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -49,7 +49,8 @@ public class RepresentationModelProcessorHandlerMethodReturnValueHandler impleme
 	static final ResolvableType COLLECTION_MODEL_TYPE = ResolvableType.forRawClass(CollectionModel.class);
 	private static final ResolvableType HTTP_ENTITY_TYPE = ResolvableType.forRawClass(HttpEntity.class);
 
-	static final Field CONTENT_FIELD = ReflectionUtils.findField(CollectionModel.class, "content");
+	static final Field CONTENT_FIELD = Objects
+			.requireNonNull(ReflectionUtils.findField(CollectionModel.class, "content"));
 
 	static {
 		if (CONTENT_FIELD != null) {

@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -28,8 +30,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -112,13 +112,13 @@ class HalFormsTemplateBuilder {
 			return new TemplateTitle(affordance, soleTemplate);
 		}
 
+
 		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.context.MessageSourceResolvable#getCodes()
 		 */
-		@NonNull
 		@Override
-		public String[] getCodes() {
+		public String @NonNull[] getCodes() {
 
 			Stream<String> seed = Stream.concat(//
 					Stream.of(affordance.getName()), //

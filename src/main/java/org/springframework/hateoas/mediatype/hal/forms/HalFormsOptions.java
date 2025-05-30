@@ -18,8 +18,8 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.Link;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

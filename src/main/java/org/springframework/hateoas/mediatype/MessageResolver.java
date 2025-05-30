@@ -15,10 +15,9 @@
  */
 package org.springframework.hateoas.mediatype;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.lang.Nullable;
 
 /**
  * A simplified variant of {@link MessageSourceAccessor} to allow more direct replacement with a no-op implementation in

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -46,8 +47,8 @@ class HypermediaConfigurationImportSelector implements ImportSelector, ResourceL
 
 	public static final String SPRING_TEST = "org.springframework.test.web.reactive.server.WebTestClient";
 
-	private ResourceLoader resourceLoader;
-	private ConfigurableBeanFactory beanFactory;
+	private @Nullable ResourceLoader resourceLoader;
+	private @Nullable ConfigurableBeanFactory beanFactory;
 
 	/*
 	 * (non-Javadoc)
@@ -73,6 +74,10 @@ class HypermediaConfigurationImportSelector implements ImportSelector, ResourceL
 	*/
 	@Override
 	public String[] selectImports(AnnotationMetadata metadata) {
+
+		if (beanFactory == null || resourceLoader == null) {
+			return new String[0];
+		}
 
 		Map<String, Object> attributes = metadata.getAnnotationAttributes(EnableHypermediaSupport.class.getName());
 

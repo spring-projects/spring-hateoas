@@ -26,11 +26,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -155,10 +155,10 @@ public class MethodParameters {
 	 */
 	private static class AnnotationNamingMethodParameter extends SynthesizingMethodParameter {
 
-		private final AnnotationAttribute attribute;
+		private final @Nullable AnnotationAttribute attribute;
 
-		private String name;
-		private @Nullable Annotation[] combinedAnnotations;
+		private @Nullable String name;
+		private Annotation @Nullable [] combinedAnnotations;
 
 		/**
 		 * Creates a new {@link AnnotationNamingMethodParameter} for the given {@link Method}'s parameter with the given

@@ -17,7 +17,6 @@ package org.springframework.hateoas.mediatype.hal.forms;
 
 import org.springframework.hateoas.AffordanceModel;
 import org.springframework.hateoas.mediatype.ConfiguredAffordance;
-import org.springframework.http.MediaType;
 
 /**
  * {@link AffordanceModel} for a HAL-FORMS {@link MediaType}.

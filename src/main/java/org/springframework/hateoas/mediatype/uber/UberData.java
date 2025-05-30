@@ -26,7 +26,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.hateoas.Affordance;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -37,7 +38,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.PropertyUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -56,6 +56,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@NullUnmarked
 final class UberData {
 
 	private @Nullable final String id, name, label;
@@ -513,7 +514,7 @@ final class UberData {
 
 	/**
 	 * Create new {@link UberData} by copying attributes and replacing {@literal accepting}.
-	 * 
+	 *
 	 * @param accepting
 	 * @return
 	 */
@@ -526,7 +527,7 @@ final class UberData {
 
 	/**
 	 * Create new {@link UberData} by copying attributes and replacing {@literal value}.
-	 * 
+	 *
 	 * @param value
 	 * @return
 	 */
@@ -539,7 +540,7 @@ final class UberData {
 
 	/**
 	 * Create new {@link UberData} by copying attributes and replacing {@literal data}.
-	 * 
+	 *
 	 * @param data
 	 * @return
 	 */
@@ -613,10 +614,12 @@ final class UberData {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof UberData))
+		}
+		if (!(o instanceof UberData)) {
 			return false;
+		}
 		UberData uberData = (UberData) o;
 		return this.transclude == uberData.transclude && Objects.equals(this.id, uberData.id)
 				&& Objects.equals(this.name, uberData.name) && Objects.equals(this.label, uberData.label)
@@ -671,10 +674,12 @@ final class UberData {
 		@Override
 		public boolean equals(Object o) {
 
-			if (this == o)
+			if (this == o) {
 				return true;
-			if (!(o instanceof LinkAndRels))
+			}
+			if (!(o instanceof LinkAndRels)) {
 				return false;
+			}
 			LinkAndRels that = (LinkAndRels) o;
 			return Objects.equals(this.link, that.link) && Objects.equals(this.rels, that.rels);
 		}
@@ -684,6 +689,7 @@ final class UberData {
 			return Objects.hash(this.link, this.rels);
 		}
 
+		@Override
 		public String toString() {
 			return "UberData.LinkAndRels(link=" + this.link + ", rels=" + this.rels + ")";
 		}

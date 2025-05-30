@@ -18,6 +18,7 @@ package org.springframework.hateoas.aot;
 import java.io.IOException;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.core.annotation.MergedAnnotation;
@@ -56,7 +57,7 @@ class HypermediaTypesRuntimeHints implements RuntimeHintsRegistrar {
 	 * @see org.springframework.aot.hint.RuntimeHintsRegistrar#registerHints(org.springframework.aot.hint.RuntimeHints, java.lang.ClassLoader)
 	 */
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 
 		AotUtils.registerTypesForReflection(hypermediaPackage, hints.reflection(),
 				HAS_JACKSON_SUPER_TYPE_FILTER, IS_JACKSON_ANNOTATION_PRESENT_FILTER);

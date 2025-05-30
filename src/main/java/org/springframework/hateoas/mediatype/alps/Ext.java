@@ -17,19 +17,23 @@ package org.springframework.hateoas.mediatype.alps;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * A value object for an ALPS ext element.
- * 
+ *
  * @author Oliver Gierke
  * @author Greg Turnquist
  * @since 0.15
  * @see http://alps.io/spec/#prop-ext
  */
 @JsonPropertyOrder({ "id", "href", "value" })
+@NullUnmarked
 public final class Ext {
 
 	private final String id;
@@ -44,7 +48,7 @@ public final class Ext {
 		this.value = value;
 	}
 
-	public static ExtBuilder builder() {
+	public static @NonNull ExtBuilder builder() {
 		return new ExtBuilder();
 	}
 
@@ -63,10 +67,12 @@ public final class Ext {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		Ext ext = (Ext) o;
 		return Objects.equals(this.id, ext.id) && Objects.equals(this.href, ext.href)
 				&& Objects.equals(this.value, ext.value);
@@ -77,6 +83,7 @@ public final class Ext {
 		return Objects.hash(this.id, this.href, this.value);
 	}
 
+	@Override
 	public String toString() {
 		return "Ext(id=" + this.id + ", href=" + this.href + ", value=" + this.value + ")";
 	}
@@ -89,19 +96,19 @@ public final class Ext {
 
 		ExtBuilder() {}
 
-		public Ext.ExtBuilder id(String id) {
+		public Ext.ExtBuilder id(@NonNull String id) {
 
 			this.id = id;
 			return this;
 		}
 
-		public Ext.ExtBuilder href(String href) {
+		public Ext.ExtBuilder href(@NonNull String href) {
 
 			this.href = href;
 			return this;
 		}
 
-		public Ext.ExtBuilder value(String value) {
+		public Ext.ExtBuilder value(@NonNull String value) {
 
 			this.value = value;
 			return this;
@@ -111,6 +118,7 @@ public final class Ext {
 			return new Ext(this.id, this.href, this.value);
 		}
 
+		@Override
 		public String toString() {
 			return "Ext.ExtBuilder(id=" + this.id + ", href=" + this.href + ", value=" + this.value + ")";
 		}

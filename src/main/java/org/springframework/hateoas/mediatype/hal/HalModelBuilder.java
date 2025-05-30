@@ -21,15 +21,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.Links;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.EmbeddedWrappers;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -47,7 +46,7 @@ public class HalModelBuilder {
 
 	private final EmbeddedWrappers wrappers;
 
-	private Object model;
+	private @Nullable Object model;
 	private Links links = Links.NONE;
 	private final List<Object> embeddeds = new ArrayList<>();
 
@@ -358,7 +357,10 @@ public class HalModelBuilder {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends RepresentationModel<T>> RepresentationModel<T> build() {
-		return (T) new HalRepresentationModel<>(model, embeddeds, links);
+
+		return model == null
+				? (T) new EmbedsOnlyHalRepresentationModel(embeddeds, links)
+				: (T) new HalRepresentationModel<>(model, embeddeds, links);
 	}
 
 	/**
@@ -377,19 +379,28 @@ public class HalModelBuilder {
 		return this;
 	}
 
+	private static class EmbedsOnlyHalRepresentationModel extends CollectionModel<Object> {
+
+		public EmbedsOnlyHalRepresentationModel(List<Object> embeddeds, Links links) {
+
+			super(embeddeds);
+			add(links);
+		}
+	}
+
 	private static class HalRepresentationModel<T> extends EntityModel<T> {
 
-		private final @Nullable T entity;
+		private final T entity;
 		private final List<Object> embeddeds;
 
-		public HalRepresentationModel(@Nullable T entity, List<Object> embeddeds, Links links) {
+		public HalRepresentationModel(T entity, List<Object> embeddeds, Links links) {
 
 			this(entity, embeddeds);
 
 			add(links);
 		}
 
-		private HalRepresentationModel(@Nullable T entity, List<Object> embeddeds) {
+		private HalRepresentationModel(T entity, List<Object> embeddeds) {
 
 			Assert.notNull(embeddeds, "Embedds must not be null!");
 
@@ -401,7 +412,6 @@ public class HalModelBuilder {
 		 * (non-Javadoc)
 		 * @see org.springframework.hateoas.EntityModel#getContent()
 		 */
-		@Nullable
 		@Override
 		public T getContent() {
 			return entity;
