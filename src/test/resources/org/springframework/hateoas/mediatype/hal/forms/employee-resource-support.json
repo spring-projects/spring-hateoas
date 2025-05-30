@@ -6,7 +6,7 @@
     }
   },
   "_templates" : {
-    "default" : {
+    "foo" : {
       "method" : "POST",
       "properties" : [ {
         "name" : "name",

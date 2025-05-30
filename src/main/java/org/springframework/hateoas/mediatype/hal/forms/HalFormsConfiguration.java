@@ -29,6 +29,7 @@ import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Contract;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -47,6 +48,7 @@ public class HalFormsConfiguration {
 	private final Consumer<ObjectMapper> objectMapperCustomizer;
 	private final HalFormsOptionsFactory options;
 	private final List<MediaType> mediaTypes;
+	private final boolean defaultSingleTemplate;
 
 	/**
 	 * Creates a new {@link HalFormsConfiguration} backed by a default {@link HalConfiguration}.
@@ -62,12 +64,12 @@ public class HalFormsConfiguration {
 	 */
 	public HalFormsConfiguration(HalConfiguration halConfiguration) {
 		this(halConfiguration, new HashMap<>(), new HalFormsOptionsFactory(), __ -> {},
-				Collections.singletonList(MediaTypes.HAL_FORMS_JSON));
+				Collections.singletonList(MediaTypes.HAL_FORMS_JSON), false);
 	}
 
 	private HalFormsConfiguration(HalConfiguration halConfiguration, Map<Class<?>, String> patterns,
 			HalFormsOptionsFactory options, @Nullable Consumer<ObjectMapper> objectMapperCustomizer,
-			List<MediaType> mediaTypes) {
+			List<MediaType> mediaTypes, boolean defaultSingleTemplate) {
 
 		Assert.notNull(halConfiguration, "HalConfiguration must not be null!");
 		Assert.notNull(patterns, "Patterns must not be null!");
@@ -80,6 +82,7 @@ public class HalFormsConfiguration {
 		this.objectMapperCustomizer = objectMapperCustomizer;
 		this.options = options;
 		this.mediaTypes = new ArrayList<>(mediaTypes);
+		this.defaultSingleTemplate = defaultSingleTemplate;
 	}
 
 	/**
@@ -97,7 +100,8 @@ public class HalFormsConfiguration {
 		Map<Class<?>, String> newPatterns = new HashMap<>(patterns);
 		newPatterns.put(type, pattern);
 
-		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer, mediaTypes);
+		return new HalFormsConfiguration(halConfiguration, newPatterns, options, objectMapperCustomizer, mediaTypes,
+				defaultSingleTemplate);
 	}
 
 	/**
@@ -113,7 +117,8 @@ public class HalFormsConfiguration {
 
 		return this.objectMapperCustomizer == objectMapperCustomizer //
 				? this //
-				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes);
+				: new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes,
+						defaultSingleTemplate);
 	}
 
 	/**
@@ -136,16 +141,18 @@ public class HalFormsConfiguration {
 		List<MediaType> newMediaTypes = new ArrayList<>(mediaTypes);
 		newMediaTypes.add(mediaTypes.size() - 1, mediaType);
 
-		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, newMediaTypes);
+		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, newMediaTypes,
+				defaultSingleTemplate);
 	}
 
 	/**
 	 * Customizes the given {@link ObjectMapper} with the registered callback.
 	 *
 	 * @param mapper must not be {@literal null}.
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @see #withObjectMapperCustomizer(Consumer)
 	 */
+	@Contract("_ -> this")
 	public HalFormsConfiguration customize(ObjectMapper mapper) {
 
 		Assert.notNull(mapper, "ObjectMapper must not be null!");
@@ -168,7 +175,21 @@ public class HalFormsConfiguration {
 			Function<PropertyMetadata, HalFormsOptions> creator) {
 
 		return new HalFormsConfiguration(halConfiguration, patterns, options.withOptions(type, property, creator),
-				objectMapperCustomizer, mediaTypes);
+				objectMapperCustomizer, mediaTypes, defaultSingleTemplate);
+	}
+
+	/**
+	 * Configures whether to use the name {@code default} in case only a single template appears. Defaults to
+	 * {@literal false}. Set this to {@literal true} in case you need the legacy behavior.
+	 *
+	 * @param defaultSingleTemplate
+	 * @return will never be {@literal null}.
+	 * @since 3.0
+	 */
+	public HalFormsConfiguration withDefaultSingleTemplate(boolean defaultSingleTemplate) {
+
+		return new HalFormsConfiguration(halConfiguration, patterns, options, objectMapperCustomizer, mediaTypes,
+				defaultSingleTemplate);
 	}
 
 	/**
@@ -206,5 +227,16 @@ public class HalFormsConfiguration {
 	 */
 	List<MediaType> getMediaTypes() {
 		return Collections.unmodifiableList(mediaTypes);
+	}
+
+	/**
+	 * Returns whether to default the name of the first template added to a form. Available for backwards-compatibility
+	 * reasons.
+	 *
+	 * @see https://github.com/mamund/hal-forms/issues/82
+	 * @since 3.0
+	 */
+	boolean isDefaultSingleTemplate() {
+		return defaultSingleTemplate;
 	}
 }

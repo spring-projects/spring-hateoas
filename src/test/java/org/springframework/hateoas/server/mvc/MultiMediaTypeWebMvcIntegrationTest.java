@@ -207,8 +207,8 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/0")))
 				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")));
 
-		expectEmployeeProperties(actions, "default", "partiallyUpdateEmployee") //
-				.andExpect(jsonPath("$._templates['default'].method", is("PUT")))
+		expectEmployeeProperties(actions, "updateEmployee", "partiallyUpdateEmployee") //
+				.andExpect(jsonPath("$._templates['updateEmployee'].method", is("PUT")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("PATCH")));
 	}
 
@@ -227,9 +227,9 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links.*", hasSize(1)))
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.andExpect(jsonPath("$._templates['default'].method", is("POST")));
+				.andExpect(jsonPath("$._templates['newEmployee'].method", is("POST")));
 
-		expectEmployeeProperties(actions, "default");
+		expectEmployeeProperties(actions, "newEmployee");
 	}
 
 	@Test
@@ -249,9 +249,9 @@ class MultiMediaTypeWebMvcIntegrationTest {
 				.andExpect(jsonPath("$._links['self'].href", is("http://localhost/employees/2")))
 				.andExpect(jsonPath("$._links['employees'].href", is("http://localhost/employees")));
 
-		expectEmployeeProperties(actions, "default", "partiallyUpdateEmployee") //
+		expectEmployeeProperties(actions, "updateEmployee", "partiallyUpdateEmployee") //
 
-				.andExpect(jsonPath("$._templates['default'].method", is("PUT")))
+				.andExpect(jsonPath("$._templates['updateEmployee'].method", is("PUT")))
 				.andExpect(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("PATCH")));
 	}
 

@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.context.MessageSourceResolvable;
-import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -38,11 +37,13 @@ class HalFormsTemplateBuilder {
 
 	private final MessageResolver resolver;
 	private final HalFormsPropertyFactory factory;
+	private final HalFormsConfiguration configuration;
 
 	public HalFormsTemplateBuilder(HalFormsConfiguration configuration, MessageResolver resolver) {
 
 		this.resolver = resolver;
 		this.factory = new HalFormsPropertyFactory(configuration, resolver);
+		this.configuration = configuration;
 	}
 
 	/**
@@ -77,7 +78,10 @@ class HalFormsTemplateBuilder {
 					}
 
 					template = applyTo(template, TemplateTitle.of(it, templates.isEmpty()));
-					templates.put(templates.isEmpty() ? "default" : it.getName(), template);
+
+					var name = templates.isEmpty() && configuration.isDefaultSingleTemplate() ? "default" : it.getName();
+
+					templates.put(name, template);
 				});
 
 		return templates;

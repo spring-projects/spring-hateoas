@@ -67,7 +67,7 @@ class HalFormsTemplateBuilderUnitTest {
 
 		Map<String, HalFormsTemplate> templates = builder.findTemplates(resource);
 
-		HalFormsTemplate template = templates.get("default");
+		HalFormsTemplate template = templates.get("postPatternExample");
 
 		assertThat(template).isNotNull();
 		assertThat(template.getPropertyByName(propertyName) //
@@ -92,7 +92,7 @@ class HalFormsTemplateBuilderUnitTest {
 
 		Map<String, HalFormsTemplate> templates = builder.findTemplates(model);
 
-		HalFormsTemplate template = templates.get("default");
+		HalFormsTemplate template = templates.get("patchRequiredProperty");
 
 		assertThat(template).isNotNull();
 		assertThat(template.getPropertyByName("name").map(HalFormsProperty::isRequired)).hasValue(false);
@@ -112,7 +112,7 @@ class HalFormsTemplateBuilderUnitTest {
 				.toLink();
 
 		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(), //
-				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("postPayload");
 
 		Optional<HalFormsProperty> number = template.getPropertyByName("number");
 		assertThat(number).map(HalFormsProperty::getMin).hasValue(2L);
@@ -136,7 +136,7 @@ class HalFormsTemplateBuilderUnitTest {
 				.toLink();
 
 		HalFormsTemplate template = new HalFormsTemplateBuilder(new HalFormsConfiguration(), //
-				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("default");
+				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link)).get("postPayload");
 
 		Optional<HalFormsProperty> decimal = template.getPropertyByName("decimal");
 		assertThat(decimal).map(HalFormsProperty::getMin).hasValue(new BigDecimal("2.1"));
@@ -155,7 +155,7 @@ class HalFormsTemplateBuilderUnitTest {
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
 
-		assertThat(templates.get("default").getTarget()).isEqualTo("/example");
+		assertThat(templates.get("create").getTarget()).isEqualTo("/example");
 	}
 
 	@Test // #1443
@@ -173,7 +173,7 @@ class HalFormsTemplateBuilderUnitTest {
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
 				MessageResolver.DEFAULTS_ONLY).findTemplates(new RepresentationModel<>().add(link));
 
-		assertThat(templates.get("default").getContentType()).isEqualTo(mediaType.toString());
+		assertThat(templates.get("create").getContentType()).isEqualTo(mediaType.toString());
 	}
 
 	@Test // #1483
@@ -193,7 +193,7 @@ class HalFormsTemplateBuilderUnitTest {
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
 				.findTemplates(models);
 
-		assertThat(templates.get("default").getPropertyByName("number")) //
+		assertThat(templates.get("postPatternExample").getPropertyByName("number")) //
 				.hasValueSatisfying(it -> {
 					assertThat(it.getOptions()).isNotNull() //
 							.isInstanceOfSatisfying(HalFormsOptions.Inline.class,
@@ -220,7 +220,7 @@ class HalFormsTemplateBuilderUnitTest {
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
 				.findTemplates(models);
 
-		assertThat(templates.get("default").getPropertyByName("number")).hasValueSatisfying(it -> {
+		assertThat(templates.get("postPatternExample").getPropertyByName("number")).hasValueSatisfying(it -> {
 			assertThat(it.getValue()).isEqualTo(selected);
 		});
 	}
@@ -243,7 +243,7 @@ class HalFormsTemplateBuilderUnitTest {
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY)
 				.findTemplates(models);
 
-		assertThat(templates.get("default").getTarget()).endsWith("/example");
+		assertThat(templates.get("post").getTarget()).endsWith("/example");
 	}
 
 	@Test // #1697
@@ -258,9 +258,27 @@ class HalFormsTemplateBuilderUnitTest {
 		Map<String, HalFormsTemplate> templates = new HalFormsTemplateBuilder(new HalFormsConfiguration(),
 				MessageResolver.DEFAULTS_ONLY).findTemplates(models);
 
-		assertThat(templates.get("default").getPropertyByName("property")).hasValueSatisfying(it -> {
+		assertThat(templates.get("postWithCustomInputType").getPropertyByName("property")).hasValueSatisfying(it -> {
 			assertThat(it.getType()).isEqualTo("custom");
 		});
+	}
+
+	@Test
+	void usesDefaultAsSingleTemplateNameIfConfigured() {
+
+		var model = new RepresentationModel<>(
+				Affordances.of(Link.of("/example", LinkRelation.of("example"))) //
+						.afford(HttpMethod.POST) //
+						.withName("name") //
+						.withInput(WithCustomInputType.class) //
+						.toLink());
+
+		var configuration = new HalFormsConfiguration().withDefaultSingleTemplate(true);
+		var builder = new HalFormsTemplateBuilder(configuration, MessageResolver.DEFAULTS_ONLY);
+
+		assertThat(builder.findTemplates(model))
+				.containsKey("default")
+				.doesNotContainKey("name");
 	}
 
 	@Getter

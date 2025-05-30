@@ -10,7 +10,7 @@
     }
   },
   "_templates" : {
-    "default" : {
+    "updateEmployee" : {
       "method" : "PUT",
       "properties" : [ {
         "name" : "name",

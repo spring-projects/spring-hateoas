@@ -70,7 +70,7 @@ class HalFormsWebFluxIntegrationTest {
 
 				.expectStatus().isOk() //
 				.expectHeader().contentType(MediaTypes.HAL_FORMS_JSON) //
-				.expectBody(String.class)//
+				.expectBody(String.class) //
 
 				.value(jsonPath("$.name", is("Frodo Baggins"))) //
 				.value(jsonPath("$.role", is("ring bearer"))) //
@@ -80,11 +80,11 @@ class HalFormsWebFluxIntegrationTest {
 				.value(jsonPath("$._links['employees'].href", is("http://localhost/employees"))) //
 
 				.value(jsonPath("$._templates.*", hasSize(2))) //
-				.value(jsonPath("$._templates['default'].method", is("PUT"))) //
-				.value(jsonPath("$._templates['default'].properties[0].name", is("name"))) //
-				.value(jsonPath("$._templates['default'].properties[0].required", is(true))) //
-				.value(jsonPath("$._templates['default'].properties[1].name", is("role"))) //
-				.value(jsonPath("$._templates['default'].properties[1].required").doesNotExist()) //
+				.value(jsonPath("$._templates['updateEmployee'].method", is("PUT"))) //
+				.value(jsonPath("$._templates['updateEmployee'].properties[0].name", is("name"))) //
+				.value(jsonPath("$._templates['updateEmployee'].properties[0].required", is(true))) //
+				.value(jsonPath("$._templates['updateEmployee'].properties[1].name", is("role"))) //
+				.value(jsonPath("$._templates['updateEmployee'].properties[1].required").doesNotExist()) //
 
 				.value(jsonPath("$._templates['partiallyUpdateEmployee'].method", is("PATCH"))) //
 				.value(jsonPath("$._templates['partiallyUpdateEmployee'].properties[0].name", is("name"))) //
@@ -111,11 +111,12 @@ class HalFormsWebFluxIntegrationTest {
 				.value(jsonPath("$._links.*", hasSize(1)))
 				.value(jsonPath("$._links['self'].href", is("http://localhost/employees")))
 
-				.value(jsonPath("$._templates.*", hasSize(1))).value(jsonPath("$._templates['default'].method", is("POST")))
-				.value(jsonPath("$._templates['default'].properties[0].name", is("name")))
-				.value(jsonPath("$._templates['default'].properties[0].required", is(true)))
-				.value(jsonPath("$._templates['default'].properties[1].name", is("role")))
-				.value(jsonPath("$._templates['default'].properties[1].required").doesNotExist());
+				.value(jsonPath("$._templates.*", hasSize(1)))
+				.value(jsonPath("$._templates['newEmployee'].method", is("POST")))
+				.value(jsonPath("$._templates['newEmployee'].properties[0].name", is("name")))
+				.value(jsonPath("$._templates['newEmployee'].properties[0].required", is(true)))
+				.value(jsonPath("$._templates['newEmployee'].properties[1].name", is("role")))
+				.value(jsonPath("$._templates['newEmployee'].properties[1].required").doesNotExist());
 	}
 
 	/**

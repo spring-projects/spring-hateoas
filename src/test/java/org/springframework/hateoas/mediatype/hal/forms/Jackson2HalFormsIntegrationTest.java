@@ -449,7 +449,7 @@ class Jackson2HalFormsIntegrationTest {
 
 		assertThatCode(() -> {
 
-			String promptString = JsonPath.compile("$._templates.default.properties[0].prompt") //
+			String promptString = JsonPath.compile("$._templates.sample.properties[0].prompt") //
 					.read(mapper.writeObject(model));
 
 			assertThat(promptString).isEqualTo("Vorname");
@@ -480,7 +480,7 @@ class Jackson2HalFormsIntegrationTest {
 
 		assertThatCode(() -> {
 
-			String promptString = JsonPath.compile("$._templates.default.title") //
+			String promptString = JsonPath.compile("$._templates.postHalFormsPayload.title") //
 					.read(mapper.writeObject(model));
 
 			assertThat(promptString).isEqualTo("Template title");
@@ -516,9 +516,9 @@ class Jackson2HalFormsIntegrationTest {
 
 		EntityModel<Jsr303Sample> model = EntityModel.of(new Jsr303Sample(), link);
 
-		assertValueForPath(model, "$._templates.default.properties[0].readOnly", true);
-		assertValueForPath(model, "$._templates.default.properties[0].regex", "[\\w\\s]");
-		assertValueForPath(model, "$._templates.default.properties[0].required", true);
+		assertValueForPath(model, "$._templates.postJsr303Sample.properties[0].readOnly", true);
+		assertValueForPath(model, "$._templates.postJsr303Sample.properties[0].regex", "[\\w\\s]");
+		assertValueForPath(model, "$._templates.postJsr303Sample.properties[0].required", true);
 	}
 
 	@Test // #968
@@ -551,7 +551,7 @@ class Jackson2HalFormsIntegrationTest {
 
 		assertThatCode(() -> {
 
-			String promptString = JsonPath.compile("$._templates.default.properties[0].placeholder") //
+			String promptString = JsonPath.compile("$._templates.postHalFormsPayload.properties[0].placeholder") //
 					.read(mapper.writeObject(model));
 
 			assertThat(promptString).isEqualTo("Property placeholder");
