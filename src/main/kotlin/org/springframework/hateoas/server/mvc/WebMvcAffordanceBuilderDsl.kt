@@ -43,7 +43,7 @@ inline infix fun Link.andAffordances(setup: WebMvcAffordanceBuilderDsl.() -> Uni
  * @author Roland Kulcsár
  * @since 1.0
  */
-inline fun <reified C> afford(func: C.() -> Any): Affordance = afford(methodOn(C::class.java as Class<C & Any>).run(func))
+inline fun <reified C : Any> afford(func: C.() -> Any): Affordance = afford(methodOn(C::class.java as Class<C>).run(func))
 
 /**
  * Provide an [Affordance]s DSL to help write idiomatic Kotlin code.
@@ -53,9 +53,9 @@ inline fun <reified C> afford(func: C.() -> Any): Affordance = afford(methodOn(C
  */
 open class WebMvcAffordanceBuilderDsl(val affordances: MutableList<Affordance> = mutableListOf()) {
 
-    inline fun <reified C> afford(func: C.() -> Any) {
+    inline fun <reified C : Any> afford(func: C.() -> Any) {
         
-        val affordance = afford(methodOn(C::class.java as Class<C & Any>).func())
+        val affordance = afford(methodOn(C::class.java as Class<C>).func())
         affordances.add(affordance)
     }
 }
