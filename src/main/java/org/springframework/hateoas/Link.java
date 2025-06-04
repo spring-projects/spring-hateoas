@@ -252,6 +252,16 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Returns a new {@link Link} without any {@link Affordance}s.
+	 *
+	 * @return will never be {@literal null}.
+	 * @since 3.0
+	 */
+	public Link withoutAffordances() {
+		return withAffordances(Collections.emptyList());
+	}
+
+	/**
 	 * Returns the variable names contained in the template.
 	 *
 	 * @return
@@ -290,12 +300,25 @@ public class Link implements Serializable {
 	}
 
 	/**
+	 * Returns whether the links are logically the same, i.e. share all link characteristics but might have different
+	 * affordances attached.
+	 *
+	 * @param other must not be {@literal null}.
+	 * @since 3.0
+	 */
+	public boolean isSameAs(Link other) {
+
+		Assert.notNull(other, "Link must not be null!");
+
+		return withoutAffordances().equals(other.withoutAffordances());
+	}
+
+	/**
 	 * Turns the current template into a {@link Link} by expanding it using the given parameters.
 	 *
 	 * @param arguments
 	 * @return
 	 */
-	@SuppressWarnings("null")
 	public Link expand(Object... arguments) {
 
 		UriTemplate template = this.template;
