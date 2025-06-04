@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class HalConfiguration {
 
 	private static final PathMatcher MATCHER = new AntPathMatcher();
+	private static final List<MediaType> DEFAULT_MEDIA_TYPES = List.of(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON);
 
 	/**
 	 * Configures how to render links in case there is exactly one defined for a given link relation in general. By
@@ -67,8 +68,7 @@ public class HalConfiguration {
 	 */
 	public HalConfiguration() {
 
-		this(RenderSingleLinks.AS_SINGLE, new LinkedHashMap<>(), true, true, __ -> {},
-				List.of(MediaTypes.HAL_JSON, MediaTypes.VND_HAL_JSON));
+		this(RenderSingleLinks.AS_SINGLE, new LinkedHashMap<>(), true, true, __ -> {}, DEFAULT_MEDIA_TYPES);
 	}
 
 	private HalConfiguration(RenderSingleLinks renderSingleLinks, Map<String, RenderSingleLinks> singleLinksPerPattern,
@@ -233,8 +233,10 @@ public class HalConfiguration {
 			return this;
 		}
 
+		var index = mediaTypes.indexOf(DEFAULT_MEDIA_TYPES.get(0));
+
 		List<MediaType> newMediaTypes = new ArrayList<>(mediaTypes);
-		newMediaTypes.add(mediaTypes.size() - 1, mediaType);
+		newMediaTypes.add(index, mediaType);
 
 		return new HalConfiguration(renderSingleLinks, singleLinksPerPattern, applyPropertyNamingStrategy,
 				enforceEmbeddedCollections, objectMapperCustomizer, newMediaTypes);
