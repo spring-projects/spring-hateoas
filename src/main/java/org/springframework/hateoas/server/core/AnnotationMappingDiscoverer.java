@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Greg Turnquist
  * @author Réda Housni Alaoui
  */
-public class AnnotationMappingDiscoverer implements MappingDiscoverer, RawMappingDiscoverer {
+public class AnnotationMappingDiscoverer implements RawMappingDiscoverer {
 
 	private final Class<? extends Annotation> annotationType;
 	private final @Nullable String mappingAttributeName;
