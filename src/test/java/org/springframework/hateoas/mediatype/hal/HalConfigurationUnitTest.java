@@ -19,7 +19,9 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration.RenderSingleLinks;
+import org.springframework.http.MediaType;
 
 /**
  * Unit tests for {@link HalConfiguration}.
@@ -64,5 +66,19 @@ class HalConfigurationUnitTest {
 				.isEqualTo(RenderSingleLinks.AS_ARRAY);
 		assertThat(configuration.getSingleLinkRenderModeFor(LinkRelation.of("https://somehost/bar")))
 				.isEqualTo(RenderSingleLinks.AS_SINGLE);
+	}
+
+	@Test // GH-2333
+	void registersCustomMediaTypesFirst() {
+
+		var config = new HalConfiguration()
+				.withMediaType(MediaType.APPLICATION_CBOR)
+				.withMediaType(MediaType.APPLICATION_PDF);
+
+		assertThat(config.getMediaTypes()).containsExactly(
+				MediaType.APPLICATION_CBOR,
+				MediaType.APPLICATION_PDF,
+				MediaTypes.HAL_JSON,
+				MediaTypes.VND_HAL_JSON);
 	}
 }
