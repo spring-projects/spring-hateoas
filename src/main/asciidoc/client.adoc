@@ -62,7 +62,7 @@ You can do so with only one slight tweak, as the following example shows:
 [source,java, tabsize=2]
 ----
 CollectionModelType<Item> collectionModelType =
-		TypeReferences.CollectionModelType<Item>() {};
+		new TypeReferences.CollectionModelType<Item>() {};
 
 CollectionModel<Item> itemResource = traverson.//
 		follow(rel("items")).//
