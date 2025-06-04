@@ -332,9 +332,9 @@ class UriTemplateUnitTest {
 						.isEqualTo("/foo{#var}");
 
 		assertThat(UriTemplate.of("/foo") //
-				.with(compositeParameter("var")) //
+				.with(simple("var").composite()) //
 				.toString()) //
-						.isEqualTo("/foo{*var}");
+						.isEqualTo("/foo{var*}");
 	}
 
 	@Test // #227

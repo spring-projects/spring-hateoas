@@ -45,32 +45,32 @@ class AnnotationMappingDiscovererUnitTest {
 
 	@Test
 	void discoversTypeLevelMapping() {
-		assertThat(discoverer.getMapping(MyController.class)).isEqualTo("/type");
+		assertThat(discoverer.getUriMapping(MyController.class)).isEqualTo(UriMapping.of("/type"));
 	}
 
 	@Test
 	void discoversMethodLevelMapping() throws Exception {
 		Method method = MyController.class.getMethod("method");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/type/method");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/type/method"));
 	}
 
 	@Test
 	void returnsNullForNonExistentTypeLevelMapping() {
-		assertThat(discoverer.getMapping(ControllerWithoutTypeLevelMapping.class)).isNull();
+		assertThat(discoverer.getUriMapping(ControllerWithoutTypeLevelMapping.class)).isNull();
 	}
 
 	@Test
 	void resolvesMethodLevelMappingWithoutTypeLevelMapping() throws Exception {
 
 		Method method = ControllerWithoutTypeLevelMapping.class.getMethod("method");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/method");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/method"));
 	}
 
 	@Test
 	void resolvesMethodLevelMappingWithSlashRootMapping() throws Exception {
 
 		Method method = SlashRootMapping.class.getMethod("method");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/method");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/method"));
 	}
 
 	/**
@@ -80,7 +80,7 @@ class AnnotationMappingDiscovererUnitTest {
 	void treatsMissingMethodMappingAsEmptyMapping() throws Exception {
 
 		Method method = MyController.class.getMethod("noMethodMapping");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/type");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/type"));
 	}
 
 	/**
@@ -90,7 +90,7 @@ class AnnotationMappingDiscovererUnitTest {
 	void detectsClassMappingOnSuperType() throws Exception {
 
 		Method method = ChildController.class.getMethod("mapping");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/parent/child");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/parent/child"));
 	}
 
 	/**
@@ -100,7 +100,7 @@ class AnnotationMappingDiscovererUnitTest {
 	void includesTypeMappingFromChildClass() throws Exception {
 
 		Method method = ParentWithMethod.class.getMethod("mapping");
-		assertThat(discoverer.getMapping(ChildWithTypeMapping.class, method)).isEqualTo("/child/parent");
+		assertThat(discoverer.getUriMapping(ChildWithTypeMapping.class, method)).isEqualTo(UriMapping.of("/child/parent"));
 	}
 
 	/**
@@ -110,16 +110,16 @@ class AnnotationMappingDiscovererUnitTest {
 	void handlesSlashes() throws Exception {
 
 		Method method = ControllerWithoutSlashes.class.getMethod("noslash");
-		assertThat(discoverer.getMapping(method)).isEqualTo("slashes/noslash");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("slashes/noslash"));
 
 		method = ControllerWithoutSlashes.class.getMethod("withslash");
-		assertThat(discoverer.getMapping(method)).isEqualTo("slashes/withslash");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("slashes/withslash"));
 
 		method = ControllerWithTrailingSlashes.class.getMethod("noslash");
-		assertThat(discoverer.getMapping(method)).isEqualTo("trailing/noslash");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("trailing/noslash"));
 
 		method = ControllerWithTrailingSlashes.class.getMethod("withslash");
-		assertThat(discoverer.getMapping(method)).isEqualTo("trailing/withslash");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("trailing/withslash"));
 	}
 
 	/**
@@ -130,7 +130,7 @@ class AnnotationMappingDiscovererUnitTest {
 
 		Method method = ControllerWithMultipleSlashes.class.getMethod("withslash");
 
-		assertThat(discoverer.getMapping(method)).isEqualTo("trailing/withslash");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("trailing/withslash"));
 	}
 
 	/**
@@ -141,7 +141,7 @@ class AnnotationMappingDiscovererUnitTest {
 
 		Method method = MultipleMappingsController.class.getMethod("method");
 
-		assertThat(discoverer.getMapping(method)).isEqualTo("/type/method");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/type/method"));
 	}
 
 	/**
@@ -151,14 +151,14 @@ class AnnotationMappingDiscovererUnitTest {
 	void discoversMethodLevelMappingUsingComposedAnnotation() throws Exception {
 
 		Method method = MyController.class.getMethod("methodWithComposedAnnotation");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/type/otherMethod");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/type/otherMethod"));
 	}
 
 	@Test // #1412
 	void removesMatchingExpressionFromTemplateVariable() throws Exception {
 
 		Method method = MyController.class.getMethod("mappingWithMatchingExpression");
-		assertThat(discoverer.getMapping(method)).isEqualTo("/type/foo/{bar}");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/type/foo/{bar}"));
 	}
 
 	@Test // #1442
@@ -176,7 +176,8 @@ class AnnotationMappingDiscovererUnitTest {
 
 		Method method = MyController.class.getMethod("multipleRegularExpressions");
 
-		assertThat(discoverer.getMapping(method)).isEqualTo("/type/spring-web/{symbolicName}-{version}{extension}");
+		assertThat(discoverer.getUriMapping(method))
+				.isEqualTo(UriMapping.of("/type/spring-web/{symbolicName}-{version}{extension}"));
 	}
 
 	@Test // #1468
@@ -184,7 +185,7 @@ class AnnotationMappingDiscovererUnitTest {
 
 		Method method = TrailingSlashes.class.getMethod("trailingSlash");
 
-		assertThat(discoverer.getMapping(method)).isEqualTo("/api/myentities/");
+		assertThat(discoverer.getUriMapping(method)).isEqualTo(UriMapping.of("/api/myentities/"));
 	}
 
 	@RequestMapping("/type")

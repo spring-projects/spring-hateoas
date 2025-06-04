@@ -58,18 +58,20 @@ class PropertyResolvingMappingDiscovererUnitTest extends TestUtils {
 		AnnotationMappingDiscoverer annotationMappingDiscoverer = new AnnotationMappingDiscoverer(RequestMapping.class);
 
 		// Test plain AnnotationMappingDiscoverer first
-		assertThat(annotationMappingDiscoverer.getMapping(ResolveEndpointController.class)).isEqualTo("/${test.parent}");
-		assertThat(annotationMappingDiscoverer.getMapping(ResolveMethodEndpointController.class, method))
-				.isEqualTo("/${test.parent}/${test.child}");
+		assertThat(annotationMappingDiscoverer.getUriMapping(ResolveEndpointController.class))
+				.isEqualTo(UriMapping.of("/${test.parent}"));
+		assertThat(annotationMappingDiscoverer.getUriMapping(ResolveMethodEndpointController.class, method))
+				.isEqualTo(UriMapping.of("/${test.parent}/${test.child}"));
 
 		PropertyResolvingMappingDiscoverer propertyResolvingMappingDiscoverer = new PropertyResolvingMappingDiscoverer(
 				annotationMappingDiscoverer);
 
-		assertThat(propertyResolvingMappingDiscoverer.getMapping(ResolveEndpointController.class))
-				.isEqualTo("/resolvedparent");
-		assertThat(propertyResolvingMappingDiscoverer.getMapping(method)).isEqualTo("/resolvedparent/resolvedchild");
-		assertThat(propertyResolvingMappingDiscoverer.getMapping(ResolveMethodEndpointController.class, method))
-				.isEqualTo("/resolvedparent/resolvedchild");
+		assertThat(propertyResolvingMappingDiscoverer.getUriMapping(ResolveEndpointController.class))
+				.isEqualTo(UriMapping.of("/resolvedparent"));
+		assertThat(propertyResolvingMappingDiscoverer.getUriMapping(method))
+				.isEqualTo(UriMapping.of("/resolvedparent/resolvedchild"));
+		assertThat(propertyResolvingMappingDiscoverer.getUriMapping(ResolveMethodEndpointController.class, method))
+				.isEqualTo(UriMapping.of("/resolvedparent/resolvedchild"));
 	}
 
 	@RequestMapping("/${test.parent}")

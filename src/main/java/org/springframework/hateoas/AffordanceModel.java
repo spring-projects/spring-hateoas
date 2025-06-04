@@ -204,15 +204,6 @@ public abstract class AffordanceModel {
 		 */
 		Stream<PropertyMetadata> stream();
 
-		/**
-		 * @deprecated since 1.4, for removal in 1.5. Prefer {@link #stream()} and selecting individual
-		 *             {@code PropertyMetadata} instances yourself.
-		 */
-		@Deprecated
-		default Optional<PropertyMetadata> getPropertyMetadata(String name) {
-			return stream().filter(it -> it.hasName(name)).findFirst();
-		}
-
 		@Nullable
 		default Class<?> getType() {
 			return null;
@@ -233,23 +224,6 @@ public abstract class AffordanceModel {
 			return InputPayloadMetadata.class.isInstance(metadata) //
 					? InputPayloadMetadata.class.cast(metadata)
 					: DelegatingInputPayloadMetadata.of(metadata);
-		}
-
-		/**
-		 * Applies the {@link InputPayloadMetadata} to the given target.
-		 *
-		 * @param <T>
-		 * @param target
-		 * @return
-		 * @deprecated since 1.3, prefer setting up the model types via
-		 *             {@link AffordanceModel#createProperties(BiFunction)}.
-		 */
-		@Deprecated
-		default <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
-
-			return getPropertyMetadata(target.getName()) //
-					.map(it -> target.apply(it)) //
-					.orElse(target);
 		}
 
 		<T extends Named> T customize(T target, Function<PropertyMetadata, T> customizer);
@@ -319,15 +293,6 @@ public abstract class AffordanceModel {
 		@Override
 		public Stream<PropertyMetadata> stream() {
 			return metadata.stream();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see org.springframework.hateoas.AffordanceModel.InputPayloadMetadata#customize(org.springframework.hateoas.AffordanceModel.PropertyMetadataConfigured)
-		 */
-		@Override
-		public <T extends PropertyMetadataConfigured<T> & Named> T applyTo(T target) {
-			return target;
 		}
 
 		/*

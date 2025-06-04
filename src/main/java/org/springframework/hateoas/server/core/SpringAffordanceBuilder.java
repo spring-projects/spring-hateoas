@@ -76,20 +76,6 @@ public class SpringAffordanceBuilder {
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @return
-	 * @deprecated since 2.0, use {@link #getUriMapping(Class, Method)} instead.
-	 */
-	@Nullable
-	@Deprecated
-	public static String getMapping(Class<?> type, Method method) {
-		return DISCOVERER.getMapping(type, method);
-	}
-
-	/**
-	 * Returns the mapping for the given type's method.
-	 *
-	 * @param type must not be {@literal null}.
-	 * @param method must not be {@literal null}.
-	 * @return
 	 * @since 2.0
 	 */
 	public static UriMapping getUriMapping(Class<?> type, Method method) {

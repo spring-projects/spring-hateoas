@@ -17,8 +17,10 @@ package org.springframework.hateoas.server.core;
 
 import static org.springframework.web.util.UriComponents.UriTemplateVariables.*;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,6 +97,43 @@ public class UriMapping {
 		return this.variables;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return mapping + " " + variables;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(@Nullable Object obj) {
+
+		if (obj == this) {
+			return true;
+		}
+
+		if (!(obj instanceof UriMapping that)) {
+			return false;
+		}
+
+		return Objects.equals(this.mapping, that.mapping)
+				&& Objects.equals(this.variables, that.variables);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.mapping, this.variables);
+	}
+
 	/**
 	 * All {@link MappingVariable}s contained in a {@link UriTemplate}.
 	 *
@@ -105,7 +144,14 @@ public class UriMapping {
 		private final List<MappingVariable> variables;
 
 		public MappingVariables(UriTemplate template) {
-			this.variables = template.getVariableNames().stream().map(MappingVariable::of).collect(Collectors.toList());
+
+			this.variables = template.getVariableNames().stream()
+					.map(MappingVariable::of)
+					.collect(Collectors.toList());
+		}
+
+		private MappingVariables(List<MappingVariable> variables) {
+			this.variables = variables;
 		}
 
 		public boolean hasCapturingVariable() {
@@ -129,6 +175,19 @@ public class UriMapping {
 					.orElseThrow(() -> new IllegalArgumentException("No variable named " + name + " found!"));
 		}
 
+		public MappingVariables and(MappingVariables other) {
+
+			List<MappingVariable> result = new ArrayList<>(variables);
+
+			for (MappingVariable variable : other) {
+				if (!result.contains(variable)) {
+					result.add(variable);
+				}
+			}
+
+			return new MappingVariables(result);
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Iterable#iterator()
@@ -136,6 +195,42 @@ public class UriMapping {
 		@Override
 		public Iterator<MappingVariable> iterator() {
 			return variables.iterator();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return variables.toString();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(@Nullable Object obj) {
+
+			if (obj == this) {
+				return true;
+			}
+
+			if (!(obj instanceof MappingVariables that)) {
+				return false;
+			}
+
+			return Objects.equals(this.variables, that.variables);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return Objects.hash(variables);
 		}
 	}
 
@@ -226,6 +321,43 @@ public class UriMapping {
 		public Object getAbsentValue() {
 			return composite ? TemplateVariable.segment(name).composite().toString() : SKIP_VALUE;
 		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return name + (composite ? "*" : "");
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(@Nullable Object obj) {
+
+			if (obj == this) {
+				return true;
+			}
+
+			if (!(obj instanceof MappingVariable that)) {
+				return false;
+			}
+
+			return Objects.equals(this.name, that.name)
+					&& this.composite == that.composite;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, composite);
+		}
 	}
 
 	/**
@@ -258,7 +390,6 @@ public class UriMapping {
 		 * @see java.util.function.Function#apply(java.lang.Object)
 		 */
 		@Override
-		@SuppressWarnings("null")
 		public String apply(String source) {
 
 			Matcher matcher = PATH_CAPTURE.matcher(source);

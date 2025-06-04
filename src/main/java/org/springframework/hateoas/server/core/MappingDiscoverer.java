@@ -38,34 +38,10 @@ public interface MappingDiscoverer {
 	 *
 	 * @param type must not be {@literal null}.
 	 * @return the type-level mapping or {@literal null} in case none is present.
-	 * @deprecated since 2.0, prefer {@link #getUriMapping(Class)}
-	 */
-	@Nullable
-	@Deprecated
-	String getMapping(Class<?> type);
-
-	/**
-	 * Returns the mapping associated with the given type.
-	 *
-	 * @param type must not be {@literal null}.
-	 * @return the type-level mapping or {@literal null} in case none is present.
 	 * @since 2.0
 	 */
 	@Nullable
-	default UriMapping getUriMapping(Class<?> type) {
-		return UriMapping.of(getMapping(type));
-	}
-
-	/**
-	 * Returns the mapping associated with the given {@link Method}. This will include the type-level mapping.
-	 *
-	 * @param method must not be {@literal null}.
-	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
-	 * @deprecated since 2.0, use {@link #getUriMapping(Method)} instead
-	 */
-	@Nullable
-	@Deprecated
-	String getMapping(Method method);
+	UriMapping getUriMapping(Class<?> type);
 
 	/**
 	 * Returns the mapping associated with the given {@link Method}. This will include the type-level mapping.
@@ -75,22 +51,7 @@ public interface MappingDiscoverer {
 	 * @since 2.0
 	 */
 	@Nullable
-	default UriMapping getUriMapping(Method method) {
-		return UriMapping.of(getMapping(method));
-	}
-
-	/**
-	 * Returns the mapping for the given {@link Method} invoked on the given type. This can be used to calculate the
-	 * mapping for a super type method being invoked on a sub-type with a type mapping.
-	 *
-	 * @param type must not be {@literal null}.
-	 * @param method must not be {@literal null}.
-	 * @return the method mapping including the type-level one or {@literal null} if neither of them present.
-	 * @deprecated since 2.0, use {@link #getUriMapping(Class, Method)} instead
-	 */
-	@Nullable
-	@Deprecated
-	String getMapping(Class<?> type, Method method);
+	UriMapping getUriMapping(Method method);
 
 	/**
 	 * Returns the mapping for the given {@link Method} invoked on the given type. This can be used to calculate the
@@ -102,9 +63,7 @@ public interface MappingDiscoverer {
 	 * @since 2.0
 	 */
 	@Nullable
-	default UriMapping getUriMapping(Class<?> type, Method method) {
-		return UriMapping.of(getMapping(type, method));
-	}
+	UriMapping getUriMapping(Class<?> type, Method method);
 
 	/**
 	 * Returns the HTTP verbs for the given {@link Method} invoked on the given type. This can be used to build hypermedia

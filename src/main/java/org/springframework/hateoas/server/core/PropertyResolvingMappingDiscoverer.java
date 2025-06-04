@@ -35,9 +35,9 @@ import org.springframework.web.context.WebApplicationContext;
  */
 class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 
-	private final MappingDiscoverer delegate;
+	private final RawMappingDiscoverer delegate;
 
-	PropertyResolvingMappingDiscoverer(MappingDiscoverer delegate) {
+	PropertyResolvingMappingDiscoverer(RawMappingDiscoverer delegate) {
 
 		Assert.notNull(delegate, "Delegate MappingDiscoverer must not be null!");
 
@@ -46,32 +46,41 @@ class PropertyResolvingMappingDiscoverer implements MappingDiscoverer {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.Class)
 	 */
 	@Nullable
 	@Override
-	public String getMapping(Class<?> type) {
-		return resolveProperties(delegate.getMapping(type));
+	public UriMapping getUriMapping(Class<?> type) {
+
+		var mapping = delegate.getMapping(type, null);
+
+		return mapping == null ? null : UriMapping.of(resolveProperties(mapping));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.reflect.Method)
 	 */
 	@Nullable
 	@Override
-	public String getMapping(Method method) {
-		return resolveProperties(delegate.getMapping(method));
+	public UriMapping getUriMapping(Method method) {
+
+		var mapping = delegate.getMapping(method.getDeclaringClass(), method);
+
+		return mapping == null ? null : UriMapping.of(resolveProperties(mapping));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.Class, java.lang.reflect.Method)
 	 */
 	@Nullable
 	@Override
-	public String getMapping(Class<?> type, Method method) {
-		return resolveProperties(delegate.getMapping(type, method));
+	public UriMapping getUriMapping(Class<?> type, Method method) {
+
+		var mapping = delegate.getMapping(type, method);
+
+		return mapping == null ? null : UriMapping.of(resolveProperties(mapping));
 	}
 
 	/*

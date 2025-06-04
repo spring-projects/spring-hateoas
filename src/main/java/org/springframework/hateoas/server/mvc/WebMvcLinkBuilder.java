@@ -84,8 +84,8 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		var mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
-		var defaulted = mapping == null ? "/" : mapping;
+		var mapping = SpringAffordanceBuilder.DISCOVERER.getUriMapping(controller);
+		var defaulted = mapping == null ? "/" : mapping.getMapping();
 
 		var uri = URI_FACTORY.expand(defaulted, parameters);
 		var uriComponents = UriComponentsBuilder.fromUri(uri).build();
@@ -107,8 +107,8 @@ public class WebMvcLinkBuilder extends TemplateVariableAwareLinkBuilderSupport<W
 		Assert.notNull(controller, "Controller must not be null!");
 		Assert.notNull(parameters, "Parameters must not be null!");
 
-		var mapping = SpringAffordanceBuilder.DISCOVERER.getMapping(controller);
-		var defaulted = mapping == null ? "/" : mapping;
+		var mapping = SpringAffordanceBuilder.DISCOVERER.getUriMapping(controller);
+		var defaulted = mapping == null ? "/" : mapping.getMapping();
 
 		var uri = URI_FACTORY.expand(defaulted, parameters);
 		var uriComponents = UriComponentsBuilder.fromUri(uri).build();

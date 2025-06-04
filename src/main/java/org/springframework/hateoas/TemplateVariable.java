@@ -95,18 +95,29 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	 * Static helper to fashion {@link VariableType#PATH_VARIABLE} variables.
 	 *
 	 * @param variable must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @since 1.1
 	 */
 	public static TemplateVariable pathVariable(String variable) {
-		return new TemplateVariable(variable, VariableType.PATH_VARIABLE);
+		return new TemplateVariable(variable, VariableType.SIMPLE);
+	}
+
+	/**
+	 * Alias of {@link #pathVariable(String)}.
+	 *
+	 * @param variable must not be {@literal null} or empty.
+	 * @return will never be {@literal null}.
+	 * @since 3.0
+	 */
+	public static TemplateVariable simple(String variable) {
+		return new TemplateVariable(variable, VariableType.SIMPLE);
 	}
 
 	/**
 	 * Static helper to fashion {@link VariableType#REQUEST_PARAM} variables.
 	 *
 	 * @param parameter must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @since 1.1
 	 */
 	public static TemplateVariable requestParameter(String parameter) {
@@ -117,7 +128,7 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	 * Static helper to fashion {@link VariableType#REQUEST_PARAM_CONTINUED} variables.
 	 *
 	 * @param parameter must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @since 1.1
 	 */
 	public static TemplateVariable requestParameterContinued(String parameter) {
@@ -128,39 +139,33 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	 * Static helper to fashion {@link VariableType#SEGMENT} variables.
 	 *
 	 * @param segment must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @since 1.1
 	 */
 	public static TemplateVariable segment(String segment) {
-		return new TemplateVariable(segment, VariableType.SEGMENT);
+		return new TemplateVariable(segment, VariableType.PATH_SEGMENT);
 	}
 
 	/**
 	 * Static helper to fashion {@link VariableType#FRAGMENT} variables.
 	 *
 	 * @param name must not be {@literal null} or empty.
-	 * @return
+	 * @return will never be {@literal null}.
 	 * @since 1.1
 	 */
 	public static TemplateVariable fragment(String name) {
 		return new TemplateVariable(name, VariableType.FRAGMENT);
 	}
 
+	/**
+	 * Static helper to fashion {@link VariableType#RESERVED_STRING} variables.
+	 *
+	 * @param name must not be {@literal null} or empty.
+	 * @return will never be {@literal null}.
+	 * @since 1.1
+	 */
 	public static TemplateVariable reservedString(String name) {
 		return new TemplateVariable(name, VariableType.RESERVED_STRING);
-	}
-
-	/**
-	 * Static helper to fashion {@link VariableType#COMPOSITE_PARAM} variables.
-	 *
-	 * @param parameter must not be {@literal null} or empty.
-	 * @return
-	 * @since 1.1
-	 * @deprecated since 1.4, use actual parameter type and call {@link #composite()} on the instance instead.
-	 */
-	@Deprecated
-	public static TemplateVariable compositeParameter(String parameter) {
-		return new TemplateVariable(parameter, VariableType.COMPOSITE_PARAM);
 	}
 
 	/**
@@ -221,18 +226,6 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	}
 
 	/**
-	 * Returns whether the template variable is optional, which means the template can be expanded to a URI without a
-	 * value given for that variable.
-	 *
-	 * @return
-	 * @deprecated since 1.4. No replacement as template variables are never required actually.
-	 */
-	@Deprecated
-	boolean isRequired() {
-		return !type.isOptional();
-	}
-
-	/**
 	 * Returns whether the given {@link TemplateVariable} is of the same type as the current one.
 	 *
 	 * @param variable must not be {@literal null}.
@@ -285,7 +278,6 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	}
 
 	public String asString() {
-
 		return "{" + type.toString() + essence() + "}";
 	}
 
@@ -474,32 +466,13 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 	public enum VariableType {
 
 		SIMPLE("", ",", false), //
-
-		/**
-		 * @deprecated since 1.4, use {@link #SIMPLE} instead.
-		 */
-		@Deprecated
-		PATH_VARIABLE("", ",", true), //
 		RESERVED_STRING("+", ",", true), //
 		DOT(".", ".", true), //
 		REQUEST_PARAM("?", "&", true), //
 		REQUEST_PARAM_CONTINUED("&", "&", true), //
-
 		PATH_SEGMENT("/", "/", true), //
-
-		/**
-		 * @deprecated since 1.4, use {@link #PATH_SEGMENT} instead.
-		 */
-		@Deprecated
-		SEGMENT("/", "/", true), //
 		PATH_STYLE_PARAMETER(";", ";", true), //
-		FRAGMENT("#", ",", true), //
-
-		/**
-		 * @deprecated since 1.4. Use the actual type and call {@link TemplateVariable#composite()}.
-		 */
-		@Deprecated
-		COMPOSITE_PARAM("*", "", true);
+		FRAGMENT("#", ",", true);
 
 		private static final EnumSet<VariableType> COMBINABLE_TYPES = EnumSet.of(REQUEST_PARAM, REQUEST_PARAM_CONTINUED);
 		static final String DEFAULT_SEPARATOR = ",";
@@ -518,7 +491,6 @@ public final class TemplateVariable implements Serializable, UriTemplate.Expanda
 
 			switch (this) {
 				case DOT:
-				case SEGMENT:
 				case PATH_SEGMENT:
 				case PATH_STYLE_PARAMETER:
 				case REQUEST_PARAM:

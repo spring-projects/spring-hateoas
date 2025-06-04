@@ -114,16 +114,6 @@ public @interface EnableHypermediaSupport {
 			return this.mediaTypes;
 		}
 
-		/**
-		 * @deprecated since 2.5, in favor of {@link #getMediaTypes()} as a logical media type might have been associated
-		 *             with multiple media type identifiers (see {@link #HAL}).
-		 * @return will never be {@literal null}.
-		 */
-		@Deprecated(since = "2.5", forRemoval = true)
-		public MediaType getMediaType() {
-			return this.mediaTypes.get(0);
-		}
-
 		public String getLocalPackageName() {
 			return localPackageName;
 		}

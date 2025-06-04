@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  */
 public class CachingMappingDiscoverer implements MappingDiscoverer {
 
-	private static final Map<String, String> MAPPINGS = new ConcurrentReferenceHashMap<>();
+	private static final Map<String, UriMapping> MAPPINGS = new ConcurrentReferenceHashMap<>();
 	private static final Map<String, Collection<HttpMethod>> METHODS = new ConcurrentReferenceHashMap<>();
 	private static final Map<String, String[]> PARAMS = new ConcurrentReferenceHashMap<>();
 	private static final Map<String, List<MediaType>> CONSUMES = new ConcurrentReferenceHashMap<>();
@@ -52,38 +52,38 @@ public class CachingMappingDiscoverer implements MappingDiscoverer {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.Class)
 	 */
 	@Nullable
 	@Override
-	public String getMapping(Class<?> type) {
+	public UriMapping getUriMapping(Class<?> type) {
 
 		String key = key(type, null);
 
-		return MAPPINGS.computeIfAbsent(key, __ -> delegate.getMapping(type));
+		return MAPPINGS.computeIfAbsent(key, __ -> delegate.getUriMapping(type));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.reflect.Method)
 	 */
 	@Nullable
 	@Override
-	public String getMapping(Method method) {
-		return MAPPINGS.computeIfAbsent(key(method), __ -> delegate.getMapping(method));
+	public UriMapping getUriMapping(Method method) {
+		return MAPPINGS.computeIfAbsent(key(method), __ -> delegate.getUriMapping(method));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.Class, java.lang.reflect.Method)
 	 */
 	@Nullable
 	@Override
-	public String getMapping(Class<?> type, Method method) {
+	public UriMapping getUriMapping(Class<?> type, Method method) {
 
 		String key = key(type, method);
 
-		return MAPPINGS.computeIfAbsent(key, __ -> delegate.getMapping(type, method));
+		return MAPPINGS.computeIfAbsent(key, __ -> delegate.getUriMapping(type, method));
 	}
 
 	/*

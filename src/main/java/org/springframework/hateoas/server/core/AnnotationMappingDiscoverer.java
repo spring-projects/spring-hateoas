@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Greg Turnquist
  * @author Réda Housni Alaoui
  */
-public class AnnotationMappingDiscoverer implements MappingDiscoverer {
+public class AnnotationMappingDiscoverer implements MappingDiscoverer, RawMappingDiscoverer {
 
 	private final Class<? extends Annotation> annotationType;
 	private final @Nullable String mappingAttributeName;
@@ -73,50 +73,59 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.Class)
 	 */
 	@Override
 	@Nullable
-	public String getMapping(Class<?> type) {
-
-		Assert.notNull(type, "Type must not be null!");
-
-		String[] mapping = getMappingFrom(findMergedAnnotation(type, annotationType));
-
-		return mapping.length == 0 ? null : mapping[0];
+	public UriMapping getUriMapping(Class<?> type) {
+		return UriMapping.of(getMapping(type));
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.reflect.Method)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.reflect.Method)
 	 */
 	@Override
 	@Nullable
-	public String getMapping(Method method) {
+	public UriMapping getUriMapping(Method method) {
 
 		Assert.notNull(method, "Method must not be null!");
-		return getMapping(method.getDeclaringClass(), method);
+
+		return getUriMapping(method.getDeclaringClass(), method);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.hateoas.core.MappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
+	 * @see org.springframework.hateoas.server.core.MappingDiscoverer#getUriMapping(java.lang.Class, java.lang.reflect.Method)
 	 */
 	@Override
 	@Nullable
-	public String getMapping(Class<?> type, Method method) {
+	public UriMapping getUriMapping(Class<?> type, Method method) {
 
-		Assert.notNull(type, "Type must not be null!");
-		Assert.notNull(method, "Method must not be null!");
+		var mapping = getMapping(type, method);
 
-		String[] mapping = getMappingFrom(findMergedAnnotation(method, annotationType));
+		return mapping == null ? null : UriMapping.of(cleanup(mapping));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.hateoas.server.core.RawMappingDiscoverer#getMapping(java.lang.Class, java.lang.reflect.Method)
+	 */
+	@Override
+	public @Nullable String getMapping(@Nullable Class<?> type, @Nullable Method method) {
+
+		String[] mapping = method == null ? new String[0] : getMappingFrom(findMergedAnnotation(method, annotationType));
 		String typeMapping = getMapping(type);
 
 		if (mapping.length == 0) {
 			return typeMapping;
 		}
 
-		return cleanup(typeMapping == null || "/".equals(typeMapping) ? mapping[0] : join(typeMapping, mapping[0]));
+		var result = typeMapping == null || "/".equals(typeMapping)
+				? mapping[0]
+				: join(typeMapping, mapping[0]);
+
+		return cleanup(result);
 	}
 
 	/**
@@ -177,6 +186,17 @@ public class AnnotationMappingDiscoverer implements MappingDiscoverer {
 		String[] params = (String[]) getValue(annotation, "params");
 
 		return params == null ? new String[0] : params;
+	}
+
+	private @Nullable String getMapping(@Nullable Class<?> type) {
+
+		if (type == null) {
+			return null;
+		}
+
+		String[] mapping = getMappingFrom(findMergedAnnotation(type, annotationType));
+
+		return mapping.length == 0 ? null : mapping[0];
 	}
 
 	private String[] getMappingFrom(@Nullable Annotation annotation) {
