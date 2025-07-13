@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * Primary API to construct {@link Affordance} instances.
  *
  * @author Oliver Drotbohm
+ * @author Jongha Park
  * @see #afford(HttpMethod)
  */
 public class Affordances implements AffordanceOperations {
@@ -100,19 +101,19 @@ public class Affordances implements AffordanceOperations {
 		private final Affordances context;
 		private final HttpMethod method;
 		private final Link target;
-		private final InputPayloadMetadata inputMetdata;
+		private final InputPayloadMetadata inputMetadata;
 		private final PayloadMetadata outputMetadata;
 
 		private List<QueryParameter> parameters = Collections.emptyList();
 		private @Nullable String name;
 
-		private AffordanceBuilder(Affordances context, HttpMethod method, Link target, InputPayloadMetadata inputMetdata,
+		private AffordanceBuilder(Affordances context, HttpMethod method, Link target, InputPayloadMetadata inputMetadata,
 				PayloadMetadata outputMetadata, List<QueryParameter> parameters, @Nullable String name) {
 
 			this.context = context;
 			this.method = method;
 			this.target = target;
-			this.inputMetdata = inputMetdata;
+			this.inputMetadata = inputMetadata;
 			this.outputMetadata = outputMetadata;
 			this.parameters = parameters;
 			this.name = name;
@@ -205,7 +206,7 @@ public class Affordances implements AffordanceOperations {
 		 */
 		@Override
 		public ConfigurableAffordance withOutput(PayloadMetadata metadata) {
-			return new AffordanceBuilder(context, method, target, inputMetdata, metadata, parameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetadata, metadata, parameters, name);
 		}
 
 		/*
@@ -223,7 +224,7 @@ public class Affordances implements AffordanceOperations {
 		 */
 		@Override
 		public ConfigurableAffordance withInputMediaTypes(List<MediaType> inputMediaTypes) {
-			return withInput(inputMetdata.withMediaTypes(inputMediaTypes));
+			return withInput(inputMetadata.withMediaTypes(inputMediaTypes));
 		}
 
 		/*
@@ -241,7 +242,7 @@ public class Affordances implements AffordanceOperations {
 		 */
 		@Override
 		public ConfigurableAffordance withParameters(List<QueryParameter> parameters) {
-			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, parameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetadata, outputMetadata, parameters, name);
 		}
 
 		/*
@@ -255,7 +256,7 @@ public class Affordances implements AffordanceOperations {
 			newParameters.addAll(this.parameters);
 			newParameters.addAll(Arrays.asList(parameters));
 
-			return new AffordanceBuilder(context, method, target, inputMetdata, outputMetadata, newParameters, name);
+			return new AffordanceBuilder(context, method, target, inputMetadata, outputMetadata, newParameters, name);
 		}
 
 		/*
@@ -268,7 +269,7 @@ public class Affordances implements AffordanceOperations {
 			Assert.notNull(target, "Target must not be null!");
 
 			return this.target == target ? this
-					: new AffordanceBuilder(this.context, this.method, target, this.inputMetdata, this.outputMetadata,
+					: new AffordanceBuilder(this.context, this.method, target, this.inputMetadata, this.outputMetadata,
 							this.parameters, this.name);
 		}
 
@@ -280,7 +281,7 @@ public class Affordances implements AffordanceOperations {
 		public ConfigurableAffordance withName(@Nullable String name) {
 
 			return this.name == name ? this
-					: new AffordanceBuilder(this.context, this.method, this.target, this.inputMetdata, this.outputMetadata,
+					: new AffordanceBuilder(this.context, this.method, this.target, this.inputMetadata, this.outputMetadata,
 							this.parameters, name);
 		}
 
@@ -323,8 +324,8 @@ public class Affordances implements AffordanceOperations {
 
 			String name = method.toString().toLowerCase();
 
-			Class<?> type = TypeBasedPayloadMetadata.class.isInstance(inputMetdata) //
-					? TypeBasedPayloadMetadata.class.cast(inputMetdata).getType() //
+			Class<?> type = TypeBasedPayloadMetadata.class.isInstance(inputMetadata) //
+					? TypeBasedPayloadMetadata.class.cast(inputMetadata).getType() //
 					: null;
 
 			return type == null ? name : name.concat(type.getSimpleName());
@@ -345,7 +346,7 @@ public class Affordances implements AffordanceOperations {
 		 */
 		@Override
 		public InputPayloadMetadata getInputMetadata() {
-			return inputMetdata;
+			return inputMetadata;
 		}
 
 		/*
