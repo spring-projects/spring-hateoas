@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.MessageSource;
@@ -60,7 +60,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.jayway.jsonpath.Configuration;
@@ -538,7 +538,7 @@ class Jackson2HalIntegrationTest {
 		model.add(Link.of("/foo/form", IanaLinkRelations.EDIT_FORM));
 
 		ObjectMapper objectMapper = mapper.copy() //
-				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
+				.setPropertyNamingStrategy(SnakeCaseStrategy.INSTANCE) //
 				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		String result = objectMapper.writeValueAsString(model);
@@ -560,7 +560,7 @@ class Jackson2HalIntegrationTest {
 
 		ObjectMapper mapper = HalTestUtils.halObjectMapper(new HalConfiguration() //
 				.withApplyPropertyNamingStrategy(false)) //
-				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
+				.setPropertyNamingStrategy(SnakeCaseStrategy.INSTANCE) //
 				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		String result = mapper.writeValueAsString(model);

@@ -54,7 +54,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
@@ -848,9 +847,9 @@ public class Jackson2HalModule extends SimpleModule {
 		 */
 		public EmbeddedMapper with(@Nullable PropertyNamingStrategy strategy) {
 
-			Function<String, String> mapper = strategy instanceof PropertyNamingStrategyBase
-					? ((PropertyNamingStrategyBase) strategy)::translate
-					: strategy instanceof NamingBase ? ((NamingBase) strategy)::translate : null;
+			Function<String, String> mapper = strategy instanceof NamingBase
+					? ((NamingBase) strategy)::translate
+					: null;
 
 			return mapper == null
 					? this
