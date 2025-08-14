@@ -119,7 +119,7 @@
 		<profile>
 			<id>jackson-next</id>
 			<properties>
-				<jackson-bom.version>2.19.0-rc2</jackson-bom.version>
+				<jackson-bom.version>2.20.0-rc1</jackson-bom.version>
 			</properties>
 		</profile>
 
