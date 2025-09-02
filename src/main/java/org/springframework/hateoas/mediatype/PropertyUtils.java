@@ -346,7 +346,7 @@ public class PropertyUtils {
 					.orElseThrow(() -> new IllegalStateException("Could not resolve value!"));
 
 			this.annotations = Stream.of(property.getReadMethod(), property.getWriteMethod(), field) //
-					.filter(it -> it != null) //
+					.filter(Objects::nonNull) //
 					.map(MergedAnnotations::from) //
 					.collect(Collectors.toList());
 
