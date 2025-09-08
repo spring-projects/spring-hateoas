@@ -34,6 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentLruCache;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +59,7 @@ public class SpringAffordanceBuilder {
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
 	 * @param href must not be {@literal null} or empty.
-	 * @return
+	 * @return list of affordances for the method
 	 */
 	public static List<Affordance> getAffordances(Class<?> type, Method method, String href) {
 
@@ -75,7 +76,7 @@ public class SpringAffordanceBuilder {
 	 *
 	 * @param type must not be {@literal null}.
 	 * @param method must not be {@literal null}.
-	 * @return
+	 * @return the URI mapping for the method
 	 * @since 2.0
 	 */
 	public static UriMapping getUriMapping(Class<?> type, Method method) {
@@ -106,9 +107,10 @@ public class SpringAffordanceBuilder {
 				.map(ResolvableType::forMethodParameter) //
 				.orElse(ResolvableType.NONE);
 
-		List<QueryParameter> queryMethodParameters = parameters.getParametersWith(RequestParam.class).stream() //
-				.filter(it -> !Map.class.isAssignableFrom(it.getParameterType()))
-				.map(QueryParameter::of) //
+		// Include both @RequestParam and @ModelAttribute parameters
+		List<QueryParameter> queryMethodParameters = parameters.getParameters().stream()
+				.filter(it -> shouldIncludeAsQueryParameter(it))
+				.map(QueryParameter::of)
 				.collect(Collectors.toList());
 
 		return affordances -> requestMethods.stream() //
@@ -121,6 +123,78 @@ public class SpringAffordanceBuilder {
 						.build() //
 						.stream()) //
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Determines if a method parameter should be included as a query parameter.
+	 * Includes @RequestParam, @ModelAttribute (explicit and implicit), but excludes
+	 * Map parameters and @RequestBody parameters.
+	 */
+	private static boolean shouldIncludeAsQueryParameter(org.springframework.core.MethodParameter parameter) {
+		// Exclude Map parameters (existing logic)
+		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+			return false;
+		}
+
+		// Exclude @RequestBody parameters
+		if (parameter.hasParameterAnnotation(RequestBody.class)) {
+			return false;
+		}
+
+		// Include @RequestParam parameters
+		if (parameter.hasParameterAnnotation(RequestParam.class)) {
+			return true;
+		}
+
+		// Include @ModelAttribute parameters
+		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
+			return true;
+		}
+
+		// Include implicit @ModelAttribute (complex objects without other annotations)
+		return isImplicitModelAttribute(parameter);
+	}
+
+	/**
+	 * Checks if a parameter is an implicit @ModelAttribute according to Spring MVC rules.
+	 */
+	private static boolean isImplicitModelAttribute(org.springframework.core.MethodParameter parameter) {
+		Class<?> parameterType = parameter.getParameterType();
+
+		// Simple types are not implicit @ModelAttribute
+		if (isSimpleValueType(parameterType)) {
+			return false;
+		}
+
+		// Check if it's annotated with other Spring MVC annotations
+		return !parameter.hasParameterAnnotation(RequestParam.class) &&
+			   !parameter.hasParameterAnnotation(RequestBody.class) &&
+			   !parameter.hasParameterAnnotation(org.springframework.web.bind.annotation.PathVariable.class) &&
+			   !parameter.hasParameterAnnotation(org.springframework.web.bind.annotation.RequestHeader.class) &&
+			   !parameter.hasParameterAnnotation(org.springframework.web.bind.annotation.CookieValue.class) &&
+			   !parameter.hasParameterAnnotation(org.springframework.web.bind.annotation.RequestPart.class) &&
+			   !parameter.hasParameterAnnotation(org.springframework.web.bind.annotation.SessionAttribute.class) &&
+			   !parameter.hasParameterAnnotation(org.springframework.web.bind.annotation.RequestAttribute.class);
+	}
+
+	/**
+	 * Determines if a type is a simple value type that should not be treated as @ModelAttribute.
+	 */
+	private static boolean isSimpleValueType(Class<?> type) {
+		return type.isPrimitive() ||
+			   type == String.class ||
+			   Number.class.isAssignableFrom(type) ||
+			   type == Boolean.class ||
+			   type.isEnum() ||
+			   java.util.Date.class.isAssignableFrom(type) ||
+			   java.time.temporal.Temporal.class.isAssignableFrom(type) ||
+			   type == java.net.URI.class ||
+			   type == java.net.URL.class ||
+			   type == java.util.Locale.class ||
+			   type == java.util.TimeZone.class ||
+			   type == java.io.InputStream.class ||
+			   type == java.io.Reader.class ||
+			   type == org.springframework.web.multipart.MultipartFile.class;
 	}
 
 	private static final class AffordanceKey {
