@@ -87,7 +87,7 @@ class AotUtils {
 			return;
 		}
 
-		LOGGER.info("Registering {} for reflection (for {})", type.getName(), context.getName());
+		LOGGER.debug("Registering {} for reflection (for {})", type.getName(), context.getName());
 
 		reflection.registerType(type,
 				MemberCategory.INVOKE_DECLARED_METHODS,
@@ -101,7 +101,7 @@ class AotUtils {
 		// Register RepresentationModel types for full reflection
 		var provider = AotUtils.getScanner(packageName, filters);
 
-		LOGGER.info("Registering Spring HATEOAS types in {} for reflection.", packageName);
+		LOGGER.debug("Registering Spring HATEOAS types in {} for reflection.", packageName);
 
 		provider.findClasses()
 				.sorted(Comparator.comparing(TypeReference::getName))
