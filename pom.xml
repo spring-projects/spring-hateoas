@@ -86,7 +86,7 @@
 		<reactor-bom.version>2025.0.0-RC1</reactor-bom.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<spring.version>7.0.0-RC1</spring.version>
-		<spring-plugin.version>4.0.0-M1</spring-plugin.version>
+		<spring-plugin.version>4.0.0-RC1</spring-plugin.version>
 		<kotlin.version>2.2.20</kotlin.version>
 		<kotlinx-coroutines.version>1.10.2</kotlinx-coroutines.version>
 		<mockk.version>1.14.6</mockk.version>
@@ -246,7 +246,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.2.7</version>
+						<version>3.2.8</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -257,7 +257,7 @@
 							</execution>
 						</executions>
 						<configuration>
-							<!-- Password via MAVEN_GPG_PASSWORD -->
+							<!-- Password via MAVEN_GPG_PASSPHRASE -->
 						</configuration>
 					</plugin>
 					 <plugin>
