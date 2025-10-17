@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import lombok.Value;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -108,6 +109,23 @@ class IanaLinkRelationUnitTest {
 				.collect(Collectors.toSet());
 
 		assertThat(linkRelations).containsExactlyElementsOf(stringConstants);
+	}
+
+	@Test // GH-2381
+	void containsAllLinkRelations() throws Exception {
+
+		var allDeclared = Arrays.stream(IanaLinkRelations.class.getDeclaredFields()) //
+				.filter(ReflectionUtils::isPublicStaticFinal) //
+				.filter(field -> LinkRelation.class.equals(field.getType())) //
+				.map(it -> ReflectionUtils.getField(it, null)) //
+				.map(LinkRelation.class::cast) //
+				.toList();
+
+		var allRelationsField = ReflectionUtils.findField(IanaLinkRelations.class, "LINK_RELATIONS");
+		ReflectionUtils.makeAccessible(allRelationsField);
+		var allRelations = (Collection<LinkRelation>) ReflectionUtils.getField(allRelationsField, null);
+
+		assertThat(allDeclared).containsExactlyInAnyOrderElementsOf(allRelations);
 	}
 
 	/**
