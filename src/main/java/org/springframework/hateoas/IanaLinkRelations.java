@@ -15,12 +15,9 @@
  */
 package org.springframework.hateoas;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Capture standard IANA-based link relations.
@@ -1224,17 +1221,17 @@ public final class IanaLinkRelations {
 	/**
 	 * Consolidated collection of {@link IanaLinkRelations}s.
 	 */
-	private static final Set<LinkRelation> LINK_RELATIONS;
-
-	static {
-
-		LINK_RELATIONS = Arrays.stream(IanaLinkRelations.class.getDeclaredFields()) //
-				.filter(ReflectionUtils::isPublicStaticFinal) //
-				.filter(field -> LinkRelation.class.equals(field.getType())) //
-				.map(it -> ReflectionUtils.getField(it, null)) //
-				.map(LinkRelation.class::cast) //
-				.collect(Collectors.toSet());
-	}
+	private static final Set<LinkRelation> LINK_RELATIONS = Set.of(ABOUT, ALTERNATE, APPENDIX, ARCHIVES, AUTHOR,
+			BLOCKED_BY, BOOKMARK, CANONICAL, CHAPTER, CITE_AS, COLLECTION, CONTENTS, CONVERTED_FROM, COPYRIGHT, CREATE_FORM,
+			CURRENT, DESCRIBED_BY, DESCRIBES, DISCLOSURE, DNS_PREFETCH, DUPLICATE, EDIT, EDIT_FORM, EDIT_MEDIA, ENCLOSURE,
+			FIRST, GLOSSARY, HELP, HOSTS, HUB, ICON, INDEX, INTERVAL_AFTER, INTERVAL_BEFORE, INTERVAL_CONTAINS,
+			INTERVAL_DISJOINT, INTERVAL_DURING, INTERVAL_EQUALS, INTERVAL_FINISHED_BY, INTERVAL_FINISHES, INTERVAL_IN,
+			INTERVAL_MEETS, INTERVAL_MET_BY, INTERVAL_OVERLAPPED_BY, INTERVAL_OVERLAPS, INTERVAL_STARTED_BY, INTERVAL_STARTS,
+			ITEM, LAST, LATEST_VERSION, LICENSE, LRDD, MEMENTO, MONITOR, MONITOR_GROUP, NEXT, NEXT_ARCHIVE, NOFOLLOW,
+			NOREFERRER, ORIGINAL, PAYMENT, PINGBACK, PRECONNECT, PREDECESSOR_VERSION, PREFETCH, PRELOAD, PRERENDER, PREV,
+			PREVIEW, PREVIOUS, PREV_ARCHIVE, PRIVACY_POLICY, PROFILE, RELATED, RESTCONF, REPLIES, SEARCH, SECTION, SELF,
+			SERVICE, START, STYLESHEET, SUBSECTION, SUCCESSOR_VERSION, TAG, TERMS_OF_SERVICE, TIMEGATE, TIMEMAP, TYPE, UP,
+			VERSION_HISTORY, VIA, WEBMENTION, WORKING_COPY, WORKING_COPY_OF);
 
 	private IanaLinkRelations() {
 		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
