@@ -89,9 +89,7 @@ class AotUtils {
 
 		LOGGER.debug("Registering {} for reflection (for {})", type.getName(), context.getName());
 
-		reflection.registerType(type,
-				MemberCategory.INVOKE_DECLARED_METHODS,
-				MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS);
+		reflection.registerType(type, MemberCategory.INVOKE_DECLARED_METHODS);
 
 		SEEN_TYPES.add(type);
 	}

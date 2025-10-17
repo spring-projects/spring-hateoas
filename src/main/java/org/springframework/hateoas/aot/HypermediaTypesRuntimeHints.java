@@ -65,7 +65,8 @@ class HypermediaTypesRuntimeHints implements RuntimeHintsRegistrar {
 
 	static class JacksonAnnotationPresentFilter implements TypeFilter {
 
-		private static final Predicate<String> IS_JACKSON_ANNOTATION = it -> it.startsWith("com.fasterxml.jackson");
+		private static final Predicate<String> IS_JACKSON_ANNOTATION = it -> it.startsWith("tools.jackson")
+				|| it.startsWith("com.fasterxml.jackson");
 
 		/*
 		 * (non-Javadoc)
@@ -94,7 +95,7 @@ class HypermediaTypesRuntimeHints implements RuntimeHintsRegistrar {
 
 	static class JacksonSuperTypeFilter extends AbstractTypeHierarchyTraversingFilter {
 
-		private static final String JACKSON_PACKAGE = "com.fasterxml.jackson";
+		private static final String JACKSON_PACKAGE = "tools.jackson";
 
 		JacksonSuperTypeFilter() {
 			super(true, true);
