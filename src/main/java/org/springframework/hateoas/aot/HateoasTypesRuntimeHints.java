@@ -15,10 +15,16 @@
  */
 package org.springframework.hateoas.aot;
 
+import java.util.Map;
+
 import org.jspecify.annotations.Nullable;
+import org.springframework.aop.SpringProxy;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.core.DecoratingProxy;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.LastInvocationAware;
 
 /**
  * Registers reflection metadata for {@link RepresentationModel} types.
@@ -38,5 +44,10 @@ class HateoasTypesRuntimeHints implements RuntimeHintsRegistrar {
 		var reflection = hints.reflection();
 
 		AotUtils.registerTypesForReflection(packageName, reflection);
+
+		// Proxy metadata for DummyInvocationUtils
+		hints.proxies()
+				.registerJdkProxy(LastInvocationAware.class, Map.class, SpringProxy.class, Advised.class,
+						DecoratingProxy.class);
 	}
 }
