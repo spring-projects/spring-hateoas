@@ -24,7 +24,6 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
-import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscovererUnitTest;
 
 /**
@@ -35,7 +34,7 @@ import org.springframework.hateoas.client.LinkDiscovererUnitTest;
  */
 class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
-	LinkDiscoverer discoverer = new HalLinkDiscoverer();
+	HalLinkDiscoverer discoverer = new HalLinkDiscoverer();
 	ContextualMapper $ = MappingTestUtils.createMapper();
 
 	/**
@@ -69,11 +68,24 @@ class HalLinkDiscovererUnitTest extends LinkDiscovererUnitTest {
 
 			assertThat(getDiscoverer().findLinkWithRel(IanaLinkRelations.SELF, linkText)).hasValue(expected);
 		});
+	}
 
+	@Test // GH-2385
+	void detectsEmbeddedLinks() {
+
+		var discoverer = getDiscoverer().inspectEmbeddeds();
+
+		$.assertFileContent("hal-link-discoverer.json").satisfies(it -> {
+
+			assertThat(discoverer.findLinksWithRel("relation", it))
+					.hasSize(3)
+					.extracting(Link::getHref)
+					.containsExactlyInAnyOrder("firstHref", "secondHref", "thirdHref");
+		});
 	}
 
 	@Override
-	protected LinkDiscoverer getDiscoverer() {
+	protected HalLinkDiscoverer getDiscoverer() {
 		return discoverer;
 	}
 

@@ -14,5 +14,14 @@
     "http://www.foo.com/bar": {
       "href": "fullRelHref"
     }
+  },
+  "_embedded": {
+    "relation": {
+      "_links": {
+        "relation" : {
+          "href": "thirdHref"
+        }
+      }
+    }
   }
 }

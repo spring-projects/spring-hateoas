@@ -21,6 +21,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.client.JsonPathLinkDiscoverer;
+import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
@@ -32,6 +33,10 @@ import org.springframework.util.Assert;
  */
 public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 
+	private static final String PATH = "_links..['%s']";
+	private static final String JSON_PATH = "$." + PATH;
+	private static final String RECURSIVE_JSON_PATH = "$.." + PATH;
+
 	/**
 	 * Constructor for {@link MediaTypes#HAL_JSON}.
 	 */
@@ -40,7 +45,25 @@ public class HalLinkDiscoverer extends JsonPathLinkDiscoverer {
 	}
 
 	protected HalLinkDiscoverer(MediaType... mediaTypes) {
-		super("$._links..['%s']", mediaTypes);
+		super(JSON_PATH, mediaTypes);
+	}
+
+	/**
+	 * Creates a new {@link LinkDiscoverer} that looks up HAL links in the document recursively. In other words, it also
+	 * finds ones contained in the {@code _embedded} clause.
+	 *
+	 * @return will never be {@literal null}.
+	 * @since 3.0
+	 */
+	public LinkDiscoverer inspectEmbeddeds() {
+
+		return new JsonPathLinkDiscoverer(RECURSIVE_JSON_PATH, mediaTypes.toArray(MediaType[]::new)) {
+
+			@Override
+			protected Link extractLink(Object element, LinkRelation rel) {
+				return HalLinkDiscoverer.this.extractLink(element, rel);
+			}
+		};
 	}
 
 	/*
