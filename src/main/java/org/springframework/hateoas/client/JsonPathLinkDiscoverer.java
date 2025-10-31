@@ -44,7 +44,7 @@ import com.jayway.jsonpath.PathNotFoundException;
 public class JsonPathLinkDiscoverer implements LinkDiscoverer {
 
 	private final String pathTemplate;
-	private final List<MediaType> mediaTypes;
+	protected final List<MediaType> mediaTypes;
 
 	/**
 	 * Creates a new {@link JsonPathLinkDiscoverer} using the given path template supporting the given {@link MediaType}.
