@@ -83,7 +83,7 @@
 		<junit.version>6.0.1</junit.version>
 		<lombok.version>1.18.42</lombok.version>
 		<nullaway.version>0.12.7</nullaway.version>
-		<reactor-bom.version>2025.0.0-RC1</reactor-bom.version>
+		<reactor-bom.version>2025.0.0</reactor-bom.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<spring.version>7.0.0-RC3</spring.version>
 		<spring-plugin.version>4.0.0-RC1</spring-plugin.version>
