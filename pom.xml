@@ -98,7 +98,7 @@
 			<id>spring-next</id>
 			<properties>
 				<reactor-bom.version>2025.0.1-SNAPSHOT</reactor-bom.version>
-				<spring.version>7.0.1-SNAPSHOT</spring.version>
+				<spring.version>7.0.2-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>

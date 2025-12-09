@@ -86,10 +86,10 @@ public class TypeConstrainedJacksonJsonHttpMessageConverter extends JacksonJsonH
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.http.converter.json.MappingJackson2HttpMessageConverter#canWrite(java.lang.Class, org.springframework.http.MediaType)
+	 * @see org.springframework.http.converter.AbstractSmartHttpMessageConverter#canWrite(org.springframework.core.ResolvableType, java.lang.Class, org.springframework.http.MediaType)
 	 */
 	@Override
-	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
-		return type.isAssignableFrom(clazz) && super.canWrite(clazz, mediaType);
+	public boolean canWrite(ResolvableType type, Class<?> clazz, @Nullable MediaType mediaType) {
+		return this.type.isAssignableFrom(clazz) && super.canWrite(type, clazz, mediaType);
 	}
 }
