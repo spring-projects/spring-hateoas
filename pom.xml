@@ -85,7 +85,7 @@
 		<nullaway.version>0.12.7</nullaway.version>
 		<reactor-bom.version>2025.0.1</reactor-bom.version>
 		<slf4j.version>2.0.17</slf4j.version>
-		<spring.version>7.0.2</spring.version>
+		<spring.version>7.0.3-SNAPSHOT</spring.version>
 		<spring-plugin.version>4.0.0</spring-plugin.version>
 		<kotlin.version>2.2.21</kotlin.version>
 		<kotlinx-coroutines.version>1.10.2</kotlinx-coroutines.version>
