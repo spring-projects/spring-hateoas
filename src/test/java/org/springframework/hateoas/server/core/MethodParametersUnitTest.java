@@ -22,7 +22,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Unit tests for {@link MethodParameters}.
@@ -30,6 +32,14 @@ import org.springframework.core.MethodParameter;
  * @author Oliver Gierke
  */
 class MethodParametersUnitTest {
+
+	@Test
+	void usesSharedParameterNameDiscoverer() {
+
+		Object discoverer = ReflectionTestUtils.getField(MethodParameters.class, "DISCOVERER");
+
+		assertThat(discoverer).isSameAs(DefaultParameterNameDiscoverer.getSharedInstance());
+	}
 
 	@Test
 	void prefersAnnotatedParameterOverDiscovered() throws Exception {
