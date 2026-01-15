@@ -42,7 +42,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public class MethodParameters {
 
-	private static ParameterNameDiscoverer DISCOVERER = new DefaultParameterNameDiscoverer();
+	private static ParameterNameDiscoverer DISCOVERER = DefaultParameterNameDiscoverer.getSharedInstance();
 	private static final Map<Method, MethodParameters> CACHE = new ConcurrentReferenceHashMap<>();
 
 	private final List<MethodParameter> parameters;
