@@ -39,7 +39,6 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * Value object to represent {@link MethodParameters} to allow to easily find the ones with a given annotation.
  *
  * @author Oliver Gierke
- * @author Jonghan Sim
  */
 public class MethodParameters {
 
