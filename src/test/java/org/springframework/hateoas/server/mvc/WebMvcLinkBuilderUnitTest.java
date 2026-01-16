@@ -48,7 +48,6 @@ import org.springframework.hateoas.NonComposite;
 import org.springframework.hateoas.TemplateVariable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
 import org.springframework.hateoas.TestUtils;
-import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilderUnitTest.Sample.SampleConverter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -620,22 +619,12 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 	@Test // #1548
 	void mapsRequestParamMap() {
 
-		Object original = ReflectionTestUtils.getField(MethodParameters.class, "DISCOVERER");
+		Stream.of(null, new HashMap<String, String>()).forEach(it -> {
 
-		try {
+			Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithMapRequestParam(it)).withSelfRel();
 
-			ReflectionTestUtils.setField(MethodParameters.class, "DISCOVERER", null);
-
-			Stream.of(null, new HashMap<String, String>()).forEach(it -> {
-
-				Link link = linkTo(methodOn(ControllerWithMethods.class).methodWithMapRequestParam(it)).withSelfRel();
-
-				assertThat(link.getHref()).endsWith("/with-map");
-			});
-
-		} finally {
-			ReflectionTestUtils.setField(MethodParameters.class, "DISCOVERER", original);
-		}
+			assertThat(link.getHref()).endsWith("/with-map");
+		});
 	}
 
 	@Test // #1588, #1589
