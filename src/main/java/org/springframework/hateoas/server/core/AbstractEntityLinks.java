@@ -32,6 +32,6 @@ public abstract class AbstractEntityLinks implements EntityLinks {
 	 */
 	@Override
 	public LinkBuilder linkForItemResource(Class<?> type, Object id) {
-		return linkFor(type).slash(id);
+		return linkFor(type).slashId(id);
 	}
 }
