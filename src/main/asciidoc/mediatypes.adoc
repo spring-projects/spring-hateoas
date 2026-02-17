@@ -260,7 +260,7 @@ public class Config {
 
   @Bean
   public CurieProvider curieProvider() {
-    return new DefaultCurieProvider("ex", new UriTemplate("https://www.example.com/rels/{rel}"));
+    return new DefaultCurieProvider("ex", UriTemplate.of("https://www.example.com/rels/{rel}"));
   }
 }
 ----
