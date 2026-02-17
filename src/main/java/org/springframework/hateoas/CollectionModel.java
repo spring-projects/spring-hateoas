@@ -350,7 +350,7 @@ public class CollectionModel<T> extends RepresentationModel<CollectionModel<T>>
 		}
 
 		return elements.stream()
-				.filter(it -> it != null)
+				.filter(Objects::nonNull)
 				.<Class<?>> map(Object::getClass)
 				.reduce(ClassUtils::determineCommonAncestor)
 				.map(ResolvableType::forClass)
