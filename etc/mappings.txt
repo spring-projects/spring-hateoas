@@ -1,5 +1,6 @@
 assertj=AssertJ
 jackson-bom=Jackson
+jsonpath=JSONPath
 junit=JUnit
 kotlin=Kotlin
 kotlinx-coroutines=Kotlin Koroutines
