@@ -23,6 +23,8 @@ import static org.springframework.hateoas.support.ContextTester.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -344,7 +346,8 @@ class EnableHypermediaSupportIntegrationTest {
 			Object accessor = ReflectionTestUtils.getField(resolver, "accessor");
 			Object messageSource = ReflectionTestUtils.getField(accessor, "messageSource");
 
-			assertThat((String) ReflectionTestUtils.getField(messageSource, "defaultEncoding")).isEqualTo("UTF-8");
+			assertThat((Charset) ReflectionTestUtils.getField(messageSource, "defaultCharset"))
+					.isEqualTo(StandardCharsets.UTF_8);
 		});
 	}
 
