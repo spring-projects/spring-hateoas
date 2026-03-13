@@ -81,7 +81,7 @@
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.10.0</jsonpath.version>
 		<junit.version>6.0.3</junit.version>
-		<lombok.version>1.18.42</lombok.version>
+		<lombok.version>1.18.44</lombok.version>
 		<nullaway.version>0.12.7</nullaway.version>
 		<reactor-bom.version>2025.0.3</reactor-bom.version>
 		<slf4j.version>2.0.17</slf4j.version>
