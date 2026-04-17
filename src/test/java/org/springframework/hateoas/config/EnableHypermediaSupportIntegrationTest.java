@@ -74,6 +74,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  */
 @ExtendWith(MockitoExtension.class)
 class EnableHypermediaSupportIntegrationTest {
@@ -465,7 +466,7 @@ class EnableHypermediaSupportIntegrationTest {
 
 			try {
 
-				doReturn(new Resource[0]).when(spy).getResources("classpath:rest-default-messages.properties");
+				doReturn(new Resource[0]).when(spy).getResources("classpath*:rest-default-messages.properties");
 				doReturn(new Resource[] { resource }).when(spy).getResources(contains("rest-messages"));
 
 			} catch (IOException o_O) {
