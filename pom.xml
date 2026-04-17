@@ -87,7 +87,7 @@
 		<slf4j.version>2.0.17</slf4j.version>
 		<spring.version>7.0.7</spring.version>
 		<spring-plugin.version>4.1.0-RC1</spring-plugin.version>
-		<kotlin.version>2.2.21</kotlin.version>
+		<kotlin.version>2.3.20</kotlin.version>
 		<kotlinx-coroutines.version>1.10.2</kotlinx-coroutines.version>
 		<mockk.version>1.14.9</mockk.version>
 	</properties>
