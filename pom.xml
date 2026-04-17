@@ -97,8 +97,8 @@
 		<profile>
 			<id>spring-next</id>
 			<properties>
-				<reactor-bom.version>2025.0.5-SNAPSHOT</reactor-bom.version>
-				<spring.version>7.0.7-SNAPSHOT</spring.version>
+				<reactor-bom.version>2025.0.6-SNAPSHOT</reactor-bom.version>
+				<spring.version>7.0.8-SNAPSHOT</spring.version>
 			</properties>
 			<repositories>
 				<repository>
@@ -111,15 +111,15 @@
 		<profile>
 			<id>kotlin-next</id>
 			<properties>
-				<kotlin.version>2.3.0-Beta1</kotlin.version>
-				<kotlinx-coroutines.version>1.10.2</kotlinx-coroutines.version>
+				<kotlin.version>2.4.0-Beta1</kotlin.version>
+				<kotlinx-coroutines.version>1.11.0-rc01</kotlinx-coroutines.version>
 			</properties>
 		</profile>
 
 		<profile>
 			<id>jackson-next</id>
 			<properties>
-				<jackson-bom.version>3.1.0</jackson-bom.version>
+				<jackson-bom.version>3.1.2</jackson-bom.version>
 			</properties>
 		</profile>
 
