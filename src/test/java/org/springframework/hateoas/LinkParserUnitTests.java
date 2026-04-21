@@ -235,4 +235,14 @@ class LinkParserUnitTests {
 				.isThrownBy(() -> parseLink("foo <url>;rel=next"))
 				.withMessage("Expecting '<' at index 0");
 	}
+
+	@Test // GH-2480
+	void parsesValueLessParameter() {
+
+		assertThat(parseLinks(
+				"<https://first.example>;rel=stylesheet;title, <https://second.example/pay>;rel=\"payment\"")) //
+						.containsExactly( //
+								Link.of("https://first.example", "stylesheet").withTitle(""), //
+								Link.of("https://second.example/pay", "payment"));
+	}
 }
