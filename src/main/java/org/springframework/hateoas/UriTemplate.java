@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.TemplateVariable.VariableType;
@@ -462,7 +463,7 @@ public class UriTemplate implements Iterable<TemplateVariable>, Serializable {
 
 			return type.join(variables.stream()
 					.map(it -> it.expand(parameters))
-					.filter(it -> it != null)
+					.filter(Objects::nonNull)
 					.collect(Collectors.toList()));
 		}
 
