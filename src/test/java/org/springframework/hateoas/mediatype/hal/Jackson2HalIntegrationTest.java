@@ -538,7 +538,7 @@ class Jackson2HalIntegrationTest {
 		model.add(Link.of("/foo/form", IanaLinkRelations.EDIT_FORM));
 
 		ObjectMapper objectMapper = mapper.copy() //
-				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
+				.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE) //
 				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		String result = objectMapper.writeValueAsString(model);
@@ -560,7 +560,7 @@ class Jackson2HalIntegrationTest {
 
 		ObjectMapper mapper = HalTestUtils.halObjectMapper(new HalConfiguration() //
 				.withApplyPropertyNamingStrategy(false)) //
-				.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE) //
+				.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE) //
 				.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		String result = mapper.writeValueAsString(model);
