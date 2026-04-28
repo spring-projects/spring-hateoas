@@ -21,6 +21,7 @@ import static org.springframework.hateoas.mediatype.uber.UberData.*;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.Version;
+import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.BeanProperty;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JavaType;
@@ -30,6 +31,8 @@ import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.deser.std.ContainerDeserializerBase;
 import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.introspect.AnnotatedClass;
+import tools.jackson.databind.introspect.ClassIntrospector;
 import tools.jackson.databind.jsontype.TypeSerializer;
 import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.std.StdContainerSerializer;
@@ -530,14 +533,15 @@ public class UberJacksonModule extends SimpleModule {
 			RepresentationModel<?> result = doc.getUber().getData().stream() //
 					.filter(uberData -> StringUtils.hasText(uberData.getName())) //
 					.findFirst() //
-					.map(uberData -> convertToResourceSupport(uberData, links)) //
+					.map(uberData -> convertToResourceSupport(uberData, links, ctxt)) //
 					.orElse(null);
 
 			return result == null ? new RepresentationModel<>().add(links) : result;
 		}
 
 		@NotNull
-		private RepresentationModel<?> convertToResourceSupport(UberData uberData, Links links) {
+		private RepresentationModel<?> convertToResourceSupport(UberData uberData, Links links,
+				DeserializationContext context) {
 
 			List<UberData> data = uberData.getData();
 			Map<String, Object> properties;
@@ -549,8 +553,10 @@ public class UberJacksonModule extends SimpleModule {
 						.collect(Collectors.toMap(UberData::getName, UberData::getValue));
 			}
 
+			BeanDescription description = getDescription(context, contentType);
+
 			RepresentationModel<?> resourceSupport = (RepresentationModel<?>) PropertyUtils
-					.createObjectFromProperties(this.getContentType().getRawClass(), properties);
+					.createObjectFromProperties(description, properties);
 
 			return resourceSupport.add(links);
 		}
@@ -587,6 +593,14 @@ public class UberJacksonModule extends SimpleModule {
 		}
 	}
 
+	private static BeanDescription getDescription(DeserializationContext context, JavaType type) {
+
+		ClassIntrospector introspector = context.getConfig().classIntrospectorInstance();
+		AnnotatedClass annotatedClass = introspector.introspectClassAnnotations(type);
+
+		return introspector.introspectForDeserialization(type, annotatedClass);
+	}
+
 	/**
 	 * Custom {@link StdDeserializer} to deserialize {@link EntityModel}.
 	 */
@@ -618,12 +632,12 @@ public class UberJacksonModule extends SimpleModule {
 			return doc.getUber().getData().stream() //
 					.filter(uberData -> StringUtils.hasText(uberData.getName())) //
 					.findFirst() //
-					.map(uberData -> convertToResource(uberData, links)) //
+					.map(uberData -> convertToResource(uberData, links, ctxt)) //
 					.orElseThrow(
 							() -> new IllegalStateException("No data entry containing a 'value' was found in this document!"));
 		}
 
-		private RepresentationModel<?> convertToResource(UberData uberData, Links links) {
+		private RepresentationModel<?> convertToResource(UberData uberData, Links links, DeserializationContext context) {
 
 			// Primitive type
 			List<UberData> data = uberData.getData();
@@ -645,7 +659,8 @@ public class UberJacksonModule extends SimpleModule {
 					: data.stream().collect(Collectors.toMap(UberData::getName, UberData::getValue));
 
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
-			Object value = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
+			BeanDescription description = getDescription(context, rootType);
+			Object value = PropertyUtils.createObjectFromProperties(description, properties);
 
 			return EntityModel.of(value, links);
 		}
@@ -710,7 +725,7 @@ public class UberJacksonModule extends SimpleModule {
 			JavaType rootType = JacksonHelper.findRootType(this.contentType);
 			UberDocument doc = p.readValueAs(UberDocument.class);
 
-			return extractResources(doc, rootType, this.contentType);
+			return extractResources(doc, rootType, this.contentType, ctxt);
 		}
 
 		/**
@@ -773,7 +788,7 @@ public class UberJacksonModule extends SimpleModule {
 
 			UberDocument doc = p.readValueAs(UberDocument.class);
 
-			CollectionModel<?> resources = extractResources(doc, rootType, this.contentType);
+			CollectionModel<?> resources = extractResources(doc, rootType, this.contentType, ctxt);
 			PageMetadata pageMetadata = extractPagingMetadata(doc);
 
 			return PagedModel.of(resources.getContent(), pageMetadata, resources.getLinks());
@@ -818,9 +833,11 @@ public class UberJacksonModule extends SimpleModule {
 	 * @param contentType
 	 * @return
 	 */
-	private static CollectionModel<?> extractResources(UberDocument doc, JavaType rootType, JavaType contentType) {
+	private static CollectionModel<?> extractResources(UberDocument doc, JavaType rootType, JavaType contentType,
+			DeserializationContext context) {
 
 		List<Object> content = new ArrayList<>();
+		BeanDescription description = getDescription(context, rootType);
 
 		for (UberData uberData : doc.getUber().getData()) {
 
@@ -872,7 +889,7 @@ public class UberJacksonModule extends SimpleModule {
 								: itemData.stream() //
 										.collect(Collectors.toMap(UberData::getName, UberData::getValue));
 
-						Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
+						Object obj = PropertyUtils.createObjectFromProperties(description, properties);
 						resource = EntityModel.of(obj, uberData.getLinks());
 					}
 				}
