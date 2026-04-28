@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.mediatype.hal.SimplePojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
@@ -224,6 +227,18 @@ class Jackson2CollectionJsonIntegrationTest {
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
 
+	@Test
+	void honorsJsonIgnoresOnDeserialization() {
+
+		EntityModel<TextIgnored> model = mapper.readFile("resource-support-pojo.json", EntityModel.class,
+				TextIgnored.class);
+
+		TextIgnored content = model.getContent();
+
+		assertThat(content.getNumber()).isNotNull();
+		assertThat(content.getText()).isNull();
+	}
+
 	private static CollectionModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
@@ -235,6 +250,7 @@ class Jackson2CollectionJsonIntegrationTest {
 
 	@Data
 	@EqualsAndHashCode(callSuper = true)
+	@Getter(onMethod = @__(@JsonProperty))
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ResourceWithAttributes extends RepresentationModel<ResourceWithAttributes> {
@@ -242,4 +258,15 @@ class Jackson2CollectionJsonIntegrationTest {
 		private String attribute;
 	}
 
+	@Data
+	public static class TextIgnored {
+
+		private @Getter(onMethod = @__(@JsonProperty)) Integer number;
+		private String text;
+
+		@JsonIgnore
+		public void setText(String text) {
+			this.text = text;
+		}
+	}
 }

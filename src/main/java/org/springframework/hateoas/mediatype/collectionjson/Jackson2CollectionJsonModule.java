@@ -23,7 +23,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.hateoas.Affordance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -43,7 +42,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -52,6 +53,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
+import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
@@ -648,6 +650,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 			Links links = collection.getLinks();
 
 			CollectionJson<?> withOwnSelfLink = collection.withOwnSelfLink();
+			BeanDescription description = getDescription(ctxt, this.contentType);
 
 			if (!items.isEmpty()) {
 
@@ -658,7 +661,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 								(left, right) -> right);
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
-				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(this.contentType);
+				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(description);
 
 				if (resource != null) {
 					resource.add(firstItem.getLinks().merge(merged));
@@ -675,7 +678,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
 				RepresentationModel<?> resourceSupport = (RepresentationModel<?>) PropertyUtils
-						.createObjectFromProperties(this.contentType.getRawClass(), properties);
+						.createObjectFromProperties(description, properties);
 
 				return resourceSupport.add(withOwnSelfLink.getLinks());
 
@@ -699,6 +702,14 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 			return new CollectionJsonResourceSupportDeserializer(type);
 		}
+	}
+
+	private static BeanDescription getDescription(DeserializationContext context, JavaType type) {
+
+		DeserializationConfig config = context.getConfig();
+		ClassIntrospector introspector = config.getClassIntrospector();
+
+		return introspector.forDeserialization(config, type, config);
 	}
 
 	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<EntityModel<?>>
@@ -755,12 +766,14 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 			Links links = collection.withOwnSelfLink().getLinks();
 			CollectionJsonTemplate template = collection.getTemplate();
 
+			BeanDescription description = getDescription(ctxt, rootType);
+
 			if (items.isEmpty() && template != null) {
 
 				Map<String, Object> properties = template.getData().stream()
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
-				Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
+				Object obj = PropertyUtils.createObjectFromProperties(description, properties);
 
 				return EntityModel.of(obj, links);
 
@@ -774,7 +787,7 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
-				return EntityModel.of(firstItem.toRawData(rootType),
+				return EntityModel.of(firstItem.toRawData(description),
 						merged.merge(MergeMode.REPLACE_BY_REL, firstItem.getLinks()));
 			}
 		}
@@ -873,12 +886,13 @@ public class Jackson2CollectionJsonModule extends SimpleModule {
 			}
 
 			boolean isResource = contentType.hasGenericTypes() && contentType.containedType(0).hasRawClass(EntityModel.class);
+			BeanDescription description = getDescription(ctxt, rootType);
 
 			return collection.getItems().stream() //
 					.map(CollectionJsonItem::withOwnSelfLink) //
 					.map(it -> isResource //
-							? RepresentationModel.of(it.toRawData(rootType), it.getLinks()) //
-							: it.toRawData(rootType)) //
+							? RepresentationModel.of(it.toRawData(description), it.getLinks()) //
+							: it.toRawData(description)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));
 		}
 	}

@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
@@ -36,11 +37,14 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Links;
+import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.support.MappingUtils;
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -56,11 +60,19 @@ class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegration
 			Link.of("bar", IanaLinkRelations.PREV) //
 	);
 
+	MappingTestUtils.ContextualMapper contextualMapper;
+
 	@BeforeEach
 	void setUpModule() {
 
 		this.mapper.registerModule(new Jackson2UberModule());
 		this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+		this.contextualMapper = MappingTestUtils.createMapper(getClass(), mapper -> {
+
+			mapper.registerModule(new Jackson2UberModule());
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		});
 	}
 
 	/**
@@ -537,6 +549,18 @@ class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegration
 		assertThat(deserialized).isEqualTo(original);
 	}
 
+	@Test
+	void honorsJsonIgnoresOnDeserialization() {
+
+		EntityModel<NameIgnored> model = contextualMapper.readFile("resource-support-pojo.json", EntityModel.class,
+				NameIgnored.class);
+
+		NameIgnored content = model.getContent();
+
+		assertThat(content.getRole()).isNotNull();
+		assertThat(content.getName()).isNull();
+	}
+
 	private static CollectionModel<EntityModel<Employee>> setupAnnotatedPagedResources() {
 
 		return setupAnnotatedPagedResources(2, 4);
@@ -555,6 +579,7 @@ class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegration
 
 	@Data
 	@NoArgsConstructor
+	@Getter(onMethod = @__(@JsonProperty))
 	@AllArgsConstructor
 	static class Employee {
 
@@ -564,9 +589,22 @@ class Jackson2UberIntegrationTest extends AbstractJackson2MarshallingIntegration
 
 	@Data
 	@AllArgsConstructor()
+	@Getter(onMethod = @__(@JsonProperty))
 	@NoArgsConstructor
 	@EqualsAndHashCode(callSuper = true)
 	static class EmployeeResource extends RepresentationModel<EmployeeResource> {
 		private @Nullable String name, role;
+	}
+
+	@Data
+	static class NameIgnored {
+
+		private String name;
+		private @Getter(onMethod = @__(@JsonProperty)) String role;
+
+		@JsonIgnore
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 }

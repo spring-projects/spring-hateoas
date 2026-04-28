@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2024 the original author or authors.
+ * Copyright 2015-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.BeanDescription;
 
 /**
  * Representation of an "item" in a Collection+JSON document.
@@ -188,21 +188,21 @@ final class CollectionJsonItem<T> {
 	/**
 	 * Generate an object using the deserialized properties and the provided type from the deserializer.
 	 *
-	 * @param javaType - type of the object to create
+	 * @param description must not be {@literal null}.
 	 * @return
 	 */
 	@Nullable
-	Object toRawData(JavaType javaType) {
+	Object toRawData(BeanDescription description) {
 
 		if (this.data.isEmpty()) {
 			return null;
 		}
 
-		if (PRIMITIVE_TYPES.contains(javaType.getRawClass())) {
+		if (PRIMITIVE_TYPES.contains(description.getBeanClass())) {
 			return this.data.get(0).getValue();
 		}
 
-		return PropertyUtils.createObjectFromProperties(javaType.getRawClass(), //
+		return PropertyUtils.createObjectFromProperties(description, //
 				this.data.stream() //
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue)));
 	}
@@ -210,10 +210,12 @@ final class CollectionJsonItem<T> {
 	@Override
 	public boolean equals(Object o) {
 
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (o == null || getClass() != o.getClass())
+		}
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 		CollectionJsonItem<?> that = (CollectionJsonItem<?>) o;
 		return Objects.equals(this.href, that.href) && Objects.equals(this.data, that.data)
 				&& Objects.equals(this.links, that.links) && Objects.equals(this.rawData, that.rawData);
@@ -224,6 +226,7 @@ final class CollectionJsonItem<T> {
 		return Objects.hash(this.href, this.data, this.links, this.rawData);
 	}
 
+	@Override
 	public String toString() {
 
 		return "CollectionJsonItem(href=" + this.href + ", data=" + this.data + ", links=" + this.links + ", rawData="
