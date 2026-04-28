@@ -17,10 +17,12 @@ package org.springframework.hateoas.mediatype.collectionjson;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.server.core.TypeReferences;
 import tools.jackson.databind.SerializationFeature;
 
 import java.util.ArrayList;
@@ -214,6 +216,20 @@ class CollectionJsonJacksonModuleIntegrationTest {
 		assertThat(result).isEqualTo(setupAnnotatedPagedResources());
 	}
 
+	@Test
+	void honorsJsonIgnoresOnDeserialization() {
+
+		$.assertDeserializesFile("resource-support-pojo.json")
+				.into(new TypeReferences.EntityModelType<TextIgnored>() {})
+				.matching(it -> {
+
+					var content = it.getContent();
+
+					assertThat(content.getNumber()).isNotNull();
+					assertThat(content.getText()).isNull();
+				});
+	}
+
 	private static CollectionModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
@@ -232,4 +248,15 @@ class CollectionJsonJacksonModuleIntegrationTest {
 		private String attribute;
 	}
 
+	@Data
+	static class TextIgnored {
+
+		private Integer number;
+		private String text;
+
+		@JsonIgnore
+		public void setText(String text) {
+			this.text = text;
+		}
+	}
 }

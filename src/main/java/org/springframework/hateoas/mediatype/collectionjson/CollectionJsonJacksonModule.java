@@ -19,6 +19,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.Version;
+import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.BeanProperty;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JavaType;
@@ -26,6 +27,8 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.deser.std.ContainerDeserializerBase;
+import tools.jackson.databind.introspect.AnnotatedClass;
+import tools.jackson.databind.introspect.ClassIntrospector;
 import tools.jackson.databind.jsontype.TypeSerializer;
 import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.std.StdContainerSerializer;
@@ -637,6 +640,7 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 			Links links = collection.getLinks();
 
 			CollectionJson<?> withOwnSelfLink = collection.withOwnSelfLink();
+			BeanDescription description = getDescription(ctxt, this.contentType);
 
 			if (!items.isEmpty()) {
 
@@ -647,7 +651,7 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 								(left, right) -> right);
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
-				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(this.contentType);
+				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(description);
 
 				if (resource != null) {
 					resource.add(firstItem.getLinks().merge(merged));
@@ -664,7 +668,7 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
 				RepresentationModel<?> resourceSupport = (RepresentationModel<?>) PropertyUtils
-						.createObjectFromProperties(this.contentType.getRawClass(), properties);
+						.createObjectFromProperties(description, properties);
 
 				return resourceSupport.add(withOwnSelfLink.getLinks());
 
@@ -687,6 +691,14 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 
 			return new CollectionJsonResourceSupportDeserializer(type);
 		}
+	}
+
+	private static BeanDescription getDescription(DeserializationContext context, JavaType type) {
+
+		ClassIntrospector introspector = context.getConfig().classIntrospectorInstance();
+		AnnotatedClass annotatedClass = introspector.introspectClassAnnotations(type);
+
+		return introspector.introspectForDeserialization(type, annotatedClass);
 	}
 
 	static class CollectionJsonResourceDeserializer extends ContainerDeserializerBase<EntityModel<?>> {
@@ -731,12 +743,14 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 			Links links = collection.withOwnSelfLink().getLinks();
 			CollectionJsonTemplate template = collection.getTemplate();
 
+			BeanDescription description = getDescription(ctxt, rootType);
+
 			if (items.isEmpty() && template != null) {
 
 				Map<String, Object> properties = template.getData().stream()
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue));
 
-				Object obj = PropertyUtils.createObjectFromProperties(rootType.getRawClass(), properties);
+				Object obj = PropertyUtils.createObjectFromProperties(description, properties);
 
 				return EntityModel.of(obj, links);
 
@@ -750,7 +764,7 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
-				return EntityModel.of(firstItem.toRawData(rootType),
+				return EntityModel.of(firstItem.toRawData(description),
 						merged.merge(MergeMode.REPLACE_BY_REL, firstItem.getLinks()));
 			}
 		}
@@ -845,12 +859,13 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 			}
 
 			boolean isResource = contentType.hasGenericTypes() && contentType.containedType(0).hasRawClass(EntityModel.class);
+			BeanDescription description = getDescription(ctxt, rootType);
 
 			return collection.getItems().stream() //
 					.map(CollectionJsonItem::withOwnSelfLink) //
 					.map(it -> isResource //
-							? RepresentationModel.of(it.toRawData(rootType), it.getLinks()) //
-							: it.toRawData(rootType)) //
+							? RepresentationModel.of(it.toRawData(description), it.getLinks()) //
+							: it.toRawData(description)) //
 					.collect(Collectors.collectingAndThen(Collectors.toList(), it -> finalizer.apply(it, links)));
 		}
 	}

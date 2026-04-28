@@ -37,8 +37,10 @@ import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.TypeReferences;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Greg Turnquist
@@ -371,6 +373,20 @@ public class UberJacksonModuleIntegrationTest {
 				.andBack();
 	}
 
+	@Test
+	void honorsJsonIgnoresOnDeserialization() {
+
+		$.assertDeserializesFile("resource-support-pojo.json")
+				.into(new TypeReferences.EntityModelType<NameIgnored>() {})
+				.matching(it -> {
+
+					var content = it.getContent();
+
+					assertThat(content.getRole()).isNotNull();
+					assertThat(content.getName()).isNull();
+				});
+	}
+
 	private static PagedModel<EntityModel<Employee>> setupAnnotatedPagedModel() {
 		return setupAnnotatedPagedModel(2, 4);
 	}
@@ -400,5 +416,16 @@ public class UberJacksonModuleIntegrationTest {
 	@EqualsAndHashCode(callSuper = true)
 	static class EmployeeModel extends RepresentationModel<EmployeeModel> {
 		private @Nullable String name, role;
+	}
+
+	@Data
+	static class NameIgnored {
+
+		private String name, role;
+
+		@JsonIgnore
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 }

@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import tools.jackson.databind.BeanDescription;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -32,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -98,24 +100,34 @@ public class PropertyUtils {
 		return extractPropertyValues(object, true);
 	}
 
-	public static <T> T createObjectFromProperties(Class<T> clazz, Map<String, Object> properties) {
+	@SuppressWarnings("unchecked")
+	public static <T> T createObjectFromProperties(BeanDescription description, Map<String, Object> properties) {
 
-		T obj = BeanUtils.instantiateClass(clazz);
+		Class<?> clazz = description.getBeanClass();
+		T obj = (T) BeanUtils.instantiateClass(clazz);
 
-		properties.forEach((key, value) -> {
-			Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, key)) //
-					.ifPresent(property -> {
+		Map<String, PropertyDescriptor> descriptors = getPropertyDescriptorMap(clazz);
 
-						try {
+		description.findProperties().forEach(it -> {
 
-							Method writeMethod = property.getWriteMethod();
-							ReflectionUtils.makeAccessible(writeMethod);
-							writeMethod.invoke(obj, value);
+			PropertyDescriptor descriptor = descriptors.get(it.getInternalName());
 
-						} catch (IllegalAccessException | InvocationTargetException e) {
-							throw new RuntimeException(e);
-						}
-					});
+			if (descriptor != null) {
+
+				Method writeMethod = descriptor.getWriteMethod();
+
+				if (writeMethod == null) {
+					return;
+				}
+
+				ReflectionUtils.makeAccessible(writeMethod);
+
+				try {
+					writeMethod.invoke(obj, properties.get(it.getName()));
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		});
 
 		return obj;
@@ -250,6 +262,16 @@ public class PropertyUtils {
 				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
 				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
 				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor));
+	}
+
+	private static Map<String, PropertyDescriptor> getPropertyDescriptorMap(Class<?> type) {
+
+		return Arrays.stream(BeanUtils.getPropertyDescriptors(type))
+				.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
+				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
+				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
+				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor))
+				.collect(Collectors.toMap(PropertyDescriptor::getName, Function.identity()));
 	}
 
 	/**
