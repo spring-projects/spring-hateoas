@@ -17,11 +17,10 @@ package org.springframework.hateoas;
 
 import java.io.Serializable;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ConcurrentLruCache;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -34,7 +33,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 final class StringLinkRelation implements LinkRelation, Serializable {
 
 	private static final long serialVersionUID = -3904935345545567957L;
-	private static final Map<String, StringLinkRelation> CACHE = new ConcurrentHashMap<>(256);
+	private static final ConcurrentLruCache<String, StringLinkRelation> CACHE = new ConcurrentLruCache<>(256,
+			StringLinkRelation::new);
 
 	private final String relation;
 
@@ -49,7 +49,7 @@ final class StringLinkRelation implements LinkRelation, Serializable {
 
 		Assert.hasText(relation, "Relation must not be null or empty!");
 
-		return CACHE.computeIfAbsent(relation, StringLinkRelation::new);
+		return CACHE.get(relation);
 	}
 
 	private StringLinkRelation(String relation) {
