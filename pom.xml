@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1-SNAPSHOT</version>
 
 	<name>Spring HATEOAS</name>
 	<url>https://github.com/spring-projects/spring-hateoas</url>
@@ -48,7 +48,7 @@
 			<name>Apache License, Version 2.0</name>
 			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-				Copyright 2011-2022 the original author or authors.
+				Copyright 2011-2026 the original author or authors.
 
 				Licensed under the Apache License, Version 2.0 (the "License");
 				you may not use this file except in compliance with the License.
@@ -994,7 +994,7 @@
 		<url>https://github.com/spring-projects/spring-hateoas</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-hateoas.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com:spring-projects/spring-hateoas.git</developerConnection>
-		<tag>3.1.0</tag>
+		<tag>main</tag>
 	</scm>
 
 	<repositories>
