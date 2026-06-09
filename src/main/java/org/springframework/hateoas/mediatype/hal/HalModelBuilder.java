@@ -394,6 +394,8 @@ public class HalModelBuilder {
 		private final T entity;
 		private final List<Object> embeddeds;
 
+		private final EmbeddedCollectionModel embeddedsModel;
+
 		public HalRepresentationModel(T entity, List<Object> embeddeds, Links links) {
 
 			this(entity, embeddeds);
@@ -407,6 +409,7 @@ public class HalModelBuilder {
 
 			this.entity = entity;
 			this.embeddeds = embeddeds;
+			this.embeddedsModel = new EmbeddedCollectionModel(embeddeds);
 		}
 
 		/*
@@ -419,26 +422,51 @@ public class HalModelBuilder {
 		}
 
 		@JsonUnwrapped
-		public CollectionModel<?> getEmbeddeds() {
+		public EmbeddedCollectionModel getEmbeddeds() {
 
-			return new CollectionModel<Object>(embeddeds) {
+			return embeddedsModel;
 
-				/**
-				 * Overriding this to make sure that the marker link added to signal the need for curie-ing is added to the
-				 * outer representation model.
-				 */
-				@Override
-				public CollectionModel<Object> add(Link link) {
-					HalRepresentationModel.this.add(link);
-					return this;
-				}
+			// return new CollectionModel<Object>(embeddeds) {
+			//
+			// /**
+			// * Overriding this to make sure that the marker link added to signal the need for curie-ing is added to the
+			// * outer representation model.
+			// */
+			// @Override
+			// public CollectionModel<Object> add(Link link) {
+			// HalRepresentationModel.this.add(link);
+			// return this;
+			// }
+			//
+			// @JsonIgnore
+			// @Override
+			// public Links getLinks() {
+			// return super.getLinks();
+			// }
+			// };
+		}
 
-				@JsonIgnore
-				@Override
-				public Links getLinks() {
-					return super.getLinks();
-				}
-			};
+		class EmbeddedCollectionModel extends CollectionModel<Object> {
+
+			public EmbeddedCollectionModel(List<Object> embeddeds) {
+				super(embeddeds);
+			}
+
+			/**
+			 * Overriding this to make sure that the marker link added to signal the need for curie-ing is added to the outer
+			 * representation model.
+			 */
+			@Override
+			public CollectionModel<Object> add(Link link) {
+				HalRepresentationModel.this.add(link);
+				return this;
+			}
+
+			@JsonIgnore
+			@Override
+			public Links getLinks() {
+				return super.getLinks();
+			}
 		}
 	}
 
