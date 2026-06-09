@@ -48,7 +48,7 @@ public abstract class LinkMixin extends Link {
 	 * @see org.springframework.hateoas.Link#getHreflang()
 	 */
 	@Override
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_EMPTY)
 	public abstract String getHreflang();
 
 	/*
@@ -56,7 +56,7 @@ public abstract class LinkMixin extends Link {
 	 * @see org.springframework.hateoas.Link#getTitle()
 	 */
 	@Override
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_EMPTY)
 	public abstract String getTitle();
 
 	/*
@@ -64,7 +64,7 @@ public abstract class LinkMixin extends Link {
 	 * @see org.springframework.hateoas.Link#getType()
 	 */
 	@Override
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_EMPTY)
 	public abstract String getType();
 
 	/*
@@ -72,7 +72,7 @@ public abstract class LinkMixin extends Link {
 	 * @see org.springframework.hateoas.Link#getDeprecation()
 	 */
 	@Override
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_EMPTY)
 	public abstract String getDeprecation();
 
 	/*
@@ -80,7 +80,7 @@ public abstract class LinkMixin extends Link {
 	 * @see org.springframework.hateoas.Link#getProfile()
 	 */
 	@Override
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_EMPTY)
 	public abstract String getProfile();
 
 	/*
@@ -88,7 +88,7 @@ public abstract class LinkMixin extends Link {
 	 * @see org.springframework.hateoas.Link#getName()
 	 */
 	@Override
-	@JsonInclude(Include.NON_NULL)
+	@JsonInclude(Include.NON_EMPTY)
 	public abstract String getName();
 
 	/*
