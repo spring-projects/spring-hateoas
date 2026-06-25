@@ -1,15 +1,8 @@
-name: "Release Train – Join"
-run-name: "${{ inputs.release-train }} – Join"
+name: "Release Train – Leave"
+run-name: "${{ inputs.release-train }} – Leave"
 "on":
   workflow_dispatch:
     inputs:
-      deployment-destination:
-        description: "Destination to which the release should be deployed"
-        options:
-        - "Maven Central"
-        - "Spring Enterprise"
-        required: true
-        type: "choice"
       release-train:
         description: "Release train"
         required: true
@@ -22,16 +15,16 @@ run-name: "${{ inputs.release-train }} – Join"
 permissions:
   contents: "none"
 jobs:
-  join-release-train:
-    name: "Join Release Train"
+  leave:
+    name: "Leave"
     runs-on: "ubuntu-latest"
     steps:
-    - name: "Join Release Train"
-      id: "join-release-train"
+    - name: "Leave"
+      id: "leave"
       env:
         GH_TOKEN: "${{ secrets.RELEASE_TRAIN_PARTICIPANT_GITHUB_TOKEN }}"
       run: |-
-        run_url=$(gh workflow run join --repo ${{ inputs.release-train-repository }} --ref ${{ inputs.release-train }} --field deployment-destination=${{ inputs.deployment-destination == 'Maven Central' && 'maven-central' || 'spring-enterprise' }} --field release-branch=${{ github.ref_name }} --field release-repository=${{ github.repository }})
+        run_url=$(gh workflow run leave --repo ${{ inputs.release-train-repository }} --ref ${{ inputs.release-train }} --field release-branch=${{ github.ref_name }} --field release-repository=${{ github.repository }})
         echo "Dispatched workflow run. Waiting for $run_url to complete."
         run_id=${run_url##*/}
         watch_exit_code=0
