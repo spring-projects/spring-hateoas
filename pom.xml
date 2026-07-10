@@ -907,7 +907,9 @@
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
 				<configuration>
-					<jvmTarget>1.8</jvmTarget>
+					<jvmTarget>${source.level}</jvmTarget>
+					<apiVersion>2.2</apiVersion>
+					<languageVersion>2.2</languageVersion>
 				</configuration>
 				<executions>
 					<execution>
