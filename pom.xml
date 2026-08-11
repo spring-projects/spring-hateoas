@@ -86,7 +86,7 @@
 		<reactor-bom.version>2026.0.0-M1</reactor-bom.version>
 		<slf4j.version>2.0.18</slf4j.version>
 		<spring.version>7.1.0-M1</spring.version>
-		<spring-plugin.version>4.2.0-SNAPSHOT</spring-plugin.version>
+		<spring-plugin.version>4.2.0-M1</spring-plugin.version>
 		<kotlin.version>2.4.0</kotlin.version>
 		<kotlinx-coroutines.version>1.11.0</kotlinx-coroutines.version>
 		<mockk.version>1.14.11</mockk.version>
