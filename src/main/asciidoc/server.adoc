@@ -138,6 +138,61 @@ assertThat(link.getHref()).endsWith("/people?names=Matthews,Beauford"); <3>
 NOTE: The reason we're exposing `@NonComposite` is that the composite way of rendering request parameters is baked into the internals of Spring's `UriComponents` builder and we only introduced that non-composite style in Spring HATEOAS 1.4.
 If we started from scratch today, we'd probably default to that style and rather let users opt into the composite style explicitly rather than the other way around.
 
+[[server.link-builder.webmvc.methods.model-attributes]]
+==== Building links for `@ModelAttribute` parameters
+
+Spring MVC binds a handler method parameter annotated with `@ModelAttribute` from the individual request parameters that match the properties of the attribute's type.
+Link building mirrors that: each bindable property contributes its own request parameter, following https://tools.ietf.org/html/rfc6570#section-3.2.8[RFC6570's form-style query expansion].
+Properties you have not populated are rendered as template variables, so that a client can fill them in.
+
+====
+[source, java]
+----
+class Filter { <1>
+
+  String category;
+  String sortBy;
+
+  // getters and setters
+}
+
+@Controller
+class PersonController {
+
+  @GetMapping("/people")
+  HttpEntity<PersonModel> showAll(@ModelAttribute Filter filter) { … }
+}
+
+var link = linkTo(methodOn(PersonController.class).showAll(null)).withSelfRel(); <2>
+
+assertThat(link.getHref()).endsWith("/people{?category,sortBy}");
+
+var filter = new Filter();
+filter.setCategory("customer");
+
+link = linkTo(methodOn(PersonController.class).showAll(filter)).withSelfRel(); <3>
+
+assertThat(link.getHref()).endsWith("/people?category=customer{&sortBy}");
+----
+<1> A plain form backing object. Java records work just as well, as their components are bound through the canonical constructor.
+<2> Invoking the method without an attribute renders all bindable properties as template variables.
+<3> Populated properties are rendered as actual request parameters, the remaining ones stay templated.
+====
+
+A property is considered bindable if it is writable (or a record component) and resolves to a simple type or a collection of such.
+`Collection`-valued properties are rendered in the composite style, i.e. the parameter name is repeated for each value; arrays are rendered comma-separated, matching how `@RequestParam` arrays already render.
+Derived, read-only properties and nested objects are skipped, as is the entire attribute if it is declared as `@ModelAttribute(binding = false)`.
+A property whose name is already taken by a `@RequestParam` or `@PathVariable` of the same method is skipped too, so that the declared parameter wins and the link stays expandable.
+
+NOTE: A property of a primitive type can never be rendered as a template variable once the attribute itself is present, because a primitive cannot express "unset" — `int page` is indistinguishable from `page = 0`.
+Such properties are always rendered as bound request parameters.
+Use the boxed type (`Integer`) if you want the property to stay fillable by the client.
+
+NOTE: Only parameters explicitly annotated with `@ModelAttribute` are considered.
+Spring MVC additionally treats unannotated complex parameters as implicit model attributes, but it can only do so because its model attribute resolver runs after every other argument resolver has had a chance to claim the parameter.
+Link building has no such chain to defer to, which means an unannotated parameter cannot be told apart from the likes of `HttpServletRequest`, `Pageable` or `BindingResult`.
+Annotate the parameter explicitly to have it rendered into the link.
+
 [[server.link-builder.webflux]]
 == Building links in Spring WebFlux
 
