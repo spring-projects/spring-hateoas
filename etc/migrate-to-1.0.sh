@@ -48,6 +48,7 @@ s/hateoas\.LinkDiscoverers/hateoas.client.LinkDiscoverers/g;\
 s/hateoas\.MethodLinkBuilderFactory/hateoas.server.MethodLinkBuilderFactory/g;\
 s/hateoas\.RelProvider/hateoas.server.LinkRelationProvider/g;\
 s/hateoas\.ResourceAssembler/hateoas.server.ResourceAssembler/g;\
+s/hateoas\.ResourceAssemblerSupport/hateoas.server.mvc.RepresentationModelAssemblerSupport/g;\
 s/hateoas\.ResourceProcessor/hateoas.server.ResourceProcessor/g;\
 s/hateoas\.VndErrors/hateoas.mediatype.vnderrors.VndErrors/g;\
 s/hateoas\.VndErrors.VndError/hateoas.mediatype.vnderrors.VndErrors.VndError/g;\
@@ -87,6 +88,9 @@ s/\([^a-z]\)ResourceProcessor\([ ><,#();\.]\)/\1RepresentationModelProcessor\2/g
 s/ ResourceAssembler / RepresentationModelAssembler /g;\
 s/\.ResourceAssembler;/.RepresentationModelAssembler;/g;\
 s/ResourceAssembler\([<#]\)/RepresentationModelAssembler\1/g;\
+s/ ResourceAssemblerSupport / RepresentationModelAssemblerSupport /g;\
+s/\.ResourceAssemblerSupport;/.RepresentationModelAssemblerSupport;/g;\
+s/ResourceAssemblerSupport\([<#]\)/RepresentationModelAssemblerSupport\1/g;\
 s/IdentifiableResourceAssemblerSupport/IdentifiableRepresentationModelAssemblerSupport/g;\
 s/toResource(/toModel(/g;\
 s/toResources(/toCollectionModel(/g;\
