@@ -238,6 +238,20 @@ class PropertyUtilsTest {
 		});
 	}
 
+	@Test // #2531
+	void mapsSizeOnCharSequenceToMinAndMaxLength() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
+
+		assertThat(getProperty(metadata, "named")).hasValueSatisfying(it -> {
+			assertThat(it.getInputType()).isEqualTo(HtmlInputType.TEXT_VALUE);
+			assertThat(it.getMinLength()).isEqualTo(0L);
+			assertThat(it.getMaxLength()).isEqualTo(256L);
+			assertThat(it.getMin()).isNull();
+			assertThat(it.getMax()).isNull();
+		});
+	}
+
 	@Data
 	@AllArgsConstructor
 	@JsonIgnoreProperties({ "ignoreThisProperty" })
@@ -285,6 +299,7 @@ class PropertyUtilsTest {
 		@NotBlank @Pattern(regexp = "\\w") String nonBlankPattern;
 		TypeAnnotated annotated;
 		@Size(min = 41, max = 4711) int sized;
+		@Size(max = 256) String named;
 	}
 
 	@Pattern(regexp = "regex")
