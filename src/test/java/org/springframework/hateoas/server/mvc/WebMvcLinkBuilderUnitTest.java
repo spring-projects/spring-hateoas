@@ -55,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,6 +80,7 @@ import org.springframework.web.util.UriUtils;
  * @author Oliver Trosien
  * @author Greg Turnquist
  * @author Réda Housni Alaoui
+ * @author Kim Tae Eun
  */
 class WebMvcLinkBuilderUnitTest extends TestUtils {
 
@@ -762,6 +764,136 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 				.isEqualTo("http://localhost/people");
 	}
 
+	@Test // GH-1240
+	void rendersModelAttributePropertiesAsTemplateVariables() {
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).search(null)).withSelfRel().getHref()) //
+				.endsWith("/search{?category,sortBy,tags}");
+	}
+
+	@Test // GH-1240
+	void bindsModelAttributePropertyValues() {
+
+		SearchForm form = new SearchForm();
+		form.setCategory("books");
+		form.setSortBy("name");
+		form.setTags(Arrays.asList("fiction", "classic"));
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).search(form)).withSelfRel().getHref()) //
+				.endsWith("/search?category=books&sortBy=name&tags=fiction&tags=classic");
+	}
+
+	@Test // GH-1240
+	void rendersUnsetModelAttributePropertiesAsTemplateVariables() {
+
+		SearchForm form = new SearchForm();
+		form.setCategory("books");
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).search(form)).withSelfRel().getHref()) //
+				.endsWith("/search?category=books{&sortBy,tags}");
+	}
+
+	@Test // GH-1240
+	void combinesRequestParametersAndModelAttributeProperties() {
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).mixed("spring", null)).withSelfRel().getHref()) //
+				.endsWith("/mixed?q=spring{&category,sortBy,tags}");
+	}
+
+	@Test // GH-1240
+	void rendersModelAttributeExposedAsOptional() {
+
+		var controller = methodOn(ModelAttributeController.class);
+
+		assertThat(linkTo(controller.optional(Optional.empty())).withSelfRel().getHref()) //
+				.endsWith("/optional{?category,sortBy,tags}");
+	}
+
+	@Test // GH-1240
+	void ignoresModelAttributeWithBindingDisabled() {
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).nonBinding(null)).withSelfRel().getHref()) //
+				.endsWith("/non-binding");
+	}
+
+	@Test // GH-1240
+	void doesNotTreatUnannotatedParametersAsModelAttributes() {
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).unannotated(null)).withSelfRel().getHref()) //
+				.endsWith("/unannotated");
+	}
+
+	@Test // GH-1240
+	void bindsRecordComponents() {
+
+		var controller = methodOn(ModelAttributeController.class);
+
+		assertThat(linkTo(controller.record(null)).withSelfRel().getHref()) //
+				.endsWith("/record{?category,sortBy}");
+
+		assertThat(linkTo(controller.record(new SearchRecord("books", "name"))).withSelfRel().getHref()) //
+				.endsWith("/record?category=books&sortBy=name");
+	}
+
+	@Test // GH-1240
+	void resolvesTypeVariablesAgainstTheActualTypeArgument() {
+
+		GenericForm<String> form = new GenericForm<>();
+		form.setValue("books");
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).generic(form)).withSelfRel().getHref()) //
+				.endsWith("/generic?value=books");
+	}
+
+	@Test // GH-1240
+	void doesNotShadowARequestParameterOfTheSameName() {
+
+		SearchForm form = new SearchForm();
+		form.setCategory("fromForm");
+		form.setSortBy("name");
+
+		var controller = methodOn(ModelAttributeController.class);
+
+		assertThat(linkTo(controller.collide("fromParam", form)).withSelfRel().getHref()) //
+				.endsWith("/collide?category=fromParam&sortBy=name{&tags}");
+	}
+
+	@Test // GH-1240
+	void doesNotShadowAPathVariableOfTheSameName() {
+
+		var controller = methodOn(ModelAttributeController.class);
+
+		assertThat(linkTo(controller.pathCollide(1L, new WithId())).withSelfRel().getHref()) //
+				.endsWith("/items/1{?note}");
+	}
+
+	@Test // GH-1240
+	void treatsAFailingGetterAsAnAbsentValue() {
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).throwing(new Throwing())).withSelfRel().getHref()) //
+				.endsWith("/throwing?ok=ok{&boom}");
+	}
+
+	@Test // GH-1240
+	void rendersPrimitivePropertiesUsingTheirDefaultValue() {
+
+		// A primitive cannot express "unset", so it is always bound. See the note in server.adoc.
+		var controller = methodOn(ModelAttributeController.class);
+
+		assertThat(linkTo(controller.primitives(new Primitives())).withSelfRel().getHref()) //
+				.endsWith("/primitives?page=0");
+	}
+
+	@Test // GH-1240
+	void rendersArrayPropertiesLikeRequestParameterArrays() {
+
+		ArrayForm form = new ArrayForm();
+		form.setCodes(new String[] { "a", "b" });
+
+		assertThat(linkTo(methodOn(ModelAttributeController.class).array(form)).withSelfRel().getHref()) //
+				.endsWith("/array?codes=a%2Cb");
+	}
+
 	private static UriComponents toComponents(Link link) {
 		return UriComponentsBuilder.fromUriString(link.expand().getHref()).build();
 	}
@@ -985,6 +1117,182 @@ class WebMvcLinkBuilderUnitTest extends TestUtils {
 		@RequestMapping("/{first}/{*second}")
 		HttpEntity<?> test(@PathVariable String first, @PathVariable String second) {
 			return null;
+		}
+	}
+
+	static class ModelAttributeController {
+
+		@RequestMapping("/search")
+		HttpEntity<?> search(@ModelAttribute SearchForm form) {
+			return null;
+		}
+
+		@RequestMapping("/mixed")
+		HttpEntity<?> mixed(@RequestParam String q, @ModelAttribute SearchForm form) {
+			return null;
+		}
+
+		@RequestMapping("/optional")
+		HttpEntity<?> optional(@ModelAttribute Optional<SearchForm> form) {
+			return null;
+		}
+
+		@RequestMapping("/non-binding")
+		HttpEntity<?> nonBinding(@ModelAttribute(binding = false) SearchForm form) {
+			return null;
+		}
+
+		@RequestMapping("/unannotated")
+		HttpEntity<?> unannotated(SearchForm form) {
+			return null;
+		}
+
+		@RequestMapping("/record")
+		HttpEntity<?> record(@ModelAttribute SearchRecord form) {
+			return null;
+		}
+
+		@RequestMapping("/generic")
+		HttpEntity<?> generic(@ModelAttribute GenericForm<String> form) {
+			return null;
+		}
+
+		@RequestMapping("/collide")
+		HttpEntity<?> collide(@RequestParam String category, @ModelAttribute SearchForm form) {
+			return null;
+		}
+
+		@RequestMapping("/items/{id}")
+		HttpEntity<?> pathCollide(@PathVariable Long id, @ModelAttribute WithId form) {
+			return null;
+		}
+
+		@RequestMapping("/throwing")
+		HttpEntity<?> throwing(@ModelAttribute Throwing form) {
+			return null;
+		}
+
+		@RequestMapping("/primitives")
+		HttpEntity<?> primitives(@ModelAttribute Primitives form) {
+			return null;
+		}
+
+		@RequestMapping("/array")
+		HttpEntity<?> array(@ModelAttribute ArrayForm form) {
+			return null;
+		}
+	}
+
+	public static class ArrayForm {
+
+		private String[] codes;
+
+		public String[] getCodes() {
+			return codes;
+		}
+
+		public void setCodes(String[] codes) {
+			this.codes = codes;
+		}
+	}
+
+	record SearchRecord(String category, String sortBy) {}
+
+	public static class GenericForm<T> {
+
+		private T value;
+
+		public T getValue() {
+			return value;
+		}
+
+		public void setValue(T value) {
+			this.value = value;
+		}
+	}
+
+	public static class WithId {
+
+		private Long id;
+		private String note;
+
+		public Long getId() {
+			return id;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
+
+		public String getNote() {
+			return note;
+		}
+
+		public void setNote(String note) {
+			this.note = note;
+		}
+	}
+
+	public static class Throwing {
+
+		private String ok = "ok";
+
+		public String getOk() {
+			return ok;
+		}
+
+		public void setOk(String ok) {
+			this.ok = ok;
+		}
+
+		public String getBoom() {
+			throw new IllegalStateException("Not available!");
+		}
+
+		public void setBoom(String boom) {}
+	}
+
+	public static class Primitives {
+
+		private int page;
+
+		public int getPage() {
+			return page;
+		}
+
+		public void setPage(int page) {
+			this.page = page;
+		}
+	}
+
+	public static class SearchForm {
+
+		private String category;
+		private String sortBy;
+		private List<String> tags;
+
+		public String getCategory() {
+			return category;
+		}
+
+		public void setCategory(String category) {
+			this.category = category;
+		}
+
+		public String getSortBy() {
+			return sortBy;
+		}
+
+		public void setSortBy(String sortBy) {
+			this.sortBy = sortBy;
+		}
+
+		public List<String> getTags() {
+			return tags;
+		}
+
+		public void setTags(List<String> tags) {
+			this.tags = tags;
 		}
 	}
 }
