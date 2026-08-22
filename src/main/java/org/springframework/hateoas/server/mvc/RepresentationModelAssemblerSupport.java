@@ -95,7 +95,7 @@ public abstract class RepresentationModelAssemblerSupport<T, D extends Represent
 		Assert.notNull(id, "Id must not be null!");
 
 		D instance = instantiateModel(entity);
-		instance.add(linkTo(this.controllerClass, parameters).slash(id).withSelfRel());
+		instance.add(linkTo(this.controllerClass, parameters).slashId(id).withSelfRel());
 		return instance;
 	}
 
