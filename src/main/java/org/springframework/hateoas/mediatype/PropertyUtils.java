@@ -272,7 +272,27 @@ public class PropertyUtils {
 				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
 				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
 				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor))
+				.filter(descriptor -> !declaredReadOnlyByJackson(type, descriptor))
 				.collect(Collectors.toMap(PropertyDescriptor::getName, Function.identity()));
+	}
+
+	/**
+	 * Check whether the property is declared {@link Access#READ_ONLY} via {@link JsonProperty} on either the field or one
+	 * of its accessors.
+	 *
+	 * @param clazz must not be {@literal null}.
+	 * @param descriptor must not be {@literal null}.
+	 */
+	private static boolean declaredReadOnlyByJackson(Class<?> clazz, PropertyDescriptor descriptor) {
+
+		var field = ReflectionUtils.findField(clazz, descriptor.getName());
+
+		return Stream.of(field, descriptor.getReadMethod(), descriptor.getWriteMethod()) //
+				.filter(Objects::nonNull) //
+				.map(MergedAnnotations::from) //
+				.map(it -> it.get(JsonProperty.class)) //
+				.filter(MergedAnnotation::isPresent) //
+				.anyMatch(it -> Access.READ_ONLY.equals(it.getEnum("access", Access.class)));
 	}
 
 	/**
