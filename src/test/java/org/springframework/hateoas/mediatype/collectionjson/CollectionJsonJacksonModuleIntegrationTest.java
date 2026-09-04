@@ -18,6 +18,8 @@ package org.springframework.hateoas.mediatype.collectionjson;
 import static org.assertj.core.api.Assertions.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -230,6 +232,29 @@ class CollectionJsonJacksonModuleIntegrationTest {
 				});
 	}
 
+	@Test // GH-2614
+	void doesNotWriteReadOnlyPropertiesOnDeserialization() {
+
+		var payload = """
+				{
+					"collection": {
+						"version": "1.0",
+						"href": "http://localhost/users",
+						"template": {
+							"data": [
+								{ "name": "username", "value": "user" },
+								{ "name": "role", "value": "ADMIN" }
+							]
+						}
+					}
+				}""";
+
+		var content = $.<UserProfile> readEntityModel(payload, UserProfile.class).getContent();
+
+		assertThat(content.getUsername()).isEqualTo("user");
+		assertThat(content.getRole()).isNull();
+	}
+
 	private static CollectionModel<EntityModel<SimplePojo>> setupAnnotatedPagedResources() {
 
 		List<EntityModel<SimplePojo>> content = new ArrayList<>();
@@ -258,5 +283,12 @@ class CollectionJsonJacksonModuleIntegrationTest {
 		public void setText(String text) {
 			this.text = text;
 		}
+	}
+
+	@Data
+	static class UserProfile {
+
+		private String username;
+		private @JsonProperty(access = Access.READ_ONLY) String role;
 	}
 }

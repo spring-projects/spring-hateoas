@@ -41,6 +41,8 @@ import org.springframework.hateoas.server.core.TypeReferences;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 /**
  * @author Greg Turnquist
@@ -387,6 +389,31 @@ public class UberJacksonModuleIntegrationTest {
 				});
 	}
 
+	@Test // GH-2614
+	void doesNotWriteReadOnlyPropertiesOnDeserialization() {
+
+		var payload = """
+				{
+					"uber": {
+						"version": "1.0",
+						"data": [
+							{
+								"name": "user",
+								"data": [
+									{ "name": "username", "value": "user" },
+									{ "name": "role", "value": "ADMIN" }
+								]
+							}
+						]
+					}
+				}""";
+
+		var content = $.<UserProfile> readEntityModel(payload, UserProfile.class).getContent();
+
+		assertThat(content.getUsername()).isEqualTo("user");
+		assertThat(content.getRole()).isNull();
+	}
+
 	private static PagedModel<EntityModel<Employee>> setupAnnotatedPagedModel() {
 		return setupAnnotatedPagedModel(2, 4);
 	}
@@ -427,5 +454,12 @@ public class UberJacksonModuleIntegrationTest {
 		public void setName(String name) {
 			this.name = name;
 		}
+	}
+
+	@Data
+	static class UserProfile {
+
+		private String username;
+		private @JsonProperty(access = Access.READ_ONLY) String role;
 	}
 }
