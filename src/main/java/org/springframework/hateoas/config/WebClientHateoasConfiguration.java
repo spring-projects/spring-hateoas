@@ -44,7 +44,7 @@ class WebClientHateoasConfiguration {
 			List<HypermediaMappingInformation> hypermediaTypes) {
 
 		WebfluxCodecCustomizer withGenericJsonTypes = new WebfluxCodecCustomizer(hypermediaTypes,
-				mapper.getIfAvailable(JsonMapper::new)).withGenericJsonTypes();
+				mapper.getIfUnique(JsonMapper::new)).withGenericJsonTypes();
 
 		return new HypermediaWebClientConfigurer(withGenericJsonTypes);
 	}
