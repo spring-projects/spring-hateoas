@@ -641,7 +641,7 @@ public class PropertyUtils {
 		@Override
 		public Number getMin() {
 
-			return getAnnotationAttribute(Size.class, "min", Number.class) //
+			return sizeAsNumericBound("min") //
 					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
 							.flatMap(it -> getAnnotationAttribute(it, "min", Number.class))) //
 					.or(() -> getAnnotationAttribute(Min.class, "value", Number.class)) //
@@ -657,7 +657,7 @@ public class PropertyUtils {
 		@Override
 		public Number getMax() {
 
-			return getAnnotationAttribute(Size.class, "max", Number.class) //
+			return sizeAsNumericBound("max") //
 					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
 							.flatMap(it -> getAnnotationAttribute(it, "max", Number.class))) //
 					.or(() -> getAnnotationAttribute(Max.class, "value", Number.class)) //
@@ -672,8 +672,10 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMinLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class)) //
-					.map(Integer::longValue) //
+
+			return sizeAsLengthBound("min") //
+					.or(() -> LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class)) //
+							.map(Integer::longValue)) //
 					.orElse(null);
 		}
 
@@ -684,8 +686,10 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMaxLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class)) //
-					.map(Integer::longValue) //
+
+			return sizeAsLengthBound("max") //
+					.or(() -> LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class)) //
+							.map(Integer::longValue)) //
 					.orElse(null);
 		}
 
@@ -737,12 +741,48 @@ public class PropertyUtils {
 			return TYPE_MAP.entrySet().stream() //
 					.flatMap(it -> {
 
+						// @Size constrains element/character count. For CharSequence properties that maps to a text
+						// input with minLength/maxLength rather than a numeric range control (GH-2531).
+						if (Size.class.equals(it.getKey()) && isCharSequenceProperty()) {
+							return Stream.empty();
+						}
+
 						MergedAnnotation<? extends Annotation> annotation = property.getAnnotation(it.getKey());
 
 						return annotation.isPresent() ? Stream.of(it.getValue()) : Stream.empty();
 					}) //
 					.findFirst() //
 					.orElse(null);
+		}
+
+		/**
+		 * {@link Size} is a character/element count constraint. Only surface it as numeric {@code min}/{@code max} when the
+		 * property is not a {@link CharSequence} (GH-2531).
+		 */
+		private Optional<Number> sizeAsNumericBound(String attribute) {
+
+			if (isCharSequenceProperty()) {
+				return Optional.empty();
+			}
+
+			return getAnnotationAttribute(Size.class, attribute, Number.class);
+		}
+
+		/**
+		 * Map {@link Size} to {@code minLength}/{@code maxLength} for {@link CharSequence} properties (GH-2531).
+		 */
+		private Optional<Long> sizeAsLengthBound(String attribute) {
+
+			if (!isCharSequenceProperty()) {
+				return Optional.empty();
+			}
+
+			return getAnnotationAttribute(Size.class, attribute, Number.class) //
+					.map(Number::longValue);
+		}
+
+		private boolean isCharSequenceProperty() {
+			return CharSequence.class.isAssignableFrom(property.getType().resolve(Object.class));
 		}
 
 		private <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,
