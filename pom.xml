@@ -79,10 +79,10 @@
 		<logback.version>1.5.34</logback.version>
 		<jacoco>0.8.12</jacoco>
 		<jacoco.destfile>${project.build.directory}/jacoco.exec</jacoco.destfile>
-		<jackson-bom.version>3.1.4</jackson-bom.version>
+		<jackson-bom.version>3.2.2</jackson-bom.version>
 		<java-module-name>spring.hateoas</java-module-name>
 		<jsonpath.version>2.10.0</jsonpath.version>
-		<junit.version>6.1.0</junit.version>
+		<junit.version>6.1.3</junit.version>
 		<lombok.version>1.18.46</lombok.version>
 		<nullaway.version>0.12.7</nullaway.version>
 		<reactor-bom.version>2026.0.0-M1</reactor-bom.version>
