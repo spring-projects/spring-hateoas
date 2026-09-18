@@ -63,7 +63,7 @@ public interface HalFormsOptions {
 
 		Assert.notNull(values, "Values must not be null!");
 
-		return new Inline(values, null, null, null, null, null);
+		return new Inline(values, null, null, null, null, null, null);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public interface HalFormsOptions {
 
 		Assert.notNull(link, "Link must not be null!");
 
-		return new Remote(link, null, null, null, null, null);
+		return new Remote(link, null, null, null, null, null, null);
 	}
 
 	/**
@@ -127,15 +127,19 @@ public interface HalFormsOptions {
 	@Nullable
 	Object getSelectedValue();
 
+	@Nullable
+	Object getSelectedValues();
+
 	public static abstract class AbstractHalFormsOptions<T extends AbstractHalFormsOptions<T>>
 			implements HalFormsOptions {
 
 		private final @Nullable String promptField, valueField;
 		private final @Nullable Long minItems, maxItems;
 		private final @Nullable Object selectedValue;
+		private final @Nullable Object selectedValues;
 
 		protected AbstractHalFormsOptions(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems, @Nullable Object selectedValue) {
+				@Nullable Long maxItems, @Nullable Object selectedValue, @Nullable Object selectedValues) {
 
 			Assert.isTrue(minItems == null || minItems >= 0, "MinItems must be greater than or equal to 0!");
 
@@ -144,6 +148,7 @@ public interface HalFormsOptions {
 			this.minItems = minItems;
 			this.maxItems = maxItems;
 			this.selectedValue = selectedValue;
+			this.selectedValues = selectedValues;
 		}
 
 		/*
@@ -201,6 +206,13 @@ public interface HalFormsOptions {
 			return selectedValue;
 		}
 
+		@Nullable
+		@Override
+		@JsonProperty
+		public Object getSelectedValues() {
+			return selectedValues;
+		}
+
 		/**
 		 * Configures the given field to be used as prompt field.
 		 *
@@ -213,7 +225,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("Prompt field has to either be null or actually have text!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems, selectedValue);
+			return with(promptField, valueField, minItems, maxItems, selectedValue, selectedValues);
 		}
 
 		/**
@@ -228,7 +240,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("Value field has to either be null or actually have text!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems, selectedValue);
+			return with(promptField, valueField, minItems, maxItems, selectedValue, selectedValues);
 		}
 
 		/**
@@ -243,7 +255,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("minItems has to be null or greater or equal to zero!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems, selectedValue);
+			return with(promptField, valueField, minItems, maxItems, selectedValue, selectedValues);
 		}
 
 		/**
@@ -258,7 +270,7 @@ public interface HalFormsOptions {
 				throw new IllegalArgumentException("maxItems has to be null or greater than zero!");
 			}
 
-			return with(promptField, valueField, minItems, maxItems, selectedValue);
+			return with(promptField, valueField, minItems, maxItems, selectedValue, selectedValues);
 		}
 
 		/**
@@ -266,9 +278,21 @@ public interface HalFormsOptions {
 		 *
 		 * @param value
 		 * @return
+		 * @deprecated Use {@link #withSelectedValues(Object)} instead
 		 */
+		@Deprecated(forRemoval = true)
 		public T withSelectedValue(@Nullable Object value) {
-			return with(promptField, valueField, minItems, maxItems, value);
+			return with(promptField, valueField, minItems, maxItems, value, selectedValues);
+		}
+
+		/**
+		 * Configured the values to be initially selected
+		 *
+		 * @param values
+		 * @return
+		 */
+		public T withSelectedValues(@Nullable Object values) {
+			return with(promptField, valueField, minItems, maxItems, selectedValue, values);
 		}
 
 		/**
@@ -281,7 +305,7 @@ public interface HalFormsOptions {
 		 * @return
 		 */
 		protected abstract T with(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems, @Nullable Object selectedValue);
+				@Nullable Long maxItems, @Nullable Object selectedValue, @Nullable Object selectedValues);
 	}
 
 	public static class Inline extends AbstractHalFormsOptions<Inline> {
@@ -294,9 +318,9 @@ public interface HalFormsOptions {
 		 * @param valueRef
 		 */
 		private Inline(Collection<? extends Object> values, @Nullable String promptRef, @Nullable String valueRef,
-				@Nullable Long minItems, @Nullable Long maxItems, @Nullable Object selectedValue) {
+				@Nullable Long minItems, @Nullable Long maxItems, @Nullable Object selectedValue, @Nullable Object selectedValues) {
 
-			super(promptRef, valueRef, minItems, maxItems, selectedValue);
+			super(promptRef, valueRef, minItems, maxItems, selectedValue, selectedValues);
 
 			Assert.notNull(values, "Values must not be null!");
 
@@ -319,8 +343,8 @@ public interface HalFormsOptions {
 		 */
 		@Override
 		protected Inline with(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems, @Nullable Object selectedValue) {
-			return new Inline(inline, promptRef, valueRef, minItems, maxItems, selectedValue);
+				@Nullable Long maxItems, @Nullable Object selectedValue, @Nullable Object selectedValues) {
+			return new Inline(inline, promptRef, valueRef, minItems, maxItems, selectedValue, selectedValues);
 		}
 	}
 
@@ -334,9 +358,9 @@ public interface HalFormsOptions {
 		private final Link link;
 
 		private Remote(Link link, @Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems, @Nullable Object selectedValue) {
+				@Nullable Long maxItems, @Nullable Object selectedValue, @Nullable Object selectedValues) {
 
-			super(promptRef, valueRef, minItems, maxItems, selectedValue);
+			super(promptRef, valueRef, minItems, maxItems, selectedValue, selectedValues);
 
 			Assert.notNull(link, "Link must not be null!");
 
@@ -359,8 +383,8 @@ public interface HalFormsOptions {
 		 */
 		@Override
 		protected Remote with(@Nullable String promptRef, @Nullable String valueRef, @Nullable Long minItems,
-				@Nullable Long maxItems, @Nullable Object selectedValue) {
-			return new Remote(link, promptRef, valueRef, minItems, maxItems, selectedValue);
+				@Nullable Long maxItems, @Nullable Object selectedValue, @Nullable Object selectedValues) {
+			return new Remote(link, promptRef, valueRef, minItems, maxItems, selectedValue, selectedValues);
 		}
 	}
 }

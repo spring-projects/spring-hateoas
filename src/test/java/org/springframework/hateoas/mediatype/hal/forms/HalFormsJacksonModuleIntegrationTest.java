@@ -466,7 +466,8 @@ public class HalFormsJacksonModuleIntegrationTest {
 				.withPromptField("my-prompt-field")
 				.withValueField("my-value-field")
 				.withMinItems(2L)
-				.withMaxItems(3L);
+				.withMaxItems(3L)
+				.withSelectedValues(List.of("bar", "baz"));
 
 		getCuriedMapper()
 				.assertSerializes(options)
@@ -478,6 +479,7 @@ public class HalFormsJacksonModuleIntegrationTest {
 					assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
 					assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
 					assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
+					assertThat(result.read("$.selectedValues", List.class)).isEqualTo(List.of("bar", "baz"));
 				});
 	}
 
@@ -490,7 +492,8 @@ public class HalFormsJacksonModuleIntegrationTest {
 				.withPromptField("my-prompt-field")
 				.withValueField("my-value-field")
 				.withMinItems(2L)
-				.withMaxItems(3L);
+				.withMaxItems(3L)
+				.withSelectedValues(List.of("bar", "baz"));
 
 		getCuriedMapper()
 				.assertSerializes(options)
@@ -503,6 +506,7 @@ public class HalFormsJacksonModuleIntegrationTest {
 					assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
 					assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
 					assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
+					assertThat(result.read("$.selectedValues", List.class)).isEqualTo(List.of("bar", "baz"));
 				});
 
 	}
