@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2026 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -45,6 +48,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -58,6 +62,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Greg Turnquist
  * @author Oliver Drotbohm
  * @author Réda Housni Alaoui
+ * @author Kim Tae Eun
  */
 public class WebHandler {
 
@@ -126,6 +131,14 @@ public class WebHandler {
 			Object[] arguments = invocation.getArguments();
 			List<String> optionalEmptyParameters = new ArrayList<>();
 
+			// Names already spoken for, so that model attribute properties do not shadow them. See
+			// HandlerMethodParameter#contributeTo(…).
+			Set<String> reservedNames = new HashSet<>();
+
+			for (MappingVariable variable : mappingVariables) {
+				reservedNames.add(variable.getKey());
+			}
+
 			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(PathVariable.class, arguments)) {
 
 				MappingVariable mappingVariable = mappingVariables.getVariable(parameter.getVariableName());
@@ -158,6 +171,10 @@ public class WebHandler {
 				boolean isSkipValue = SKIP_VALUE.equals(parameter.getVerifiedValue(arguments));
 				boolean isMapParameter = Map.class.isAssignableFrom(parameter.parameter.getParameterType());
 
+				if (!isMapParameter) {
+					reservedNames.add(parameter.getVariableName());
+				}
+
 				if (isSkipValue && !isMapParameter) {
 
 					values.put(parameter.getVariableName(), SKIP_VALUE);
@@ -166,6 +183,12 @@ public class WebHandler {
 						optionalEmptyParameters.add(parameter.getVariableName());
 					}
 				}
+			}
+
+			for (HandlerMethodParameter parameter : parameters.getParameterAnnotatedWith(ModelAttribute.class,
+					arguments)) {
+
+				optionalEmptyParameters.addAll(parameter.contributeTo(builder, arguments, factory, reservedNames));
 			}
 
 			for (MappingVariable variable : mappingVariables) {
@@ -285,7 +308,7 @@ public class WebHandler {
 	private static class HandlerMethodParameters {
 
 		private static final List<Class<? extends Annotation>> ANNOTATIONS = Arrays.asList(RequestParam.class,
-				PathVariable.class);
+				PathVariable.class, ModelAttribute.class);
 		private static final Map<Method, HandlerMethodParameters> CACHE = new ConcurrentHashMap<Method, HandlerMethodParameters>();
 
 		private final MultiValueMap<Class<? extends Annotation>, HandlerMethodParameter> byAnnotationCache;
@@ -342,6 +365,7 @@ public class WebHandler {
 			FACTORY = new HashMap<>();
 			FACTORY.put(RequestParam.class, RequestParamParameter::new);
 			FACTORY.put(PathVariable.class, PathVariableParameter::new);
+			FACTORY.put(ModelAttribute.class, ModelAttributeParameter::new);
 		}
 
 		private final MethodParameter parameter;
@@ -400,6 +424,16 @@ public class WebHandler {
 
 		Class<? extends Annotation> getAnnotationType() {
 			return attribute.getAnnotationType();
+		}
+
+		/**
+		 * Returns the {@link TypeDescriptor} of the parameter, with a potential {@link Optional} wrapper already
+		 * unwrapped.
+		 *
+		 * @return will never be {@literal null}.
+		 */
+		TypeDescriptor getTypeDescriptor() {
+			return typeDescriptor;
 		}
 
 		/**
@@ -513,6 +547,23 @@ public class WebHandler {
 		}
 
 		public abstract boolean isRequired();
+
+		/**
+		 * Contributes the request parameters this parameter binds to the given {@link UriComponentsBuilder} and
+		 * returns the names of the ones no value was available for, so that they can be rendered as template
+		 * variables. Only implemented for parameters expanding into more than one request parameter; single-variable
+		 * ones are handled by {@code bindRequestParameters(…)}.
+		 *
+		 * @param builder must not be {@literal null}.
+		 * @param arguments must not be {@literal null}.
+		 * @param factory must not be {@literal null}.
+		 * @param reservedNames names already bound by other parameters, must not be {@literal null}.
+		 * @return will never be {@literal null}.
+		 */
+		public List<String> contributeTo(UriComponentsBuilder builder, Object[] arguments, FormatterFactory factory,
+				Set<String> reservedNames) {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -623,6 +674,127 @@ public class WebHandler {
 			RequestParam annotation = parameter.getParameterAnnotation(RequestParam.class);
 
 			return annotation != null && annotation.defaultValue().equals(ValueConstants.DEFAULT_NONE) ? SKIP_VALUE : null;
+		}
+	}
+
+	/**
+	 * {@link HandlerMethodParameter} extension dealing with {@link ModelAttribute} parameters. In contrast to the other
+	 * implementations a {@link ModelAttribute} parameter does not contribute a single request parameter but one per
+	 * bindable property of the attribute's type.
+	 *
+	 * @author Kim Tae Eun
+	 * @since 3.2
+	 */
+	private static class ModelAttributeParameter extends HandlerMethodParameter {
+
+		private final MethodParameter parameter;
+		private final List<String> propertyNames;
+
+		public ModelAttributeParameter(MethodParameter parameter) {
+
+			super(parameter, new AnnotationAttribute(ModelAttribute.class));
+
+			ModelAttribute annotation = parameter.getParameterAnnotation(ModelAttribute.class);
+
+			this.parameter = parameter;
+			this.propertyNames = annotation != null && !annotation.binding() //
+					? Collections.emptyList() //
+					: ModelAttributeProperties.getPropertyNames(getTypeDescriptor().getResolvableType());
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#isRequired()
+		 */
+		@Override
+		public boolean isRequired() {
+			return false;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#getVerifiedValue(java.lang.Object[])
+		 */
+		@Override
+		@Nullable
+		public Object getVerifiedValue(Object[] values) {
+
+			Object value = ObjectUtils.unwrapOptional(values[parameter.getParameterIndex()]);
+
+			return value == null ? SKIP_VALUE : value;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.springframework.hateoas.server.core.WebHandler.HandlerMethodParameter#contributeTo
+		 */
+		@Override
+		public List<String> contributeTo(UriComponentsBuilder builder, Object[] arguments, FormatterFactory factory,
+				Set<String> reservedNames) {
+
+			List<String> names = new ArrayList<>();
+
+			for (String property : propertyNames) {
+				if (reservedNames.add(property)) {
+					names.add(property);
+				}
+			}
+
+			Object value = getVerifiedValue(arguments);
+
+			if (value == null || SKIP_VALUE.equals(value)) {
+				return names;
+			}
+
+			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(value);
+			List<String> unbound = new ArrayList<>();
+
+			for (String property : names) {
+
+				Object propertyValue = readProperty(wrapper, property);
+
+				// An empty collection is treated as absent, so that the link stays expandable. Note that an empty
+				// collection handed to a @RequestParam vanishes entirely instead - see bindRequestParameters(…).
+				if (propertyValue == null
+						|| propertyValue instanceof Collection && ((Collection<?>) propertyValue).isEmpty()) {
+
+					unbound.add(property);
+					continue;
+				}
+
+				TemplateVariable variable = TemplateVariable.requestParameter(property);
+				Object prepared = prepareValue(propertyValue, factory, wrapper.getPropertyTypeDescriptor(property));
+
+				if (prepared instanceof Collection) {
+
+					for (Object element : (Collection<?>) prepared) {
+						builder.queryParam(property, variable.prepareAndEncode(element));
+					}
+
+				} else {
+					builder.queryParam(property, variable.prepareAndEncode(prepared));
+				}
+			}
+
+			return unbound;
+		}
+
+		/**
+		 * Reads the given property, treating a failing getter as an absent value. Link building must not break
+		 * because a form object exposes a getter that throws.
+		 *
+		 * @param wrapper must not be {@literal null}.
+		 * @param property must not be {@literal null}.
+		 * @return can be {@literal null}.
+		 */
+		@Nullable
+		private static Object readProperty(BeanWrapper wrapper, String property) {
+
+			try {
+				return wrapper.getPropertyValue(property);
+			} catch (BeansException o_O) {
+				return null;
+			}
 		}
 	}
 
