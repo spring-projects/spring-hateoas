@@ -86,7 +86,7 @@
 		<lombok.version>1.18.48</lombok.version>
 		<nullaway.version>0.12.7</nullaway.version>
 		<reactor.version>2026.0.0-M2</reactor.version>
-		<slf4j.version>2.0.19</slf4j.version>
+		<slf4j.version>2.0.20</slf4j.version>
 		<spring-framework.version>7.1.0-M2</spring-framework.version>
 		<spring-plugin.version>4.2.0-M2</spring-plugin.version>
 		<kotlin.version>2.4.20</kotlin.version>
