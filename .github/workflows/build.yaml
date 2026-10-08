@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     name: Build project
+    if: ${{ !endsWith(github.repository, '-commercial') }}
     runs-on: ubuntu-latest
 
     steps:
