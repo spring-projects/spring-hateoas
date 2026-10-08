@@ -1,4 +1,4 @@
-name: CI Build
+name: CI Build (Open Source)
 
 on:
   push:
