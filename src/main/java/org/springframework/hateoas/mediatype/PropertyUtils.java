@@ -218,8 +218,18 @@ public class PropertyUtils {
 			return replaceIfUnwrappable(type, () -> OBJECT_TYPE);
 		}
 
-		return DOMAIN_TYPE_CACHE.computeIfAbsent(type,
-				it -> replaceIfUnwrappable(it, () -> unwrapDomainType(it.getGeneric(0))));
+		ResolvableType cached = DOMAIN_TYPE_CACHE.get(type);
+
+		if (cached != null) {
+			return cached;
+		}
+
+		// Do not use computeIfAbsent(…) here as the unwrapping recurses into this method and thus would acquire further
+		// segment locks of the cache while already holding one, which can lead to deadlocks between concurrent callers.
+		ResolvableType unwrapped = replaceIfUnwrappable(type, () -> unwrapDomainType(type.getGeneric(0)));
+		ResolvableType previous = DOMAIN_TYPE_CACHE.putIfAbsent(type, unwrapped);
+
+		return previous == null ? unwrapped : previous;
 	}
 
 	/**
