@@ -482,6 +482,27 @@ public class HalFormsJacksonModuleIntegrationTest {
 	}
 
 	@Test // #2257
+	void rendersEmptyInlineOptions() {
+
+		var options = HalFormsOptions.inline()
+				.withPromptField("my-prompt-field")
+				.withValueField("my-value-field")
+				.withMinItems(2L)
+				.withMaxItems(3L);
+
+		getCuriedMapper()
+				.assertSerializes(options)
+				.into(result -> {
+
+					assertThat(result.read("$.inline", Collection.class)).isEmpty();
+					assertThat(result.read("$.promptField", String.class)).isEqualTo("my-prompt-field");
+					assertThat(result.read("$.valueField", String.class)).isEqualTo("my-value-field");
+					assertThat(result.read("$.minItems", Long.class)).isEqualTo(2L);
+					assertThat(result.read("$.maxItems", Long.class)).isEqualTo(3L);
+				});
+	}
+
+	@Test // #2257
 	void rendersFullRemoteOptions() {
 
 		var link = Link.of("/foo{?bar}").withType(MediaType.APPLICATION_JSON_VALUE);
