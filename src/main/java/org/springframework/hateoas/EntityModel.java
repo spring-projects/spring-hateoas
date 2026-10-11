@@ -45,7 +45,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
- * @author Anurag Verma
  */
 public class EntityModel<T> extends RepresentationModel<EntityModel<T>> {
 

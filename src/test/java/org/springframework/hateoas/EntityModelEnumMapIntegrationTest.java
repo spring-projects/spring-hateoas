@@ -33,8 +33,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Regression tests for enum-keyed map serialization (GH-1990).
- *
- * @author Anurag Verma
  */
 class EntityModelEnumMapIntegrationTest {
 
