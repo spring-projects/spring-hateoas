@@ -76,7 +76,7 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 	 */
 	public T slash(@Nullable Object object) {
 
-		object = object instanceof Optional ? ((Optional<?>) object).orElse(null) : object;
+		object = unwrapPotentialOptional(object);
 
 		if (object == null) {
 			return getThis();
@@ -95,6 +95,25 @@ public abstract class LinkBuilderSupport<T extends LinkBuilder> implements LinkB
 		path = path.startsWith("/") ? path : "/".concat(path);
 
 		return slash(UriComponentsBuilder.fromUriString(path).build(), false);
+	}
+
+	public T slashId(@Nullable Object id) {
+
+		id = unwrapPotentialOptional(id);
+
+		if (id == null) {
+			return getThis();
+		}
+
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uriComponents(this.components);
+		builder.pathSegment(encodePath(id));
+
+		return createNewInstance(builder.build(), affordances);
+	}
+
+	@Nullable
+	private Object unwrapPotentialOptional(@Nullable Object id) {
+		return id instanceof Optional ? ((Optional<?>) id).orElse(null) : id;
 	}
 
 	protected T slash(UriComponents components, boolean encoded) {
