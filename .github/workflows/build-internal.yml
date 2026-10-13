@@ -32,15 +32,8 @@ jobs:
           IS_SNAPSHOT=false
         fi
 
-        if [[ "${PROJECT_VERSION}" =~ ^[0-9]+(\.[0-9]+){3}([-].*)?$ ]]; then
-          IS_HOTFIX=true
-        else
-          IS_HOTFIX=false
-        fi
-
-        echo "Project version: ${PROJECT_VERSION} (isSnapshot=${IS_SNAPSHOT}, isHotfix=${IS_HOTFIX})"
+        echo "Project version: ${PROJECT_VERSION} (isSnapshot=${IS_SNAPSHOT})"
         echo "isSnapshot=${IS_SNAPSHOT}" >> "$GITHUB_OUTPUT"
-        echo "isHotfix=${IS_HOTFIX}" >> "$GITHUB_OUTPUT"
 
         if [[ "${IS_SNAPSHOT}" != true ]]; then
           echo "::notice::Project version ${PROJECT_VERSION} is not a snapshot, skipping build"
@@ -53,10 +46,6 @@ jobs:
         distribution: 'temurin'
         java-version: 17
         cache: 'maven'
-
-    - name: Replace -SNAPSHOT with -INTERNAL-SNAPSHOT in pom.xml
-      if: steps.determine-version.outputs.isSnapshot == 'true' && steps.determine-version.outputs.isHotfix == 'true'
-      run: sed -i 's/-SNAPSHOT/-INTERNAL-SNAPSHOT/g' pom.xml
 
     - name: Build & deploy internal snapshot
       if: steps.determine-version.outputs.isSnapshot == 'true'
