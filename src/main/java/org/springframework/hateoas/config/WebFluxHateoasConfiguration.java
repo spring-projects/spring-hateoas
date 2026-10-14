@@ -46,7 +46,7 @@ class WebFluxHateoasConfiguration {
 		comparator.ifPresent(mappingInformation::sort);
 
 		WebfluxCodecCustomizer customizer = new WebfluxCodecCustomizer(mappingInformation,
-				mapper.getIfAvailable(JsonMapper::new));
+				mapper.getIfUnique(JsonMapper::new));
 
 		return new HypermediaWebFluxConfigurer(customizer);
 	}
