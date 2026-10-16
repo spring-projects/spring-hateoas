@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>3.0.6-SNAPSHOT</version>
+	<version>3.0.6</version>
 
 	<name>Spring HATEOAS</name>
 	<url>https://github.com/spring-projects/spring-hateoas</url>
@@ -67,7 +68,7 @@
 
 	<properties>
 		<!-- Use stable timestamp (1.0 release) for reproducible builds -->
-		<project.build.outputTimestamp>2019-09-30T15:30:00Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2026-10-22T00:00:00Z</project.build.outputTimestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<source.level>17</source.level>
 		<artifactory-maven-plugin.version>3.6.2</artifactory-maven-plugin.version>
@@ -1001,20 +1002,8 @@
 	</scm>
 
 	<repositories>
-		<repository>
-			<id>spring-milestone</id>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/snapshot</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
+		
+		
 	</repositories>
 
 </project>
