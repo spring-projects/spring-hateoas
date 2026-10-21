@@ -18,10 +18,12 @@ package org.springframework.hateoas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -275,29 +277,31 @@ public class Links implements Iterable<Link> {
 	 */
 	public Links merge(MergeMode mode, Iterable<Link> links) {
 
-		Assert.notNull(mode, "MergeMode must not be null!");
 		Assert.notNull(links, "Links must not be null!");
 
-		List<Link> newLinks = MergeMode.REPLACE_BY_REL.equals(mode) //
-				? allWithoutRels(links)
-				: new ArrayList<>(this.links);
+		return mergeAll(mode, List.of(Links.of(links)));
+	}
 
-		links.forEach(it -> {
+	/**
+	 * Merges the given {@link Links} into the current one applying the given {@link MergeMode}. Semantically equivalent to
+	 * successively calling {@link #merge(MergeMode, Iterable)} for each of the given {@link Links} but performs the merge
+	 * in a single pass for better performance.
+	 *
+	 * @param mode must not be {@literal null}.
+	 * @param others must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 * @since 3.2, 3.1.4, 3.0.7
+	 */
+	public Links mergeAll(MergeMode mode, Iterable<Links> others) {
 
-			if (MergeMode.REPLACE_BY_REL.equals(mode)) {
-				newLinks.add(it);
-			}
+		Assert.notNull(mode, "MergeMode must not be null!");
+		Assert.notNull(others, "Links must not be null!");
 
-			if (MergeMode.SKIP_BY_EQUALITY.equals(mode) && !this.links.contains(it)) {
-				newLinks.add(it);
-			}
-
-			if (MergeMode.SKIP_BY_REL.equals(mode) && !this.hasLink(it.getRel())) {
-				newLinks.add(it);
-			}
-		});
-
-		return new Links(newLinks);
+		return switch (mode) {
+			case SKIP_BY_EQUALITY -> mergeAllSkipping(others, it -> it);
+			case SKIP_BY_REL -> mergeAllSkipping(others, Link::getRel);
+			case REPLACE_BY_REL -> mergeAllReplacingRel(others);
+		};
 	}
 
 	/**
@@ -520,15 +524,46 @@ public class Links implements Iterable<Link> {
 		return result;
 	}
 
-	private List<Link> allWithoutRels(Iterable<Link> links) {
+	private Links mergeAllSkipping(Iterable<Links> others, Function<Link, Object> key) {
 
-		Set<LinkRelation> toFilter = StreamSupport.stream(links.spliterator(), false) //
-				.map(Link::getRel) //
-				.collect(Collectors.toSet());
+		var result = new ArrayList<>(this.links);
+		var seen = result.stream().map(key).collect(Collectors.toCollection(HashSet::new));
 
-		return this.links.stream() //
-				.filter(it -> !toFilter.contains(it.getRel())) //
-				.collect(Collectors.toList());
+		for (var other : others) {
+
+			// Compare against the links of previous instances only, just like merge(…) does
+			var toAdd = other.links.stream() //
+					.filter(it -> !seen.contains(key.apply(it))) //
+					.toList();
+
+			result.addAll(toAdd);
+			toAdd.forEach(it -> seen.add(key.apply(it)));
+		}
+
+		return new Links(result);
+	}
+
+	private Links mergeAllReplacingRel(Iterable<Links> others) {
+
+		var groups = new ArrayList<List<Link>>();
+		groups.add(this.links);
+		others.forEach(it -> groups.add(it.links));
+
+		// Walk backwards as a link survives only if no later instance contains one with the same relation
+		var claimed = new HashSet<LinkRelation>();
+		var survivors = new ArrayList<List<Link>>();
+
+		for (var i = groups.size() - 1; i >= 0; i--) {
+
+			var group = groups.get(i);
+
+			survivors.add(group.stream().filter(it -> !claimed.contains(it.getRel())).toList());
+			group.forEach(it -> claimed.add(it.getRel()));
+		}
+
+		Collections.reverse(survivors);
+
+		return new Links(survivors.stream().flatMap(List::stream).toList());
 	}
 
 	/**

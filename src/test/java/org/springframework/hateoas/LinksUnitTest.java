@@ -296,4 +296,27 @@ class LinksUnitTest {
 		String name;
 		Links links;
 	}
+
+	@TestFactory // GH-2590
+	Stream<DynamicTest> mergeAllIsEquivalentToSuccessiveMerges() {
+
+		var initial = Links.of(Link.of("/a", "a"), Link.of("/b", "b"));
+
+		var others = List.of( //
+				Links.of(Link.of("/a", "a"), Link.of("/c", "c"), Link.of("/c", "c")), //
+				Links.of(Link.of("/a2", "a"), Link.of("/d", "d"), Link.of("/c2", "c"), Link.of("/a3", "a")), //
+				Links.NONE, //
+				Links.of(Link.of("/b", "b"), Link.of("/e", "e"), Link.of("/d", "d")));
+
+		return Stream.of(MergeMode.values()).map(mode -> DynamicTest.dynamicTest(mode.name(), () -> {
+
+			var expected = initial;
+
+			for (var other : others) {
+				expected = expected.merge(mode, other);
+			}
+
+			assertThat(initial.mergeAll(mode, others)).containsExactlyElementsOf(expected);
+		}));
+	}
 }
