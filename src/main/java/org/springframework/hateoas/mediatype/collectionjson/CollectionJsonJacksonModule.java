@@ -644,11 +644,8 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 
 			if (!items.isEmpty()) {
 
-				Links merged = items.stream() //
-						.map(CollectionJsonItem::getLinks) //
-						.reduce(links, //
-								(left, right) -> left.merge(right), //
-								(left, right) -> right);
+				var itemLinks = items.stream().map(CollectionJsonItem::getLinks).toList();
+				var merged = links.mergeAll(MergeMode.SKIP_BY_EQUALITY, itemLinks);
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 				RepresentationModel<?> resource = (RepresentationModel<?>) firstItem.toRawData(description);
@@ -756,11 +753,8 @@ public class CollectionJsonJacksonModule extends SimpleModule {
 
 			} else {
 
-				Links merged = items.stream() //
-						.map(CollectionJsonItem::getLinks) //
-						.reduce(links, //
-								(left, right) -> left.merge(MergeMode.REPLACE_BY_REL, right), //
-								(left, right) -> right);
+				var itemLinks = items.stream().map(CollectionJsonItem::getLinks).toList();
+				var merged = links.mergeAll(MergeMode.REPLACE_BY_REL, itemLinks);
 
 				CollectionJsonItem<?> firstItem = items.get(0).withOwnSelfLink();
 
