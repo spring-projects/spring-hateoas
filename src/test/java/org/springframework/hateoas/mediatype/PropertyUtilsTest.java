@@ -29,10 +29,21 @@ import lombok.Setter;
 import lombok.Value;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URI;
+import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.hibernate.validator.constraints.Range;
@@ -49,6 +60,8 @@ import org.springframework.hateoas.InputType;
 import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.hateoas.server.core.MethodParameters;
 import org.springframework.hateoas.support.Employee;
+import org.springframework.http.HttpEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -104,6 +117,66 @@ class PropertyUtilsTest {
 
 		assertThat(metadata.stream()).hasSize(2);
 		assertThat(metadata.stream().map(PropertyMetadata::getName)).contains("name", "role");
+	}
+
+	// GH-2573
+	@Test
+	void unwrapsDomainTypesWithoutHoldingOneCacheSegmentWhileAcquiringAnother() throws Exception {
+
+		Map<ResolvableType, ResolvableType> cache = domainTypeCache();
+
+		// A wrapper type nesting another one, each living in a different segment of the cache
+		ResolvableType inner = findKey(__ -> true, cache, EntityModel.class, Employee.class);
+		Object innerSegment = segmentOf(cache, inner);
+		ResolvableType outer = findKey(it -> it != innerSegment, cache, HttpEntity.class, inner.getType());
+		Object outerSegment = segmentOf(cache, outer);
+
+		// Keys to let a concurrent thread occupy the inner segment, and then ask for the outer one
+		ResolvableType innerSegmentKey = findKey(it -> it == innerSegment, cache, Map.class, String.class);
+		ResolvableType outerSegmentKey = findKey(it -> it == outerSegment, cache, Map.class, Employee.class);
+
+		CountDownLatch innerSegmentOccupied = new CountDownLatch(1);
+		CountDownLatch unwrappingBlocked = new CountDownLatch(1);
+		AtomicReference<Thread> unwrappingThread = new AtomicReference<>();
+
+		ExecutorService executor = Executors.newFixedThreadPool(2, runnable -> {
+
+			Thread thread = new Thread(runnable);
+			thread.setDaemon(true); // Don't keep the JVM alive if the threads deadlock
+			return thread;
+		});
+
+		try {
+
+			Future<?> occupier = executor.submit(() -> cache.computeIfAbsent(innerSegmentKey, __ -> {
+
+				innerSegmentOccupied.countDown();
+				await(unwrappingBlocked);
+
+				return cache.computeIfAbsent(outerSegmentKey, ___ -> outerSegmentKey);
+			}));
+
+			await(innerSegmentOccupied);
+
+			Future<InputPayloadMetadata> unwrapping = executor.submit(() -> {
+
+				unwrappingThread.set(Thread.currentThread());
+				return PropertyUtils.getExposedProperties(outer);
+			});
+
+			awaitWaitingOrDone(unwrappingThread, unwrapping);
+			unwrappingBlocked.countDown();
+
+			assertThat(occupier).as("Thread holding the inner segment and asking for the outer one") //
+					.succeedsWithin(Duration.ofSeconds(5));
+
+			assertThat(unwrapping).as("Thread unwrapping the nested domain type") //
+					.succeedsWithin(Duration.ofSeconds(5)) //
+					.satisfies(metadata -> assertThat(metadata.stream().map(PropertyMetadata::getName))
+							.containsExactlyInAnyOrder("name", "role"));
+		} finally {
+			executor.shutdownNow();
+		}
 	}
 
 	@Test
@@ -362,6 +435,104 @@ class PropertyUtilsTest {
 
 	private static Optional<PropertyMetadata> getProperty(PayloadMetadata metadata, String name) {
 		return metadata.stream().filter(it -> it.hasName(name)).findFirst();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<ResolvableType, ResolvableType> domainTypeCache() {
+		return (Map<ResolvableType, ResolvableType>) ReflectionTestUtils.getField(PropertyUtils.class,
+				"DOMAIN_TYPE_CACHE");
+	}
+
+	/**
+	 * Returns the segment of the given {@code ConcurrentReferenceHashMap} the given key is stored in.
+	 */
+	private static Object segmentOf(Map<?, ?> cache, Object key) {
+
+		Object hash = ReflectionTestUtils.invokeMethod(cache, "getHash", key);
+		return ReflectionTestUtils.invokeMethod(cache, "getSegmentForHash", hash);
+	}
+
+	/**
+	 * Looks up a {@link ResolvableType} for the given raw type and argument whose cache segment matches the given
+	 * {@link Predicate}.
+	 */
+	private static ResolvableType findKey(Predicate<Object> segmentFilter, Map<?, ?> cache, Class<?> rawType,
+			Type argument) {
+
+		return IntStream.iterate(0, it -> it + 1) //
+				.mapToObj(hash -> ResolvableType.forType(new FixedHashParameterizedType(rawType, argument, hash))) //
+				.filter(it -> segmentFilter.test(segmentOf(cache, it))) //
+				.findFirst() //
+				.orElseThrow();
+	}
+
+	private static void await(CountDownLatch latch) {
+
+		try {
+
+			if (!latch.await(5, TimeUnit.SECONDS)) {
+				throw new IllegalStateException("Timed out waiting for the other thread!");
+			}
+
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private static void awaitWaitingOrDone(AtomicReference<Thread> thread, Future<?> future)
+			throws InterruptedException {
+
+		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+
+		while (!future.isDone() && System.nanoTime() < deadline) {
+
+			Thread candidate = thread.get();
+
+			if (candidate != null && candidate.getState() == Thread.State.WAITING) {
+				return;
+			}
+
+			Thread.sleep(10);
+		}
+	}
+
+	/**
+	 * A {@link ParameterizedType} with a fixed hash code, so that tests can control the cache segment the
+	 * {@link ResolvableType} created for it ends up in.
+	 */
+	private static class FixedHashParameterizedType implements ParameterizedType {
+
+		private final Class<?> rawType;
+		private final Type argument;
+		private final int hash;
+
+		FixedHashParameterizedType(Class<?> rawType, Type argument, int hash) {
+
+			this.rawType = rawType;
+			this.argument = argument;
+			this.hash = hash;
+		}
+
+		@Override
+		public Type[] getActualTypeArguments() {
+			return new Type[] { argument };
+		}
+
+		@Override
+		public Type getRawType() {
+			return rawType;
+		}
+
+		@Override
+		public Type getOwnerType() {
+			return null;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
 	}
 
 	// #1402
