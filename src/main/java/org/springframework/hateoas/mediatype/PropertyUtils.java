@@ -44,6 +44,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.convert.Property;
@@ -674,8 +675,7 @@ public class PropertyUtils {
 		public Long getMinLength() {
 
 			return sizeAsLengthBound("min") //
-					.or(() -> LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class)) //
-							.map(Integer::longValue)) //
+					.or(() -> LENGTH_ANNOTATION.flatMap(it -> nonDefaultLengthBound(it, "min"))) //
 					.orElse(null);
 		}
 
@@ -688,8 +688,7 @@ public class PropertyUtils {
 		public Long getMaxLength() {
 
 			return sizeAsLengthBound("max") //
-					.or(() -> LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class)) //
-							.map(Integer::longValue)) //
+					.or(() -> LENGTH_ANNOTATION.flatMap(it -> nonDefaultLengthBound(it, "max"))) //
 					.orElse(null);
 		}
 
@@ -742,8 +741,9 @@ public class PropertyUtils {
 					.flatMap(it -> {
 
 						// @Size constrains element/character count. For CharSequence properties that maps to a text
-						// input with minLength/maxLength rather than a numeric range control (GH-2592).
-						if (Size.class.equals(it.getKey()) && isCharSequenceProperty()) {
+						// input with minLength/maxLength rather than a numeric range control. Collection-like properties
+						// have no HAL-FORMS equivalent, so we don't expose a range either (GH-2592).
+						if (Size.class.equals(it.getKey()) && isSizeConstrainedProperty()) {
 							return Stream.empty();
 						}
 
@@ -761,7 +761,7 @@ public class PropertyUtils {
 		 */
 		private Optional<Number> sizeAsNumericBound(String attribute) {
 
-			if (isCharSequenceProperty()) {
+			if (isSizeConstrainedProperty()) {
 				return Optional.empty();
 			}
 
@@ -777,12 +777,40 @@ public class PropertyUtils {
 				return Optional.empty();
 			}
 
-			return getAnnotationAttribute(Size.class, attribute, Number.class) //
+			return nonDefaultLengthBound(Size.class, attribute);
+		}
+
+		/**
+		 * Returns the given attribute of the given length-constraining annotation as {@link Long}, skipping values equal to
+		 * the declared default of the attribute (i.e. {@code min = 0}, {@code max = Integer.MAX_VALUE}) as they don't
+		 * constrain anything.
+		 */
+		private Optional<Long> nonDefaultLengthBound(Class<? extends Annotation> annotation, String attribute) {
+
+			Object defaultValue = AnnotationUtils.getDefaultValue(annotation, attribute);
+
+			return getAnnotationAttribute(annotation, attribute, Number.class) //
+					.filter(it -> !it.equals(defaultValue)) //
 					.map(Number::longValue);
 		}
 
 		private boolean isCharSequenceProperty() {
 			return CharSequence.class.isAssignableFrom(property.getType().resolve(Object.class));
+		}
+
+		/**
+		 * Whether {@link Size} constrains the number of characters or elements rather than a numeric value, i.e. the
+		 * property is a {@link CharSequence}, {@link Collection}, {@link Map} or array.
+		 */
+		private boolean isSizeConstrainedProperty() {
+
+			ResolvableType type = property.getType();
+			Class<?> resolved = type.resolve(Object.class);
+
+			return type.isArray()
+					|| isCharSequenceProperty()
+					|| Collection.class.isAssignableFrom(resolved)
+					|| Map.class.isAssignableFrom(resolved);
 		}
 
 		private <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,

@@ -31,10 +31,12 @@ import lombok.Value;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
 import org.junit.jupiter.api.DynamicTest;
@@ -243,13 +245,59 @@ class PropertyUtilsTest {
 
 		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
 
-		assertThat(getProperty(metadata, "named")).hasValueSatisfying(it -> {
+		assertThat(getProperty(metadata, "maxOnly")).hasValueSatisfying(it -> {
 			assertThat(it.getInputType()).isEqualTo(HtmlInputType.TEXT_VALUE);
-			assertThat(it.getMinLength()).isEqualTo(0L);
+			assertThat(it.getMinLength()).isNull();
 			assertThat(it.getMaxLength()).isEqualTo(256L);
 			assertThat(it.getMin()).isNull();
 			assertThat(it.getMax()).isNull();
 		});
+
+		assertThat(getProperty(metadata, "minOnly")).hasValueSatisfying(it -> {
+			assertThat(it.getMinLength()).isEqualTo(1L);
+			assertThat(it.getMaxLength()).isNull();
+		});
+
+		assertThat(getProperty(metadata, "minAndMax")).hasValueSatisfying(it -> {
+			assertThat(it.getInputType()).isEqualTo(HtmlInputType.TEXT_VALUE);
+			assertThat(it.getMinLength()).isEqualTo(10L);
+			assertThat(it.getMaxLength()).isEqualTo(20L);
+			assertThat(it.getMin()).isNull();
+			assertThat(it.getMax()).isNull();
+		});
+	}
+
+	@Test // #2592
+	void doesNotExposeDefaultBoundsOfHibernateLength() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
+
+		assertThat(getProperty(metadata, "lengthMaxOnly")).hasValueSatisfying(it -> {
+			assertThat(it.getMinLength()).isNull();
+			assertThat(it.getMaxLength()).isEqualTo(30L);
+		});
+
+		assertThat(getProperty(metadata, "lengthMinOnly")).hasValueSatisfying(it -> {
+			assertThat(it.getMinLength()).isEqualTo(3L);
+			assertThat(it.getMaxLength()).isNull();
+		});
+	}
+
+	@Test // #2592
+	void doesNotExposeSizeOnCollectionLikePropertiesAsRange() {
+
+		InputPayloadMetadata metadata = PropertyUtils.getExposedProperties(Jsr303SamplePayload.class);
+
+		for (String name : new String[] { "sizedList", "sizedMap", "sizedArray" }) {
+
+			assertThat(getProperty(metadata, name)).hasValueSatisfying(it -> {
+				assertThat(it.getInputType()).isNotEqualTo("range");
+				assertThat(it.getMin()).isNull();
+				assertThat(it.getMax()).isNull();
+				assertThat(it.getMinLength()).isNull();
+				assertThat(it.getMaxLength()).isNull();
+			});
+		}
 	}
 
 	@Data
@@ -299,7 +347,15 @@ class PropertyUtilsTest {
 		@NotBlank @Pattern(regexp = "\\w") String nonBlankPattern;
 		TypeAnnotated annotated;
 		@Size(min = 41, max = 4711) int sized;
-		@Size(max = 256) String named;
+
+		@Size(max = 256) String maxOnly;
+		@Size(min = 1) String minOnly;
+		@Size(min = 10, max = 20) String minAndMax;
+		@Length(max = 30) String lengthMaxOnly;
+		@Length(min = 3) String lengthMinOnly;
+		@Size(min = 1, max = 5) List<String> sizedList;
+		@Size(min = 1, max = 5) Map<String, String> sizedMap;
+		@Size(min = 1, max = 5) String[] sizedArray;
 	}
 
 	@Pattern(regexp = "regex")
