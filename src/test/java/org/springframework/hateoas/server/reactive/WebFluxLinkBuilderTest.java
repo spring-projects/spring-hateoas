@@ -37,6 +37,7 @@ import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.WebFluxLin
 import org.springframework.http.HttpEntity;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Greg Turnquist
  * @author Oliver Drotbohm
+ * @author Kim Tae Eun
  */
 @ExtendWith(MockitoExtension.class)
 class WebFluxLinkBuilderTest {
@@ -239,6 +241,29 @@ class WebFluxLinkBuilderTest {
 		});
 	}
 
+	@Test // GH-1240
+	void rendersModelAttributePropertiesAsTemplateVariables() {
+
+		WebFluxLink link = linkTo(methodOn(ModelAttributeController.class).search(null)).withSelfRel();
+
+		verify(null, link, it -> {
+			assertThat(it.getHref()).endsWith("/search{?category,sortBy}");
+		});
+	}
+
+	@Test // GH-1240
+	void bindsModelAttributePropertyValues() {
+
+		SearchForm form = new SearchForm();
+		form.setCategory("books");
+
+		WebFluxLink link = linkTo(methodOn(ModelAttributeController.class).search(form)).withSelfRel();
+
+		verify(null, link, it -> {
+			assertThat(it.getHref()).endsWith("/search?category=books{&sortBy}");
+		});
+	}
+
 	private void verify(@Nullable MockServerHttpRequest request, WebFluxLink link, Consumer<Link> verifications) {
 
 		Mono<Link> mono = link.toMono();
@@ -295,6 +320,37 @@ class WebFluxLinkBuilderTest {
 		@Override
 		public Mono<HttpEntity<?>> root(String view) {
 			return Mono.empty();
+		}
+	}
+
+	@RestController
+	static class ModelAttributeController {
+
+		@GetMapping("/search")
+		Mono<HttpEntity<?>> search(@ModelAttribute SearchForm form) {
+			return Mono.empty();
+		}
+	}
+
+	public static class SearchForm {
+
+		private String category;
+		private String sortBy;
+
+		public String getCategory() {
+			return category;
+		}
+
+		public void setCategory(String category) {
+			this.category = category;
+		}
+
+		public String getSortBy() {
+			return sortBy;
+		}
+
+		public void setSortBy(String sortBy) {
+			this.sortBy = sortBy;
 		}
 	}
 }
