@@ -18,7 +18,7 @@ package org.springframework.hateoas.mediatype.alps;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ class AlpsLinkDiscoverUnitTest extends LinkDiscovererUnitTest {
 
 		try {
 			return StreamUtils.copyToString(new ClassPathResource("link-discoverer.json", getClass()).getInputStream(),
-					Charset.defaultCharset());
+					StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
