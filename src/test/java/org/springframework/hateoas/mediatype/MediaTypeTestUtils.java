@@ -40,7 +40,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public class MediaTypeTestUtils {
 
 	/**
-	 * Looks up the the media types supported for {@link RepresentationModel} in the {@link RequestMappingHandlerAdapter}
+	 * Looks up the media types supported for {@link RepresentationModel} in the {@link RequestMappingHandlerAdapter}
 	 * within the given {@link ApplicationContext}.
 	 *
 	 * @param context must not be {@literal null}.
@@ -51,7 +51,7 @@ public class MediaTypeTestUtils {
 	}
 
 	/**
-	 * Looks up the the media types supported for the given type in the {@link RequestMappingHandlerAdapter} within the
+	 * Looks up the media types supported for the given type in the {@link RequestMappingHandlerAdapter} within the
 	 * given {@link ApplicationContext}.
 	 *
 	 * @param context must not be {@literal null}.
