@@ -38,6 +38,6 @@ class WebTestHateoasConfiguration {
 	@Lazy
 	HypermediaWebTestClientConfigurer webTestClientConfigurer(ObjectProvider<JsonMapper> mapper,
 			List<HypermediaMappingInformation> hypermediaTypes) {
-		return new HypermediaWebTestClientConfigurer(mapper.getIfAvailable(JsonMapper::new), hypermediaTypes);
+		return new HypermediaWebTestClientConfigurer(mapper.getIfUnique(JsonMapper::new), hypermediaTypes);
 	}
 }
