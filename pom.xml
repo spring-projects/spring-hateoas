@@ -120,7 +120,7 @@
 		<profile>
 			<id>jackson-next</id>
 			<properties>
-				<jackson-bom.version>3.2.0</jackson-bom.version>
+				<jackson-bom.version>3.3.0</jackson-bom.version>
 			</properties>
 		</profile>
 
