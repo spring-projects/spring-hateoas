@@ -79,6 +79,7 @@ class HalFormsPropertyFactory {
 		}
 
 		HalFormsOptionsFactory optionsFactory = configuration.getOptionsFactory();
+		HalFormsValueFactory valuesFactory = configuration.getValuesFactory();
 
 		return model.createProperties((payload, metadata) -> {
 
@@ -95,7 +96,7 @@ class HalFormsPropertyFactory {
 					.withMaxLength(metadata.getMaxLength())
 					.withRegex(lookupRegex(metadata)) //
 					.withType(inputType) //
-					.withValue(options != null ? options.getSelectedValue() : null) //
+					.withValue(options != null ? options.getSelectedValue() : valuesFactory.getValue(payload, metadata)) //
 					.withOptions(options);
 
 			Function<String, I18nedPropertyMetadata> factory = I18nedPropertyMetadata.factory(payload, property);
