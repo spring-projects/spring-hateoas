@@ -149,6 +149,27 @@ public class HalFormsJacksonModuleIntegrationTest {
 	}
 
 	@Test
+	void rendersQueryTemplateWithInputProperties() {
+
+		var link = Affordances.of(Link.of("/search")) //
+				.afford(HttpMethod.QUERY) //
+				.withInput(Jsr303Sample.class) //
+				.withInputMediaType(MediaType.APPLICATION_JSON) //
+				.withName("search") //
+				.toLink();
+
+		$.assertSerializes(new RepresentationModel<>().add(link))
+				.into(result -> {
+					assertThat(result.read("$._templates.search.method", String.class)).isEqualTo("QUERY");
+					assertThat(result.read("$._templates.search.contentType", String.class)).isEqualTo("application/json");
+					assertThat(result.read("$._templates.search.properties", List.class)).hasSize(1);
+					assertThat(result.read("$._templates.search.properties[0].name", String.class)).isEqualTo("firstname");
+					assertThat(result.read("$._templates.search.properties[0].required", boolean.class)).isTrue();
+					assertThat(result.read("$._templates.search.properties[0].regex", String.class)).isEqualTo("[\\w\\s]");
+				});
+	}
+
+	@Test
 	void rendersResource() {
 
 		$.assertSerializes(EntityModel.of(new SimplePojo("test1", 1), Link.of("localhost")))
