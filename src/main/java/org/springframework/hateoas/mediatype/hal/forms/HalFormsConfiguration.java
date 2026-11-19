@@ -173,10 +173,22 @@ public class HalFormsConfiguration {
 				mapperCustomizer, mediaTypes, defaultSingleTemplate);
 	}
 
-	public <T> HalFormsConfiguration withValues(Class<T> type, String property,
-			Function<PropertyMetadata, @Nullable Object> creator) {
+	/**
+	 * Returns a new {@link HalFormsConfiguration} that fills the {@code value} of the HAL-FORMS template properties of
+	 * the given payload type. It replaces any {@link HalFormsValuesCreator} previously registered for that type.
+	 * <p>
+	 * The creator is invoked at most once per rendered template whose input is the given type, and only when a property
+	 * of that input has no options. A property it gives no value gets none. A property that has options takes its value
+	 * from the options' selected value only.
+	 *
+	 * @param <T> the payload type
+	 * @param type must not be {@literal null}.
+	 * @param creator must not be {@literal null}.
+	 * @return will never be {@literal null}.
+	 */
+	public <T> HalFormsConfiguration withValues(Class<T> type, HalFormsValuesCreator creator) {
 
-		return new HalFormsConfiguration(halConfiguration, patterns, options, values.withValues(type, property, creator),
+		return new HalFormsConfiguration(halConfiguration, patterns, options, values.withValues(type, creator),
 				mapperCustomizer, mediaTypes, defaultSingleTemplate);
 	}
 
