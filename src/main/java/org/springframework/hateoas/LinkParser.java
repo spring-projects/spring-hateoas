@@ -181,20 +181,30 @@ class LinkParser {
 
 					if (ch == '=') {
 						state = State.BEFORE_VALUE;
-					}
-					// value isn't mandatory, so param separator, link separator, or end of input all create a new param
-					else if (ch == ';' || ch == ',' || eoi) {
+						pos[0]++;
+					} else if (ch == ',') {
 
+						// value-less parameter before link separator
+						if (!key.isEmpty()) {
+							params.put(key.toString().trim(), "");
+							key.setLength(0);
+						}
+						// Leave pos at ',' so we can start to parse the next link
+						break outer;
+					} else if (ch == ';' || eoi) {
+
+						// value-less parameter before next param or end of input
 						if (!key.isEmpty()) {
 							params.put(key.toString().trim(), "");
 							key.setLength(0);
 						}
 
+						pos[0]++;
 					} else {
 						key.append(ch);
+						pos[0]++;
 					}
 
-					pos[0]++;
 					break;
 
 				case BEFORE_VALUE:

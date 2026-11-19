@@ -160,7 +160,7 @@ public class RepresentationModelProcessorIntegrationTest {
 		public EntityModel<Employee> process(EntityModel<Employee> model) {
 
 			triggered = true;
-			model.add(Link.of("/entity/link", ENTITY_LINK_RELATION));
+			model.add(Link.of("/entity/link", ENTITY_LINK_RELATION).withTitle("Title"));
 			return model;
 		}
 	}

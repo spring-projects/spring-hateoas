@@ -15,7 +15,7 @@
  */
 package org.springframework.hateoas.mediatype.collectionjson;
 
-import tools.jackson.databind.JavaType;
+import tools.jackson.databind.BeanDescription;
 
 import java.util.Collections;
 import java.util.List;
@@ -191,21 +191,21 @@ final class CollectionJsonItem<T> {
 	/**
 	 * Generate an object using the deserialized properties and the provided type from the deserializer.
 	 *
-	 * @param javaType - type of the object to create
+	 * @param description must not be {@literal null}.
 	 * @return
 	 */
 	@Nullable
-	Object toRawData(JavaType javaType) {
+	Object toRawData(BeanDescription description) {
 
 		if (this.data.isEmpty()) {
 			return null;
 		}
 
-		if (PRIMITIVE_TYPES.contains(javaType.getRawClass())) {
+		if (PRIMITIVE_TYPES.contains(description.getBeanClass())) {
 			return this.data.get(0).getValue();
 		}
 
-		return PropertyUtils.createObjectFromProperties(javaType.getRawClass(), //
+		return PropertyUtils.createObjectFromProperties(description, //
 				this.data.stream() //
 						.collect(Collectors.toMap(CollectionJsonData::getName, CollectionJsonData::getValue)));
 	}

@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import tools.jackson.databind.BeanDescription;
 
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
@@ -32,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,6 +44,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.convert.Property;
@@ -98,24 +101,34 @@ public class PropertyUtils {
 		return extractPropertyValues(object, true);
 	}
 
-	public static <T> T createObjectFromProperties(Class<T> clazz, Map<String, Object> properties) {
+	@SuppressWarnings("unchecked")
+	public static <T> T createObjectFromProperties(BeanDescription description, Map<String, Object> properties) {
 
-		T obj = BeanUtils.instantiateClass(clazz);
+		Class<?> clazz = description.getBeanClass();
+		T obj = (T) BeanUtils.instantiateClass(clazz);
 
-		properties.forEach((key, value) -> {
-			Optional.ofNullable(BeanUtils.getPropertyDescriptor(clazz, key)) //
-					.ifPresent(property -> {
+		Map<String, PropertyDescriptor> descriptors = getPropertyDescriptorMap(clazz);
 
-						try {
+		description.findProperties().forEach(it -> {
 
-							Method writeMethod = property.getWriteMethod();
-							ReflectionUtils.makeAccessible(writeMethod);
-							writeMethod.invoke(obj, value);
+			PropertyDescriptor descriptor = descriptors.get(it.getInternalName());
 
-						} catch (IllegalAccessException | InvocationTargetException e) {
-							throw new RuntimeException(e);
-						}
-					});
+			if (descriptor != null) {
+
+				Method writeMethod = descriptor.getWriteMethod();
+
+				if (writeMethod == null) {
+					return;
+				}
+
+				ReflectionUtils.makeAccessible(writeMethod);
+
+				try {
+					writeMethod.invoke(obj, properties.get(it.getName()));
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		});
 
 		return obj;
@@ -250,6 +263,16 @@ public class PropertyUtils {
 				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
 				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
 				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor));
+	}
+
+	private static Map<String, PropertyDescriptor> getPropertyDescriptorMap(Class<?> type) {
+
+		return Arrays.stream(BeanUtils.getPropertyDescriptors(type))
+				.filter(descriptor -> !FIELDS_TO_IGNORE.contains(descriptor.getName()))
+				.filter(descriptor -> !descriptorToBeIgnoredByJackson(type, descriptor))
+				.filter(descriptor -> !toBeIgnoredByJackson(type, descriptor.getName()))
+				.filter(descriptor -> !readerIsToBeIgnoredByJackson(descriptor))
+				.collect(Collectors.toMap(PropertyDescriptor::getName, Function.identity()));
 	}
 
 	/**
@@ -619,7 +642,7 @@ public class PropertyUtils {
 		@Override
 		public Number getMin() {
 
-			return getAnnotationAttribute(Size.class, "min", Number.class) //
+			return sizeAsNumericBound("min") //
 					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
 							.flatMap(it -> getAnnotationAttribute(it, "min", Number.class))) //
 					.or(() -> getAnnotationAttribute(Min.class, "value", Number.class)) //
@@ -635,7 +658,7 @@ public class PropertyUtils {
 		@Override
 		public Number getMax() {
 
-			return getAnnotationAttribute(Size.class, "max", Number.class) //
+			return sizeAsNumericBound("max") //
 					.or(() -> Optional.ofNullable(RANGE_ANNOTATION)
 							.flatMap(it -> getAnnotationAttribute(it, "max", Number.class))) //
 					.or(() -> getAnnotationAttribute(Max.class, "value", Number.class)) //
@@ -650,8 +673,9 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMinLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "min", Integer.class)) //
-					.map(Integer::longValue) //
+
+			return sizeAsLengthBound("min") //
+					.or(() -> LENGTH_ANNOTATION.flatMap(it -> nonDefaultLengthBound(it, "min"))) //
 					.orElse(null);
 		}
 
@@ -662,8 +686,9 @@ public class PropertyUtils {
 		@Nullable
 		@Override
 		public Long getMaxLength() {
-			return LENGTH_ANNOTATION.flatMap(it -> getAnnotationAttribute(it, "max", Integer.class)) //
-					.map(Integer::longValue) //
+
+			return sizeAsLengthBound("max") //
+					.or(() -> LENGTH_ANNOTATION.flatMap(it -> nonDefaultLengthBound(it, "max"))) //
 					.orElse(null);
 		}
 
@@ -715,12 +740,77 @@ public class PropertyUtils {
 			return TYPE_MAP.entrySet().stream() //
 					.flatMap(it -> {
 
+						// @Size constrains element/character count. For CharSequence properties that maps to a text
+						// input with minLength/maxLength rather than a numeric range control. Collection-like properties
+						// have no HAL-FORMS equivalent, so we don't expose a range either (GH-2531).
+						if (Size.class.equals(it.getKey()) && isSizeConstrainedProperty()) {
+							return Stream.empty();
+						}
+
 						MergedAnnotation<? extends Annotation> annotation = property.getAnnotation(it.getKey());
 
 						return annotation.isPresent() ? Stream.of(it.getValue()) : Stream.empty();
 					}) //
 					.findFirst() //
 					.orElse(null);
+		}
+
+		/**
+		 * {@link Size} is a character/element count constraint. Only surface it as numeric {@code min}/{@code max} when the
+		 * property is not a {@link CharSequence} (GH-2531).
+		 */
+		private Optional<Number> sizeAsNumericBound(String attribute) {
+
+			if (isSizeConstrainedProperty()) {
+				return Optional.empty();
+			}
+
+			return getAnnotationAttribute(Size.class, attribute, Number.class);
+		}
+
+		/**
+		 * Map {@link Size} to {@code minLength}/{@code maxLength} for {@link CharSequence} properties (GH-2531).
+		 */
+		private Optional<Long> sizeAsLengthBound(String attribute) {
+
+			if (!isCharSequenceProperty()) {
+				return Optional.empty();
+			}
+
+			return nonDefaultLengthBound(Size.class, attribute);
+		}
+
+		/**
+		 * Returns the given attribute of the given length-constraining annotation as {@link Long}, skipping values equal to
+		 * the declared default of the attribute (i.e. {@code min = 0}, {@code max = Integer.MAX_VALUE}) as they don't
+		 * constrain anything.
+		 */
+		private Optional<Long> nonDefaultLengthBound(Class<? extends Annotation> annotation, String attribute) {
+
+			Object defaultValue = AnnotationUtils.getDefaultValue(annotation, attribute);
+
+			return getAnnotationAttribute(annotation, attribute, Number.class) //
+					.filter(it -> !it.equals(defaultValue)) //
+					.map(Number::longValue);
+		}
+
+		private boolean isCharSequenceProperty() {
+			return CharSequence.class.isAssignableFrom(property.getType().resolve(Object.class));
+		}
+
+		/**
+		 * Whether {@link Size} constrains the number of characters or elements rather than a numeric value, i.e. the
+		 * property is a {@link CharSequence}, {@link Collection}, {@link Map} or array.
+		 */
+		private boolean isSizeConstrainedProperty() {
+
+			ResolvableType type = property.getType();
+			Class<?> resolved = type.resolve(Object.class);
+
+			return type.isArray()
+					|| isCharSequenceProperty()
+					|| Collection.class.isAssignableFrom(resolved)
+					|| Map.class.isAssignableFrom(resolved);
 		}
 
 		private <T> Optional<T> getAnnotationAttribute(Class<? extends Annotation> annotation, String attribute,

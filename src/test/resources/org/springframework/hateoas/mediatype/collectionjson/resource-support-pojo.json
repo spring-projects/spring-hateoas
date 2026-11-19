@@ -1,0 +1,17 @@
+{
+  "collection" : {
+    "version" : "1.0",
+    "href" : "localhost",
+    "items" : [ {
+      "href" : "localhost",
+      "data" : [ {
+        "name" : "number",
+        "value" : 1
+      },
+        {
+          "name" : "text",
+          "value" : "text"
+        }]
+    } ]
+  }
+}

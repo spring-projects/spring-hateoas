@@ -390,7 +390,7 @@ class HalJacksonModuleIntegrationTest {
 	@Test // #1019
 	void doesNotRenderTitleForEmptyString() throws Exception {
 
-		$.assertSerializes(new HalJacksonModule.HalLink(Link.of("/some-href", "foo"), ""))
+		$.assertSerializes(new HalJacksonModule.HalLink(Link.of("/some-href", "foo").withTitle("")))
 				.into("{\"href\":\"/some-href\"}");
 	}
 

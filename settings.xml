@@ -8,5 +8,25 @@
 			<username>${env.SONATYPE_USER}</username>
 			<password>${env.SONATYPE_PASSWORD}</password>
 		</server>
+		<server>
+			<id>internal</id>
+			<username>${env.INTERNAL_REPOSITORY_USERNAME}</username>
+			<password>${env.INTERNAL_REPOSITORY_PASSWORD}</password>
+		</server>
 	</servers>
+
+	<profiles>
+		<profile>
+			<id>internal</id>
+			<repositories>
+				<repository>
+					<id>internal</id>
+					<url>${env.INTERNAL_REPOSITORY_URL}</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
 </settings>
