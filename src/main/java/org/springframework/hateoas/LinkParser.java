@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -67,7 +68,7 @@ class LinkParser {
 					// In a single link there can be multiple rels separated by whitespace. The Link class doesn't handle this
 					// because it doesn't have API to handle it. However, at this level, we can split the rels and create a
 					// separate Link for each rel.
-					var rels = link.getRel().value().split("\\s");
+					var rels = link.getRel().value().trim().split("\\s+");
 
 					if (rels.length == 0) {
 						throw new IllegalArgumentException("A link with missing rel at " + pos[0]);
@@ -186,7 +187,7 @@ class LinkParser {
 
 						// value-less parameter before link separator
 						if (!key.isEmpty()) {
-							params.put(key.toString().trim(), "");
+							params.put(parameterName(key), "");
 							key.setLength(0);
 						}
 						// Leave pos at ',' so we can start to parse the next link
@@ -195,7 +196,7 @@ class LinkParser {
 
 						// value-less parameter before next param or end of input
 						if (!key.isEmpty()) {
-							params.put(key.toString().trim(), "");
+							params.put(parameterName(key), "");
 							key.setLength(0);
 						}
 
@@ -214,7 +215,7 @@ class LinkParser {
 					} else if (ch == '"' || ch == '\'') {
 
 						consumeQuotedString(input, value, pos);
-						params.putIfAbsent(key.toString().trim(), value.toString());
+						params.putIfAbsent(parameterName(key), value.toString());
 						key.setLength(0);
 						value.setLength(0);
 						state = State.INITIAL;
@@ -228,7 +229,7 @@ class LinkParser {
 
 					if (ch == ';' || ch == ',' || eoi) {
 
-						params.putIfAbsent(key.toString().trim(), value.toString().trim());
+						params.putIfAbsent(parameterName(key), value.toString().trim());
 						key.setLength(0);
 						value.setLength(0);
 						state = State.INITIAL;
@@ -295,6 +296,13 @@ class LinkParser {
 		}
 
 		throw new IllegalArgumentException("Missing final quote at index " + pos[0]);
+	}
+
+	/**
+	 * Parameter names are case-insensitive, see RFC 8288, Appendix B.3, step 9.
+	 */
+	private static String parameterName(StringBuilder key) {
+		return key.toString().trim().toLowerCase(Locale.ROOT);
 	}
 
 	private enum State {

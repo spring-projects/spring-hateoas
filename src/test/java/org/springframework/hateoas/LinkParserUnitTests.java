@@ -192,6 +192,26 @@ class LinkParserUnitTests {
 						Link.of("/next", "last"));
 	}
 
+	@Test // GH-2617
+	void parsingMultipleRelsSeparatedByMoreThanOneWhitespace() {
+
+		assertThat(parseLinks("<url>;rel=\"next  last\"")) //
+				.containsExactly(Link.of("url", "next"), Link.of("url", "last"));
+
+		assertThat(parseLinks("<url>;rel=\" next\t\tlast \"")) //
+				.containsExactly(Link.of("url", "next"), Link.of("url", "last"));
+	}
+
+	@Test // GH-2617
+	void parsingParameterNamesCaseInsensitively() {
+
+		assertThat(parseLinks("<url>; REL=\"next\"; Title=\"Next page\"")) //
+				.containsExactly(Link.of("url", "next").withTitle("Next page"));
+
+		assertThat(parseLink("<url>;Rel=next;rel=last")) //
+				.isEqualTo(Link.of("url", "next"));
+	}
+
 	@Test // GH-2099
 	void parsingSpecialChars() {
 
