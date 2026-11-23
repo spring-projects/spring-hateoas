@@ -315,6 +315,68 @@ Read about the <<server.affordances,Affordances API>> to augment your controller
 As for single-item (`EntityModel`) and aggregate root collections (`CollectionModel`), Spring HATEOAS renders them
 identically to <<mediatypes.hal,HAL documents>>.
 
+=== Describing QUERY requests
+
+HAL-FORMS renders input properties for `POST`, `PUT`, `PATCH`, and `QUERY` affordances.
+Like `POST`, `QUERY` uses the input payload metadata to describe the request body, including validation constraints and required fields.
+Unlike `POST`, `QUERY` is safe and idempotent.
+`GET` affordances do not produce templates.
+
+To derive a `QUERY` affordance from a Spring controller, declare the search criteria as a `@RequestBody`:
+
+[source, java]
+----
+@RestController
+class CustomerSearchController {
+
+  @RequestMapping(path = "/customers/search", method = RequestMethod.QUERY,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  CollectionModel<?> search(@RequestBody CustomerSearch criteria) {
+    // Execute the search.
+  }
+
+  @GetMapping("/customers/search")
+  RepresentationModel<?> searchForm() {
+    var controller = methodOn(CustomerSearchController.class);
+    var link = linkTo(controller.searchForm()).withSelfRel()
+        .andAffordance(afford(controller.search(null)));
+
+    return new RepresentationModel<>().add(link);
+  }
+}
+
+class CustomerSearch {
+
+  @NotNull
+  private String name;
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+}
+----
+
+The `GET` response includes a template named `search` with `method` set to `QUERY`, `contentType` set to `application/json`, and a required `name` property.
+Alternatively, supply the input metadata explicitly with the Affordances API:
+
+[source, java]
+----
+Affordances.of(Link.of("/customers/search"))
+    .afford(HttpMethod.QUERY)
+    .withInput(CustomerSearch.class)
+    .withInputMediaType(MediaType.APPLICATION_JSON)
+    .withName("search")
+    .toLink();
+----
+
+URI query parameters are not automatically converted into request body properties.
+Without input payload metadata, a `QUERY` template has no properties.
+Clients consuming these templates need to support sending `QUERY` requests with a body.
+
 [[mediatypes.hal-forms.metadata]]
 === Defining HAL-FORMS metadata
 HAL-FORMS allows to describe criterias for each form field.

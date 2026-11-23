@@ -18,6 +18,7 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
@@ -29,17 +30,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.mediatype.hal.HalConfiguration;
+import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.WebMvcEmployeeController;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -124,6 +134,22 @@ class HalFormsWebMvcIntegrationTest {
 				.andExpect(header().stringValues(HttpHeaders.LOCATION, "http://localhost/employees/2"));
 	}
 
+	@Test
+	void rendersQueryAffordanceWithRequestBodyProperties() throws Exception {
+
+		this.mockMvc.perform(get("/query-form").accept(MediaTypes.HAL_FORMS_JSON)) //
+				.andExpect(status().isOk()) //
+				.andExpect(jsonPath("$._templates.*", hasSize(1))) //
+				.andExpect(jsonPath("$._templates.query.method", is("QUERY"))) //
+				.andExpect(jsonPath("$._templates.query.contentType", is("application/json"))) //
+				.andExpect(jsonPath("$._templates.query.target", is("http://localhost/query-form/search"))) //
+				.andExpect(jsonPath("$._templates.query.properties", hasSize(2))) //
+				.andExpect(jsonPath("$._templates.query.properties[0].name", is("name"))) //
+				.andExpect(jsonPath("$._templates.query.properties[0].required").value(true)) //
+				.andExpect(jsonPath("$._templates.query.properties[1].name", is("role"))) //
+				.andExpect(jsonPath("$._templates.query.properties[1].required").doesNotExist());
+	}
+
 	@Test // #832
 	public void usesRegisteredHalFormsConfiguration() {
 		assertInstanceUsed(WithHalFormsConfiguration.class, WithHalFormsConfiguration.CONFIG);
@@ -153,6 +179,31 @@ class HalFormsWebMvcIntegrationTest {
 		@Bean
 		WebMvcEmployeeController employeeController() {
 			return new WebMvcEmployeeController();
+		}
+
+		@Bean
+		QueryController queryController() {
+			return new QueryController();
+		}
+	}
+
+	@RestController
+	static class QueryController {
+
+		@GetMapping("/query-form")
+		public RepresentationModel<?> form() {
+
+			var controller = methodOn(QueryController.class);
+			var link = linkTo(controller.form()).withSelfRel() //
+					.andAffordance(afford(controller.query(null)));
+
+			return new RepresentationModel<>().add(link);
+		}
+
+		@RequestMapping(path = "/query-form/search", method = RequestMethod.QUERY,
+				consumes = MediaType.APPLICATION_JSON_VALUE)
+		public EntityModel<Employee> query(@RequestBody Employee criteria) {
+			return EntityModel.of(criteria);
 		}
 	}
 

@@ -18,7 +18,10 @@ package org.springframework.hateoas.mediatype.hal.forms;
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.*;
+import static org.springframework.hateoas.server.reactive.WebFluxLinkBuilder.*;
 import static org.springframework.hateoas.support.JsonPathUtils.*;
+
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
 
@@ -29,20 +32,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MappingTestUtils;
 import org.springframework.hateoas.MappingTestUtils.ContextualMapper;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.hateoas.config.HypermediaWebTestClientConfigurer;
 import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.hateoas.support.Employee;
 import org.springframework.hateoas.support.WebFluxEmployeeController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 /**
@@ -136,6 +148,23 @@ class HalFormsWebFluxIntegrationTest {
 		});
 	}
 
+	@Test
+	void rendersQueryAffordanceWithRequestBodyProperties() {
+
+		testClient.get().uri("http://localhost/query-form").accept(MediaTypes.HAL_FORMS_JSON).exchange() //
+				.expectStatus().isOk() //
+				.expectBody(String.class) //
+				.value(jsonPath("$._templates.*", hasSize(1))) //
+				.value(jsonPath("$._templates.query.method", is("QUERY"))) //
+				.value(jsonPath("$._templates.query.contentType", is("application/json"))) //
+				.value(jsonPath("$._templates.query.target", is("http://localhost/query-form/search"))) //
+				.value(jsonPath("$._templates.query.properties", hasSize(2))) //
+				.value(jsonPath("$._templates.query.properties[0].name", is("name"))) //
+				.value(jsonPath("$._templates.query.properties[0].required", is(true))) //
+				.value(jsonPath("$._templates.query.properties[1].name", is("role"))) //
+				.value(jsonPath("$._templates.query.properties[1].required").doesNotExist());
+	}
+
 	@Test // #786
 	void problemReturningControllerMethod() {
 
@@ -165,8 +194,34 @@ class HalFormsWebFluxIntegrationTest {
 		}
 
 		@Bean
+		QueryController queryController() {
+			return new QueryController();
+		}
+
+		@Bean
 		WebTestClient webTestClient(HypermediaWebTestClientConfigurer configurer, ApplicationContext ctx) {
 			return WebTestClient.bindToApplicationContext(ctx).build().mutateWith(configurer);
+		}
+	}
+
+	@RestController
+	static class QueryController {
+
+		@GetMapping("/query-form")
+		public Mono<RepresentationModel<?>> form() {
+
+			var controller = methodOn(QueryController.class);
+
+			return linkTo(controller.form()).withSelfRel() //
+					.andAffordance(controller.query(null)) //
+					.toMono() //
+					.map(link -> new RepresentationModel<>().add(link));
+		}
+
+		@RequestMapping(path = "/query-form/search", method = RequestMethod.QUERY,
+				consumes = MediaType.APPLICATION_JSON_VALUE)
+		public Mono<EntityModel<Employee>> query(@RequestBody Employee criteria) {
+			return Mono.just(EntityModel.of(criteria));
 		}
 	}
 }

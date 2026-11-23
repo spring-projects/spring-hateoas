@@ -103,6 +103,52 @@ class HalFormsTemplateBuilderUnitTest {
 		assertThat(template.getPropertyByName("name").map(HalFormsProperty::isRequired)).hasValue(true);
 	}
 
+	@Test
+	void createsQueryPropertiesLikePostProperties() {
+
+		var link = Affordances.of(Link.of("/example")) //
+				.afford(HttpMethod.POST) //
+				.withInput(RequiredProperty.class) //
+				.andAfford(HttpMethod.QUERY) //
+				.withInput(RequiredProperty.class) //
+				.toLink();
+
+		var builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.DEFAULTS_ONLY);
+		var templates = builder.findTemplates(new RepresentationModel<>().add(link));
+		var query = templates.get("queryRequiredProperty");
+
+		assertThat(query).isNotNull();
+		assertThat(query.getProperties()).containsExactlyElementsOf(templates.get("postRequiredProperty").getProperties());
+		assertThat(query.getPropertyByName("name").map(HalFormsProperty::isRequired)).hasValue(true);
+	}
+
+	@Test
+	void doesNotCreateTemplateForGetWithInput() {
+
+		var link = Affordances.of(Link.of("/example")) //
+				.afford(HttpMethod.GET) //
+				.withInput(RequiredProperty.class) //
+				.toLink();
+
+		var builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.DEFAULTS_ONLY);
+
+		assertThat(builder.findTemplates(new RepresentationModel<>().add(link))).isEmpty();
+	}
+
+	@Test
+	void createsQueryTemplateWithoutPropertiesIfNoInputIsConfigured() {
+
+		var link = Affordances.of(Link.of("/example")) //
+				.afford(HttpMethod.QUERY) //
+				.toLink();
+
+		var builder = new HalFormsTemplateBuilder(new HalFormsConfiguration(), MessageResolver.DEFAULTS_ONLY);
+		var templates = builder.findTemplates(new RepresentationModel<>().add(link));
+
+		assertThat(templates).containsOnlyKeys("query");
+		assertThat(templates.get("query").getProperties()).isEmpty();
+	}
+
 	@Test // #1439
 	void considersMinandMaxAnnotations() {
 

@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  */
 class HalFormsPropertyFactory {
 
-	private static final Set<HttpMethod> ENTITY_ALTERING_METHODS = Set.of(POST, PUT, PATCH);
+	private static final Set<HttpMethod> METHODS_SUPPORTING_INPUT_PROPERTIES = Set.of(POST, PUT, PATCH, QUERY);
 
 	private final HalFormsConfiguration configuration;
 	private final MessageResolver resolver;
@@ -74,7 +74,7 @@ class HalFormsPropertyFactory {
 
 		Assert.notNull(model, "HalFormsModel must not be null!");
 
-		if (!ENTITY_ALTERING_METHODS.contains(model.getHttpMethod())) {
+		if (!METHODS_SUPPORTING_INPUT_PROPERTIES.contains(model.getHttpMethod())) {
 			return Collections.emptyList();
 		}
 
