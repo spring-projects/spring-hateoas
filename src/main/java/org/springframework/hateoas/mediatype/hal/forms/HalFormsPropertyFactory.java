@@ -19,7 +19,9 @@ import static org.springframework.http.HttpMethod.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -79,11 +81,17 @@ class HalFormsPropertyFactory {
 		}
 
 		HalFormsOptionsFactory optionsFactory = configuration.getOptionsFactory();
+		HalFormsValueFactory valuesFactory = configuration.getValuesFactory();
+
+		Map<InputPayloadMetadata, HalFormsValues> valuesByPayload = new HashMap<>();
 
 		return model.createProperties((payload, metadata) -> {
 
 			String inputType = metadata.getInputType();
 			HalFormsOptions options = optionsFactory.getOptions(payload, metadata);
+			@Nullable Object value = options != null //
+					? options.getSelectedValue() //
+					: valuesByPayload.computeIfAbsent(payload, valuesFactory::getValues).getValue(metadata.getName());
 
 			HalFormsProperty property = new HalFormsProperty()
 					.withName(metadata.getName())
@@ -95,7 +103,7 @@ class HalFormsPropertyFactory {
 					.withMaxLength(metadata.getMaxLength())
 					.withRegex(lookupRegex(metadata)) //
 					.withType(inputType) //
-					.withValue(options != null ? options.getSelectedValue() : null) //
+					.withValue(value) //
 					.withOptions(options);
 
 			Function<String, I18nedPropertyMetadata> factory = I18nedPropertyMetadata.factory(payload, property);
