@@ -33,7 +33,7 @@ public class UriTemplateFactory {
 	private static final Map<String, UriTemplate> CACHE = new ConcurrentReferenceHashMap<>();
 
 	/**
-	 * Returns the the {@link UriTemplate} for the given mapping.
+	 * Returns the {@link UriTemplate} for the given mapping.
 	 *
 	 * @param mapping must not be {@literal null} or empty.
 	 * @return
