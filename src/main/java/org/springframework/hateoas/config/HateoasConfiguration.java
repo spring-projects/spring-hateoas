@@ -15,6 +15,7 @@
  */
 package org.springframework.hateoas.config;
 
+import org.springframework.core.io.support.ResourcePatternResolver;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
@@ -59,6 +60,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Oliver Gierke
  * @author Greg Turnquist
+ * @author Réda Housni Alaoui
  * @soundtrack Elephants Crossing - Wait (Live at Stadtfest Dresden)
  * @since 0.19
  */
@@ -173,7 +175,8 @@ public class HateoasConfiguration {
 
 		try {
 			return Arrays //
-					.stream(context.getResources(String.format("classpath:%s%s.properties", baseName, withWildcard ? "*" : ""))) //
+					.stream(context.getResources(String.format("%s%s%s.properties", //
+							ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX, baseName, withWildcard ? "*" : ""))) //
 					.filter(Resource::exists) //
 					.collect(Collectors.toList());
 
