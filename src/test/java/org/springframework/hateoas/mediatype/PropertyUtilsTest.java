@@ -47,6 +47,7 @@ import org.springframework.hateoas.AffordanceModel.InputPayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PayloadMetadata;
 import org.springframework.hateoas.AffordanceModel.PropertyMetadata;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.InputEdition;
 import org.springframework.hateoas.InputType;
 import org.springframework.hateoas.mediatype.html.HtmlInputType;
 import org.springframework.hateoas.server.core.MethodParameters;
@@ -149,6 +150,14 @@ class PropertyUtilsTest {
 
 		assertThat(getProperty(metadata, "readOnly")) //
 				.map(PropertyMetadata::isReadOnly) //
+				.hasValue(true);
+
+		assertThat(getProperty(metadata, "getterWithInputEditionEnabled"))
+				.map(PropertyMetadata::isReadOnly)
+				.hasValue(false);
+
+		assertThat(getProperty(metadata, "setterWithInputEditionDisabled"))
+				.map(PropertyMetadata::isReadOnly)
 				.hasValue(true);
 	}
 
@@ -365,6 +374,8 @@ class PropertyUtilsTest {
 
 		@Getter @Setter String readWrite;
 		@Getter String readOnly;
+		@Getter @InputEdition(InputEdition.Mode.READ_WRITE) String getterWithInputEditionEnabled;
+		@Getter @Setter @InputEdition(InputEdition.Mode.READ_ONLY) String setterWithInputEditionDisabled;
 	}
 
 	@RestController
